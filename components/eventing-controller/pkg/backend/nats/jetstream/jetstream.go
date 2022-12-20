@@ -15,8 +15,9 @@ import (
 
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 
-	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 	"k8s.io/apimachinery/pkg/api/resource"
+
+	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 
 	cev2 "github.com/cloudevents/sdk-go/v2"
 	cev2protocol "github.com/cloudevents/sdk-go/v2/protocol"
@@ -320,7 +321,7 @@ func (js *JetStream) GetJetStreamSubjects(subjects []string) []string {
 
 // GetJetStreamSubject appends the prefix to subject.
 func (js *JetStream) GetJetStreamSubject(subject string) string {
-	return fmt.Sprintf("%s.%s", env.JetStreamSubjectPrefix, subject)
+	return fmt.Sprintf("%s.%s", js.Config.JSSubjectPrefix, subject)
 }
 
 // GetJetStreamContext returns the current JetStreamContext.
@@ -456,7 +457,7 @@ func getStreamConfig(natsConfig env.NatsConfig) (*nats.StreamConfig, error) {
 		// use a prefix. This prefix is handled only on the JetStream level (i.e. JetStream handler
 		// and EPP) and should not be exposed in the Kyma subscription. Any Kyma event type gets appended with the
 		// configured stream's subject prefix.
-		Subjects: []string{fmt.Sprintf("%s.>", env.JetStreamSubjectPrefix)},
+		Subjects: []string{fmt.Sprintf("%s.>", natsConfig.JSSubjectPrefix)},
 	}
 	return streamConfig, nil
 }
@@ -679,7 +680,7 @@ func (js *JetStream) getCallback(subKeyPrefix, subscriptionName string) nats.Msg
 		result := js.client.Send(traceCtxWithCE, *ce)
 		if !cev2protocol.IsACK(result) {
 			js.metricsCollector.RecordDeliveryPerSubscription(subscriptionName, ce.Type(), sink, http.StatusInternalServerError)
-			ceLogger.Errorw("Failed to dispatch the CloudEvent")
+			ceLogger.Errorw("Failed to dispatch the CloudEvent", "error", result.Error())
 			// Do not NAK the msg so that the server waits for AckWait and then redeliver the msg.
 			return
 		}

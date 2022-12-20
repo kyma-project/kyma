@@ -1,4 +1,4 @@
-FROM golang:1.17.6-alpine3.15 as builder
+FROM golang:1.19-alpine3.17 as builder
 
 ENV BASE_APP_DIR /go/src/github.com/kyma-project/kyma/tests/function-controller
 WORKDIR ${BASE_APP_DIR}

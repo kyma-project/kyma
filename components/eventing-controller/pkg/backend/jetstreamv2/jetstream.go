@@ -141,10 +141,10 @@ func (js *JetStream) GetJetStreamContext() nats.JetStreamContext {
 // GetJetStreamSubject appends the prefix and the cleaned source to subject.
 func (js *JetStream) GetJetStreamSubject(source, subject string, typeMatching eventingv1alpha2.TypeMatching) string {
 	if typeMatching == eventingv1alpha2.TypeMatchingExact {
-		return fmt.Sprintf("%s.%s", env.JetStreamSubjectPrefix, subject)
+		return fmt.Sprintf("%s.%s", js.Config.JSSubjectPrefix, subject)
 	}
 	cleanSource, _ := js.cleaner.CleanSource(source)
-	return fmt.Sprintf("%s.%s.%s", env.JetStreamSubjectPrefix, cleanSource, subject)
+	return fmt.Sprintf("%s.%s.%s", js.Config.JSSubjectPrefix, cleanSource, subject)
 }
 
 // DeleteInvalidConsumers deletes all JetStream consumers having no subscription event types in subscription resources.
@@ -185,10 +185,10 @@ func (js *JetStream) isConsumerUsedByKymaSub(consumerName string, subscriptions 
 // getJetStreamSubject appends the prefix and the cleaned source to subject.
 func (js *JetStream) getJetStreamSubject(source, subject string, typeMatching eventingv1alpha2.TypeMatching) string {
 	if typeMatching == eventingv1alpha2.TypeMatchingExact {
-		return fmt.Sprintf("%s.%s", env.JetStreamSubjectPrefix, subject)
+		return fmt.Sprintf("%s.%s", js.Config.JSSubjectPrefix, subject)
 	}
 	cleanSource, _ := js.cleaner.CleanSource(source)
-	return fmt.Sprintf("%s.%s.%s", env.JetStreamSubjectPrefix, cleanSource, subject)
+	return fmt.Sprintf("%s.%s.%s", js.Config.JSSubjectPrefix, cleanSource, subject)
 }
 
 func (js *JetStream) validateConfig() error {
@@ -447,7 +447,7 @@ func (js *JetStream) getCallback(subKeyPrefix, subscriptionName string) nats.Msg
 		result := js.client.Send(traceCtxWithCE, *ce)
 		if !cev2protocol.IsACK(result) {
 			js.metricsCollector.RecordDeliveryPerSubscription(subscriptionName, ce.Type(), sink, http.StatusInternalServerError)
-			ceLogger.Errorw("Failed to dispatch the CloudEvent")
+			ceLogger.Errorw("Failed to dispatch the CloudEvent", "error", result.Error())
 			// Do not NAK the msg so that the server waits for AckWait and then redeliver the msg.
 			return
 		}

@@ -11,7 +11,6 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
-	natsserver "github.com/nats-io/nats-server/v2/server"
 	"github.com/onsi/gomega"
 	gomegatypes "github.com/onsi/gomega/types"
 	v1 "k8s.io/api/core/v1"
@@ -67,7 +66,7 @@ func TestUnavailableNATSServer(t *testing.T) {
 		reconcilertesting.HaveSubscriptionNotReady(),
 	)
 
-	ens.NatsServer = startJetStream(natsPort)
+	ens.NatsServer = reconcilertesting.StartDefaultJetStreamServer(natsPort)
 	utils.TestSubscriptionOnK8s(ens.TestEnsemble, sub, reconcilertesting.HaveSubscriptionReady())
 
 	t.Cleanup(ens.Cancel)
@@ -107,7 +106,8 @@ func TestCreateSubscription(t *testing.T) {
 					reconcilertesting.OrderCreatedEventType: {
 						natstesting.BeExistingSubscription(),
 						natstesting.BeValidSubscription(),
-						natstesting.BeJetStreamSubscriptionWithSubject(reconcilertesting.OrderCreatedEventType),
+						natstesting.BeJetStreamSubscriptionWithSubject(reconcilertesting.OrderCreatedEventType,
+							ens.JetStreamBackend.Config),
 					},
 				},
 			},
@@ -272,7 +272,8 @@ func TestCreateSubscription(t *testing.T) {
 					reconcilertesting.OrderCreatedEventType: {
 						natstesting.BeExistingSubscription(),
 						natstesting.BeValidSubscription(),
-						natstesting.BeJetStreamSubscriptionWithSubject(reconcilertesting.OrderCreatedEventType),
+						natstesting.BeJetStreamSubscriptionWithSubject(reconcilertesting.OrderCreatedEventType,
+							ens.JetStreamBackend.Config),
 					},
 				},
 			},
@@ -352,7 +353,8 @@ func TestChangeSubscription(t *testing.T) {
 					utils.NewCleanEventType("0"): {
 						natstesting.BeExistingSubscription(),
 						natstesting.BeValidSubscription(),
-						natstesting.BeJetStreamSubscriptionWithSubject(utils.NewCleanEventType("0")),
+						natstesting.BeJetStreamSubscriptionWithSubject(utils.NewCleanEventType("0"),
+							ens.JetStreamBackend.Config),
 					},
 				},
 			},
@@ -514,7 +516,8 @@ func TestChangeSubscription(t *testing.T) {
 					utils.NewCleanEventType(""): {
 						natstesting.BeExistingSubscription(),
 						natstesting.BeValidSubscription(),
-						natstesting.BeJetStreamSubscriptionWithSubject(utils.NewCleanEventType("")),
+						natstesting.BeJetStreamSubscriptionWithSubject(utils.NewCleanEventType(""),
+							ens.JetStreamBackend.Config),
 					},
 				},
 			},
@@ -663,7 +666,8 @@ func TestEmptyEventTypePrefix(t *testing.T) {
 	expectedNatsSubscription := []gomegatypes.GomegaMatcher{
 		natstesting.BeExistingSubscription(),
 		natstesting.BeValidSubscription(),
-		natstesting.BeJetStreamSubscriptionWithSubject(reconcilertesting.OrderCreatedEventTypePrefixEmpty),
+		natstesting.BeJetStreamSubscriptionWithSubject(reconcilertesting.OrderCreatedEventTypePrefixEmpty,
+			ens.JetStreamBackend.Config),
 	}
 
 	testSubscriptionOnNATS(ens, sub, reconcilertesting.OrderCreatedEventTypePrefixEmpty, expectedNatsSubscription...)
@@ -704,13 +708,16 @@ func ensureNATSSubscriptionIsDeleted(ens *utils.JetStreamTestEnsemble,
 func setupTestEnsemble(ctx context.Context, eventTypePrefix string,
 	g *gomega.GomegaWithT, natsPort int) *utils.JetStreamTestEnsemble {
 	useExistingCluster := useExistingCluster
+	natsServer := reconcilertesting.StartDefaultJetStreamServer(natsPort)
+	log.Printf("NATS server with JetStream started %v", natsServer.ClientURL())
+
 	ens := &utils.TestEnsemble{
 		Ctx: ctx,
 		G:   g,
 		DefaultSubscriptionConfig: env.DefaultSubscriptionConfig{
 			MaxInFlightMessages: 1,
 		},
-		NatsServer: startJetStream(natsPort),
+		NatsServer: natsServer,
 		TestEnv: &envtest.Environment{
 			CRDDirectoryPaths: []string{
 				filepath.Join("../../../", "config", "crd", "bases"),
@@ -723,6 +730,7 @@ func setupTestEnsemble(ctx context.Context, eventTypePrefix string,
 
 	jsTestEnsemble := &utils.JetStreamTestEnsemble{
 		TestEnsemble: ens,
+		JSStreamName: fmt.Sprintf("%s%d", reconcilertesting.JSStreamName, natsPort),
 	}
 
 	utils.StartTestEnv(ens)
@@ -730,15 +738,6 @@ func setupTestEnsemble(ctx context.Context, eventTypePrefix string,
 	utils.StartSubscriberSvc(ens)
 
 	return jsTestEnsemble
-}
-
-func startJetStream(port int) *natsserver.Server {
-	natsServer := reconcilertesting.RunNatsServerOnPort(
-		reconcilertesting.WithPort(port),
-		reconcilertesting.WithJetStreamEnabled(),
-	)
-	log.Printf("NATS server with JetStream started %v", natsServer.ClientURL())
-	return natsServer
 }
 
 func startReconciler(eventTypePrefix string, ens *utils.JetStreamTestEnsemble) *utils.JetStreamTestEnsemble {
@@ -767,7 +766,8 @@ func startReconciler(eventTypePrefix string, ens *utils.JetStreamTestEnsemble) *
 		MaxReconnects:           10,
 		ReconnectWait:           time.Second,
 		EventTypePrefix:         eventTypePrefix,
-		JSStreamName:            reconcilertesting.JSStreamName,
+		JSStreamName:            ens.JSStreamName,
+		JSSubjectPrefix:         ens.JSStreamName,
 		JSStreamStorageType:     jetstreamv2.StorageTypeMemory,
 		JSStreamMaxBytes:        "-1",
 		JSStreamMaxMessages:     -1,

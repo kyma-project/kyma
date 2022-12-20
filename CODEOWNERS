@@ -9,7 +9,7 @@
 
 /.github @kyma-project/prow
 /.github/workflows @PK85 @piotrmiskiewicz @szwedm @wozniakjan @tillknuesting @ralikio @kyma-project/prow
-/.github/ISSUE_TEMPLATE @mmitoraj @NHingerl @grego952 @IwonaLanger  
+/.github/ISSUE_TEMPLATE @mmitoraj @NHingerl @grego952 @IwonaLanger @nataliasitko
 
 
 # Owners of the .kyma-project-io folder
@@ -27,12 +27,12 @@
 /components/eventing-controller @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh @muralov
 /components/function-controller @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
 /components/function-runtimes @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
-/components/telemetry-operator @a-thaler @rakesh-garimella @skhalash @jeremyharisch @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
+/components/telemetry-operator @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
 /components/directory-size-exporter @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
 /components/webhook-cert-init @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @hisarbalik
 
 # All files and subdirectories in /docs
-/docs @mmitoraj @NHingerl @grego952 @IwonaLanger  
+/docs @mmitoraj @NHingerl @grego952 @IwonaLanger @nataliasitko
 
 /hack @clebs
 
@@ -96,7 +96,7 @@
 /tests/components/reconciler @khlifi411 @jeremyharisch @ruanxin @tobiscr @Tomasz-Smelcerz-SAP @jakobmoellersap @adityabhatia
 
 # performance tests
-/tests/perf @a-thaler @rakesh-garimella @skhalash @jeremyharisch @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
+/tests/perf @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
 /tests/serverless-bench @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
 
 # The tools/event-subscriber directory
@@ -106,13 +106,13 @@
 /tools/gitserver/ @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
 
 # Config file for MILV - milv.config.yaml
-milv.config.yaml @m00g3n @pPrecel @kwiatekus @moelsayed @cortey @anoipm @mmitoraj @NHingerl @grego952 @IwonaLanger
+milv.config.yaml @m00g3n @pPrecel @kwiatekus @moelsayed @cortey @anoipm @mmitoraj @NHingerl @grego952 @IwonaLanger @nataliasitko
 
 # VERSION file
 VERSION @kyma-project/prow
 
 # All .md files
-*.md @mmitoraj @NHingerl @grego952 @IwonaLanger
+*.md @mmitoraj @NHingerl @grego952 @IwonaLanger @nataliasitko
 
 # Managed Modules
 /modules @pbochynski @janmedrek @khlifi411 @jeremyharisch @ruanxin @tobiscr @Tomasz-Smelcerz-SAP @jakobmoellersap @adityabhatia @clebs

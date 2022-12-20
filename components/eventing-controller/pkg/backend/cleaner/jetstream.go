@@ -7,9 +7,9 @@ import (
 )
 
 var (
-	invalidSourceCharacters = regexp.MustCompile(`[\s.>*]`)
+	invalidSourceCharacters = regexp.MustCompile(`[\s.>*/\\]`)
 
-	invalidEventTypeCharacters = regexp.MustCompile(`[\s>*]`)
+	invalidEventTypeCharacters = regexp.MustCompile(`[\s>*/\\]`)
 )
 
 // Perform a compile-time check.
