@@ -18,7 +18,7 @@ kubectl get secrets -n kyma-system eventing-nats-secret -oyaml | grep -e account
 ```
 
 ### Result: 
-You got the credentials for the `system account` user in the following format:
+You get the credentials for the `system account` user in the following format:
 ```bash
 user: admin, password: <your password>
 ```
