@@ -74,8 +74,6 @@ rules:
   - watch
 - apiGroups:
   - monitoring.coreos.com
-  resources:
-  - servicemonitors
   verbs:
   - create
   - delete
