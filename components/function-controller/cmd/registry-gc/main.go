@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/docker/distribution/reference"
 	"github.com/go-logr/logr"
@@ -32,15 +33,40 @@ func main() {
 		os.Exit(1)
 	}
 
-	functionImages, err := listFunctionImages(restConfig)
+	functionImages, err := listRunningFunctionsImages(restConfig)
 	if err != nil {
 		mainLog.Error(err, "while listing function images")
 		os.Exit(1)
 	}
 
-	for _, functionImage := range functionImages.ListImages() {
-		if err := deleteUnreferencedTag(registryClient, functionImages, mainLog, functionImage); err != nil {
+	for _, functionImage := range functionImages.ListKeys() {
+		if err := deleteUnreferencedTags(registryClient, functionImages, mainLog, functionImage); err != nil {
 			mainLog.Error(err, "while deleting unreferenced tag")
+			os.Exit(1)
+		}
+	}
+	// It's better to get the list of layers _after_ we have deleted the unreferenced tags the previous step.
+	// This way we know we don't have any unused images on the registry.
+	imageLayers, err := registryClient.ListRegistryImagesLayers()
+	if err != nil {
+		mainLog.Error(err, "while getting registry image layers")
+		os.Exit(1)
+
+	}
+	cachedLayers, err := registryClient.ListRegistryCachedLayers()
+	if err != nil {
+		mainLog.Error(err, "while getting registry cached layers")
+		os.Exit(1)
+
+	}
+	for _, cachedLayer := range cachedLayers.ListKeys() {
+		// this cached layer is used by one of existing images, which means it's
+		// likely to be used by updated versions of the same function
+		if imageLayers.HasKey(cachedLayer) {
+			continue
+		}
+		if err := deleteCacheTags(registryClient, mainLog, cachedLayers.GetKey(cachedLayer)); err != nil {
+			mainLog.Error(err, "while deleting unreferenced cached tag")
 			os.Exit(1)
 		}
 	}
@@ -58,14 +84,14 @@ func readConfigurationOrDie(l logr.Logger) (*rest.Config, *registry.RegistryClie
 	return restConfig, registryConfig
 }
 
-func listFunctionImages(restConfig *rest.Config) (*registry.ImageList, error) {
+func listRunningFunctionsImages(restConfig *rest.Config) (*registry.NestedSet, error) {
 	deploymentList, err := registry.GetFunctionDeploymentList(restConfig)
 	if err != nil {
 		return nil, errors.Wrap(err, "while listing Function Deployments")
 
 	}
 
-	functionImages := registry.NewTaggedImageList()
+	functionImages := registry.NewNestedSet()
 
 	for _, deployment := range deploymentList.Items {
 		tagged, err := registry.GetFunctionImage(deployment)
@@ -74,13 +100,13 @@ func listFunctionImages(restConfig *rest.Config) (*registry.ImageList, error) {
 		}
 		imageName := reference.Path(tagged)
 		imageTag := tagged.Tag()
-		functionImages.AddImageWithTag(imageName, imageTag)
+		functionImages.AddKeyWithValue(imageName, imageTag)
 	}
 
 	return &functionImages, nil
 }
 
-func deleteUnreferencedTag(cli registry.RegistryClient, imageList *registry.ImageList, l logr.Logger, image string) error {
+func deleteUnreferencedTags(cli registry.RegistryClient, imageList *registry.NestedSet, l logr.Logger, image string) error {
 	repoCli, err := cli.ImageRepository(image)
 	if err != nil {
 		return errors.Wrap(err, "while creating repository client")
@@ -90,13 +116,36 @@ func deleteUnreferencedTag(cli registry.RegistryClient, imageList *registry.Imag
 		return errors.Wrap(err, "while getting image tags")
 	}
 	for _, tagStr := range registryTags {
-		if !imageList.HasImageWithTag(image, tagStr) {
+		if !imageList.HasKeyWithValue(image, tagStr) {
 			err = deleteImageTag(repoCli, l, image, tagStr)
 			if err != nil {
 				l.Error(err, "while deleting image tag")
 			} else {
 				l.Info(fmt.Sprintf("image [%v:%v] deleted successfully", image, tagStr))
 			}
+		}
+	}
+	return nil
+}
+
+func deleteCacheTags(cli registry.RegistryClient, l logr.Logger, cachedImages map[string]struct{}) error {
+	for c := range cachedImages {
+		parts := strings.Split(c, ":")
+		if len(parts) != 2 {
+			return errors.New("invalid cached image name")
+		}
+		imageName := parts[0]
+		tagStr := parts[1]
+
+		repoCli, err := cli.ImageRepository(imageName)
+		if err != nil {
+			return err
+		}
+		err = deleteImageTag(repoCli, l, imageName, tagStr)
+		if err != nil {
+			l.Error(err, "while deleting image tag")
+		} else {
+			l.Info(fmt.Sprintf("image [%v:%v] deleted successfully", imageName, tagStr))
 		}
 	}
 	return nil
