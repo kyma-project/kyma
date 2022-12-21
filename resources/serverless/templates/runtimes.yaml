@@ -87,6 +87,7 @@ data:
     FROM {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_runtime_java17_jvm_alpha) }} as builder
 
     ARG BUILD_DIR=/build
+    #When kaniko build the image it has Handler.java and pom.xml in the /src, but When I work on function locally the pom.xml can be in /src, but Handler.java lies in the package deep in src.
     ARG SOURCE_DIR=/src
     ARG DEPS_DIR=/src
     WORKDIR $BUILD_DIR
