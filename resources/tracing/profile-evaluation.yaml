@@ -31,3 +31,5 @@ kcproxy:
       cpu: 10m
       memory: 5Mi
 
+istio:
+  samplingRate: 100.0
