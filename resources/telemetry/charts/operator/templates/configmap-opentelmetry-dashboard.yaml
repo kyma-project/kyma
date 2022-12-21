@@ -122,7 +122,7 @@ data:
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
-              "legendFormat": "{{receiver}} spans accepted / sec",
+              "legendFormat": "{{`{{receiver}}`}} spans accepted / sec",
               "refId": "A"
             },
             {
@@ -132,7 +132,7 @@ data:
               },
               "expr": "sum(rate(otelcol_receiver_refused_spans{receiver=~\"$receiver\"}[1m])) by (receiver)",
               "interval": "",
-              "legendFormat": "{{ receiver }} spans refused /sec",
+              "legendFormat": "{{`{{ receiver }}`}} spans refused /sec",
               "refId": "B"
             }
           ],
@@ -228,7 +228,7 @@ data:
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
-              "legendFormat": "{{processor}} | received",
+              "legendFormat": "{{`{{processor}}`}} | received",
               "refId": "A"
             },
             {
@@ -238,7 +238,7 @@ data:
               },
               "expr": "sum(rate(otelcol_processor_spans_dropped{processor=~\"$processor\"}[1m])) by (processor)",
               "interval": "",
-              "legendFormat": "{{processor}} | dropped",
+              "legendFormat": "{{`{{processor}}`}} | dropped",
               "refId": "B"
             },
             {
@@ -248,7 +248,7 @@ data:
               },
               "expr": "sum(rate(otelcol_processor_accepted_spans{processor=~\"$processor\"}[1m])) by (processor)",
               "interval": "",
-              "legendFormat": "{{processor}} | accepted",
+              "legendFormat": "{{`{{processor}}`}} | accepted",
               "refId": "C"
             },
             {
@@ -258,7 +258,7 @@ data:
               },
               "expr": "sum(rate(otelcol_processor_refused_spans{processor=~\"$processor\"}[1m])) by (processor)",
               "interval": "",
-              "legendFormat": "{{processor}} | refused",
+              "legendFormat": "{{`{{processor}}`}} | refused",
               "refId": "E"
             }
           ],
@@ -382,7 +382,7 @@ data:
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
-              "legendFormat": "{{exporter}} sent / sec",
+              "legendFormat": "{{`{{exporter}}`}} sent / sec",
               "refId": "A"
             },
             {
@@ -392,7 +392,7 @@ data:
               },
               "expr": "sum(rate(otelcol_exporter_send_failed_spans{exporter=~\"$exporter\"}[1m])) by (exporter)",
               "interval": "",
-              "legendFormat": "{{ exporter }} failed /sec",
+              "legendFormat": "{{`{{ exporter }}`}} failed /sec",
               "refId": "B"
             }
           ],
@@ -594,7 +594,7 @@ data:
               "hide": false,
               "interval": "",
               "intervalFactor": 1,
-              "legendFormat": "{{exporter}} sent spans",
+              "legendFormat": "{{`{{exporter}}`}} sent spans",
               "refId": "A"
             },
             {
@@ -605,7 +605,7 @@ data:
               "exemplar": true,
               "expr": "sum(rate(otelcol_exporter_send_failed_spans{exporter=~\"$exporter\"}[1m])) by (exporter)",
               "interval": "",
-              "legendFormat": "{{exporter}} failed spans",
+              "legendFormat": "{{`{{exporter}}`}} failed spans",
               "refId": "B"
             }
           ],
