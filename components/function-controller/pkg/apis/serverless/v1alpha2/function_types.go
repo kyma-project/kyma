@@ -147,7 +147,7 @@ const (
 	BuildResourcesPresetLabel    = "serverless.kyma-project.io/build-resources-preset"
 )
 
-// FunctionSpec defines the desired state of Function
+// Spec defines the desired state of Function
 type FunctionSpec struct {
 	// Runtime specifies the runtime of the Function. The available values are `nodejs16`, `nodejs18`, and `python39`.
 	Runtime Runtime `json:"runtime"`
