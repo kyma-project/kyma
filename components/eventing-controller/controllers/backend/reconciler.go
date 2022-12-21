@@ -479,8 +479,7 @@ func (r *Reconciler) DeletePublisherProxySecret(ctx context.Context) error {
 		Namespace: deployment.PublisherNamespace,
 		Name:      deployment.PublisherName,
 	}
-	err := r.deleteSecret(ctx, secretNamespacedName)
-	return err
+	return r.deleteSecret(ctx, secretNamespacedName)
 }
 
 func (r *Reconciler) DeleteNATSSecret(ctx context.Context) error {
@@ -488,8 +487,7 @@ func (r *Reconciler) DeleteNATSSecret(ctx context.Context) error {
 		Namespace: kymaSystemNamespace,
 		Name:      natsSecretName,
 	}
-	err := r.deleteSecret(ctx, secretNamespacedName)
-	return err
+	return r.deleteSecret(ctx, secretNamespacedName)
 }
 
 func (r *Reconciler) deleteSecret(ctx context.Context, secretNamespacedName types.NamespacedName) error {
@@ -772,8 +770,7 @@ func (r *Reconciler) createNATSSecret(ctx context.Context) error {
 		Name:      natsSecretName,
 	}
 	currentSecret := new(v1.Secret)
-	err := r.Get(ctx, secretNamespacedName, currentSecret)
-	if err != nil {
+	if err := r.Get(ctx, secretNamespacedName, currentSecret); err != nil {
 		if k8serrors.IsNotFound(err) {
 			if err := r.Client.Create(ctx, constructNATSSecret()); err != nil {
 				return errors.Wrapf(err, "failed to create NATS Secret")
