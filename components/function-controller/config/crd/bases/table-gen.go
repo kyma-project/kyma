@@ -63,8 +63,7 @@ func replaceDocInMD(doc string) {
 
 	newContent := strings.Join([]string{
 		"<!-- " + FunctionSpecIdentifier + "-START -->",
-		doc,
-		"<!-- " + FunctionSpecIdentifier + "-END -->",
+		doc + "<!-- " + FunctionSpecIdentifier + "-END -->",
 	}, "\n")
 	re := regexp.MustCompile(REFunctionSpecPattern)
 	outDoc := re.ReplaceAll(inDoc, []byte(newContent))
