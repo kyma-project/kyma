@@ -7,89 +7,69 @@ import (
 	"sigs.k8s.io/yaml"
 	"sort"
 	"strings"
-	"time"
 )
 
-type IndentType int
-
-const (
-	IndentSpace IndentType = iota
-	IndentNbsp
-	IndentParentPath
-)
-const indentType = IndentParentPath
-
-// TODO: use relative path or from param
-const InputCRDFilename = `/Users/I567085/src/2022jul/kyma/components/function-controller/config/crd/bases/serverless.kyma-project.io_functions.yaml`
+// TODO: consider move to param?
 const APIVersion = "v1alpha2"
 
 // TODO: use relative path or from param
-const OutputMDFilename = `/Users/I567085/src/2022jul/kyma/docs/05-technical-reference/00-custom-resources/svls-01-function.md`
+const CRDFilename = `/Users/I567085/src/2022jul/kyma/components/function-controller/config/crd/bases/serverless.kyma-project.io_functions.yaml`
 
-// TODO: rename - this script create only SPEC
-const ReplacePartIdentifier = `FUNCTION-CRD-PARAMETERS-TABLE`
-const REPatternToReplace = `(?s)<!--\s*` + ReplacePartIdentifier + `\(START\).*<!--\s*` + ReplacePartIdentifier + `\(END\)[^\n]*`
+// TODO: use relative path or from param
+const MDFilename = `/Users/I567085/src/2022jul/kyma/docs/05-technical-reference/00-custom-resources/svls-01-function.md`
 
-const KeepIdentifier = `KEEP-THIS`
-const REPatternKeep = `<!--\s*` + KeepIdentifier + `\s*-->\s*[|]\s*\*{2}([^|]*)\*{2}.*`
+const FunctionSpecIdentifier = `FUNCTION-SPEC`
+const REFunctionSpecPattern = `(?s)<!--\s*` + FunctionSpecIdentifier + `-START\s* -->.*<!--\s*` + FunctionSpecIdentifier + `-END\s*-->`
+
+const KeepThisIdentifier = `KEEP-THIS`
+const REKeepThisPattern = `\s*[|]\s*\*{2}([^*]*)\*{2}.*<!--\s*` + KeepThisIdentifier + `\s*-->`
+
+type FunctionSpecGenerator struct {
+	elementsToKeep map[string]string
+}
 
 func main() {
 	elementsToKeep := getElementsToKeep()
-	newDoc := generateDocFromCRD(elementsToKeep)
-	replaceDocInMD(newDoc)
+	gen := CreateFunctionSpecGenerator(elementsToKeep)
+	doc := gen.generateDocFromCRD()
+	replaceDocInMD(doc)
 }
 
 func getElementsToKeep() map[string]string {
-	inDoc, err := os.ReadFile(OutputMDFilename)
+	inDoc, err := os.ReadFile(MDFilename)
 	if err != nil {
 		panic(err)
 	}
 
-	re, err := regexp.Compile(REPatternToReplace)
-	if err != nil {
-		panic(err)
-	}
-
-	tablePart := re.FindString(string(inDoc))
-
-	reKeep, err := regexp.Compile(REPatternKeep)
-	if err != nil {
-		panic(err)
-	}
-
-	rows := reKeep.FindAllStringSubmatch(tablePart, -1)
+	reFunSpec := regexp.MustCompile(REFunctionSpecPattern)
+	funSpecPart := reFunSpec.FindString(string(inDoc))
+	reKeep := regexp.MustCompile(REKeepThisPattern)
+	rowsToKeep := reKeep.FindAllStringSubmatch(funSpecPart, -1)
 
 	toKeep := map[string]string{}
-	for _, pair := range rows {
-		paramName := pair[1]
+	for _, pair := range rowsToKeep {
 		rowContent := pair[0]
+		paramName := pair[1]
 		toKeep[paramName] = rowContent
 	}
 	return toKeep
 }
 
 func replaceDocInMD(doc string) {
-	inDoc, err := os.ReadFile(OutputMDFilename)
-	if err != nil {
-		panic(err)
-	}
-
-	re, err := regexp.Compile(REPatternToReplace)
+	inDoc, err := os.ReadFile(MDFilename)
 	if err != nil {
 		panic(err)
 	}
 
 	newContent := strings.Join([]string{
-		"<!-- " + ReplacePartIdentifier + "(START) -->",
-		//TODO: for test only - remove row with date (unnecessary changes after regeneration without changes) or detect changes
-		"<!-- generated: " + time.Now().String() + " -->",
+		"<!-- " + FunctionSpecIdentifier + "-START -->",
 		doc,
-		"<!-- " + ReplacePartIdentifier + "(END) -->",
+		"<!-- " + FunctionSpecIdentifier + "-END -->",
 	}, "\n")
-
+	re := regexp.MustCompile(REFunctionSpecPattern)
 	outDoc := re.ReplaceAll(inDoc, []byte(newContent))
 
-	outFile, err := os.OpenFile(OutputMDFilename, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
+	outFile, err := os.OpenFile(MDFilename, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
 	if err != nil {
 		panic(err)
 	}
@@ -97,20 +77,25 @@ func replaceDocInMD(doc string) {
 	outFile.Write(outDoc)
 }
 
-func generateDocFromCRD(elementsToKeep map[string]string) string {
-	input, err := os.ReadFile(InputCRDFilename)
+func CreateFunctionSpecGenerator(toKeep map[string]string) FunctionSpecGenerator {
+	return FunctionSpecGenerator{
+		elementsToKeep: toKeep,
+	}
+}
+
+func (g *FunctionSpecGenerator) generateDocFromCRD() string {
+	input, err := os.ReadFile(CRDFilename)
 	if err != nil {
 		panic(err)
 	}
 
-	//TODO: check why unmarshalling to CustomResource don't work
+	// why unmarshalling to CustomResource don't work?
 	var obj interface{}
 	if err := yaml.Unmarshal(input, &obj); err != nil {
 		panic(err)
 	}
 
 	docElements := map[string]string{}
-
 	versions := getElement(obj, "spec", "versions")
 	for _, version := range versions.([]interface{}) {
 		name := getElement(version, "name")
@@ -118,12 +103,12 @@ func generateDocFromCRD(elementsToKeep map[string]string) string {
 			continue
 		}
 		functionSpec := getElement(version, "schema", "openAPIV3Schema", "properties", "spec")
-		for k, v := range generateElementDoc(functionSpec, "spec", true, 0, "", elementsToKeep) {
+		for k, v := range g.generateElementDoc(functionSpec, "spec", true, "") {
 			docElements[k] = v
 		}
 	}
 
-	for k, v := range elementsToKeep {
+	for k, v := range g.elementsToKeep {
 		docElements[k] = v
 	}
 
@@ -131,8 +116,54 @@ func generateDocFromCRD(elementsToKeep map[string]string) string {
 	for _, propName := range sortedKeys(docElements) {
 		doc = append(doc, docElements[propName])
 	}
-
 	return strings.Join(doc, "\n")
+}
+
+func (g *FunctionSpecGenerator) generateElementDoc(obj interface{}, name string, required bool, parentPath string) map[string]string {
+	result := map[string]string{}
+	element := obj.(map[string]interface{})
+	elementType := element["type"].(string)
+	description := ""
+	if d := element["description"]; d != nil {
+		description = d.(string)
+	}
+
+	fullName := fmt.Sprintf("%s%s", parentPath, name)
+	_, isRowToKeep := g.elementsToKeep[fullName]
+	if !isRowToKeep {
+		result[fullName] =
+			fmt.Sprintf("| **%s** | %s | %s |",
+				fullName, yesNo(required), normalizeDescription(description, name))
+	}
+
+	if elementType == "object" {
+		for k, v := range g.generateObjectDoc(element, name, parentPath) {
+			result[k] = v
+		}
+	}
+	return result
+}
+
+func (g *FunctionSpecGenerator) generateObjectDoc(element map[string]interface{}, name string, parentPath string) map[string]string {
+	result := map[string]string{}
+	properties := getElement(element, "properties")
+	if properties == nil {
+		return result
+	}
+
+	var requiredChildren []interface{}
+	if rc := getElement(element, "required"); rc != nil {
+		requiredChildren = rc.([]interface{})
+	}
+
+	propMap := properties.(map[string]interface{})
+	for _, propName := range sortedKeys(propMap) {
+		propRequired := contains(requiredChildren, name)
+		for k, v := range g.generateElementDoc(propMap[propName], propName, propRequired, parentPath+name+".") {
+			result[k] = v
+		}
+	}
+	return result
 }
 
 func getElement(obj interface{}, path ...string) interface{} {
@@ -141,34 +172,6 @@ func getElement(obj interface{}, path ...string) interface{} {
 		elem = elem.(map[string]interface{})[p]
 	}
 	return elem
-}
-
-func generateElementDoc(obj interface{}, name string, required bool, indent int, parentPath string, elementsToKeep map[string]string) map[string]string {
-	result := map[string]string{}
-	element := obj.(map[string]interface{})
-	elementType := element["type"].(string)
-	description := ""
-	if d := element["description"]; d != nil {
-		description = d.(string)
-	}
-	fullName := fmt.Sprintf("%s%s", parentPath, name)
-	_, isRowToKeep := elementsToKeep[fullName]
-	var generatedRow string
-	if !isRowToKeep {
-		//	generatedRow = rowToKeep
-		//} else {
-		generatedRow =
-			fmt.Sprintf("| **%s** | %s | %s |",
-				fullName, yesNo(required), normalizeDescription(description, name))
-	}
-	result[fullName] = generatedRow
-
-	if elementType == "object" {
-		for k, v := range generateObjectDoc(element, name, indent, parentPath, elementsToKeep) {
-			result[k] = v
-		}
-	}
-	return result
 }
 
 func normalizeDescription(description string, name string) any {
@@ -187,27 +190,6 @@ func normalizeDescription(description string, name string) any {
 	d = strings.Trim(dParts[1], " ")
 	d = strings.ToUpper(d[:1]) + d[1:]
 	return d
-}
-
-func generateObjectDoc(element map[string]interface{}, name string, indent int, parentPath string, elementsToKeep map[string]string) map[string]string {
-	result := map[string]string{}
-	properties := getElement(element, "properties")
-	if properties == nil {
-		return result
-	}
-	var requiredChildren []interface{}
-	if rc := getElement(element, "required"); rc != nil {
-		requiredChildren = rc.([]interface{})
-	}
-	propMap := properties.(map[string]interface{})
-	for _, propName := range sortedKeys(propMap) {
-		propRequired := contains(requiredChildren, name)
-		for k, v := range generateElementDoc(propMap[propName], propName, propRequired,
-			indent+1, parentPath+name+".", elementsToKeep) {
-			result[k] = v
-		}
-	}
-	return result
 }
 
 func sortedKeys[T any](propMap map[string]T) []string {
