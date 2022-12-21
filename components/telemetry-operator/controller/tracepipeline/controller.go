@@ -176,14 +176,17 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 }
 
 func (r *Reconciler) checkLock(ctx context.Context, pipeline *telemetryv1alpha1.TracePipeline) error {
-	lockName := types.NamespacedName{Name: "telemetry-tracepipeline-lock"}
+	lockName := types.NamespacedName{Name: "telemetry-tracepipeline-lock", Namespace: "kyma-system"}
 	var lock corev1.ConfigMap
 	if err := r.Get(ctx, lockName, &lock); err != nil {
 		if apierrors.IsNotFound(err) {
 			lock.Name = lockName.Name
 			lock.Namespace = lockName.Namespace
 			controllerutil.SetControllerReference(pipeline, &lock, r.Scheme)
-			return r.Create(ctx, &lock)
+			if createErr := r.Create(ctx, &lock); createErr != nil {
+				return fmt.Errorf("failed to create lock: %v", createErr)
+			}
+			return nil
 		}
 		return fmt.Errorf("failed to get the lock: %v", err)
 	}
