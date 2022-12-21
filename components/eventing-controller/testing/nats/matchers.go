@@ -1,6 +1,7 @@
 package nats
 
 import (
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/onsi/gomega"
 	gomegatypes "github.com/onsi/gomega/types"
 
@@ -20,13 +21,15 @@ func BeSubscriptionWithSubject(subject string) gomegatypes.GomegaMatcher {
 	}, gomega.BeTrue())
 }
 
-func BeJetStreamSubscriptionWithSubject(subject string) gomegatypes.GomegaMatcher {
+func BeJetStreamSubscriptionWithSubject(subject string, natsConfig env.NatsConfig) gomegatypes.GomegaMatcher {
 	return gomega.WithTransform(func(subscriber nats.Subscriber) bool {
 		info, err := subscriber.ConsumerInfo()
 		if err != nil {
 			return false
 		}
-		js := jetstream.JetStream{}
+		js := jetstream.JetStream{
+			Config: natsConfig,
+		}
 		return info.Config.FilterSubject == js.GetJetStreamSubject(subject)
 	}, gomega.BeTrue())
 }

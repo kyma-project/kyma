@@ -472,12 +472,14 @@ func TestJetStream_NATSSubscriptionCount(t *testing.T) {
 	}
 }
 
-func defaultNatsConfig(url string) env.NatsConfig {
+func defaultNatsConfig(url string, port int) env.NatsConfig {
+	streamName := fmt.Sprintf("%s%d", DefaultStreamName, port)
 	return env.NatsConfig{
 		URL:                     url,
 		MaxReconnects:           DefaultMaxReconnects,
 		ReconnectWait:           3 * time.Second,
-		JSStreamName:            DefaultStreamName,
+		JSStreamName:            streamName,
+		JSSubjectPrefix:         streamName,
 		JSStreamStorageType:     StorageTypeMemory,
 		JSStreamRetentionPolicy: RetentionPolicyInterest,
 		JSStreamDiscardPolicy:   DiscardPolicyNew,
@@ -505,7 +507,7 @@ func getJetStreamClient(t *testing.T, serverURL string) *jetStreamClient {
 func setupTestEnvironment(t *testing.T) *TestEnvironment {
 	natsServer, natsPort, err := natstesting.StartNATSServer(evtesting.WithJetStreamEnabled())
 	require.NoError(t, err)
-	natsConfig := defaultNatsConfig(natsServer.ClientURL())
+	natsConfig := defaultNatsConfig(natsServer.ClientURL(), natsPort)
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	require.NoError(t, err)
 

@@ -25,9 +25,10 @@ import (
 type Runtime string
 
 const (
-	Python39 Runtime = "python39"
-	NodeJs14 Runtime = "nodejs14"
-	NodeJs16 Runtime = "nodejs16"
+	Python39       Runtime = "python39"
+	NodeJs14       Runtime = "nodejs14"
+	NodeJs16       Runtime = "nodejs16"
+	Java17JvmAlpha Runtime = "java17-jvm-alpha"
 )
 
 type FunctionType string
