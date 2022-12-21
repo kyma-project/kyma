@@ -22,15 +22,22 @@ const FunctionSpecIdentifier = `FUNCTION-SPEC`
 const REFunctionSpecPattern = `(?s)<!--\s*` + FunctionSpecIdentifier + `-START\s* -->.*<!--\s*` + FunctionSpecIdentifier + `-END\s*-->`
 
 const KeepThisIdentifier = `KEEP-THIS`
-const REKeepThisPattern = `\s*[|]\s*\*{2}([^*]*)\*{2}.*<!--\s*` + KeepThisIdentifier + `\s*-->`
+const REKeepThisPattern = `\s*[|]\s*\*{2}([^*]+)\*{2}.*<!--\s*` + KeepThisIdentifier + `\s*-->`
+
+const SkipIdentifier = `SKIP-ELEMENT`
+const RESkipPattern = `<!--\s*` + SkipIdentifier + `\s*([^\s]+)\s*-->`
+const SkipWithAncestorsIdentifier = `SKIP-WITH-ANCESTORS`
+const RESkipWithAncestorsPattern = `<!--\s*` + SkipWithAncestorsIdentifier + `\s*([^\s-]+)\s*-->`
 
 type FunctionSpecGenerator struct {
 	elementsToKeep map[string]string
+	elementsToSkip map[string]bool
 }
 
 func main() {
-	elementsToKeep := getElementsToKeep()
-	gen := CreateFunctionSpecGenerator(elementsToKeep)
+	toKeep := getElementsToKeep()
+	toSkip := getElementsToSkip()
+	gen := CreateFunctionSpecGenerator(toKeep, toSkip)
 	doc := gen.generateDocFromCRD()
 	replaceDocInMD(doc)
 }
@@ -55,6 +62,29 @@ func getElementsToKeep() map[string]string {
 	return toKeep
 }
 
+func getElementsToSkip() map[string]bool {
+	inDoc, err := os.ReadFile(MDFilename)
+	if err != nil {
+		panic(err)
+	}
+
+	doc := string(inDoc)
+	reSkip := regexp.MustCompile(RESkipPattern)
+	toSkip := map[string]bool{}
+	for _, pair := range reSkip.FindAllStringSubmatch(doc, -1) {
+		paramName := pair[1]
+		toSkip[paramName] = false
+	}
+
+	reSkipWithAncestors := regexp.MustCompile(RESkipWithAncestorsPattern)
+	for _, pair := range reSkipWithAncestors.FindAllStringSubmatch(doc, -1) {
+		paramName := pair[1]
+		toSkip[paramName] = true
+	}
+
+	return toSkip
+}
+
 func replaceDocInMD(doc string) {
 	inDoc, err := os.ReadFile(MDFilename)
 	if err != nil {
@@ -76,9 +106,10 @@ func replaceDocInMD(doc string) {
 	outFile.Write(outDoc)
 }
 
-func CreateFunctionSpecGenerator(toKeep map[string]string) FunctionSpecGenerator {
+func CreateFunctionSpecGenerator(toKeep map[string]string, toSkip map[string]bool) FunctionSpecGenerator {
 	return FunctionSpecGenerator{
 		elementsToKeep: toKeep,
+		elementsToSkip: toSkip,
 	}
 }
 
@@ -128,8 +159,12 @@ func (g *FunctionSpecGenerator) generateElementDoc(obj interface{}, name string,
 	}
 
 	fullName := fmt.Sprintf("%s%s", parentPath, name)
+	skipWithAncestors, shouldBeSkipped := g.elementsToSkip[fullName]
+	if shouldBeSkipped && skipWithAncestors {
+		return result
+	}
 	_, isRowToKeep := g.elementsToKeep[fullName]
-	if !isRowToKeep {
+	if !shouldBeSkipped && !isRowToKeep {
 		result[fullName] =
 			fmt.Sprintf("| **%s** | %s | %s |",
 				fullName, yesNo(required), normalizeDescription(description, name))

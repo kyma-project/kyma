@@ -115,6 +115,9 @@ This table lists all the possible parameters of a given resource together with t
 <!-- Some special tags (html comments) are at the end of lines due to markdown requirements. -->
 <!-- The content between "FUNCTION-SPEC-START" and "FUNCTION-SPEC-END" will be replaced but rows with "KEEP-THIS" at the end will be preserved-->
 
+<!-- SKIP-ELEMENT spec -->
+<!-- SKIP-WITH-ANCESTORS spec.template -->
+
 | Parameter         |    Required    | Description                                   |
 | ---------------------------------------- | :------------: | ---------|
 | **metadata.name**              |      Yes       | Specifies the name of the CR.                 |
