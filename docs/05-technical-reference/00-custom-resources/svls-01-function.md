@@ -117,8 +117,7 @@ This table lists all the possible parameters of a given resource together with t
 | ---------------------------------------- | :------------: | ---------|
 | **metadata.name**              |      Yes       | Specifies the name of the CR.                 |
 | **metadata.namespace**     |       No       | Defines the Namespace in which the CR is available. It is set to `default` unless you specify otherwise.      |
-| **metadata.labels**                          |       No       | Specifies the Function's Pod labels.    |
-<!-- FUNCTION-CRD-PARAMETERS-TABLE(START) -->
+| **metadata.labels**                          |       No       | Specifies the Function's Pod labels.    |<!-- FUNCTION-CRD-PARAMETERS-TABLE(START) -->
 | **spec.runtime**                         |      Yes       | Specifies the runtime of the Function. The available values are `nodejs16`, `nodejs16`, and `python39`. |
 | **spec.runtimeImageOverride**                 |       No       | Specifies the runtimes image which must be used instead of the default one. |
 | **spec.source**                               |      Yes       | Contains the Function's specification. Only one specification is allowed. |
@@ -154,8 +153,7 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.scaleConfig.maxReplicas**              |      Yes       | Defines the maximum number of Function's Pods to run at a time. |
 | **spec.secretMounts**                         |       No       | Specifies Secrets to mount into the Function's container filesystem. |
 | **spec.secretMounts.secretName**              |      Yes       | Specifies name of the Secret in the Function's Namespace to use. |
-| **spec.secretMounts.mountPath**               |      Yes       | Specifies path within the container at which the Secret should be mounted. |
-<!-- FUNCTION-CRD-PARAMETERS-TABLE(END) -->
+| **spec.secretMounts.mountPath**               |      Yes       | Specifies path within the container at which the Secret should be mounted. |<!-- FUNCTION-CRD-PARAMETERS-TABLE(END) -->
 | **status.conditions.lastTransitionTime** | Not applicable | Provides a timestamp for the last time the Function's condition status changed from one to another.    |
 | **status.conditions.message**            | Not applicable | Describes a human-readable message on the CR processing progress, success, or failure.   |
 | **status.conditions.reason**             | Not applicable | Provides information on the Function CR processing success or failure. See the [**Reasons**](#status-reasons) section for the full list of possible status reasons and their descriptions. All status reasons are in camelCase.   |
