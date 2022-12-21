@@ -62,7 +62,7 @@ spec:
       {{- if and .Values.auth.enabled .Values.auth.resolver }}
       - name: accounts-volume
         secret:
-          secretName: {{ .Values.auth.resolver.secret.name }}
+          secretName: {{ include "nats.fullname" . }}-secret
       {{- end }}
       - name: config-volume
         configMap:
@@ -105,7 +105,7 @@ spec:
           - "-config"
           - "/etc/nats-config/nats.conf"
           - "-config"
-          - "/etc/nats-config/accounts/{{ .Values.auth.resolver.secret.key }}"
+          - "/etc/nats-config/accounts/resolver.conf"
         volumeMounts:
           - name: config-volume
             mountPath: /etc/nats-config

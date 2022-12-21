@@ -296,7 +296,7 @@ func getSecretWithTLSSecret(dummyCABundle []byte) *corev1.Secret {
 	return &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      getTestBackendConfig().WebhookSecretName,
-			Namespace: certificateSecretNamespace,
+			Namespace: kymaSystemNamespace,
 		},
 		Data: map[string][]byte{
 			tlsCertField: dummyCABundle,

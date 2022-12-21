@@ -54,8 +54,11 @@ const (
 
 	reconcilerName = "backend-reconciler"
 
-	certificateSecretNamespace = "kyma-system"
-	tlsCertField               = "tls.crt"
+	kymaSystemNamespace = "kyma-system"
+	tlsCertField        = "tls.crt"
+
+	natsSecretName = "eventing-nats-secret"
+	natsSecretKey  = "resolver.conf"
 )
 
 var (
@@ -169,6 +172,15 @@ func (r *Reconciler) reconcileNATSBackend(ctx context.Context, backendStatus *ev
 		return ctrl.Result{}, err
 	}
 
+	// Create NATS Secret for the eventing-nats statefulset
+	if err := r.createNATSSecret(ctx); err != nil {
+		backendStatus.SetSubscriptionControllerReadyCondition(false, eventingv1alpha1.ConditionReasonNATSSecretError, err.Error())
+		if updateErr := r.syncBackendStatus(ctx, backendStatus, nil); updateErr != nil {
+			return ctrl.Result{}, errors.Wrapf(err, "failed to update status while creating NATS secret")
+		}
+		return ctrl.Result{}, err
+	}
+
 	// Start the NATS subscription controller
 	if err := r.startNATSController(); err != nil {
 		backendStatus.SetSubscriptionControllerReadyCondition(false, eventingv1alpha1.ConditionReasonControllerStartFailed, err.Error())
@@ -228,6 +240,15 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 			return ctrl.Result{}, errors.Wrapf(err, "failed to update status while stopping NATS controller")
 		}
 		return ctrl.Result{}, err
+	}
+
+	//Delete NATS Secret
+	if err = r.DeleteNATSSecret(ctx); err != nil {
+		backendStatus.SetSubscriptionControllerReadyCondition(false, eventingv1alpha1.ConditionReasonNATSSecretError, err.Error())
+		if updateErr := r.syncBackendStatus(ctx, backendStatus, nil); updateErr != nil {
+			return ctrl.Result{}, errors.Wrapf(err, "failed to update status while deleting NATS secret")
+		}
+		return ctrl.Result{}, errors.Wrapf(err, "delete eventing NATS secret failed")
 	}
 
 	// gets oauth2ClientID and secret and stops the BEB controller if changed
@@ -458,6 +479,20 @@ func (r *Reconciler) DeletePublisherProxySecret(ctx context.Context) error {
 		Namespace: deployment.PublisherNamespace,
 		Name:      deployment.PublisherName,
 	}
+	err := r.deleteSecret(ctx, secretNamespacedName)
+	return err
+}
+
+func (r *Reconciler) DeleteNATSSecret(ctx context.Context) error {
+	secretNamespacedName := types.NamespacedName{
+		Namespace: kymaSystemNamespace,
+		Name:      natsSecretName,
+	}
+	err := r.deleteSecret(ctx, secretNamespacedName)
+	return err
+}
+
+func (r *Reconciler) deleteSecret(ctx context.Context, secretNamespacedName types.NamespacedName) error {
 	currentSecret := new(v1.Secret)
 	err := r.Get(ctx, secretNamespacedName, currentSecret)
 	if err != nil {
@@ -469,7 +504,7 @@ func (r *Reconciler) DeletePublisherProxySecret(ctx context.Context) error {
 	}
 
 	if err := r.Client.Delete(ctx, currentSecret); err != nil {
-		return errors.Wrapf(err, "failed to delete Event Publisher secret")
+		return errors.Wrapf(err, "failed to delete secret: %s", secretNamespacedName.Name)
 	}
 	return nil
 }
@@ -731,6 +766,25 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
+func (r *Reconciler) createNATSSecret(ctx context.Context) error {
+	secretNamespacedName := types.NamespacedName{
+		Namespace: kymaSystemNamespace,
+		Name:      natsSecretName,
+	}
+	currentSecret := new(v1.Secret)
+	err := r.Get(ctx, secretNamespacedName, currentSecret)
+	if err != nil {
+		if k8serrors.IsNotFound(err) {
+			if err := r.Client.Create(ctx, constructNATSSecret()); err != nil {
+				return errors.Wrapf(err, "failed to create NATS Secret")
+			}
+			return nil
+		}
+		return err
+	}
+	return nil
+}
+
 func (r *Reconciler) startNATSController() error {
 	if !r.natsSubMgrStarted {
 		if err := r.natsSubMgr.Start(r.cfg.DefaultSubscriptionConfig, subscriptionmanager.Params{}); err != nil {
@@ -817,7 +871,7 @@ func (r *Reconciler) updateMutatingValidatingWebhookWithCABundle(ctx context.Con
 	// get the secret containing the certificate
 	var certificateSecret v1.Secret
 	secretKey := client.ObjectKey{
-		Namespace: certificateSecretNamespace,
+		Namespace: kymaSystemNamespace,
 		Name:      r.cfg.WebhookSecretName,
 	}
 	if err := r.Client.Get(ctx, secretKey, &certificateSecret); err != nil {
@@ -889,4 +943,25 @@ func (r *Reconciler) namedLogger() *zap.SugaredLogger {
 
 func getOAuth2ClientSecretName() string {
 	return deployment.ControllerName + BEBSecretNameSuffix
+}
+
+func constructNATSSecret() *v1.Secret {
+	secretMap := make(map[string][]byte)
+	password := utils.GetRandString(60)
+	secretMap[natsSecretKey] = []byte(fmt.Sprintf(
+		`accounts: {
+  "$SYS": {
+    users: [
+      {user: admin, password: %v}
+    ]
+  },
+}
+system_account: "$SYS"`, password))
+	return &v1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      natsSecretName,
+			Namespace: kymaSystemNamespace,
+		},
+		Data: secretMap,
+	}
 }

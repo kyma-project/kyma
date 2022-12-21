@@ -157,7 +157,7 @@ data:
     {{- if .Values.auth.resolver }}
     {{- if eq .Values.auth.resolver.type "memory" }}
     resolver: MEMORY
-    include "accounts/{{ .Values.auth.resolver.secret.key }}"
+    include "accounts/resolver.conf"
     {{- end }}
     {{- end }}
     {{- end }}

@@ -202,9 +202,6 @@ auth:
     #                            #
     ##############################
     type: memory
-    secret:
-      name: eventing-nats-secret
-      key: accountsJson
 
 
 nameOverride: ""
