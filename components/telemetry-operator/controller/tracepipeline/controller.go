@@ -104,6 +104,10 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 		}
 	}()
 
+	if err = r.checkLock(ctx, pipeline); err != nil {
+		return err
+	}
+
 	var secretData map[string][]byte
 	if secretData, err = fetchSecretData(ctx, r, pipeline.Spec.Output.Otlp); err != nil {
 		return err
@@ -172,7 +176,7 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 }
 
 func (r *Reconciler) checkLock(ctx context.Context, pipeline *telemetryv1alpha1.TracePipeline) error {
-	lockName := types.NamespacedName{Name: "things-n-stuff"}
+	lockName := types.NamespacedName{Name: "telemetry-tracepipeline-lock"}
 	var lock corev1.ConfigMap
 	if err := r.Get(ctx, lockName, &lock); err != nil {
 		if apierrors.IsNotFound(err) {
