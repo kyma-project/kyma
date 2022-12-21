@@ -22,7 +22,7 @@ const FunctionSpecIdentifier = `FUNCTION-SPEC`
 const REFunctionSpecPattern = `(?s)<!--\s*` + FunctionSpecIdentifier + `-START\s* -->.*<!--\s*` + FunctionSpecIdentifier + `-END\s*-->`
 
 const KeepThisIdentifier = `KEEP-THIS`
-const REKeepThisPattern = `\s*[|]\s*\*{2}([^*]+)\*{2}.*<!--\s*` + KeepThisIdentifier + `\s*-->`
+const REKeepThisPattern = `[^\S\r\n]*[|]\s*\*{2}([^*]+)\*{2}.*<!--\s*` + KeepThisIdentifier + `\s*-->`
 
 const SkipIdentifier = `SKIP-ELEMENT`
 const RESkipPattern = `<!--\s*` + SkipIdentifier + `\s*([^\s]+)\s*-->`
