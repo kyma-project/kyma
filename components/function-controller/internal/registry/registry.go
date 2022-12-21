@@ -46,9 +46,9 @@ type RegistryClientOptions struct {
 var _ RegistryClient = &registryClient{}
 
 func NewRegistryClient(ctx context.Context, opts *RegistryClientOptions) (RegistryClient, error) {
-	// if opts.Username == "" || opts.Password == "" {
-	// 	return nil, errors.Errorf("username and password can't be empty")
-	// }
+	if opts.Username == "" || opts.Password == "" {
+		return nil, errors.Errorf("username and password can't be empty")
+	}
 	// url.Parse() doesn't correctly parse URLs with ports and no scheme! So we need to add
 	// the proper scheme before parsing the url
 	strURL := opts.URL
