@@ -57,8 +57,9 @@ const (
 	ConditionReasonControllerStartFailed          ConditionReason = "Starting the controller failed"
 	ConditionReasonControllerStopFailed           ConditionReason = "Stopping the controller failed"
 	ConditionReasonPublisherProxySecretError      ConditionReason = "Publisher proxy secret sync failed"
-	ConditionReasonNATSSecretError                ConditionReason = "NATS secret sync failed"
-	ConditionDuplicateSecrets                     ConditionReason = "Multiple eventing backend labeled secrets exist"
+	//nolint:gosec // no potential hardcoded credentials
+	ConditionReasonNATSSecretError ConditionReason = "NATS secret sync failed"
+	ConditionDuplicateSecrets      ConditionReason = "Multiple eventing backend labeled secrets exist"
 )
 
 // initializeConditions sets unset conditions to Unknown.

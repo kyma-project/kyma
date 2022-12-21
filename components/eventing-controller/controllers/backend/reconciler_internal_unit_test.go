@@ -3,9 +3,10 @@ package backend
 import (
 	"context"
 	"errors"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"math/rand"
 	"testing"
+
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 

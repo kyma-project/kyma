@@ -57,8 +57,9 @@ const (
 	kymaSystemNamespace = "kyma-system"
 	tlsCertField        = "tls.crt"
 
-	natsSecretName = "eventing-nats-secret"
-	natsSecretKey  = "resolver.conf"
+	natsSecretName           = "eventing-nats-secret"
+	natsSecretKey            = "resolver.conf"
+	natsSecretPasswordLength = 60
 )
 
 var (
@@ -173,12 +174,13 @@ func (r *Reconciler) reconcileNATSBackend(ctx context.Context, backendStatus *ev
 	}
 
 	// Create NATS Secret for the eventing-nats statefulset
-	if err := r.createNATSSecret(ctx); err != nil {
-		backendStatus.SetSubscriptionControllerReadyCondition(false, eventingv1alpha1.ConditionReasonNATSSecretError, err.Error())
+	if createErr := r.createNATSSecret(ctx); createErr != nil {
+		backendStatus.SetSubscriptionControllerReadyCondition(false,
+			eventingv1alpha1.ConditionReasonNATSSecretError, createErr.Error())
 		if updateErr := r.syncBackendStatus(ctx, backendStatus, nil); updateErr != nil {
 			return ctrl.Result{}, errors.Wrapf(err, "failed to update status while creating NATS secret")
 		}
-		return ctrl.Result{}, err
+		return ctrl.Result{}, createErr
 	}
 
 	// Start the NATS subscription controller
@@ -242,9 +244,10 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 		return ctrl.Result{}, err
 	}
 
-	//Delete NATS Secret
+	// Delete NATS Secret
 	if err = r.DeleteNATSSecret(ctx); err != nil {
-		backendStatus.SetSubscriptionControllerReadyCondition(false, eventingv1alpha1.ConditionReasonNATSSecretError, err.Error())
+		backendStatus.SetSubscriptionControllerReadyCondition(false,
+			eventingv1alpha1.ConditionReasonNATSSecretError, err.Error())
 		if updateErr := r.syncBackendStatus(ctx, backendStatus, nil); updateErr != nil {
 			return ctrl.Result{}, errors.Wrapf(err, "failed to update status while deleting NATS secret")
 		}
@@ -772,8 +775,8 @@ func (r *Reconciler) createNATSSecret(ctx context.Context) error {
 	currentSecret := new(v1.Secret)
 	if err := r.Get(ctx, secretNamespacedName, currentSecret); err != nil {
 		if k8serrors.IsNotFound(err) {
-			if err := r.Client.Create(ctx, constructNATSSecret()); err != nil {
-				return errors.Wrapf(err, "failed to create NATS Secret")
+			if createErr := r.Client.Create(ctx, constructNATSSecret()); createErr != nil {
+				return errors.Wrapf(createErr, "failed to create NATS Secret")
 			}
 			return nil
 		}
@@ -944,7 +947,7 @@ func getOAuth2ClientSecretName() string {
 
 func constructNATSSecret() *v1.Secret {
 	secretMap := make(map[string][]byte)
-	password := utils.GetRandString(60)
+	password := utils.GetRandString(natsSecretPasswordLength)
 	secretMap[natsSecretKey] = []byte(fmt.Sprintf(
 		`accounts: {
   "$SYS": {
