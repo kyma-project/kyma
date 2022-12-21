@@ -89,7 +89,7 @@ global:
       version: "v20221212-75f7ed08"
     function_runtime_nodejs14:
       name: "function-runtime-nodejs14"
-      version: "v20221209-28eb3cee"
+      version: "v20221221-c4e979d1"
     function_runtime_nodejs16:
       name: "function-runtime-nodejs16"
       version: "v20221209-28eb3cee"
