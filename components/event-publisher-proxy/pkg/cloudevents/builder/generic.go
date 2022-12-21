@@ -2,7 +2,6 @@ package builder
 
 import (
 	"fmt"
-	"net/url"
 	"strings"
 
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
@@ -31,27 +30,17 @@ func NewGenericBuilder(typePrefix string, cleaner cleaner.Cleaner, applicationLi
 }
 
 func (gb *GenericBuilder) Build(event cev2event.Event) (*cev2event.Event, error) {
-	// get unescaped strings from cloud event
-	eventSource, err := url.QueryUnescape(event.Source())
-	if err != nil {
-		return nil, err
-	}
-	eventType, err := url.QueryUnescape(event.Type())
-	if err != nil {
-		return nil, err
-	}
-
 	// format logger
-	namedLogger := gb.namedLogger(eventSource, eventType)
+	namedLogger := gb.namedLogger(event.Source(), event.Type())
 
 	// clean the source
-	cleanSource, err := gb.cleaner.CleanSource(gb.GetAppNameOrSource(eventSource, namedLogger))
+	cleanSource, err := gb.cleaner.CleanSource(gb.GetAppNameOrSource(event.Source(), namedLogger))
 	if err != nil {
 		return nil, err
 	}
 
 	// clean the event type
-	cleanEventType, err := gb.cleaner.CleanEventType(eventType)
+	cleanEventType, err := gb.cleaner.CleanEventType(event.Type())
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +53,7 @@ func (gb *GenericBuilder) Build(event cev2event.Event) (*cev2event.Event, error)
 	if CheckForEmptySegments(segments) {
 		return nil, fmt.Errorf("event type cannot have empty segments after cleaning: %s", finalEventType)
 	}
-	namedLogger.Debugf("using event type ==: %s", finalEventType)
+	namedLogger.Debugf("using event type: %s", finalEventType)
 
 	ceEvent := event.Clone()
 	ceEvent.SetType(finalEventType)

@@ -2,10 +2,13 @@ package builder
 
 import (
 	"context"
+	"encoding/json"
 	golog "log"
 	"testing"
 
-	cev2event "github.com/cloudevents/sdk-go/v2/event"
+	cloudevents "github.com/cloudevents/sdk-go/v2"
+	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
+
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application/applicationtest"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application/fake"
@@ -43,10 +46,10 @@ func Test_Build(t *testing.T) {
 		},
 		{
 			name:                 "should return cleaned source and type (without application)",
-			givenSource:          "sour c/\\e.1",
-			givenType:            "order.cr/\\eat ed.v1",
+			givenSource:          "source1",
+			givenType:            "o-rder.creat ed.v1",
 			givenApplicationName: "appName1",
-			wantType:             "prefix.source1.order.created.v1",
+			wantType:             "prefix.source1.o-rder.created.v1",
 			wantSource:           "source1",
 		},
 		{
@@ -67,13 +70,6 @@ func Test_Build(t *testing.T) {
 			wantSource:             "testapptype",
 		},
 		{
-			name:                 "should return error if empty source",
-			givenSource:          "",
-			givenType:            "order.created.v1",
-			givenApplicationName: "appName1",
-			wantError:            true,
-		},
-		{
 			name:                 "should return error if empty type",
 			givenSource:          "source1",
 			givenType:            "",
@@ -88,9 +84,16 @@ func Test_Build(t *testing.T) {
 			t.Parallel()
 
 			// given
-			event := cev2event.New(cev2event.CloudEventsVersionV1)
-			event.SetSource(tc.givenSource)
-			event.SetType(tc.givenType)
+			// build cloud event
+			builder := testingutils.NewCloudEventBuilder(
+				testingutils.WithCloudEventSource(tc.givenSource),
+				testingutils.WithCloudEventType(tc.givenType),
+			)
+			payload, _ := builder.BuildStructured()
+			newEvent := cloudevents.NewEvent()
+			newEvent.SetType(testingutils.CloudEventTypeWithPrefix)
+			err := json.Unmarshal([]byte(payload), &newEvent)
+			require.NoError(t, err)
 
 			appLister := fake.NewApplicationListerOrDie(
 				context.Background(),
@@ -104,12 +107,13 @@ func Test_Build(t *testing.T) {
 			}
 
 			// when
-			buildEvent, err := genericBuilder.Build(event)
+			buildEvent, err := genericBuilder.Build(newEvent)
 
 			// then
 			if tc.wantError {
 				require.Error(t, err)
 			} else {
+				require.NoError(t, err)
 				require.Equal(t, tc.wantSource, buildEvent.Source())
 				require.Equal(t, tc.wantType, buildEvent.Type())
 			}
