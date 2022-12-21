@@ -35,17 +35,20 @@ func (cs *CompassRuntimeAgentSuite) TestApplication() {
 
 	applicationInterface := cs.applicationsClientSet.ApplicationconnectorV1alpha1().Applications()
 	err = cs.assignApplicationToFormationAndWaitForSync(applicationInterface, synchronizedCompassAppName, applicationID)
-	cs.Assert().NoError(err)
+	cs.NoError(err)
 
 	// Compare Application created by Compass Runtime Agent with expected result
 
 	cs.Run("Compass Runtime Agent should create Application", func() {
 		err = cs.appComparator.Compare(cs.T(), expectedAppName, synchronizedCompassAppName)
-		cs.Assert().NoError(err)
+		cs.NoError(err)
 	})
 
 	cs.Run("Update app", func() {
-		err := cs.updateAndWaitForCompare(applicationInterface, synchronizedCompassAppName, applicationID, updatedAppName)
+		err = cs.updateAndWaitForCompare(applicationInterface, synchronizedCompassAppName, applicationID, updatedAppName)
+		cs.Require().NoError(err)
+
+		err = cs.appComparator.Compare(cs.T(), updatedAppName, synchronizedCompassAppName)
 		cs.NoError(err)
 	})
 
@@ -66,12 +69,12 @@ func (cs *CompassRuntimeAgentSuite) updateAndWaitForCompare(appReader Applicatio
 	}
 
 	verify := func() bool {
-		err := cs.appComparator.Compare(cs.T(), updatedName, compassAppName)
+		app, err := appReader.Get(context.Background(), compassAppName, v1.GetOptions{})
 		if err != nil {
-			t.Logf("Couldn't verify update: %v", err)
+			t.Logf("Couldn't get updated: %v", err)
 		}
 
-		return err == nil
+		return err == nil && app.Spec.Description == "Updated"
 	}
 
 	return executor.ExecuteAndWaitForCondition{
