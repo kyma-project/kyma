@@ -14,7 +14,7 @@ Kyma version `2.7` or later.
 To acquire the credentials, run the following command:
 
 ```bash
-kubectl get secrets -n kyma-system eventing-nats-secret -oyaml | grep -e accountsJson | awk '{print $2}' | base64 -d | grep {user: | awk '{$1=$1};1' | awk '{print substr($0, 2, length($0) - 2)}'
+kubectl get secrets -n kyma-system eventing-nats-secret -ogo-template='{{index .data "resolver.conf"|base64decode}}'| grep 'user:' | tr -d '{}'
 ```
 
 ### Result: 
