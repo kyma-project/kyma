@@ -193,7 +193,7 @@ func (r *Reconciler) reconcileNATSBackend(ctx context.Context, backendStatus *ev
 	}
 
 	// Delete secret for publisher proxy if it exists
-	err = r.DeletePublisherProxySecret(ctx)
+	err = r.deletePublisherProxySecret(ctx)
 	if err != nil {
 		backendStatus.SetPublisherReadyCondition(false, eventingv1alpha1.ConditionReasonPublisherProxySecretError, err.Error())
 		if updateErr := r.syncBackendStatus(ctx, backendStatus, nil); updateErr != nil {
@@ -245,7 +245,7 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 	}
 
 	// Delete NATS Secret
-	if err = r.DeleteNATSSecret(ctx); err != nil {
+	if err = r.deleteNATSSecret(ctx); err != nil {
 		backendStatus.SetSubscriptionControllerReadyCondition(false,
 			eventingv1alpha1.ConditionReasonNATSSecretError, err.Error())
 		if updateErr := r.syncBackendStatus(ctx, backendStatus, nil); updateErr != nil {
@@ -477,7 +477,7 @@ func getDefaultBackendStatus() eventingv1alpha1.EventingBackendStatus {
 	return defaultStatus
 }
 
-func (r *Reconciler) DeletePublisherProxySecret(ctx context.Context) error {
+func (r *Reconciler) deletePublisherProxySecret(ctx context.Context) error {
 	secretNamespacedName := types.NamespacedName{
 		Namespace: deployment.PublisherNamespace,
 		Name:      deployment.PublisherName,
@@ -485,7 +485,7 @@ func (r *Reconciler) DeletePublisherProxySecret(ctx context.Context) error {
 	return r.deleteSecret(ctx, secretNamespacedName)
 }
 
-func (r *Reconciler) DeleteNATSSecret(ctx context.Context) error {
+func (r *Reconciler) deleteNATSSecret(ctx context.Context) error {
 	secretNamespacedName := types.NamespacedName{
 		Namespace: kymaSystemNamespace,
 		Name:      natsSecretName,

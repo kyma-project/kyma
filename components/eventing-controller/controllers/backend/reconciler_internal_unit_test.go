@@ -142,7 +142,7 @@ func TestCreateDeleteNATSSecret(t *testing.T) {
 			}
 
 			// when
-			err = r.DeleteNATSSecret(ctx)
+			err = r.deleteNATSSecret(ctx)
 
 			// then
 			assert.NoError(t, err)
