@@ -102,8 +102,8 @@ async function ensureOperationSucceeded(keb, kcp, instanceID, operationID, timeo
   ).catch(async (err) => {
     const runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID);
     const events = await kcp.getRuntimeEvents(instanceID);
-    const msg = `${err}\nError thrown by ensureOperationSucceeded: Runtime status: ${runtimeStatus}\nEvents: ${events}`;
-    throw new Error(msg);
+    const msg = `${err}\nError thrown by ensureOperationSucceeded: Runtime status: ${runtimeStatus}`;
+    throw new Error(`${msg}\nEvents:\n${events}`);
   });
 
   if (res.state !== 'succeeded') {
