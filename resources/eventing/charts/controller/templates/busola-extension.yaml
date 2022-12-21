@@ -1,3 +1,4 @@
+# TODO Remove this file after the v1alpha2 Subscription will be enabled per default and this ConfigMap will be moved to kyma-dashboard repository.
 {{ if .Values.enableNewCRDVersion }}
 kind: ConfigMap
 apiVersion: v1
@@ -51,7 +52,7 @@ data:
           - source: '$item.reason'
             name: status.conditions.reason
           - source: '$item.message'
-            name: status.message
+            name: status.conditions.message
           - source: '$readableTimestamp($item.lastTransitionTime)'
             name: status.conditions.lastTransitionTime
       - name: spec.types
@@ -137,5 +138,6 @@ data:
       status.conditions.reason: Reason
       status.conditions.status: Status
       status.conditions.type: Type
+      status.conditions.message: Message
       status.type: Type
   {{- end }}
