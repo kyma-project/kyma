@@ -153,7 +153,7 @@ func (spec *FunctionSpec) validateGitAuthSecretName(_ *ValidationConfig) error {
 	return nil
 }
 
-var ErrInvalidGitRepositoryAuthType = fmt.Errorf("invalid git reposiotry authentication type")
+var ErrInvalidGitRepositoryAuthType = fmt.Errorf("invalid git repository authentication type")
 
 func (spec *FunctionSpec) validateGitAuthType(_ *ValidationConfig) error {
 	switch spec.Source.GitRepository.Auth.Type {
@@ -167,7 +167,7 @@ func (spec *FunctionSpec) validateGitAuthType(_ *ValidationConfig) error {
 func (spec *FunctionSpec) validateRuntime(_ *ValidationConfig) error {
 	runtimeName := spec.Runtime
 	switch runtimeName {
-	case Python39, NodeJs14, NodeJs16:
+	case Python39, NodeJs14, NodeJs16, Java17JvmAlpha:
 		return nil
 	}
 	return fmt.Errorf("spec.runtime contains unsupported value")
