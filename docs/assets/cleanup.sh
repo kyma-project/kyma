@@ -2,6 +2,7 @@
 
 kubectl delete -n kyma-system --ignore-not-found=true servicemonitors.monitoring.coreos.com api-gateway
 kubectl delete -n kyma-system --ignore-not-found=true servicemonitors.monitoring.coreos.com eventing-controller
+kubectl delete -n kyma-system --ignore-not-found=true servicemonitors.monitoring.coreos.com eventing-nats
 kubectl delete -n kyma-system --ignore-not-found=true servicemonitors.monitoring.coreos.com eventing-publisher-proxy
 kubectl delete -n kyma-system --ignore-not-found=true servicemonitors.monitoring.coreos.com kiali
 kubectl delete -n kyma-system --ignore-not-found=true servicemonitors.monitoring.coreos.com logging-loki
