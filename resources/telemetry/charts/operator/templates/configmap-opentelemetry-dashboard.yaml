@@ -33,8 +33,7 @@ data:
       "editable": true,
       "gnetId": 12553,
       "graphTooltip": 0,
-      "id": 227,
-      "iteration": 1671605842357,
+      "iteration": 1671613496016,
       "links": [],
       "panels": [
         {
@@ -642,32 +641,6 @@ data:
           "yaxis": {
             "align": false
           }
-        },
-        {
-          "collapsed": false,
-          "datasource": {
-            "type": "prometheus",
-            "uid": "webstore-metrics"
-          },
-          "gridPos": {
-            "h": 1,
-            "w": 24,
-            "x": 0,
-            "y": 29
-          },
-          "id": 21,
-          "panels": [],
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "webstore-metrics"
-              },
-              "refId": "A"
-            }
-          ],
-          "title": "Processors",
-          "type": "row"
         }
       ],
       "refresh": "10s",
@@ -691,7 +664,7 @@ data:
               ]
             },
             "datasource": null,
-            "definition": "label_values(otelsvc_receiver)",
+            "definition": "label_values(receiver)",
             "description": null,
             "error": null,
             "hide": 0,
@@ -701,7 +674,7 @@ data:
             "name": "receiver",
             "options": [],
             "query": {
-              "query": "label_values(otelsvc_receiver)",
+              "query": "label_values(receiver)",
               "refId": "StandardVariableQuery"
             },
             "refresh": 2,
@@ -726,7 +699,7 @@ data:
               ]
             },
             "datasource": null,
-            "definition": "label_values(otelsvc_exporter)",
+            "definition": "label_values(exporter)",
             "description": null,
             "error": null,
             "hide": 0,
@@ -736,7 +709,7 @@ data:
             "name": "exporter",
             "options": [],
             "query": {
-              "query": "label_values(otelsvc_exporter)",
+              "query": "label_values(exporter)",
               "refId": "StandardVariableQuery"
             },
             "refresh": 2,
@@ -815,8 +788,8 @@ data:
         ]
       },
       "timezone": "",
-      "title": "Kyma / OpenTelemetry Collector",
+      "title": "Kyma / Telemetry / Trace Collector",
       "uid": "Dzc-UHcVz",
-      "version": 5
+      "version": 6
     }
 {{- end }}
