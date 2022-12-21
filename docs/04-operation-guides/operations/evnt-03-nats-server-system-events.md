@@ -5,10 +5,6 @@ title: Acquiring NATS server system account credentials
 
 Accessing certain resources in NATS requires [`system_account` privileges](https://docs.nats.io/running-a-nats-service/configuration/sys_accounts). Kyma automatically generates a `system account` user using a Secret dubbed `eventing-nats-secret` in the `kyma-system` Namespace.
 
-## Prerequisites
-
-Kyma version `2.7` or later.
-
 ## Procedure
 
 To acquire the credentials, run the following command:
