@@ -78,7 +78,6 @@ func NewHandler(receiver *receiver.HTTPMessageReceiver, sender sender.GenericSen
 // setupMux configures the request router for all required endpoints.
 func (h *Handler) setupMux() {
 	router := mux.NewRouter()
-	router.Use(h.collector.MetricsMiddleware())
 	router.HandleFunc(PublishEndpoint, h.maxBytes(h.publishCloudEvents)).Methods(http.MethodPost)
 	router.HandleFunc(LegacyEndpointPattern, h.maxBytes(h.publishLegacyEventsAsCE)).Methods(http.MethodPost)
 	if h.Options.EnableNewCRDVersion {
@@ -209,12 +208,12 @@ func (h *Handler) sendEventAndRecordMetrics(ctx context.Context, event *cev2even
 	result, err := h.Sender.Send(ctx, event)
 	duration := time.Since(start)
 	if err != nil {
-		h.collector.RecordBackendError()
+		h.collector.RecordError()
 		return nil, err
 	}
 	h.collector.RecordEventType(event.Type(), event.Source(), result.HTTPStatus())
-	h.collector.RecordBackendLatency(duration, result.HTTPStatus(), host)
-	h.collector.RecordBackendRequests(result.HTTPStatus(), host)
+	h.collector.RecordLatency(duration, result.HTTPStatus(), host)
+	h.collector.RecordRequests(result.HTTPStatus(), host)
 	return result, nil
 }
 

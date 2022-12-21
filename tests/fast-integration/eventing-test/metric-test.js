@@ -63,7 +63,7 @@ const dashboards = {
   },
   latency_eventPublisherToMessagingServer: {
     title: 'Latency of Event Publisher -> Messaging Server',
-    query: 'histogram_quantile(0.99999, sum(rate(eventing_epp_backend_duration_milliseconds_bucket{namespace="kyma-system"}[5m])) by (le,pod,namespace,service))',
+    query: 'histogram_quantile(0.99999, sum(rate(eventing_epp_messaging_server_latency_duration_milliseconds_bucket{namespace="kyma-system"}[5m])) by (le,pod,namespace,service))',
     backends: ['nats', 'beb'],
     assert: function(result) {
       const foundMetric = result.find((res) =>
