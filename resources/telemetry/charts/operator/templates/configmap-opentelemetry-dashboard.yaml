@@ -223,7 +223,7 @@ data:
                 "type": "prometheus",
                 "uid": "webstore-metrics"
               },
-              "expr": "sum(rate(otelcol_processor_spans_received{processor=~\"$processor\"}[1m])) by (processor)",
+              "expr": "sum(rate(otelcol_processor_received_spans{processor=~\"$processor\"}[1m])) by (processor)",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
@@ -235,7 +235,7 @@ data:
                 "type": "prometheus",
                 "uid": "webstore-metrics"
               },
-              "expr": "sum(rate(otelcol_processor_spans_dropped{processor=~\"$processor\"}[1m])) by (processor)",
+              "expr": "sum(rate(otelcol_processor_dropped_spans{processor=~\"$processor\"}[1m])) by (processor)",
               "interval": "",
               "legendFormat": "{{`{{processor}}`}} | dropped",
               "refId": "B"
