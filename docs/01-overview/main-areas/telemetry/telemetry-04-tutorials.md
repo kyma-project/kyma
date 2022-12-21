@@ -1,5 +1,5 @@
 ---
-title: Telemetry - Tutorials
+title: Tutorials
 ---
 
 If you're interested in learning more about the Telemetry module and how to integrate backends, check out these links:
