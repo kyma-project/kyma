@@ -252,10 +252,6 @@ func MakeService(name types.NamespacedName) *corev1.Service {
 			Name:      name.Name,
 			Namespace: name.Namespace,
 			Labels:    labels(),
-			Annotations: map[string]string{
-				"prometheus.io/scrape": "true",
-				"prometheus.io/port":   "8888",
-			},
 		},
 		Spec: corev1.ServiceSpec{
 			Ports: []corev1.ServicePort{
