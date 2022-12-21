@@ -247,12 +247,16 @@ func MakeDaemonSet(name types.NamespacedName) *appsv1.DaemonSet {
 	}
 }
 
-func MakeService(name types.NamespacedName) *corev1.Service {
+func MakeMetricsService(name types.NamespacedName) *corev1.Service {
 	return &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name.Name,
 			Namespace: name.Namespace,
 			Labels:    labels(),
+			Annotations: map[string]string{
+				"prometheus.io/scrape": "true",
+				"prometheus.io/port":   "2020",
+			},
 		},
 		Spec: corev1.ServiceSpec{
 			Ports: []corev1.ServicePort{
@@ -262,6 +266,25 @@ func MakeService(name types.NamespacedName) *corev1.Service {
 					Port:       2020,
 					TargetPort: intstr.FromString("http"),
 				},
+			},
+			Selector: labels(),
+		},
+	}
+}
+
+func MakeExporterMetricsService(name types.NamespacedName) *corev1.Service {
+	return &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      fmt.Sprintf("%s-exporter", name.Name),
+			Namespace: name.Namespace,
+			Labels:    labels(),
+			Annotations: map[string]string{
+				"prometheus.io/scrape": "true",
+				"prometheus.io/port":   "2021",
+			},
+		},
+		Spec: corev1.ServiceSpec{
+			Ports: []corev1.ServicePort{
 				{
 					Name:       "http-metrics",
 					Protocol:   "TCP",
