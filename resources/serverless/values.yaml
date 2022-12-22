@@ -98,7 +98,7 @@ global:
       version: "PR-16309"
     function_runtime_java17_jvm_alpha:
       name: "function-runtime-java17-jvm-alpha"
-      version: "v20221219-dac6264c"
+      version: "PR-16428"
     kaniko_executor:
       name: "kaniko-executor"
       version: "1.9.0-4ced14d5"
@@ -117,7 +117,7 @@ global:
   testImages:
     function_controller_test:
       name: "function-controller-test"
-      version: "PR-16359"
+      version: "PR-16428"
     git_server:
       name: "gitserver"
       version: "708f6a87"

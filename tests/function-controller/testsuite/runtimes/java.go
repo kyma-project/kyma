@@ -27,9 +27,9 @@ const basicJavaDepsTpl = `
 
     <dependencies>
         <dependency>
-            <groupId>javax.ws.rs</groupId>
-            <artifactId>javax.ws.rs-api</artifactId>
-            <version>2.0</version>
+            <groupId>jakarta.ws.rs</groupId>
+            <artifactId>jakarta.ws.rs-api</artifactId>
+            <version>3.1.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -58,8 +58,8 @@ var updatedDeps = fmt.Sprintf(basicJavaDepsTpl, additionalLib)
 const basicHandlerTpl = `
 package io.project.kyma.serverless.handler;
         
-        import javax.ws.rs.core.Context;
-        import javax.ws.rs.core.Response;
+        import jakarta.ws.rs.core.Context;
+        import jakarta.ws.rs.core.Response;
         import io.project.kyma.serverless.sdk.CloudEvent;
         import io.project.kyma.serverless.sdk.Function;
         
@@ -75,8 +75,8 @@ package io.project.kyma.serverless.handler;
 
 const csvHandler = `
 package io.project.kyma.serverless.handler;
-        import javax.ws.rs.core.Context;
-        import javax.ws.rs.core.Response;
+        import jakarta.ws.rs.core.Context;
+        import jakarta.ws.rs.core.Response;
         import io.project.kyma.serverless.sdk.CloudEvent;
         import io.project.kyma.serverless.sdk.Function;
 		import com.fasterxml.jackson.core.JsonProcessingException;
