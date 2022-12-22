@@ -8,8 +8,7 @@ require (
 	github.com/go-git/go-git/v5 v5.2.0
 	github.com/hashicorp/errwrap v1.0.0
 	github.com/hashicorp/go-multierror v1.1.0
-	github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20220915084356-1d9b39c6797a
-	github.com/kyma-project/kyma/components/function-controller v0.0.0-20221012075513-f3e30e39496e
+	github.com/kyma-project/kyma/components/function-controller v0.0.0-20221221113257-a11ffbf1f2b1
 	github.com/onsi/gomega v1.20.2
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.8.1

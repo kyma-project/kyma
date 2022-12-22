@@ -1,8 +1,9 @@
 package gitops
 
 import (
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
 	"net/url"
+
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
 
 	functionv1alpha1 "github.com/kyma-project/kyma/tests/function-controller/pkg/function/v1alpha1"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
