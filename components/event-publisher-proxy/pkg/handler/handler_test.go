@@ -222,9 +222,6 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 				# HELP eventing_epp_backend_requests_total The total number of backend requests
 				# TYPE eventing_epp_backend_requests_total counter
 				eventing_epp_backend_requests_total{code="204",destination_service="FOO"} 1
-				# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
-				# TYPE eventing_epp_backend_errors_total counter
-				eventing_epp_backend_errors_total 0
 			`,
 		},
 		{
@@ -268,9 +265,6 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 				# HELP eventing_epp_backend_requests_total The total number of backend requests
 				# TYPE eventing_epp_backend_requests_total counter
 				eventing_epp_backend_requests_total{code="204",destination_service="FOO"} 1
-				# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
-				# TYPE eventing_epp_backend_errors_total counter
-				eventing_epp_backend_errors_total 0
 			`,
 		},
 		{
@@ -285,11 +279,6 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 			},
 			wantStatus: 400,
 			wantBody:   []byte("type: MUST be a non-empty string\n"),
-			wantTEF: `
-				# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
-				# TYPE eventing_epp_backend_errors_total counter
-				eventing_epp_backend_errors_total 0
-			`,
 		},
 		{
 			name: "Publish invalid binary CloudEvent",
@@ -302,11 +291,6 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 				request: CreateInvalidBinaryRequest(t),
 			},
 			wantStatus: 400,
-			wantTEF: `
-				# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
-				# TYPE eventing_epp_backend_errors_total counter
-				eventing_epp_backend_errors_total 0
-			`,
 		},
 		{
 			name: "Publish binary CloudEvent but cannot clean",
@@ -323,11 +307,7 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 			},
 			wantStatus: 400,
 			wantBody:   []byte("I cannot clean"),
-			wantTEF: `
-				# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
-				# TYPE eventing_epp_backend_errors_total counter
-				eventing_epp_backend_errors_total 0
-			`,
+			wantTEF:    "", // client error will not be recorded as EPP internal error. So no metric will be updated.
 		},
 		{
 			name: "Publish binary CloudEvent but cannot send",
@@ -465,9 +445,6 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 					# HELP eventing_epp_backend_requests_total The total number of backend requests
 					# TYPE eventing_epp_backend_requests_total counter
 					eventing_epp_backend_requests_total{code="204",destination_service="FOO"} 1
-					# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
-					# TYPE eventing_epp_backend_errors_total counter
-					eventing_epp_backend_errors_total 0
 				`,
 		},
 		{
@@ -554,11 +531,8 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 			},
 			wantStatus: 400,
 			wantOk:     false,
-			wantTEF: `
-					# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
-					# TYPE eventing_epp_backend_errors_total counter
-					eventing_epp_backend_errors_total 0
-		`},
+			wantTEF:    "", // this is a client error. We do record an error metric for requests that cannot even be decoded correctly.
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -711,7 +685,7 @@ func TestHandler_sendEventAndRecordMetrics(t *testing.T) {
 					Body:   nil,
 				},
 				assertionFunc:   assert.NoError,
-				metricErrors:    1,
+				metricErrors:    0,
 				metricTotal:     1,
 				metricLatency:   1,
 				metricPublished: 1,
