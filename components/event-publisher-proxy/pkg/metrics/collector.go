@@ -84,7 +84,7 @@ type Collector struct {
 
 // NewCollector a new instance of Collector
 func NewCollector(latency histogram.BucketsProvider) *Collector {
-	return &Collector{
+	c := &Collector{
 		backendErrors: prometheus.NewCounterVec(
 			prometheus.CounterOpts{
 				Name: BackendErrorsKey,
@@ -131,6 +131,10 @@ func NewCollector(latency histogram.BucketsProvider) *Collector {
 			},
 			[]string{responseCodeLabel, methodLabel, pathLabel}),
 	}
+	// TODO[k15r]: find a way to initialize other metrics as well, or at least have them show up in the metrics endpoints output
+	c.backendErrors.WithLabelValues().Add(0)
+	return c
+
 }
 
 // Describe implements the prometheus.Collector interface Describe method
