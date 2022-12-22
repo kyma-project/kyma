@@ -14,6 +14,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/internal"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy/api"
 	apiv1 "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy/api"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/tracing"
 )
@@ -29,6 +30,7 @@ const (
 )
 
 type RequestToCETransformer interface {
+	ExtractCEFromLegacyRequests(request *http.Request) (*cev2event.Event, *api.PublishEventResponses, error)
 	TransformLegacyRequestsToCE(http.ResponseWriter, *http.Request) (*cev2event.Event, string)
 	TransformsCEResponseToLegacyResponse(http.ResponseWriter, int, *cev2event.Event, string)
 }
@@ -81,13 +83,55 @@ func (t *Transformer) checkParameters(parameters *apiv1.PublishEventParametersV1
 	return &apiv1.PublishEventResponses{}
 }
 
+// ExtractCEFromLegacyRequests extracts the cloudevent from the given legacy event request.
+func (t *Transformer) ExtractCEFromLegacyRequests(request *http.Request) (*cev2event.Event, *api.PublishEventResponses, error) {
+	// parse request body to PublishRequestV1
+	if request.Body == nil || request.ContentLength == 0 {
+		resp := ErrorResponseBadRequest(ErrorMessageBadPayload)
+		return nil, resp, errors.New(resp.Error.Message)
+	}
+
+	parameters := &apiv1.PublishEventParametersV1{}
+	decoder := json.NewDecoder(request.Body)
+	if err := decoder.Decode(&parameters.PublishrequestV1); err != nil {
+		var resp *apiv1.PublishEventResponses
+		if err.Error() == requestBodyTooLargeErrorMessage {
+			resp = ErrorResponseRequestBodyTooLarge(err.Error())
+		} else {
+			resp = ErrorResponseBadRequest(err.Error())
+		}
+		return nil, resp, errors.New(resp.Error.Message)
+	}
+
+	// validate the PublishRequestV1 for missing / incoherent values
+	checkResp := t.checkParameters(parameters)
+	if checkResp.Error != nil {
+		return nil, checkResp, errors.New(checkResp.Error.Message)
+	}
+
+	// clean the application name form non-alphanumeric characters
+	source := ParseApplicationNameFromPath(request.URL.Path)
+	if !application.IsCleanName(source) {
+		err := errors.New("application name should be cleaned from none-alphanumeric characters")
+		return nil, ErrorResponse(http.StatusInternalServerError, err), err
+	}
+
+	event, err := t.convertPublishRequestToRawCloudEvent(source, parameters)
+	if err != nil {
+		response := ErrorResponse(http.StatusInternalServerError, err)
+		return nil, response, errors.New(response.Error.Message)
+	}
+
+	return event, nil, nil
+}
+
 // TransformLegacyRequestsToCE transforms the legacy event to cloudevent from the given request.
 // It also returns the original event-type without cleanup as the second return type.
 func (t *Transformer) TransformLegacyRequestsToCE(writer http.ResponseWriter, request *http.Request) (*cev2event.Event, string) {
 	// parse request body to PublishRequestV1
 	if request.Body == nil || request.ContentLength == 0 {
 		resp := ErrorResponseBadRequest(ErrorMessageBadPayload)
-		writeJSONResponse(writer, resp)
+		WriteJSONResponse(writer, resp)
 		return nil, ""
 	}
 
@@ -100,14 +144,14 @@ func (t *Transformer) TransformLegacyRequestsToCE(writer http.ResponseWriter, re
 		} else {
 			resp = ErrorResponseBadRequest(err.Error())
 		}
-		writeJSONResponse(writer, resp)
+		WriteJSONResponse(writer, resp)
 		return nil, ""
 	}
 
 	// validate the PublishRequestV1 for missing / incoherent values
 	checkResp := t.checkParameters(parameters)
 	if checkResp.Error != nil {
-		writeJSONResponse(writer, checkResp)
+		WriteJSONResponse(writer, checkResp)
 		return nil, ""
 	}
 
@@ -125,7 +169,7 @@ func (t *Transformer) TransformLegacyRequestsToCE(writer http.ResponseWriter, re
 	event, err := t.convertPublishRequestToCloudEvent(appName, parameters)
 	if err != nil {
 		response := ErrorResponse(http.StatusInternalServerError, err)
-		writeJSONResponse(writer, response)
+		WriteJSONResponse(writer, response)
 		return nil, ""
 	}
 
@@ -146,13 +190,53 @@ func (t *Transformer) TransformsCEResponseToLegacyResponse(writer http.ResponseW
 			Status:  statusCode,
 			Message: msg,
 		}
-		writeJSONResponse(writer, response)
+		WriteJSONResponse(writer, response)
 		return
 	}
 
 	// Success
 	response.Ok = &apiv1.PublishResponse{EventID: event.ID()}
-	writeJSONResponse(writer, response)
+	WriteJSONResponse(writer, response)
+}
+
+// convertPublishRequestToRawCloudEvent converts the given publish request to a CloudEvent with raw values.
+func (t *Transformer) convertPublishRequestToRawCloudEvent(source string, publishRequest *apiv1.PublishEventParametersV1) (*cev2event.Event, error) {
+	if !application.IsCleanName(source) {
+		return nil, errors.New("application name should be cleaned from none-alphanumeric characters")
+	}
+
+	// instantiate a new cloudEvent object
+	event := cev2event.New(cev2event.CloudEventsVersionV1)
+	eventName := publishRequest.PublishrequestV1.EventType
+	eventTypeVersion := publishRequest.PublishrequestV1.EventTypeVersion
+
+	// set type by combining type and version (<type>.<version>) e.g. order.created.v1
+	event.SetType(fmt.Sprintf("%s.%s", eventName, eventTypeVersion))
+	event.SetSource(source)
+	event.SetExtension(eventTypeVersionExtensionKey, eventTypeVersion)
+	event.SetDataContentType(internal.ContentTypeApplicationJSON)
+
+	// set cloudEvent time
+	evTime, err := time.Parse(time.RFC3339, publishRequest.PublishrequestV1.EventTime)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to parse time from the external publish request")
+	}
+	event.SetTime(evTime)
+
+	// set cloudEvent data
+	if err := event.SetData(internal.ContentTypeApplicationJSON, publishRequest.PublishrequestV1.Data); err != nil {
+		return nil, errors.Wrap(err, "failed to set data to CloudEvent data field")
+	}
+
+	// set the event id from the request if it is available
+	// otherwise generate a new one
+	if len(publishRequest.PublishrequestV1.EventID) > 0 {
+		event.SetID(publishRequest.PublishrequestV1.EventID)
+	} else {
+		event.SetID(uuid.New().String())
+	}
+
+	return &event, nil
 }
 
 // convertPublishRequestToCloudEvent converts the given publish request to a CloudEvent.
