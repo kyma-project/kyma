@@ -6,7 +6,7 @@ import (
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 )
 
-const basicJavaRequirementsTpl = `
+const basicJavaDepsTpl = `
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -52,10 +52,10 @@ const additionalLib = `
 </dependency>
 `
 
-var basicDeps = fmt.Sprintf(basicJavaRequirementsTpl, "")
-var updatedDeps = fmt.Sprintf(basicJavaRequirementsTpl, additionalLib)
+var basicDeps = fmt.Sprintf(basicJavaDepsTpl, "")
+var updatedDeps = fmt.Sprintf(basicJavaDepsTpl, additionalLib)
 
-const basicHandler = `
+const basicHandlerTpl = `
 package io.project.kyma.serverless.handler;
         
         import javax.ws.rs.core.Context;
@@ -65,9 +65,7 @@ package io.project.kyma.serverless.handler;
         
         
         public class Handler implements Function {
-        
-            public static final String RETURN_STRING = "Hello World from local java11 runtime from docker graalvm with serverless SDK!";
-        
+
             @Override
             public Response main(CloudEvent event, Context context) {
 			return Response.ok("%s").build();
@@ -86,9 +84,7 @@ package io.project.kyma.serverless.handler;
         
         
         public class Handler implements Function {
-        
-            public static final String RETURN_STRING = "Hello World from local java11 runtime from docker graalvm with serverless SDK!";
-        
+
             @Override
             public Response main(CloudEvent event, Context context) {
 				var msgData = new String[]{"Hello", "from", "new", "library"};
@@ -113,7 +109,7 @@ func BasicJavaFunction(returnMsg string, rtm serverlessv1alpha2.Runtime) serverl
 		Runtime: rtm,
 		Source: serverlessv1alpha2.Source{
 			Inline: &serverlessv1alpha2.InlineSource{
-				Source:       fmt.Sprintf(basicHandler, returnMsg),
+				Source:       fmt.Sprintf(basicHandlerTpl, returnMsg),
 				Dependencies: basicDeps,
 			},
 		},
