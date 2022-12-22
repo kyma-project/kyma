@@ -236,7 +236,3 @@ authorizationPolicy:
   monitoring:
      extraPrincipals:
 #      - cluster.local/ns/kiali/sa/kiali-server-service-account
-
-istio:
-  samplingRate: 1.0
-

@@ -117,7 +117,7 @@ controllers:
   logging:
     enabled: true
   tracing:
-    enabled: true
+    enabled: false
 
 syncPeriod: 1h
 maxLogPipelines: 3
