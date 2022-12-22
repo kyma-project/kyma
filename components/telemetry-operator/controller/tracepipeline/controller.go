@@ -22,6 +22,7 @@ import (
 	"fmt"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configchecksum"
@@ -93,10 +94,10 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (reconcile
 
 func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha1.TracePipeline) error {
 	var err error
-	locked := true
+	lockAcquired := true
 
 	defer func() {
-		if statusErr := r.updateStatus(ctx, pipeline.Name, locked); statusErr != nil {
+		if statusErr := r.updateStatus(ctx, pipeline.Name, lockAcquired); statusErr != nil {
 			if err != nil {
 				err = fmt.Errorf("failed while updating status: %v: %v", statusErr, err)
 			} else {
@@ -105,8 +106,8 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 		}
 	}()
 
-	if err = r.checkLock(ctx, pipeline); err != nil {
-		locked = false
+	if err = r.tryAcquireLock(ctx, pipeline); err != nil {
+		lockAcquired = false
 		return err
 	}
 
@@ -177,20 +178,14 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 	return nil
 }
 
-func (r *Reconciler) checkLock(ctx context.Context, pipeline *telemetryv1alpha1.TracePipeline) error {
-	lockName := types.NamespacedName{Name: "telemetry-tracepipeline-lock", Namespace: "kyma-system"}
+func (r *Reconciler) tryAcquireLock(ctx context.Context, pipeline *telemetryv1alpha1.TracePipeline) error {
+	lockName := types.NamespacedName{Name: "telemetry-tracepipeline-lock", Namespace: r.config.Namespace}
 	var lock corev1.ConfigMap
 	if err := r.Get(ctx, lockName, &lock); err != nil {
 		if apierrors.IsNotFound(err) {
-			lock.Name = lockName.Name
-			lock.Namespace = lockName.Namespace
-			controllerutil.SetControllerReference(pipeline, &lock, r.Scheme)
-			if createErr := r.Create(ctx, &lock); createErr != nil {
-				return fmt.Errorf("failed to create lock: %v", createErr)
-			}
-			return nil
+			return r.createLock(ctx, lockName, pipeline)
 		}
-		return fmt.Errorf("failed to get the lock: %v", err)
+		return fmt.Errorf("failed to get lock: %v", err)
 	}
 
 	for _, ref := range lock.GetOwnerReferences() {
@@ -200,5 +195,19 @@ func (r *Reconciler) checkLock(ctx context.Context, pipeline *telemetryv1alpha1.
 		}
 	}
 
-	return errors.New("lock is already used")
+	return errors.New("lock is already acquired by another TracePipeline")
+}
+
+func (r *Reconciler) createLock(ctx context.Context, name types.NamespacedName, owner *telemetryv1alpha1.TracePipeline) error {
+	lock := corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name.Name,
+			Namespace: name.Namespace,
+		},
+	}
+	controllerutil.SetControllerReference(owner, &lock, r.Scheme)
+	if createErr := r.Create(ctx, &lock); createErr != nil {
+		return fmt.Errorf("failed to create lock: %v", createErr)
+	}
+	return nil
 }

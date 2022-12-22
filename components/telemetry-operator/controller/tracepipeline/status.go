@@ -18,7 +18,7 @@ const (
 	reasonWaitingForLock                   = "WaitingForLock"
 )
 
-func (r *Reconciler) updateStatus(ctx context.Context, pipelineName string, pipelineLocked bool) error {
+func (r *Reconciler) updateStatus(ctx context.Context, pipelineName string, lockAcquired bool) error {
 	log := logf.FromContext(ctx)
 
 	var pipeline telemetryv1alpha1.TracePipeline
@@ -34,7 +34,7 @@ func (r *Reconciler) updateStatus(ctx context.Context, pipelineName string, pipe
 		return nil
 	}
 
-	if !pipelineLocked {
+	if !lockAcquired {
 		pending := telemetryv1alpha1.NewTracePipelineCondition(reasonWaitingForLock, telemetryv1alpha1.TracePipelinePending)
 
 		if pipeline.Status.HasCondition(telemetryv1alpha1.TracePipelineRunning) {
