@@ -102,7 +102,9 @@ func TestTransformLegacyRequestsToCE(t *testing.T) {
 			app := applicationtest.NewApplication(tc.givenApplication, applicationTypeLabel(tc.givenTypeLabel))
 			appLister := fake.NewApplicationListerOrDie(ctx, app)
 			transformer := NewTransformer("test", tc.givenPrefix, appLister)
-			gotEvent, gotEventType := transformer.TransformLegacyRequestsToCE(writer, request)
+			publishData, errResp, _ := transformer.ExtractPublishRequestData(request)
+			assert.Nil(t, errResp)
+			gotEvent, gotEventType := transformer.TransformLegacyRequestsToCE(writer, publishData)
 			wantEventType := formatEventType(tc.givenPrefix, tc.givenApplication, tc.givenEventName, tc.wantVersion)
 			assert.Equal(t, wantEventType, gotEventType)
 

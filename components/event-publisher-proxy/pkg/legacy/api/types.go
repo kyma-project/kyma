@@ -1,7 +1,17 @@
 package api
 
+import "net/http"
+
 // AnyValue implements the service definition of AnyValue
 type AnyValue interface {
+}
+
+// PublishRequestData holds request data
+type PublishRequestData struct {
+	PublishEventParameters *PublishEventParametersV1
+	ApplicationName        string
+	Headers                http.Header
+	URLPath                string
 }
 
 // PublishRequestV1 implements the service definition of PublishRequestV1

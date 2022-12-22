@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy/api"
+
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
 
 	"github.com/gorilla/mux"
@@ -124,8 +126,8 @@ func (h *Handler) maxBytes(f http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-func (h *Handler) handlePublishLegacyEventV1alpha2(writer http.ResponseWriter, request *http.Request) (sender.PublishResult, *cev2event.Event) {
-	ceEvent, errResp, _ := h.LegacyTransformer.ExtractCEFromLegacyRequests(request)
+func (h *Handler) handlePublishLegacyEventV1alpha2(writer http.ResponseWriter, publishData *api.PublishRequestData, request *http.Request) (sender.PublishResult, *cev2event.Event) {
+	ceEvent, errResp, _ := h.LegacyTransformer.ExtractCEFromLegacyPublishRequestData(publishData)
 	if errResp != nil {
 		legacy.WriteJSONResponse(writer, errResp)
 		return nil, nil
@@ -158,8 +160,8 @@ func (h *Handler) handlePublishLegacyEventV1alpha2(writer http.ResponseWriter, r
 	return result, event
 }
 
-func (h *Handler) handlePublishLegacyEventV1alpha1(writer http.ResponseWriter, request *http.Request) (sender.PublishResult, *cev2event.Event) {
-	event, _ := h.LegacyTransformer.TransformLegacyRequestsToCE(writer, request)
+func (h *Handler) handlePublishLegacyEventV1alpha1(writer http.ResponseWriter, publishData *api.PublishRequestData, request *http.Request) (sender.PublishResult, *cev2event.Event) {
+	event, _ := h.LegacyTransformer.TransformLegacyRequestsToCE(writer, publishData)
 	if event == nil {
 		h.namedLogger().Error("Failed to transform legacy event to CloudEvent, event is nil")
 		return nil, nil
@@ -188,9 +190,16 @@ func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *h
 	var publishedEvent *cev2event.Event
 	var successResult sender.PublishResult
 
+	// extract publish data from request
+	publishRequestData, errResp, _ := h.LegacyTransformer.ExtractPublishRequestData(request)
+	if errResp != nil {
+		legacy.WriteJSONResponse(writer, errResp)
+		return
+	}
+
 	// publish event for Subscription v1alpha2
 	if h.Options.EnableNewCRDVersion {
-		successResult, publishedEvent = h.handlePublishLegacyEventV1alpha2(writer, request)
+		successResult, publishedEvent = h.handlePublishLegacyEventV1alpha2(writer, publishRequestData, request)
 		// if publishedEvent is nil, then it means that the publishing failed
 		// and the response is already returned to the user
 		if publishedEvent == nil {
@@ -204,7 +213,7 @@ func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *h
 	// i.e. with prefix (`sap.kyma.custom`) and without prefix
 	// this behaviour will be depreciated when we remove support for JetStream with Subscription `exact` typeMatching
 	if !h.Options.EnableNewCRDVersion || h.activeBackend == env.JetStreamBackend {
-		successResult, publishedEvent = h.handlePublishLegacyEventV1alpha1(writer, request)
+		successResult, publishedEvent = h.handlePublishLegacyEventV1alpha1(writer, publishRequestData, request)
 		// if publishedEvent is nil, then it means that the publishing failed
 		// and the response is already returned to the user
 		if publishedEvent == nil {

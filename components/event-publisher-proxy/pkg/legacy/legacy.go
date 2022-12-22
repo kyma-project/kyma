@@ -16,7 +16,6 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy/api"
 	apiv1 "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy/api"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/tracing"
 )
 
 var (
@@ -30,8 +29,9 @@ const (
 )
 
 type RequestToCETransformer interface {
-	ExtractCEFromLegacyRequests(request *http.Request) (*cev2event.Event, *api.PublishEventResponses, error)
-	TransformLegacyRequestsToCE(http.ResponseWriter, *http.Request) (*cev2event.Event, string)
+	ExtractPublishRequestData(request *http.Request) (*api.PublishRequestData, *api.PublishEventResponses, error)
+	ExtractCEFromLegacyPublishRequestData(publishData *api.PublishRequestData) (*cev2event.Event, *api.PublishEventResponses, error)
+	TransformLegacyRequestsToCE(writer http.ResponseWriter, publishData *api.PublishRequestData) (*cev2event.Event, string)
 	TransformsCEResponseToLegacyResponse(http.ResponseWriter, int, *cev2event.Event, string)
 }
 
@@ -83,8 +83,26 @@ func (t *Transformer) checkParameters(parameters *apiv1.PublishEventParametersV1
 	return &apiv1.PublishEventResponses{}
 }
 
-// ExtractCEFromLegacyRequests extracts the cloudevent from the given legacy event request.
-func (t *Transformer) ExtractCEFromLegacyRequests(request *http.Request) (*cev2event.Event, *api.PublishEventResponses, error) {
+// ExtractCEFromLegacyPublishRequestData extracts the cloudevent from the given legacy event request.
+func (t *Transformer) ExtractCEFromLegacyPublishRequestData(publishData *api.PublishRequestData) (*cev2event.Event, *api.PublishEventResponses, error) {
+	// clean the application name form non-alphanumeric characters
+	source := publishData.ApplicationName
+	if !application.IsCleanName(source) {
+		err := errors.New("application name should be cleaned from none-alphanumeric characters")
+		return nil, ErrorResponse(http.StatusInternalServerError, err), err
+	}
+
+	event, err := t.convertPublishRequestToRawCloudEvent(source, publishData.PublishEventParameters)
+	if err != nil {
+		response := ErrorResponse(http.StatusInternalServerError, err)
+		return nil, response, errors.New(response.Error.Message)
+	}
+
+	return event, nil, nil
+}
+
+// ExtractPublishRequestData extracts the data for publishing event from the given legacy event request.
+func (t *Transformer) ExtractPublishRequestData(request *http.Request) (*api.PublishRequestData, *api.PublishEventResponses, error) {
 	// parse request body to PublishRequestV1
 	if request.Body == nil || request.ContentLength == 0 {
 		resp := ErrorResponseBadRequest(ErrorMessageBadPayload)
@@ -109,55 +127,21 @@ func (t *Transformer) ExtractCEFromLegacyRequests(request *http.Request) (*cev2e
 		return nil, checkResp, errors.New(checkResp.Error.Message)
 	}
 
-	// clean the application name form non-alphanumeric characters
-	source := ParseApplicationNameFromPath(request.URL.Path)
-	if !application.IsCleanName(source) {
-		err := errors.New("application name should be cleaned from none-alphanumeric characters")
-		return nil, ErrorResponse(http.StatusInternalServerError, err), err
+	publishRequestData := &api.PublishRequestData{
+		PublishEventParameters: parameters,
+		ApplicationName:        ParseApplicationNameFromPath(request.URL.Path),
+		URLPath:                request.URL.Path,
+		Headers:                request.Header,
 	}
 
-	event, err := t.convertPublishRequestToRawCloudEvent(source, parameters)
-	if err != nil {
-		response := ErrorResponse(http.StatusInternalServerError, err)
-		return nil, response, errors.New(response.Error.Message)
-	}
-
-	return event, nil, nil
+	return publishRequestData, nil, nil
 }
 
 // TransformLegacyRequestsToCE transforms the legacy event to cloudevent from the given request.
 // It also returns the original event-type without cleanup as the second return type.
-func (t *Transformer) TransformLegacyRequestsToCE(writer http.ResponseWriter, request *http.Request) (*cev2event.Event, string) {
-	// parse request body to PublishRequestV1
-	if request.Body == nil || request.ContentLength == 0 {
-		resp := ErrorResponseBadRequest(ErrorMessageBadPayload)
-		WriteJSONResponse(writer, resp)
-		return nil, ""
-	}
-
-	parameters := &apiv1.PublishEventParametersV1{}
-	decoder := json.NewDecoder(request.Body)
-	if err := decoder.Decode(&parameters.PublishrequestV1); err != nil {
-		var resp *apiv1.PublishEventResponses
-		if err.Error() == requestBodyTooLargeErrorMessage {
-			resp = ErrorResponseRequestBodyTooLarge(err.Error())
-		} else {
-			resp = ErrorResponseBadRequest(err.Error())
-		}
-		WriteJSONResponse(writer, resp)
-		return nil, ""
-	}
-
-	// validate the PublishRequestV1 for missing / incoherent values
-	checkResp := t.checkParameters(parameters)
-	if checkResp.Error != nil {
-		WriteJSONResponse(writer, checkResp)
-		return nil, ""
-	}
-
+func (t *Transformer) TransformLegacyRequestsToCE(writer http.ResponseWriter, publishData *api.PublishRequestData) (*cev2event.Event, string) {
 	// clean the application name form non-alphanumeric characters
-	appNameOriginal := ParseApplicationNameFromPath(request.URL.Path)
-	appName := appNameOriginal
+	appName := publishData.ApplicationName
 	if appObj, err := t.applicationLister.Get(appName); err == nil {
 		// handle existing applications
 		appName = application.GetCleanTypeOrName(appObj)
@@ -166,18 +150,17 @@ func (t *Transformer) TransformLegacyRequestsToCE(writer http.ResponseWriter, re
 		appName = application.GetCleanName(appName)
 	}
 
-	event, err := t.convertPublishRequestToCloudEvent(appName, parameters)
+	event, err := t.convertPublishRequestToCloudEvent(appName, publishData.PublishEventParameters)
 	if err != nil {
 		response := ErrorResponse(http.StatusInternalServerError, err)
 		WriteJSONResponse(writer, response)
 		return nil, ""
 	}
 
-	// Add tracing context to cloud events
-	tracing.AddTracingContextToCEExtensions(request.Header, event)
-
 	// prepare the original event-type without cleanup
-	eventType := formatEventType(t.eventTypePrefix, appNameOriginal, parameters.PublishrequestV1.EventType, parameters.PublishrequestV1.EventTypeVersion)
+	eventType := formatEventType(t.eventTypePrefix, publishData.ApplicationName,
+		publishData.PublishEventParameters.PublishrequestV1.EventType,
+		publishData.PublishEventParameters.PublishrequestV1.EventTypeVersion)
 
 	return event, eventType
 }
