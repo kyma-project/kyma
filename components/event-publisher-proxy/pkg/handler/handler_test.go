@@ -44,15 +44,17 @@ func Test_extractCloudEventFromRequest(t *testing.T) {
 		errorAssertionFunc assert.ErrorAssertionFunc
 	}
 	tests := []struct {
-		name  string
-		args  args
-		wants wants
+		name     string
+		args     args
+		wantType string
+		wants    wants
 	}{
 		{
 			name: "Valid event",
 			args: args{
 				request: CreateValidStructuredRequest(t),
 			},
+			wantType: fmt.Sprintf("sap.kyma.custom.%s", testingutils.CloudEventType),
 			wants: wants{
 				event:              CreateCloudEvent(t),
 				errorAssertionFunc: assert.NoError,
@@ -83,6 +85,7 @@ func Test_extractCloudEventFromRequest(t *testing.T) {
 			args: args{
 				request: CreateValidBinaryRequest(t),
 			},
+			wantType: fmt.Sprintf("sap.kyma.custom.%s", testingutils.CloudEventType),
 			wants: wants{
 				event:              CreateCloudEvent(t),
 				errorAssertionFunc: assert.NoError,
@@ -102,6 +105,9 @@ func Test_extractCloudEventFromRequest(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			gotEvent, err := extractCloudEventFromRequest(tt.args.request)
+			if tt.wantType != "" {
+				tt.wants.event.SetType(tt.wantType)
+			}
 			if !tt.wants.errorAssertionFunc(t, err, fmt.Sprintf("extractCloudEventFromRequest(%v)", tt.args.request)) {
 				return
 			}
@@ -819,7 +825,7 @@ func CreateCloudEvent(t *testing.T) *cev2event.Event {
 // CreateValidStructuredRequest creates a structured cloudevent as http request.
 func CreateValidStructuredRequest(t *testing.T) *http.Request {
 	t.Helper()
-	req := httptest.NewRequest(http.MethodPost, "http://localhost/publish", strings.NewReader("{\"specversion\":\"1.0\",\"type\":\"prefix.testapp1023.order.created.v1\",\"source\":\"/default/sap.kyma/id\",\"id\":\"8945ec08-256b-11eb-9928-acde48001122\",\"data\":{\"foo\":\"bar\"}}"))
+	req := httptest.NewRequest(http.MethodPost, "http://localhost/publish", strings.NewReader("{\"specversion\":\"1.0\",\"type\":\"sap.kyma.custom.testapp1023.order.created.v1\",\"source\":\"/default/sap.kyma/id\",\"id\":\"8945ec08-256b-11eb-9928-acde48001122\",\"data\":{\"foo\":\"bar\"}}"))
 	req.Header.Add("Content-Type", "application/cloudevents+json")
 	return req
 }
@@ -845,7 +851,7 @@ func CreateValidBinaryRequest(t *testing.T) *http.Request {
 	t.Helper()
 	req := httptest.NewRequest(http.MethodPost, "http://localhost/publish", strings.NewReader("{\"foo\":\"bar\"}"))
 	req.Header.Add("Ce-Specversion", "1.0")
-	req.Header.Add("Ce-Type", "prefix.testapp1023.order.created.v1")
+	req.Header.Add("Ce-Type", "sap.kyma.custom.testapp1023.order.created.v1")
 	req.Header.Add("Ce-Source", "/default/sap.kyma/id")
 	req.Header.Add("Ce-ID", "8945ec08-256b-11eb-9928-acde48001122")
 	return req
