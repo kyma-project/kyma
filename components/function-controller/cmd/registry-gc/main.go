@@ -45,7 +45,7 @@ func main() {
 			os.Exit(1)
 		}
 	}
-	// It's better to get the list of layers _after_ we have deleted the unreferenced tags the previous step.
+	// It's better to get the list of layers _after_ we have deleted the unreferenced tags in the previous step.
 	// This way we know we don't have any unused images on the registry.
 	imageLayers, err := registryClient.ListRegistryImagesLayers()
 	if err != nil {
@@ -61,7 +61,7 @@ func main() {
 	}
 	for _, cachedLayer := range cachedLayers.ListKeys() {
 		// this cached layer is used by one of existing images, which means it's
-		// likely to be used by updated versions of the same function
+		// likely to be used by an updated versions of the same function
 		if imageLayers.HasKey(cachedLayer) {
 			continue
 		}
