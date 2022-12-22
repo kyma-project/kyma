@@ -176,12 +176,6 @@ const (
 	LogPipelineRunning LogPipelineConditionType = "Running"
 )
 
-const (
-	FluentBitDSNotReadyReason     = "FluentBitDaemonSetNotReady"
-	FluentBitDSReadyReason        = "FluentBitDaemonSetReady"
-	ReferencedSecretMissingReason = "ReferencedSecretMissing"
-)
-
 // LogPipelineCondition contains details for the current condition of this LogPipeline
 type LogPipelineCondition struct {
 	LastTransitionTime metav1.Time              `json:"lastTransitionTime,omitempty"`
