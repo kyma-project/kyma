@@ -93,9 +93,10 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (reconcile
 
 func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha1.TracePipeline) error {
 	var err error
+	locked := true
 
 	defer func() {
-		if statusErr := r.updateStatus(ctx, pipeline.Name); statusErr != nil {
+		if statusErr := r.updateStatus(ctx, pipeline.Name, locked); statusErr != nil {
 			if err != nil {
 				err = fmt.Errorf("failed while updating status: %v: %v", statusErr, err)
 			} else {
@@ -105,6 +106,7 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 	}()
 
 	if err = r.checkLock(ctx, pipeline); err != nil {
+		locked = false
 		return err
 	}
 

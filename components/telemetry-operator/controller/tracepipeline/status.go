@@ -15,13 +15,10 @@ const (
 	reasonTraceCollectorDeploymentNotReady = "TraceCollectorDeploymentNotReady"
 	reasonTraceCollectorDeploymentReady    = "TraceCollectorDeploymentReady"
 	reasonReferencedSecretMissingReason    = "ReferencedSecretMissing"
+	reasonWaitingForLock                   = "WaitingForLock"
 )
 
-func (r *Reconciler) updateStatus(ctx context.Context, pipelineName string) error {
-	return r.updateStatusConditions(ctx, pipelineName)
-}
-
-func (r *Reconciler) updateStatusConditions(ctx context.Context, pipelineName string) error {
+func (r *Reconciler) updateStatus(ctx context.Context, pipelineName string, pipelineLocked bool) error {
 	log := logf.FromContext(ctx)
 
 	var pipeline telemetryv1alpha1.TracePipeline
@@ -35,6 +32,17 @@ func (r *Reconciler) updateStatusConditions(ctx context.Context, pipelineName st
 
 	if pipeline.DeletionTimestamp != nil {
 		return nil
+	}
+
+	if !pipelineLocked {
+		pending := telemetryv1alpha1.NewTracePipelineCondition(reasonWaitingForLock, telemetryv1alpha1.TracePipelinePending)
+
+		if pipeline.Status.HasCondition(telemetryv1alpha1.TracePipelineRunning) {
+			log.V(1).Info(fmt.Sprintf("Updating the status of %s to %s. Resetting previous conditions", pipeline.Name, pending.Type))
+			pipeline.Status.Conditions = []telemetryv1alpha1.TracePipelineCondition{}
+		}
+
+		return setCondition(ctx, r.Client, &pipeline, pending)
 	}
 
 	secretsMissing := checkForMissingSecrets(ctx, r.Client, &pipeline)
