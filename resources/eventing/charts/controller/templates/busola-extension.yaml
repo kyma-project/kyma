@@ -32,9 +32,7 @@ data:
         source: spec.source
       - name: spec.sink
         source: spec.sink
-      - source: spec.sink
         widget: ResourceLink
-        name: spec.sink.controlledBy
         resource:
           name: '$substringBefore($substringAfter(spec.sink, "http://"), ".")'
           namespace: $root.metadata.namespace
