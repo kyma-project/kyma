@@ -53,7 +53,6 @@ const {
 } = require('../../../lib/oauth');
 
 const {bebBackend, getEventMeshNamespace} = require('../../../eventing-test/common/common');
-const { trace } = require('console');
 
 const commerceMockYaml = fs.readFileSync(
     path.join(__dirname, './commerce-mock.yaml'),
