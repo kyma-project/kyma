@@ -18,6 +18,8 @@ const checkAppExistsPeriod = 10 * time.Second
 const appCreationTimeout = 2 * time.Minute
 const appUpdateTimeout = 3 * time.Minute
 
+const updatedDescription = "The app was updated"
+
 type ApplicationReader interface {
 	Get(ctx context.Context, name string, opts v1.GetOptions) (*v1alpha1.Application, error)
 }
@@ -63,7 +65,7 @@ func (cs *CompassRuntimeAgentSuite) updateAndWaitForCompare(appReader Applicatio
 	t.Helper()
 
 	exec := func() error {
-		_, err := cs.directorClient.UpdateApplication(applicationID, "Updated")
+		_, err := cs.directorClient.UpdateApplication(applicationID, updatedDescription)
 		return err
 	}
 
@@ -73,7 +75,7 @@ func (cs *CompassRuntimeAgentSuite) updateAndWaitForCompare(appReader Applicatio
 			t.Logf("Couldn't get updated: %v", err)
 		}
 
-		return err == nil && app.Spec.Description == "Updated"
+		return err == nil && app.Spec.Description == updatedDescription
 	}
 
 	return executor.ExecuteAndWaitForCondition{
