@@ -50,7 +50,7 @@ func (gb *GenericBuilder) Build(event cev2event.Event) (*cev2event.Event, error)
 
 	// validate if the segments are not empty
 	segments := strings.Split(finalEventType, ".")
-	if CheckForEmptySegments(segments) {
+	if DoesEmptySegmentsExist(segments) {
 		return nil, fmt.Errorf("event type cannot have empty segments after cleaning: %s", finalEventType)
 	}
 	namedLogger.Debugf("using event type: %s", finalEventType)

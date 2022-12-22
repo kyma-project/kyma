@@ -1,6 +1,6 @@
 package builder
 
-func CheckForEmptySegments(segments []string) bool {
+func DoesEmptySegmentsExist(segments []string) bool {
 	for _, segment := range segments {
 		if segment == "" {
 			return true
