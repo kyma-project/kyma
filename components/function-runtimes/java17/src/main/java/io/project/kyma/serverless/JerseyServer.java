@@ -10,11 +10,11 @@ import io.project.kyma.serverless.handler.Handler;
 import io.project.kyma.serverless.sdk.CloudEvent;
 import io.project.kyma.serverless.sdk.Function;
 
-import javax.ws.rs.*;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
 import java.net.URI;
 import java.util.logging.Logger;
 
