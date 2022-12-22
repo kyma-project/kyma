@@ -1,7 +1,7 @@
 const k8s = require('@kubernetes/client-node');
 const fs = require('fs');
 const path = require('path');
-const {expect} = require('chai');
+const {expect, assert} = require('chai');
 const https = require('https');
 const axios = require('axios').default;
 const httpsAgent = new https.Agent({
@@ -304,7 +304,15 @@ async function checkInClusterEventTracing(targetNamespace) {
 
   // Extract traceId from response
   // Second part of traceparent header contains trace-id. See https://www.w3.org/TR/trace-context/#traceparent-header
-  const traceId = res.data.event.headers['traceparent'].split('-')[1];
+  let traceId = res.data.event.headers['traceparent'].split('-')[1];
+  if (traceID == null) {
+    debug('traceID using traceparent is not present. Trying to fetch traceID using b3');
+    debug(`Following traceheaders: ${res.data.event.headers} are present`);
+    traceId = res.data.event.headers['x-b3-traceid'];
+    assert.isNotEmpty(traceId);
+  }
+  debug(`got the traceID: ${traceId}`);
+
 
   // Define expected trace data
   const correctTraceProcessSequence = [
