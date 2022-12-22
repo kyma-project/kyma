@@ -1,5 +1,5 @@
 ---
-title: Telemetry - Operator
+title: Telemetry Operator
 ---
 
 ## Module lifecycle

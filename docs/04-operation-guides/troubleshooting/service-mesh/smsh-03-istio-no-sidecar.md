@@ -27,9 +27,9 @@ Follow these steps to troubleshoot:
 2. Check if sidecar injection is enabled in the Pod's Deployment:
 
     ```bash
-    kubectl get deployments {DEPLOYMENT_NAME} -n {NAMESPACE} -o jsonpath='{ .spec.template.metadata.annotations }'
+    kubectl get deployments {DEPLOYMENT_NAME} -n {NAMESPACE} -o jsonpath='{ .spec.template.metadata.labels }'
     ```
 
-   Sidecar injection is disabled if the output does not contain the `sidecar.istio.io/inject:true` line. Change or add the annotation and restart the Pod to enable sidecar injection for the Deployment.
+   Sidecar injection is disabled if the output does not contain the `sidecar.istio.io/inject:true` line. Change or add the label and restart the Pod to enable sidecar injection for the Deployment.
 
 For more information, read [Istio documentation](https://istio.io/docs/ops/common-problems/injection/).

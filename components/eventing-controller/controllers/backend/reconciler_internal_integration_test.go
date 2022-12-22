@@ -41,7 +41,6 @@ const (
 	beforeSuiteTimeoutInSeconds = testEnvStartAttempts * 60
 	useExistingCluster          = false
 	attachControlPlaneOutput    = false
-	kymaSystemNamespace         = "kyma-system"
 	timeout                     = 15 * time.Second
 	pollingInterval             = 1 * time.Second
 	eventingBackendName         = "eventing-backend"
