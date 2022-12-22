@@ -109,6 +109,6 @@
   },
   {
     "title":"NATS Delivery: Successful Event Publisher Requests per Event Type",
-    "query":"sum by (event_type) (rate(eventing_epp_event_type_published_total{response_code=~\"[2].*\"}[5m]))"
+    "query":"sum by (event_type) (rate(eventing_epp_event_type_published_total{code=~\"[2].*\"}[5m]))"
   }
 ]
