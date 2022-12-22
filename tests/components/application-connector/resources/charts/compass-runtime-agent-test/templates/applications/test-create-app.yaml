@@ -20,7 +20,7 @@ metadata:
     applicationconnector.kyma-project.io/managed-by: compass-runtime-agent
   name: app1-updated
 spec:
-  description: Updated
+  description: "The app was updated"
   displayName: ""
   longDescription: ""
   providerDisplayName: ""
