@@ -252,8 +252,24 @@ async function sendCloudEventBinaryModeAndCheckResponse(backendType = 'nats', mo
   return await sendEventAndCheckResponse('cloud event binary', body, params, mockNamespace);
 }
 
+async function getTraceId() {
+  // Extract traceId from response
+  // Second part of traceparent header contains trace-id. See https://www.w3.org/TR/trace-context/#traceparent-header
+  const traceParent = res.data.event.headers['traceparent'];
+  debug(`Traceparent header is: ${traceParent}`);
+  let traceId;
+  if (traceParent == null) {
+    debug('traceID using traceparent is not present. Trying to fetch traceID using b3');
+    traceId = res.data.event.headers['x-b3-traceid'];
+    assert.isNotEmpty(traceId, 'neither traceparent or b3 header is present in the response header');
+  } else {
+    traceId = res.data.event.headers['traceparent'].split('-')[1];
+  }
+  debug(`got the traceId: ${traceId}`);
+}
+
 async function checkEventTracing(targetNamespace = 'test', res) {
-  expect(res.data).to.have.nested.property('event.headers.x-b3-traceid');
+  expect(res.data).to.have.nested.property('event.headers.traceparent');
   expect(res.data).to.have.nested.property('podName');
 
   // Extract traceId from response
@@ -302,19 +318,7 @@ async function checkInClusterEventTracing(targetNamespace) {
   expect(res.data).to.have.nested.property('event.headers.traceparent');
   expect(res.data).to.have.nested.property('podName');
 
-  // Extract traceId from response
-  // Second part of traceparent header contains trace-id. See https://www.w3.org/TR/trace-context/#traceparent-header
-  const traceParent = res.data.event.headers['traceparent'];
-  debug(`Traceparent header is: ${traceParent}`);
-  let traceId;
-  if (traceParent == null) {
-    debug('traceID using traceparent is not present. Trying to fetch traceID using b3');
-    traceId = res.data.event.headers['x-b3-traceid'];
-    assert.isNotEmpty(traceId, 'neither traceparent or b3 header is present in the response header');
-  } else {
-    traceId = res.data.event.headers['traceparent'].split('-')[1];
-  }
-  debug(`got the traceId: ${traceId}`);
+  const traceId = await getTraceId(res.data);
 
 
   // Define expected trace data
