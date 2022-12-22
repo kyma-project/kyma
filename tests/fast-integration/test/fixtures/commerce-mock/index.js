@@ -273,7 +273,7 @@ async function checkEventTracing(targetNamespace = 'test', res) {
   expect(res.data).to.have.nested.property('podName');
 
   // Extract traceId from response
-  const traceId = res.data.event.headers['x-b3-traceid'];
+  const traceId = getTraceId['x-b3-traceid'];
 
   // Define expected trace data
   const correctTraceProcessSequence = [
