@@ -192,6 +192,18 @@ nats:
       annotations:
       # key: "value"
 
+# Authentication setup
+auth:
+  enabled: true
+  resolver:
+    ##############################
+    #                            #
+    # Memory resolver settings   #
+    #                            #
+    ##############################
+    type: memory
+
+
 nameOverride: ""
 
 # Toggle whether to use setup a Pod Security Context

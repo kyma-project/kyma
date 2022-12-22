@@ -31,4 +31,3 @@ data:
   WEBHOOK_DEFAULTING_BUILD_JOB_RESOURCES_DEFAULT_PRESET: {{ .Values.values.buildJob.resources.defaultPreset | quote }}
   WEBHOOK_DEFAULTING_BUILD_JOB_RESOURCES_PRESETS_MAP: |-
 {{ include "tplValue" ( dict "value" .Values.values.buildJob.resources.presets "context" . ) | nindent 4 }}
-  WEBHOOK_FEATURE_FLAGS_JAVA17_JVM_ALPHA_ENABLED: {{ .Values.values.featureFlags.java17AlphaEnabled | quote }}
