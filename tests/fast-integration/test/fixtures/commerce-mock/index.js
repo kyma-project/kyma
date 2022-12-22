@@ -53,6 +53,7 @@ const {
 } = require('../../../lib/oauth');
 
 const {bebBackend, getEventMeshNamespace} = require('../../../eventing-test/common/common');
+const { trace } = require('console');
 
 const commerceMockYaml = fs.readFileSync(
     path.join(__dirname, './commerce-mock.yaml'),
@@ -304,14 +305,17 @@ async function checkInClusterEventTracing(targetNamespace) {
 
   // Extract traceId from response
   // Second part of traceparent header contains trace-id. See https://www.w3.org/TR/trace-context/#traceparent-header
-  let traceId = res.data.event.headers['traceparent'].split('-')[1];
-  if (traceID == null) {
+  const traceParent = res.data.event.headers['traceparent'];
+  debug(`Traceparent header is: ${traceParent}`);
+  let traceId;
+  if (traceParent == null) {
     debug('traceID using traceparent is not present. Trying to fetch traceID using b3');
-    debug(`Following traceheaders: ${res.data.event.headers} are present`);
     traceId = res.data.event.headers['x-b3-traceid'];
-    assert.isNotEmpty(traceId);
+    assert.isNotEmpty(traceId, 'neither traceparent or b3 header is present in the response header');
+  } else {
+    traceId = res.data.event.headers['traceparent'].split('-')[1];
   }
-  debug(`got the traceID: ${traceId}`);
+  debug(`got the traceId: ${traceId}`);
 
 
   // Define expected trace data
