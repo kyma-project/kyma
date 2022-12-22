@@ -29,7 +29,7 @@ type RegistryClient interface {
 type registryClient struct {
 	ctx context.Context
 
-	userName string
+	username string
 	password string
 	url      *url.URL
 
@@ -62,12 +62,12 @@ func NewRegistryClient(ctx context.Context, opts *RegistryClientOptions) (Regist
 
 	rc := &registryClient{
 		ctx:      ctx,
-		userName: opts.Username,
+		username: opts.Username,
 		password: opts.Password,
 		url:      u,
 	}
 
-	rc.transport, err = rc.registryAuthTransport()
+	rc.transport, err = registryAuthTransport(opts.Username, opts.Password, u)
 	if err != nil {
 		return nil, errors.Wrap(err, "while building registry auth transport")
 	}
@@ -130,16 +130,16 @@ func (c *registryClient) Repositories() ([]string, error) {
 	return ret, nil
 }
 
-func (rc *registryClient) registryAuthTransport() (http.RoundTripper, error) {
+func registryAuthTransport(username, password string, u *url.URL) (http.RoundTripper, error) {
 	// Header required to force the Registry to use V2 digest values
 	// details are here: https://docs.docker.com/registry/spec/api/#deleting-an-image
 	header := http.Header(map[string][]string{"Accept": {"application/vnd.docker.distribution.manifest.v2+json"}})
 	authconfig := &dockertypes.AuthConfig{
-		Username: rc.userName,
-		Password: rc.password,
+		Username: username,
+		Password: password,
 	}
 
-	challengeManager, _, err := dockerregistry.PingV2Registry(rc.url, transport.NewTransport(http.DefaultTransport))
+	challengeManager, _, err := dockerregistry.PingV2Registry(u, transport.NewTransport(http.DefaultTransport))
 	if err != nil {
 		errors.Wrap(err, "while generating auth challengeManager")
 	}
