@@ -11,7 +11,6 @@ const k8s = require('@kubernetes/client-node');
 const fs = require('fs');
 const path = require('path');
 const {
-  k8sCoreV1Api,
   waitForK8sObject,
 } = require('../utils');
 
@@ -107,20 +106,5 @@ function waitForPodWithLabel(
       },
       timeout,
       `Waiting for pod with label ${labelKey}=${labelValue} timeout (${timeout} ms)`,
-  );
-}
-
-async function patchSecret(secretName, namespace, patch) {
-  const options = {'headers': {'Content-type': k8s.PatchUtils.PATCH_FORMAT_JSON_PATCH}};
-
-  await k8sCoreV1Api.patchNamespacedSecret(
-      secretName,
-      namespace,
-      patch,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      options,
   );
 }
