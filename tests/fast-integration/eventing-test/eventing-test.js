@@ -71,6 +71,20 @@ const {
   unexposeGrafana,
 } = require('../monitoring');
 
+// This code can be removed when we have release 2.10
+const lastorderFunctionYaml = fs.readFileSync(
+    path.join(__dirname, '../test/fixtures/commerce-mock/lastorder-function.yaml'),
+    {
+      encoding: 'utf8',
+    },
+);
+
+// This code can be removed when we have release 2.10
+async function redeployFunction(testNamespace) {
+  await k8sApply(lastorderFunctionYaml, testNamespace, true);
+  await waitForFunction('lastorder', testNamespace);
+}
+
 describe('Eventing tests', function() {
   this.timeout(timeoutTime);
   this.slow(slowTime);
@@ -99,6 +113,11 @@ describe('Eventing tests', function() {
 
   // eventingTestSuite - Runs Eventing tests
   function eventingTestSuite(backend, isSKR, testCompassFlow=false) {
+    // This code can be removed when we have release 2.10
+    it('redeploys the function to use the latest code', async function() {
+      await redeployFunction(testNamespace);
+    });
+
     it('lastorder function should be reachable through secured API Rule', async function() {
       await checkFunctionResponse(testNamespace, mockNamespace);
     });
@@ -181,6 +200,7 @@ describe('Eventing tests', function() {
       });
     });
   }
+
 
   function testJetStreamAtLeastOnceDelivery() {
     context('with JetStream file storage', function() {
