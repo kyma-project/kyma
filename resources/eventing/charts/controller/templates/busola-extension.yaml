@@ -100,6 +100,9 @@ data:
         kind: Application
         group: applicationconnector.kyma-project.io
         version: v1alpha1
+    - path: spec.config
+      widget: KeyValuePair
+      defaultExpanded: true
     - path: spec.types
       simple: true
       widget: SimpleList
