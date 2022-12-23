@@ -130,6 +130,7 @@ func TestGetStreamConfig(t *testing.T) {
 			name: "Should return valid StreamConfig",
 			givenNatsConfig: env.NatsConfig{
 				JSStreamName:            DefaultStreamName,
+				JSSubjectPrefix:         DefaultJetStreamSubjectPrefix,
 				JSStreamStorageType:     StorageTypeMemory,
 				JSStreamRetentionPolicy: RetentionPolicyLimits,
 				JSStreamReplicas:        3,
@@ -145,7 +146,7 @@ func TestGetStreamConfig(t *testing.T) {
 				Retention: nats.LimitsPolicy,
 				MaxMsgs:   -1,
 				MaxBytes:  -1,
-				Subjects:  []string{fmt.Sprintf("%s.>", env.JetStreamSubjectPrefix)},
+				Subjects:  []string{fmt.Sprintf("%s.>", DefaultJetStreamSubjectPrefix)},
 			},
 			wantError: false,
 		},
@@ -153,6 +154,7 @@ func TestGetStreamConfig(t *testing.T) {
 			name: "Should parse MaxBytes correctly without unit",
 			givenNatsConfig: env.NatsConfig{
 				JSStreamName:            DefaultStreamName,
+				JSSubjectPrefix:         DefaultJetStreamSubjectPrefix,
 				JSStreamStorageType:     StorageTypeMemory,
 				JSStreamRetentionPolicy: RetentionPolicyLimits,
 				JSStreamDiscardPolicy:   DiscardPolicyNew,
@@ -168,7 +170,7 @@ func TestGetStreamConfig(t *testing.T) {
 				Retention: nats.LimitsPolicy,
 				MaxMsgs:   -1,
 				MaxBytes:  10485760,
-				Subjects:  []string{fmt.Sprintf("%s.>", env.JetStreamSubjectPrefix)},
+				Subjects:  []string{fmt.Sprintf("%s.>", DefaultJetStreamSubjectPrefix)},
 			},
 			wantError: false,
 		},
@@ -176,6 +178,7 @@ func TestGetStreamConfig(t *testing.T) {
 			name: "Should parse MaxBytes correctly with unit",
 			givenNatsConfig: env.NatsConfig{
 				JSStreamName:            DefaultStreamName,
+				JSSubjectPrefix:         DefaultJetStreamSubjectPrefix,
 				JSStreamStorageType:     StorageTypeMemory,
 				JSStreamDiscardPolicy:   DiscardPolicyNew,
 				JSStreamRetentionPolicy: RetentionPolicyLimits,
@@ -191,7 +194,7 @@ func TestGetStreamConfig(t *testing.T) {
 				Retention: nats.LimitsPolicy,
 				MaxMsgs:   -1,
 				MaxBytes:  10485760,
-				Subjects:  []string{fmt.Sprintf("%s.>", env.JetStreamSubjectPrefix)},
+				Subjects:  []string{fmt.Sprintf("%s.>", DefaultJetStreamSubjectPrefix)},
 			},
 			wantError: false,
 		},
@@ -308,7 +311,9 @@ func TestGetBackendJetStreamTypes(t *testing.T) {
 	t.Parallel()
 	jsCleaner := cleaner.NewJetStreamCleaner(nil)
 	defaultSub := evtestingv2.NewSubscription(subName, subNamespace)
-	js := NewJetStream(env.NatsConfig{}, nil, jsCleaner, env.DefaultSubscriptionConfig{}, nil)
+	js := NewJetStream(env.NatsConfig{
+		JSSubjectPrefix: DefaultJetStreamSubjectPrefix,
+	}, nil, jsCleaner, env.DefaultSubscriptionConfig{}, nil)
 	testCases := []struct {
 		name              string
 		givenSubscription *eventingv1alpha2.Subscription

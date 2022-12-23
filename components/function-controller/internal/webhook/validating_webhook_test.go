@@ -120,7 +120,7 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 					AdmissionRequest: v1.AdmissionRequest{
 						Kind: metav1.GroupVersionKind{Kind: serverlessv1alpha2.FunctionKind, Version: serverlessv1alpha2.FunctionVersion},
 						Object: runtime.RawExtension{
-							Raw: []byte(ValidV1Alpha2Function(t)),
+							Raw: []byte(Marshall(t, ValidV1Alpha2Function())),
 						},
 					},
 				},
@@ -239,4 +239,46 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 			require.Equal(t, tt.responseCode, got.Result.Code)
 		})
 	}
+}
+
+func TestFeatureFlags_Java17JVMAlpha(t *testing.T) {
+	scheme := runtime.NewScheme()
+	_ = serverlessv1alpha2.AddToScheme(scheme)
+	decoder, err := admission.NewDecoder(scheme)
+	require.NoError(t, err)
+	testClient := fake.NewClientBuilder().Build()
+	configV1Alpha2 := ReadValidationConfigV1Alpha2OrDie()
+
+	//GIVEN
+	validFn := ValidV1Alpha2Function()
+	validFn.Spec.Runtime = serverlessv1alpha2.Java17JvmAlpha
+	validReq := admission.Request{
+		AdmissionRequest: v1.AdmissionRequest{
+			Kind: metav1.GroupVersionKind{Kind: serverlessv1alpha2.FunctionKind, Version: serverlessv1alpha2.FunctionVersion},
+			Object: runtime.RawExtension{
+				Raw: []byte(Marshall(t, validFn)),
+			},
+		},
+	}
+
+	t.Run("Java Enabled", func(t *testing.T) {
+		ff := FeatureFlags{Java17JvmAlphaEnabled: true}
+		webhook := NewValidatingWebHook(nil, configV1Alpha2, ff, testClient)
+		require.NoError(t, webhook.InjectDecoder(decoder))
+
+		//WHEN
+		res := webhook.Handle(context.TODO(), validReq)
+		//THEN
+		require.True(t, res.Allowed)
+	})
+
+	t.Run("Java Disabled", func(t *testing.T) {
+		ff := FeatureFlags{Java17JvmAlphaEnabled: false}
+		webhook := NewValidatingWebHook(nil, nil, ff, testClient)
+		require.NoError(t, webhook.InjectDecoder(decoder))
+		//WHEN
+		res := webhook.Handle(context.TODO(), validReq)
+		//THEN
+		require.False(t, res.Allowed)
+	})
 }

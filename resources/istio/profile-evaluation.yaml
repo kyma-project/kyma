@@ -1,9 +1,6 @@
 ---
 meshConfig:
   accessLogFile: ""
-  defaultConfig:
-    tracing:
-      sampling: 100
 
 helmValues:
   global:

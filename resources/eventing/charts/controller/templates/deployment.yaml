@@ -68,6 +68,8 @@ spec:
             value: {{ .Values.global.log.level | quote }}
           - name: JS_STREAM_NAME
             value: {{ .Values.jetstream.streamName | quote }}
+          - name: JS_STREAM_SUBJECT_PREFIX
+            value: {{ .Values.jetstream.streamSubjectPrefix | quote }}
           - name: JS_STREAM_STORAGE_TYPE
             value: {{ .Values.global.jetstream.storage | quote }}
           - name: JS_STREAM_REPLICAS
