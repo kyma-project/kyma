@@ -50,7 +50,7 @@ For this phase, a simple command line tool will perform the following steps:
 
 #### Cache image garbage collection
 - List all non-cache layers on the Registry. This is done after applying the Function image garbage collection to make sure only referenced images are listed.
-- List all the cache layers. Each layer is mapped to it's referencing tag.
+- List all the cache layers. Each layer is mapped to its referencing tag.
 - Cross check the image layers and the cached layers list. Layers referenced in both lists should be kept.
 - Tags referencing the remaining cache layers are deleted using the Registry API.
 
