@@ -299,11 +299,12 @@ async function sendCloudEventBinaryModeAndCheckTracing(targetNamespace = 'test',
 
 async function checkInClusterEventTracing(targetNamespace) {
   const res = await checkInClusterEventDeliveryHelper(targetNamespace, 'structured');
-  expect(res.data).to.have.nested.property('event.headers.x-b3-traceid');
+  expect(res.data).to.have.nested.property('event.headers.traceparent');
   expect(res.data).to.have.nested.property('podName');
 
   // Extract traceId from response
-  const traceId = res.data.event.headers['x-b3-traceid'];
+  // Second part of traceparent header contains trace-id. See https://www.w3.org/TR/trace-context/#traceparent-header
+  const traceId = res.data.event.headers['traceparent'].split('-')[1];
 
   // Define expected trace data
   const correctTraceProcessSequence = [
@@ -315,8 +316,9 @@ async function checkInClusterEventTracing(targetNamespace) {
     `lastorder-${res.data.podName.split('-')[1]}.${targetNamespace}`,
   ];
 
-  // wait sometime for jaeger to complete tracing data
-  await sleep(10_000);
+  // wait sometime for jaeger to complete tracing data.
+  // Arrival of traces might be delayed by otel-collectors batch timeout.
+  await sleep(20_000);
   await checkTrace(traceId, correctTraceProcessSequence);
 }
 
@@ -760,9 +762,6 @@ async function sendInClusterEventWithRetry(mockHost, eventId, encoding, eventTyp
         send: true,
         encoding: encoding,
       },
-      headers: {
-        'X-B3-Sampled': 1,
-      },
     });
 
     debug('Send response:', {
@@ -787,9 +786,6 @@ async function sendInClusterLegacyEventWithRetry(mockHost, eventData, retriesLef
       params: {
         send: true,
         isLegacyEvent: true,
-      },
-      headers: {
-        'X-B3-Sampled': 1,
       },
     });
 

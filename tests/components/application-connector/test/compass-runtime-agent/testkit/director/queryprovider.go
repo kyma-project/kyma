@@ -29,6 +29,15 @@ func (qp queryProvider) registerApplicationFromTemplateMutation(appName, display
 	}) { id } }`, appName, displayName)
 }
 
+func (qp queryProvider) updateApplicationMutation(id, description string) string {
+	return fmt.Sprintf(`mutation {
+	result: updateApplication(
+		id: "%s"
+		in: { description: "%s"
+			}) { id } }`,
+		id, description)
+}
+
 func (qp queryProvider) assignFormationForAppMutation(applicationId, formationName string) string {
 	return fmt.Sprintf(`mutation {
 	result: assignFormation(

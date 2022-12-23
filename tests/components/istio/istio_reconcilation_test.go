@@ -20,7 +20,7 @@ func InitializeScenarioReconcilation(ctx *godog.ScenarioContext) {
 	profile := os.Getenv(deployedKymaProfileVar)
 
 	reconcilationCase := istioReconcilationCase{}
-	reconcilationCase.command = helpers.Command{Cmd: "./kyma", Args: []string{"deploy", "-s", "main", "--component", "istio", "-v", "--ci", "-p", profile}, OutputChannel: make(chan string)}
+	reconcilationCase.command = helpers.Command{Cmd: "./kyma", Args: []string{"deploy", "--source", "local", "--workspace", "../../../", "--component", "istio", "-v", "--ci", "-p", profile}, OutputChannel: make(chan string)}
 
 	ctx.Before(func(ctx context.Context, sc *godog.Scenario) (context.Context, error) {
 		out, err := os.Create("kyma")
@@ -44,9 +44,7 @@ func InitializeScenarioReconcilation(ctx *godog.ScenarioContext) {
 
 	ctx.Step(`^a reconcilation takes place$`, reconcilationCase.aReconcilationTakesPlace)
 	ctx.Step(`^istioctl install takes place$`, reconcilationCase.istioctlInstallTakesPlace)
-	ctx.Step(`^the httpbin deployment in "([^"]*)" namespace gets restarted until there is no sidecar$`, reconcilationCase.httpbinGetsRestartedUntilThereIsNoSidecar)
-	ctx.Step(`^reconciler restarts the faulty deployment$`, reconcilationCase.reconcilerRestartsTheFaultyDeployment)
-	ctx.Step(`^the reconcilation is aborted$`, reconcilationCase.abort)
+	ctx.Step(`^the httpbin deployment in "([^"]*)" namespace gets restarted until the end of reconcilation$`, reconcilationCase.httpbinGetsRestartedUntilThereIsNoSidecar)
 	InitializeScenarioIstioInstalled(ctx)
 }
 
@@ -109,31 +107,13 @@ func (i *istioReconcilationCase) httpbinGetsRestartedUntilThereIsNoSidecar(names
 	for {
 		select {
 		case <-i.doneChannel:
-			return errors.New("The httpbin deployment could not be restarted to a state without sidecar")
+			return nil
 		case <-noSidecar:
 			time.Sleep(time.Millisecond * 200)
-			return nil
+			return errors.New("The httpbin deployment is missing sidecar after rollout restart")
 		// Continue with reconcilation
 		case <-i.command.OutputChannel:
 
 		}
 	}
-}
-
-func (i *istioReconcilationCase) reconcilerRestartsTheFaultyDeployment() error {
-	for {
-		select {
-		case line := <-i.command.OutputChannel:
-			if strings.Contains(line, "Proxy reset for 1 pods without sidecar successfully done") {
-				return nil
-			}
-		case <-i.doneChannel:
-			return errors.New("Reconcilation didn't restart the faulty pod")
-		}
-	}
-}
-
-func (i *istioReconcilationCase) abort() error{
-	i.command.Kill()
-	return nil
 }

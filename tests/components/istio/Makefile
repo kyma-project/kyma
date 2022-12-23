@@ -35,7 +35,7 @@ kyma-istio-deploy: ## Deploy Kyma Istio using profile is set in KYMA_PROFILE env
 ifndef KYMA_PROFILE
 $(error KYMA_PROFILE is not set)
 endif
-	kyma deploy -s main --component cluster-essentials --component istio --profile ${KYMA_PROFILE} --ci
+	kyma deploy --source=local --workspace ../../../ --component istio -p ${KYMA_PROFILE} --ci
 
 ## Help:
 help: ## Show this help.

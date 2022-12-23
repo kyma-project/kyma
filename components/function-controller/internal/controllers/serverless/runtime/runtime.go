@@ -58,6 +58,9 @@ func fillConfigFileNames(runtime serverlessv1alpha2.Runtime, config *Config) {
 		config.DependencyFile = "requirements.txt"
 		config.FunctionFile = "handler.py"
 		return
+	case serverlessv1alpha2.Java17JvmAlpha:
+		config.DependencyFile = "pom.xml"
+		config.FunctionFile = "Handler.java"
 	}
 }
 
@@ -67,6 +70,8 @@ func GetRuntime(r serverlessv1alpha2.Runtime) Runtime {
 		return nodejs{}
 	case serverlessv1alpha2.Python39:
 		return python{}
+	case serverlessv1alpha2.Java17JvmAlpha:
+		return java{}
 	default:
 		return nodejs{}
 	}

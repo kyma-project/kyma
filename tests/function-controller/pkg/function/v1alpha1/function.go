@@ -2,58 +2,70 @@ package v1alpha1
 
 import (
 	"context"
+	"fmt"
+	"net/url"
 	"time"
 
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/retry"
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
-	"github.com/pkg/errors"
+
 	"github.com/sirupsen/logrus"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
+
+	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
+
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
+
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
 type Function struct {
 	resCli      *resource.Resource
-	name        string
-	namespace   string
+	function    *serverlessv1alpha1.Function
+	FunctionURL *url.URL
 	waitTimeout time.Duration
 	log         *logrus.Entry
 	verbose     bool
 }
 
-func NewFunction(name string, c shared.Container) *Function {
-	return &Function{
-		resCli:      resource.New(c.DynamicCli, serverlessv1alpha1.GroupVersion.WithResource("functions"), c.Namespace, c.Log, c.Verbose),
-		name:        name,
-		namespace:   c.Namespace,
-		waitTimeout: c.WaitTimeout,
-		log:         c.Log,
-		verbose:     c.Verbose,
-	}
-}
-
-func (f *Function) Create(spec serverlessv1alpha1.FunctionSpec) error {
+func NewFunction(name string, proxyEnabled bool, c shared.Container) *Function {
 	function := &serverlessv1alpha1.Function{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Function",
 			APIVersion: serverlessv1alpha1.GroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      f.name,
-			Namespace: f.namespace,
+			Name:      name,
+			Namespace: c.Namespace,
 		},
-		Spec: spec,
 	}
 
-	_, err := f.resCli.Create(function)
+	fnURL, err := helpers.GetSvcURL(name, c.Namespace, proxyEnabled)
 	if err != nil {
-		return errors.Wrapf(err, "while creating Function %s in namespace %s", f.name, f.namespace)
+		panic(err)
+	}
+
+	return &Function{
+		resCli:      resource.New(c.DynamicCli, serverlessv1alpha1.GroupVersion.WithResource("functions"), c.Namespace, c.Log, c.Verbose),
+		waitTimeout: c.WaitTimeout,
+		log:         c.Log,
+		verbose:     c.Verbose,
+		function:    function,
+		FunctionURL: fnURL,
+	}
+}
+
+func (f *Function) Create(spec serverlessv1alpha1.FunctionSpec) error {
+	f.function.Spec = spec
+	_, err := f.resCli.Create(f.function)
+	if err != nil {
+		return errors.Wrapf(err, "while creating %s", f.toString)
 	}
 	return err
 }
@@ -79,9 +91,9 @@ func (f *Function) WaitForStatusRunning() error {
 }
 
 func (f *Function) Delete() error {
-	err := f.resCli.Delete(f.name)
+	err := f.resCli.Delete(f.function.Name)
 	if err != nil {
-		return errors.Wrapf(err, "while deleting Function %s in namespace %s", f.name, f.namespace)
+		return errors.Wrapf(err, "while deleting %s", f.toString)
 	}
 
 	return nil
@@ -105,17 +117,17 @@ func (f *Function) Update(spec serverlessv1alpha1.FunctionSpec) error {
 		// https://github.com/kubernetes/client-go/blob/9927afa2880713c4332723b7f0865adee5e63a7b/util/retry/util.go#L89-L93
 		return err
 	}, f.log)
+	return errors.Wrapf(err, "while updating %s", f.toString)
 
-	return errors.Wrapf(err, "while updating Function %s in namespace %s", f.name, f.namespace)
 }
 
 func (f *Function) Get() (*serverlessv1alpha1.Function, error) {
-	u, err := f.resCli.Get(f.name)
+	u, err := f.resCli.Get(f.function.Name)
 	if err != nil {
-		return nil, errors.Wrapf(err, "while getting Function %s in namespace %s", f.name, f.namespace)
+		return nil, errors.Wrapf(err, "while getting %s", f.toString)
 	}
 
-	function, err := convertFromUnstructuredToFunctionV1Alpha1(u)
+	function, err := convertFromUnstructuredToFunction(u)
 	if err != nil {
 		return nil, err
 	}
@@ -156,19 +168,35 @@ func (f *Function) isFunctionReady() func(event watch.Event) (bool, error) {
 func (f Function) isConditionReady(fn serverlessv1alpha1.Function) bool {
 	conditions := fn.Status.Conditions
 	if len(conditions) == 0 {
-		shared.LogReadiness(false, f.verbose, f.name, f.log, fn)
+		f.LogReadiness(false)
 		return false
 	}
 
 	ready := conditions[0].Type == serverlessv1alpha1.ConditionRunning && conditions[0].Status == corev1.ConditionTrue
 
-	shared.LogReadiness(ready, f.verbose, f.name, f.log, fn)
+	f.LogReadiness(ready)
 
 	return ready
 }
 
-func convertFromUnstructuredToFunctionV1Alpha1(u *unstructured.Unstructured) (serverlessv1alpha1.Function, error) {
+func convertFromUnstructuredToFunction(u *unstructured.Unstructured) (serverlessv1alpha1.Function, error) {
 	fn := serverlessv1alpha1.Function{}
 	err := runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &fn)
 	return fn, err
+}
+
+func (f Function) toString() string {
+	return fmt.Sprintf("Function %s in namespace %s", f.function.Name, f.function.Namespace)
+}
+
+func (f Function) LogReadiness(ready bool) {
+	if ready {
+		f.log.Infof("%s is ready", f.toString())
+	} else {
+		f.log.Infof("%s is not ready", f.toString())
+	}
+
+	if f.verbose {
+		f.log.Infof("%+v", f.function)
+	}
 }

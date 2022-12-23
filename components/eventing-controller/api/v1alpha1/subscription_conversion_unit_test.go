@@ -3,6 +3,8 @@ package v1alpha1_test
 import (
 	"testing"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
+
 	testingv1 "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	testingv2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
 
@@ -149,6 +151,43 @@ func Test_Conversion(t *testing.T) {
 					},
 				}),
 				v2WithBEBStatusFields(),
+			),
+		},
+		{
+			name: "Converting Subscription with Protocol, ProtocolSettings and WebhookAuth",
+			alpha1Sub: newDefaultSubscription(
+				testingv1.WithProtocolBEB(),
+				testingv1.WithProtocolSettings(
+					testingv1.NewProtocolSettings(
+						testingv1.WithAtLeastOnceQOS(),
+						testingv1.WithRequiredWebhookAuth())),
+				testingv1.WithFilter(eventSource, orderCreatedEventType),
+				testingv1.WithStatusCleanEventTypes([]string{
+					orderCreatedEventType,
+				}),
+			),
+			alpha2Sub: newV2DefaultSubscription(
+				testingv2.WithEventSource(eventSource),
+				testingv2.WithTypes([]string{
+					orderCreatedEventType,
+				}),
+				testingv2.WithProtocolBEB(),
+				testingv2.WithConfigValue(v1alpha2.ProtocolSettingsQos,
+					string(types.QosAtLeastOnce)),
+				testingv2.WithConfigValue(v1alpha2.WebhookAuthGrantType,
+					"client_credentials"),
+				testingv2.WithConfigValue(v1alpha2.WebhookAuthClientID,
+					"xxx"),
+				testingv2.WithConfigValue(v1alpha2.WebhookAuthClientSecret,
+					"xxx"),
+				testingv2.WithConfigValue(v1alpha2.WebhookAuthTokenURL,
+					"https://oauth2.xxx.com/oauth2/token"),
+				v2WithStatusTypes([]v1alpha2.EventType{
+					{
+						OriginalType: orderCreatedEventType,
+						CleanType:    orderCreatedEventType,
+					},
+				}),
 			),
 		},
 	}

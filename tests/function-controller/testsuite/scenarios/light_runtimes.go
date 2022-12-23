@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/function"
+
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/configmap"
 
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
@@ -41,6 +43,7 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 	python39Logger := logf.WithField(scenarioKey, "python39")
 	nodejs14Logger := logf.WithField(scenarioKey, "nodejs14")
 	nodejs16Logger := logf.WithField(scenarioKey, "nodejs16")
+	java17AlphaJvmLogger := logf.WithField(scenarioKey, "java17jvm-alpha")
 
 	genericContainer := shared.Container{
 		DynamicCli:  dynamicCli,
@@ -50,19 +53,13 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 		Log:         logf,
 	}
 
-	python39Cfg, err := runtimes.NewFunctionSimpleConfig("python39", genericContainer.WithLogger(python39Logger))
-	if err != nil {
-		return nil, errors.Wrapf(err, "while creating python39 config")
-	}
+	python39Fn := function.NewFunction("python39", cfg.KubectlProxyEnabled, genericContainer.WithLogger(python39Logger))
 
-	nodejs14Cfg, err := runtimes.NewFunctionSimpleConfig("nodejs14", genericContainer.WithLogger(nodejs14Logger))
-	if err != nil {
-		return nil, errors.Wrapf(err, "while creating nodejs14 config")
-	}
-	nodejs16Cfg, err := runtimes.NewFunctionSimpleConfig("nodejs16", genericContainer.WithLogger(nodejs16Logger))
-	if err != nil {
-		return nil, errors.Wrapf(err, "while creating nodejs16 config")
-	}
+	nodeJS14Fn := function.NewFunction("nodejs14", cfg.KubectlProxyEnabled, genericContainer.WithLogger(nodejs14Logger))
+
+	nodejs16Fn := function.NewFunction("nodejs16", cfg.KubectlProxyEnabled, genericContainer.WithLogger(nodejs16Logger))
+
+	java17AlphaJvmFn := function.NewFunction("java17jvm-alpha", cfg.KubectlProxyEnabled, genericContainer.WithLogger(nodejs16Logger))
 
 	cm := configmap.NewConfigMap("test-serverless-configmap", genericContainer.WithLogger(nodejs14Logger))
 	cmEnvKey := "CM_ENV_KEY"
@@ -95,24 +92,33 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 		teststep.CreateSecret(logf, pkgCfgSecret, "Create package configuration secret", pkgCfgSecretData),
 		step.NewParallelRunner(logf, "Fn tests",
 			step.NewSerialTestRunner(python39Logger, "Python39 test",
-				teststep.CreateFunction(python39Logger, python39Cfg.Fn, "Create Python39 Function", runtimes.BasicPythonFunction("Hello From python", serverlessv1alpha2.Python39)),
-				teststep.NewHTTPCheck(python39Logger, "Python39 pre update simple check through service", python39Cfg.InClusterURL, poll.WithLogger(python39Logger), "Hello From python"),
-				teststep.UpdateFunction(python39Logger, python39Cfg.Fn, "Update Python39 Function", runtimes.BasicPythonFunctionWithCustomDependency("Hello From updated python", serverlessv1alpha2.Python39)),
-				teststep.NewHTTPCheck(python39Logger, "Python39 post update simple check through service", python39Cfg.InClusterURL, poll.WithLogger(python39Logger), "Hello From updated python"),
+				teststep.CreateFunction(python39Logger, python39Fn, "Create Python39 Function", runtimes.BasicPythonFunction("Hello From python", serverlessv1alpha2.Python39)),
+				teststep.NewHTTPCheck(python39Logger, "Python39 pre update simple check through service", python39Fn.FunctionURL, poll, "Hello From python"),
+				teststep.UpdateFunction(python39Logger, python39Fn, "Update Python39 Function", runtimes.BasicPythonFunctionWithCustomDependency("Hello From updated python", serverlessv1alpha2.Python39)),
+				teststep.NewHTTPCheck(python39Logger, "Python39 post update simple check through service", python39Fn.FunctionURL, poll, "Hello From updated python"),
 			),
 			step.NewSerialTestRunner(nodejs14Logger, "NodeJS14 test",
 				teststep.CreateConfigMap(nodejs14Logger, cm, "Create Test ConfigMap", cmData),
 				teststep.CreateSecret(nodejs14Logger, sec, "Create Test Secret", secretData),
-				teststep.CreateFunction(nodejs14Logger, nodejs14Cfg.Fn, "Create NodeJS14 Function", runtimes.NodeJSFunctionWithEnvFromConfigMapAndSecret(cm.Name(), cmEnvKey, sec.Name(), secEnvKey, serverlessv1alpha2.NodeJs14)),
-				teststep.NewHTTPCheck(nodejs14Logger, "NodeJS14 pre update simple check through service", nodejs14Cfg.InClusterURL, poll.WithLogger(nodejs14Logger), fmt.Sprintf("%s-%s", cmEnvValue, secEnvValue)),
-				teststep.UpdateFunction(nodejs14Logger, nodejs14Cfg.Fn, "Update NodeJS14 Function", runtimes.BasicNodeJSFunctionWithCustomDependency("Hello From updated nodejs14", serverlessv1alpha2.NodeJs14)),
-				teststep.NewHTTPCheck(nodejs14Logger, "NodeJS14 post update simple check through service", nodejs14Cfg.InClusterURL, poll.WithLogger(nodejs14Logger), "Hello From updated nodejs14"),
+				teststep.CreateFunction(nodejs14Logger, nodeJS14Fn, "Create NodeJS14 Function", runtimes.NodeJSFunctionWithEnvFromConfigMapAndSecret(cm.Name(), cmEnvKey, sec.Name(), secEnvKey, serverlessv1alpha2.NodeJs14)),
+				teststep.NewHTTPCheck(nodejs14Logger, "NodeJS14 pre update simple check through service", nodeJS14Fn.FunctionURL, poll, fmt.Sprintf("%s-%s", cmEnvValue, secEnvValue)),
+				teststep.UpdateFunction(nodejs14Logger, nodeJS14Fn, "Update NodeJS14 Function", runtimes.BasicNodeJSFunctionWithCustomDependency("Hello From updated nodejs14", serverlessv1alpha2.NodeJs14)),
+				teststep.NewHTTPCheck(nodejs14Logger, "NodeJS14 post update simple check through service", nodeJS14Fn.FunctionURL, poll, "Hello From updated nodejs14"),
 			),
 			step.NewSerialTestRunner(nodejs16Logger, "NodeJS16 test",
-				teststep.CreateFunction(nodejs16Logger, nodejs16Cfg.Fn, "Create NodeJS16 Function", runtimes.BasicNodeJSFunction("Hello from nodejs16", serverlessv1alpha2.NodeJs16)),
-				teststep.NewHTTPCheck(nodejs16Logger, "NodeJS16 pre update simple check through service", nodejs16Cfg.InClusterURL, poll.WithLogger(nodejs16Logger), "Hello from nodejs16"),
-				teststep.UpdateFunction(nodejs16Logger, nodejs16Cfg.Fn, "Update NodeJS16 Function", runtimes.BasicNodeJSFunctionWithCustomDependency("Hello from updated nodejs16", serverlessv1alpha2.NodeJs16)),
-				teststep.NewHTTPCheck(nodejs16Logger, "NodeJS16 post update simple check through service", nodejs16Cfg.InClusterURL, poll.WithLogger(nodejs16Logger), "Hello from updated nodejs16"),
+				teststep.CreateFunction(nodejs16Logger, nodejs16Fn, "Create NodeJS16 Function", runtimes.BasicNodeJSFunction("Hello from nodejs16", serverlessv1alpha2.NodeJs16)),
+				teststep.NewHTTPCheck(nodejs16Logger, "NodeJS16 pre update simple check through service", nodejs16Fn.FunctionURL, poll, "Hello from nodejs16"),
+				teststep.UpdateFunction(nodejs16Logger, nodejs16Fn, "Update NodeJS16 Function", runtimes.BasicNodeJSFunctionWithCustomDependency("Hello from updated nodejs16", serverlessv1alpha2.NodeJs16)),
+				teststep.NewHTTPCheck(nodejs16Logger, "NodeJS16 post update simple check through service", nodejs16Fn.FunctionURL, poll, "Hello from updated nodejs16"),
+			),
+			step.NewSerialTestRunner(java17AlphaJvmLogger, "Java 17 Jvm Alppha test",
+				teststep.CreateFunction(java17AlphaJvmLogger, java17AlphaJvmFn, "Create Java 17 JVM", runtimes.BasicJavaFunction("Hello from java17 jvm", serverlessv1alpha2.Java17JvmAlpha)),
+				teststep.NewHTTPCheck(java17AlphaJvmLogger, "Java17 Jvm pre update simple check through service", java17AlphaJvmFn.FunctionURL, poll, "Hello from java17 jvm"),
+				teststep.UpdateFunction(java17AlphaJvmLogger, java17AlphaJvmFn, "Update Java 17 JVM Function", runtimes.BasicJavaFunction("Hello from update java17 jvm", serverlessv1alpha2.Java17JvmAlpha)),
+				teststep.NewHTTPCheck(java17AlphaJvmLogger, "Java17 Jvm pre update simple check through service", java17AlphaJvmFn.FunctionURL, poll, "Hello from update java17 jvm"),
+				//TODO: Using custom dependencies in java functions doesn't work. I will be fixed.
+				//teststep.UpdateFunction(java17AlphaJvmLogger, java17AlphaJvmFn, "Update Java 17 JVM Function", runtimes.UpdatedDepJavaCsvResponse(serverlessv1alpha2.Java17JvmAlpha)),
+				//teststep.NewHTTPCheck(java17AlphaJvmLogger, "Java 17 JVM post update simple check through service", java17AlphaJvmFn.FunctionURL, poll, runtimes.ExpectedUpdatedResponse),
 			),
 		),
 	), nil

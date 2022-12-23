@@ -1,0 +1,27 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: telemetry-trace-collector
+rules:
+- apiGroups: [""]
+  resources: ["pods", "namespaces"]
+  verbs: ["get", "watch", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: telemetry-trace-collector
+subjects:
+- kind: ServiceAccount
+  name: telemetry-trace-collector
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: telemetry-trace-collector
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: telemetry-trace-collector
+  namespace: {{ .Release.Namespace }}

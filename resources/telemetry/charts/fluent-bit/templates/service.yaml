@@ -1,3 +1,4 @@
+{{- if not .Values.global.operatorManagedFluentBit }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -37,3 +38,4 @@ spec:
   {{- end }}
   selector:
     {{- include "fluent-bit.selectorLabels" . | nindent 4 }}
+{{- end }}

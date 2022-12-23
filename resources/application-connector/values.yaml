@@ -32,10 +32,10 @@ global:
   images:
     central_application_connectivity_validator:
       name: "central-application-connectivity-validator"
-      version: "PR-16290"
+      version: "PR-16414"
     central_application_gateway:
       name: "central-application-gateway"
-      version: "PR-15984"
+      version: "PR-16320"
     busybox:
       name: "busybox"
       version: "1.34.1"

@@ -4,7 +4,10 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strings"
 	"time"
+
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
 
 	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
@@ -15,6 +18,7 @@ import (
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
 	cev2http "github.com/cloudevents/sdk-go/v2/protocol/http"
 
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/builder"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/health"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy"
@@ -54,13 +58,21 @@ type Handler struct {
 	collector metrics.PublishingMetricsCollector
 	// eventTypeCleaner cleans the cloud event type
 	eventTypeCleaner eventtype.Cleaner
-	router           *mux.Router
+	// builds the cloud event according to Subscription v1alpha2 specifications
+	ceBuilder builder.CloudEventBuilder
+	router    *mux.Router
 }
+
+const (
+	originalTypeHeaderName = "ce-original-type"
+)
 
 // NewHandler returns a new HTTP Handler instance.
 func NewHandler(receiver *receiver.HTTPMessageReceiver, sender sender.GenericSender, healthChecker health.Checker, requestTimeout time.Duration,
 	legacyTransformer legacy.RequestToCETransformer, opts *options.Options, subscribedProcessor *subscribed.Processor,
-	logger *logger.Logger, collector metrics.PublishingMetricsCollector, eventTypeCleaner eventtype.Cleaner) *Handler {
+	logger *logger.Logger, collector metrics.PublishingMetricsCollector, eventTypeCleaner eventtype.Cleaner,
+	ceBuilder builder.CloudEventBuilder) *Handler {
+
 	return &Handler{
 		Receiver:            receiver,
 		Sender:              sender,
@@ -72,15 +84,25 @@ func NewHandler(receiver *receiver.HTTPMessageReceiver, sender sender.GenericSen
 		Options:             opts,
 		collector:           collector,
 		eventTypeCleaner:    eventTypeCleaner,
+		ceBuilder:           ceBuilder,
 	}
 }
 
 // setupMux configures the request router for all required endpoints.
 func (h *Handler) setupMux() {
 	router := mux.NewRouter()
+	router.Use(h.collector.MetricsMiddleware())
 	router.HandleFunc(PublishEndpoint, h.maxBytes(h.publishCloudEvents)).Methods(http.MethodPost)
 	router.HandleFunc(LegacyEndpointPattern, h.maxBytes(h.publishLegacyEventsAsCE)).Methods(http.MethodPost)
-	router.HandleFunc(SubscribedEndpointPattern, h.maxBytes(h.SubscribedProcessor.ExtractEventsFromSubscriptions)).Methods(http.MethodGet)
+	if h.Options.EnableNewCRDVersion {
+		router.HandleFunc(
+			SubscribedEndpointPattern,
+			h.maxBytes(h.SubscribedProcessor.ExtractEventsFromSubscriptions)).Methods(http.MethodGet)
+	} else {
+		router.HandleFunc(
+			SubscribedEndpointPattern,
+			h.maxBytes(h.SubscribedProcessor.ExtractEventsFromSubscriptionsV1alpha1)).Methods(http.MethodGet)
+	}
 	router.HandleFunc(health.ReadinessURI, h.maxBytes(h.HealthChecker.ReadinessCheck))
 	router.HandleFunc(health.LivenessURI, h.maxBytes(h.HealthChecker.LivenessCheck))
 	h.router = router
@@ -144,16 +166,30 @@ func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.R
 	}
 
 	eventTypeOriginal := event.Type()
-	eventTypeClean, err := h.eventTypeCleaner.Clean(eventTypeOriginal)
-	if err != nil {
-		h.namedLogger().Error(err)
-		e := writeResponse(writer, http.StatusBadRequest, []byte(err.Error()))
-		if e != nil {
-			h.namedLogger().Error(e)
+	event.SetExtension(originalTypeHeaderName, eventTypeOriginal)
+
+	if h.Options.EnableNewCRDVersion && !strings.HasPrefix(eventTypeOriginal, env.OldEventTypePrefix) {
+		// build a new cloud event instance as per specifications per backend
+		event, err = h.ceBuilder.Build(*event)
+		if err != nil {
+			e := writeResponse(writer, http.StatusBadRequest, []byte(err.Error()))
+			if e != nil {
+				h.namedLogger().Error(e)
+			}
+			return
 		}
-		return
+	} else {
+		eventTypeClean, err := h.eventTypeCleaner.Clean(eventTypeOriginal)
+		if err != nil {
+			h.namedLogger().Error(err)
+			e := writeResponse(writer, http.StatusBadRequest, []byte(err.Error()))
+			if e != nil {
+				h.namedLogger().Error(e)
+			}
+			return
+		}
+		event.SetType(eventTypeClean)
 	}
-	event.SetType(eventTypeClean)
 
 	result, err := h.sendEventAndRecordMetrics(ctx, event, h.Sender.URL(), request.Header)
 	if err != nil {
@@ -200,12 +236,12 @@ func (h *Handler) sendEventAndRecordMetrics(ctx context.Context, event *cev2even
 	result, err := h.Sender.Send(ctx, event)
 	duration := time.Since(start)
 	if err != nil {
-		h.collector.RecordError()
+		h.collector.RecordBackendError()
 		return nil, err
 	}
 	h.collector.RecordEventType(event.Type(), event.Source(), result.HTTPStatus())
-	h.collector.RecordLatency(duration, result.HTTPStatus(), host)
-	h.collector.RecordRequests(result.HTTPStatus(), host)
+	h.collector.RecordBackendLatency(duration, result.HTTPStatus(), host)
+	h.collector.RecordBackendRequests(result.HTTPStatus(), host)
 	return result, nil
 }
 

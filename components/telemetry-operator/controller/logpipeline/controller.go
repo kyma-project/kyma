@@ -22,6 +22,8 @@ import (
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configchecksum"
 	configbuilder "github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
+	utils "github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
+	resources "github.com/kyma-project/kyma/components/telemetry-operator/internal/resources/logpipeline"
 	"github.com/prometheus/client_golang/prometheus"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -39,6 +41,7 @@ type Config struct {
 	FilesConfigMap    types.NamespacedName
 	EnvSecret         types.NamespacedName
 	PipelineDefaults  configbuilder.PipelineDefaults
+	ManageFluentBit   bool
 }
 
 //go:generate mockery --name DaemonSetProber --filename daemon_set_prober.go
@@ -107,6 +110,13 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 		return err
 	}
 
+	if r.config.ManageFluentBit {
+		name := r.config.DaemonSet
+		if err = r.reconcileFluentBit(ctx, name, pipeline); err != nil {
+			return err
+		}
+	}
+
 	if err = r.syncer.syncFluentBitConfig(ctx, pipeline); err != nil {
 		return err
 	}
@@ -125,6 +135,39 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 	}
 
 	return err
+}
+
+func (r *Reconciler) reconcileFluentBit(ctx context.Context, name types.NamespacedName, pipeline *telemetryv1alpha1.LogPipeline) error {
+	if isNotMarkedForDeletion(pipeline) {
+		ds := resources.MakeDaemonSet(name)
+		if err := utils.CreateOrUpdateDaemonSet(ctx, r, ds); err != nil {
+			return fmt.Errorf("failed to reconcile fluent bit daemonset: %w", err)
+		}
+		service := resources.MakeService(name)
+		if err := utils.CreateOrUpdateService(ctx, r, service); err != nil {
+			return fmt.Errorf("failed to reconcile fluent bit service: %w", err)
+		}
+		cm := resources.MakeConfigMap(name)
+		if err := utils.CreateOrUpdateConfigMap(ctx, r, cm); err != nil {
+			return fmt.Errorf("failed to reconcile fluent bit configmap: %w", err)
+		}
+		luaCm := resources.MakeLuaConfigMap(name)
+		if err := utils.CreateOrUpdateConfigMap(ctx, r, luaCm); err != nil {
+			return fmt.Errorf("failed to reconcile fluent bit lua configmap: %w", err)
+		}
+		return nil
+	}
+
+	var allPipelines telemetryv1alpha1.LogPipelineList
+	if err := r.List(ctx, &allPipelines); err != nil {
+		return fmt.Errorf("failed to determine condition for deleting fluent bit: %w", err)
+	}
+
+	if len(allPipelines.Items) == 1 && allPipelines.Items[0].Name == pipeline.Name {
+		return utils.DeleteFluentBit(ctx, r, name)
+	}
+
+	return nil
 }
 
 func (r *Reconciler) updateMetrics(ctx context.Context) error {
@@ -152,7 +195,7 @@ func count(pipelines *telemetryv1alpha1.LogPipelineList, keep keepFunc) int {
 }
 
 func isNotMarkedForDeletion(pipeline *telemetryv1alpha1.LogPipeline) bool {
-	return pipeline.DeletionTimestamp.IsZero()
+	return pipeline.ObjectMeta.DeletionTimestamp.IsZero()
 }
 
 func isUnsupported(pipeline *telemetryv1alpha1.LogPipeline) bool {

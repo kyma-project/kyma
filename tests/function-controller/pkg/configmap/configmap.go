@@ -1,8 +1,6 @@
 package configmap
 
 import (
-	"time"
-
 	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/sirupsen/logrus"
@@ -18,22 +16,18 @@ import (
 )
 
 type ConfigMap struct {
-	resCli      *resource.Resource
-	name        string
-	namespace   string
-	waitTimeout time.Duration
-	log         *logrus.Entry
-	verbose     bool
+	resCli    *resource.Resource
+	name      string
+	namespace string
+	log       *logrus.Entry
 }
 
 func NewConfigMap(name string, c shared.Container) *ConfigMap {
 	return &ConfigMap{
-		resCli:      resource.New(c.DynamicCli, corev1.SchemeGroupVersion.WithResource("configmaps"), c.Namespace, c.Log, c.Verbose),
-		name:        name,
-		namespace:   c.Namespace,
-		waitTimeout: c.WaitTimeout,
-		log:         c.Log,
-		verbose:     c.Verbose,
+		resCli:    resource.New(c.DynamicCli, corev1.SchemeGroupVersion.WithResource("configmaps"), c.Namespace, c.Log, c.Verbose),
+		name:      name,
+		namespace: c.Namespace,
+		log:       c.Log,
 	}
 }
 

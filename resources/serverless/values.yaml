@@ -76,34 +76,40 @@ global:
   images:
     k8s_tools:
       name: "k8s-tools"
-      version: "20221124-ed850f15"
+      version: "v20221213-1840f45a"
       directory: "tpi"
     function_controller:
       name: "function-controller"
-      version: "PR-16183"
+      version: "PR-15910"
     function_webhook:
       name: "function-webhook"
-      version: "PR-16183"
+      version: "PR-15910"
     function_build_init:
       name: "function-build-init"
-      version: "PR-16183"
+      version: "PR-15910"
     function_runtime_nodejs14:
       name: "function-runtime-nodejs14"
-      version: "PR-16259"
+      version: "PR-16398"
     function_runtime_nodejs16:
       name: "function-runtime-nodejs16"
-      version: "PR-16259"
+      version: "PR-16398"
     function_runtime_python39:
       name: "function-runtime-python39"
-      version: "PR-16240"
+      version: "PR-16309"
+    function_runtime_java17_jvm_alpha:
+      name: "function-runtime-java17-jvm-alpha"
+      version: "PR-16428"
     kaniko_executor:
       name: "kaniko-executor"
       version: "1.9.0-4ced14d5"
       directory: "tpi"
     registry:
       name: "registry"
-      version: "2.7.1-4ced14d5"
+      version: "2.8.1-68053f3c"
       directory: "tpi"
+    function_registry_gc:
+      name: "function-registry-gc"
+      version: "PR-16262"
     google_pause:
       name: "pause-amd64"
       version: "3.2"
@@ -111,7 +117,7 @@ global:
   testImages:
     function_controller_test:
       name: "function-controller-test"
-      version: "PR-16282"
+      version: "PR-16428"
     git_server:
       name: "gitserver"
       version: "708f6a87"
@@ -214,7 +220,7 @@ containers:
       functionJaegerServiceEndpoint:
         value: "http://tracing-jaeger-collector.kyma-system.svc.cluster.local:14268/api/traces"
       functionTraceCollectorEndpoint:
-        value: "http://tracing-jaeger-collector.kyma-system.svc.cluster.local:4318/v1/traces"
+        value: "http://telemetry-otlp-traces.kyma-system.svc.cluster.local:4318/v1/traces"
       functionPublisherProxyAddress:
         value: "http://eventing-publisher-proxy.kyma-system.svc.cluster.local/publish"
       functionRequeueDuration:
@@ -302,6 +308,9 @@ docker-registry:
 webhook:
   enabled: true
   fullnameOverride: "serverless-webhook"
+  values:
+    featureFlags:
+      java17AlphaEnabled: false
 
 k3s-tests:
   enabled: false # this chart is installed manually, do not flip this value
