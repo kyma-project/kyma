@@ -84,7 +84,10 @@ const lastorderFunctionYaml = fs.readFileSync(
 
 // This code can be removed when we have release 2.10
 async function redeployFunction(testNamespace) {
-  await k8sApply(lastorderFunctionYaml, testNamespace, true);
+  const lastorderObjs = k8s.loadAllYaml(lastorderFunctionYaml);
+  debug(`Namespace: ${testNamespace}`);
+  debug(`lastorder function: ${lastorderObjs}`);
+  await k8sApply(lastorderObjs, testNamespace, true);
   await waitForFunction('lastorder', testNamespace);
 }
 
