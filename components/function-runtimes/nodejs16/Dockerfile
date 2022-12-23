@@ -1,5 +1,5 @@
-# image base on 16.18.1-alpine3.16
-FROM node@sha256:34d5b3bc90f9beb47e7eb14c17837c9d393eb2524b34c9421b1d675ba05b69b2
+# image base on 16.19.0-alpine3.17
+FROM node@sha256:e427ffd1ba7915ca8d8aeba45806ef3f1f1e6b65ce152b363645cd7428f8d75a
 
 ARG NODE_ENV
 ENV NODE_ENV $NODE_ENV

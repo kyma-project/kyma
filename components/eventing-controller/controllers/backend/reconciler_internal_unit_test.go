@@ -6,6 +6,8 @@ import (
 	"math/rand"
 	"testing"
 
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 
 	"github.com/stretchr/testify/require"
@@ -96,6 +98,57 @@ func TestGetSecretForPublisher(t *testing.T) {
 			}
 			assert.Nil(t, err)
 			assert.Equal(t, tc.expectedSecret, *gotPublisherSecret, "invalid publisher secret")
+		})
+	}
+}
+
+// TestGetSecretForPublisher verifies the successful and failing retrieval
+// of secrets.
+func TestCreateDeleteNATSSecret(t *testing.T) {
+	ctx := context.Background()
+
+	testCases := []struct {
+		name        string
+		givenSecret *corev1.Secret
+	}{
+		{
+			name:        "create secret when secret does not exist",
+			givenSecret: &corev1.Secret{},
+		},
+		{
+			name:        "do not recreate secret when secret exists",
+			givenSecret: constructNATSSecret(),
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			// given
+			r := setup(tc.givenSecret)
+
+			// when
+			err := r.createNATSSecret(ctx)
+
+			// then
+			assert.NoError(t, err)
+			gotSecret := corev1.Secret{}
+			err = r.Client.Get(ctx, client.ObjectKey{Name: natsSecretName, Namespace: kymaSystemNamespace}, &gotSecret)
+			assert.NoError(t, err)
+
+			if tc.givenSecret.ObjectMeta.Name == natsSecretName {
+				assert.Equal(t, gotSecret.Data, tc.givenSecret.Data)
+			} else {
+				assert.NotNil(t, gotSecret.Data)
+			}
+
+			// when
+			err = r.deleteNATSSecret(ctx)
+
+			// then
+			assert.NoError(t, err)
+			gotSecret = corev1.Secret{}
+			err = r.Client.Get(ctx, client.ObjectKey{Name: natsSecretName, Namespace: kymaSystemNamespace}, &gotSecret)
+			assert.True(t, k8serrors.IsNotFound(err))
 		})
 	}
 }
@@ -296,7 +349,7 @@ func getSecretWithTLSSecret(dummyCABundle []byte) *corev1.Secret {
 	return &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      getTestBackendConfig().WebhookSecretName,
-			Namespace: certificateSecretNamespace,
+			Namespace: kymaSystemNamespace,
 		},
 		Data: map[string][]byte{
 			tlsCertField: dummyCABundle,

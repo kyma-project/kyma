@@ -1,5 +1,5 @@
 ---
-title: Telemetry - Application Logs
+title: Application Logs
 ---
 
 Application logs are the historical go-to signals for debugging an application and deriving the internal state of an application. They can be very useful if developers emit the logs wisely (using the right severity level and context) and are essential for observing an application. However, they usually lack contextual information, such as where they were called from. 
@@ -384,10 +384,6 @@ In the next stage, the [Kubernetes filter](https://docs.fluentbit.io/manual/pipe
       "labels":
       {
           "app": "myApp",
-          ...
-      },
-      "annotations":
-      {
           "sidecar.istio.io/inject"=>"true",
           ...
       }
