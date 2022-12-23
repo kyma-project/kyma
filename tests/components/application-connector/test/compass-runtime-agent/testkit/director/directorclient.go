@@ -2,13 +2,15 @@ package director
 
 import (
 	"fmt"
+
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql/graphqlizer"
+	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
+
 	gql "github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/graphql"
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/oauth"
 	gcli "github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/third_party/machinebox/graphql"
-	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -28,6 +30,7 @@ type Client interface {
 	UnregisterFormation(formationName string) error
 	AssignRuntimeToFormation(runtimeId, formationName string) error
 	GetConnectionToken(runtimeID string) (string, string, error)
+	UpdateApplication(id, newDesc string) (string, error)
 }
 
 type directorClient struct {
@@ -143,6 +146,24 @@ func (cc *directorClient) RegisterApplication(appName, displayName string) (stri
 	execFunc := getExecGraphQLFunc[graphql.Application](cc)
 	operationDescription := "register application"
 	successfulLogMessage := fmt.Sprintf("Successfully registered application %s in Director for tenant %s", appName, cc.tenant)
+
+	result, err := executeQuery(queryFunc, execFunc, operationDescription, successfulLogMessage)
+	if err != nil {
+		return "", err
+	}
+	return result.Result.ID, err
+}
+
+func (cc *directorClient) UpdateApplication(id, newDesc string) (string, error) {
+	log.Infof("Updating Application %s", id)
+
+	queryFunc := func() string {
+		return cc.queryProvider.
+			updateApplicationMutation(id, newDesc)
+	}
+	execFunc := getExecGraphQLFunc[graphql.Application](cc)
+	operationDescription := "update application"
+	successfulLogMessage := fmt.Sprintf("Successfully updated application %s in Director for tenant %s", id, cc.tenant)
 
 	result, err := executeQuery(queryFunc, execFunc, operationDescription, successfulLogMessage)
 	if err != nil {

@@ -2,6 +2,10 @@ package nats
 
 import (
 	"context"
+
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/builder"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 	"k8s.io/client-go/tools/cache"
 
 	"github.com/kelseyhightower/envconfig"
@@ -85,7 +89,7 @@ func (c *Commander) Start() error {
 	defer connection.Close()
 
 	// configure the message sender
-	messageSender := jetstream.NewSender(ctx, connection, c.envCfg, c.logger)
+	messageSender := jetstream.NewSender(ctx, connection, c.envCfg, c.opts, c.logger)
 
 	// cluster config
 	k8sConfig := config.GetConfigOrDie()
@@ -122,11 +126,18 @@ func (c *Commander) Start() error {
 	c.namedLogger().Info("Informers are synced successfully")
 
 	// configure event type cleaner
-	eventTypeCleaner := eventtype.NewCleaner(c.envCfg.EventTypePrefix, applicationLister, c.logger)
+	eventTypeCleanerV1 := eventtype.NewCleaner(c.envCfg.EventTypePrefix, applicationLister, c.logger)
+
+	// configure event type cleaner for subscription CRD v1alpha2
+	eventTypeCleaner := cleaner.NewJetStreamCleaner(c.logger)
+
+	// configure cloud event builder for subscription CRD v1alpha2
+	ceBuilder := builder.NewGenericBuilder(env.JetStreamSubjectPrefix, eventTypeCleaner,
+		applicationLister, c.logger)
 
 	// start handler which blocks until it receives a shutdown signal
 	if err := handler.NewHandler(messageReceiver, messageSender, messageSender, c.envCfg.RequestTimeout, legacyTransformer, c.opts,
-		subscribedProcessor, c.logger, c.metricsCollector, eventTypeCleaner).Start(ctx); err != nil {
+		subscribedProcessor, c.logger, c.metricsCollector, eventTypeCleanerV1, ceBuilder).Start(ctx); err != nil {
 		return xerrors.Errorf("failed to start handler for %s : %v", natsCommanderName, err)
 	}
 

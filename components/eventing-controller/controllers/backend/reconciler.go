@@ -952,7 +952,7 @@ func constructNATSSecret() *v1.Secret {
 		`accounts: {
   "$SYS": {
     users: [
-      {user: admin, password: %v}
+      {user: "admin", password: "%v" }
     ]
   },
 }
