@@ -25,6 +25,7 @@ const {
   waitForNamespace,
   switchEventingBackend,
   waitForEventingBackendToReady,
+  waitForFunction,
   printAllSubscriptions,
   printEventingControllerLogs,
   printEventingPublisherProxyLogs,
