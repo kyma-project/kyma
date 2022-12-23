@@ -190,7 +190,6 @@ func (r *Reconciler) tryAcquireLock(ctx context.Context, pipeline *telemetryv1al
 
 	for _, ref := range lock.GetOwnerReferences() {
 		if ref.Name == pipeline.Name && ref.UID == pipeline.UID {
-			// I am the owner
 			return nil
 		}
 	}
