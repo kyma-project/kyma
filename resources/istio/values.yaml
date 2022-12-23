@@ -54,6 +54,7 @@ meshConfig:
         port: 55678
         context:
           - W3C_TRACE_CONTEXT
+          - B3
     - name: envoy
       envoyFileAccessLog:
         path: "/dev/stdout"
