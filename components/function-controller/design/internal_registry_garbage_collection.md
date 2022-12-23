@@ -27,7 +27,7 @@ To utilize this, we need to implement custom logic that will periodically run an
 - Identify current images used by those Functions' runtimes.
 - List all tags for the used images.
 - Identify unused tags and use the Registry API to delete them.
-- List all cache layers on the registry
+- List all cache layers on the registry.
 - Identify unused cache layers and use the Registry API to delete corresponding tags.
 
 One caveat with this approach is that it's possible to miss some images for Functions created and deleted between runs. It's technically possible to simply list _all_ images on the Registry and delete all images that are not currently used by a Function, but this approach has a wider blast radius. The more conservative approach is preferred.
