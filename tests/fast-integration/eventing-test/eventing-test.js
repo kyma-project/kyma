@@ -1,3 +1,4 @@
+const k8s = require('@kubernetes/client-node');
 const axios = require('axios');
 const https = require('https');
 const fs = require('fs');
@@ -35,7 +36,7 @@ const {
   k8sApply,
   deleteK8sPod,
   eventingSubscription, waitForEndpoint, waitForPodStatusWithLabel, waitForPodWithLabelAndCondition,
-  createApiRuleForService, getConfigMap, deleteApiRule,
+  createApiRuleForService, getConfigMap, deleteApiRule, sleep,
 } = require('../utils');
 const {
   eventingMonitoringTest,
@@ -73,6 +74,7 @@ const {
   exposeGrafana,
   unexposeGrafana,
 } = require('../monitoring');
+const { time } = require('console');
 
 // This code can be removed when we have release 2.10
 const lastorderFunctionYaml = fs.readFileSync(
@@ -86,7 +88,9 @@ const lastorderFunctionYaml = fs.readFileSync(
 async function redeployFunction(testNamespace) {
   const lastorderObjs = k8s.loadAllYaml(lastorderFunctionYaml);
   debug(`Namespace: ${testNamespace}`);
-  debug(`lastorder function: ${lastorderObjs}`);
+  debug(`lastorder function: ${lastorderFunctionYaml}`);
+  await k8sDelete(lastorderObjs, testNamespace);
+  await sleep(5*1000);
   await k8sApply(lastorderObjs, testNamespace, true);
   await waitForFunction('lastorder', testNamespace);
 }
