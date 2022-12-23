@@ -85,7 +85,7 @@ func (ph *proxyHandler) ProxyAppConnectorRequests(w http.ResponseWriter, r *http
 
 	applicationClientIDs, err := ph.getCompassMetadataClientIDs(applicationName)
 	if err != nil {
-		httptools.RespondWithError(ph.log.WithTracing(r.Context()).With("handler", handlerName).With("applicationName", applicationName), w, apperrors.Internal("while getting application ClientIds: %s", err))
+		httptools.RespondWithError(ph.log.WithTracing(r.Context()).With("handler", handlerName).With("applicationName", applicationName), w, apperrors.NotFound("while getting application ClientIds: %s", err))
 		return
 	}
 
@@ -108,7 +108,7 @@ func (ph *proxyHandler) ProxyAppConnectorRequests(w http.ResponseWriter, r *http
 func (ph *proxyHandler) getCompassMetadataClientIDs(applicationName string) ([]string, apperrors.AppError) {
 	applicationClientIDs, found := ph.getClientIDsFromCache(applicationName)
 	if !found {
-		err := apperrors.Internal("application with name %s is not found in the cache. Please retry", applicationName)
+		err := apperrors.NotFound("application with name %s is not found in the cache. Please retry", applicationName)
 		return nil, err
 	}
 	return applicationClientIDs, nil
