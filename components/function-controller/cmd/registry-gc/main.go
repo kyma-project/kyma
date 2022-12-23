@@ -32,6 +32,7 @@ func main() {
 		mainLog.Error(err, "while creating registry client")
 		os.Exit(1)
 	}
+	mainLog.Info("removing function images")
 
 	functionImages, err := listRunningFunctionsImages(restConfig)
 	if err != nil {
@@ -45,6 +46,8 @@ func main() {
 			os.Exit(1)
 		}
 	}
+
+	mainLog.Info("removing cached layers")
 	// It's better to get the list of layers _after_ we have deleted the unreferenced tags in the previous step.
 	// This way we know we don't have any unused images on the registry.
 	imageLayers, err := registryClient.ListRegistryImagesLayers()
