@@ -67,6 +67,15 @@ data:
         defaultType: NORMAL
         hideInvolvedObjects: true
   form: |-
+    - path: spec.config
+      widget: KeyValuePair
+      defaultExpanded: false
+    - path: spec.types
+      simple: true
+      widget: SimpleList
+      defaultExpanded: true
+      children:
+        - path: '[]'
     - simple: true
       type: string
       var: service
@@ -100,15 +109,6 @@ data:
         kind: Application
         group: applicationconnector.kyma-project.io
         version: v1alpha1
-    - path: spec.config
-      widget: KeyValuePair
-      defaultExpanded: true
-    - path: spec.types
-      simple: true
-      widget: SimpleList
-      children:
-        - path: '[]'
-      defaultExpanded: true
   list: |-
     - name: status.conditions.status
       source: 'status.ready = false ? "error" : "ready"'
