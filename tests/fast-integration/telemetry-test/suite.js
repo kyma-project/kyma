@@ -23,6 +23,7 @@ const {
   waitForTracePipeline,
   waitForPodWithLabel,
   waitForTracePipelineStatusRunning,
+  waitForTracePipelineStatusPending,
 } = require('./helpers');
 
 
@@ -330,16 +331,16 @@ describe('Telemetry Operator', function() {
 
   context('Configurable Tracing', function() {
     context('TracePipeline', function() {
-      const pipeline = loadTestData('tracepipeline-output-otlp-secret-ref.yaml');
-      const pipelineName = pipeline[0].metadata.name;
+      const firstPipeline = loadTestData('tracepipeline-output-otlp-secret-ref-1.yaml');
+      const firstPipelineName = firstPipeline[0].metadata.name;
 
-      it(`Should create TracePipeline '${pipelineName}'`, async function() {
-        await k8sApply(pipeline);
-        await waitForTracePipeline(pipelineName);
+      it(`Should create TracePipeline '${firstPipelineName}'`, async function() {
+        await k8sApply(firstPipeline);
+        await waitForTracePipeline(firstPipelineName);
       });
 
       it('Should be \'Running\'', async function() {
-        await waitForTracePipelineStatusRunning(pipelineName);
+        await waitForTracePipelineStatusRunning(firstPipelineName);
       });
 
       it('Should have ready trace collector pods', async () => {
@@ -358,8 +359,28 @@ describe('Telemetry Operator', function() {
         assert.equal(secret.data.OTLP_ENDPOINT, 'aHR0cDovL2Fub3RoZXItZW5kcG9pbnQ=');
       });
 
-      it(`Should delete TracePipeline '${pipelineName}'`, async function() {
-        await k8sDelete(pipeline);
+      const secondPipeline = loadTestData('tracepipeline-output-otlp-secret-ref-2.yaml');
+      const secondPipelineName = secondPipeline[0].metadata.name;
+      it(`Should create second TracePipeline '${secondPipelineName}'`, async function() {
+        await k8sApply(secondPipeline);
+        await waitForTracePipeline(secondPipelineName);
+      });
+
+      it('Second pipeline should be \'Pending\', first pipeline should be \'Running\'', async function() {
+        await waitForTracePipelineStatusPending(secondPipelineName);
+        await waitForLogPipelineStatusRunning(firstPipeline);
+      });
+
+      it(`Should delete first TracePipeline '${secondPipelineName}'`, async function() {
+        await k8sDelete(firstPipeline);
+      });
+
+      it('Second pipeline should be \'Running\'', async function() {
+        await waitForLogPipelineStatusRunning(secondPipelineName);
+      });
+
+      it(`Should delete second TracePipeline '${secondPipelineName}'`, async function() {
+        await k8sDelete(secondPipeline);
       });
     });
   });

@@ -1,10 +1,10 @@
 module.exports = {
   loadTestData,
-  patchSecret,
   waitForLogPipelineStatusRunning,
   waitForTracePipeline,
   waitForPodWithLabel,
   waitForTracePipelineStatusRunning,
+  waitForTracePipelineStatusPending,
 };
 
 const k8s = require('@kubernetes/client-node');
@@ -46,6 +46,10 @@ function waitForLogPipelineStatusCondition(name, lastConditionType, timeout) {
 
 function waitForTracePipelineStatusRunning(name) {
   return waitForTracePipelineStatusCondition(name, 'Running', 180000);
+}
+
+function waitForTracePipelineStatusPending(name) {
+  return waitForTracePipelineStatusCondition(name, 'Pending', 180000);
 }
 
 function waitForTracePipelineStatusCondition(name, lastConditionType, timeout) {
