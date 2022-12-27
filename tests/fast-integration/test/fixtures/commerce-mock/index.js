@@ -4,6 +4,7 @@ const path = require('path');
 const {expect, assert} = require('chai');
 const https = require('https');
 const axios = require('axios').default;
+const crypto = require('crypto');
 const httpsAgent = new https.Agent({
   rejectUnauthorized: false, // curl -k
 });
@@ -274,7 +275,8 @@ async function checkEventTracing(targetNamespace = 'test', res) {
   expect(res.data).to.have.nested.property('podName');
 
   // Extract traceId from response
-  const traceId = getTraceId['x-b3-traceid'];
+  debug('I am invoked');
+  const traceId = getTraceId(res.data);
 
   // Define expected trace data
   const correctTraceProcessSequence = [
@@ -320,6 +322,9 @@ async function checkInClusterEventTracing(targetNamespace) {
   expect(res.data).to.have.nested.property('podName');
 
   const traceId = await getTraceId(res.data);
+  console.log('sssss');
+  console.log(res.data.event.headers);
+  // const traceId = res.data.event.headers['x-b3-traceid'];
 
 
   // Define expected trace data
@@ -355,7 +360,9 @@ async function checkTrace(traceId, expectedTraceProcessSequence) {
   expect(traceData['spans'].length).to.be.gte(expectedTraceProcessSequence.length);
 
   // generate DAG for trace spans
+  console.log('trace data', traceData);
   const traceDAG = await getTraceDAG(traceData);
+  console.log('DAG', traceDAG);
   expect(traceDAG).to.have.length(1);
 
   // log the actual trace
@@ -773,10 +780,18 @@ async function sendInClusterEventWithRetry(mockHost, eventId, encoding, eventTyp
   }
 
   await retryPromise(async () => {
+    const version = Buffer.alloc(1).toString('hex');
+    const traceId = crypto.randomBytes(16).toString('hex');
+    const id = crypto.randomBytes(8).toString('hex');
+    const flags = '01';
+    const traceParentHeader = `${version}-${traceId}-${id}-${flags}`;
     const response = await axios.post(`https://${mockHost}`, eventData, {
       params: {
         send: true,
         encoding: encoding,
+      },
+      headers: {
+        'traceparent': traceParentHeader,
       },
     });
 
@@ -955,4 +970,5 @@ module.exports = {
   getVirtualServiceHost,
   sendInClusterEventWithRetry,
   ensureInClusterEventReceivedWithRetry,
+  prepareFunction,
 };
