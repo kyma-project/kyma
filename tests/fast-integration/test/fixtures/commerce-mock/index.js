@@ -1,9 +1,10 @@
 const k8s = require('@kubernetes/client-node');
 const fs = require('fs');
 const path = require('path');
-const {expect} = require('chai');
+const {expect, assert} = require('chai');
 const https = require('https');
 const axios = require('axios').default;
+const crypto = require('crypto');
 const httpsAgent = new https.Agent({
   rejectUnauthorized: false, // curl -k
 });
@@ -252,12 +253,29 @@ async function sendCloudEventBinaryModeAndCheckResponse(backendType = 'nats', mo
   return await sendEventAndCheckResponse('cloud event binary', body, params, mockNamespace);
 }
 
+async function getTraceId(data) {
+  // Extract traceId from response
+  // Second part of traceparent header contains trace-id. See https://www.w3.org/TR/trace-context/#traceparent-header
+  const traceParent = data.event.headers['traceparent'];
+  debug(`Traceparent header is: ${traceParent}`);
+  let traceId;
+  if (traceParent == null) {
+    debug('traceID using traceparent is not present. Trying to fetch traceID using b3');
+    traceId = data.event.headers['x-b3-traceid'];
+    assert.isNotEmpty(traceId, 'neither traceparent or b3 header is present in the response header');
+  } else {
+    traceId = data.event.headers['traceparent'].split('-')[1];
+  }
+  debug(`got the traceId: ${traceId}`);
+  return traceId;
+}
+
 async function checkEventTracing(targetNamespace = 'test', res) {
-  expect(res.data).to.have.nested.property('event.headers.x-b3-traceid');
+  expect(res.data).to.have.nested.property('event.headers.traceparent');
   expect(res.data).to.have.nested.property('podName');
 
   // Extract traceId from response
-  const traceId = res.data.event.headers['x-b3-traceid'];
+  const traceId = getTraceId(res.data);
 
   // Define expected trace data
   const correctTraceProcessSequence = [
@@ -302,9 +320,7 @@ async function checkInClusterEventTracing(targetNamespace) {
   expect(res.data).to.have.nested.property('event.headers.traceparent');
   expect(res.data).to.have.nested.property('podName');
 
-  // Extract traceId from response
-  // Second part of traceparent header contains trace-id. See https://www.w3.org/TR/trace-context/#traceparent-header
-  const traceId = res.data.event.headers['traceparent'].split('-')[1];
+  const traceId = await getTraceId(res.data);
 
   // Define expected trace data
   const correctTraceProcessSequence = [
@@ -748,6 +764,15 @@ async function checkInClusterEventDelivery(targetNamespace, testSubscriptionV1Al
   await checkInClusterLegacyEvent(targetNamespace, testSubscriptionV1Alpha2);
 }
 
+async function generateTraceParentHeader() {
+  const version = Buffer.alloc(1).toString('hex');
+  const traceId = crypto.randomBytes(16).toString('hex');
+  const id = crypto.randomBytes(8).toString('hex');
+  const flags = '01';
+  const traceParentHeader = `${version}-${traceId}-${id}-${flags}`;
+  return traceParentHeader;
+}
+
 // send event using function query parameter send=true
 async function sendInClusterEventWithRetry(mockHost, eventId, encoding, eventType='', retriesLeft = 10) {
   const eventData = {id: eventId};
@@ -757,10 +782,14 @@ async function sendInClusterEventWithRetry(mockHost, eventId, encoding, eventTyp
   }
 
   await retryPromise(async () => {
+    const traceParentHeader = await generateTraceParentHeader();
     const response = await axios.post(`https://${mockHost}`, eventData, {
       params: {
         send: true,
         encoding: encoding,
+      },
+      headers: {
+        'traceparent': traceParentHeader,
       },
     });
 
@@ -939,4 +968,5 @@ module.exports = {
   getVirtualServiceHost,
   sendInClusterEventWithRetry,
   ensureInClusterEventReceivedWithRetry,
+  prepareFunction,
 };
