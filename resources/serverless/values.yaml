@@ -106,7 +106,7 @@ global:
       directory: "tpi"
     function_registry_gc:
       name: "function-registry-gc"
-      version: "PR-16262"
+      version: "PR-16425"
     google_pause:
       name: "pause-amd64"
       version: "3.2"
@@ -114,7 +114,7 @@ global:
   testImages:
     function_controller_test:
       name: "function-controller-test"
-      version: "PR-16354"
+      version: "PR-16448"
     git_server:
       name: "gitserver"
       version: "708f6a87"
