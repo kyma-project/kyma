@@ -17,14 +17,14 @@ const {
   getVirtualServiceHost,
   sendInClusterEventWithRetry,
   ensureInClusterEventReceivedWithRetry,
-  prepareFunction,
+  // prepareFunction,
 } = require('../test/fixtures/commerce-mock');
 const {
   getEventingBackend,
   waitForNamespace,
   switchEventingBackend,
   waitForEventingBackendToReady,
-  waitForFunction,
+  // waitForFunction,
   printAllSubscriptions,
   printEventingControllerLogs,
   printEventingPublisherProxyLogs,
@@ -34,7 +34,7 @@ const {
   k8sApply,
   deleteK8sPod,
   eventingSubscription, waitForEndpoint, waitForPodStatusWithLabel, waitForPodWithLabelAndCondition,
-  createApiRuleForService, getConfigMap, deleteApiRule, sleep,
+  createApiRuleForService, getConfigMap, deleteApiRule,
 } = require('../utils');
 const {
   eventingMonitoringTest,
@@ -75,14 +75,14 @@ const {
 
 
 // This code can be removed when we have release 2.10
-async function redeployFunction(testNamespace) {
-  const lastorderObjs = prepareFunction('central-app-gateway');
+// async function redeployFunction(testNamespace) {
+//   const lastorderObjs = prepareFunction('central-app-gateway');
 
-  await k8sDelete(lastorderObjs, testNamespace);
-  await sleep(5*1000);
-  await k8sApply(lastorderObjs, testNamespace, true);
-  await waitForFunction('lastorder', testNamespace);
-}
+//   await k8sDelete(lastorderObjs, testNamespace);
+//   await sleep(5*1000);
+//   await k8sApply(lastorderObjs, testNamespace, true);
+//   await waitForFunction('lastorder', testNamespace);
+// }
 
 describe('Eventing tests', function() {
   this.timeout(timeoutTime);
@@ -113,9 +113,9 @@ describe('Eventing tests', function() {
   // eventingTestSuite - Runs Eventing tests
   function eventingTestSuite(backend, isSKR, testCompassFlow=false) {
     // This code can be removed when we have release 2.10
-    it('redeploys the function to use the latest code', async function() {
-      await redeployFunction(testNamespace);
-    });
+    // it('redeploys the function to use the latest code', async function() {
+    //   await redeployFunction(testNamespace);
+    // });
 
     it('lastorder function should be reachable through secured API Rule', async function() {
       await checkFunctionResponse(testNamespace, mockNamespace);

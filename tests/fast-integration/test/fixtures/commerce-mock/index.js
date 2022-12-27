@@ -275,7 +275,6 @@ async function checkEventTracing(targetNamespace = 'test', res) {
   expect(res.data).to.have.nested.property('podName');
 
   // Extract traceId from response
-  debug('I am invoked');
   const traceId = getTraceId(res.data);
 
   // Define expected trace data
@@ -765,6 +764,15 @@ async function checkInClusterEventDelivery(targetNamespace, testSubscriptionV1Al
   await checkInClusterLegacyEvent(targetNamespace, testSubscriptionV1Alpha2);
 }
 
+async function generateTraceParentHeader() {
+  const version = Buffer.alloc(1).toString('hex');
+  const traceId = crypto.randomBytes(16).toString('hex');
+  const id = crypto.randomBytes(8).toString('hex');
+  const flags = '01';
+  const traceParentHeader = `${version}-${traceId}-${id}-${flags}`;
+  return traceParentHeader;
+}
+
 // send event using function query parameter send=true
 async function sendInClusterEventWithRetry(mockHost, eventId, encoding, eventType='', retriesLeft = 10) {
   const eventData = {id: eventId};
@@ -774,11 +782,7 @@ async function sendInClusterEventWithRetry(mockHost, eventId, encoding, eventTyp
   }
 
   await retryPromise(async () => {
-    const version = Buffer.alloc(1).toString('hex');
-    const traceId = crypto.randomBytes(16).toString('hex');
-    const id = crypto.randomBytes(8).toString('hex');
-    const flags = '01';
-    const traceParentHeader = `${version}-${traceId}-${id}-${flags}`;
+    const traceParentHeader = generateTraceParentHeader();
     const response = await axios.post(`https://${mockHost}`, eventData, {
       params: {
         send: true,
