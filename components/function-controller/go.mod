@@ -42,6 +42,7 @@ require (
 require (
 	github.com/docker/distribution v2.8.1+incompatible
 	github.com/docker/docker v20.10.21+incompatible
+	github.com/go-logr/logr v1.2.3
 	github.com/opencontainers/go-digest v1.0.0-rc1
 )
 
@@ -56,7 +57,6 @@ require (
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/docker/libtrust v0.0.0-20160708172513-aabc10ec26b7 // indirect
 	github.com/evanphx/json-patch v4.12.0+incompatible // indirect
-	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
