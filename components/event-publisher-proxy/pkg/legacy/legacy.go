@@ -14,7 +14,6 @@ import (
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/internal"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy/api"
 	apiv1 "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy/api"
 )
 
@@ -29,9 +28,9 @@ const (
 )
 
 type RequestToCETransformer interface {
-	ExtractPublishRequestData(request *http.Request) (*api.PublishRequestData, *api.PublishEventResponses, error)
-	ExtractCEFromLegacyPublishRequestData(publishData *api.PublishRequestData) (*cev2event.Event, *api.PublishEventResponses, error)
-	TransformLegacyRequestsToCE(writer http.ResponseWriter, publishData *api.PublishRequestData) (*cev2event.Event, string)
+	ExtractPublishRequestData(request *http.Request) (*apiv1.PublishRequestData, *apiv1.PublishEventResponses, error)
+	ExtractCEFromLegacyPublishRequestData(publishData *apiv1.PublishRequestData) (*cev2event.Event, *apiv1.PublishEventResponses, error)
+	TransformLegacyRequestsToCE(writer http.ResponseWriter, publishData *apiv1.PublishRequestData) (*cev2event.Event, string)
 	TransformsCEResponseToLegacyResponse(http.ResponseWriter, int, *cev2event.Event, string)
 }
 
@@ -84,11 +83,11 @@ func (t *Transformer) checkParameters(parameters *apiv1.PublishEventParametersV1
 }
 
 // ExtractCEFromLegacyPublishRequestData extracts the cloudevent from the given legacy event request.
-func (t *Transformer) ExtractCEFromLegacyPublishRequestData(publishData *api.PublishRequestData) (*cev2event.Event, *api.PublishEventResponses, error) {
+func (t *Transformer) ExtractCEFromLegacyPublishRequestData(publishData *apiv1.PublishRequestData) (*cev2event.Event, *apiv1.PublishEventResponses, error) {
 	// clean the application name form non-alphanumeric characters
 	source := publishData.ApplicationName
 	if !application.IsCleanName(source) {
-		err := errors.New("application name should be cleaned from none-alphanumeric characters")
+		err := errors.New("application name should be cleaned from non-alphanumeric characters")
 		return nil, ErrorResponse(http.StatusInternalServerError, err), err
 	}
 
@@ -102,7 +101,7 @@ func (t *Transformer) ExtractCEFromLegacyPublishRequestData(publishData *api.Pub
 }
 
 // ExtractPublishRequestData extracts the data for publishing event from the given legacy event request.
-func (t *Transformer) ExtractPublishRequestData(request *http.Request) (*api.PublishRequestData, *api.PublishEventResponses, error) {
+func (t *Transformer) ExtractPublishRequestData(request *http.Request) (*apiv1.PublishRequestData, *apiv1.PublishEventResponses, error) {
 	// parse request body to PublishRequestV1
 	if request.Body == nil || request.ContentLength == 0 {
 		resp := ErrorResponseBadRequest(ErrorMessageBadPayload)
@@ -127,7 +126,7 @@ func (t *Transformer) ExtractPublishRequestData(request *http.Request) (*api.Pub
 		return nil, checkResp, errors.New(checkResp.Error.Message)
 	}
 
-	publishRequestData := &api.PublishRequestData{
+	publishRequestData := &apiv1.PublishRequestData{
 		PublishEventParameters: parameters,
 		ApplicationName:        ParseApplicationNameFromPath(request.URL.Path),
 		URLPath:                request.URL.Path,
@@ -139,7 +138,7 @@ func (t *Transformer) ExtractPublishRequestData(request *http.Request) (*api.Pub
 
 // TransformLegacyRequestsToCE transforms the legacy event to cloudevent from the given request.
 // It also returns the original event-type without cleanup as the second return type.
-func (t *Transformer) TransformLegacyRequestsToCE(writer http.ResponseWriter, publishData *api.PublishRequestData) (*cev2event.Event, string) {
+func (t *Transformer) TransformLegacyRequestsToCE(writer http.ResponseWriter, publishData *apiv1.PublishRequestData) (*cev2event.Event, string) {
 	// clean the application name form non-alphanumeric characters
 	appName := publishData.ApplicationName
 	if appObj, err := t.applicationLister.Get(appName); err == nil {

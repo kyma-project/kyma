@@ -3,9 +3,12 @@ package legacy
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	cev2event "github.com/cloudevents/sdk-go/v2/event"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -16,7 +19,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application/fake"
 	legacyapi "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy/api"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy/legacytest"
-	. "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
+	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 )
 
 const (
@@ -132,22 +135,22 @@ func applicationTypeLabel(label string) map[string]string {
 }
 
 func TestConvertPublishRequestToCloudEvent(t *testing.T) {
-	givenEventID := EventID
-	givenApplicationName := ApplicationName
-	givenEventTypePrefix := Prefix
+	givenEventID := testingutils.EventID
+	givenApplicationName := testingutils.ApplicationName
+	givenEventTypePrefix := testingutils.Prefix
 	givenTimeNow := time.Now().Format(time.RFC3339)
-	givenLegacyEventVersion := EventVersion
+	givenLegacyEventVersion := testingutils.EventVersion
 	givenPublishReqParams := &legacyapi.PublishEventParametersV1{
 		PublishrequestV1: legacyapi.PublishRequestV1{
 			EventID:          givenEventID,
 			EventType:        eventTypeMultiSegment,
 			EventTime:        givenTimeNow,
 			EventTypeVersion: givenLegacyEventVersion,
-			Data:             EventData,
+			Data:             testingutils.EventData,
 		},
 	}
 
-	wantBEBNamespace := MessagingNamespace
+	wantBEBNamespace := testingutils.MessagingNamespace
 	wantEventID := givenEventID
 	wantEventType := formatEventType(givenEventTypePrefix, givenApplicationName, eventTypeMultiSegmentCombined, givenLegacyEventVersion)
 	wantTimeNowFormatted, _ := time.Parse(time.RFC3339, givenTimeNow)
@@ -176,8 +179,8 @@ func TestCombineEventTypeSegments(t *testing.T) {
 	}{
 		{
 			name:           "event-type with two segments",
-			givenEventType: EventName,
-			wantEventType:  EventName,
+			givenEventType: testingutils.EventName,
+			wantEventType:  testingutils.EventName,
 		},
 		{
 			name:           "event-type with more than two segments",
@@ -232,6 +235,198 @@ func TestRemoveNonAlphanumeric(t *testing.T) {
 
 			gotEventType := removeNonAlphanumeric(tc.givenEventType)
 			assert.Equal(t, tc.wantEventType, gotEventType)
+		})
+	}
+}
+
+func TestExtractPublishRequestData(t *testing.T) {
+	const givenVersion = "v1"
+	const givenPrefix = "pre1.pre2.pre3"
+	const givenApplication = "app"
+	const givenEventName = "object.do"
+
+	testCases := []struct {
+		name                   string
+		givenLegacyRequestFunc func() (*http.Request, error)
+		wantPublishRequestData legacyapi.PublishRequestData
+		wantErrorResponse      legacyapi.PublishEventResponses
+		wantError              bool
+	}{
+		{
+			name: "should fail if request body is empty",
+			givenLegacyRequestFunc: func() (*http.Request, error) {
+				return legacytest.InvalidLegacyRequestWithEmptyBody(givenVersion, givenApplication)
+			},
+			wantError:         true,
+			wantErrorResponse: *ErrorResponseBadRequest(ErrorMessageBadPayload),
+		},
+		{
+			name: "should fail if request body has missing parameters",
+			givenLegacyRequestFunc: func() (*http.Request, error) {
+				return legacytest.InvalidLegacyRequest(givenVersion, givenApplication, givenEventName)
+			},
+			wantError:         true,
+			wantErrorResponse: *ErrorResponseMissingFieldEventType(),
+		},
+		{
+			name: "should succeed if request body is valid",
+			givenLegacyRequestFunc: func() (*http.Request, error) {
+				return legacytest.ValidLegacyRequest(givenVersion, givenApplication, givenEventName)
+			},
+			wantError: false,
+			wantPublishRequestData: legacyapi.PublishRequestData{
+				PublishEventParameters: &legacyapi.PublishEventParametersV1{
+					PublishrequestV1: legacyapi.PublishRequestV1{
+						EventType:        "object.do",
+						EventTypeVersion: "v1",
+						EventTime:        "2020-04-02T21:37:00Z",
+						Data:             "{\"legacy\":\"event\"}",
+					},
+				},
+				ApplicationName: "app",
+				URLPath:         "/app/v1/events",
+			},
+		},
+	}
+
+	for _, tt := range testCases {
+		tc := tt
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			// given
+			ctx, cancel := context.WithCancel(context.Background())
+			defer cancel()
+
+			request, err := tc.givenLegacyRequestFunc()
+			require.NoError(t, err)
+			// set expected header
+			tc.wantPublishRequestData.Headers = request.Header
+
+			app := applicationtest.NewApplication(givenApplication, applicationTypeLabel(""))
+			appLister := fake.NewApplicationListerOrDie(ctx, app)
+			transformer := NewTransformer("test", givenPrefix, appLister)
+
+			// when
+			publishData, errResp, err := transformer.ExtractPublishRequestData(request)
+
+			// then
+			if tc.wantError {
+				require.Error(t, err)
+				require.Equal(t, tc.wantErrorResponse, *errResp)
+			} else {
+				require.NoError(t, err)
+				require.Nil(t, errResp)
+				require.Equal(t, tc.wantPublishRequestData, *publishData)
+			}
+		})
+	}
+}
+
+func TestExtractCEFromLegacyPublishRequestData(t *testing.T) {
+	const givenVersion = "v1"
+	const givenPrefix = "pre1.pre2.pre3"
+	const givenApplication = "app"
+	const givenEventName = "object.do"
+
+	testCases := []struct {
+		name                    string
+		givenPublishRequestData legacyapi.PublishRequestData
+		wantCloudEventFunc      func() (cev2event.Event, error)
+		wantErrorResponse       legacyapi.PublishEventResponses
+		wantError               bool
+		wantEventType           string
+		wantSource              string
+		wantData                string
+		wantEventID             string
+	}{
+		{
+			name: "should fail if application name is not cleaned from non-alphanumeric characters",
+			givenPublishRequestData: legacyapi.PublishRequestData{
+				PublishEventParameters: &legacyapi.PublishEventParametersV1{},
+				ApplicationName:        "app^^*&",
+				URLPath:                "/app/v1/events",
+			},
+			wantError: true,
+			wantErrorResponse: legacyapi.PublishEventResponses{
+				Error: &legacyapi.Error{
+					Status:  http.StatusInternalServerError,
+					Message: "application name should be cleaned from non-alphanumeric characters",
+				},
+			},
+		},
+		{
+			name: "should succeed if publish data is valid",
+			givenPublishRequestData: legacyapi.PublishRequestData{
+				PublishEventParameters: &legacyapi.PublishEventParametersV1{
+					PublishrequestV1: legacyapi.PublishRequestV1{
+						EventID:          testingutils.EventID,
+						EventType:        givenEventName,
+						EventTypeVersion: givenVersion,
+						EventTime:        "2020-04-02T21:37:00Z",
+						Data:             map[string]string{"key": "value"},
+					},
+				},
+				ApplicationName: givenApplication,
+				URLPath:         "/app/v1/events",
+			},
+			wantError:     false,
+			wantEventID:   testingutils.EventID,
+			wantEventType: "object.do.v1",
+			wantSource:    givenApplication,
+			wantData:      `{"key":"value"}`,
+		},
+		{
+			name: "should set new event ID when not provided",
+			givenPublishRequestData: legacyapi.PublishRequestData{
+				PublishEventParameters: &legacyapi.PublishEventParametersV1{
+					PublishrequestV1: legacyapi.PublishRequestV1{
+						EventType:        givenEventName,
+						EventTypeVersion: givenVersion,
+						EventTime:        "2020-04-02T21:37:00Z",
+						Data:             map[string]string{"key": "value"},
+					},
+				},
+				ApplicationName: givenApplication,
+				URLPath:         "/app/v1/events",
+			},
+			wantError:     false,
+			wantEventType: "object.do.v1",
+			wantSource:    givenApplication,
+			wantData:      `{"key":"value"}`,
+		},
+	}
+
+	for _, tt := range testCases {
+		tc := tt
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			ctx, cancel := context.WithCancel(context.Background())
+			defer cancel()
+			app := applicationtest.NewApplication(givenApplication, applicationTypeLabel(""))
+			appLister := fake.NewApplicationListerOrDie(ctx, app)
+			transformer := NewTransformer("test", givenPrefix, appLister)
+
+			// when
+			ceEvent, errResp, err := transformer.ExtractCEFromLegacyPublishRequestData(&tc.givenPublishRequestData)
+
+			// then
+			if tc.wantError {
+				require.Error(t, err)
+				require.Equal(t, tc.wantErrorResponse, *errResp)
+			} else {
+				require.NoError(t, err)
+				require.Nil(t, errResp)
+
+				require.Equal(t, tc.wantEventType, ceEvent.Type())
+				require.Equal(t, tc.wantSource, ceEvent.Source())
+				require.Equal(t, tc.wantData, string(ceEvent.Data()))
+				require.NotEmpty(t, ceEvent.ID())
+				if tc.wantEventID != "" {
+					require.Equal(t, tc.wantEventID, ceEvent.ID())
+				}
+			}
 		})
 	}
 }

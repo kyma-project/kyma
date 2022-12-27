@@ -63,6 +63,7 @@ type Handler struct {
 	// builds the cloud event according to Subscription v1alpha2 specifications
 	ceBuilder          builder.CloudEventBuilder
 	router             *mux.Router
+	activeBackend      string
 	OldEventTypePrefix string
 }
 

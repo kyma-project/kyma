@@ -51,3 +51,8 @@ func ValidLegacyRequestOrDie(t *testing.T, version, appname, eventType string) *
 	assert.NoError(t, err)
 	return r
 }
+
+func InvalidLegacyRequestWithEmptyBody(version, appname string) (*http.Request, error) {
+	url := fmt.Sprintf("http://localhost:8080/%s/%s/events", appname, version)
+	return http.NewRequest(http.MethodPost, url, nil)
+}
