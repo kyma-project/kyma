@@ -1,7 +1,5 @@
 const axios = require('axios');
 const https = require('https');
-const fs = require('fs');
-const path = require('path');
 const httpsAgent = new https.Agent({
   rejectUnauthorized: false, // curl -k
 });

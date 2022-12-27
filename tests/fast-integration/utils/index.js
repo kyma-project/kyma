@@ -1742,13 +1742,13 @@ async function getTraceDAG(trace) {
   // Find root spans which are not child of any other span
   const rootSpans = [];
   for (const span of trace['spans']) {
-      if (span['references'].length === 0) {
-          rootSpans.push(span);
-      }
+    if (span['references'].length === 0) {
+      rootSpans.push(span);
+    }
 
-      if (!trace['spans'].find((s) => s['spanID'] === span['references'][0]['spanID'])) {
-          rootSpans.push(span);
-      }
+    if (!trace['spans'].find((s) => s['spanID'] === span['references'][0]['spanID'])) {
+      rootSpans.push(span);
+    }
   }
 
   // Find and attach child spans for each root span

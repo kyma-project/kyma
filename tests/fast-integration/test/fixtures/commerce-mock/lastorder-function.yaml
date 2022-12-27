@@ -127,11 +127,7 @@ spec:
           console.log("Printing event header: ", event.headers);
           return {event:inAppEvent[event.extensions.request.query.inappevent], podName: process.env.HOSTNAME};
         } else if (event["ce-type"] && event["ce-type"].includes("order.received")){
-          //console.log("Got in-app event:", event);
-          //console.log("Printing event 222: ", JSON.stringify(event));
-          // console.dir(event);
-          console.log(event.extensions.request.rawHeaders)
-          console.log("Printing event header: 2222", event.headers);
+          console.log("Got in-app event:", event.data);
           inAppEvent[event.data.id] = { ...cloudEventHeaders(event), shipped:true, ...event.data, headers:event.extensions.request.headers };
         } else if (event["ce-type"] && (event["ce-type"].includes("order.created") || event.data.save)) {
           console.log("Order created event:", event.data)
