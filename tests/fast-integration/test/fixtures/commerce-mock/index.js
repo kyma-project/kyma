@@ -782,7 +782,7 @@ async function sendInClusterEventWithRetry(mockHost, eventId, encoding, eventTyp
   }
 
   await retryPromise(async () => {
-    const traceParentHeader = generateTraceParentHeader();
+    const traceParentHeader = await generateTraceParentHeader();
     const response = await axios.post(`https://${mockHost}`, eventData, {
       params: {
         send: true,
