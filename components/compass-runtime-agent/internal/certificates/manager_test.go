@@ -15,7 +15,7 @@ import (
 
 const (
 	clusterCertSecretName      = "cluster-certificate"
-	clusterCertSecretNamespace = "kyma-integration"
+	clusterCertSecretNamespace = "kyma-system"
 	caCertSecretName           = "ca-cert"
 	caCertSecretNamespace      = "istio-system"
 )
