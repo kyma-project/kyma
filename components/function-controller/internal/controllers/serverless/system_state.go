@@ -2,10 +2,9 @@ package serverless
 
 import (
 	"fmt"
+	"k8s.io/utils/pointer"
 	"path"
 	"strings"
-
-	"k8s.io/utils/pointer"
 
 	fnRuntime "github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
 	"github.com/kyma-project/kyma/components/function-controller/internal/git"

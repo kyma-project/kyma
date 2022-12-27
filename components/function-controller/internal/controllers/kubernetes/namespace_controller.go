@@ -14,23 +14,23 @@ import (
 )
 
 type NamespaceReconciler struct {
-	Log               *zap.SugaredLogger
-	client            client.Client
-	config            Config
-	configMapSvc      ConfigMapService
-	secretSvc         SecretService
-	serviceAccountSvc ServiceAccountService
+	Log                *zap.SugaredLogger
+	client             client.Client
+	config             Config
+	configMapSvc       ConfigMapService
+	secretSvc          SecretService
+	serviceAccountSvc  ServiceAccountService
 }
 
 func NewNamespace(client client.Client, log *zap.SugaredLogger, config Config,
 	configMapSvc ConfigMapService, secretSvc SecretService, serviceAccountSvc ServiceAccountService) *NamespaceReconciler {
 	return &NamespaceReconciler{
-		client:            client,
-		Log:               log,
-		config:            config,
-		configMapSvc:      configMapSvc,
-		secretSvc:         secretSvc,
-		serviceAccountSvc: serviceAccountSvc,
+		client:             client,
+		Log:                log,
+		config:             config,
+		configMapSvc:       configMapSvc,
+		secretSvc:          secretSvc,
+		serviceAccountSvc:  serviceAccountSvc,
 	}
 }
 

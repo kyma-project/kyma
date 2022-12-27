@@ -15,7 +15,7 @@ import (
 var one int32 = 1
 var two int32 = 2
 
-func ValidV1Alpha2Function() serverlessv1alpha2.Function {
+func ValidV1Alpha2Function(t *testing.T) string {
 	f := serverlessv1alpha2.Function{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       serverlessv1alpha2.FunctionKind,
@@ -62,11 +62,8 @@ func ValidV1Alpha2Function() serverlessv1alpha2.Function {
 			},
 			Runtime: serverlessv1alpha2.Python39,
 		}}
-	return f
-}
 
-func Marshall(t *testing.T, obj interface{}) string {
-	out, err := json.Marshal(obj)
+	out, err := json.Marshal(f)
 	require.NoError(t, err)
 	return string(out)
 }

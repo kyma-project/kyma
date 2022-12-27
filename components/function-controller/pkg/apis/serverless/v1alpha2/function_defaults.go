@@ -2,7 +2,6 @@ package v1alpha2
 
 import (
 	"encoding/json"
-
 	"k8s.io/apimachinery/pkg/api/resource"
 
 	"github.com/pkg/errors"
