@@ -2,9 +2,8 @@ package helpers
 
 import (
 	"fmt"
-	"net/url"
-
 	"github.com/pkg/errors"
+	"net/url"
 )
 
 func GetSvcURL(name, namespace string, useProxy bool) (*url.URL, error) {
