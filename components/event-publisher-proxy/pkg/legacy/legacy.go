@@ -28,9 +28,9 @@ const (
 )
 
 type RequestToCETransformer interface {
-	ExtractPublishRequestData(request *http.Request) (*apiv1.PublishRequestData, *apiv1.PublishEventResponses, error)
-	ExtractCEFromLegacyPublishRequestData(publishData *apiv1.PublishRequestData) (*cev2event.Event, *apiv1.PublishEventResponses, error)
-	TransformLegacyRequestsToCE(writer http.ResponseWriter, publishData *apiv1.PublishRequestData) (*cev2event.Event, string)
+	ExtractPublishRequestData(*http.Request) (*apiv1.PublishRequestData, *apiv1.PublishEventResponses, error)
+	ExtractCEFromLegacyPublishRequestData(*apiv1.PublishRequestData) (*cev2event.Event, *apiv1.PublishEventResponses, error)
+	TransformLegacyRequestsToCE(http.ResponseWriter, *apiv1.PublishRequestData) (*cev2event.Event, string)
 	TransformsCEResponseToLegacyResponse(http.ResponseWriter, int, *cev2event.Event, string)
 }
 
@@ -183,10 +183,6 @@ func (t *Transformer) TransformsCEResponseToLegacyResponse(writer http.ResponseW
 
 // convertPublishRequestToRawCloudEvent converts the given publish request to a CloudEvent with raw values.
 func (t *Transformer) convertPublishRequestToRawCloudEvent(source string, publishRequest *apiv1.PublishEventParametersV1) (*cev2event.Event, error) {
-	if !application.IsCleanName(source) {
-		return nil, errors.New("application name should be cleaned from none-alphanumeric characters")
-	}
-
 	// instantiate a new cloudEvent object
 	event := cev2event.New(cev2event.CloudEventsVersionV1)
 	eventName := publishRequest.PublishrequestV1.EventType

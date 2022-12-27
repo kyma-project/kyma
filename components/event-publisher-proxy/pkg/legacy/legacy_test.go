@@ -295,17 +295,12 @@ func TestExtractPublishRequestData(t *testing.T) {
 			t.Parallel()
 
 			// given
-			ctx, cancel := context.WithCancel(context.Background())
-			defer cancel()
-
 			request, err := tc.givenLegacyRequestFunc()
 			require.NoError(t, err)
 			// set expected header
 			tc.wantPublishRequestData.Headers = request.Header
 
-			app := applicationtest.NewApplication(givenApplication, applicationTypeLabel(""))
-			appLister := fake.NewApplicationListerOrDie(ctx, app)
-			transformer := NewTransformer("test", givenPrefix, appLister)
+			transformer := NewTransformer("test", givenPrefix, nil)
 
 			// when
 			publishData, errResp, err := transformer.ExtractPublishRequestData(request)
@@ -402,11 +397,8 @@ func TestExtractCEFromLegacyPublishRequestData(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			ctx, cancel := context.WithCancel(context.Background())
-			defer cancel()
-			app := applicationtest.NewApplication(givenApplication, applicationTypeLabel(""))
-			appLister := fake.NewApplicationListerOrDie(ctx, app)
-			transformer := NewTransformer("test", givenPrefix, appLister)
+			// given
+			transformer := NewTransformer("test", givenPrefix, nil)
 
 			// when
 			ceEvent, errResp, err := transformer.ExtractCEFromLegacyPublishRequestData(&tc.givenPublishRequestData)
@@ -418,6 +410,109 @@ func TestExtractCEFromLegacyPublishRequestData(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 				require.Nil(t, errResp)
+
+				require.Equal(t, tc.wantEventType, ceEvent.Type())
+				require.Equal(t, tc.wantSource, ceEvent.Source())
+				require.Equal(t, tc.wantData, string(ceEvent.Data()))
+				require.NotEmpty(t, ceEvent.ID())
+				if tc.wantEventID != "" {
+					require.Equal(t, tc.wantEventID, ceEvent.ID())
+				}
+			}
+		})
+	}
+}
+
+func TestConvertPublishRequestToRawCloudEvent(t *testing.T) {
+	const givenVersion = "v1"
+	const givenPrefix = "pre1.pre2.pre3"
+	const givenApplication = "app"
+	const givenEventName = "object.do"
+
+	testCases := []struct {
+		name                        string
+		givenPublishEventParameters legacyapi.PublishEventParametersV1
+		wantCloudEventFunc          func() (cev2event.Event, error)
+		wantErrorResponse           legacyapi.PublishEventResponses
+		wantError                   bool
+		wantEventType               string
+		wantSource                  string
+		wantData                    string
+		wantEventID                 string
+	}{
+		{
+			name: "should succeed if publish data is valid",
+			givenPublishEventParameters: legacyapi.PublishEventParametersV1{
+				PublishrequestV1: legacyapi.PublishRequestV1{
+					EventID:          testingutils.EventID,
+					EventType:        givenEventName,
+					EventTypeVersion: givenVersion,
+					EventTime:        "2020-04-02T21:37:00Z",
+					Data:             map[string]string{"key": "value"},
+				},
+			},
+			wantError:     false,
+			wantEventID:   testingutils.EventID,
+			wantEventType: "object.do.v1",
+			wantSource:    givenApplication,
+			wantData:      `{"key":"value"}`,
+		},
+		{
+			name: "should set new event ID when not provided",
+			givenPublishEventParameters: legacyapi.PublishEventParametersV1{
+				PublishrequestV1: legacyapi.PublishRequestV1{
+					EventType:        givenEventName,
+					EventTypeVersion: givenVersion,
+					EventTime:        "2020-04-02T21:37:00Z",
+					Data:             map[string]string{"key": "value"},
+				},
+			},
+			wantError:     false,
+			wantEventType: "object.do.v1",
+			wantSource:    givenApplication,
+			wantData:      `{"key":"value"}`,
+		},
+		{
+			name: "should fail if event time is invalid",
+			givenPublishEventParameters: legacyapi.PublishEventParametersV1{
+				PublishrequestV1: legacyapi.PublishRequestV1{
+					EventType:        givenEventName,
+					EventTypeVersion: givenVersion,
+					EventTime:        "20dsadsa20-04-02T21:37:00Z",
+					Data:             map[string]string{"key": "value"},
+				},
+			},
+			wantError: true,
+		},
+		{
+			name: "should fail if event data is not json",
+			givenPublishEventParameters: legacyapi.PublishEventParametersV1{
+				PublishrequestV1: legacyapi.PublishRequestV1{
+					EventType:        givenEventName,
+					EventTypeVersion: givenVersion,
+					EventTime:        "20dsadsa20-04-02T21:37:00Z",
+					Data:             "test",
+				},
+			},
+			wantError: true,
+		},
+	}
+
+	for _, tt := range testCases {
+		tc := tt
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			transformer := NewTransformer("test", givenPrefix, nil)
+
+			// when
+			ceEvent, err := transformer.convertPublishRequestToRawCloudEvent(givenApplication, &tc.givenPublishEventParameters)
+
+			// then
+			if tc.wantError {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
 
 				require.Equal(t, tc.wantEventType, ceEvent.Type())
 				require.Equal(t, tc.wantSource, ceEvent.Source())
