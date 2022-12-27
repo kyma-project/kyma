@@ -1740,7 +1740,16 @@ async function printAllSubscriptions(testNamespace, crdVersion='v1alpha1') {
 // getTraceDAG returns a DAG for the provided Jaeger tracing data
 async function getTraceDAG(trace) {
   // Find root spans which are not child of any other span
-  const rootSpans = trace['spans'].filter((s) => !(s['references'].find((r) => r['refType'] === 'CHILD_OF')));
+  const rootSpans = [];
+  for (const span of trace['spans']) {
+    if (span['references'].length === 0) {
+      rootSpans.push(span);
+    }
+
+    if (!trace['spans'].find((s) => s['spanID'] === span['references'][0]['spanID'])) {
+      rootSpans.push(span);
+    }
+  }
 
   // Find and attach child spans for each root span
   for (const root of rootSpans) {
