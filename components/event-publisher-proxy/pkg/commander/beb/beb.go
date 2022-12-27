@@ -128,7 +128,7 @@ func (c *Commander) Start() error {
 
 	// start handler which blocks until it receives a shutdown signal
 	if err := handler.NewHandler(messageReceiver, messageSender, health.NewChecker(), c.envCfg.RequestTimeout, legacyTransformer, c.opts,
-		subscribedProcessor, c.logger, c.metricsCollector, eventTypeCleanerV1, ceBuilder, env.EventMeshBackend).Start(ctx); err != nil {
+		subscribedProcessor, c.logger, c.metricsCollector, eventTypeCleanerV1, ceBuilder, c.envCfg.EventTypePrefix, env.EventMeshBackend).Start(ctx); err != nil {
 		return xerrors.Errorf("failed to start handler for %s : %v", bebCommanderName, err)
 	}
 	c.namedLogger().Info("Event Publisher was shut down")

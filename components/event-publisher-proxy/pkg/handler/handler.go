@@ -61,9 +61,9 @@ type Handler struct {
 	// eventTypeCleaner cleans the cloud event type
 	eventTypeCleaner eventtype.Cleaner
 	// builds the cloud event according to Subscription v1alpha2 specifications
-	ceBuilder     builder.CloudEventBuilder
-	router        *mux.Router
-	activeBackend string
+	ceBuilder          builder.CloudEventBuilder
+	router             *mux.Router
+	OldEventTypePrefix string
 }
 
 const (
@@ -74,7 +74,7 @@ const (
 func NewHandler(receiver *receiver.HTTPMessageReceiver, sender sender.GenericSender, healthChecker health.Checker, requestTimeout time.Duration,
 	legacyTransformer legacy.RequestToCETransformer, opts *options.Options, subscribedProcessor *subscribed.Processor,
 	logger *logger.Logger, collector metrics.PublishingMetricsCollector, eventTypeCleaner eventtype.Cleaner,
-	ceBuilder builder.CloudEventBuilder, activeBackend string) *Handler {
+	ceBuilder builder.CloudEventBuilder, oldEventTypePrefix string, activeBackend string) *Handler {
 
 	return &Handler{
 		Receiver:            receiver,
@@ -88,6 +88,7 @@ func NewHandler(receiver *receiver.HTTPMessageReceiver, sender sender.GenericSen
 		collector:           collector,
 		eventTypeCleaner:    eventTypeCleaner,
 		ceBuilder:           ceBuilder,
+		OldEventTypePrefix:  oldEventTypePrefix,
 		activeBackend:       activeBackend,
 	}
 }
@@ -244,7 +245,7 @@ func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.R
 	eventTypeOriginal := event.Type()
 	event.SetExtension(originalTypeHeaderName, eventTypeOriginal)
 
-	if h.Options.EnableNewCRDVersion && !strings.HasPrefix(eventTypeOriginal, env.OldEventTypePrefix) {
+	if h.Options.EnableNewCRDVersion && !strings.HasPrefix(eventTypeOriginal, h.OldEventTypePrefix) {
 		// build a new cloud event instance as per specifications per backend
 		event, err = h.ceBuilder.Build(*event)
 		if err != nil {
