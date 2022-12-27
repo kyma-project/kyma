@@ -9,10 +9,12 @@ The metrics follow the [Prometheus naming convention](https://prometheus.io/docs
 
 | Metric                                                          | Description                                                                                   |
 |-----------------------------------------------------------------|:----------------------------------------------------------------------------------------------|
-| **eventing_epp_errors_total**                                   | Total number of errors while sending events to the messaging server.                          |
-| **eventing_epp_messaging_server_latency_duration_milliseconds** | Duration of sending events to the messaging server in milliseconds.                           |
-| **epp_event_type_published_total**                              | Total number of event publishing requests to the NATS messaging server for a given eventType. |
-| **eventing_epp_requests_total**                                 | Total number of event publishing requests to the messaging server.                            |
+| **eventing_epp_backend_errors_total**                           | Total number of backend errors while sending events to the messaging server.                  |
+| **eventing_epp_backend_duration_milliseconds**                  | Duration of sending events to the messaging server in milliseconds.                           |
+| **eventing_epp_requests_duration_milliseconds**                 | Duration of processing an incoming request that includes sending the event to the backend.    |
+| **eventing_epp_backend_requests_total**                         | Total number of event publishing requests to the NATS messaging server.                       |
+| **eventing_epp_requests_total**                                 | Total number of publishing requests to the EPP.                                               |
+| **eventing_epp_event_type_published_total**                     | Total number of event publishing requests to the NATS messaging server for a given eventType. |
 
 ### Metrics Emitted by Eventing Controller:
 

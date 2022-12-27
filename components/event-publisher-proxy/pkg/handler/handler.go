@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy/api"
-
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
+
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy/api"
 
 	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"

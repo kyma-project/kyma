@@ -28,7 +28,7 @@ func Test_checkForEmptySegments(t *testing.T) {
 		tc := testCase
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			require.Equal(t, tc.wantResult, CheckForEmptySegments(tc.givenSegments))
+			require.Equal(t, tc.wantResult, DoesEmptySegmentsExist(tc.givenSegments))
 		})
 	}
 }

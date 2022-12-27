@@ -25,7 +25,7 @@ func parse(eventType, prefix string) (string, string, string, error) {
 	// make sure that the remaining string has at least 4 segments separated by "."
 	// (e.g. application.businessObject.operation.version)
 	parts := strings.Split(eventType, ".")
-	if len(parts) < 4 || builder.CheckForEmptySegments(parts) {
+	if len(parts) < 4 || builder.DoesEmptySegmentsExist(parts) {
 		return "", "", "", errors.New("invalid format")
 	}
 

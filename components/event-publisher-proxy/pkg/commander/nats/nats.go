@@ -126,18 +126,18 @@ func (c *Commander) Start() error {
 	c.namedLogger().Info("Informers are synced successfully")
 
 	// configure event type cleaner
-	eventTypeCleaner := eventtype.NewCleaner(c.envCfg.EventTypePrefix, applicationLister, c.logger)
+	eventTypeCleanerV1 := eventtype.NewCleaner(c.envCfg.EventTypePrefix, applicationLister, c.logger)
 
 	// configure event type cleaner for subscription CRD v1alpha2
-	eventTypeCleanerV2 := cleaner.NewJetStreamCleaner(c.logger)
+	eventTypeCleaner := cleaner.NewJetStreamCleaner(c.logger)
 
 	// configure cloud event builder for subscription CRD v1alpha2
-	ceBuilder := builder.NewGenericBuilder(env.JetStreamSubjectPrefix, eventTypeCleanerV2,
+	ceBuilder := builder.NewGenericBuilder(env.JetStreamSubjectPrefix, eventTypeCleaner,
 		applicationLister, c.logger)
 
 	// start handler which blocks until it receives a shutdown signal
 	if err := handler.NewHandler(messageReceiver, messageSender, messageSender, c.envCfg.RequestTimeout, legacyTransformer, c.opts,
-		subscribedProcessor, c.logger, c.metricsCollector, eventTypeCleaner, ceBuilder, env.JetStreamBackend).Start(ctx); err != nil {
+		subscribedProcessor, c.logger, c.metricsCollector, eventTypeCleanerV1, ceBuilder, env.JetStreamBackend).Start(ctx); err != nil {
 		return xerrors.Errorf("failed to start handler for %s : %v", natsCommanderName, err)
 	}
 
