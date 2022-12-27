@@ -322,10 +322,6 @@ async function checkInClusterEventTracing(targetNamespace) {
   expect(res.data).to.have.nested.property('podName');
 
   const traceId = await getTraceId(res.data);
-  console.log('sssss');
-  console.log(res.data.event.headers);
-  // const traceId = res.data.event.headers['x-b3-traceid'];
-
 
   // Define expected trace data
   const correctTraceProcessSequence = [
@@ -360,9 +356,7 @@ async function checkTrace(traceId, expectedTraceProcessSequence) {
   expect(traceData['spans'].length).to.be.gte(expectedTraceProcessSequence.length);
 
   // generate DAG for trace spans
-  console.log('trace data', traceData);
   const traceDAG = await getTraceDAG(traceData);
-  console.log('DAG', traceDAG);
   expect(traceDAG).to.have.length(1);
 
   // log the actual trace

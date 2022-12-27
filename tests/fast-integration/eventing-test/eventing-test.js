@@ -1,4 +1,3 @@
-const k8s = require('@kubernetes/client-node');
 const axios = require('axios');
 const https = require('https');
 const fs = require('fs');
@@ -75,22 +74,11 @@ const {
   exposeGrafana,
   unexposeGrafana,
 } = require('../monitoring');
-const { time } = require('console');
 
-// This code can be removed when we have release 2.10
-const lastorderFunctionYaml = fs.readFileSync(
-    path.join(__dirname, '../test/fixtures/commerce-mock/lastorder-function.yaml'),
-    {
-      encoding: 'utf8',
-    },
-);
 
 // This code can be removed when we have release 2.10
 async function redeployFunction(testNamespace) {
   const lastorderObjs = prepareFunction('central-app-gateway');
-
-  debug(`Namespace: ${testNamespace}`);
-  debug(`lastorder function: ${lastorderFunctionYaml}`);
 
   await k8sDelete(lastorderObjs, testNamespace);
   await sleep(5*1000);
@@ -127,35 +115,35 @@ describe('Eventing tests', function() {
   // eventingTestSuite - Runs Eventing tests
   function eventingTestSuite(backend, isSKR, testCompassFlow=false) {
     // This code can be removed when we have release 2.10
-    // it('redeploys the function to use the latest code', async function() {
-    //   await redeployFunction(testNamespace);
-    // });
+    it('redeploys the function to use the latest code', async function() {
+      await redeployFunction(testNamespace);
+    });
 
-    // it('lastorder function should be reachable through secured API Rule', async function() {
-    //   await checkFunctionResponse(testNamespace, mockNamespace);
-    // });
+    it('lastorder function should be reachable through secured API Rule', async function() {
+      await checkFunctionResponse(testNamespace, mockNamespace);
+    });
 
-    // it('In-cluster v1alpha1 subscription events should be delivered ' +
-    //     '(legacy events, structured and binary cloud events)', async function() {
-    //   await checkInClusterEventDelivery(testNamespace);
-    // });
+    it('In-cluster v1alpha1 subscription events should be delivered ' +
+        '(legacy events, structured and binary cloud events)', async function() {
+      await checkInClusterEventDelivery(testNamespace);
+    });
 
-    // it('In-cluster v1alpha2 subscription events should be delivered ' +
-    //     '(legacy events, structured and binary cloud events)', async function() {
-    //   if (!testSubscriptionV1Alpha2) {
-    //     this.skip();
-    //   }
-    //   await checkInClusterEventDelivery(testNamespace, true);
-    // });
+    it('In-cluster v1alpha2 subscription events should be delivered ' +
+        '(legacy events, structured and binary cloud events)', async function() {
+      if (!testSubscriptionV1Alpha2) {
+        this.skip();
+      }
+      await checkInClusterEventDelivery(testNamespace, true);
+    });
 
-    // if (isSKR && testCompassFlow) {
-    //   eventingE2ETestSuiteWithCommerceMock(backend);
-    // }
+    if (isSKR && testCompassFlow) {
+      eventingE2ETestSuiteWithCommerceMock(backend);
+    }
 
-    // if (backend === natsBackend) {
-    //   testStreamNotReCreated();
-    //   testJetStreamAtLeastOnceDelivery();
-    // }
+    if (backend === natsBackend) {
+      testStreamNotReCreated();
+      testJetStreamAtLeastOnceDelivery();
+    }
   }
 
   // eventingE2ETestSuiteWithCommerceMock - Runs Eventing end-to-end tests with Compass
@@ -328,60 +316,60 @@ describe('Eventing tests', function() {
     // Running Eventing tracing tests
     eventingTracingTestSuite(isSKR);
 
-    // it('Run Eventing Monitoring tests', async function() {
-    //   await eventingMonitoringTest(natsBackend, isSKR);
-    // });
+    it('Run Eventing Monitoring tests', async function() {
+      await eventingMonitoringTest(natsBackend, isSKR);
+    });
   });
 
-  // context('with BEB backend', function() {
-  //   // skip publishing cloud events for beb backend when event mesh credentials file is missing
-  //   if (getEventMeshNamespace() === undefined) {
-  //     debug('Skipping E2E eventing tests for BEB backend due to missing EVENTMESH_SECRET_FILE');
-  //     return;
-  //   }
-  //   it('Switch Eventing Backend to BEB', async function() {
-  //     const currentBackend = await getEventingBackend();
-  //     if (currentBackend && currentBackend.toLowerCase() === bebBackend) {
-  //       this.skip();
-  //     }
-  //     await switchEventingBackend(backendK8sSecretName, backendK8sSecretNamespace, bebBackend);
-  //   });
-  //   it('Wait until subscriptions are ready', async function() {
-  //     await waitForSubscriptionsTillReady(testNamespace); // print subscriptions status when debugLogs is enabled
-  //     if (isDebugEnabled()) {
-  //       await printAllSubscriptions(testNamespace, subCRDVersion);
-  //     }
-  //   });
-  //   // Running Eventing end-to-end tests
-  //   eventingTestSuite(bebBackend, isSKR, testCompassFlow);
+  context('with BEB backend', function() {
+    // skip publishing cloud events for beb backend when event mesh credentials file is missing
+    if (getEventMeshNamespace() === undefined) {
+      debug('Skipping E2E eventing tests for BEB backend due to missing EVENTMESH_SECRET_FILE');
+      return;
+    }
+    it('Switch Eventing Backend to BEB', async function() {
+      const currentBackend = await getEventingBackend();
+      if (currentBackend && currentBackend.toLowerCase() === bebBackend) {
+        this.skip();
+      }
+      await switchEventingBackend(backendK8sSecretName, backendK8sSecretNamespace, bebBackend);
+    });
+    it('Wait until subscriptions are ready', async function() {
+      await waitForSubscriptionsTillReady(testNamespace); // print subscriptions status when debugLogs is enabled
+      if (isDebugEnabled()) {
+        await printAllSubscriptions(testNamespace, subCRDVersion);
+      }
+    });
+    // Running Eventing end-to-end tests
+    eventingTestSuite(bebBackend, isSKR, testCompassFlow);
 
-  //   it('Run Eventing Monitoring tests', async function() {
-  //     await eventingMonitoringTest(bebBackend, isSKR);
-  //   });
-  // });
+    it('Run Eventing Monitoring tests', async function() {
+      await eventingMonitoringTest(bebBackend, isSKR);
+    });
+  });
 
-  // context('with Nats backend switched back from BEB', async function() {
-  //   it('Switch Eventing Backend to Nats', async function() {
-  //     const currentBackend = await getEventingBackend();
-  //     if (currentBackend && currentBackend.toLowerCase() === natsBackend) {
-  //       this.skip();
-  //     }
-  //     await switchEventingBackend(backendK8sSecretName, backendK8sSecretNamespace, natsBackend);
-  //   });
-  //   it('Wait until subscriptions are ready', async function() {
-  //     await waitForSubscriptionsTillReady(testNamespace);
-  //   });
-  //   // Running Eventing end-to-end tests
-  //   eventingTestSuite(natsBackend, isSKR, testCompassFlow);
-  //   // Running Eventing tracing tests
-  //   eventingTracingTestSuite(isSKR);
+  context('with Nats backend switched back from BEB', async function() {
+    it('Switch Eventing Backend to Nats', async function() {
+      const currentBackend = await getEventingBackend();
+      if (currentBackend && currentBackend.toLowerCase() === natsBackend) {
+        this.skip();
+      }
+      await switchEventingBackend(backendK8sSecretName, backendK8sSecretNamespace, natsBackend);
+    });
+    it('Wait until subscriptions are ready', async function() {
+      await waitForSubscriptionsTillReady(testNamespace);
+    });
+    // Running Eventing end-to-end tests
+    eventingTestSuite(natsBackend, isSKR, testCompassFlow);
+    // Running Eventing tracing tests
+    eventingTracingTestSuite(isSKR);
 
-  //   it('Run Eventing Monitoring tests', async function() {
-  //     await eventingMonitoringTest(natsBackend, isSKR);
-  //   });
-  // });
+    it('Run Eventing Monitoring tests', async function() {
+      await eventingMonitoringTest(natsBackend, isSKR);
+    });
+  });
 
-  // after('Unexpose Grafana', async function() {
-  //   await unexposeGrafana(isSKR);
-  // });
+  after('Unexpose Grafana', async function() {
+    await unexposeGrafana(isSKR);
+  });
 });
