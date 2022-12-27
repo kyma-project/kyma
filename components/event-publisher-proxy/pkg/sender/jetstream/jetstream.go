@@ -126,7 +126,7 @@ func (s *Sender) eventToNATSMsg(event *event.Event) (*nats.Msg, error) {
 // getJsSubjectToPublish appends stream name to subject if needed.
 func (s *Sender) getJsSubjectToPublish(subject string) string {
 	// if subscription CRD v1alpha2 is enabled then do not append prefix.
-	if s.opts.EnableNewCRDVersion && !strings.HasPrefix(subject, env.OldEventTypePrefix) {
+	if s.opts.EnableNewCRDVersion && !strings.HasPrefix(subject, s.envCfg.EventTypePrefix) {
 		return subject
 	}
 

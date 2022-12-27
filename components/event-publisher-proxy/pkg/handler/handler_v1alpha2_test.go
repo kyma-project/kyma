@@ -24,6 +24,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender/beb"
+	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 )
 
 func TestHandler_publishCloudEventsV1Alpha2(t *testing.T) {
@@ -303,6 +304,7 @@ func TestHandler_publishCloudEventsV1Alpha2(t *testing.T) {
 				Options: &options.Options{
 					Env: options.Env{EnableNewCRDVersion: true},
 				},
+				OldEventTypePrefix: testingutils.OldEventTypePrefix,
 			}
 			writer := httptest.NewRecorder()
 
