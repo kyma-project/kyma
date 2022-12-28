@@ -42,7 +42,7 @@ This guide shows you how to register a service of your external solution in Kyma
 1. Create a Secret that contains your username and password to the external service:
 
     ```bash
-    kubectl create secret generic $SECRET_NAME --from-literal username=$USER_NAME --from-literal password=$PASSWORD -n kyma-integration
+    kubectl create secret generic $SECRET_NAME --from-literal username=$USER_NAME --from-literal password=$PASSWORD -n kyma-system
     ```
 
 2. To register a service with a Basic Authentication-secured API, you must create or modify the respective Application CR. To create an Application CR with the service definition, run this command:
