@@ -83,11 +83,11 @@ func (cs *CompassRuntimeAgentSuite) initKubernetesApis() {
 }
 
 func (cs *CompassRuntimeAgentSuite) initComparators() {
-	secretComparator, err := applications.NewSecretComparator(cs.coreClientSet, cs.testConfig.OAuthCredentialsNamespace, cs.testConfig.IntegrationNamespace)
+	secretComparator, err := applications.NewSecretComparator(cs.coreClientSet, cs.testConfig.OAuthCredentialsNamespace, cs.testConfig.SystemNamespace)
 	cs.Require().NoError(err)
 
 	applicationGetter := cs.applicationsClientSet.ApplicationconnectorV1alpha1().Applications()
-	cs.appComparator, err = applications.NewComparator(secretComparator, applicationGetter, "kyma-integration", "kyma-integration")
+	cs.appComparator, err = applications.NewComparator(secretComparator, applicationGetter, "kyma-system", "kyma-system")
 }
 
 func (cs *CompassRuntimeAgentSuite) configureRuntimeAgent() {
