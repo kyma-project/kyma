@@ -5,7 +5,7 @@ global:
   images:
     compass_runtime_agent:
       name: "compass-runtime-agent"
-      version: "PR-16382"
+      version: "PR-16024"
   istio:
     gateway:
       name: kyma-gateway
@@ -21,7 +21,7 @@ compassRuntimeAgent:
     controllerSyncPeriod: 15s
     minimalConfigSyncTime: 15s
   resources:
-    integrationNamespace: "kyma-integration"
+    systemNamespace: "kyma-system"
     dexSecretNamespace: "kyma-system"
     dexSecretName: "admin-user"
     gatewayPort: 8080

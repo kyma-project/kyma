@@ -11,3 +11,18 @@ spec:
   providerDisplayName: ""
   services: []
   skipVerify: true
+---
+
+apiVersion: applicationconnector.kyma-project.io/v1alpha1
+kind: Application
+metadata:
+  labels:
+    applicationconnector.kyma-project.io/managed-by: compass-runtime-agent
+  name: app1-updated
+spec:
+  description: "The app was updated"
+  displayName: ""
+  longDescription: ""
+  providerDisplayName: ""
+  services: []
+  skipVerify: true

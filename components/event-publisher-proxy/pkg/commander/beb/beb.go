@@ -2,6 +2,10 @@ package beb
 
 import (
 	"context"
+
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/builder"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 	"k8s.io/client-go/tools/cache"
 
 	"github.com/kelseyhightower/envconfig"
@@ -113,11 +117,18 @@ func (c *Commander) Start() error {
 	c.namedLogger().Info("Informers were successfully synced")
 
 	// configure event type cleaner
-	eventTypeCleaner := eventtype.NewCleaner(c.envCfg.EventTypePrefix, applicationLister, c.logger)
+	eventTypeCleanerV1 := eventtype.NewCleaner(c.envCfg.EventTypePrefix, applicationLister, c.logger)
+
+	// configure event type cleaner for subscription CRD v1alpha2
+	eventTypeCleaner := cleaner.NewEventMeshCleaner(c.logger)
+
+	// configure cloud event builder for subscription CRD v1alpha2
+	ceBuilder := builder.NewEventMeshBuilder(c.envCfg.EventTypePrefix, c.envCfg.BEBNamespace, eventTypeCleaner,
+		applicationLister, c.logger)
 
 	// start handler which blocks until it receives a shutdown signal
 	if err := handler.NewHandler(messageReceiver, messageSender, health.NewChecker(), c.envCfg.RequestTimeout, legacyTransformer, c.opts,
-		subscribedProcessor, c.logger, c.metricsCollector, eventTypeCleaner).Start(ctx); err != nil {
+		subscribedProcessor, c.logger, c.metricsCollector, eventTypeCleanerV1, ceBuilder).Start(ctx); err != nil {
 		return xerrors.Errorf("failed to start handler for %s : %v", bebCommanderName, err)
 	}
 	c.namedLogger().Info("Event Publisher was shut down")
