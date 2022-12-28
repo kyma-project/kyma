@@ -76,6 +76,8 @@ const lastorderFunctionYaml = fs.readFileSync(
     },
 );
 
+const eventTypeOrderCompleted = 'order.completed.v1';
+const eventSourceInApp = 'inapp';
 const applicationObjs = k8s.loadAllYaml(applicationMockYaml);
 const lastorderObjs = k8s.loadAllYaml(lastorderFunctionYaml);
 let eventMeshSourceNamespace = '/default/sap.kyma/tunas-prow';
@@ -664,8 +666,8 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
   if (testSubscriptionV1Alpha2) {
     debug('creating v1alpha2 subscription CR');
     const orderCompletedV1Alpha2Sub = eventingSubscriptionV1Alpha2(
-        'order.completed.v1alpha2',
-        'fi-tests',
+        eventTypeOrderCompleted,
+        eventSourceInApp,
         `http://lastorder.${targetNamespace}.svc.cluster.local`,
         'order-completed',
         targetNamespace,
@@ -774,11 +776,13 @@ async function generateTraceParentHeader() {
 }
 
 // send event using function query parameter send=true
-async function sendInClusterEventWithRetry(mockHost, eventId, encoding, eventType='', retriesLeft = 10) {
+async function sendInClusterEventWithRetry(mockHost, eventId, encoding, eventType='',
+    eventSource='', retriesLeft = 10) {
   const eventData = {id: eventId};
   if (eventType) {
     eventData.save = true;
     eventData.type = eventType;
+    eventData.source = eventSource;
   }
 
   await retryPromise(async () => {
@@ -912,14 +916,15 @@ async function getVirtualServiceHost(targetNamespace, funcName) {
 
 async function checkInClusterEventDeliveryHelper(targetNamespace, encoding, testSubscriptionV1Alpha2=false) {
   const eventId = getRandomEventId(encoding);
-  const eventType = testSubscriptionV1Alpha2? 'order.completed.v1alpha2': '';
+  const eventType = testSubscriptionV1Alpha2? eventTypeOrderCompleted: '';
+  const eventSource = testSubscriptionV1Alpha2? eventSourceInApp: '';
   const mockHost = await getVirtualServiceHost(targetNamespace, 'lastorder');
 
   if (isDebugEnabled()) {
     await printStatusOfInClusterEventingInfrastructure(targetNamespace, encoding, 'lastorder');
   }
 
-  await sendInClusterEventWithRetry(mockHost, eventId, encoding, eventType);
+  await sendInClusterEventWithRetry(mockHost, eventId, encoding, eventType, eventSource);
   return ensureInClusterEventReceivedWithRetry(mockHost, eventId, eventType);
 }
 
@@ -932,7 +937,7 @@ async function checkInClusterLegacyEvent(targetNamespace, testSubscriptionV1Alph
   }
 
   const eventData = {'id': eventId, 'legacyOrder': '987'};
-  const eventType = testSubscriptionV1Alpha2? 'order.completed.v1alpha2': '';
+  const eventType = testSubscriptionV1Alpha2? eventTypeOrderCompleted: '';
   if (testSubscriptionV1Alpha2) {
     eventData.save = true;
     eventData.type = eventType;
