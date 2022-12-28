@@ -12,6 +12,12 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
+const (
+	reasonFluentBitDSNotReady     = "FluentBitDaemonSetNotReady"
+	reasonFluentBitDSReady        = "FluentBitDaemonSetReady"
+	reasonReferencedSecretMissing = "ReferencedSecretMissing"
+)
+
 func (r *Reconciler) updateStatus(ctx context.Context, pipelineName string) error {
 	if err := r.updateStatusUnsupportedMode(ctx, pipelineName); err != nil {
 		return err
@@ -58,10 +64,7 @@ func (r *Reconciler) updateStatusConditions(ctx context.Context, pipelineName st
 	log := logf.FromContext(ctx)
 	secretsMissing := checkForMissingSecrets(ctx, r.Client, &pipeline)
 	if secretsMissing {
-		pending := telemetryv1alpha1.NewLogPipelineCondition(
-			telemetryv1alpha1.ReferencedSecretMissingReason,
-			telemetryv1alpha1.LogPipelinePending,
-		)
+		pending := telemetryv1alpha1.NewLogPipelineCondition(reasonReferencedSecretMissing, telemetryv1alpha1.LogPipelinePending)
 
 		if pipeline.Status.HasCondition(telemetryv1alpha1.LogPipelineRunning) {
 			log.V(1).Info(fmt.Sprintf("Updating the status of %s to %s. Resetting previous conditions", pipeline.Name, pending.Type))
@@ -81,18 +84,11 @@ func (r *Reconciler) updateStatusConditions(ctx context.Context, pipelineName st
 			return nil
 		}
 
-		running := telemetryv1alpha1.NewLogPipelineCondition(
-			telemetryv1alpha1.FluentBitDSReadyReason,
-			telemetryv1alpha1.LogPipelineRunning,
-		)
-
+		running := telemetryv1alpha1.NewLogPipelineCondition(reasonFluentBitDSReady, telemetryv1alpha1.LogPipelineRunning)
 		return setCondition(ctx, r.Client, &pipeline, running)
 	}
 
-	pending := telemetryv1alpha1.NewLogPipelineCondition(
-		telemetryv1alpha1.FluentBitDSNotReadyReason,
-		telemetryv1alpha1.LogPipelinePending,
-	)
+	pending := telemetryv1alpha1.NewLogPipelineCondition(reasonFluentBitDSNotReady, telemetryv1alpha1.LogPipelinePending)
 
 	if pipeline.Status.HasCondition(telemetryv1alpha1.LogPipelineRunning) {
 		log.V(1).Info(fmt.Sprintf("Updating the status of %s to %s. Resetting previous conditions", pipeline.Name, pending.Type))

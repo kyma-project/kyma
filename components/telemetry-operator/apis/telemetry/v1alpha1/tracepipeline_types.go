@@ -64,12 +64,6 @@ const (
 	TracePipelineRunning TracePipelineConditionType = "Running"
 )
 
-const (
-	OpenTelemetryDNotReadyReason    = "OpenTelemetryDeploymentNotReady"
-	OpenTelemetryDReadyReason       = "OpenTelemetryDeploymentReady"
-	OTReferencedSecretMissingReason = "ReferencedSecretMissing"
-)
-
 // LogPipelineCondition contains details for the current condition of this LogPipeline
 type TracePipelineCondition struct {
 	LastTransitionTime metav1.Time                `json:"lastTransitionTime,omitempty"`

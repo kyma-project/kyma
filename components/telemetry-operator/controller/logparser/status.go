@@ -11,6 +11,11 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
+const (
+	reasonFluentBitDSNotReady = "FluentBitDaemonSetNotReady"
+	reasonFluentBitDSReady    = "FluentBitDaemonSetReady"
+)
+
 func (r *Reconciler) updateStatus(ctx context.Context, parserName string) error {
 	log := logf.FromContext(ctx)
 	var parser telemetryv1alpha1.LogParser
@@ -36,18 +41,11 @@ func (r *Reconciler) updateStatus(ctx context.Context, parserName string) error 
 			return nil
 		}
 
-		running := telemetryv1alpha1.NewLogParserCondition(
-			telemetryv1alpha1.FluentBitDSReadyReason,
-			telemetryv1alpha1.LogParserRunning,
-		)
-
+		running := telemetryv1alpha1.NewLogParserCondition(reasonFluentBitDSReady, telemetryv1alpha1.LogParserRunning)
 		return setCondition(ctx, r.Client, &parser, running)
 	}
 
-	pending := telemetryv1alpha1.NewLogParserCondition(
-		telemetryv1alpha1.FluentBitDSNotReadyReason,
-		telemetryv1alpha1.LogParserPending,
-	)
+	pending := telemetryv1alpha1.NewLogParserCondition(reasonFluentBitDSNotReady, telemetryv1alpha1.LogParserPending)
 
 	if parser.Status.HasCondition(telemetryv1alpha1.LogParserRunning) {
 		log.V(1).Info(fmt.Sprintf("Updating the status of %s to %s. Resetting previous conditions", parser.Name, pending.Type))
