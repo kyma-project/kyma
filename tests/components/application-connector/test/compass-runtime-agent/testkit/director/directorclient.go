@@ -31,6 +31,7 @@ type Client interface {
 	AssignRuntimeToFormation(runtimeId, formationName string) error
 	GetConnectionToken(runtimeID string) (string, string, error)
 	UpdateApplication(id, newDesc string) (string, error)
+	AddBundle(appID string) (string, error)
 }
 
 type directorClient struct {
@@ -146,6 +147,21 @@ func (cc *directorClient) RegisterApplication(appName, displayName string) (stri
 	execFunc := getExecGraphQLFunc[graphql.Application](cc)
 	operationDescription := "register application"
 	successfulLogMessage := fmt.Sprintf("Successfully registered application %s in Director for tenant %s", appName, cc.tenant)
+
+	result, err := executeQuery(queryFunc, execFunc, operationDescription, successfulLogMessage)
+	if err != nil {
+		return "", err
+	}
+	return result.Result.ID, err
+}
+
+func (cc *directorClient) AddBundle(appID string) (string, error) {
+	log.Infof("Adding Bundle to Application")
+
+	queryFunc := func() string { return cc.queryProvider.addBundleMutation(appID) }
+	execFunc := getExecGraphQLFunc[graphql.Application](cc)
+	operationDescription := "add bundle"
+	successfulLogMessage := fmt.Sprintf("Successfully added bundle to application with ID %s in Director for tenant %s", appID, cc.tenant)
 
 	result, err := executeQuery(queryFunc, execFunc, operationDescription, successfulLogMessage)
 	if err != nil {
