@@ -128,9 +128,29 @@ func (h *Handler) maxBytes(f http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-// handlePublishLegacyEventV1alpha2 handles the publishing of events for Subscription v1alpha2 CRD
-// It writes to the user request if any error occurs
-// Otherwise return the published event
+// handlePublishLegacyEventV1alpha1 handles the publishing of metrics.
+// It writes to the user request if any error occurs.
+// Otherwise, returns the result.
+func (h *Handler) handleSendEventAndRecordMetricsLegacy(writer http.ResponseWriter, request *http.Request, event *cev2event.Event) (sender.PublishResult, error) {
+	result, err := h.sendEventAndRecordMetrics(request.Context(), event, h.Sender.URL(), request.Header)
+	if err != nil {
+		h.namedLogger().Error(err)
+		httpStatus := http.StatusInternalServerError
+		if errors.Is(err, sender.ErrInsufficientStorage) {
+			httpStatus = http.StatusInsufficientStorage
+		} else if errors.Is(err, sender.ErrBackendTargetNotFound) {
+			httpStatus = http.StatusBadGateway
+		}
+		h.LegacyTransformer.WriteCEResponseAsLegacyResponse(writer, httpStatus, event, err.Error())
+		return nil, err
+	}
+	h.namedLogger().Debug(result)
+	return result, nil
+}
+
+// handlePublishLegacyEventV1alpha2 handles the publishing of events for Subscription v1alpha2 CRD.
+// It writes to the user request if any error occurs.
+// Otherwise, return the published event.
 func (h *Handler) handlePublishLegacyEventV1alpha2(writer http.ResponseWriter, publishData *api.PublishRequestData, request *http.Request) (sender.PublishResult, *cev2event.Event) {
 	ceEvent, err := h.LegacyTransformer.TransformPublishRequestToCloudEvent(publishData)
 	if err != nil {
@@ -148,23 +168,17 @@ func (h *Handler) handlePublishLegacyEventV1alpha2(writer http.ResponseWriter, p
 		return nil, nil
 	}
 
-	result, err := h.sendEventAndRecordMetrics(request.Context(), event, h.Sender.URL(), request.Header)
+	result, err := h.handleSendEventAndRecordMetricsLegacy(writer, request, event)
 	if err != nil {
-		h.namedLogger().With().Error(err)
-		httpStatus := http.StatusInternalServerError
-		if errors.Is(err, sender.ErrInsufficientStorage) {
-			httpStatus = http.StatusInsufficientStorage
-		} else if errors.Is(err, sender.ErrBackendTargetNotFound) {
-			httpStatus = http.StatusBadGateway
-		}
-		h.LegacyTransformer.WriteCEResponseAsLegacyResponse(writer, httpStatus, event, err.Error())
 		return nil, nil
 	}
-	h.namedLogger().With().Debug(result)
 
 	return result, event
 }
 
+// handlePublishLegacyEventV1alpha1 handles the publishing of events for Subscription v1alpha1 CRD.
+// It writes to the user request if any error occurs.
+// Otherwise, return the published event.
 func (h *Handler) handlePublishLegacyEventV1alpha1(writer http.ResponseWriter, publishData *api.PublishRequestData, request *http.Request) (sender.PublishResult, *cev2event.Event) {
 	event, _ := h.LegacyTransformer.WriteLegacyRequestsToCE(writer, publishData)
 	if event == nil {
@@ -172,19 +186,10 @@ func (h *Handler) handlePublishLegacyEventV1alpha1(writer http.ResponseWriter, p
 		return nil, nil
 	}
 
-	result, err := h.sendEventAndRecordMetrics(request.Context(), event, h.Sender.URL(), request.Header)
+	result, err := h.handleSendEventAndRecordMetricsLegacy(writer, request, event)
 	if err != nil {
-		h.namedLogger().With().Error(err)
-		httpStatus := http.StatusInternalServerError
-		if errors.Is(err, sender.ErrInsufficientStorage) {
-			httpStatus = http.StatusInsufficientStorage
-		} else if errors.Is(err, sender.ErrBackendTargetNotFound) {
-			httpStatus = http.StatusBadGateway
-		}
-		h.LegacyTransformer.WriteCEResponseAsLegacyResponse(writer, httpStatus, event, err.Error())
 		return nil, nil
 	}
-	h.namedLogger().With().Debug(result)
 
 	return result, event
 }
