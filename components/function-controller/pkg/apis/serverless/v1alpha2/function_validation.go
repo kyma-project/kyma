@@ -153,7 +153,7 @@ func (spec *FunctionSpec) validateGitAuthSecretName(_ *ValidationConfig) error {
 	return nil
 }
 
-var ErrInvalidGitRepositoryAuthType = fmt.Errorf("invalid git reposiotry authentication type")
+var ErrInvalidGitRepositoryAuthType = fmt.Errorf("invalid git repository authentication type")
 
 func (spec *FunctionSpec) validateGitAuthType(_ *ValidationConfig) error {
 	switch spec.Source.GitRepository.Auth.Type {
