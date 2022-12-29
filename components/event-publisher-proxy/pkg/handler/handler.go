@@ -132,9 +132,9 @@ func (h *Handler) maxBytes(f http.HandlerFunc) http.HandlerFunc {
 // It writes to the user request if any error occurs
 // Otherwise return the published event
 func (h *Handler) handlePublishLegacyEventV1alpha2(writer http.ResponseWriter, publishData *api.PublishRequestData, request *http.Request) (sender.PublishResult, *cev2event.Event) {
-	ceEvent, errResp, _ := h.LegacyTransformer.ExtractCEFromLegacyPublishRequestData(publishData)
-	if errResp != nil {
-		legacy.WriteJSONResponse(writer, errResp)
+	ceEvent, err := h.LegacyTransformer.TransformPublishRequestToCloudEvent(publishData)
+	if err != nil {
+		legacy.WriteJSONResponse(writer, legacy.ErrorResponse(http.StatusInternalServerError, err))
 		return nil, nil
 	}
 
@@ -157,7 +157,7 @@ func (h *Handler) handlePublishLegacyEventV1alpha2(writer http.ResponseWriter, p
 		} else if errors.Is(err, sender.ErrBackendTargetNotFound) {
 			httpStatus = http.StatusBadGateway
 		}
-		h.LegacyTransformer.TransformsCEResponseToLegacyResponse(writer, httpStatus, event, err.Error())
+		h.LegacyTransformer.WriteCEResponseAsLegacyResponse(writer, httpStatus, event, err.Error())
 		return nil, nil
 	}
 	h.namedLogger().With().Debug(result)
@@ -166,7 +166,7 @@ func (h *Handler) handlePublishLegacyEventV1alpha2(writer http.ResponseWriter, p
 }
 
 func (h *Handler) handlePublishLegacyEventV1alpha1(writer http.ResponseWriter, publishData *api.PublishRequestData, request *http.Request) (sender.PublishResult, *cev2event.Event) {
-	event, _ := h.LegacyTransformer.TransformLegacyRequestsToCE(writer, publishData)
+	event, _ := h.LegacyTransformer.WriteLegacyRequestsToCE(writer, publishData)
 	if event == nil {
 		h.namedLogger().Error("Failed to transform legacy event to CloudEvent, event is nil")
 		return nil, nil
@@ -181,7 +181,7 @@ func (h *Handler) handlePublishLegacyEventV1alpha1(writer http.ResponseWriter, p
 		} else if errors.Is(err, sender.ErrBackendTargetNotFound) {
 			httpStatus = http.StatusBadGateway
 		}
-		h.LegacyTransformer.TransformsCEResponseToLegacyResponse(writer, httpStatus, event, err.Error())
+		h.LegacyTransformer.WriteCEResponseAsLegacyResponse(writer, httpStatus, event, err.Error())
 		return nil, nil
 	}
 	h.namedLogger().With().Debug(result)
@@ -228,7 +228,7 @@ func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *h
 
 	// return success response to user
 	// change response as per old error codes
-	h.LegacyTransformer.TransformsCEResponseToLegacyResponse(writer, successResult.HTTPStatus(), publishedEvent, string(successResult.ResponseBody()))
+	h.LegacyTransformer.WriteCEResponseAsLegacyResponse(writer, successResult.HTTPStatus(), publishedEvent, string(successResult.ResponseBody()))
 }
 
 // publishCloudEvents validates an incoming cloudevent and dispatches it using

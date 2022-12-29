@@ -62,15 +62,6 @@ func TestTransformLegacyRequestsToCE(t *testing.T) {
 			wantType:         "pre1.pre2.pre3.app.object.do.v1",
 		},
 		{
-			name:             "unclean",
-			givenPrefix:      "p!r@e&1.p,r:e2.p|r+e3",
-			givenApplication: "m(i_s+h*a}p",
-			givenTypeLabel:   "",
-			givenEventName:   "o{b?j>e$c't.d;o",
-			wantVersion:      "v1",
-			wantType:         "pre1.pre2.pre3.mishap.object.do.v1",
-		},
-		{
 			name:             "event name too many segments",
 			givenPrefix:      "pre1.pre2.pre3",
 			givenApplication: "app",
@@ -107,7 +98,7 @@ func TestTransformLegacyRequestsToCE(t *testing.T) {
 			transformer := NewTransformer("test", tc.givenPrefix, appLister)
 			publishData, errResp, _ := transformer.ExtractPublishRequestData(request)
 			assert.Nil(t, errResp)
-			gotEvent, gotEventType := transformer.TransformLegacyRequestsToCE(writer, publishData)
+			gotEvent, gotEventType := transformer.WriteLegacyRequestsToCE(writer, publishData)
 			wantEventType := formatEventType(tc.givenPrefix, tc.givenApplication, tc.givenEventName, tc.wantVersion)
 			assert.Equal(t, wantEventType, gotEventType)
 
@@ -248,33 +239,41 @@ func TestExtractPublishRequestData(t *testing.T) {
 	testCases := []struct {
 		name                   string
 		givenLegacyRequestFunc func() (*http.Request, error)
-		wantPublishRequestData legacyapi.PublishRequestData
-		wantErrorResponse      legacyapi.PublishEventResponses
-		wantError              bool
+		wantPublishRequestData *legacyapi.PublishRequestData
+		wantErrorResponse      *legacyapi.PublishEventResponses
 	}{
 		{
 			name: "should fail if request body is empty",
 			givenLegacyRequestFunc: func() (*http.Request, error) {
 				return legacytest.InvalidLegacyRequestWithEmptyBody(givenVersion, givenApplication)
 			},
-			wantError:         true,
-			wantErrorResponse: *ErrorResponseBadRequest(ErrorMessageBadPayload),
+			wantErrorResponse: ErrorResponseBadRequest(ErrorMessageBadPayload),
 		},
 		{
 			name: "should fail if request body has missing parameters",
 			givenLegacyRequestFunc: func() (*http.Request, error) {
 				return legacytest.InvalidLegacyRequest(givenVersion, givenApplication, givenEventName)
 			},
-			wantError:         true,
-			wantErrorResponse: *ErrorResponseMissingFieldEventType(),
+			wantErrorResponse: ErrorResponseMissingFieldEventType(),
+		},
+		{
+			name: "should fail if application name is not cleaned  from non-alphanumeric characters",
+			givenLegacyRequestFunc: func() (*http.Request, error) {
+				return legacytest.ValidLegacyRequest(givenVersion, "app^^*&", givenEventName)
+			},
+			wantErrorResponse: &legacyapi.PublishEventResponses{
+				Error: &legacyapi.Error{
+					Status:  http.StatusInternalServerError,
+					Message: "application name should be cleaned from non-alphanumeric characters",
+				},
+			},
 		},
 		{
 			name: "should succeed if request body is valid",
 			givenLegacyRequestFunc: func() (*http.Request, error) {
 				return legacytest.ValidLegacyRequest(givenVersion, givenApplication, givenEventName)
 			},
-			wantError: false,
-			wantPublishRequestData: legacyapi.PublishRequestData{
+			wantPublishRequestData: &legacyapi.PublishRequestData{
 				PublishEventParameters: &legacyapi.PublishEventParametersV1{
 					PublishrequestV1: legacyapi.PublishRequestV1{
 						EventType:        "object.do",
@@ -289,8 +288,8 @@ func TestExtractPublishRequestData(t *testing.T) {
 		},
 	}
 
-	for _, tt := range testCases {
-		tc := tt
+	for _, tc := range testCases {
+		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -298,7 +297,9 @@ func TestExtractPublishRequestData(t *testing.T) {
 			request, err := tc.givenLegacyRequestFunc()
 			require.NoError(t, err)
 			// set expected header
-			tc.wantPublishRequestData.Headers = request.Header
+			if tc.wantPublishRequestData != nil {
+				tc.wantPublishRequestData.Headers = request.Header
+			}
 
 			transformer := NewTransformer("test", givenPrefix, nil)
 
@@ -306,124 +307,19 @@ func TestExtractPublishRequestData(t *testing.T) {
 			publishData, errResp, err := transformer.ExtractPublishRequestData(request)
 
 			// then
-			if tc.wantError {
+			if tc.wantErrorResponse != nil {
 				require.Error(t, err)
-				require.Equal(t, tc.wantErrorResponse, *errResp)
+				require.Equal(t, *tc.wantErrorResponse, *errResp)
 			} else {
 				require.NoError(t, err)
 				require.Nil(t, errResp)
-				require.Equal(t, tc.wantPublishRequestData, *publishData)
+				require.Equal(t, *tc.wantPublishRequestData, *publishData)
 			}
 		})
 	}
 }
 
-func TestExtractCEFromLegacyPublishRequestData(t *testing.T) {
-	const givenVersion = "v1"
-	const givenPrefix = "pre1.pre2.pre3"
-	const givenApplication = "app"
-	const givenEventName = "object.do"
-
-	testCases := []struct {
-		name                    string
-		givenPublishRequestData legacyapi.PublishRequestData
-		wantCloudEventFunc      func() (cev2event.Event, error)
-		wantErrorResponse       legacyapi.PublishEventResponses
-		wantError               bool
-		wantEventType           string
-		wantSource              string
-		wantData                string
-		wantEventID             string
-	}{
-		{
-			name: "should fail if application name is not cleaned from non-alphanumeric characters",
-			givenPublishRequestData: legacyapi.PublishRequestData{
-				PublishEventParameters: &legacyapi.PublishEventParametersV1{},
-				ApplicationName:        "app^^*&",
-				URLPath:                "/app/v1/events",
-			},
-			wantError: true,
-			wantErrorResponse: legacyapi.PublishEventResponses{
-				Error: &legacyapi.Error{
-					Status:  http.StatusInternalServerError,
-					Message: "application name should be cleaned from non-alphanumeric characters",
-				},
-			},
-		},
-		{
-			name: "should succeed if publish data is valid",
-			givenPublishRequestData: legacyapi.PublishRequestData{
-				PublishEventParameters: &legacyapi.PublishEventParametersV1{
-					PublishrequestV1: legacyapi.PublishRequestV1{
-						EventID:          testingutils.EventID,
-						EventType:        givenEventName,
-						EventTypeVersion: givenVersion,
-						EventTime:        "2020-04-02T21:37:00Z",
-						Data:             map[string]string{"key": "value"},
-					},
-				},
-				ApplicationName: givenApplication,
-				URLPath:         "/app/v1/events",
-			},
-			wantError:     false,
-			wantEventID:   testingutils.EventID,
-			wantEventType: "object.do.v1",
-			wantSource:    givenApplication,
-			wantData:      `{"key":"value"}`,
-		},
-		{
-			name: "should set new event ID when not provided",
-			givenPublishRequestData: legacyapi.PublishRequestData{
-				PublishEventParameters: &legacyapi.PublishEventParametersV1{
-					PublishrequestV1: legacyapi.PublishRequestV1{
-						EventType:        givenEventName,
-						EventTypeVersion: givenVersion,
-						EventTime:        "2020-04-02T21:37:00Z",
-						Data:             map[string]string{"key": "value"},
-					},
-				},
-				ApplicationName: givenApplication,
-				URLPath:         "/app/v1/events",
-			},
-			wantError:     false,
-			wantEventType: "object.do.v1",
-			wantSource:    givenApplication,
-			wantData:      `{"key":"value"}`,
-		},
-	}
-
-	for _, tt := range testCases {
-		tc := tt
-		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
-
-			// given
-			transformer := NewTransformer("test", givenPrefix, nil)
-
-			// when
-			ceEvent, errResp, err := transformer.ExtractCEFromLegacyPublishRequestData(&tc.givenPublishRequestData)
-
-			// then
-			if tc.wantError {
-				require.Error(t, err)
-				require.Equal(t, tc.wantErrorResponse, *errResp)
-			} else {
-				require.NoError(t, err)
-				require.Nil(t, errResp)
-
-				require.Equal(t, tc.wantEventType, ceEvent.Type())
-				require.Equal(t, tc.wantSource, ceEvent.Source())
-				require.Equal(t, tc.wantData, string(ceEvent.Data()))
-				require.NotEmpty(t, ceEvent.ID())
-				if tc.wantEventID != "" {
-					require.Equal(t, tc.wantEventID, ceEvent.ID())
-				}
-			}
-		})
-	}
-}
-
-func TestConvertPublishRequestToRawCloudEvent(t *testing.T) {
+func TestTransformPublishRequestToCloudEvent(t *testing.T) {
 	const givenVersion = "v1"
 	const givenPrefix = "pre1.pre2.pre3"
 	const givenApplication = "app"
@@ -498,15 +394,20 @@ func TestConvertPublishRequestToRawCloudEvent(t *testing.T) {
 		},
 	}
 
-	for _, tt := range testCases {
-		tc := tt
+	for _, tc := range testCases {
+		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
+			// given
+			givenPublishRequestData := legacyapi.PublishRequestData{
+				PublishEventParameters: &tc.givenPublishEventParameters,
+				ApplicationName:        givenApplication,
+			}
 			transformer := NewTransformer("test", givenPrefix, nil)
 
 			// when
-			ceEvent, err := transformer.convertPublishRequestToRawCloudEvent(givenApplication, &tc.givenPublishEventParameters)
+			ceEvent, err := transformer.TransformPublishRequestToCloudEvent(&givenPublishRequestData)
 
 			// then
 			if tc.wantError {
