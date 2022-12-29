@@ -5,7 +5,6 @@ go 1.19
 replace (
 	github.com/aws/aws-sdk-go => github.com/aws/aws-sdk-go v1.42.52
 
-	github.com/kyma-project/kyma/common/logging => github.com/pPrecel/kyma/common/logging v0.0.0-20221103083340-8c749c35c79b
 	github.com/prometheus/common => github.com/prometheus/common v0.26.0
 	go.etcd.io/etcd => go.etcd.io/etcd v3.3.25+incompatible
 	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20220213190939-1e6e3497d506
@@ -20,7 +19,7 @@ replace (
 require (
 	github.com/fsnotify/fsnotify v1.5.1
 	github.com/go-logr/zapr v1.2.0
-	github.com/kyma-project/kyma/common/logging v0.0.0-20220602092229-f2e29f34ed5e
+	github.com/kyma-project/kyma/common/logging v0.0.0-20221208072023-1c1502074930
 	github.com/libgit2/git2go/v31 v31.7.9
 	github.com/onsi/gomega v1.17.0
 	github.com/pkg/errors v0.9.1
