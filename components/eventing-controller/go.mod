@@ -24,9 +24,9 @@ require (
 	go.uber.org/zap v1.24.0
 	golang.org/x/oauth2 v0.3.0
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2
-	k8s.io/api v0.25.4
-	k8s.io/apimachinery v0.25.4
-	k8s.io/client-go v0.25.4
+	k8s.io/api v0.25.5
+	k8s.io/apimachinery v0.25.5
+	k8s.io/client-go v0.25.5
 	sigs.k8s.io/controller-runtime v0.13.1
 )
 
@@ -73,7 +73,7 @@ require (
 	github.com/stretchr/objx v0.5.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
 	golang.org/x/crypto v0.0.0-20220926161630-eccd6366d1be // indirect
-	golang.org/x/net v0.3.0 // indirect
+	golang.org/x/net v0.3.1-0.20221206200815-1e63c2f08a10 // indirect
 	golang.org/x/sys v0.3.0 // indirect
 	golang.org/x/term v0.3.0 // indirect
 	golang.org/x/text v0.5.0 // indirect
@@ -86,7 +86,7 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	k8s.io/apiextensions-apiserver v0.25.0 // indirect
-	k8s.io/component-base v0.25.4 // indirect
+	k8s.io/component-base v0.25.5 // indirect
 	k8s.io/klog/v2 v2.80.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20220803162953-67bda5d908f1 // indirect
 	k8s.io/utils v0.0.0-20220728103510-ee6ede2d64ed // indirect
@@ -97,11 +97,11 @@ require (
 
 // keep the following always at the same version:
 replace (
-	k8s.io/api => k8s.io/api v0.25.4
-	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.25.4
-	k8s.io/apimachinery => k8s.io/apimachinery v0.25.4
-	k8s.io/client-go => k8s.io/client-go v0.25.4
-	k8s.io/component-base => k8s.io/component-base v0.25.4
+	k8s.io/api => k8s.io/api v0.25.5
+	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.25.5
+	k8s.io/apimachinery => k8s.io/apimachinery v0.25.5
+	k8s.io/client-go => k8s.io/client-go v0.25.5
+	k8s.io/component-base => k8s.io/component-base v0.25.5
 )
 
 replace (
