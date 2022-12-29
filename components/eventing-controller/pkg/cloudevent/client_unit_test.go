@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestNewHTTP(t *testing.T) {
+func Test_NewHTTP(t *testing.T) {
 	// SuT: ClientFactory
 	// UoW: NewHTTP()
 	// test kind: value
