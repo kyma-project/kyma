@@ -63,7 +63,7 @@ type Handler struct {
 	// builds the cloud event according to Subscription v1alpha2 specifications
 	ceBuilder          builder.CloudEventBuilder
 	router             *mux.Router
-	activeBackend      string
+	activeBackend      env.ActiveBackend
 	OldEventTypePrefix string
 }
 
@@ -75,7 +75,7 @@ const (
 func NewHandler(receiver *receiver.HTTPMessageReceiver, sender sender.GenericSender, healthChecker health.Checker, requestTimeout time.Duration,
 	legacyTransformer legacy.RequestToCETransformer, opts *options.Options, subscribedProcessor *subscribed.Processor,
 	logger *logger.Logger, collector metrics.PublishingMetricsCollector, eventTypeCleaner eventtype.Cleaner,
-	ceBuilder builder.CloudEventBuilder, oldEventTypePrefix string, activeBackend string) *Handler {
+	ceBuilder builder.CloudEventBuilder, oldEventTypePrefix string, activeBackend env.ActiveBackend) *Handler {
 
 	return &Handler{
 		Receiver:            receiver,
@@ -128,6 +128,9 @@ func (h *Handler) maxBytes(f http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
+// handlePublishLegacyEventV1alpha2 handles the publishing of events for Subscription v1alpha2 CRD
+// It writes to the user request if any error occurs
+// Otherwise return the published event
 func (h *Handler) handlePublishLegacyEventV1alpha2(writer http.ResponseWriter, publishData *api.PublishRequestData, request *http.Request) (sender.PublishResult, *cev2event.Event) {
 	ceEvent, errResp, _ := h.LegacyTransformer.ExtractCEFromLegacyPublishRequestData(publishData)
 	if errResp != nil {
@@ -213,7 +216,7 @@ func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *h
 	// In case of EnableNewCRDVersion is true and the active backend is JetStream
 	// then we will publish event on both possible subjects
 	// i.e. with prefix (`sap.kyma.custom`) and without prefix
-	// this behaviour will be depreciated when we remove support for JetStream with Subscription `exact` typeMatching
+	// this behaviour will be deprecated when we remove support for JetStream with Subscription `exact` typeMatching
 	if !h.Options.EnableNewCRDVersion || h.activeBackend == env.JetStreamBackend {
 		successResult, publishedEvent = h.handlePublishLegacyEventV1alpha1(writer, publishRequestData, request)
 		// if publishedEvent is nil, then it means that the publishing failed

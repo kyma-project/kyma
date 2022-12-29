@@ -331,47 +331,34 @@ func TestHandler_publishCloudEventsV1Alpha2(t *testing.T) {
 }
 
 func TestHandler_publishLegacyEventsAsCEV1alpha2(t *testing.T) {
-	type fields struct {
-		Sender            sender.GenericSender
-		LegacyTransformer legacy.RequestToCETransformer
-		collector         metrics.PublishingMetricsCollector
-		eventTypeCleaner  eventtype.Cleaner
-	}
-	type args struct {
-		request *http.Request
-	}
+	// define common given variables
+	appLister := NewApplicationListerOrDie(context.Background(), "testapp")
 
-	const bucketsFunc = "Buckets"
+	// set mock for latency metrics
 	latency := new(mocks.BucketsProvider)
-	latency.On(bucketsFunc).Return(nil)
-	latency.Test(t)
+	latency.On("Buckets").Return(nil)
 
 	tests := []struct {
-		name       string
-		fields     fields
-		args       args
-		wantStatus int
-		wantOk     bool
-		wantTEF    string
+		name                   string
+		givenSender            sender.GenericSender
+		givenLegacyTransformer legacy.RequestToCETransformer
+		givenCollector         metrics.PublishingMetricsCollector
+		givenRequest           *http.Request
+		wantHttpStatus         int
+		wantTEF                string
 	}{
 		{
 			name: "Send valid legacy event",
-			fields: fields{
-				Sender: &GenericSenderStub{
-					Result: beb.HTTPPublishResult{
-						Status: 204,
-					},
-					BackendURL: "FOO",
+			givenSender: &GenericSenderStub{
+				Result: beb.HTTPPublishResult{
+					Status: 204,
 				},
-				LegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", NewApplicationListerOrDie(context.Background(), "testapp")),
-				collector:         metrics.NewCollector(latency),
-				eventTypeCleaner:  eventtypetest.CleanerStub{},
+				BackendURL: "FOO",
 			},
-			args: args{
-				request: legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
-			},
-			wantStatus: 200,
-			wantOk:     true,
+			givenLegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", appLister),
+			givenCollector:         metrics.NewCollector(latency),
+			givenRequest:           legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
+			wantHttpStatus:         http.StatusOK,
 			wantTEF: `
 					# HELP eventing_epp_event_type_published_total The total number of events published for a given eventTypeLabel
 					# TYPE eventing_epp_event_type_published_total counter
@@ -401,20 +388,14 @@ func TestHandler_publishLegacyEventsAsCEV1alpha2(t *testing.T) {
 		},
 		{
 			name: "Send valid legacy event but cannot send to backend due to target not found (e.g. stream missing)",
-			fields: fields{
-				Sender: &GenericSenderStub{
-					Err:        fmt.Errorf("oh no, i cannot send: %w", sender.ErrBackendTargetNotFound),
-					BackendURL: "FOO",
-				},
-				LegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", NewApplicationListerOrDie(context.Background(), "testapp")),
-				collector:         metrics.NewCollector(latency),
-				eventTypeCleaner:  eventtypetest.CleanerStub{},
+			givenSender: &GenericSenderStub{
+				Err:        fmt.Errorf("oh no, i cannot send: %w", sender.ErrBackendTargetNotFound),
+				BackendURL: "FOO",
 			},
-			args: args{
-				request: legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
-			},
-			wantStatus: http.StatusBadGateway,
-			wantOk:     false,
+			givenLegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", appLister),
+			givenCollector:         metrics.NewCollector(latency),
+			givenRequest:           legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
+			wantHttpStatus:         http.StatusBadGateway,
 			wantTEF: `
 					# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
 					# TYPE eventing_epp_backend_errors_total counter
@@ -423,20 +404,14 @@ func TestHandler_publishLegacyEventsAsCEV1alpha2(t *testing.T) {
 		},
 		{
 			name: "Send valid legacy event but cannot send to backend due to full storage",
-			fields: fields{
-				Sender: &GenericSenderStub{
-					Err:        fmt.Errorf("oh no, i cannot send: %w", sender.ErrInsufficientStorage),
-					BackendURL: "FOO",
-				},
-				LegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", NewApplicationListerOrDie(context.Background(), "testapp")),
-				collector:         metrics.NewCollector(latency),
-				eventTypeCleaner:  eventtypetest.CleanerStub{},
+			givenSender: &GenericSenderStub{
+				Err:        fmt.Errorf("oh no, i cannot send: %w", sender.ErrInsufficientStorage),
+				BackendURL: "FOO",
 			},
-			args: args{
-				request: legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
-			},
-			wantStatus: 507,
-			wantOk:     false,
+			givenLegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", appLister),
+			givenCollector:         metrics.NewCollector(latency),
+			givenRequest:           legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
+			wantHttpStatus:         507,
 			wantTEF: `
 					# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
 					# TYPE eventing_epp_backend_errors_total counter
@@ -445,20 +420,14 @@ func TestHandler_publishLegacyEventsAsCEV1alpha2(t *testing.T) {
 		},
 		{
 			name: "Send valid legacy event but cannot send to backend",
-			fields: fields{
-				Sender: &GenericSenderStub{
-					Err:        fmt.Errorf("i cannot send"),
-					BackendURL: "FOO",
-				},
-				LegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", NewApplicationListerOrDie(context.Background(), "testapp")),
-				collector:         metrics.NewCollector(latency),
-				eventTypeCleaner:  eventtypetest.CleanerStub{},
+			givenSender: &GenericSenderStub{
+				Err:        fmt.Errorf("i cannot send"),
+				BackendURL: "FOO",
 			},
-			args: args{
-				request: legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
-			},
-			wantStatus: 500,
-			wantOk:     false,
+			givenLegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", appLister),
+			givenCollector:         metrics.NewCollector(latency),
+			givenRequest:           legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
+			wantHttpStatus:         500,
 			wantTEF: `
 					# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
 					# TYPE eventing_epp_backend_errors_total counter
@@ -467,23 +436,17 @@ func TestHandler_publishLegacyEventsAsCEV1alpha2(t *testing.T) {
 		},
 		{
 			name: "Send invalid legacy event",
-			fields: fields{
-				Sender: &GenericSenderStub{
-					Result: beb.HTTPPublishResult{
-						Status: 204,
-					},
-					BackendURL: "FOO",
+			givenSender: &GenericSenderStub{
+				Result: beb.HTTPPublishResult{
+					Status: 204,
 				},
-				LegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", NewApplicationListerOrDie(context.Background(), "testapp")),
-				collector:         metrics.NewCollector(latency),
-				eventTypeCleaner:  eventtypetest.CleanerStub{},
+				BackendURL: "FOO",
 			},
-			args: args{
-				request: legacytest.InvalidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
-			},
-			wantStatus: 400,
-			wantOk:     false,
-			wantTEF:    "", // this is a client error. We do record an error metric for requests that cannot even be decoded correctly.
+			givenLegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", appLister),
+			givenCollector:         metrics.NewCollector(latency),
+			givenRequest:           legacytest.InvalidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
+			wantHttpStatus:         400,
+			wantTEF:                "", // this is a client error. We do record an error metric for requests that cannot even be decoded correctly.
 		},
 	}
 	for _, tt := range tests {
@@ -492,17 +455,13 @@ func TestHandler_publishLegacyEventsAsCEV1alpha2(t *testing.T) {
 			logger, err := eclogger.New("text", "debug")
 			require.NoError(t, err)
 
-			app := applicationtest.NewApplication("appName1", nil)
-			appLister := fake.NewApplicationListerOrDie(context.Background(), app)
-
 			ceBuilder := builder.NewGenericBuilder("prefix", cleaner.NewJetStreamCleaner(logger), appLister, logger)
 
 			h := &Handler{
-				Sender:            tt.fields.Sender,
+				Sender:            tt.givenSender,
 				Logger:            logger,
-				LegacyTransformer: tt.fields.LegacyTransformer,
-				collector:         tt.fields.collector,
-				eventTypeCleaner:  tt.fields.eventTypeCleaner,
+				LegacyTransformer: tt.givenLegacyTransformer,
+				collector:         tt.givenCollector,
 				ceBuilder:         ceBuilder,
 				Options: &options.Options{
 					Env: options.Env{EnableNewCRDVersion: true},
@@ -511,14 +470,14 @@ func TestHandler_publishLegacyEventsAsCEV1alpha2(t *testing.T) {
 			writer := httptest.NewRecorder()
 
 			// when
-			h.publishLegacyEventsAsCE(writer, tt.args.request)
+			h.publishLegacyEventsAsCE(writer, tt.givenRequest)
 
 			// then
-			require.Equal(t, tt.wantStatus, writer.Result().StatusCode)
+			require.Equal(t, tt.wantHttpStatus, writer.Result().StatusCode)
 			body, err := io.ReadAll(writer.Result().Body)
 			require.NoError(t, err)
 
-			if tt.wantOk {
+			if tt.wantHttpStatus == http.StatusOK {
 				ok := &api.PublishResponse{}
 				err = json.Unmarshal(body, ok)
 				require.NoError(t, err)
@@ -529,7 +488,6 @@ func TestHandler_publishLegacyEventsAsCEV1alpha2(t *testing.T) {
 			}
 
 			metricstest.EnsureMetricMatchesTextExpositionFormat(t, h.collector, tt.wantTEF)
-
 		})
 	}
 }
