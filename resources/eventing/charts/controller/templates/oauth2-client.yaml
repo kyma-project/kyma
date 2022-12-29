@@ -4,8 +4,6 @@ kind: OAuth2Client
 metadata:
   name: {{ include "controller.fullname" . }}
   labels: {{- include "controller.labels" . | nindent 4 }}
-  finalizers:
-    - finalizer.ory.hydra.sh
 spec:
   grantTypes:
     - client_credentials
