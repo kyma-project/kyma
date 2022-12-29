@@ -8,6 +8,7 @@ import (
 	"time"
 
 	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
+	pkgerrors "github.com/kyma-project/kyma/components/eventing-controller/pkg/errors"
 
 	cev2 "github.com/cloudevents/sdk-go/v2"
 	cev2protocol "github.com/cloudevents/sdk-go/v2/protocol"
@@ -497,7 +498,7 @@ func (js *JetStream) syncConsumerAndSubscription(subscription *eventingv1alpha2.
 		}
 
 		if _, ok := js.subscriptions[jsSubKey]; !ok {
-			return utils.MakeError(ErrMissingSubscription, err)
+			return pkgerrors.MakeError(ErrMissingSubscription, err)
 		}
 
 		// try to bind invalid NATS Subscriptions
@@ -529,10 +530,10 @@ func (js *JetStream) getOrCreateConsumer(subscription *eventingv1alpha2.Subscrip
 				js.getConsumerConfig(jsSubKey, jsSubject, subscription.GetMaxInFlightMessages(&js.subsConfig)),
 			)
 			if err != nil {
-				return nil, utils.MakeError(ErrAddConsumer, err)
+				return nil, pkgerrors.MakeError(ErrAddConsumer, err)
 			}
 		} else {
-			return nil, utils.MakeError(ErrGetConsumer, err)
+			return nil, pkgerrors.MakeError(ErrGetConsumer, err)
 		}
 	}
 	return consumerInfo, nil
@@ -550,7 +551,7 @@ func (js *JetStream) createNATSSubscription(subscription *eventingv1alpha2.Subsc
 		js.getDefaultSubscriptionOptions(jsSubKey, subscription.GetMaxInFlightMessages(&js.subsConfig))...,
 	)
 	if err != nil {
-		return utils.MakeError(ErrFailedSubscribe, err)
+		return pkgerrors.MakeError(ErrFailedSubscribe, err)
 	}
 	// save created JetStream subscription in storage
 	js.subscriptions[jsSubKey] = &Subscription{Subscription: jsSubscription}
@@ -576,7 +577,7 @@ func (js *JetStream) bindInvalidSubscriptions(subscription *eventingv1alpha2.Sub
 		nats.Bind(js.Config.JSStreamName, jsSubKey.ConsumerName()),
 	)
 	if err != nil {
-		return utils.MakeError(ErrFailedSubscribe, err)
+		return pkgerrors.MakeError(ErrFailedSubscribe, err)
 	}
 	// save recreated JetStream subscription in storage
 	js.subscriptions[jsSubKey] = &Subscription{Subscription: jsSubscription}
@@ -599,7 +600,7 @@ func (js *JetStream) syncConsumerMaxInFlight(subscription *eventingv1alpha2.Subs
 
 	// update the consumer
 	if _, updateErr := js.jsCtx.UpdateConsumer(js.Config.JSStreamName, &consumerConfig); updateErr != nil {
-		return utils.MakeError(ErrUpdateConsumer, updateErr)
+		return pkgerrors.MakeError(ErrUpdateConsumer, updateErr)
 	}
 	return nil
 }
