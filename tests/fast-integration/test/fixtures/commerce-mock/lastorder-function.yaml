@@ -34,7 +34,7 @@ spec:
       if(isLegacyEvent) {
         return {
           payload: {
-             "event-type": "order.received",
+             "event-type": type? type: "order.received",
              "event-type-version": "v1",
              "event-time": "2020-09-28T14:47:16.491Z",
              data
