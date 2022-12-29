@@ -99,7 +99,7 @@ app.all("*", (req, res) => {
                     res.set(name, headers[name]);
                 }
             }
-            res.status(status).send(body);
+            res.sendStatus(status).send(body);
         };
 
         const span = startNewSpan('userFunction', tracer);
@@ -123,6 +123,8 @@ app.all("*", (req, res) => {
                 } else {
                     callback(200, out)
                 }
+            } else {
+                callback(204)
             }
         } catch (err) {
             helper.handleError(err.status || 500, err, span, callback)
