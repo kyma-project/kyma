@@ -5,6 +5,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/cloudevent"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewHTTP(t *testing.T) {
@@ -14,6 +15,7 @@ func TestNewHTTP(t *testing.T) {
 
 	cf := cloudevent.ClientFactory{}
 	client, err := cf.NewHTTP()
-	assert.NoError(t, err)
-	assert.NotNil(t, client)
+	require.NoError(t, err)
+	require.NotNil(t, client)
+	assert.NotNil(t, client.Client)
 }
