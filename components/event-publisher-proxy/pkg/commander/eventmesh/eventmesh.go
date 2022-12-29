@@ -28,7 +28,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/oauth"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/receiver"
-    eventmesh "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender/eventmesh"
+	eventmesh "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender/eventmesh"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/signals"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/subscribed"
 )

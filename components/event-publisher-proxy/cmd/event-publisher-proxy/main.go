@@ -8,7 +8,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/commander"
-    eventmesh "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/commander/eventmesh"
+	eventmesh "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/commander/eventmesh"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/commander/nats"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics/latency"
@@ -16,8 +16,8 @@ import (
 )
 
 const (
-	backendEventMesh  = "beb"
-	backendNATS = "nats"
+	backendEventMesh = "beb"
+	backendNATS      = "nats"
 )
 
 type Config struct {
