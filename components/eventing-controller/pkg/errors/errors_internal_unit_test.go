@@ -18,8 +18,8 @@ func Test_ArgumentError_WithArg(t *testing.T) {
 	errorWithArg := errInvalidStorageType.WithArg(someArgument)
 
 	// then
-	// ensure errors are still equal, otherwise Is() would return false.
+	// Ensure errors are still equal, otherwise Is() would return false.
 	assert.Equal(t, errorWithoutArg.errorFormatType, errorWithArg.errorFormatType)
-	// ensure argument is set
+	// Ensure argument is set.
 	assert.Equal(t, errorWithArg.argument, someArgument)
 }
