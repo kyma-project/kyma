@@ -100,7 +100,7 @@ func (c *Commander) Start() error {
 
 	// configure legacyTransformer
 	legacyTransformer := legacy.NewTransformer(
-		c.envCfg.ToConfig().BEBNamespace,
+		c.envCfg.ToConfig().Namespace,
 		c.envCfg.ToConfig().EventTypePrefix,
 		applicationLister,
 	)
@@ -116,7 +116,7 @@ func (c *Commander) Start() error {
 	subscribedProcessor := &subscribed.Processor{
 		SubscriptionLister: &subLister,
 		Prefix:             c.envCfg.ToConfig().EventTypePrefix,
-		Namespace:          c.envCfg.ToConfig().BEBNamespace,
+		Namespace:          c.envCfg.ToConfig().Namespace,
 		Logger:             c.logger,
 	}
 
