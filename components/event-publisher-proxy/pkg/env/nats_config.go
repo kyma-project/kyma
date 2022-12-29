@@ -32,7 +32,7 @@ type NATSConfig struct {
 // ToConfig converts to a default BEB BEBConfig
 func (c *NATSConfig) ToConfig() *Config {
 	cfg := &Config{
-		Namespace:    c.LegacyNamespace,
+		Namespace:       c.LegacyNamespace,
 		EventTypePrefix: c.EventTypePrefix,
 	}
 	return cfg
