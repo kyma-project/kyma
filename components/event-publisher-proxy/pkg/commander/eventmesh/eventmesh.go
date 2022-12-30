@@ -1,4 +1,4 @@
-package beb
+package eventmesh
 
 import (
 	"context"
@@ -34,8 +34,8 @@ import (
 )
 
 const (
-	bebBackend       = "beb"
-	bebCommanderName = bebBackend + "-commander"
+	Backend       = "beb"
+	CommanderName = Backend + "-commander"
 )
 
 // Commander implements the Commander interface.
@@ -60,7 +60,7 @@ func NewCommander(opts *options.Options, metricsCollector *metrics.Collector, lo
 // Init implements the Commander interface and initializes the publisher to BEB.
 func (c *Commander) Init() error {
 	if err := envconfig.Process("", c.envCfg); err != nil {
-		return xerrors.Errorf("failed to read configuration for %s : %v", bebCommanderName, err)
+		return xerrors.Errorf("failed to read configuration for %s : %v", CommanderName, err)
 	}
 	return nil
 }
@@ -129,7 +129,7 @@ func (c *Commander) Start() error {
 	// start handler which blocks until it receives a shutdown signal
 	if err := handler.NewHandler(messageReceiver, messageSender, health.NewChecker(), c.envCfg.RequestTimeout, legacyTransformer, c.opts,
 		subscribedProcessor, c.logger, c.metricsCollector, eventTypeCleanerV1, ceBuilder).Start(ctx); err != nil {
-		return xerrors.Errorf("failed to start handler for %s : %v", bebCommanderName, err)
+		return xerrors.Errorf("failed to start handler for %s : %v", CommanderName, err)
 	}
 	c.namedLogger().Info("Event Publisher was shut down")
 	return nil
@@ -142,5 +142,5 @@ func (c *Commander) Stop() error {
 }
 
 func (c *Commander) namedLogger() *zap.SugaredLogger {
-	return c.logger.WithContext().Named(bebCommanderName).With("backend", bebBackend)
+	return c.logger.WithContext().Named(CommanderName).With("backend", Backend)
 }
