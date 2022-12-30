@@ -43,7 +43,6 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 	python39Logger := logf.WithField(scenarioKey, "python39")
 	nodejs14Logger := logf.WithField(scenarioKey, "nodejs14")
 	nodejs16Logger := logf.WithField(scenarioKey, "nodejs16")
-	java17AlphaJvmLogger := logf.WithField(scenarioKey, "java17jvm-alpha")
 
 	genericContainer := shared.Container{
 		DynamicCli:  dynamicCli,
@@ -58,8 +57,6 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 	nodeJS14Fn := function.NewFunction("nodejs14", cfg.KubectlProxyEnabled, genericContainer.WithLogger(nodejs14Logger))
 
 	nodejs16Fn := function.NewFunction("nodejs16", cfg.KubectlProxyEnabled, genericContainer.WithLogger(nodejs16Logger))
-
-	java17AlphaJvmFn := function.NewFunction("java17jvm-alpha", cfg.KubectlProxyEnabled, genericContainer.WithLogger(nodejs16Logger))
 
 	cm := configmap.NewConfigMap("test-serverless-configmap", genericContainer.WithLogger(nodejs14Logger))
 	cmEnvKey := "CM_ENV_KEY"
@@ -110,15 +107,6 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 				teststep.NewHTTPCheck(nodejs16Logger, "NodeJS16 pre update simple check through service", nodejs16Fn.FunctionURL, poll, "Hello from nodejs16"),
 				teststep.UpdateFunction(nodejs16Logger, nodejs16Fn, "Update NodeJS16 Function", runtimes.BasicNodeJSFunctionWithCustomDependency("Hello from updated nodejs16", serverlessv1alpha2.NodeJs16)),
 				teststep.NewHTTPCheck(nodejs16Logger, "NodeJS16 post update simple check through service", nodejs16Fn.FunctionURL, poll, "Hello from updated nodejs16"),
-			),
-			step.NewSerialTestRunner(java17AlphaJvmLogger, "Java 17 Jvm Alppha test",
-				teststep.CreateFunction(java17AlphaJvmLogger, java17AlphaJvmFn, "Create Java 17 JVM", runtimes.BasicJavaFunction("Hello from java17 jvm", serverlessv1alpha2.Java17JvmAlpha)),
-				teststep.NewHTTPCheck(java17AlphaJvmLogger, "Java17 Jvm pre update simple check through service", java17AlphaJvmFn.FunctionURL, poll, "Hello from java17 jvm"),
-				teststep.UpdateFunction(java17AlphaJvmLogger, java17AlphaJvmFn, "Update Java 17 JVM Function", runtimes.BasicJavaFunction("Hello from update java17 jvm", serverlessv1alpha2.Java17JvmAlpha)),
-				teststep.NewHTTPCheck(java17AlphaJvmLogger, "Java17 Jvm pre update simple check through service", java17AlphaJvmFn.FunctionURL, poll, "Hello from update java17 jvm"),
-				//TODO: Using custom dependencies in java functions doesn't work. I will be fixed.
-				//teststep.UpdateFunction(java17AlphaJvmLogger, java17AlphaJvmFn, "Update Java 17 JVM Function", runtimes.UpdatedDepJavaCsvResponse(serverlessv1alpha2.Java17JvmAlpha)),
-				//teststep.NewHTTPCheck(java17AlphaJvmLogger, "Java 17 JVM post update simple check through service", java17AlphaJvmFn.FunctionURL, poll, runtimes.ExpectedUpdatedResponse),
 			),
 		),
 	), nil

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 
+	pkgerrors "github.com/kyma-project/kyma/components/eventing-controller/pkg/errors"
 	"golang.org/x/xerrors"
 
 	"github.com/pkg/errors"
@@ -875,7 +876,7 @@ func (r *Reconciler) updateMutatingValidatingWebhookWithCABundle(ctx context.Con
 		Name:      r.cfg.WebhookSecretName,
 	}
 	if err := r.Client.Get(ctx, secretKey, &certificateSecret); err != nil {
-		return utils.MakeError(errObjectNotFound, err)
+		return pkgerrors.MakeError(errObjectNotFound, err)
 	}
 
 	// get the mutating and validation WH config
@@ -886,11 +887,11 @@ func (r *Reconciler) updateMutatingValidatingWebhookWithCABundle(ctx context.Con
 
 	// check that the mutating and validation WH config are valid
 	if len(mutatingWH.Webhooks) == 0 {
-		return utils.MakeError(errInvalidObject,
+		return pkgerrors.MakeError(errInvalidObject,
 			errors.Errorf("mutatingWH %s does not have associated webhooks", r.cfg.MutatingWebhookName))
 	}
 	if len(validatingWH.Webhooks) == 0 {
-		return utils.MakeError(errInvalidObject,
+		return pkgerrors.MakeError(errInvalidObject,
 			errors.Errorf("validatingWH %s does not have associated webhooks", r.cfg.ValidatingWebhookName))
 	}
 
@@ -925,14 +926,14 @@ func (r *Reconciler) getMutatingAndValidatingWebHookConfig(ctx context.Context) 
 		Name: r.cfg.MutatingWebhookName,
 	}
 	if err := r.Client.Get(ctx, mutatingWHKey, &mutatingWH); err != nil {
-		return nil, nil, utils.MakeError(errObjectNotFound, err)
+		return nil, nil, pkgerrors.MakeError(errObjectNotFound, err)
 	}
 	var validatingWH admissionv1.ValidatingWebhookConfiguration
 	validatingWHKey := client.ObjectKey{
 		Name: r.cfg.ValidatingWebhookName,
 	}
 	if err := r.Client.Get(ctx, validatingWHKey, &validatingWH); err != nil {
-		return nil, nil, utils.MakeError(errObjectNotFound, err)
+		return nil, nil, pkgerrors.MakeError(errObjectNotFound, err)
 	}
 	return &mutatingWH, &validatingWH, nil
 }

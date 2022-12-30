@@ -41,7 +41,7 @@ func init() {
 func main() {
 	setupLog := ctrlzap.New().WithName("setup")
 
-	setupLog.Info("reading configuration")
+	setupLog.Info("reading 	configuration")
 	cfg := &webhook.Config{}
 	if err := envconfig.InitWithPrefix(cfg, "WEBHOOK"); err != nil {
 		panic(errors.Wrap(err, "while reading env variables"))
@@ -124,7 +124,7 @@ func main() {
 	})
 
 	whs.Register(resources.FunctionValidationWebhookPath, &ctrlwebhook.Admission{
-		Handler: webhook.NewValidatingWebHook(validationConfigv1alpha1, validationConfigv1alpha2, cfg.FeatureFlags, mgr.GetClient()),
+		Handler: webhook.NewValidatingHook(validationConfigv1alpha1, validationConfigv1alpha2, mgr.GetClient()),
 	})
 
 	whs.Register(resources.RegistryConfigDefaultingWebhookPath, &ctrlwebhook.Admission{Handler: webhook.NewRegistryWatcher()})
