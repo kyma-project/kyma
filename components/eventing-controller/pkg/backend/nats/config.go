@@ -28,7 +28,8 @@ type Config struct {
 
 	// JetStream-specific configs
 	// Name of the JetStream stream where all events are stored.
-	JSStreamName    string `envconfig:"JS_STREAM_NAME" required:"true"`
+	JSStreamName string `envconfig:"JS_STREAM_NAME" required:"true"`
+	// Prefix for the subjects in the stream.
 	JSSubjectPrefix string `envconfig:"JS_STREAM_SUBJECT_PREFIX" required:"true"`
 	// Storage type of the stream, memory or file.
 	JSStreamStorageType string `envconfig:"JS_STREAM_STORAGE_TYPE" default:"memory"`
