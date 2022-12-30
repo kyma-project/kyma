@@ -41,7 +41,7 @@ const (
 // Commander implements the Commander interface.
 type Commander struct {
 	cancel           context.CancelFunc
-	envCfg           *env.BEBConfig
+	envCfg           *env.EventMeshConfig
 	logger           *logger.Logger
 	metricsCollector *metrics.Collector
 	opts             *options.Options
@@ -52,7 +52,7 @@ func NewCommander(opts *options.Options, metricsCollector *metrics.Collector, lo
 	return &Commander{
 		metricsCollector: metricsCollector,
 		logger:           logger,
-		envCfg:           new(env.BEBConfig),
+		envCfg:           new(env.EventMeshConfig),
 		opts:             opts,
 	}
 }

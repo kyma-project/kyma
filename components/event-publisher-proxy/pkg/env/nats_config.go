@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-// compile time check
+// Compile time check of the interface implementation.
 var _ fmt.Stringer = &NATSConfig{}
 
 const JetStreamSubjectPrefix = "kyma"
@@ -19,9 +19,9 @@ type NATSConfig struct {
 	ReconnectWait        time.Duration `envconfig:"RECONNECT_WAIT" default:"5s"`
 	RequestTimeout       time.Duration `envconfig:"REQUEST_TIMEOUT" default:"5s"`
 
-	// Legacy Namespace is used as the event source for legacy events
+	// Legacy Namespace is used as the event source for legacy events.
 	LegacyNamespace string `envconfig:"LEGACY_NAMESPACE" default:"kyma"`
-	// EventTypePrefix is the prefix of each event as per the eventing specification
+	// EventTypePrefix is the prefix of each event as per the eventing specification.
 	// It follows the eventType format: <eventTypePrefix>.<appName>.<event-name>.<version>
 	EventTypePrefix string `envconfig:"EVENT_TYPE_PREFIX" default:"kyma"`
 
@@ -29,16 +29,16 @@ type NATSConfig struct {
 	JSStreamName string `envconfig:"JS_STREAM_NAME" default:"kyma"`
 }
 
-// ToConfig converts to a default BEB BEBConfig
-func (c *NATSConfig) ToConfig() *BEBConfig {
-	cfg := &BEBConfig{
+// ToConfig converts to a default EvenMeshConfig.
+func (c *NATSConfig) ToConfig() *EventMeshConfig {
+	cfg := &EventMeshConfig{
 		BEBNamespace:    c.LegacyNamespace,
 		EventTypePrefix: c.EventTypePrefix,
 	}
 	return cfg
 }
 
-// String implements the fmt.Stringer interface
+// String implements the fmt.Stringer interface.
 func (c *NATSConfig) String() string {
 	return fmt.Sprintf("%#v", c)
 }
