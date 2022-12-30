@@ -137,8 +137,6 @@ func getPackageConfigVolumeMountsForRuntime(rtm serverlessv1alpha2.Runtime) []co
 				MountPath: path.Join(workspaceMountPath, "registry-config/pip.conf"),
 				SubPath:   "pip.conf"},
 		}
-	case serverlessv1alpha2.Java17JvmAlpha:
-		return []corev1.VolumeMount{}
 	}
 	return nil
 }
