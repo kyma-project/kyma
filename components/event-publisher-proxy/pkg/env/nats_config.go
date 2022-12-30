@@ -30,10 +30,10 @@ type NATSConfig struct {
 }
 
 // ToConfig converts to a default BEB BEBConfig
-func (c *NATSConfig) ToConfig() *BEBConfig {
-	cfg := &BEBConfig{
-		BEBNamespace:    c.LegacyNamespace,
-		EventTypePrefix: c.EventTypePrefix,
+func (c *NATSConfig) ToConfig() *EventMeshConfig {
+	cfg := &EventMeshConfig{
+		EventMeshNamespace: c.LegacyNamespace,
+		EventTypePrefix:    c.EventTypePrefix,
 	}
 	return cfg
 }

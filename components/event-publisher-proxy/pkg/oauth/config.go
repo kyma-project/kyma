@@ -7,7 +7,7 @@ import (
 )
 
 // Config returns a new oauth2 client credentials config instance.
-func Config(cfg *env.BEBConfig) clientcredentials.Config {
+func Config(cfg *env.EventMeshConfig) clientcredentials.Config {
 	return clientcredentials.Config{
 		ClientID:     cfg.ClientID,
 		ClientSecret: cfg.ClientSecret,
