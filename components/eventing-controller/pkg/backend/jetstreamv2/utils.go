@@ -6,13 +6,14 @@ import (
 	"fmt"
 	"strings"
 
+	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
+	pkgerrors "github.com/kyma-project/kyma/components/eventing-controller/pkg/errors"
 	"github.com/nats-io/nats.go"
 	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/types"
 
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 )
 
 const (
@@ -49,6 +50,11 @@ func (js *JetStream) getDefaultSubscriptionOptions(consumer SubscriptionSubjectI
 	}
 }
 
+var ErrInvalidStorageType = pkgerrors.NewArgumentError("invalid stream storage type: %q")
+var ErrInvalidRetentionPolicy = pkgerrors.NewArgumentError("invalid stream retention policy: %q")
+var ErrInvalidDiscardPolicy = pkgerrors.NewArgumentError("invalid stream discard policy: %q")
+
+// toJetStreamStorageType converts a string to a nats.StorageType.
 func toJetStreamStorageType(s string) (nats.StorageType, error) {
 	switch s {
 	case StorageTypeMemory:
@@ -56,7 +62,7 @@ func toJetStreamStorageType(s string) (nats.StorageType, error) {
 	case StorageTypeFile:
 		return nats.FileStorage, nil
 	}
-	return nats.MemoryStorage, fmt.Errorf("invalid stream storage type %q", s)
+	return nats.MemoryStorage, ErrInvalidStorageType.WithArg(s)
 }
 
 func toJetStreamRetentionPolicy(s string) (nats.RetentionPolicy, error) {
@@ -66,7 +72,7 @@ func toJetStreamRetentionPolicy(s string) (nats.RetentionPolicy, error) {
 	case RetentionPolicyInterest:
 		return nats.InterestPolicy, nil
 	}
-	return nats.LimitsPolicy, fmt.Errorf("invalid stream retention policy %q", s)
+	return nats.LimitsPolicy, ErrInvalidRetentionPolicy.WithArg(s)
 }
 
 func toJetStreamDiscardPolicy(s string) (nats.DiscardPolicy, error) {
@@ -76,7 +82,7 @@ func toJetStreamDiscardPolicy(s string) (nats.DiscardPolicy, error) {
 	case DiscardPolicyNew:
 		return nats.DiscardNew, nil
 	}
-	return nats.DiscardNew, fmt.Errorf("invalid stream discard policy %q", s)
+	return nats.DiscardNew, ErrInvalidDiscardPolicy.WithArg(s)
 }
 
 // toJetStreamConsumerDeliverPolicyOpt returns a nats.DeliverPolicy opt based on the given deliver policy string value.
@@ -113,7 +119,7 @@ func toJetStreamConsumerDeliverPolicy(deliverPolicy string) nats.DeliverPolicy {
 	return nats.DeliverNewPolicy
 }
 
-func getStreamConfig(natsConfig env.NatsConfig) (*nats.StreamConfig, error) {
+func getStreamConfig(natsConfig backendnats.Config) (*nats.StreamConfig, error) {
 	storage, err := toJetStreamStorageType(natsConfig.JSStreamStorageType)
 	if err != nil {
 		return nil, err

@@ -997,9 +997,9 @@ func TestJSSubscriptionUsingCESDK(t *testing.T) {
 	require.NoError(t, jsBackend.DeleteSubscription(sub))
 }
 
-func defaultNatsConfig(url string, natsPort int) env.NatsConfig {
+func defaultNatsConfig(url string, natsPort int) backendnats.Config {
 	streamName := fmt.Sprintf("%s%d", defaultStreamName, natsPort)
-	return env.NatsConfig{
+	return backendnats.Config{
 		URL:                     url,
 		MaxReconnects:           defaultMaxReconnects,
 		ReconnectWait:           3 * time.Second,
@@ -1044,7 +1044,7 @@ type TestEnvironment struct {
 	logger      *logger.Logger
 	natsServer  *server.Server
 	jsClient    *jetStreamClient
-	natsConfig  env.NatsConfig
+	natsConfig  backendnats.Config
 	cleaner     eventtype.Cleaner
 	cleanerv2   cleanerv1alpha2.Cleaner
 	natsPort    int

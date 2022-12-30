@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
 	"github.com/stretchr/testify/assert"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
@@ -472,9 +473,9 @@ func TestJetStream_NATSSubscriptionCount(t *testing.T) {
 	}
 }
 
-func defaultNatsConfig(url string, port int) env.NatsConfig {
+func defaultNatsConfig(url string, port int) backendnats.Config {
 	streamName := fmt.Sprintf("%s%d", DefaultStreamName, port)
-	return env.NatsConfig{
+	return backendnats.Config{
 		URL:                     url,
 		MaxReconnects:           DefaultMaxReconnects,
 		ReconnectWait:           3 * time.Second,
