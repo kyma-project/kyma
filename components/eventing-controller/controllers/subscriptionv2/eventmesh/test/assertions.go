@@ -45,5 +45,5 @@ func getAPIRuleAssert(ctx context.Context, g *gomega.GomegaWithT,
 			return apigatewayv1beta1.APIRule{}
 		}
 		return *fetchedAPIRule
-	}, bigTimeOut, bigPollingInterval)
+	}, twoMinTimeOut, bigPollingInterval)
 }
