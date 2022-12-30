@@ -107,25 +107,25 @@ func (c *registryClient) ImageRepository(imageName string) (RepositoryClient, er
 
 func (c *registryClient) Repositories() ([]string, error) {
 	var (
-		ret  []string
-		last string
-		err  error
-		n    int
+		ret   []string
+		last  string
+		err   error
+		count int
 	)
 	// I can't even...
 	for {
 		repos := make([]string, 50)
-		n, err = c.regClient.Repositories(c.ctx, repos, last)
-		if n > 0 {
-			ret = append(ret, repos[:n]...)
+		count, err = c.regClient.Repositories(c.ctx, repos, last)
+		if count > 0 {
+			ret = append(ret, repos[:count]...)
 		}
 		if err != nil {
 			break
 		}
-		last = repos[n-1]
+		last = repos[count-1]
 	}
 	if err != nil && err != io.EOF {
-		return nil, err
+		return nil, errors.Wrap(err, "while fetching repositories")
 	}
 	return ret, nil
 }
@@ -141,7 +141,7 @@ func registryAuthTransport(username, password string, u *url.URL) (http.RoundTri
 
 	challengeManager, _, err := dockerregistry.PingV2Registry(u, transport.NewTransport(http.DefaultTransport))
 	if err != nil {
-		errors.Wrap(err, "while generating auth challengeManager")
+		return nil, errors.Wrap(err, "while generating auth challengeManager")
 	}
 
 	basicAuthHandler := auth.NewBasicHandler(dockerregistry.NewStaticCredentialStore(authconfig))
@@ -156,7 +156,7 @@ func registryAuthTransport(username, password string, u *url.URL) (http.RoundTri
 func (rc *registryClient) ListRegistryImagesLayers() (NestedSet, error) {
 	r, err := rc.Repositories()
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "while listing registry images")
 	}
 	images := []string{}
 	for _, image := range r {
@@ -171,7 +171,7 @@ func (rc *registryClient) ListRegistryImagesLayers() (NestedSet, error) {
 func (rc *registryClient) ListRegistryCachedLayers() (NestedSet, error) {
 	r, err := rc.Repositories()
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "while listing registry images")
 	}
 
 	images := []string{}
@@ -188,12 +188,12 @@ func (rc *registryClient) fetchImagesLayers(images []string) (NestedSet, error) 
 	for _, image := range images {
 		repoCli, err := rc.ImageRepository(image)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "while getting image repository client")
 		}
 
 		imageTags, err := repoCli.ListTags()
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "while getting image tags")
 		}
 
 		for _, tag := range imageTags {
@@ -204,9 +204,12 @@ func (rc *registryClient) fetchImagesLayers(images []string) (NestedSet, error) 
 				distribution.WithManifestMediaTypes([]string{schema2.MediaTypeManifest}),
 			)
 			if err != nil {
-				return nil, err
+				return nil, errors.Wrap(err, "while getting tag manifest")
 			}
 			for _, ref := range m.References() {
+				// each layer manifest containers two references: 1) tag reference, 2) blob reference.
+				// the tag reference is useless for us, so we skip it. We are only interested in the blob reference,
+				// since it's the reference used by other images using this layer.
 				if ref.MediaType != schema2.MediaTypeLayer {
 					continue
 				}
