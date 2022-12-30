@@ -23,7 +23,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics/metricstest"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender/beb"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender/eventmesh"
 )
 
 func TestHandler_publishCloudEventsV1Alpha2(t *testing.T) {
@@ -54,7 +54,7 @@ func TestHandler_publishCloudEventsV1Alpha2(t *testing.T) {
 			fields: fields{
 				Sender: &GenericSenderStub{
 					Err: nil,
-					Result: beb.HTTPPublishResult{
+					Result: eventmesh.HTTPPublishResult{
 						Status: 204,
 						Body:   []byte(""),
 					},
@@ -96,7 +96,7 @@ func TestHandler_publishCloudEventsV1Alpha2(t *testing.T) {
 			fields: fields{
 				Sender: &GenericSenderStub{
 					Err: nil,
-					Result: beb.HTTPPublishResult{
+					Result: eventmesh.HTTPPublishResult{
 						Status: 204,
 						Body:   []byte(""),
 					},
@@ -139,7 +139,7 @@ func TestHandler_publishCloudEventsV1Alpha2(t *testing.T) {
 			fields: fields{
 				Sender: &GenericSenderStub{
 					Err: nil,
-					Result: beb.HTTPPublishResult{
+					Result: eventmesh.HTTPPublishResult{
 						Status: 204,
 						Body:   []byte(""),
 					},
@@ -181,7 +181,7 @@ func TestHandler_publishCloudEventsV1Alpha2(t *testing.T) {
 			fields: fields{
 				Sender: &GenericSenderStub{
 					Err: nil,
-					Result: beb.HTTPPublishResult{
+					Result: eventmesh.HTTPPublishResult{
 						Status: 204,
 						Body:   []byte(""),
 					},
