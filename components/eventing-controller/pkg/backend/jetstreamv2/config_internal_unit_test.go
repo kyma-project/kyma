@@ -63,7 +63,7 @@ func TestUnitValidate_For_Errors(t *testing.T) {
 		})
 	}
 }
-func TestGetNatsConfig(t *testing.T) {
+func Test_GetNATSConfig(t *testing.T) {
 	type args struct {
 		maxReconnects int
 		reconnectWait time.Duration
@@ -177,13 +177,13 @@ func TestGetNatsConfig(t *testing.T) {
 				t.Setenv(k, v)
 			}
 
-			got, err := backendnats.GetNatsConfig(tt.args.maxReconnects, tt.args.reconnectWait)
+			got, err := backendnats.GetNATSConfig(tt.args.maxReconnects, tt.args.reconnectWait)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("GetNatsConfig() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("GetNATSConfig() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GetNatsConfig() got = %v, want %v", got, tt.want)
+				t.Errorf("GetNATSConfig() got = %v, want %v", got, tt.want)
 			}
 		})
 	}

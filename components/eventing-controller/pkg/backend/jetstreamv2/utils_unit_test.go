@@ -6,8 +6,6 @@ import (
 	"testing"
 
 	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
-	"github.com/nats-io/nats.go"
-
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
@@ -107,13 +105,13 @@ func TestGetStreamConfig(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
 		name             string
-		givenNatsConfig  backendnats.Config
+		givenNATSConfig  backendnats.Config
 		wantStreamConfig *nats.StreamConfig
 		wantError        bool
 	}{
 		{
 			name: "Should throw an error if storage type is invalid",
-			givenNatsConfig: backendnats.Config{
+			givenNATSConfig: backendnats.Config{
 				JSStreamStorageType: "invalid",
 			},
 			wantStreamConfig: nil,
@@ -121,7 +119,7 @@ func TestGetStreamConfig(t *testing.T) {
 		},
 		{
 			name: "Should throw an error if retention policy is invalid",
-			givenNatsConfig: backendnats.Config{
+			givenNATSConfig: backendnats.Config{
 				JSStreamRetentionPolicy: "invalid",
 			},
 			wantStreamConfig: nil,
@@ -129,7 +127,7 @@ func TestGetStreamConfig(t *testing.T) {
 		},
 		{
 			name: "Should return valid StreamConfig",
-			givenNatsConfig: backendnats.Config{
+			givenNATSConfig: backendnats.Config{
 				JSStreamName:            DefaultStreamName,
 				JSSubjectPrefix:         DefaultJetStreamSubjectPrefix,
 				JSStreamStorageType:     StorageTypeMemory,
@@ -153,7 +151,7 @@ func TestGetStreamConfig(t *testing.T) {
 		},
 		{
 			name: "Should parse MaxBytes correctly without unit",
-			givenNatsConfig: backendnats.Config{
+			givenNATSConfig: backendnats.Config{
 				JSStreamName:            DefaultStreamName,
 				JSSubjectPrefix:         DefaultJetStreamSubjectPrefix,
 				JSStreamStorageType:     StorageTypeMemory,
@@ -177,7 +175,7 @@ func TestGetStreamConfig(t *testing.T) {
 		},
 		{
 			name: "Should parse MaxBytes correctly with unit",
-			givenNatsConfig: backendnats.Config{
+			givenNATSConfig: backendnats.Config{
 				JSStreamName:            DefaultStreamName,
 				JSSubjectPrefix:         DefaultJetStreamSubjectPrefix,
 				JSStreamStorageType:     StorageTypeMemory,
@@ -204,7 +202,7 @@ func TestGetStreamConfig(t *testing.T) {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			streamConfig, err := getStreamConfig(tc.givenNatsConfig)
+			streamConfig, err := getStreamConfig(tc.givenNATSConfig)
 			if tc.wantError {
 				require.Error(t, err)
 			} else {

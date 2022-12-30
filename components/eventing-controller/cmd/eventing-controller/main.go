@@ -52,7 +52,7 @@ func main() {
 
 	var natsSubMgr subscriptionmanager.Manager
 
-	natsConfig, err := backendnats.GetNatsConfig(opts.MaxReconnects, opts.ReconnectWait)
+	natsConfig, err := backendnats.GetNATSConfig(opts.MaxReconnects, opts.ReconnectWait)
 	if err != nil {
 		setupLogger.Fatalw("Failed to load configuration", "error", err)
 	}

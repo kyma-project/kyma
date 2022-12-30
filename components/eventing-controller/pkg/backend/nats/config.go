@@ -61,7 +61,7 @@ type Config struct {
 	EnableNewCRDVersion bool `envconfig:"ENABLE_NEW_CRD_VERSION" default:"false"`
 }
 
-func GetNatsConfig(maxReconnects int, reconnectWait time.Duration) (Config, error) {
+func GetNATSConfig(maxReconnects int, reconnectWait time.Duration) (Config, error) {
 	cfg := Config{
 		MaxReconnects: maxReconnects,
 		ReconnectWait: reconnectWait,

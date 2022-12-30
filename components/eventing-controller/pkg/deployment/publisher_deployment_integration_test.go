@@ -86,7 +86,7 @@ func Test_GetNATSEnvVars(t *testing.T) {
 	testCases := []struct {
 		name            string
 		givenEnvs       map[string]string
-		givenNatsConfig backendnats.Config
+		givenNATSConfig backendnats.Config
 		wantEnvs        map[string]string
 	}{
 		{
@@ -96,7 +96,7 @@ func Test_GetNATSEnvVars(t *testing.T) {
 				"PUBLISHER_REQUESTS_MEMORY": "128Mi",
 				"PUBLISHER_REQUEST_TIMEOUT": "10s",
 			},
-			givenNatsConfig: backendnats.Config{},
+			givenNATSConfig: backendnats.Config{},
 			wantEnvs: map[string]string{
 				"REQUEST_TIMEOUT": "10s",
 				"JS_STREAM_NAME":  "",
@@ -107,7 +107,7 @@ func Test_GetNATSEnvVars(t *testing.T) {
 			givenEnvs: map[string]string{
 				"PUBLISHER_REQUEST_TIMEOUT": "10s",
 			},
-			givenNatsConfig: backendnats.Config{
+			givenNATSConfig: backendnats.Config{
 				JSStreamName: "kyma",
 			},
 			wantEnvs: map[string]string{
@@ -122,7 +122,7 @@ func Test_GetNATSEnvVars(t *testing.T) {
 				t.Setenv(k, v)
 			}
 			backendConfig := env.GetBackendConfig()
-			envVars := getNATSEnvVars(tc.givenNatsConfig, backendConfig.PublisherConfig)
+			envVars := getNATSEnvVars(tc.givenNATSConfig, backendConfig.PublisherConfig)
 
 			// ensure the right envs were set
 			for index, val := range tc.wantEnvs {

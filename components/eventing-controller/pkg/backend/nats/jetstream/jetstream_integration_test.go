@@ -9,7 +9,6 @@ import (
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	"github.com/nats-io/nats-server/v2/server"
-	"github.com/nats-io/nats.go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -997,7 +996,7 @@ func TestJSSubscriptionUsingCESDK(t *testing.T) {
 	require.NoError(t, jsBackend.DeleteSubscription(sub))
 }
 
-func defaultNatsConfig(url string, natsPort int) backendnats.Config {
+func defaultNATSConfig(url string, natsPort int) backendnats.Config {
 	streamName := fmt.Sprintf("%s%d", defaultStreamName, natsPort)
 	return backendnats.Config{
 		URL:                     url,
@@ -1054,7 +1053,7 @@ type TestEnvironment struct {
 func setupTestEnvironment(t *testing.T, newCRD bool) *TestEnvironment {
 	natsServer, natsPort, err := natstesting.StartNATSServer(evtesting.WithJetStreamEnabled())
 	require.NoError(t, err)
-	natsConfig := defaultNatsConfig(natsServer.ClientURL(), natsPort)
+	natsConfig := defaultNATSConfig(natsServer.ClientURL(), natsPort)
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	require.NoError(t, err)
 
