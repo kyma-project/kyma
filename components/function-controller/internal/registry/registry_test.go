@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/go-logr/logr"
 	"github.com/stretchr/testify/require"
 )
 
@@ -62,7 +63,7 @@ func TestNewRegistryClient(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := NewRegistryClient(ctx, tt.opts)
+			got, err := NewRegistryClient(ctx, tt.opts, logr.Discard())
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NewRegistryClient() error = %v, wantErr %v", err, tt.wantErr)
 				return

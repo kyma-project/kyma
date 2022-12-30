@@ -11,11 +11,13 @@ import (
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/manifest/schema2"
 	"github.com/docker/distribution/reference"
+	v2 "github.com/docker/distribution/registry/api/v2"
 	"github.com/docker/distribution/registry/client"
 	"github.com/docker/distribution/registry/client/auth"
 	"github.com/docker/distribution/registry/client/transport"
 	dockertypes "github.com/docker/docker/api/types"
 	dockerregistry "github.com/docker/docker/registry"
+	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 )
 
@@ -33,6 +35,8 @@ type registryClient struct {
 	password string
 	url      *url.URL
 
+	logger logr.Logger
+
 	transport http.RoundTripper
 	regClient client.Registry
 }
@@ -45,7 +49,7 @@ type RegistryClientOptions struct {
 
 var _ RegistryClient = &registryClient{}
 
-func NewRegistryClient(ctx context.Context, opts *RegistryClientOptions) (RegistryClient, error) {
+func NewRegistryClient(ctx context.Context, opts *RegistryClientOptions, l logr.Logger) (RegistryClient, error) {
 	if opts.Username == "" || opts.Password == "" {
 		return nil, errors.Errorf("username and password can't be empty")
 	}
@@ -65,6 +69,7 @@ func NewRegistryClient(ctx context.Context, opts *RegistryClientOptions) (Regist
 		username: opts.Username,
 		password: opts.Password,
 		url:      u,
+		logger:   l,
 	}
 
 	rc.transport, err = registryAuthTransport(opts.Username, opts.Password, u)
@@ -204,7 +209,12 @@ func (rc *registryClient) fetchImagesLayers(images []string) (NestedSet, error) 
 				distribution.WithManifestMediaTypes([]string{schema2.MediaTypeManifest}),
 			)
 			if err != nil {
-				return nil, errors.Wrap(err, "while getting tag manifest")
+				// We are ok with notfound
+				if notFoundErr(err) {
+					rc.logger.Error(err, fmt.Sprintf("manifest for the image [%v:%v] is not found. skipping..", image, tag))
+					continue
+				}
+				return nil, errors.Wrapf(err, "while getting manifest for tagged image: %v:%v", image, tag)
 			}
 			for _, ref := range m.References() {
 				// each layer manifest containers two references: 1) tag reference, 2) blob reference.
@@ -218,6 +228,10 @@ func (rc *registryClient) fetchImagesLayers(images []string) (NestedSet, error) 
 			}
 		}
 	}
-
 	return layers, nil
+}
+
+func notFoundErr(err error) bool {
+	// The returned error is string-wrapped and the API provided error parser can't unwrap it.
+	return strings.Contains(err.Error(), v2.ErrorCodeManifestUnknown.Message())
 }
