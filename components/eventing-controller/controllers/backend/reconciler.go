@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 
+	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
 	pkgerrors "github.com/kyma-project/kyma/components/eventing-controller/pkg/errors"
 	"golang.org/x/xerrors"
 
@@ -78,7 +79,7 @@ type Reconciler struct {
 	client.Client
 	ctx               context.Context
 	natsSubMgr        subscriptionmanager.Manager
-	natsConfig        env.NatsConfig
+	natsConfig        backendnats.Config
 	natsSubMgrStarted bool
 	bebSubMgr         subscriptionmanager.Manager
 	bebSubMgrStarted  bool
@@ -92,7 +93,9 @@ type Reconciler struct {
 	oauth2ClientSecret []byte
 }
 
-func NewReconciler(ctx context.Context, natsSubMgr subscriptionmanager.Manager, natsConfig env.NatsConfig, bebSubMgr subscriptionmanager.Manager, client client.Client, logger *logger.Logger, recorder record.EventRecorder) *Reconciler {
+func NewReconciler(ctx context.Context, natsSubMgr subscriptionmanager.Manager, natsConfig backendnats.Config,
+	bebSubMgr subscriptionmanager.Manager, client client.Client, logger *logger.Logger,
+	recorder record.EventRecorder) *Reconciler {
 	cfg := env.GetBackendConfig()
 	return &Reconciler{
 		ctx:        ctx,

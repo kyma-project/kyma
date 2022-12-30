@@ -30,7 +30,6 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	backendmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
 	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/tracing"
 )
 
@@ -106,7 +105,7 @@ func computeNamespacedSubjectName(subscription *eventingv1alpha1.Subscription, s
 }
 
 type JetStream struct {
-	Config        env.NatsConfig
+	Config        backendnats.Config
 	conn          *nats.Conn
 	jsCtx         nats.JetStreamContext
 	client        cev2.Client
@@ -119,7 +118,7 @@ type JetStream struct {
 	cleaner           eventtype.Cleaner
 }
 
-func NewJetStream(config env.NatsConfig, metricsCollector *backendmetrics.Collector, jsCleaner eventtype.Cleaner,
+func NewJetStream(config backendnats.Config, metricsCollector *backendmetrics.Collector, jsCleaner eventtype.Cleaner,
 	logger *logger.Logger) *JetStream {
 	return &JetStream{
 		Config:           config,
@@ -130,7 +129,7 @@ func NewJetStream(config env.NatsConfig, metricsCollector *backendmetrics.Collec
 	}
 }
 
-func (js *JetStream) initCloudEventClient(config env.NatsConfig) error {
+func (js *JetStream) initCloudEventClient(config backendnats.Config) error {
 	if js.client != nil {
 		return nil
 	}
@@ -422,7 +421,7 @@ func streamIsConfiguredCorrectly(got nats.StreamConfig, want nats.StreamConfig) 
 	return reflect.DeepEqual(got, want)
 }
 
-func getStreamConfig(natsConfig env.NatsConfig) (*nats.StreamConfig, error) {
+func getStreamConfig(natsConfig backendnats.Config) (*nats.StreamConfig, error) {
 	storage, err := toJetStreamStorageType(natsConfig.JSStreamStorageType)
 	if err != nil {
 		return nil, err

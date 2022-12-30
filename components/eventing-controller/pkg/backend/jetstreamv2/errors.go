@@ -1,6 +1,10 @@
 package jetstreamv2
 
-import "github.com/pkg/errors"
+import (
+	"fmt"
+
+	"github.com/pkg/errors"
+)
 
 var (
 	ErrMissingSubscription = errors.New("failed to find a NATS subscription for a subject")
@@ -10,4 +14,7 @@ var (
 	ErrDeleteConsumer      = errors.New("failed to delete consumer")
 	ErrFailedSubscribe     = errors.New("failed to create NATS JetStream subscription")
 	ErrFailedUnsubscribe   = errors.New("failed to unsubscribe from NATS JetStream")
+
+	ErrEmptyStreamName   = errors.New("stream name cannot be empty")
+	ErrStreamNameTooLong = fmt.Errorf("stream name should be max %d characters long", jsMaxStreamNameLength)
 )

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/go-logr/zapr"
+	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -109,7 +110,7 @@ var _ = BeforeSuite(func(done Done) {
 	Expect(err).To(BeNil())
 
 	// populate with required env variables
-	natsConfig := env.NatsConfig{
+	natsConfig := backendnats.Config{
 		EventTypePrefix: reconcilertesting.EventTypePrefix,
 		JSStreamName:    reconcilertesting.JSStreamName,
 	}
