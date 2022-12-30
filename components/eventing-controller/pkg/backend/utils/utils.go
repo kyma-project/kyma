@@ -90,6 +90,10 @@ func GetInternalView4Ev2(subscription *eventingv1alpha1.Subscription, apiRule *a
 	emsSubscription.WebhookURL = urlTobeRegistered
 
 	// Events
+	if subscription.Spec.Filter == nil {
+		return nil, errors.New("subscription filter is empty")
+	}
+
 	uniqueFilters, err := subscription.Spec.Filter.Deduplicate()
 	if err != nil {
 		return nil, errors.Wrap(err, "deduplicate subscription filters failed")

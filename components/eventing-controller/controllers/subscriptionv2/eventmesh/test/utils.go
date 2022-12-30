@@ -6,6 +6,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	testingv2 "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscriptionv2/reconcilertesting"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"
@@ -53,6 +55,7 @@ type eventMeshTestEnsemble struct {
 	testEnv       *envtest.Environment
 	eventMeshMock *reconcilertestingv1.BEBMock
 	nameMapper    backendutils.NameMapper
+	envConfig     env.Config
 }
 
 const (
@@ -137,6 +140,7 @@ func setupSuite() error {
 		ClientID:     "foo-client-id",
 		ClientSecret: "foo-client-secret",
 	}
+	emTestEnsemble.envConfig = getEnvConfig()
 	testReconciler := eventmeshreconciler.NewReconciler(
 		context.Background(),
 		k8sManager.GetClient(),
@@ -223,7 +227,7 @@ func getEnvConfig() env.Config {
 		WebhookTokenEndpoint:     "foo-token-endpoint",
 		Domain:                   domain,
 		EventTypePrefix:          reconcilertesting.EventMeshPrefix,
-		BEBNamespace:             "/default/ns",
+		BEBNamespace:             reconcilertesting.EventMeshNamespaceNS,
 		Qos:                      string(eventMeshtypes.QosAtLeastOnce),
 		EnableNewCRDVersion:      true,
 	}
@@ -361,4 +365,31 @@ func countEventMeshRequests(subscriptionName, eventType string) (int, int, int) 
 			}
 		})
 	return countGet, countPost, countDelete
+}
+
+// ensureK8sEventReceived checks if a certain event have triggered for the given namespace.
+func ensureK8sEventReceived(t *testing.T, event corev1.Event, namespace string) {
+	ctx := context.TODO()
+	assert.Eventually(t, func() bool {
+		// get all events from k8s for namespace
+		eventList := &corev1.EventList{}
+		err := emTestEnsemble.k8sClient.List(ctx, eventList, client.InNamespace(namespace))
+		require.NoError(t, err)
+
+		// find the desired event
+		var receivedEvent *corev1.Event
+		for i, e := range eventList.Items {
+			if e.Reason == event.Reason {
+				receivedEvent = &eventList.Items[i]
+				break
+			}
+		}
+
+		// check the received event
+		require.NotNil(t, receivedEvent)
+		require.Equal(t, receivedEvent.Reason, event.Reason)
+		require.Equal(t, receivedEvent.Message, event.Message)
+		require.Equal(t, receivedEvent.Type, event.Type)
+		return true
+	}, bigTimeOut, bigPollingInterval)
 }

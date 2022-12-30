@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	eventMeshtypes "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
+
 	testingv2 "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscriptionv2/reconcilertesting"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
 	reconcilertestingv1 "github.com/kyma-project/kyma/components/eventing-controller/testing"
@@ -11,6 +13,7 @@ import (
 
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
+	eventmeshsubmatchers "github.com/kyma-project/kyma/components/eventing-controller/testing/v2/matchers/eventmeshsub"
 	"github.com/onsi/gomega"
 	gomegatypes "github.com/onsi/gomega/types"
 
@@ -120,6 +123,11 @@ func Test_CreateSubscription(t *testing.T) {
 		name                     string
 		givenSubscriptionFunc    func(namespace string) *eventingv1alpha2.Subscription
 		wantSubscriptionMatchers gomegatypes.GomegaMatcher
+		wantEventMeshSubMatchers gomegatypes.GomegaMatcher
+		wantEventMeshSubCheck    bool
+		wantAPIRuleCheck         bool
+		wantSubCreatedEventCheck bool
+		wantSubActiveEventCheck  bool
 	}{
 		{
 			name: "should fail to create subscription if sink does not exist",
@@ -156,6 +164,7 @@ func Test_CreateSubscription(t *testing.T) {
 				)
 			},
 			wantSubscriptionMatchers: gomega.And(
+				reconcilertesting.HaveSubscriptionFinalizer(eventingv1alpha2.Finalizer),
 				reconcilertesting.HaveSubscriptionActiveCondition(),
 				reconcilertesting.HaveCleanEventTypes([]eventingv1alpha2.EventType{
 					{
@@ -167,6 +176,114 @@ func Test_CreateSubscription(t *testing.T) {
 					},
 				}),
 			),
+			wantEventMeshSubMatchers: gomega.And(
+				eventmeshsubmatchers.HaveEvents(eventMeshtypes.Events{
+					{
+						Source: reconcilertesting.EventMeshNamespaceNS,
+						Type: fmt.Sprintf("%s.%s.%s0", reconcilertesting.EventMeshPrefix,
+							reconcilertesting.ApplicationName, reconcilertesting.OrderCreatedV1Event),
+					},
+					{
+						Source: reconcilertesting.EventMeshNamespaceNS,
+						Type: fmt.Sprintf("%s.%s.%s1", reconcilertesting.EventMeshPrefix,
+							reconcilertesting.ApplicationName, reconcilertesting.OrderCreatedV1Event),
+					},
+				}),
+			),
+			wantEventMeshSubCheck: true,
+			wantAPIRuleCheck:      true,
+		},
+		{
+			name: "should succeed to create subscription with empty protocol and webhook settings",
+			givenSubscriptionFunc: func(namespace string) *eventingv1alpha2.Subscription {
+				return reconcilertesting.NewSubscription(testName, namespace,
+					reconcilertesting.WithDefaultSource(),
+					reconcilertesting.WithNotCleanType(),
+					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, testName)),
+				)
+			},
+			wantSubscriptionMatchers: gomega.And(
+				reconcilertesting.HaveSubscriptionActiveCondition(),
+			),
+			wantEventMeshSubMatchers: gomega.And(
+				// should have default values for protocol and webhook auth
+				eventmeshsubmatchers.HaveContentMode(emTestEnsemble.envConfig.ContentMode),
+				eventmeshsubmatchers.HaveExemptHandshake(emTestEnsemble.envConfig.ExemptHandshake),
+				eventmeshsubmatchers.HaveQoS(eventMeshtypes.Qos(emTestEnsemble.envConfig.Qos)),
+				eventmeshsubmatchers.HaveWebhookAuth(eventMeshtypes.WebhookAuth{
+					ClientID:     "foo-client-id",
+					ClientSecret: "foo-client-secret",
+					TokenURL:     emTestEnsemble.envConfig.WebhookTokenEndpoint,
+					Type:         eventMeshtypes.AuthTypeClientCredentials,
+					GrantType:    eventMeshtypes.GrantTypeClientCredentials,
+				}),
+			),
+			wantAPIRuleCheck:      true,
+			wantEventMeshSubCheck: true,
+		},
+		{
+			name: "should succeed to create subscription with EXACT type matching",
+			givenSubscriptionFunc: func(namespace string) *eventingv1alpha2.Subscription {
+				return reconcilertesting.NewSubscription(testName, namespace,
+					reconcilertesting.WithExactTypeMatching(),
+					reconcilertesting.WithEventMeshExactType(),
+					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, testName)),
+				)
+			},
+			wantSubscriptionMatchers: gomega.And(
+				reconcilertesting.HaveSubscriptionFinalizer(eventingv1alpha2.Finalizer),
+				reconcilertesting.HaveSubscriptionActiveCondition(),
+				reconcilertesting.HaveCleanEventTypes([]eventingv1alpha2.EventType{
+					{
+						OriginalType: reconcilertesting.EventMeshExactType,
+						CleanType:    reconcilertesting.EventMeshExactType,
+					},
+				}),
+			),
+			wantEventMeshSubMatchers: gomega.And(
+				eventmeshsubmatchers.HaveEvents(eventMeshtypes.Events{
+					{
+						Source: reconcilertesting.EventMeshNamespaceNS,
+						Type:   reconcilertesting.EventMeshExactType,
+					},
+				}),
+			),
+			wantEventMeshSubCheck:    true,
+			wantAPIRuleCheck:         true,
+			wantSubCreatedEventCheck: true,
+			wantSubActiveEventCheck:  true,
+		},
+		{
+			name: "should mark a non-cleaned Subscription as ready",
+			givenSubscriptionFunc: func(namespace string) *eventingv1alpha2.Subscription {
+				return reconcilertesting.NewSubscription(testName, namespace,
+					reconcilertesting.WithNotCleanSource(),
+					reconcilertesting.WithNotCleanType(),
+					reconcilertesting.WithWebhookAuthForBEB(),
+					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, testName)),
+				)
+			},
+			wantSubscriptionMatchers: gomega.And(
+				reconcilertesting.HaveSubscriptionFinalizer(eventingv1alpha2.Finalizer),
+				reconcilertesting.HaveSubscriptionActiveCondition(),
+				reconcilertesting.HaveCleanEventTypes([]eventingv1alpha2.EventType{
+					{
+						OriginalType: reconcilertesting.OrderCreatedV1EventNotClean,
+						CleanType:    reconcilertesting.OrderCreatedV1Event,
+					},
+				}),
+			),
+			wantEventMeshSubMatchers: gomega.And(
+				eventmeshsubmatchers.HaveEvents(eventMeshtypes.Events{
+					{
+						Source: reconcilertesting.EventMeshNamespaceNS,
+						Type: fmt.Sprintf("%s.%s.%s", reconcilertesting.EventMeshPrefix,
+							reconcilertesting.ApplicationName, reconcilertesting.OrderCreatedV1Event),
+					},
+				}),
+			),
+			wantEventMeshSubCheck: true,
+			wantAPIRuleCheck:      true,
 		},
 	}
 
@@ -193,6 +310,39 @@ func Test_CreateSubscription(t *testing.T) {
 
 			// check if the subscription is as required
 			getSubscriptionAssert(ctx, g, givenSubscription).Should(tc.wantSubscriptionMatchers)
+
+			if tc.wantAPIRuleCheck {
+				// check if an APIRule was created for the subscription
+				getAPIRuleForASvcAssert(ctx, g, subscriberSvc).Should(reconcilertestingv1.HaveNotEmptyAPIRule())
+			}
+
+			if tc.wantEventMeshSubCheck {
+				nm1 := emTestEnsemble.nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace)
+				key := fmt.Sprintf("%s/%s", "/messaging/events/subscriptions", nm1)
+				emSub := emTestEnsemble.eventMeshMock.Subscriptions.GetSubscription(key)
+				g.Expect(emSub).ShouldNot(gomega.BeNil())
+				g.Expect(emSub).Should(tc.wantEventMeshSubMatchers)
+			}
+
+			if tc.wantSubCreatedEventCheck {
+				message := eventingv1alpha2.CreateMessageForConditionReasonSubscriptionCreated(
+					emTestEnsemble.nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace))
+				subscriptionCreatedEvent := corev1.Event{
+					Reason:  string(eventingv1alpha2.ConditionReasonSubscriptionCreated),
+					Message: message,
+					Type:    corev1.EventTypeNormal,
+				}
+				ensureK8sEventReceived(t, subscriptionCreatedEvent, givenSubscription.Namespace)
+			}
+
+			if tc.wantSubActiveEventCheck {
+				subscriptionActiveEvent := corev1.Event{
+					Reason:  string(eventingv1alpha2.ConditionReasonSubscriptionActive),
+					Message: "",
+					Type:    corev1.EventTypeNormal,
+				}
+				ensureK8sEventReceived(t, subscriptionActiveEvent, givenSubscription.Namespace)
+			}
 		})
 	}
 }

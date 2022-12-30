@@ -37,6 +37,7 @@ const (
 	EventSourceUnclean       = "s>o>*u*r>c.e"
 	EventSourceClean         = "source"
 
+	EventMeshNamespaceNS        = "/default/ns"
 	EventMeshNamespace          = "/default/kyma/id"
 	EventSource                 = "/default/kyma/id"
 	EventTypePrefix             = "prefix"
