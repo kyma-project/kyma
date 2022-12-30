@@ -19,7 +19,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/health"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender/beb"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender/eventmesh"
 
 	"github.com/nats-io/nats.go"
 )
@@ -99,7 +99,7 @@ func (s *Sender) Send(_ context.Context, event *event.Event) (sender.PublishResu
 		}
 		return nil, fmt.Errorf("%w : %v", sender.ErrInternalBackendError, fmt.Errorf("%w, %v", ErrCannotSendToStream, err))
 	}
-	return beb.HTTPPublishResult{Status: http.StatusNoContent}, nil
+	return eventmesh.HTTPPublishResult{Status: http.StatusNoContent}, nil
 }
 
 // eventToNATSMsg translates cloud event into the NATS Msg.
@@ -126,7 +126,7 @@ func (s *Sender) eventToNATSMsg(event *event.Event) (*nats.Msg, error) {
 // getJsSubjectToPublish appends stream name to subject if needed.
 func (s *Sender) getJsSubjectToPublish(subject string) string {
 	// if subscription CRD v1alpha2 is enabled then do not append prefix.
-	if s.opts.EnableNewCRDVersion && !strings.HasPrefix(subject, env.OldEventTypePrefix) {
+	if s.opts.EnableNewCRDVersion && !strings.HasPrefix(subject, s.envCfg.EventTypePrefix) {
 		return subject
 	}
 
