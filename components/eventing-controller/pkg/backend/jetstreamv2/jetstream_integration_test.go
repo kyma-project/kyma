@@ -6,6 +6,7 @@ import (
 	"time"
 
 	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
+	"github.com/nats-io/nats.go"
 	"github.com/stretchr/testify/assert"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
