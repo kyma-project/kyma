@@ -2,7 +2,6 @@ package registry
 
 import (
 	"context"
-	"net/http"
 	"net/url"
 	"reflect"
 	"testing"
@@ -80,11 +79,4 @@ func validURL(t *testing.T, s string) *url.URL {
 	require.NoError(t, err)
 
 	return u
-}
-
-func validTransport(t *testing.T, u, p string, l *url.URL) http.RoundTripper {
-	tr, err := registryAuthTransport(u, p, l)
-	require.NoError(t, err)
-
-	return tr
 }
