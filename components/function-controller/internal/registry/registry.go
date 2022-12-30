@@ -50,6 +50,23 @@ type RegistryClientOptions struct {
 var _ RegistryClient = &registryClient{}
 
 func NewRegistryClient(ctx context.Context, opts *RegistryClientOptions, l logr.Logger) (RegistryClient, error) {
+	rc, err := basicClientWithOptions(ctx, opts, l)
+	if err != nil {
+		return nil, errors.Wrap(err, "while initializing registry client")
+	}
+	rc.transport, err = registryAuthTransport(opts.Username, opts.Password, rc.url)
+	if err != nil {
+		return nil, errors.Wrap(err, "while building registry auth transport")
+	}
+
+	rc.regClient, err = client.NewRegistry(rc.url.String(), rc.transport)
+	if err != nil {
+		return nil, errors.Wrap(err, "while creating registry client")
+	}
+	return rc, nil
+}
+
+func basicClientWithOptions(ctx context.Context, opts *RegistryClientOptions, l logr.Logger) (*registryClient, error) {
 	if opts.Username == "" || opts.Password == "" {
 		return nil, errors.Errorf("username and password can't be empty")
 	}
@@ -63,26 +80,13 @@ func NewRegistryClient(ctx context.Context, opts *RegistryClientOptions, l logr.
 	if err != nil {
 		return nil, errors.Wrap(err, "while parsing url")
 	}
-
-	rc := &registryClient{
+	return &registryClient{
 		ctx:      ctx,
 		username: opts.Username,
 		password: opts.Password,
 		url:      u,
 		logger:   l,
-	}
-
-	rc.transport, err = registryAuthTransport(opts.Username, opts.Password, u)
-	if err != nil {
-		return nil, errors.Wrap(err, "while building registry auth transport")
-	}
-
-	rc.regClient, err = client.NewRegistry(strURL, rc.transport)
-	if err != nil {
-		return nil, errors.Wrap(err, "while creating registry client")
-	}
-
-	return rc, nil
+	}, nil
 }
 
 func (c *registryClient) ImageRepository(imageName string) (RepositoryClient, error) {
