@@ -29,7 +29,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics/metricstest"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender/beb"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender/eventmesh"
 	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 )
 
@@ -61,7 +61,7 @@ func TestHandler_publishCloudEventsV1Alpha2(t *testing.T) {
 			fields: fields{
 				Sender: &GenericSenderStub{
 					Err: nil,
-					Result: beb.HTTPPublishResult{
+					Result: eventmesh.HTTPPublishResult{
 						Status: 204,
 						Body:   []byte(""),
 					},
@@ -103,7 +103,7 @@ func TestHandler_publishCloudEventsV1Alpha2(t *testing.T) {
 			fields: fields{
 				Sender: &GenericSenderStub{
 					Err: nil,
-					Result: beb.HTTPPublishResult{
+					Result: eventmesh.HTTPPublishResult{
 						Status: 204,
 						Body:   []byte(""),
 					},
@@ -146,7 +146,7 @@ func TestHandler_publishCloudEventsV1Alpha2(t *testing.T) {
 			fields: fields{
 				Sender: &GenericSenderStub{
 					Err: nil,
-					Result: beb.HTTPPublishResult{
+					Result: eventmesh.HTTPPublishResult{
 						Status: 204,
 						Body:   []byte(""),
 					},
@@ -188,7 +188,7 @@ func TestHandler_publishCloudEventsV1Alpha2(t *testing.T) {
 			fields: fields{
 				Sender: &GenericSenderStub{
 					Err: nil,
-					Result: beb.HTTPPublishResult{
+					Result: eventmesh.HTTPPublishResult{
 						Status: 204,
 						Body:   []byte(""),
 					},
@@ -350,7 +350,7 @@ func TestHandler_publishLegacyEventsAsCEV1alpha2(t *testing.T) {
 		{
 			name: "Send valid legacy event",
 			givenSender: &GenericSenderStub{
-				Result: beb.HTTPPublishResult{
+				Result: eventmesh.HTTPPublishResult{
 					Status: 204,
 				},
 				BackendURL: "FOO",
@@ -437,7 +437,7 @@ func TestHandler_publishLegacyEventsAsCEV1alpha2(t *testing.T) {
 		{
 			name: "Send invalid legacy event",
 			givenSender: &GenericSenderStub{
-				Result: beb.HTTPPublishResult{
+				Result: eventmesh.HTTPPublishResult{
 					Status: 204,
 				},
 				BackendURL: "FOO",
