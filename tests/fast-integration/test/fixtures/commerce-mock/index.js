@@ -813,7 +813,13 @@ async function sendInClusterEventWithRetry(mockHost, eventId, encoding, eventTyp
 }
 
 // send legacy event using function query parameter send=true
-async function sendInClusterLegacyEventWithRetry(mockHost, eventData, retriesLeft = 10) {
+async function sendInClusterLegacyEventWithRetry(mockHost, eventData, eventType, eventSource, retriesLeft = 10) {
+  if (eventType) {
+    eventData.save = true;
+    eventData.type = eventType;
+    eventData.source = eventSource;
+  }
+
   await retryPromise(async () => {
     const response = await axios.post(`https://${mockHost}`, eventData, {
       params: {
@@ -892,8 +898,7 @@ async function ensureInClusterLegacyEventReceivedWithRetry(mockHost, eventId, ev
 
     if (eventType) {
       debug(`checking if received event type is: ${eventType}`);
-      expect(response.data).to.have.nested.property(
-          'event.type', eventType, 'The same event type expected in the result');
+      expect(response.data).to.have.nested.property('event.ce-type').that.contains(eventType);
     } else {
       expect(response.data).to.have.nested.property('event.ce-type').that.contains('order.received');
     }
@@ -937,13 +942,10 @@ async function checkInClusterLegacyEvent(targetNamespace, testSubscriptionV1Alph
   }
 
   const eventData = {'id': eventId, 'legacyOrder': '987'};
-  const eventType = testSubscriptionV1Alpha2? eventTypeOrderCompleted: '';
-  if (testSubscriptionV1Alpha2) {
-    eventData.save = true;
-    eventData.type = eventType;
-  }
+  const eventType = testSubscriptionV1Alpha2? eventTypeOrderCompleted.replace('.v1', ''): '';
+  const eventSource = testSubscriptionV1Alpha2? eventSourceInApp: '';
 
-  await sendInClusterLegacyEventWithRetry(mockHost, eventData);
+  await sendInClusterLegacyEventWithRetry(mockHost, eventData, eventType, eventSource);
   return ensureInClusterLegacyEventReceivedWithRetry(mockHost, eventId, eventType);
 }
 
