@@ -203,9 +203,10 @@ func addConsumer(t *testing.T, connection *nats.Conn, sc *nats.StreamConfig, con
 
 func CreateNATSJsConfig(url string) *env.NATSConfig {
 	return &env.NATSConfig{
-		JSStreamName:  testingutils.StreamName,
-		URL:           url,
-		ReconnectWait: time.Second,
+		JSStreamName:    testingutils.StreamName,
+		URL:             url,
+		ReconnectWait:   time.Second,
+		EventTypePrefix: testingutils.OldEventTypePrefix,
 	}
 }
 
@@ -286,7 +287,8 @@ func TestSender_getJsSubjectToPublish(t *testing.T) {
 			t.Parallel()
 
 			s := &Sender{
-				opts: tc.fields.opts,
+				opts:   tc.fields.opts,
+				envCfg: CreateNATSJsConfig(""),
 			}
 			assert.Equal(t, tc.want, s.getJsSubjectToPublish(tc.subject))
 		})

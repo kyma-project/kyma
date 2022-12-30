@@ -27,7 +27,7 @@ func main() {
 
 	restConfig, registryConfig := readConfigurationOrDie(mainLog)
 
-	registryClient, err := registry.NewRegistryClient(context.Background(), registryConfig)
+	registryClient, err := registry.NewRegistryClient(context.Background(), registryConfig, mainLog)
 	if err != nil {
 		mainLog.Error(err, "while creating registry client")
 		os.Exit(1)
