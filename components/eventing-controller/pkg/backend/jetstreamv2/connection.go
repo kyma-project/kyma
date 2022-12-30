@@ -6,7 +6,7 @@ import (
 	"github.com/nats-io/nats.go"
 )
 
-type ConnectionBuilderInterface interface {
+type Builder interface {
 	Build() (ConnectionInterface, error)
 }
 
@@ -15,7 +15,7 @@ type ConnectionBuilder struct {
 	config backendnats.Config
 }
 
-func NewConnectionBuilder(config backendnats.Config) ConnectionBuilder {
+func NewConnectionBuilder(config backendnats.Config) Builder {
 	return ConnectionBuilder{config: config}
 }
 
