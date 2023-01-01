@@ -315,6 +315,17 @@ func init() {
 	)
 }
 
+func (f Function) IsUpdating() bool {
+	conditions := []ConditionType{ConditionBuildReady, ConditionConfigurationReady, ConditionRunning}
+	status := f.Status
+	for _, c := range conditions {
+		if !status.Condition(c).IsTrue() {
+			return true
+		}
+	}
+	return false
+}
+
 func (s *FunctionStatus) Condition(c ConditionType) *Condition {
 	for _, cond := range s.Conditions {
 		if cond.Type == c {
