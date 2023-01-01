@@ -100,7 +100,7 @@ func (c *Commander) Start() error {
 
 	// configure legacyTransformer
 	legacyTransformer := legacy.NewTransformer(
-		c.envCfg.ToConfig().BEBNamespace,
+		c.envCfg.ToConfig().EventMeshNamespace,
 		c.envCfg.ToConfig().EventTypePrefix,
 		applicationLister,
 	)
@@ -116,7 +116,7 @@ func (c *Commander) Start() error {
 	subscribedProcessor := &subscribed.Processor{
 		SubscriptionLister: &subLister,
 		Prefix:             c.envCfg.ToConfig().EventTypePrefix,
-		Namespace:          c.envCfg.ToConfig().BEBNamespace,
+		Namespace:          c.envCfg.ToConfig().EventMeshNamespace,
 		Logger:             c.logger,
 	}
 
@@ -137,7 +137,7 @@ func (c *Commander) Start() error {
 
 	// start handler which blocks until it receives a shutdown signal
 	if err := handler.NewHandler(messageReceiver, messageSender, messageSender, c.envCfg.RequestTimeout, legacyTransformer, c.opts,
-		subscribedProcessor, c.logger, c.metricsCollector, eventTypeCleanerV1, ceBuilder).Start(ctx); err != nil {
+		subscribedProcessor, c.logger, c.metricsCollector, eventTypeCleanerV1, ceBuilder, c.envCfg.EventTypePrefix, env.JetStreamBackend).Start(ctx); err != nil {
 		return xerrors.Errorf("failed to start handler for %s : %v", natsCommanderName, err)
 	}
 

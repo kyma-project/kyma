@@ -1,28 +1,27 @@
 package nats
 
 import (
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/onsi/gomega"
 	gomegatypes "github.com/onsi/gomega/types"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
+	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats/jetstream"
 )
 
 func BeValidSubscription() gomegatypes.GomegaMatcher {
-	return gomega.WithTransform(func(subscriber nats.Subscriber) bool {
+	return gomega.WithTransform(func(subscriber backendnats.Subscriber) bool {
 		return subscriber.IsValid()
 	}, gomega.BeTrue())
 }
 
 func BeSubscriptionWithSubject(subject string) gomegatypes.GomegaMatcher {
-	return gomega.WithTransform(func(subscriber nats.Subscriber) bool {
+	return gomega.WithTransform(func(subscriber backendnats.Subscriber) bool {
 		return subscriber.SubscriptionSubject() == subject
 	}, gomega.BeTrue())
 }
 
-func BeJetStreamSubscriptionWithSubject(subject string, natsConfig env.NatsConfig) gomegatypes.GomegaMatcher {
-	return gomega.WithTransform(func(subscriber nats.Subscriber) bool {
+func BeJetStreamSubscriptionWithSubject(subject string, natsConfig backendnats.Config) gomegatypes.GomegaMatcher {
+	return gomega.WithTransform(func(subscriber backendnats.Subscriber) bool {
 		info, err := subscriber.ConsumerInfo()
 		if err != nil {
 			return false
@@ -35,7 +34,7 @@ func BeJetStreamSubscriptionWithSubject(subject string, natsConfig env.NatsConfi
 }
 
 func BeExistingSubscription() gomegatypes.GomegaMatcher {
-	return gomega.WithTransform(func(subscriber nats.Subscriber) bool {
+	return gomega.WithTransform(func(subscriber backendnats.Subscriber) bool {
 		return subscriber != nil
 	}, gomega.BeTrue())
 }

@@ -553,6 +553,7 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 				LegacyTransformer: tt.fields.LegacyTransformer,
 				collector:         tt.fields.collector,
 				eventTypeCleaner:  tt.fields.eventTypeCleaner,
+				Options:           &options.Options{},
 			}
 			writer := httptest.NewRecorder()
 

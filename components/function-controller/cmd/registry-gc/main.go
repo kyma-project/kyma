@@ -27,7 +27,7 @@ func main() {
 
 	restConfig, registryConfig := readConfigurationOrDie(mainLog)
 
-	registryClient, err := registry.NewRegistryClient(context.Background(), registryConfig)
+	registryClient, err := registry.NewRegistryClient(context.Background(), registryConfig, mainLog)
 	if err != nil {
 		mainLog.Error(err, "while creating registry client")
 		os.Exit(1)
@@ -41,7 +41,7 @@ func main() {
 	}
 
 	for _, functionImage := range functionImages.ListKeys() {
-		if err := deleteUnreferencedTags(registryClient, functionImages, mainLog, functionImage); err != nil {
+		if err := deleteUnreferencedTags(registryClient, restConfig, functionImages, mainLog, functionImage); err != nil {
 			mainLog.Error(err, "while deleting unreferenced tag")
 			os.Exit(1)
 		}
@@ -93,7 +93,6 @@ func listRunningFunctionsImages(restConfig *rest.Config) (*registry.NestedSet, e
 		return nil, errors.Wrap(err, "while listing Function Deployments")
 
 	}
-
 	functionImages := registry.NewNestedSet()
 
 	for _, deployment := range deploymentList.Items {
@@ -105,30 +104,23 @@ func listRunningFunctionsImages(restConfig *rest.Config) (*registry.NestedSet, e
 		imageTag := tagged.Tag()
 		functionImages.AddKeyWithValue(imageName, imageTag)
 	}
-
 	return &functionImages, nil
 }
 
-func deleteUnreferencedTags(cli registry.RegistryClient, imageList *registry.NestedSet, l logr.Logger, image string) error {
-	repoCli, err := cli.ImageRepository(image)
+func deleteUnreferencedTags(cli registry.RegistryClient, config *rest.Config, imageList *registry.NestedSet, l logr.Logger, image string) error {
+	functionName, namespace, err := registry.FunctionFromImageName(image)
 	if err != nil {
-		return errors.Wrap(err, "while creating repository client")
+		return errors.Wrap(err, "while resolving function name")
 	}
-	registryTags, err := repoCli.ListTags()
+	functionUpdating, err := registry.IsFunctionUpdating(config, functionName, namespace)
 	if err != nil {
-		return errors.Wrap(err, "while getting image tags")
+		return errors.Wrap(err, "while checking function update status")
 	}
-	for _, tagStr := range registryTags {
-		if !imageList.HasKeyWithValue(image, tagStr) {
-			err = deleteImageTag(repoCli, l, image, tagStr)
-			if err != nil {
-				l.Error(err, "while deleting image tag")
-			} else {
-				l.Info(fmt.Sprintf("image [%v:%v] deleted successfully", image, tagStr))
-			}
-		}
+	// we skip the whole image if the related function is updating
+	if functionUpdating {
+		return nil
 	}
-	return nil
+	return deleteImageTags(cli, imageList, l, image)
 }
 
 func deleteCacheTags(cli registry.RegistryClient, l logr.Logger, cachedImages map[string]struct{}) error {
@@ -149,6 +141,29 @@ func deleteCacheTags(cli registry.RegistryClient, l logr.Logger, cachedImages ma
 			l.Error(err, "while deleting image tag")
 		} else {
 			l.Info(fmt.Sprintf("image [%v:%v] deleted successfully", imageName, tagStr))
+		}
+	}
+	return nil
+}
+
+func deleteImageTags(cli registry.RegistryClient, imageList *registry.NestedSet, l logr.Logger, image string) error {
+	repoCli, err := cli.ImageRepository(image)
+	if err != nil {
+		return errors.Wrap(err, "while creating repository client")
+	}
+	registryTags, err := repoCli.ListTags()
+	if err != nil {
+		return errors.Wrap(err, "while getting image tags")
+	}
+	for _, tagStr := range registryTags {
+		if imageList.HasKeyWithValue(image, tagStr) {
+			continue
+		}
+		err = deleteImageTag(repoCli, l, image, tagStr)
+		if err != nil {
+			l.Error(err, "while deleting image tag")
+		} else {
+			l.Info(fmt.Sprintf("image [%v:%v] deleted successfully", image, tagStr))
 		}
 	}
 	return nil

@@ -11,11 +11,13 @@ import (
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/manifest/schema2"
 	"github.com/docker/distribution/reference"
+	v2 "github.com/docker/distribution/registry/api/v2"
 	"github.com/docker/distribution/registry/client"
 	"github.com/docker/distribution/registry/client/auth"
 	"github.com/docker/distribution/registry/client/transport"
 	dockertypes "github.com/docker/docker/api/types"
 	dockerregistry "github.com/docker/docker/registry"
+	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 )
 
@@ -33,6 +35,8 @@ type registryClient struct {
 	password string
 	url      *url.URL
 
+	logger logr.Logger
+
 	transport http.RoundTripper
 	regClient client.Registry
 }
@@ -45,7 +49,24 @@ type RegistryClientOptions struct {
 
 var _ RegistryClient = &registryClient{}
 
-func NewRegistryClient(ctx context.Context, opts *RegistryClientOptions) (RegistryClient, error) {
+func NewRegistryClient(ctx context.Context, opts *RegistryClientOptions, l logr.Logger) (RegistryClient, error) {
+	rc, err := basicClientWithOptions(ctx, opts, l)
+	if err != nil {
+		return nil, errors.Wrap(err, "while initializing registry client")
+	}
+	rc.transport, err = registryAuthTransport(opts.Username, opts.Password, rc.url)
+	if err != nil {
+		return nil, errors.Wrap(err, "while building registry auth transport")
+	}
+
+	rc.regClient, err = client.NewRegistry(rc.url.String(), rc.transport)
+	if err != nil {
+		return nil, errors.Wrap(err, "while creating registry client")
+	}
+	return rc, nil
+}
+
+func basicClientWithOptions(ctx context.Context, opts *RegistryClientOptions, l logr.Logger) (*registryClient, error) {
 	if opts.Username == "" || opts.Password == "" {
 		return nil, errors.Errorf("username and password can't be empty")
 	}
@@ -59,25 +80,13 @@ func NewRegistryClient(ctx context.Context, opts *RegistryClientOptions) (Regist
 	if err != nil {
 		return nil, errors.Wrap(err, "while parsing url")
 	}
-
-	rc := &registryClient{
+	return &registryClient{
 		ctx:      ctx,
 		username: opts.Username,
 		password: opts.Password,
 		url:      u,
-	}
-
-	rc.transport, err = registryAuthTransport(opts.Username, opts.Password, u)
-	if err != nil {
-		return nil, errors.Wrap(err, "while building registry auth transport")
-	}
-
-	rc.regClient, err = client.NewRegistry(strURL, rc.transport)
-	if err != nil {
-		return nil, errors.Wrap(err, "while creating registry client")
-	}
-
-	return rc, nil
+		logger:   l,
+	}, nil
 }
 
 func (c *registryClient) ImageRepository(imageName string) (RepositoryClient, error) {
@@ -107,25 +116,25 @@ func (c *registryClient) ImageRepository(imageName string) (RepositoryClient, er
 
 func (c *registryClient) Repositories() ([]string, error) {
 	var (
-		ret  []string
-		last string
-		err  error
-		n    int
+		ret   []string
+		last  string
+		err   error
+		count int
 	)
 	// I can't even...
 	for {
 		repos := make([]string, 50)
-		n, err = c.regClient.Repositories(c.ctx, repos, last)
-		if n > 0 {
-			ret = append(ret, repos[:n]...)
+		count, err = c.regClient.Repositories(c.ctx, repos, last)
+		if count > 0 {
+			ret = append(ret, repos[:count]...)
 		}
 		if err != nil {
 			break
 		}
-		last = repos[n-1]
+		last = repos[count-1]
 	}
 	if err != nil && err != io.EOF {
-		return nil, err
+		return nil, errors.Wrap(err, "while fetching repositories")
 	}
 	return ret, nil
 }
@@ -141,7 +150,7 @@ func registryAuthTransport(username, password string, u *url.URL) (http.RoundTri
 
 	challengeManager, _, err := dockerregistry.PingV2Registry(u, transport.NewTransport(http.DefaultTransport))
 	if err != nil {
-		errors.Wrap(err, "while generating auth challengeManager")
+		return nil, errors.Wrap(err, "while generating auth challengeManager")
 	}
 
 	basicAuthHandler := auth.NewBasicHandler(dockerregistry.NewStaticCredentialStore(authconfig))
@@ -156,7 +165,7 @@ func registryAuthTransport(username, password string, u *url.URL) (http.RoundTri
 func (rc *registryClient) ListRegistryImagesLayers() (NestedSet, error) {
 	r, err := rc.Repositories()
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "while listing registry images")
 	}
 	images := []string{}
 	for _, image := range r {
@@ -171,7 +180,7 @@ func (rc *registryClient) ListRegistryImagesLayers() (NestedSet, error) {
 func (rc *registryClient) ListRegistryCachedLayers() (NestedSet, error) {
 	r, err := rc.Repositories()
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "while listing registry images")
 	}
 
 	images := []string{}
@@ -188,12 +197,12 @@ func (rc *registryClient) fetchImagesLayers(images []string) (NestedSet, error) 
 	for _, image := range images {
 		repoCli, err := rc.ImageRepository(image)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "while getting image repository client")
 		}
 
 		imageTags, err := repoCli.ListTags()
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "while getting image tags")
 		}
 
 		for _, tag := range imageTags {
@@ -204,9 +213,17 @@ func (rc *registryClient) fetchImagesLayers(images []string) (NestedSet, error) 
 				distribution.WithManifestMediaTypes([]string{schema2.MediaTypeManifest}),
 			)
 			if err != nil {
-				return nil, err
+				// We are ok with notfound
+				if notFoundErr(err) {
+					rc.logger.Error(err, fmt.Sprintf("manifest for the image [%v:%v] is not found. skipping..", image, tag))
+					continue
+				}
+				return nil, errors.Wrapf(err, "while getting manifest for tagged image: %v:%v", image, tag)
 			}
 			for _, ref := range m.References() {
+				// each layer manifest containers two references: 1) tag reference, 2) blob reference.
+				// the tag reference is useless for us, so we skip it. We are only interested in the blob reference,
+				// since it's the reference used by other images using this layer.
 				if ref.MediaType != schema2.MediaTypeLayer {
 					continue
 				}
@@ -215,6 +232,10 @@ func (rc *registryClient) fetchImagesLayers(images []string) (NestedSet, error) 
 			}
 		}
 	}
-
 	return layers, nil
+}
+
+func notFoundErr(err error) bool {
+	// The returned error is string-wrapped and the API provided error parser can't unwrap it.
+	return strings.Contains(err.Error(), v2.ErrorCodeManifestUnknown.Message())
 }

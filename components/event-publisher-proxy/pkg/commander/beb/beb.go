@@ -41,7 +41,7 @@ const (
 // Commander implements the Commander interface.
 type Commander struct {
 	cancel           context.CancelFunc
-	envCfg           *env.BEBConfig
+	envCfg           *env.EventMeshConfig
 	logger           *logger.Logger
 	metricsCollector *metrics.Collector
 	opts             *options.Options
@@ -52,7 +52,7 @@ func NewCommander(opts *options.Options, metricsCollector *metrics.Collector, lo
 	return &Commander{
 		metricsCollector: metricsCollector,
 		logger:           logger,
-		envCfg:           new(env.BEBConfig),
+		envCfg:           new(env.EventMeshConfig),
 		opts:             opts,
 	}
 }
@@ -92,7 +92,7 @@ func (c *Commander) Start() error {
 
 	// configure legacyTransformer
 	legacyTransformer := legacy.NewTransformer(
-		c.envCfg.BEBNamespace,
+		c.envCfg.EventMeshNamespace,
 		c.envCfg.EventTypePrefix,
 		applicationLister,
 	)
@@ -108,7 +108,7 @@ func (c *Commander) Start() error {
 	subscribedProcessor := &subscribed.Processor{
 		SubscriptionLister: &subLister,
 		Prefix:             c.envCfg.EventTypePrefix,
-		Namespace:          c.envCfg.BEBNamespace,
+		Namespace:          c.envCfg.EventMeshNamespace,
 		Logger:             c.logger,
 	}
 	// Sync informer cache or die
@@ -123,12 +123,12 @@ func (c *Commander) Start() error {
 	eventTypeCleaner := cleaner.NewEventMeshCleaner(c.logger)
 
 	// configure cloud event builder for subscription CRD v1alpha2
-	ceBuilder := builder.NewEventMeshBuilder(c.envCfg.EventTypePrefix, c.envCfg.BEBNamespace, eventTypeCleaner,
+	ceBuilder := builder.NewEventMeshBuilder(c.envCfg.EventTypePrefix, c.envCfg.EventMeshNamespace, eventTypeCleaner,
 		applicationLister, c.logger)
 
 	// start handler which blocks until it receives a shutdown signal
 	if err := handler.NewHandler(messageReceiver, messageSender, health.NewChecker(), c.envCfg.RequestTimeout, legacyTransformer, c.opts,
-		subscribedProcessor, c.logger, c.metricsCollector, eventTypeCleanerV1, ceBuilder).Start(ctx); err != nil {
+		subscribedProcessor, c.logger, c.metricsCollector, eventTypeCleanerV1, ceBuilder, c.envCfg.EventTypePrefix, env.EventMeshBackend).Start(ctx); err != nil {
 		return xerrors.Errorf("failed to start handler for %s : %v", bebCommanderName, err)
 	}
 	c.namedLogger().Info("Event Publisher was shut down")
