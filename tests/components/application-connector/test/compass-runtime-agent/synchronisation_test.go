@@ -31,6 +31,8 @@ func (cs *CompassRuntimeAgentSuite) TestApplication() {
 
 	compassAppName := expectedAppName + random.RandomString(10)
 
+	correctState := false
+
 	//Create Application in Director
 	applicationID, err := cs.directorClient.RegisterApplication(compassAppName, "Test Application for testing Compass Runtime Agent")
 	cs.Require().NoError(err)
@@ -46,16 +48,26 @@ func (cs *CompassRuntimeAgentSuite) TestApplication() {
 	cs.Run("Compass Runtime Agent should create Application", func() {
 		err = cs.appComparator.Compare(cs.T(), expectedAppName, synchronizedCompassAppName)
 		cs.NoError(err)
+
+		correctState = err == nil
 	})
 
 	cs.Run("Update app", func() {
+		if !correctState {
+			cs.T().Skip("App not in correct state")
+		}
 		_ = cs.updateAndWait(applicationInterface, synchronizedCompassAppName, applicationID)
 
 		err = cs.appComparator.Compare(cs.T(), updatedAppName, synchronizedCompassAppName)
 		cs.NoError(err)
+
+		correctState = err == nil
 	})
 
 	cs.Run("With bundles compare", func() {
+		if !correctState {
+			cs.T().Skip("App not in correct state")
+		}
 		_ = cs.addBundleAndWait(applicationInterface, synchronizedCompassAppName, applicationID)
 		err = cs.appComparator.Compare(cs.T(), appWithBundles, synchronizedCompassAppName)
 		cs.NoError(err)
