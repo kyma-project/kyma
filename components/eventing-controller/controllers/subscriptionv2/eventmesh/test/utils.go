@@ -287,6 +287,10 @@ func ensureK8sResourceUpdated(ctx context.Context, t *testing.T, obj client.Obje
 	require.NoError(t, emTestEnsemble.k8sClient.Update(ctx, obj))
 }
 
+func ensureK8sResourceDeleted(ctx context.Context, t *testing.T, obj client.Object) {
+	require.NoError(t, emTestEnsemble.k8sClient.Delete(ctx, obj))
+}
+
 func ensureK8sSubscriptionUpdated(ctx context.Context, t *testing.T, subscription *eventingv1alpha2.Subscription) {
 	require.Eventually(t, func() bool {
 		latestSubscription := &eventingv1alpha2.Subscription{}

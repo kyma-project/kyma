@@ -821,3 +821,54 @@ func Test_APIRuleReUseAfterUpdatingSink(t *testing.T) {
 	// phase 4: check that the unused APIRule is deleted.
 	ensureAPIRuleNotFound(ctx, t, apiRule2)
 }
+
+// Test_APIRuleRecreateAfterManualDelete tests that the APIRule is re-created by the reconciler
+// when it is deleted manuallySubscription sink change scenario.
+func Test_APIRuleRecreateAfterManualDelete(t *testing.T) {
+	t.Parallel()
+
+	// given
+	g := gomega.NewGomegaWithT(t)
+	ctx := context.Background()
+
+	// create unique namespace for this test run
+	testNamespace := getTestNamespace()
+	ensureNamespaceCreated(ctx, t, testNamespace)
+	subName := fmt.Sprintf("test-sink-%s", testNamespace)
+
+	givenSubscription := reconcilertesting.NewSubscription(subName, testNamespace,
+		reconcilertesting.WithDefaultSource(),
+		reconcilertesting.WithOrderCreatedV1Event(),
+		reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(testNamespace, subName)),
+	)
+
+	// phase 1: Create a Subscription with ready APIRule and ready status.
+	// create a subscriber service
+	subscriberSvc := reconcilertesting.NewSubscriberSvc(subName, testNamespace)
+	ensureK8sResourceCreated(ctx, t, subscriberSvc)
+	// create subscription
+	ensureK8sResourceCreated(ctx, t, givenSubscription)
+	createdSubscription := givenSubscription.DeepCopy()
+
+	// wait until the APIRule is assigned to the created subscription
+	getSubscriptionAssert(ctx, g, createdSubscription).Should(reconcilertesting.HaveNoneEmptyAPIRuleName())
+
+	// fetch the APIRule and update the status of the APIRule to ready (mocking APIGateway controller)
+	// and wait until the created Subscription becomes ready
+	apiRule := &apigatewayv1beta1.APIRule{ObjectMeta: metav1.ObjectMeta{
+		Name: createdSubscription.Status.Backend.APIRuleName, Namespace: createdSubscription.Namespace}}
+	getAPIRuleAssert(ctx, g, apiRule).Should(reconcilertestingv1.HaveNotEmptyAPIRule())
+	ensureAPIRuleStatusUpdatedWithStatusReady(ctx, t, apiRule)
+
+	// phase 2: Delete the APIRule from k8s
+	// delete the APIRule and wait until its deleted.
+	ensureK8sResourceDeleted(ctx, t, apiRule)
+	ensureAPIRuleNotFound(ctx, t, apiRule)
+
+	// phase 3: Check if APIRule is re-created by the reconciler
+	getSubscriptionAssert(ctx, g, createdSubscription).Should(reconcilertesting.HaveNoneEmptyAPIRuleName())
+	apiRule = &apigatewayv1beta1.APIRule{ObjectMeta: metav1.ObjectMeta{
+		Name: createdSubscription.Status.Backend.APIRuleName, Namespace: createdSubscription.Namespace}}
+	getAPIRuleAssert(ctx, g, apiRule).Should(reconcilertestingv1.HaveNotEmptyAPIRule())
+	ensureAPIRuleStatusUpdatedWithStatusReady(ctx, t, apiRule)
+}

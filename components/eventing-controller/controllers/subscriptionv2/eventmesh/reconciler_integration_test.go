@@ -576,47 +576,6 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		})
 	})
 
-	When("Removing APIRule of a subscription", func() {
-		It("Should recreate the APIRule", func() {
-			subscriptionName := "test-sub-apirule-recreation"
-
-			By("Creating a valid subscription")
-			// Ensuring subscriber svc
-			subscriberSvc := reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
-			ensureSubscriberSvcCreated(ctx, subscriberSvc)
-
-			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
-				reconcilertesting.WithNotCleanSource(),
-				reconcilertesting.WithNotCleanType(),
-				reconcilertesting.WithWebhookAuthForBEB(),
-				reconcilertesting.WithSinkURLFromSvc(subscriberSvc),
-			)
-			ensureSubscriptionCreated(ctx, subscription)
-
-			getAPIRuleForASvc(ctx, subscriberSvc).Should(reconcilertestingv1.HaveNotEmptyAPIRule())
-
-			By("Finding and removing the matching APIRule")
-			apiRules := getAPIRules(ctx, subscriberSvc)
-			apiRule := filterAPIRulesForASvc(apiRules, subscriberSvc)
-			Expect(apiRule).Should(reconcilertestingv1.HaveNotEmptyAPIRule())
-			Expect(k8sClient.Delete(ctx, &apiRule)).ShouldNot(HaveOccurred())
-
-			// wait until it is removed
-			apiRuleKey := client.ObjectKey{
-				Namespace: apiRule.Namespace,
-				Name:      apiRule.Name,
-			}
-			Eventually(func() bool {
-				apiRule := new(apigatewayv1beta1.APIRule)
-				err := k8sClient.Get(ctx, apiRuleKey, apiRule)
-				return k8serrors.IsNotFound(err)
-			}).Should(BeTrue())
-
-			By("Ensuring a new APIRule is created")
-			getAPIRuleForASvc(ctx, subscriberSvc).Should(reconcilertestingv1.HaveNotEmptyAPIRule())
-		})
-	})
-
 	DescribeTable("Schema tests: ensuring required fields are not treated as optional",
 		func(subscription *eventingv1alpha2.Subscription) {
 			subscription.Namespace = namespaceName
