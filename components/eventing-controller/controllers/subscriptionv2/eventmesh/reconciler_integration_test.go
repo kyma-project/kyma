@@ -214,65 +214,6 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		})
 	})
 
-	When("Subscription1 sink is changed to reuse Subscription2 APIRule", func() {
-		It("Should delete APIRule for Subscription1 and use APIRule2 from Subscription2 instead", func() {
-			// prepare objects
-			// create them and wait for Subscription to be ready
-			subscriptionName1 := "test-subscription-1"
-			service1 := reconcilertesting.NewSubscriberSvc("webhook-1", namespaceName)
-			subscription1 := reconcilertesting.NewSubscription(subscriptionName1, namespaceName,
-				reconcilertesting.WithNotCleanSource(),
-				reconcilertesting.WithWebhookAuthForBEB(),
-				reconcilertesting.WithNotCleanType(),
-				reconcilertesting.WithSinkURLFromSvcAndPath(service1, "/path1"),
-			)
-			readySubscription1, apiRule1 := createSubscriptionObjectsAndWaitForReadiness(ctx, subscription1, service1)
-
-			subscriptionName2 := "test-subscription-2"
-			service2 := reconcilertesting.NewSubscriberSvc("webhook-2", namespaceName)
-			subscription2 := reconcilertesting.NewSubscription(subscriptionName2, namespaceName,
-				reconcilertesting.WithNotCleanSource(),
-				reconcilertesting.WithWebhookAuthForBEB(),
-				reconcilertesting.WithNotCleanType(),
-				reconcilertesting.WithSinkURLFromSvcAndPath(service2, "/path2"),
-			)
-			readySubscription2, apiRule2 := createSubscriptionObjectsAndWaitForReadiness(ctx, subscription2, service2)
-
-			By("Updating the sink to use same port and service as Subscription 2")
-			newSink := fmt.Sprintf("https://%s.%s.svc.cluster.local/path1", service2.Name, service2.Namespace)
-			readySubscription1.Spec.Sink = newSink
-			updateSubscription(ctx, readySubscription1).Should(reconcilertesting.HaveSubscriptionSink(newSink))
-
-			By("Reusing APIRule from Subscription 2")
-			getSubscription(ctx, readySubscription1).Should(reconcilertesting.HaveAPIRuleName(apiRule2.Name))
-
-			By("Get the reused APIRule (from subscription 2)")
-			apiRuleNew := &apigatewayv1beta1.APIRule{ObjectMeta: metav1.ObjectMeta{Name: readySubscription1.Status.Backend.APIRuleName, Namespace: namespaceName}}
-			getAPIRule(ctx, apiRuleNew).Should(And(
-				reconcilertestingv1.HaveNotEmptyHost(),
-				reconcilertestingv1.HaveNotEmptyAPIRule(),
-			))
-
-			By("Ensuring the reused APIRule has 2 OwnerReferences and 2 paths")
-			getAPIRule(ctx, apiRule2).Should(And(
-				reconcilertestingv1.HaveAPIRuleOwnersRefs(readySubscription1.UID, readySubscription2.UID),
-				reconcilertestingv1.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, "/path1"),
-				reconcilertestingv1.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, "/path2"),
-			))
-
-			By("Deleting APIRule from Subscription 1")
-			getAPIRule(ctx, apiRule1).ShouldNot(reconcilertestingv1.HaveNotEmptyAPIRule())
-
-			By("Sending at least one creation request for Subscription 1")
-			_, creationRequests, _ := countEventMeshRequests(nameMapper.MapSubscriptionName(subscription1.Name, subscription1.Namespace), reconcilertesting.EventMeshOrderCreatedV1Type)
-			Expect(creationRequests).Should(reconcilertestingv1.BeGreaterThanOrEqual(1))
-
-			By("Sending at least one creation request for Subscription 2")
-			_, creationRequests, _ = countEventMeshRequests(nameMapper.MapSubscriptionName(subscription2.Name, subscription2.Namespace), reconcilertesting.EventMeshOrderCreatedV1Type)
-			Expect(creationRequests).Should(reconcilertestingv1.BeGreaterThanOrEqual(1))
-		})
-	})
-
 	When("EventMesh subscription creation failed", func() {
 		It("Should not mark the subscription as ready", func() {
 			subscriptionName := "test-subscription-event-mesh-not-status-not-ready"

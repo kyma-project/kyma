@@ -288,14 +288,18 @@ func ensureK8sResourceUpdated(ctx context.Context, t *testing.T, obj client.Obje
 }
 
 func ensureK8sSubscriptionUpdated(ctx context.Context, t *testing.T, subscription *eventingv1alpha2.Subscription) {
-	latestSubscription := &eventingv1alpha2.Subscription{}
-	lookupKey := types.NamespacedName{
-		Namespace: subscription.Namespace,
-		Name:      subscription.Name,
-	}
-	require.NoError(t, emTestEnsemble.k8sClient.Get(ctx, lookupKey, latestSubscription))
-	latestSubscription.Spec = subscription.Spec
-	require.NoError(t, emTestEnsemble.k8sClient.Update(ctx, latestSubscription))
+	require.Eventually(t, func() bool {
+		latestSubscription := &eventingv1alpha2.Subscription{}
+		lookupKey := types.NamespacedName{
+			Namespace: subscription.Namespace,
+			Name:      subscription.Name,
+		}
+		require.NoError(t, emTestEnsemble.k8sClient.Get(ctx, lookupKey, latestSubscription))
+		require.NotEmpty(t, latestSubscription.Name)
+		latestSubscription.Spec = subscription.Spec
+		require.NoError(t, emTestEnsemble.k8sClient.Update(ctx, latestSubscription))
+		return true
+	}, bigTimeOut, bigPollingInterval)
 }
 
 // ensureAPIRuleStatusUpdatedWithStatusReady updates the status fof the APIRule (mocking APIGateway controller).
@@ -313,6 +317,20 @@ func ensureAPIRuleStatusUpdatedWithStatusReady(ctx context.Context, t *testing.T
 		// update ApiRule status on k8s
 		err = emTestEnsemble.k8sClient.Status().Update(ctx, newAPIRule)
 		return err == nil
+	}, bigTimeOut, bigPollingInterval)
+}
+
+// ensureAPIRuleNotFound ensures that a APIRule does not exists (or deleted).
+func ensureAPIRuleNotFound(ctx context.Context, t *testing.T, apiRule *apigatewayv1beta1.APIRule) {
+	require.Eventually(t, func() bool {
+		apiRuleKey := client.ObjectKey{
+			Namespace: apiRule.Namespace,
+			Name:      apiRule.Name,
+		}
+
+		apiRule2 := new(apigatewayv1beta1.APIRule)
+		err := emTestEnsemble.k8sClient.Get(ctx, apiRuleKey, apiRule2)
+		return k8serrors.IsNotFound(err)
 	}, bigTimeOut, bigPollingInterval)
 }
 

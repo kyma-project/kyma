@@ -490,6 +490,11 @@ func ValidSinkURL(namespace, svcName string) string {
 	return fmt.Sprintf("https://%s.%s.svc.cluster.local", svcName, namespace)
 }
 
+// ValidSinkURLWithPath converts a namespace and service name to a valid sink url with path.
+func ValidSinkURLWithPath(namespace, svcName, path string) string {
+	return fmt.Sprintf("https://%s.%s.svc.cluster.local/%s", svcName, namespace, path)
+}
+
 // WithSinkURL is a SubscriptionOpt for creating a subscription with a specific sink.
 func WithSinkURL(sinkURL string) SubscriptionOpt {
 	return func(subscription *eventingv1alpha2.Subscription) { subscription.Spec.Sink = sinkURL }
