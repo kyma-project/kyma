@@ -14,8 +14,6 @@ import (
 	k8slabels "k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/avast/retry-go/v3"
 	"github.com/go-logr/zapr"
 	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
@@ -260,7 +258,7 @@ func ensureNamespaceCreated(ctx context.Context, t *testing.T, namespace string)
 	ns := fixtureNamespace(namespace)
 	err := emTestEnsemble.k8sClient.Create(ctx, ns)
 	if !k8serrors.IsAlreadyExists(err) {
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	}
 }
 
@@ -278,20 +276,31 @@ func fixtureNamespace(name string) *corev1.Namespace {
 }
 
 func ensureK8sResourceCreated(ctx context.Context, t *testing.T, obj client.Object) {
-	assert.NoError(t, emTestEnsemble.k8sClient.Create(ctx, obj))
+	require.NoError(t, emTestEnsemble.k8sClient.Create(ctx, obj))
 }
 
 func ensureK8sResourceNotCreated(ctx context.Context, t *testing.T, obj client.Object, err error) {
-	assert.Equal(t, emTestEnsemble.k8sClient.Create(ctx, obj), err)
+	require.Equal(t, emTestEnsemble.k8sClient.Create(ctx, obj), err)
 }
 
 func ensureK8sResourceUpdated(ctx context.Context, t *testing.T, obj client.Object) {
-	assert.NoError(t, emTestEnsemble.k8sClient.Update(ctx, obj))
+	require.NoError(t, emTestEnsemble.k8sClient.Update(ctx, obj))
+}
+
+func ensureK8sSubscriptionUpdated(ctx context.Context, t *testing.T, subscription *eventingv1alpha2.Subscription) {
+	latestSubscription := &eventingv1alpha2.Subscription{}
+	lookupKey := types.NamespacedName{
+		Namespace: subscription.Namespace,
+		Name:      subscription.Name,
+	}
+	require.NoError(t, emTestEnsemble.k8sClient.Get(ctx, lookupKey, latestSubscription))
+	latestSubscription.Spec = subscription.Spec
+	require.NoError(t, emTestEnsemble.k8sClient.Update(ctx, latestSubscription))
 }
 
 // ensureAPIRuleStatusUpdatedWithStatusReady updates the status fof the APIRule (mocking APIGateway controller).
 func ensureAPIRuleStatusUpdatedWithStatusReady(ctx context.Context, t *testing.T, apiRule *apigatewayv1beta1.APIRule) {
-	assert.Eventually(t, func() bool {
+	require.Eventually(t, func() bool {
 		fetchedAPIRule, err := getAPIRule(ctx, apiRule)
 		if err != nil {
 			return false
@@ -367,10 +376,16 @@ func countEventMeshRequests(subscriptionName, eventType string) (int, int, int) 
 	return countGet, countPost, countDelete
 }
 
+func getEventMeshSubFromMock(subscriptionName, subscriptionNamespace string) *eventMeshtypes.Subscription {
+	nm1 := emTestEnsemble.nameMapper.MapSubscriptionName(subscriptionName, subscriptionNamespace)
+	key := fmt.Sprintf("%s/%s", "/messaging/events/subscriptions", nm1)
+	return emTestEnsemble.eventMeshMock.Subscriptions.GetSubscription(key)
+}
+
 // ensureK8sEventReceived checks if a certain event have triggered for the given namespace.
 func ensureK8sEventReceived(t *testing.T, event corev1.Event, namespace string) {
 	ctx := context.TODO()
-	assert.Eventually(t, func() bool {
+	require.Eventually(t, func() bool {
 		// get all events from k8s for namespace
 		eventList := &corev1.EventList{}
 		err := emTestEnsemble.k8sClient.List(ctx, eventList, client.InNamespace(namespace))

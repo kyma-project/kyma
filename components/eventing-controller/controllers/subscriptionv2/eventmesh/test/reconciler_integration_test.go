@@ -4,6 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	eventMeshtypes "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 
 	testingv2 "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscriptionv2/reconcilertesting"
@@ -317,9 +320,7 @@ func Test_CreateSubscription(t *testing.T) {
 			}
 
 			if tc.wantEventMeshSubCheck {
-				nm1 := emTestEnsemble.nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace)
-				key := fmt.Sprintf("%s/%s", "/messaging/events/subscriptions", nm1)
-				emSub := emTestEnsemble.eventMeshMock.Subscriptions.GetSubscription(key)
+				emSub := getEventMeshSubFromMock(givenSubscription.Name, givenSubscription.Namespace)
 				g.Expect(emSub).ShouldNot(gomega.BeNil())
 				g.Expect(emSub).Should(tc.wantEventMeshSubMatchers)
 			}
@@ -525,7 +526,7 @@ func Test_UpdateSubscription(t *testing.T) {
 
 			// update subscription
 			givenUpdateSubscription.ResourceVersion = createdSubscription.ResourceVersion
-			ensureK8sResourceUpdated(ctx, t, givenUpdateSubscription)
+			ensureK8sSubscriptionUpdated(ctx, t, givenUpdateSubscription)
 
 			// check if the updated subscription is correct
 			getSubscriptionAssert(ctx, g, givenSubscription).Should(tc.wantUpdateSubscriptionMatchers)
@@ -615,7 +616,7 @@ func Test_FixingSinkAndApiRule(t *testing.T) {
 
 			// update subscription with valid sink
 			givenUpdateSubscription.ResourceVersion = createdSubscription.ResourceVersion
-			ensureK8sResourceUpdated(ctx, t, givenUpdateSubscription)
+			ensureK8sSubscriptionUpdated(ctx, t, givenUpdateSubscription)
 
 			// check if an APIRule was created for the subscription
 			getAPIRuleForASvcAssert(ctx, g, subscriberSvc).Should(reconcilertestingv1.HaveNotEmptyAPIRule())
@@ -648,4 +649,74 @@ func Test_FixingSinkAndApiRule(t *testing.T) {
 			assert.GreaterOrEqual(t, postRequests, 1)
 		})
 	}
+}
+
+// Test_SinkChangeAndAPIRule tests the Subscription sink change scenario.
+// The reconciler should update the EventMesh subscription webhookURL by creating a new APIRule
+// when the sink is changed.
+func Test_SinkChangeAndAPIRule(t *testing.T) {
+	t.Parallel()
+
+	// given
+	g := gomega.NewGomegaWithT(t)
+	ctx := context.Background()
+
+	// create unique namespace for this test run
+	testNamespace := getTestNamespace()
+	ensureNamespaceCreated(ctx, t, testNamespace)
+	subName := fmt.Sprintf("test-sink-%s", testNamespace)
+
+	givenSubscription := reconcilertesting.NewSubscription(subName, testNamespace,
+		reconcilertesting.WithDefaultSource(),
+		reconcilertesting.WithOrderCreatedV1Event(),
+		reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(testNamespace, subName)),
+	)
+
+	// phase 1: Create a Subscription with ready APIRule and ready status.
+	// create a subscriber service
+	subscriberSvc := reconcilertesting.NewSubscriberSvc(subName, testNamespace)
+	ensureK8sResourceCreated(ctx, t, subscriberSvc)
+	// create subscription
+	ensureK8sResourceCreated(ctx, t, givenSubscription)
+	createdSubscription := givenSubscription.DeepCopy()
+
+	// wait until the APIRule is assigned to the created subscription
+	getSubscriptionAssert(ctx, g, createdSubscription).Should(reconcilertesting.HaveNoneEmptyAPIRuleName())
+
+	// fetch the APIRule and update the status of the APIRule to ready (mocking APIGateway controller)
+	// and wait until the created Subscription becomes ready
+	apiRule := &apigatewayv1beta1.APIRule{ObjectMeta: metav1.ObjectMeta{
+		Name: createdSubscription.Status.Backend.APIRuleName, Namespace: createdSubscription.Namespace}}
+	getAPIRuleAssert(ctx, g, apiRule).Should(reconcilertestingv1.HaveNotEmptyAPIRule())
+	ensureAPIRuleStatusUpdatedWithStatusReady(ctx, t, apiRule)
+
+	// check if the EventMesh Subscription has the correct webhook URL
+	emSub := getEventMeshSubFromMock(givenSubscription.Name, givenSubscription.Namespace)
+	g.Expect(emSub).ShouldNot(gomega.BeNil())
+	g.Expect(emSub).Should(eventmeshsubmatchers.HaveWebhookURL(fmt.Sprintf("https://%s/", *apiRule.Spec.Host)))
+
+	// phase 2: Update the Subscription sink and check if new APIRule is created.
+	// create a subscriber service
+	subscriberSvcNew := reconcilertesting.NewSubscriberSvc(fmt.Sprintf("%s2", subName), testNamespace)
+	ensureK8sResourceCreated(ctx, t, subscriberSvcNew)
+
+	// update subscription sink
+	updatedSubscription := createdSubscription.DeepCopy()
+	reconcilertesting.SetSink(subscriberSvcNew.Namespace, subscriberSvcNew.Name, updatedSubscription)
+	ensureK8sSubscriptionUpdated(ctx, t, updatedSubscription)
+	// wait until the APIRule details are updated in Subscription.
+	getSubscriptionAssert(ctx, g, updatedSubscription).Should(reconcilertesting.HaveSubscriptionReady())
+	getSubscriptionAssert(ctx, g, updatedSubscription).ShouldNot(reconcilertesting.HaveAPIRuleName(apiRule.Name))
+
+	// fetch the new APIRule and update the status of the APIRule to ready (mocking APIGateway controller)
+	// and wait until the created Subscription becomes ready
+	apiRule = &apigatewayv1beta1.APIRule{ObjectMeta: metav1.ObjectMeta{
+		Name: updatedSubscription.Status.Backend.APIRuleName, Namespace: updatedSubscription.Namespace}}
+	getAPIRuleAssert(ctx, g, apiRule).Should(reconcilertestingv1.HaveNotEmptyAPIRule())
+	ensureAPIRuleStatusUpdatedWithStatusReady(ctx, t, apiRule)
+
+	// check if the EventMesh Subscription has the correct webhook URL
+	emSub = getEventMeshSubFromMock(givenSubscription.Name, givenSubscription.Namespace)
+	g.Expect(emSub).ShouldNot(gomega.BeNil())
+	g.Expect(emSub).Should(eventmeshsubmatchers.HaveWebhookURL(fmt.Sprintf("https://%s/", *apiRule.Spec.Host)))
 }

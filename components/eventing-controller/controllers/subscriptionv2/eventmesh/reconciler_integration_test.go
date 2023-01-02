@@ -20,7 +20,6 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
-	. "github.com/onsi/gomega/gstruct"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -212,56 +211,6 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			)
 			Expect(creationRequestsSubscription2).Should(reconcilertestingv1.BeGreaterThanOrEqual(1))
 			Expect(deletionRequestsSubscription2).Should(reconcilertestingv1.BeGreaterThanOrEqual(1))
-		})
-	})
-
-	When("Subscription sink name is changed", func() {
-		It("Should update the EventMesh subscription webhookURL by creating a new APIRule", func() {
-			subscriptionName := "test-subscription-sink-name-changed"
-
-			// prepare objects
-			serviceOld := reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
-			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
-				reconcilertesting.WithNotCleanSource(),
-				reconcilertesting.WithWebhookAuthForBEB(),
-				reconcilertesting.WithNotCleanType(),
-				reconcilertesting.WithSinkURLFromSvc(serviceOld),
-			)
-
-			// create them and wait for Subscription to be ready
-			readySubscription, apiRule := createSubscriptionObjectsAndWaitForReadiness(ctx, givenSubscription, serviceOld)
-
-			By("Updating the sink")
-			serviceNew := reconcilertesting.NewSubscriberSvc("webhook-new", namespaceName)
-			ensureSubscriberSvcCreated(ctx, serviceNew)
-			reconcilertesting.SetSink(serviceNew.Namespace, serviceNew.Name, readySubscription)
-			updateSubscription(ctx, readySubscription).Should(reconcilertesting.HaveSubscriptionReady())
-			getSubscription(ctx, readySubscription).ShouldNot(reconcilertesting.HaveAPIRuleName(apiRule.Name))
-
-			apiRuleNew := &apigatewayv1beta1.APIRule{ObjectMeta: metav1.ObjectMeta{Name: readySubscription.Status.Backend.APIRuleName, Namespace: namespaceName}}
-			getAPIRule(ctx, apiRuleNew).Should(And(
-				reconcilertestingv1.HaveNotEmptyHost(),
-				reconcilertestingv1.HaveNotEmptyAPIRule(),
-			))
-			reconcilertesting.MarkReady(apiRuleNew)
-			updateAPIRuleStatus(ctx, apiRuleNew).ShouldNot(HaveOccurred())
-
-			By("EventMesh Subscription has the same webhook URL")
-			eventMeshCreationRequests := make([]eventMeshtypes.Subscription, 0)
-			getEventMeshSubscriptionCreationRequests(eventMeshCreationRequests).Should(And(
-				ContainElement(MatchFields(IgnoreMissing|IgnoreExtras,
-					Fields{
-						"Name":       BeEquivalentTo(nameMapper.MapSubscriptionName(readySubscription.Name, readySubscription.Namespace)),
-						"WebhookURL": ContainSubstring(*apiRuleNew.Spec.Host),
-					},
-				))))
-
-			By("Cleanup not used APIRule")
-			getAPIRule(ctx, apiRule).ShouldNot(reconcilertestingv1.HaveNotEmptyAPIRule())
-
-			By("Sending at least one creation request")
-			_, creationRequests, _ := countEventMeshRequests(nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace), reconcilertesting.EventMeshOrderCreatedV1Type)
-			Expect(creationRequests).Should(reconcilertestingv1.BeGreaterThanOrEqual(1))
 		})
 	})
 
