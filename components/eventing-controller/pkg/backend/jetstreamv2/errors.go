@@ -15,6 +15,7 @@ var (
 	ErrFailedSubscribe     = errors.New("failed to create NATS JetStream subscription")
 	ErrFailedUnsubscribe   = errors.New("failed to unsubscribe from NATS JetStream")
 
+	ErrConnect           = errors.New("failed to connect to NATS JetStream")
 	ErrEmptyStreamName   = errors.New("stream name cannot be empty")
 	ErrStreamNameTooLong = fmt.Errorf("stream name should be max %d characters long", jsMaxStreamNameLength)
 )
