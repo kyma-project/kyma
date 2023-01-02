@@ -3,10 +3,11 @@ package jetstreamv2
 import (
 	"sync"
 
+	cev2 "github.com/cloudevents/sdk-go/v2"
 	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
 	backendutilsv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils/v2"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/cloudevent"
 
-	cev2 "github.com/cloudevents/sdk-go/v2"
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
@@ -19,6 +20,7 @@ const (
 	separator = "/"
 )
 
+// Backend is the interface for JetStream.
 type Backend interface {
 	// Initialize should initialize the communication layer with the messaging backend system
 	Initialize(connCloseHandler backendutilsv2.ConnClosedHandler) error
@@ -26,10 +28,10 @@ type Backend interface {
 	// SyncSubscription should synchronize the Kyma eventing subscription with the subscriber infrastructure of JetStream.
 	SyncSubscription(subscription *eventingv1alpha2.Subscription) error
 
-	// DeleteSubscription should delete the corresponding subscriber data of messaging backend
+	// DeleteSubscription should delete the corresponding subscriber data of messaging backend.
 	DeleteSubscription(subscription *eventingv1alpha2.Subscription) error
 
-	// GetJetStreamSubjects returns a list of subjects appended with stream name and source as prefix if needed
+	// GetJetStreamSubjects returns a list of subjects appended with stream name and source as prefix if needed.
 	GetJetStreamSubjects(source string, subjects []string, typeMatching eventingv1alpha2.TypeMatching) []string
 
 	// DeleteInvalidConsumers deletes all JetStream consumers having no subscription types in subscription resources
@@ -40,18 +42,34 @@ type Backend interface {
 }
 
 type JetStream struct {
-	Config        backendnats.Config
-	Conn          *nats.Conn
-	jsCtx         nats.JetStreamContext
-	client        cev2.Client
-	subscriptions map[SubscriptionSubjectIdentifier]Subscriber
-	sinks         sync.Map
-	// connClosedHandler gets called by the NATS server when Conn is closed and retry attempts are exhausted.
-	connClosedHandler backendutilsv2.ConnClosedHandler
-	logger            *logger.Logger
-	metricsCollector  *backendmetrics.Collector
-	cleaner           cleaner.Cleaner
-	subsConfig        env.DefaultSubscriptionConfig
+	// handleConnectionClosedEvent gets called by the NATS server when the connection is closed
+	// and retry attempts are exhausted.
+	// Provide your custom handler if you are interested in reacting to these events.
+	handleConnectionClosedEvent backendutilsv2.ConnClosedHandler
+
+	// ceClient is used to send cloudevents to a sink.
+	ceClient cev2.Client
+	// ceClientFactory helps in creating a cloudevent.Client.
+	ceClientFactory cloudevent.ClientFactoryInterface
+
+	// connection is the actual connection to NATS.
+	connection Connection
+	// jsCtx is used for JetStream specific calls. These cannot be performed directly on the connection object.
+	jsCtx nats.JetStreamContext
+	// ConnectionBuilder helps in creating a NATS connection.
+	connectionBuilder Builder
+
+	// config is the configuration for the NATS JetStream backend.
+	config backendnats.Config
+
+	// logger is a structured logger.
+	logger logger.KLogger
+
+	subscriptions    map[SubscriptionSubjectIdentifier]Subscriber
+	sinks            sync.Map
+	metricsCollector *backendmetrics.Collector
+	cleaner          cleaner.Cleaner
+	subsConfig       env.DefaultSubscriptionConfig
 }
 
 type Subscriber interface {

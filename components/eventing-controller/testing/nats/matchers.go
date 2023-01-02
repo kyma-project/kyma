@@ -14,12 +14,6 @@ func BeValidSubscription() gomegatypes.GomegaMatcher {
 	}, gomega.BeTrue())
 }
 
-func BeSubscriptionWithSubject(subject string) gomegatypes.GomegaMatcher {
-	return gomega.WithTransform(func(subscriber backendnats.Subscriber) bool {
-		return subscriber.SubscriptionSubject() == subject
-	}, gomega.BeTrue())
-}
-
 func BeJetStreamSubscriptionWithSubject(subject string, natsConfig backendnats.Config) gomegatypes.GomegaMatcher {
 	return gomega.WithTransform(func(subscriber backendnats.Subscriber) bool {
 		info, err := subscriber.ConsumerInfo()

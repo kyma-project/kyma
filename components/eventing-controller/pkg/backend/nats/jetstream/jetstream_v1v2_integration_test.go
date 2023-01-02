@@ -85,16 +85,25 @@ func TestJetStream_ServerRestart(t *testing.T) { //nolint:gocognit
 
 	for id, tc := range testCases {
 		tc, id := tc, id
-		t.Run(tc.name, func(t *testing.T) {
-			// given
+
+		// create unique test name
+		testName := "v1alpha1:"
+		if tc.givenEnableCRDVersion {
+			testName = "v1alpha2:"
+		}
+		testName = fmt.Sprintf("%s %s", testName, tc.name)
+
+		t.Run(testName, func(t *testing.T) {
+			// given: there is a NATS test server
 			testEnvironment := setupTestEnvironment(t, tc.givenEnableCRDVersion)
 			defer testEnvironment.natsServer.Shutdown()
 			defer testEnvironment.jsClient.natsConn.Close()
 			defer func() { _ = testEnvironment.jsClient.DeleteStream(testEnvironment.natsConfig.JSStreamName) }()
 			var err error
 			if tc.givenEnableCRDVersion {
-				testEnvironment.jsBackendv2.Config.JSStreamStorageType = tc.givenStorageType
-				testEnvironment.jsBackendv2.Config.MaxReconnects = tc.givenMaxReconnects
+				config := testEnvironment.jsBackendv2.GetConfig()
+				config.JSStreamStorageType = tc.givenStorageType
+				config.MaxReconnects = tc.givenMaxReconnects
 				err = testEnvironment.jsBackendv2.Initialize(nil)
 			} else {
 				testEnvironment.jsBackend.Config.JSStreamStorageType = tc.givenStorageType
@@ -135,7 +144,7 @@ func TestJetStream_ServerRestart(t *testing.T) { //nolint:gocognit
 
 			ev1data := fmt.Sprintf("%s%d", "sampledata", id)
 			if tc.givenEnableCRDVersion {
-				require.NoError(t, jetstreamv2.SendEventToJetStream(testEnvironment.jsBackendv2, ev1data))
+				require.NoError(t, jetstreamv2.SendEventToJetStream(testEnvironment.jsClient, testEnvironment.jsBackendv2, ev1data))
 			} else {
 				require.NoError(t, SendEventToJetStream(testEnvironment.jsBackend, ev1data))
 			}
@@ -146,7 +155,7 @@ func TestJetStream_ServerRestart(t *testing.T) { //nolint:gocognit
 			testEnvironment.natsServer.Shutdown()
 			require.Eventually(t, func() bool {
 				if tc.givenEnableCRDVersion {
-					return !testEnvironment.jsBackendv2.Conn.IsConnected()
+					return !testEnvironment.jsBackendv2.IsConnected()
 				}
 				return !testEnvironment.jsBackend.conn.IsConnected()
 			}, 30*time.Second, 2*time.Second)
@@ -160,7 +169,7 @@ func TestJetStream_ServerRestart(t *testing.T) { //nolint:gocognit
 			if tc.givenMaxReconnects > 0 {
 				require.Eventually(t, func() bool {
 					if tc.givenEnableCRDVersion {
-						return testEnvironment.jsBackendv2.Conn.IsConnected()
+						return testEnvironment.jsBackendv2.IsConnected()
 					}
 					return testEnvironment.jsBackend.conn.IsConnected()
 				}, 30*time.Second, 2*time.Second)
@@ -191,7 +200,7 @@ func TestJetStream_ServerRestart(t *testing.T) { //nolint:gocognit
 
 			ev2data := fmt.Sprintf("%s%d", "newsampledata", id)
 			if tc.givenEnableCRDVersion {
-				require.NoError(t, jetstreamv2.SendEventToJetStream(testEnvironment.jsBackendv2, ev2data))
+				require.NoError(t, jetstreamv2.SendEventToJetStream(testEnvironment.jsClient, testEnvironment.jsBackendv2, ev2data))
 			} else {
 				require.NoError(t, SendEventToJetStream(testEnvironment.jsBackend, ev2data))
 			}
@@ -221,8 +230,9 @@ func TestJetStream_ServerAndSinkRestart(t *testing.T) {
 
 			var err error
 			if newCRD {
-				testEnvironment.jsBackendv2.Config.JSStreamStorageType = StorageTypeFile
-				testEnvironment.jsBackendv2.Config.MaxReconnects = 0
+				config := testEnvironment.jsBackendv2.GetConfig()
+				config.JSStreamStorageType = StorageTypeFile
+				config.MaxReconnects = 0
 				err = testEnvironment.jsBackendv2.Initialize(nil)
 			} else {
 				testEnvironment.jsBackend.Config.JSStreamStorageType = StorageTypeFile
@@ -260,7 +270,7 @@ func TestJetStream_ServerAndSinkRestart(t *testing.T) {
 			require.NoError(t, err)
 			ev1data := "sampledata"
 			if newCRD {
-				require.NoError(t, jetstreamv2.SendEventToJetStream(testEnvironment.jsBackendv2, ev1data))
+				require.NoError(t, jetstreamv2.SendEventToJetStream(testEnvironment.jsClient, testEnvironment.jsBackendv2, ev1data))
 			} else {
 				require.NoError(t, SendEventToJetStream(testEnvironment.jsBackend, ev1data))
 			}
@@ -272,7 +282,7 @@ func TestJetStream_ServerAndSinkRestart(t *testing.T) {
 			require.False(t, subscriber.IsRunning())
 			ev2data := "newsampletestdata"
 			if newCRD {
-				require.NoError(t, jetstreamv2.SendEventToJetStream(testEnvironment.jsBackendv2, ev2data))
+				require.NoError(t, jetstreamv2.SendEventToJetStream(testEnvironment.jsClient, testEnvironment.jsBackendv2, ev2data))
 			} else {
 				require.NoError(t, SendEventToJetStream(testEnvironment.jsBackend, ev2data))
 			}
@@ -291,7 +301,7 @@ func TestJetStream_ServerAndSinkRestart(t *testing.T) {
 			testEnvironment.natsServer.Shutdown()
 			require.Eventually(t, func() bool {
 				if newCRD {
-					return !testEnvironment.jsBackendv2.Conn.IsConnected()
+					return !testEnvironment.jsBackendv2.IsConnected()
 				}
 				return !testEnvironment.jsBackend.conn.IsConnected()
 			}, 30*time.Second, 2*time.Second)

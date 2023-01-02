@@ -11,14 +11,14 @@ import (
 	natstesting "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats/testing"
 	evtestingv2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
 	"github.com/nats-io/nats-server/v2/server"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
+	"github.com/nats-io/nats.go"
 
 	nats2 "github.com/cloudevents/sdk-go/protocol/nats/v2"
 	v2 "github.com/cloudevents/sdk-go/v2"
 	"github.com/cloudevents/sdk-go/v2/binding"
 	cev2http "github.com/cloudevents/sdk-go/v2/protocol/http"
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	evtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
@@ -41,16 +41,17 @@ type TestEnvironment struct {
 	natsPort   int
 }
 
-func SendEventToJetStream(jsClient *JetStream, data string) error {
+func SendEventToJetStream(jsClient nats.JetStream, jetStreamBackend *JetStream, data string) error {
 	// assumption: the event-type used for publishing is already cleaned from none-alphanumeric characters
 	// because the publisher-application should have cleaned it already before publishing
 	eventType := evtestingv2.OrderCreatedCleanEvent
 	eventTime := time.Now().Format(time.RFC3339)
 	sampleEvent := natstesting.NewNatsMessagePayload(data, "id", evtestingv2.EventSourceClean, eventTime, eventType)
-	return jsClient.Conn.Publish(jsClient.GetJetStreamSubject(evtestingv2.EventSourceClean,
+	_, err := jsClient.Publish(jetStreamBackend.GetJetStreamSubject(evtestingv2.EventSourceClean,
 		eventType,
 		v1alpha2.TypeMatchingStandard,
 	), []byte(sampleEvent))
+	return err
 }
 
 func SendCloudEventToJetStream(jetStreamClient *JetStream, subject, eventData, cetype string) error {
@@ -82,7 +83,7 @@ func SendCloudEventToJetStream(jetStreamClient *JetStream, subject, eventData, c
 	}
 	// get a CE sender for the embedded NATS using CE-SDK
 	natsOpts := nats2.NatsOptions()
-	url := jetStreamClient.Config.URL
+	url := jetStreamClient.GetConfig().URL
 	sender, err := nats2.NewSender(url, subject, natsOpts)
 	if err != nil {
 		return nil

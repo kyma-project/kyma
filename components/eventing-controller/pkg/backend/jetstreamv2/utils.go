@@ -35,6 +35,7 @@ const (
 // getDefaultSubscriptionOptions builds the default nats.SubOpts by using the subscription/consumer configuration.
 func (js *JetStream) getDefaultSubscriptionOptions(consumer SubscriptionSubjectIdentifier,
 	maxInFlightMessages int) DefaultSubOpts {
+	config := js.config
 	return DefaultSubOpts{
 		nats.Durable(consumer.consumerName),
 		nats.Description(consumer.namespacedSubjectName),
@@ -42,11 +43,11 @@ func (js *JetStream) getDefaultSubscriptionOptions(consumer SubscriptionSubjectI
 		nats.AckExplicit(),
 		nats.IdleHeartbeat(idleHeartBeatDuration),
 		nats.EnableFlowControl(),
-		toJetStreamConsumerDeliverPolicyOptOrDefault(js.Config.JSConsumerDeliverPolicy),
+		toJetStreamConsumerDeliverPolicyOptOrDefault(config.JSConsumerDeliverPolicy),
 		nats.MaxAckPending(maxInFlightMessages),
 		nats.MaxDeliver(jsConsumerMaxRedeliver),
 		nats.AckWait(jsConsumerAcKWait),
-		nats.Bind(js.Config.JSStreamName, consumer.ConsumerName()),
+		nats.Bind(config.JSStreamName, consumer.ConsumerName()),
 	}
 }
 
@@ -119,7 +120,9 @@ func toJetStreamConsumerDeliverPolicy(deliverPolicy string) nats.DeliverPolicy {
 	return nats.DeliverNewPolicy
 }
 
-func getStreamConfig(natsConfig backendnats.Config) (*nats.StreamConfig, error) {
+// convertNatsConfigToStreamConfig converts a backendnats.Config to a nats.StreamConfig.
+// This is useful in order to check if the current NATS stream config reflects the desired backend configuration.
+func convertNatsConfigToStreamConfig(natsConfig backendnats.Config) (*nats.StreamConfig, error) {
 	storage, err := toJetStreamStorageType(natsConfig.JSStreamStorageType)
 	if err != nil {
 		return nil, err
@@ -165,10 +168,11 @@ func getStreamConfig(natsConfig backendnats.Config) (*nats.StreamConfig, error) 
 // getConsumerConfig return the consumerConfig according to the default configuration.
 func (js *JetStream) getConsumerConfig(jsSubKey SubscriptionSubjectIdentifier,
 	jsSubject string, maxInFlight int) *nats.ConsumerConfig {
+	config := js.config
 	return &nats.ConsumerConfig{
 		Durable:        jsSubKey.ConsumerName(),
 		Description:    jsSubKey.namespacedSubjectName,
-		DeliverPolicy:  toJetStreamConsumerDeliverPolicy(js.Config.JSConsumerDeliverPolicy),
+		DeliverPolicy:  toJetStreamConsumerDeliverPolicy(config.JSConsumerDeliverPolicy),
 		FlowControl:    true,
 		MaxAckPending:  maxInFlight,
 		AckPolicy:      nats.AckExplicitPolicy,
