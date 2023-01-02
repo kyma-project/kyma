@@ -44,7 +44,6 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"
 	eventMeshtypes "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
 	reconcilertestingv1 "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
 )
@@ -102,116 +101,6 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			logf.Log.Error(err, "print subscriptions failed")
 		}
 		testID++
-	})
-
-	When("Two Subscriptions using different Sinks are made to use the same Sink and then both are deleted", func() {
-		It("Should update the APIRule accordingly and then remove the APIRule", func() {
-			// Service
-			subscriberSvc := reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
-			ensureSubscriberSvcCreated(ctx, subscriberSvc)
-
-			// Subscriptions
-			subscription1Path := "/path1"
-			subscription1Name := "test-delete-valid-subscription-1"
-			subscription1 := reconcilertesting.NewSubscription(subscription1Name, namespaceName,
-				reconcilertesting.WithNotCleanSource(),
-				reconcilertesting.WithWebhookAuthForBEB(),
-				reconcilertesting.WithNotCleanType(),
-				reconcilertesting.WithSinkURLFromSvcAndPath(subscriberSvc, subscription1Path),
-			)
-			ensureSubscriptionCreated(ctx, subscription1)
-
-			subscription2Path := "/path2"
-			subscription2Name := "test-delete-valid-subscription-2"
-			subscription2 := reconcilertesting.NewSubscription(subscription2Name, namespaceName,
-				reconcilertesting.WithNotCleanSource(),
-				reconcilertesting.WithWebhookAuthForBEB(),
-				reconcilertesting.WithNotCleanType(),
-				reconcilertesting.WithSinkURLFromSvcAndPath(subscriberSvc, subscription2Path),
-			)
-			ensureSubscriptionCreated(ctx, subscription2)
-
-			By("Creating a valid APIRule")
-			getAPIRuleForASvc(ctx, subscriberSvc).Should(reconcilertestingv1.HaveNotEmptyAPIRule())
-
-			By("Updating the APIRule status to be Ready")
-			apiRuleCreated := filterAPIRulesForASvc(getAPIRules(ctx, subscriberSvc), subscriberSvc)
-			ensureAPIRuleStatusUpdatedWithStatusReady(ctx, &apiRuleCreated)
-
-			By("Using the same APIRule for both Subscriptions")
-			getSubscription(ctx, subscription1).Should(reconcilertesting.HaveAPIRuleName(apiRuleCreated.Name))
-			getSubscription(ctx, subscription2).Should(reconcilertesting.HaveAPIRuleName(apiRuleCreated.Name))
-
-			By("Ensuring the APIRule has 2 OwnerReferences and 2 paths")
-			getAPIRule(ctx, &apiRuleCreated).Should(And(
-				reconcilertestingv1.HaveNotEmptyHost(),
-				reconcilertestingv1.HaveNotEmptyAPIRule(),
-				reconcilertestingv1.HaveAPIRuleOwnersRefs(subscription1.UID, subscription2.UID),
-				reconcilertestingv1.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, subscription1Path),
-				reconcilertestingv1.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, subscription2Path),
-			))
-
-			By("Deleting the first Subscription")
-			Expect(k8sClient.Delete(ctx, subscription1)).Should(BeNil())
-
-			By("Removing the Subscription")
-			getSubscription(ctx, subscription1).Should(reconcilertesting.IsAnEmptySubscription())
-
-			By("Emitting a k8s Subscription deleted event")
-			var subscriptionEvents = corev1.EventList{}
-			subscriptionDeletedEvent := corev1.Event{
-				Reason:  string(eventingv1alpha2.ConditionReasonSubscriptionDeleted),
-				Message: "",
-				Type:    corev1.EventTypeWarning,
-			}
-			getK8sEvents(&subscriptionEvents, subscription1.Namespace).Should(reconcilertestingv1.HaveEvent(subscriptionDeletedEvent))
-
-			By("Ensuring the APIRule has 1 OwnerReference and 1 path")
-			getAPIRule(ctx, &apiRuleCreated).Should(And(
-				reconcilertestingv1.HaveNotEmptyHost(),
-				reconcilertestingv1.HaveNotEmptyAPIRule(),
-				reconcilertestingv1.HaveAPIRuleOwnersRefs(subscription2.UID),
-				reconcilertestingv1.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, subscription2Path),
-			))
-
-			By("Ensuring the deleted Subscription is removed as Owner from the APIRule")
-			getAPIRule(ctx, &apiRuleCreated).ShouldNot(And(
-				reconcilertestingv1.HaveAPIRuleOwnersRefs(subscription1.UID),
-				reconcilertestingv1.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, subscription1Path),
-			))
-
-			By("Deleting the second Subscription")
-			Expect(k8sClient.Delete(ctx, subscription2)).Should(BeNil())
-
-			By("Removing the Subscription")
-			getSubscription(ctx, subscription2).Should(reconcilertesting.IsAnEmptySubscription())
-
-			By("Emitting a k8s Subscription deleted event")
-			subscriptionDeletedEvent = corev1.Event{
-				Reason:  string(eventingv1alpha2.ConditionReasonSubscriptionDeleted),
-				Message: "",
-				Type:    corev1.EventTypeWarning,
-			}
-			getK8sEvents(&subscriptionEvents, subscription2.Namespace).Should(reconcilertestingv1.HaveEvent(subscriptionDeletedEvent))
-
-			By("Removing the APIRule")
-			Expect(apiRuleCreated.GetDeletionTimestamp).NotTo(BeNil())
-
-			By("Sending at least one creation and one deletion request for each subscription")
-			_, creationRequestsSubscription1, deletionRequestsSubscription1 := countEventMeshRequests(
-				nameMapper.MapSubscriptionName(subscription1.Name, subscription1.Namespace),
-				reconcilertesting.EventMeshOrderCreatedV1Type,
-			)
-			Expect(creationRequestsSubscription1).Should(reconcilertestingv1.BeGreaterThanOrEqual(1))
-			Expect(deletionRequestsSubscription1).Should(reconcilertestingv1.BeGreaterThanOrEqual(1))
-
-			_, creationRequestsSubscription2, deletionRequestsSubscription2 := countEventMeshRequests(
-				nameMapper.MapSubscriptionName(subscription2.Name, subscription2.Namespace),
-				reconcilertesting.EventMeshOrderCreatedV1Type,
-			)
-			Expect(creationRequestsSubscription2).Should(reconcilertestingv1.BeGreaterThanOrEqual(1))
-			Expect(deletionRequestsSubscription2).Should(reconcilertestingv1.BeGreaterThanOrEqual(1))
-		})
 	})
 
 	When("EventMesh subscription creation failed", func() {

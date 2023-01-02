@@ -822,6 +822,84 @@ func Test_APIRuleReUseAfterUpdatingSink(t *testing.T) {
 	ensureAPIRuleNotFound(ctx, t, apiRule2)
 }
 
+// Test_APIRuleExistsAfterDeletingSub tests that if two Subscriptions are using same sinks (i.e. APIRule)
+// then deleting one of the subscription should not delete the shared APIRule.
+func Test_APIRuleExistsAfterDeletingSub(t *testing.T) {
+	t.Parallel()
+
+	// given
+	g := gomega.NewGomegaWithT(t)
+	ctx := context.Background()
+
+	// create unique namespace for this test run
+	testNamespace := getTestNamespace()
+	ensureNamespaceCreated(ctx, t, testNamespace)
+
+	// phase 1: Create two Subscriptions with same sink.
+	// create a subscriber service
+	sub1Name := fmt.Sprintf("test-sink-%s", testNamespace)
+	sub2Name := fmt.Sprintf("test-sink-%s-2", testNamespace)
+	subscriberSvc := reconcilertesting.NewSubscriberSvc(sub1Name, testNamespace)
+	ensureK8sResourceCreated(ctx, t, subscriberSvc)
+	// create subscriptions
+	givenSubscription1 := reconcilertesting.NewSubscription(sub1Name, testNamespace,
+		reconcilertesting.WithDefaultSource(),
+		reconcilertesting.WithOrderCreatedV1Event(),
+		reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURLWithPath(testNamespace, sub1Name, "path1")),
+	)
+	givenSubscription2 := reconcilertesting.NewSubscription(sub2Name, testNamespace,
+		reconcilertesting.WithDefaultSource(),
+		reconcilertesting.WithOrderCreatedV1Event(),
+		reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURLWithPath(testNamespace, sub1Name, "path2")),
+	)
+
+	ensureK8sResourceCreated(ctx, t, givenSubscription1)
+	ensureK8sResourceCreated(ctx, t, givenSubscription2)
+	createdSubscription1 := givenSubscription1.DeepCopy()
+	createdSubscription2 := givenSubscription2.DeepCopy()
+
+	// wait until the APIRule is assigned to the created subscriptions
+	getSubscriptionAssert(ctx, g, createdSubscription1).Should(reconcilertesting.HaveNoneEmptyAPIRuleName())
+	getSubscriptionAssert(ctx, g, createdSubscription2).Should(reconcilertesting.HaveNoneEmptyAPIRuleName())
+
+	// verify that both subscriptions have same APIRule name
+	getSubscriptionAssert(ctx, g, createdSubscription2).Should(reconcilertesting.HaveAPIRuleName(
+		createdSubscription1.Status.Backend.APIRuleName))
+
+	// fetch the APIRule and update the status of the APIRule to ready (mocking APIGateway controller)
+	// and wait until the created Subscription becomes ready
+	apiRule1 := &apigatewayv1beta1.APIRule{ObjectMeta: metav1.ObjectMeta{
+		Name: createdSubscription1.Status.Backend.APIRuleName, Namespace: createdSubscription1.Namespace}}
+	getAPIRuleAssert(ctx, g, apiRule1).Should(gomega.And(
+		reconcilertestingv1.HaveNotEmptyAPIRule(),
+		reconcilertestingv1.HaveAPIRuleOwnersRefs(createdSubscription1.UID, createdSubscription2.UID),
+		reconcilertestingv1.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, "/path1"),
+		reconcilertestingv1.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, "/path2"),
+	))
+	ensureAPIRuleStatusUpdatedWithStatusReady(ctx, t, apiRule1)
+
+	// phase 2: Delete the second Subscription and verify that the shared APIRule is not deleted.
+	// delete the subscription and wait until deleted
+	ensureK8sResourceDeleted(ctx, t, createdSubscription2)
+	getSubscriptionAssert(ctx, g, createdSubscription2).Should(reconcilertesting.IsAnEmptySubscription())
+
+	// fetch the APIRule again and check
+	apiRule1 = &apigatewayv1beta1.APIRule{ObjectMeta: metav1.ObjectMeta{
+		Name: createdSubscription1.Status.Backend.APIRuleName, Namespace: createdSubscription1.Namespace}}
+	getAPIRuleAssert(ctx, g, apiRule1).Should(gomega.And(
+		reconcilertestingv1.HaveNotEmptyAPIRule(),
+		reconcilertestingv1.HaveNotEmptyHost(),
+		reconcilertestingv1.HaveNotEmptyAPIRule(),
+		reconcilertestingv1.HaveAPIRuleOwnersRefs(createdSubscription1.UID),
+		reconcilertestingv1.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, "/path1"),
+	))
+	// ensure that the deleted Subscription is removed as Owner from the APIRule
+	getAPIRuleAssert(ctx, g, apiRule1).ShouldNot(gomega.And(
+		reconcilertestingv1.HaveAPIRuleOwnersRefs(createdSubscription1.UID),
+		reconcilertestingv1.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, "/path2"),
+	))
+}
+
 // Test_APIRuleRecreateAfterManualDelete tests that the APIRule is re-created by the reconciler
 // when it is deleted manuallySubscription sink change scenario.
 func Test_APIRuleRecreateAfterManualDelete(t *testing.T) {
