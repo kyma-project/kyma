@@ -10,7 +10,6 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/backend"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/options"
-	jetstreambackendv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2"
 	backendmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
 	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
@@ -57,13 +56,7 @@ func main() {
 	if err != nil {
 		setupLogger.Fatalw("Failed to load configuration", "error", err)
 	}
-	// Validate the NATS config as soon as possible to fail-fast.
-	if validateErr := jetstreambackendv2.Validate(natsConfig); validateErr != nil {
-		setupLogger.Fatalw("Failed to validate NATS configuration", "error", validateErr)
-	}
-
-	natsSubMgr = jetstream.NewSubscriptionManager(restCfg, natsConfig, opts.MetricsAddr, metricsCollector,
-		ctrLogger)
+	natsSubMgr = jetstream.NewSubscriptionManager(restCfg, natsConfig, opts.MetricsAddr, metricsCollector, ctrLogger)
 	if err = jetstream.AddToScheme(scheme); err != nil {
 		setupLogger.Fatalw("Failed to start manager", "backend", v1alpha1.NatsBackendType, "error", err)
 	}

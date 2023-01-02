@@ -7,7 +7,7 @@ import (
 )
 
 type Builder interface {
-	Build() (Connection, error)
+	Build() (ConnectionInterface, error)
 }
 
 // ConnectionBuilder helps in establishing a connection to NATS.
@@ -20,7 +20,7 @@ func NewConnectionBuilder(config backendnats.Config) Builder {
 }
 
 // Build connects to NATS and returns the connection. If an error occurs, ErrConnect is returned.
-func (b ConnectionBuilder) Build() (Connection, error) {
+func (b ConnectionBuilder) Build() (ConnectionInterface, error) {
 	config := b.config
 	jsOptions := []nats.Option{
 		nats.RetryOnFailedConnect(true),
@@ -36,8 +36,8 @@ func (b ConnectionBuilder) Build() (Connection, error) {
 	return conn, nil
 }
 
-// Connection is a contract for a NATS connection object.
-type Connection interface {
+// ConnectionInterface is a contract for a NATS connection object.
+type ConnectionInterface interface {
 	IsConnected() bool
 	SetClosedHandler(cb nats.ConnHandler)
 	SetReconnectHandler(rcb nats.ConnHandler)

@@ -281,13 +281,12 @@ func TestJetStreamSubAfterSync_DeleteOldFilterConsumerForTypeChangeWhileNatsDown
 
 	// then
 	// make sure first filter does have JetStream consumer
-	config := testEnv.jsBackend.GetConfig()
-	firstCon, err := testEnv.jsBackend.jsCtx.ConsumerInfo(config.JSStreamName,
+	firstCon, err := testEnv.jsBackend.jsCtx.ConsumerInfo(testEnv.jsBackend.Config.JSStreamName,
 		firstSubKey.consumerName)
 	require.NotNil(t, firstCon)
 	require.NoError(t, err)
 	// make sure second filter doesn't have any JetStream consumer
-	secondCon, err := testEnv.jsBackend.jsCtx.ConsumerInfo(config.JSStreamName,
+	secondCon, err := testEnv.jsBackend.jsCtx.ConsumerInfo(testEnv.jsBackend.Config.JSStreamName,
 		secondSubKey.consumerName)
 	require.Nil(t, secondCon)
 	require.ErrorIs(t, err, nats.ErrConsumerNotFound)
@@ -297,9 +296,8 @@ func TestJetStreamSubAfterSync_DeleteOldFilterConsumerForTypeChangeWhileNatsDown
 
 func prepareTestEnvironment(t *testing.T) *TestEnvironment {
 	testEnvironment := setupTestEnvironment(t)
-	config := testEnvironment.jsBackend.GetConfig()
-	config.JSStreamStorageType = StorageTypeFile
-	config.MaxReconnects = 0
+	testEnvironment.jsBackend.Config.JSStreamStorageType = StorageTypeFile
+	testEnvironment.jsBackend.Config.MaxReconnects = 0
 	initErr := testEnvironment.jsBackend.Initialize(nil)
 	require.NoError(t, initErr)
 	return testEnvironment
@@ -334,7 +332,7 @@ func createSubscriptionAndAssert(t *testing.T,
 func shutdownJetStream(t *testing.T, testEnv *TestEnvironment) {
 	testEnv.natsServer.Shutdown()
 	require.Eventually(t, func() bool {
-		return !testEnv.jsBackend.connection.IsConnected()
+		return !testEnv.jsBackend.Conn.IsConnected()
 	}, 30*time.Second, 2*time.Second)
 }
 
@@ -522,8 +520,7 @@ func setupTestEnvironment(t *testing.T) *TestEnvironment {
 	jsClient := getJetStreamClient(t, natsConfig.URL)
 	jsCleaner := cleaner.NewJetStreamCleaner(defaultLogger)
 	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 9}
-	jsBackend := NewJetStream(natsConfig, metricsCollector, jsCleaner, defaultSubsConfig,
-		defaultLogger)
+	jsBackend := NewJetStream(natsConfig, metricsCollector, jsCleaner, defaultSubsConfig, defaultLogger)
 
 	return &TestEnvironment{
 		jsBackend:  jsBackend,

@@ -11,13 +11,18 @@ import (
 
 // ClientFactoryInterface is an interface for the creation of a cloudevent client.
 type ClientFactoryInterface interface {
-	NewHTTP(opts ...http.Option) (cev2.Client, error)
+	NewHTTP(opts ...http.Option) (Client, error)
 }
 
 type ClientFactory struct{}
 
 // NewHTTP creates a cloudevent client at the HTTP protocol level.
-func (c ClientFactory) NewHTTP(opts ...http.Option) (cev2.Client, error) {
+func (c ClientFactory) NewHTTP(opts ...http.Option) (Client, error) {
 	ceClient, err := cev2.NewClientHTTP(opts...)
-	return ceClient, err
+	return Client{ceClient}, err
+}
+
+// Client is a wrapper over cev2.Client.
+type Client struct {
+	cev2.Client
 }

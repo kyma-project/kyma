@@ -168,7 +168,7 @@ func TestIdempotency(t *testing.T) {
 			reconcilertestingv2.BeValidSubscription(),
 			reconcilertestingv2.BeNatsSubWithMaxPending(ens.DefaultSubscriptionConfig.MaxInFlightMessages),
 			reconcilertestingv2.BeJetStreamSubscriptionWithSubject(testingv2.EventSource,
-				testingv2.OrderCreatedEventType, eventingv1alpha2.TypeMatchingExact, *ens.jetStreamBackend.GetConfig()),
+				testingv2.OrderCreatedEventType, eventingv1alpha2.TypeMatchingExact, ens.jetStreamBackend.Config),
 		)
 	}
 	testNatsSub()
@@ -225,7 +225,7 @@ func TestCreateSubscription(t *testing.T) {
 						reconcilertestingv2.BeValidSubscription(),
 						reconcilertestingv2.BeJetStreamSubscriptionWithSubject(testingv2.EventSource,
 							testingv2.OrderCreatedEventType, eventingv1alpha2.TypeMatchingExact,
-							*ens.jetStreamBackend.GetConfig()),
+							ens.jetStreamBackend.Config),
 					},
 				},
 			},
@@ -285,7 +285,7 @@ func TestCreateSubscription(t *testing.T) {
 							testingv2.EventTypePrefixEmpty,
 							testingv2.OrderCreatedEventType,
 							eventingv1alpha2.TypeMatchingExact,
-							*ens.jetStreamBackend.GetConfig(),
+							ens.jetStreamBackend.Config,
 						),
 					},
 				},
@@ -368,7 +368,7 @@ func TestChangeSubscription(t *testing.T) {
 						reconcilertestingv2.BeValidSubscription(),
 						reconcilertestingv2.BeJetStreamSubscriptionWithSubject(
 							testingv2.EventTypePrefix, reconcilertestingv2.NewCleanEventType("0"),
-							eventingv1alpha2.TypeMatchingExact, *ens.jetStreamBackend.GetConfig(),
+							eventingv1alpha2.TypeMatchingExact, ens.jetStreamBackend.Config,
 						),
 					},
 				},
@@ -503,7 +503,7 @@ func TestChangeSubscription(t *testing.T) {
 						reconcilertestingv2.BeValidSubscription(),
 						reconcilertestingv2.BeJetStreamSubscriptionWithSubject(
 							testingv2.EventTypePrefix, testingv2.OrderCreatedEventType, eventingv1alpha2.TypeMatchingExact,
-							*ens.jetStreamBackend.GetConfig(),
+							ens.jetStreamBackend.Config,
 						),
 						reconcilertestingv2.BeNatsSubWithMaxPending(101),
 					},
@@ -589,7 +589,7 @@ func TestEmptyEventTypePrefix(t *testing.T) {
 		reconcilertestingv2.BeExistingSubscription(),
 		reconcilertestingv2.BeValidSubscription(),
 		reconcilertestingv2.BeJetStreamSubscriptionWithSubject(testingv2.EventSource,
-			testingv2.OrderCreatedEventTypePrefixEmpty, eventingv1alpha2.TypeMatchingExact, *ens.jetStreamBackend.GetConfig()),
+			testingv2.OrderCreatedEventTypePrefixEmpty, eventingv1alpha2.TypeMatchingExact, ens.jetStreamBackend.Config),
 	}
 
 	testSubscriptionOnNATS(ens, sub, testingv2.OrderCreatedEventTypePrefixEmpty, expectedNatsSubscription...)

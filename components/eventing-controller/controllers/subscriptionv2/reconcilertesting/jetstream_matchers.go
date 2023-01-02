@@ -6,9 +6,7 @@ import (
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2"
 	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/onsi/gomega"
-
 	gomegatypes "github.com/onsi/gomega/types"
 )
 
@@ -35,7 +33,9 @@ func BeJetStreamSubscriptionWithSubject(source, subject string,
 		if err != nil {
 			return false, err
 		}
-		js := jetstreamv2.NewJetStream(natsConfig, nil, nil, env.DefaultSubscriptionConfig{}, nil)
+		js := jetstreamv2.JetStream{
+			Config: natsConfig,
+		}
 		result := info.Config.FilterSubject == js.GetJetStreamSubject(source, subject, typeMatching)
 		if !result {
 			return false, fmt.Errorf(

@@ -13,6 +13,7 @@ type JetStreamContext struct {
 }
 
 func (_m *JetStreamContext) StreamNameBySubject(s string, opt ...nats.JSOpt) (string, error) {
+	// TODO implement me
 	panic("implement me")
 }
 

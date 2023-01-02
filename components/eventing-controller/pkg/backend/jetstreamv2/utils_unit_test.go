@@ -205,7 +205,7 @@ func TestGetStreamConfig(t *testing.T) {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			streamConfig, err := convertNatsConfigToStreamConfig(tc.givenNATSConfig)
+			streamConfig, err := getStreamConfig(tc.givenNATSConfig)
 			if tc.wantError {
 				require.Error(t, err)
 			} else {
