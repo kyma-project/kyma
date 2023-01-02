@@ -1,3 +1,6 @@
+//go:build integration
+// +build integration
+
 package jetstreamv2
 
 import (
