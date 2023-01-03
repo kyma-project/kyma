@@ -23,7 +23,7 @@ import (
 // TracePipelineSpec defines the desired state of TracePipeline
 type TracePipelineSpec struct {
 	// Configures the trace receiver of a TracePipeline.
-	Output TracePipelineOutput `json:"output,omitempty"`
+	Output TracePipelineOutput `json:"output"`
 }
 
 // TracePipelineOutput defines the output configuration section.

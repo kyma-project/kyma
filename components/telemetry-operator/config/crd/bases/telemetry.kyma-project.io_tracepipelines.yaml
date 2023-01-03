@@ -127,6 +127,8 @@ spec:
                 required:
                 - otlp
                 type: object
+            required:
+            - output
             type: object
           status:
             description: Shows the observed state of the TracePipeline
