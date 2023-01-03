@@ -70,14 +70,14 @@ const (
 	TracePipelineRunning TracePipelineConditionType = "Running"
 )
 
-// TracePipelineCondition contains details for the current condition of this TracePipeline
+// Contains details for the current condition of this TracePipeline
 type TracePipelineCondition struct {
 	LastTransitionTime metav1.Time                `json:"lastTransitionTime,omitempty"`
 	Reason             string                     `json:"reason,omitempty"`
 	Type               TracePipelineConditionType `json:"type,omitempty"`
 }
 
-// TracePipelineStatus defines the observed state of TracePipeline
+// Defines the observed state of TracePipeline
 type TracePipelineStatus struct {
 	Conditions []TracePipelineCondition `json:"conditions,omitempty"`
 }

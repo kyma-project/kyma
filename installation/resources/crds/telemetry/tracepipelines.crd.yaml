@@ -135,8 +135,8 @@ spec:
             properties:
               conditions:
                 items:
-                  description: TracePipelineCondition contains details for the current
-                    condition of this TracePipeline
+                  description: Contains details for the current condition of this
+                    TracePipeline
                   properties:
                     lastTransitionTime:
                       format: date-time
