@@ -1015,5 +1015,4 @@ func Test_APIRuleRecreateAfterManualDelete(t *testing.T) {
 	apiRule = &apigatewayv1beta1.APIRule{ObjectMeta: metav1.ObjectMeta{
 		Name: createdSubscription.Status.Backend.APIRuleName, Namespace: createdSubscription.Namespace}}
 	getAPIRuleAssert(ctx, g, apiRule).Should(reconcilertestingv1.HaveNotEmptyAPIRule())
-	ensureAPIRuleStatusUpdatedWithStatusReady(ctx, t, apiRule)
 }
