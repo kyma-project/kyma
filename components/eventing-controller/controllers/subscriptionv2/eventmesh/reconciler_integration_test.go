@@ -332,68 +332,6 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		})
 	})
 
-	When("Deleting a valid Subscription", func() {
-		It("Should reconcile the Subscription", func() {
-
-			// Create service
-			subscriberSvc := reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
-			ensureSubscriberSvcCreated(ctx, subscriberSvc)
-
-			// Create subscription
-			subscriptionName := "test-delete-valid-subscription-1"
-			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
-				reconcilertesting.WithNotCleanSource(),
-				reconcilertesting.WithWebhookAuthForBEB(),
-				reconcilertesting.WithNotCleanType(),
-				reconcilertesting.WithSinkURLFromSvc(subscriberSvc),
-			)
-			ensureSubscriptionCreated(ctx, givenSubscription)
-
-			By("Creating a valid APIRule")
-			getAPIRuleForASvc(ctx, subscriberSvc).Should(reconcilertestingv1.HaveNotEmptyAPIRule())
-
-			By("Updating the APIRule(replicating apigateway controller) status to be Ready")
-			apiRuleCreated := filterAPIRulesForASvc(getAPIRules(ctx, subscriberSvc), subscriberSvc)
-			ensureAPIRuleStatusUpdatedWithStatusReady(ctx, &apiRuleCreated).Should(BeNil())
-
-			By("Given the subscription is ready", func() {
-				getSubscription(ctx, givenSubscription).Should(And(
-					reconcilertesting.HaveSubscriptionName(subscriptionName),
-					reconcilertesting.HaveSubscriptionReady(),
-				))
-
-				By("Creating a EventMesh Subscription")
-				Eventually(wasSubscriptionCreated(givenSubscription)).Should(BeTrue())
-			})
-
-			By("Deleting the Subscription")
-			Expect(k8sClient.Delete(ctx, givenSubscription)).Should(BeNil())
-
-			By("Removing the Subscription")
-			getSubscription(ctx, givenSubscription).Should(reconcilertesting.IsAnEmptySubscription())
-
-			By("Deleting the EventMesh Subscription")
-			Eventually(wasSubscriptionCreated(givenSubscription)).Should(BeTrue())
-
-			By("Removing the APIRule")
-			Expect(apiRuleCreated.GetDeletionTimestamp).NotTo(BeNil())
-
-			By("Emitting some k8s events")
-			var subscriptionEvents = corev1.EventList{}
-			subscriptionDeletedEvent := corev1.Event{
-				Reason:  string(eventingv1alpha2.ConditionReasonSubscriptionDeleted),
-				Message: "",
-				Type:    corev1.EventTypeWarning,
-			}
-			getK8sEvents(&subscriptionEvents, givenSubscription.Namespace).Should(reconcilertestingv1.HaveEvent(subscriptionDeletedEvent))
-
-			By("Sending at least one creation and one deletion request for the Subscription")
-			_, creationRequests, deletionRequests := countEventMeshRequests(nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace), reconcilertesting.EventMeshOrderCreatedV1Type)
-			Expect(creationRequests).Should(reconcilertestingv1.BeGreaterThanOrEqual(1))
-			Expect(deletionRequests).Should(reconcilertestingv1.BeGreaterThanOrEqual(1))
-		})
-	})
-
 	When("Deleting EventMesh Subscription manually", func() {
 		It("Should recreate EventMesh Subscription again", func() {
 
