@@ -34,6 +34,8 @@ const (
 	CloudEventSpecVersion            = "1.0"
 
 	LegacyEventTime = "2020-04-02T21:37:00Z"
+
+	OldEventTypePrefix = "sap.kyma.custom"
 )
 
 type Event struct {

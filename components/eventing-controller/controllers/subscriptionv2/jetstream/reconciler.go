@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"time"
 
+	pkgerrors "github.com/kyma-project/kyma/components/eventing-controller/pkg/errors"
 	"github.com/nats-io/nats.go"
 
 	"github.com/pkg/errors"
@@ -214,7 +215,7 @@ func (r *Reconciler) syncSubscriptionStatus(ctx context.Context,
 	if updateStatus || readyStatusChanged {
 		if updateErr := r.Client.Status().Update(ctx, sub, &client.UpdateOptions{}); updateErr != nil {
 			events.Warn(r.recorder, sub, events.ReasonUpdateFailed, "Update Subscription status failed %s", sub.Name)
-			return utils.MakeError(errFailedToUpdateStatus, updateErr)
+			return pkgerrors.MakeError(errFailedToUpdateStatus, updateErr)
 		}
 		events.Normal(r.recorder, sub, events.ReasonUpdate, "Update Subscription status succeeded %s", sub.Name)
 	}
@@ -228,7 +229,7 @@ func (r *Reconciler) handleSubscriptionDeletion(ctx context.Context,
 		if err := r.Backend.DeleteSubscription(subscription); err != nil {
 			// if failed to delete the external dependency here, return with error
 			// so that it can be retried
-			return utils.MakeError(errFailedToDeleteSub, err)
+			return pkgerrors.MakeError(errFailedToDeleteSub, err)
 		}
 
 		// remove our finalizer from the list and update it.
@@ -236,7 +237,7 @@ func (r *Reconciler) handleSubscriptionDeletion(ctx context.Context,
 			eventingv1alpha2.Finalizer)
 		if err := r.Client.Update(ctx, subscription); err != nil {
 			events.Warn(r.recorder, subscription, events.ReasonUpdateFailed, "Update Subscription failed %s", subscription.Name)
-			return utils.MakeError(errFailedToRemoveFinalizer, err)
+			return pkgerrors.MakeError(errFailedToRemoveFinalizer, err)
 		}
 		log.Debug("Removed finalizer from subscription")
 	}
@@ -248,7 +249,7 @@ func (r *Reconciler) addFinalizerToSubscription(sub *eventingv1alpha2.Subscripti
 	sub.ObjectMeta.Finalizers = append(sub.ObjectMeta.Finalizers, eventingv1alpha2.Finalizer)
 	// to avoid a dangling subscription, we update the subscription as soon as the finalizer is added to it
 	if err := r.Client.Update(context.Background(), sub); err != nil {
-		return utils.MakeError(errFailedToAddFinalizer, err)
+		return pkgerrors.MakeError(errFailedToAddFinalizer, err)
 	}
 	log.Debug("Added finalizer to subscription")
 	return nil

@@ -61,7 +61,7 @@ type TestEnvironment struct {
 	jsCtx         nats.JetStreamContext
 	natsServer    *server.Server
 	subscriber    *controllertesting.Subscriber
-	envConf       env.NatsConfig
+	envConf       backendnats.Config
 	defaultLogger *logger.Logger
 }
 
@@ -82,9 +82,9 @@ func getJetStreamClient(t *testing.T, natsURL string) nats.JetStreamContext {
 	return jsClient
 }
 
-func getNATSConf(natsURL string, natsPort int) env.NatsConfig {
+func getNATSConf(natsURL string, natsPort int) backendnats.Config {
 	streamName := fmt.Sprintf("%s%d", controllertesting.JSStreamName, natsPort)
-	return env.NatsConfig{
+	return backendnats.Config{
 		URL:                     natsURL,
 		MaxReconnects:           10,
 		ReconnectWait:           time.Second,

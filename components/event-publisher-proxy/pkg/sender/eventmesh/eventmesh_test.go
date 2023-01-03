@@ -1,4 +1,4 @@
-package beb
+package eventmesh
 
 import (
 	"context"
@@ -30,7 +30,7 @@ const (
 func TestNewHttpMessageSender(t *testing.T) {
 	t.Parallel()
 
-	client := oauth.NewClient(context.Background(), &env.BEBConfig{})
+	client := oauth.NewClient(context.Background(), &env.EventMeshConfig{})
 	defer client.CloseIdleConnections()
 
 	msgSender := NewSender(eventsEndpoint, client)
@@ -45,7 +45,7 @@ func TestNewHttpMessageSender(t *testing.T) {
 func TestNewRequestWithTarget(t *testing.T) {
 	t.Parallel()
 
-	client := oauth.NewClient(context.Background(), &env.BEBConfig{MaxIdleConns: maxIdleConns, MaxIdleConnsPerHost: maxIdleConnsPerHost})
+	client := oauth.NewClient(context.Background(), &env.EventMeshConfig{MaxIdleConns: maxIdleConns, MaxIdleConnsPerHost: maxIdleConnsPerHost})
 	defer client.CloseIdleConnections()
 
 	msgSender := NewSender(eventsEndpoint, client)

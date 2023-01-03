@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"os"
 
+	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
+	pkgerrors "github.com/kyma-project/kyma/components/eventing-controller/pkg/errors"
 	"golang.org/x/xerrors"
 
 	"github.com/pkg/errors"
@@ -77,7 +79,7 @@ type Reconciler struct {
 	client.Client
 	ctx               context.Context
 	natsSubMgr        subscriptionmanager.Manager
-	natsConfig        env.NatsConfig
+	natsConfig        backendnats.Config
 	natsSubMgrStarted bool
 	bebSubMgr         subscriptionmanager.Manager
 	bebSubMgrStarted  bool
@@ -91,7 +93,9 @@ type Reconciler struct {
 	oauth2ClientSecret []byte
 }
 
-func NewReconciler(ctx context.Context, natsSubMgr subscriptionmanager.Manager, natsConfig env.NatsConfig, bebSubMgr subscriptionmanager.Manager, client client.Client, logger *logger.Logger, recorder record.EventRecorder) *Reconciler {
+func NewReconciler(ctx context.Context, natsSubMgr subscriptionmanager.Manager, natsConfig backendnats.Config,
+	bebSubMgr subscriptionmanager.Manager, client client.Client, logger *logger.Logger,
+	recorder record.EventRecorder) *Reconciler {
 	cfg := env.GetBackendConfig()
 	return &Reconciler{
 		ctx:        ctx,
@@ -875,7 +879,7 @@ func (r *Reconciler) updateMutatingValidatingWebhookWithCABundle(ctx context.Con
 		Name:      r.cfg.WebhookSecretName,
 	}
 	if err := r.Client.Get(ctx, secretKey, &certificateSecret); err != nil {
-		return utils.MakeError(errObjectNotFound, err)
+		return pkgerrors.MakeError(errObjectNotFound, err)
 	}
 
 	// get the mutating and validation WH config
@@ -886,11 +890,11 @@ func (r *Reconciler) updateMutatingValidatingWebhookWithCABundle(ctx context.Con
 
 	// check that the mutating and validation WH config are valid
 	if len(mutatingWH.Webhooks) == 0 {
-		return utils.MakeError(errInvalidObject,
+		return pkgerrors.MakeError(errInvalidObject,
 			errors.Errorf("mutatingWH %s does not have associated webhooks", r.cfg.MutatingWebhookName))
 	}
 	if len(validatingWH.Webhooks) == 0 {
-		return utils.MakeError(errInvalidObject,
+		return pkgerrors.MakeError(errInvalidObject,
 			errors.Errorf("validatingWH %s does not have associated webhooks", r.cfg.ValidatingWebhookName))
 	}
 
@@ -925,14 +929,14 @@ func (r *Reconciler) getMutatingAndValidatingWebHookConfig(ctx context.Context) 
 		Name: r.cfg.MutatingWebhookName,
 	}
 	if err := r.Client.Get(ctx, mutatingWHKey, &mutatingWH); err != nil {
-		return nil, nil, utils.MakeError(errObjectNotFound, err)
+		return nil, nil, pkgerrors.MakeError(errObjectNotFound, err)
 	}
 	var validatingWH admissionv1.ValidatingWebhookConfiguration
 	validatingWHKey := client.ObjectKey{
 		Name: r.cfg.ValidatingWebhookName,
 	}
 	if err := r.Client.Get(ctx, validatingWHKey, &validatingWH); err != nil {
-		return nil, nil, utils.MakeError(errObjectNotFound, err)
+		return nil, nil, pkgerrors.MakeError(errObjectNotFound, err)
 	}
 	return &mutatingWH, &validatingWH, nil
 }

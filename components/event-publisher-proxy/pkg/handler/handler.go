@@ -9,6 +9,8 @@ import (
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
 
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy/api"
+
 	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"go.uber.org/zap"
@@ -59,8 +61,10 @@ type Handler struct {
 	// eventTypeCleaner cleans the cloud event type
 	eventTypeCleaner eventtype.Cleaner
 	// builds the cloud event according to Subscription v1alpha2 specifications
-	ceBuilder builder.CloudEventBuilder
-	router    *mux.Router
+	ceBuilder          builder.CloudEventBuilder
+	router             *mux.Router
+	activeBackend      env.ActiveBackend
+	OldEventTypePrefix string
 }
 
 const (
@@ -71,7 +75,7 @@ const (
 func NewHandler(receiver *receiver.HTTPMessageReceiver, sender sender.GenericSender, healthChecker health.Checker, requestTimeout time.Duration,
 	legacyTransformer legacy.RequestToCETransformer, opts *options.Options, subscribedProcessor *subscribed.Processor,
 	logger *logger.Logger, collector metrics.PublishingMetricsCollector, eventTypeCleaner eventtype.Cleaner,
-	ceBuilder builder.CloudEventBuilder) *Handler {
+	ceBuilder builder.CloudEventBuilder, oldEventTypePrefix string, activeBackend env.ActiveBackend) *Handler {
 
 	return &Handler{
 		Receiver:            receiver,
@@ -85,6 +89,8 @@ func NewHandler(receiver *receiver.HTTPMessageReceiver, sender sender.GenericSen
 		collector:           collector,
 		eventTypeCleaner:    eventTypeCleaner,
 		ceBuilder:           ceBuilder,
+		OldEventTypePrefix:  oldEventTypePrefix,
+		activeBackend:       activeBackend,
 	}
 }
 
@@ -122,32 +128,112 @@ func (h *Handler) maxBytes(f http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-// publishLegacyEventsAsCE converts an incoming request in legacy event format to a cloudevent and dispatches it using
-// the configured GenericSender.
-func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *http.Request) {
-	event, _ := h.LegacyTransformer.TransformLegacyRequestsToCE(writer, request)
-	if event == nil {
-		h.namedLogger().Error("Failed to transform legacy event to CloudEvent, event is nil")
-		return
-	}
-	ctx := request.Context()
-
-	result, err := h.sendEventAndRecordMetrics(ctx, event, h.Sender.URL(), request.Header)
+// handlePublishLegacyEventV1alpha1 handles the publishing of metrics.
+// It writes to the user request if any error occurs.
+// Otherwise, returns the result.
+func (h *Handler) handleSendEventAndRecordMetricsLegacy(writer http.ResponseWriter, request *http.Request, event *cev2event.Event) (sender.PublishResult, error) {
+	result, err := h.sendEventAndRecordMetrics(request.Context(), event, h.Sender.URL(), request.Header)
 	if err != nil {
-		h.namedLogger().With().Error(err)
+		h.namedLogger().Error(err)
 		httpStatus := http.StatusInternalServerError
 		if errors.Is(err, sender.ErrInsufficientStorage) {
 			httpStatus = http.StatusInsufficientStorage
 		} else if errors.Is(err, sender.ErrBackendTargetNotFound) {
 			httpStatus = http.StatusBadGateway
 		}
-		h.LegacyTransformer.TransformsCEResponseToLegacyResponse(writer, httpStatus, event, err.Error())
+		h.LegacyTransformer.WriteCEResponseAsLegacyResponse(writer, httpStatus, event, err.Error())
+		return nil, err
+	}
+	h.namedLogger().Debug(result)
+	return result, nil
+}
+
+// handlePublishLegacyEventV1alpha2 handles the publishing of events for Subscription v1alpha2 CRD.
+// It writes to the user request if any error occurs.
+// Otherwise, return the published event.
+func (h *Handler) handlePublishLegacyEventV1alpha2(writer http.ResponseWriter, publishData *api.PublishRequestData, request *http.Request) (sender.PublishResult, *cev2event.Event) {
+	ceEvent, err := h.LegacyTransformer.TransformPublishRequestToCloudEvent(publishData)
+	if err != nil {
+		legacy.WriteJSONResponse(writer, legacy.ErrorResponse(http.StatusInternalServerError, err))
+		return nil, nil
+	}
+
+	// set original type header
+	ceEvent.SetExtension(originalTypeHeaderName, ceEvent.Type())
+
+	// build a new cloud event instance as per specifications per backend
+	event, err := h.ceBuilder.Build(*ceEvent)
+	if err != nil {
+		legacy.WriteJSONResponse(writer, legacy.ErrorResponseBadRequest(err.Error()))
+		return nil, nil
+	}
+
+	result, err := h.handleSendEventAndRecordMetricsLegacy(writer, request, event)
+	if err != nil {
+		return nil, nil
+	}
+
+	return result, event
+}
+
+// handlePublishLegacyEventV1alpha1 handles the publishing of events for Subscription v1alpha1 CRD.
+// It writes to the user request if any error occurs.
+// Otherwise, return the published event.
+func (h *Handler) handlePublishLegacyEventV1alpha1(writer http.ResponseWriter, publishData *api.PublishRequestData, request *http.Request) (sender.PublishResult, *cev2event.Event) {
+	event, _ := h.LegacyTransformer.WriteLegacyRequestsToCE(writer, publishData)
+	if event == nil {
+		h.namedLogger().Error("Failed to transform legacy event to CloudEvent, event is nil")
+		return nil, nil
+	}
+
+	result, err := h.handleSendEventAndRecordMetricsLegacy(writer, request, event)
+	if err != nil {
+		return nil, nil
+	}
+
+	return result, event
+}
+
+// publishLegacyEventsAsCE converts an incoming request in legacy event format to a cloudevent and dispatches it using
+// the configured GenericSender.
+func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *http.Request) {
+	var publishedEvent *cev2event.Event
+	var successResult sender.PublishResult
+
+	// extract publish data from request
+	publishRequestData, errResp, _ := h.LegacyTransformer.ExtractPublishRequestData(request)
+	if errResp != nil {
+		legacy.WriteJSONResponse(writer, errResp)
 		return
 	}
-	h.namedLogger().With().Debug(result)
 
-	// Change response as per old error codes
-	h.LegacyTransformer.TransformsCEResponseToLegacyResponse(writer, result.HTTPStatus(), event, string(result.ResponseBody()))
+	// publish event for Subscription v1alpha2
+	if h.Options.EnableNewCRDVersion {
+		successResult, publishedEvent = h.handlePublishLegacyEventV1alpha2(writer, publishRequestData, request)
+		// if publishedEvent is nil, then it means that the publishing failed
+		// and the response is already returned to the user
+		if publishedEvent == nil {
+			return
+		}
+	}
+
+	// publish event for Subscription v1alpha1
+	// In case of EnableNewCRDVersion is true and the active backend is JetStream
+	// then we will publish event on both possible subjects
+	// i.e. with prefix (`sap.kyma.custom`) and without prefix
+	// this behaviour will be deprecated when we remove support for JetStream with Subscription `exact` typeMatching
+	if !h.Options.EnableNewCRDVersion || h.activeBackend == env.JetStreamBackend {
+		successResult, publishedEvent = h.handlePublishLegacyEventV1alpha1(writer, publishRequestData, request)
+		// if publishedEvent is nil, then it means that the publishing failed
+		// and the response is already returned to the user
+		if publishedEvent == nil {
+			return
+		}
+	}
+
+	// return success response to user
+	// change response as per old error codes
+	h.LegacyTransformer.WriteCEResponseAsLegacyResponse(writer, successResult.HTTPStatus(), publishedEvent, string(successResult.ResponseBody()))
 }
 
 // publishCloudEvents validates an incoming cloudevent and dispatches it using
@@ -168,7 +254,7 @@ func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.R
 	eventTypeOriginal := event.Type()
 	event.SetExtension(originalTypeHeaderName, eventTypeOriginal)
 
-	if h.Options.EnableNewCRDVersion && !strings.HasPrefix(eventTypeOriginal, env.OldEventTypePrefix) {
+	if h.Options.EnableNewCRDVersion && !strings.HasPrefix(eventTypeOriginal, h.OldEventTypePrefix) {
 		// build a new cloud event instance as per specifications per backend
 		event, err = h.ceBuilder.Build(*event)
 		if err != nil {

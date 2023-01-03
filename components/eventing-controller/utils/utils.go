@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	pkgerrors "github.com/kyma-project/kyma/components/eventing-controller/pkg/errors"
 	"github.com/pkg/errors"
 )
 
@@ -88,7 +89,7 @@ func IsValidScheme(sink string) bool {
 func GetSinkData(sink string) (string, []string, error) {
 	sURL, err := url.ParseRequestURI(sink)
 	if err != nil {
-		return "", nil, MakeError(ErrParseSink, err)
+		return "", nil, pkgerrors.MakeError(ErrParseSink, err)
 	}
 	trimmedHost := strings.Split(sURL.Host, ":")[0]
 	subDomains := strings.Split(trimmedHost, ".")

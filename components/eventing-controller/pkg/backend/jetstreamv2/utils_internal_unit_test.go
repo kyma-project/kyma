@@ -1,3 +1,5 @@
+//go:build unit
+
 package jetstreamv2
 
 import (
@@ -5,9 +7,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/nats-io/nats.go"
-
+	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	"github.com/nats-io/nats.go"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	"github.com/stretchr/testify/require"
@@ -106,13 +108,13 @@ func TestGetStreamConfig(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
 		name             string
-		givenNatsConfig  env.NatsConfig
+		givenNATSConfig  backendnats.Config
 		wantStreamConfig *nats.StreamConfig
 		wantError        bool
 	}{
 		{
 			name: "Should throw an error if storage type is invalid",
-			givenNatsConfig: env.NatsConfig{
+			givenNATSConfig: backendnats.Config{
 				JSStreamStorageType: "invalid",
 			},
 			wantStreamConfig: nil,
@@ -120,7 +122,7 @@ func TestGetStreamConfig(t *testing.T) {
 		},
 		{
 			name: "Should throw an error if retention policy is invalid",
-			givenNatsConfig: env.NatsConfig{
+			givenNATSConfig: backendnats.Config{
 				JSStreamRetentionPolicy: "invalid",
 			},
 			wantStreamConfig: nil,
@@ -128,7 +130,7 @@ func TestGetStreamConfig(t *testing.T) {
 		},
 		{
 			name: "Should return valid StreamConfig",
-			givenNatsConfig: env.NatsConfig{
+			givenNATSConfig: backendnats.Config{
 				JSStreamName:            DefaultStreamName,
 				JSSubjectPrefix:         DefaultJetStreamSubjectPrefix,
 				JSStreamStorageType:     StorageTypeMemory,
@@ -152,7 +154,7 @@ func TestGetStreamConfig(t *testing.T) {
 		},
 		{
 			name: "Should parse MaxBytes correctly without unit",
-			givenNatsConfig: env.NatsConfig{
+			givenNATSConfig: backendnats.Config{
 				JSStreamName:            DefaultStreamName,
 				JSSubjectPrefix:         DefaultJetStreamSubjectPrefix,
 				JSStreamStorageType:     StorageTypeMemory,
@@ -176,7 +178,7 @@ func TestGetStreamConfig(t *testing.T) {
 		},
 		{
 			name: "Should parse MaxBytes correctly with unit",
-			givenNatsConfig: env.NatsConfig{
+			givenNATSConfig: backendnats.Config{
 				JSStreamName:            DefaultStreamName,
 				JSSubjectPrefix:         DefaultJetStreamSubjectPrefix,
 				JSStreamStorageType:     StorageTypeMemory,
@@ -203,7 +205,7 @@ func TestGetStreamConfig(t *testing.T) {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			streamConfig, err := getStreamConfig(tc.givenNatsConfig)
+			streamConfig, err := getStreamConfig(tc.givenNATSConfig)
 			if tc.wantError {
 				require.Error(t, err)
 			} else {
@@ -311,7 +313,7 @@ func TestGetBackendJetStreamTypes(t *testing.T) {
 	t.Parallel()
 	jsCleaner := cleaner.NewJetStreamCleaner(nil)
 	defaultSub := evtestingv2.NewSubscription(subName, subNamespace)
-	js := NewJetStream(env.NatsConfig{
+	js := NewJetStream(backendnats.Config{
 		JSSubjectPrefix: DefaultJetStreamSubjectPrefix,
 	}, nil, jsCleaner, env.DefaultSubscriptionConfig{}, nil)
 	testCases := []struct {
@@ -557,69 +559,6 @@ func TestSubscriptionSubjectIdentifierNamespacedName(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			require.Equal(t, tc.wantNamespacedName, tc.givenIdentifier.NamespacedName())
-		})
-	}
-}
-
-// TestJetStream_isJsSubAssociatedWithKymaSub tests the isJsSubAssociatedWithKymaSub method.
-func TestJetStream_isJsSubAssociatedWithKymaSub(t *testing.T) {
-	t.Parallel()
-	// given
-	testEnvironment := setupTestEnvironment(t)
-	jsBackend := testEnvironment.jsBackend
-	defer testEnvironment.natsServer.Shutdown()
-	defer testEnvironment.jsClient.natsConn.Close()
-	initErr := jsBackend.Initialize(nil)
-	require.NoError(t, initErr)
-
-	// create subscription 1 and its JetStream subscription
-	cleanSubject1 := "subOne"
-	sub1 := evtestingv2.NewSubscription(cleanSubject1, "foo", evtestingv2.WithNotCleanEventSourceAndType())
-	jsSub1Key := NewSubscriptionSubjectIdentifier(sub1, cleanSubject1)
-
-	// create subscription 2 and its JetStream subscription
-	cleanSubject2 := "subOneTwo"
-	sub2 := evtestingv2.NewSubscription(cleanSubject2, "foo", evtestingv2.WithNotCleanEventSourceAndType())
-	jsSub2Key := NewSubscriptionSubjectIdentifier(sub2, cleanSubject2)
-
-	testCases := []struct {
-		name            string
-		givenJSSubKey   SubscriptionSubjectIdentifier
-		givenKymaSubKey *eventingv1alpha2.Subscription
-		wantResult      bool
-	}{
-		{
-			name:            "",
-			givenJSSubKey:   jsSub1Key,
-			givenKymaSubKey: sub1,
-			wantResult:      true,
-		},
-		{
-			name:            "",
-			givenJSSubKey:   jsSub2Key,
-			givenKymaSubKey: sub2,
-			wantResult:      true,
-		},
-		{
-			name:            "",
-			givenJSSubKey:   jsSub1Key,
-			givenKymaSubKey: sub2,
-			wantResult:      false,
-		},
-		{
-			name:            "",
-			givenJSSubKey:   jsSub2Key,
-			givenKymaSubKey: sub1,
-			wantResult:      false,
-		},
-	}
-
-	for _, tC := range testCases {
-		testCase := tC
-		t.Run(testCase.name, func(t *testing.T) {
-			t.Parallel()
-			gotResult := isJsSubAssociatedWithKymaSub(tC.givenJSSubKey, tC.givenKymaSubKey)
-			require.Equal(t, tC.wantResult, gotResult)
 		})
 	}
 }

@@ -1,3 +1,5 @@
+//go:build integration
+
 package jetstreamv2
 
 import (
@@ -5,10 +7,11 @@ import (
 	"testing"
 	"time"
 
+	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
+	"github.com/nats-io/nats.go"
 	"github.com/stretchr/testify/assert"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
-	"github.com/nats-io/nats.go"
 	"github.com/stretchr/testify/require"
 
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
@@ -472,9 +475,9 @@ func TestJetStream_NATSSubscriptionCount(t *testing.T) {
 	}
 }
 
-func defaultNatsConfig(url string, port int) env.NatsConfig {
+func defaultNATSConfig(url string, port int) backendnats.Config {
 	streamName := fmt.Sprintf("%s%d", DefaultStreamName, port)
-	return env.NatsConfig{
+	return backendnats.Config{
 		URL:                     url,
 		MaxReconnects:           DefaultMaxReconnects,
 		ReconnectWait:           3 * time.Second,
@@ -507,7 +510,7 @@ func getJetStreamClient(t *testing.T, serverURL string) *jetStreamClient {
 func setupTestEnvironment(t *testing.T) *TestEnvironment {
 	natsServer, natsPort, err := natstesting.StartNATSServer(evtesting.WithJetStreamEnabled())
 	require.NoError(t, err)
-	natsConfig := defaultNatsConfig(natsServer.ClientURL(), natsPort)
+	natsConfig := defaultNATSConfig(natsServer.ClientURL(), natsPort)
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	require.NoError(t, err)
 
