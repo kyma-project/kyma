@@ -1115,7 +1115,10 @@ func TestWithEventMeshServerErrors(t *testing.T) {
 					eventingv1alpha2.ConditionSubscribed,
 					eventingv1alpha2.ConditionReasonSubscriptionCreationFailed,
 					corev1.ConditionFalse,
-					"failed to get subscription from EventMesh: create subscription failed: 500; 500 Internal Server Error;{\"message\":\"sorry, but this mock does not let you create a EventMesh subscription\"}\n"),
+					"failed to get subscription from EventMesh: create subscription failed: 500; 500 Internal"+
+						" Server Error;{\"message\":\"sorry, but this mock does not let you create a"+
+						" EventMesh subscription\"}\n",
+				),
 				),
 			),
 			wantEventMeshSubMatchers: gomega.And(
@@ -1147,8 +1150,8 @@ func TestWithEventMeshServerErrors(t *testing.T) {
 			name: "when EventMesh server subscription webhook is unauthorized",
 			givenCreateResponseFunc: func(w http.ResponseWriter, sub eventMeshtypes.Subscription) {
 				sub.SubscriptionStatus = eventMeshtypes.SubscriptionStatusActive
-				sub.LastSuccessfulDelivery =   time.Now().Format(time.RFC3339)                       // "now",
-				sub.LastFailedDelivery =       time.Now().Add(10 * time.Second).Format(time.RFC3339) // "now + 10s"
+				sub.LastSuccessfulDelivery = time.Now().Format(time.RFC3339)                   // "now",
+				sub.LastFailedDelivery = time.Now().Add(10 * time.Second).Format(time.RFC3339) // "now + 10s"
 				sub.LastFailedDeliveryReason = "Webhook endpoint response code: 401"
 
 				subKey := getEventMeshKeyForMock(sub.Name)

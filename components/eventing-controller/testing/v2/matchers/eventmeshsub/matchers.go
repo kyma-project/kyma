@@ -34,12 +34,14 @@ func HaveWebhookURL(webhookURL string) gomegatypes.GomegaMatcher {
 
 func HaveStatusPaused() gomegatypes.GomegaMatcher {
 	return gomega.WithTransform(func(s *eventMeshtypes.Subscription) eventMeshtypes.SubscriptionStatus {
-		return s.SubscriptionStatus }, gomega.Equal(eventMeshtypes.SubscriptionStatusPaused))
+		return s.SubscriptionStatus
+	}, gomega.Equal(eventMeshtypes.SubscriptionStatusPaused))
 }
 
 func HaveStatusActive() gomegatypes.GomegaMatcher {
 	return gomega.WithTransform(func(s *eventMeshtypes.Subscription) eventMeshtypes.SubscriptionStatus {
-		return s.SubscriptionStatus }, gomega.Equal(eventMeshtypes.SubscriptionStatusActive))
+		return s.SubscriptionStatus
+	}, gomega.Equal(eventMeshtypes.SubscriptionStatusActive))
 }
 
 func HaveContentMode(contentMode string) gomegatypes.GomegaMatcher {
@@ -49,5 +51,6 @@ func HaveContentMode(contentMode string) gomegatypes.GomegaMatcher {
 
 func HaveNonEmptyLastFailedDeliveryReason() gomegatypes.GomegaMatcher {
 	return gomega.WithTransform(func(s *eventMeshtypes.Subscription) string {
-		return s.LastFailedDeliveryReason }, gomega.Not(gomega.BeEmpty()))
+		return s.LastFailedDeliveryReason
+	}, gomega.Not(gomega.BeEmpty()))
 }

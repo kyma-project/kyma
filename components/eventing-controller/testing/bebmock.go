@@ -30,31 +30,31 @@ const (
 
 // BEBMock implements a programmable mock for BEB.
 type BEBMock struct {
-	Requests       *SafeRequests
-	Subscriptions  *SafeSubscriptions
-	TokenURL       string
-	MessagingURL   string
-	log            logr.Logger
-	AuthResponse   Response
-	GetResponse    ResponseWithName
-	ListResponse   Response
-	CreateResponse Response
-	DeleteResponse Response
-	server         *httptest.Server
+	Requests          *SafeRequests
+	Subscriptions     *SafeSubscriptions
+	TokenURL          string
+	MessagingURL      string
+	log               logr.Logger
+	AuthResponse      Response
+	GetResponse       ResponseWithName
+	ListResponse      Response
+	CreateResponse    Response
+	DeleteResponse    Response
+	server            *httptest.Server
 	ResponseOverrides *BEBMockResponseOverride
 }
 
 type BEBMockResponseOverride struct {
 	CreateResponse map[string]ResponseWithSub
-	GetResponse map[string]ResponseWithName
+	GetResponse    map[string]ResponseWithName
 }
 
 func NewBEBMock() *BEBMock {
 	logger := logf.Log.WithName("beb mock")
 	return &BEBMock{
-		Requests:      NewSafeRequests(),
-		Subscriptions: NewSafeSubscriptions(),
-		log:           logger,
+		Requests:          NewSafeRequests(),
+		Subscriptions:     NewSafeSubscriptions(),
+		log:               logger,
 		ResponseOverrides: NewBEBMockResponseOverride(),
 	}
 }
@@ -62,7 +62,7 @@ func NewBEBMock() *BEBMock {
 func NewBEBMockResponseOverride() *BEBMockResponseOverride {
 	return &BEBMockResponseOverride{
 		CreateResponse: map[string]ResponseWithSub{},
-		GetResponse: map[string]ResponseWithName{},
+		GetResponse:    map[string]ResponseWithName{},
 	}
 }
 
