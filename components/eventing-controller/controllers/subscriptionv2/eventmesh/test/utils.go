@@ -410,6 +410,10 @@ func getEventMeshSubKeyForMock(subscriptionName, subscriptionNamespace string) s
 	return fmt.Sprintf("%s/%s", "/messaging/events/subscriptions", nm1)
 }
 
+func getEventMeshKeyForMock(name string) string {
+	return fmt.Sprintf("%s/%s", "/messaging/events/subscriptions", name)
+}
+
 // ensureK8sEventReceived checks if a certain event have triggered for the given namespace.
 func ensureK8sEventReceived(t *testing.T, event corev1.Event, namespace string) {
 	ctx := context.TODO()

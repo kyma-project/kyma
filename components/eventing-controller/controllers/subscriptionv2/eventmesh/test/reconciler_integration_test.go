@@ -1080,191 +1080,134 @@ func Test_EventMeshSubRecreateAfterManualDelete(t *testing.T) {
 	g.Expect(emSub).ShouldNot(gomega.BeNil())
 }
 
-// Test_BadEventMeshCreateResponse tests that the subscription should not be ready
-// when EventMesh server is not able to create new EventMesh subscriptions.
-func Test_BadEventMeshCreateResponse(t *testing.T) {
+func TestWithEventMeshServerErrors(t *testing.T) {
 	t.Parallel()
 
-	// given
-	g := gomega.NewGomegaWithT(t)
-	ctx := context.Background()
-
-	// create unique namespace for this test run
-	testNamespace := getTestNamespace()
-	ensureNamespaceCreated(ctx, t, testNamespace)
-	subName := fmt.Sprintf("test-sink-%s", testNamespace)
-
-	givenSubscription := reconcilertesting.NewSubscription(subName, testNamespace,
-		reconcilertesting.WithDefaultSource(),
-		reconcilertesting.WithOrderCreatedV1Event(),
-		reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(testNamespace, subName)),
-	)
-
-	// phase 1: Make EventMesh mock to return error response on create requests
-	subKey := getEventMeshSubKeyForMock(givenSubscription.Name, givenSubscription.Namespace)
-	createResponse := func(w http.ResponseWriter, _ eventMeshtypes.Subscription) {
-		// ups ... server returns 500
-		w.WriteHeader(http.StatusInternalServerError)
-		s := eventMeshtypes.Response{
-			StatusCode: http.StatusInternalServerError,
-			Message:    "sorry, but this mock does not let you create a EventMesh subscription",
-		}
-		err := json.NewEncoder(w).Encode(s)
-		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+	givenSubscriptionFunc := func(namespace string) *eventingv1alpha2.Subscription {
+		return reconcilertesting.NewSubscription(testName, namespace,
+			reconcilertesting.WithDefaultSource(),
+			reconcilertesting.WithOrderCreatedV1Event(),
+			reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, testName)),
+		)
 	}
-	emTestEnsemble.eventMeshMock.AddCreateResponseOverride(subKey, createResponse)
 
-	// when
-	// phase 2: Create a Subscription.
-	// create a subscriber service
-	subscriberSvc := reconcilertesting.NewSubscriberSvc(subName, testNamespace)
-	ensureK8sResourceCreated(ctx, t, subscriberSvc)
-	// create subscription
-	ensureK8sResourceCreated(ctx, t, givenSubscription)
-	createdSubscription := givenSubscription.DeepCopy()
+	var testCases = []struct {
+		name                     string
+		givenCreateResponseFunc  func(w http.ResponseWriter, _ eventMeshtypes.Subscription)
+		wantSubscriptionMatchers gomegatypes.GomegaMatcher
+		wantEventMeshSubMatchers gomegatypes.GomegaMatcher
+	}{
+		{
+			name: "should not be ready when when EventMesh server is not able to create new EventMesh subscriptions",
+			givenCreateResponseFunc: func(w http.ResponseWriter, _ eventMeshtypes.Subscription) {
+				// ups ... server returns 500
+				w.WriteHeader(http.StatusInternalServerError)
+				s := eventMeshtypes.Response{
+					StatusCode: http.StatusInternalServerError,
+					Message:    "sorry, but this mock does not let you create a EventMesh subscription",
+				}
+				err := json.NewEncoder(w).Encode(s)
+				gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+			},
+			wantSubscriptionMatchers: gomega.And(
+				reconcilertesting.HaveSubscriptionNotReady(),
+				reconcilertesting.HaveCondition(eventingv1alpha2.MakeCondition(
+					eventingv1alpha2.ConditionSubscribed,
+					eventingv1alpha2.ConditionReasonSubscriptionCreationFailed,
+					corev1.ConditionFalse,
+					"failed to get subscription from EventMesh: create subscription failed: 500; 500 Internal Server Error;{\"message\":\"sorry, but this mock does not let you create a EventMesh subscription\"}\n"),
+				),
+			),
+			wantEventMeshSubMatchers: gomega.And(
+				gomega.BeNil(),
+			),
+		},
+		{
+			name: "should not be ready when EventMesh server subscription is paused",
+			givenCreateResponseFunc: func(w http.ResponseWriter, sub eventMeshtypes.Subscription) {
+				sub.SubscriptionStatus = eventMeshtypes.SubscriptionStatusPaused
+				subKey := getEventMeshKeyForMock(sub.Name)
+				emTestEnsemble.eventMeshMock.Subscriptions.PutSubscription(subKey, &sub)
+				reconcilertestingv1.BEBCreateSuccess(w)
+			},
+			wantSubscriptionMatchers: gomega.And(
+				reconcilertesting.HaveSubscriptionNotReady(),
+				reconcilertesting.HaveCondition(eventingv1alpha2.MakeCondition(
+					eventingv1alpha2.ConditionSubscriptionActive,
+					eventingv1alpha2.ConditionReasonSubscriptionNotActive,
+					corev1.ConditionFalse,
+					"Waiting for subscription to be active"),
+				),
+			),
+			wantEventMeshSubMatchers: gomega.And(
+				eventmeshsubmatchers.HaveStatusPaused(),
+			),
+		},
+		{
+			name: "when EventMesh server subscription webhook is unauthorized",
+			givenCreateResponseFunc: func(w http.ResponseWriter, sub eventMeshtypes.Subscription) {
+				sub.SubscriptionStatus = eventMeshtypes.SubscriptionStatusActive
+				sub.LastSuccessfulDelivery =   time.Now().Format(time.RFC3339)                       // "now",
+				sub.LastFailedDelivery =       time.Now().Add(10 * time.Second).Format(time.RFC3339) // "now + 10s"
+				sub.LastFailedDeliveryReason = "Webhook endpoint response code: 401"
 
-	// then
-	// phase 3: check the subscription for desired errors
-	// wait until the subscription shows the condition with not-ready status
-	message := "failed to get subscription from EventMesh: create subscription failed: 500; 500 Internal Server Error;{\"message\":\"sorry, but this mock does not let you create a EventMesh subscription\"}\n"
-	subscriptionNotCreatedCondition := eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionSubscribed, eventingv1alpha2.ConditionReasonSubscriptionCreationFailed, corev1.ConditionFalse, message)
-	getSubscriptionAssert(ctx, g, createdSubscription).Should(gomega.And(
-		reconcilertesting.HaveCondition(subscriptionNotCreatedCondition),
-		reconcilertesting.HaveSubscriptionNotReady(),
-	))
-
-	// there should not exist any subscription on EventMesh server
-	emSub := getEventMeshSubFromMock(createdSubscription.Name, createdSubscription.Namespace)
-	g.Expect(emSub).Should(gomega.BeNil())
-
-	// phase 4: clean up
-	// delete the subscription to not provoke more reconciliation requests
-	ensureK8sResourceDeleted(ctx, t, createdSubscription)
-	emTestEnsemble.eventMeshMock.ResetResponseOverrides()
-}
-
-// Test_EventMeshSubPaused tests that the subscription should reflect correct status and conditions
-// when EventMesh server subscription is paused.
-func Test_EventMeshSubPaused(t *testing.T) {
-	t.Parallel()
-
-	// given
-	g := gomega.NewGomegaWithT(t)
-	ctx := context.Background()
-
-	// create unique namespace for this test run
-	testNamespace := getTestNamespace()
-	ensureNamespaceCreated(ctx, t, testNamespace)
-	subName := fmt.Sprintf("test-sink-%s", testNamespace)
-
-	givenSubscription := reconcilertesting.NewSubscription(subName, testNamespace,
-		reconcilertesting.WithDefaultSource(),
-		reconcilertesting.WithOrderCreatedV1Event(),
-		reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(testNamespace, subName)),
-	)
-
-	// phase 1: Make EventMesh mock to create subscription with paused status
-	subKey := getEventMeshSubKeyForMock(givenSubscription.Name, givenSubscription.Namespace)
-	createResponse := func(w http.ResponseWriter, sub eventMeshtypes.Subscription) {
-		sub.SubscriptionStatus = eventMeshtypes.SubscriptionStatusPaused
-		emTestEnsemble.eventMeshMock.Subscriptions.PutSubscription(subKey, &sub)
-		reconcilertestingv1.BEBCreateSuccess(w)
+				subKey := getEventMeshKeyForMock(sub.Name)
+				emTestEnsemble.eventMeshMock.Subscriptions.PutSubscription(subKey, &sub)
+				reconcilertestingv1.BEBCreateSuccess(w)
+			},
+			wantSubscriptionMatchers: gomega.And(
+				reconcilertesting.HaveSubscriptionNotReady(),
+				reconcilertesting.HaveCondition(eventingv1alpha2.MakeCondition(
+					eventingv1alpha2.ConditionWebhookCallStatus,
+					eventingv1alpha2.ConditionReasonWebhookCallStatus,
+					corev1.ConditionFalse,
+					"Webhook endpoint response code: 401"),
+				),
+			),
+			wantEventMeshSubMatchers: gomega.And(
+				eventmeshsubmatchers.HaveStatusActive(),
+				eventmeshsubmatchers.HaveNonEmptyLastFailedDeliveryReason(),
+			),
+		},
 	}
-	emTestEnsemble.eventMeshMock.AddCreateResponseOverride(subKey, createResponse)
 
-	// when
-	// phase 2: Create a Subscription.
-	// create a subscriber service
-	subscriberSvc := reconcilertesting.NewSubscriberSvc(subName, testNamespace)
-	ensureK8sResourceCreated(ctx, t, subscriberSvc)
-	// create subscription
-	ensureK8sResourceCreated(ctx, t, givenSubscription)
-	createdSubscription := givenSubscription.DeepCopy()
+	for _, testCase := range testCases {
+		tc := testCase
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			g := gomega.NewGomegaWithT(t)
+			ctx := context.Background()
 
-	// then
-	// phase 3: check the subscription for desired errors
-	// wait until the subscription shows the condition with not-ready status
-	subscriptionNotActiveCondition := eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionSubscriptionActive,
-		eventingv1alpha2.ConditionReasonSubscriptionNotActive, corev1.ConditionFalse,
-		"Waiting for subscription to be active")
-	getSubscriptionAssert(ctx, g, createdSubscription).Should(gomega.And(
-		reconcilertesting.HaveCondition(subscriptionNotActiveCondition),
-		reconcilertesting.HaveSubscriptionNotReady(),
-	))
+			// create unique namespace for this test run
+			testNamespace := getTestNamespace()
+			ensureNamespaceCreated(ctx, t, testNamespace)
 
-	// there should exist a subscription on EventMesh server with paused
-	emSub := getEventMeshSubFromMock(createdSubscription.Name, createdSubscription.Namespace)
-	g.Expect(emSub).ShouldNot(gomega.BeNil())
-	g.Expect(emSub.SubscriptionStatus).Should(gomega.Equal(eventMeshtypes.SubscriptionStatusPaused))
+			// given
+			// update namespace information in given test assets
+			givenSubscription := givenSubscriptionFunc(testNamespace)
 
-	// phase 4: clean up
-	// delete the subscription to not provoke more reconciliation requests
-	ensureK8sResourceDeleted(ctx, t, createdSubscription)
-	emTestEnsemble.eventMeshMock.ResetResponseOverrides()
-}
+			// override create request response in EventMesh mock
+			subKey := getEventMeshSubKeyForMock(givenSubscription.Name, givenSubscription.Namespace)
+			emTestEnsemble.eventMeshMock.AddCreateResponseOverride(subKey, tc.givenCreateResponseFunc)
 
-// Test_EventMeshWebhookFailed tests that the subscription should reflect correct status and conditions
-// when EventMesh server subscription webhook is unauthorized.
-func Test_EventMeshWebhookFailed(t *testing.T) {
-	t.Parallel()
+			// when
+			// create a subscriber service
+			subscriberSvc := reconcilertesting.NewSubscriberSvc(testName, testNamespace)
+			ensureK8sResourceCreated(ctx, t, subscriberSvc)
+			// create subscription
+			ensureK8sResourceCreated(ctx, t, givenSubscription)
+			createdSubscription := givenSubscription.DeepCopy()
 
-	// given
-	g := gomega.NewGomegaWithT(t)
-	ctx := context.Background()
+			// then
+			// wait until the subscription shows the condition with not-ready status
+			getSubscriptionAssert(ctx, g, createdSubscription).Should(tc.wantSubscriptionMatchers)
 
-	// create unique namespace for this test run
-	testNamespace := getTestNamespace()
-	ensureNamespaceCreated(ctx, t, testNamespace)
-	subName := fmt.Sprintf("test-sink-%s", testNamespace)
+			// check subscription on EventMesh server
+			emSub := getEventMeshSubFromMock(createdSubscription.Name, createdSubscription.Namespace)
+			g.Expect(emSub).Should(tc.wantEventMeshSubMatchers)
 
-	givenSubscription := reconcilertesting.NewSubscription(subName, testNamespace,
-		reconcilertesting.WithDefaultSource(),
-		reconcilertesting.WithOrderCreatedV1Event(),
-		reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(testNamespace, subName)),
-	)
-
-	// phase 1: Make EventMesh mock to create subscription with paused status
-	subKey := getEventMeshSubKeyForMock(givenSubscription.Name, givenSubscription.Namespace)
-	lastFailedDeliveryReason := "Webhook endpoint response code: 401"
-	createResponse := func(w http.ResponseWriter, sub eventMeshtypes.Subscription) {
-		sub.SubscriptionStatus = eventMeshtypes.SubscriptionStatusActive
-		sub.LastSuccessfulDelivery =   time.Now().Format(time.RFC3339)                       // "now",
-		sub.LastFailedDelivery =       time.Now().Add(10 * time.Second).Format(time.RFC3339) // "now + 10s"
-		sub.LastFailedDeliveryReason = lastFailedDeliveryReason
-
-		emTestEnsemble.eventMeshMock.Subscriptions.PutSubscription(subKey, &sub)
-		reconcilertestingv1.BEBCreateSuccess(w)
+			// delete the subscription to not provoke more reconciliation requests
+			ensureK8sResourceDeleted(ctx, t, createdSubscription)
+		})
 	}
-	emTestEnsemble.eventMeshMock.AddCreateResponseOverride(subKey, createResponse)
-
-	// when
-	// phase 2: Create a Subscription.
-	// create a subscriber service
-	subscriberSvc := reconcilertesting.NewSubscriberSvc(subName, testNamespace)
-	ensureK8sResourceCreated(ctx, t, subscriberSvc)
-	// create subscription
-	ensureK8sResourceCreated(ctx, t, givenSubscription)
-	createdSubscription := givenSubscription.DeepCopy()
-
-	// then
-	// phase 3: check the subscription for desired errors
-	// wait until the subscription shows the condition with not-ready status
-	subscriptionWebhookCallFailedCondition := eventingv1alpha2.MakeCondition(
-		eventingv1alpha2.ConditionWebhookCallStatus,
-		eventingv1alpha2.ConditionReasonWebhookCallStatus,
-		corev1.ConditionFalse,
-		lastFailedDeliveryReason)
-	getSubscriptionAssert(ctx, g, createdSubscription).Should(gomega.And(
-		reconcilertesting.HaveCondition(subscriptionWebhookCallFailedCondition),
-		reconcilertesting.HaveSubscriptionNotReady(),
-	))
-
-	// there should exist a subscription on EventMesh server with paused
-	emSub := getEventMeshSubFromMock(createdSubscription.Name, createdSubscription.Namespace)
-	g.Expect(emSub).ShouldNot(gomega.BeNil())
-
-	// phase 4: clean up
-	// delete the subscription to not provoke more reconciliation requests
-	ensureK8sResourceDeleted(ctx, t, createdSubscription)
-	emTestEnsemble.eventMeshMock.ResetResponseOverrides()
 }
