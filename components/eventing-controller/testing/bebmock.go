@@ -41,6 +41,12 @@ type BEBMock struct {
 	CreateResponse Response
 	DeleteResponse Response
 	server         *httptest.Server
+	ResponseOverrides *BEBMockResponseOverride
+}
+
+type BEBMockResponseOverride struct {
+	CreateResponse map[string]ResponseWithSub
+	GetResponse map[string]ResponseWithName
 }
 
 func NewBEBMock() *BEBMock {
@@ -49,9 +55,18 @@ func NewBEBMock() *BEBMock {
 		Requests:      NewSafeRequests(),
 		Subscriptions: NewSafeSubscriptions(),
 		log:           logger,
+		ResponseOverrides: NewBEBMockResponseOverride(),
 	}
 }
 
+func NewBEBMockResponseOverride() *BEBMockResponseOverride {
+	return &BEBMockResponseOverride{
+		CreateResponse: map[string]ResponseWithSub{},
+		GetResponse: map[string]ResponseWithName{},
+	}
+}
+
+type ResponseWithSub func(w http.ResponseWriter, subscription bebtypes.Subscription)
 type ResponseWithName func(w http.ResponseWriter, subscriptionName string)
 type Response func(w http.ResponseWriter)
 
@@ -64,6 +79,20 @@ func (m *BEBMock) Reset() {
 	m.ListResponse = BEBListSuccess
 	m.CreateResponse = BEBCreateSuccess
 	m.DeleteResponse = BEBDeleteResponseSuccess
+	m.ResponseOverrides = NewBEBMockResponseOverride()
+}
+
+func (m *BEBMock) ResetResponseOverrides() {
+	m.log.Info("Resetting response overrides")
+	m.ResponseOverrides = NewBEBMockResponseOverride()
+}
+
+func (m *BEBMock) AddCreateResponseOverride(key string, responseFunc ResponseWithSub) {
+	m.ResponseOverrides.CreateResponse[key] = responseFunc
+}
+
+func (m *BEBMock) AddGetResponseOverride(key string, responseFunc ResponseWithName) {
+	m.ResponseOverrides.GetResponse[key] = responseFunc
 }
 
 func (m *BEBMock) Start() string {
@@ -95,12 +124,26 @@ func (m *BEBMock) Start() string {
 		case http.MethodPost:
 			var subscription bebtypes.Subscription
 			_ = json.NewDecoder(r.Body).Decode(&subscription)
-			m.Requests.PutSubscription(r, subscription)
 			key := r.URL.Path + "/" + subscription.Name
+			// check if any response override defined for this subscription
+			if overrideFunc, ok := m.ResponseOverrides.CreateResponse[key]; ok {
+				overrideFunc(w, subscription)
+				return
+			}
+
+			// otherwise, use default flow
+			m.Requests.PutSubscription(r, subscription)
 			m.Subscriptions.PutSubscription(key, &subscription)
 			m.CreateResponse(w)
 		case http.MethodGet:
 			key := r.URL.Path
+			// check if any response override defined for this subscription
+			if overrideFunc, ok := m.ResponseOverrides.GetResponse[key]; ok {
+				overrideFunc(w, key)
+				return
+			}
+
+			// otherwise, use default flow
 			m.GetResponse(w, key)
 		default:
 			w.WriteHeader(http.StatusNotImplemented)
@@ -147,7 +190,9 @@ func GetSubscriptionResponse(m *BEBMock) ResponseWithName {
 	return func(w http.ResponseWriter, key string) {
 		subscriptionSaved := m.Subscriptions.GetSubscription(key)
 		if subscriptionSaved != nil {
-			subscriptionSaved.SubscriptionStatus = bebtypes.SubscriptionStatusActive
+			if subscriptionSaved.SubscriptionStatus == "" {
+				subscriptionSaved.SubscriptionStatus = bebtypes.SubscriptionStatusActive
+			}
 			w.WriteHeader(http.StatusOK)
 			err := json.NewEncoder(w).Encode(*subscriptionSaved)
 			Expect(err).ShouldNot(HaveOccurred())

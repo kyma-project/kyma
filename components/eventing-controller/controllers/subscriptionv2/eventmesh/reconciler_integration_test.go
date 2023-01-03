@@ -18,7 +18,6 @@ import (
 	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -101,146 +100,6 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			logf.Log.Error(err, "print subscriptions failed")
 		}
 		testID++
-	})
-
-	When("EventMesh subscription creation failed", func() {
-		It("Should not mark the subscription as ready", func() {
-			subscriptionName := "test-subscription-event-mesh-not-status-not-ready"
-
-			// Ensuring subscriber svc
-			subscriberSvc := reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
-			ensureSubscriberSvcCreated(ctx, subscriberSvc)
-
-			// Create subscription
-			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
-				reconcilertesting.WithNotCleanSource(),
-				reconcilertesting.WithWebhookAuthForBEB(),
-				reconcilertesting.WithNotCleanType(),
-				reconcilertesting.WithSinkURLFromSvc(subscriberSvc),
-			)
-			ensureSubscriptionCreated(ctx, givenSubscription)
-
-			By("preparing mock to simulate creation of EventMesh subscription failing on EventMesh side")
-			eventMeshMock.CreateResponse = func(w http.ResponseWriter) {
-				// ups ... server returns 500
-				w.WriteHeader(http.StatusInternalServerError)
-				s := eventMeshtypes.Response{
-					StatusCode: http.StatusInternalServerError,
-					Message:    "sorry, but this mock does not let you create a EventMesh subscription",
-				}
-				err := json.NewEncoder(w).Encode(s)
-				Expect(err).ShouldNot(HaveOccurred())
-			}
-
-			By("Creating a valid APIRule")
-			getAPIRuleForASvc(ctx, subscriberSvc).Should(reconcilertestingv1.HaveNotEmptyAPIRule())
-
-			By("Updating the APIRule(replicating apigateway controller) status to be Ready")
-			apiRuleCreated := filterAPIRulesForASvc(getAPIRules(ctx, subscriberSvc), subscriberSvc)
-			ensureAPIRuleStatusUpdatedWithStatusReady(ctx, &apiRuleCreated).Should(BeNil())
-
-			By("Setting a subscription not created condition")
-			message := "failed to get subscription from EventMesh: create subscription failed: 500; 500 Internal Server Error;{\"message\":\"sorry, but this mock does not let you create a EventMesh subscription\"}\n"
-			subscriptionNotCreatedCondition := eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionSubscribed, eventingv1alpha2.ConditionReasonSubscriptionCreationFailed, corev1.ConditionFalse, message)
-			getSubscription(ctx, givenSubscription).Should(And(
-				reconcilertesting.HaveSubscriptionName(subscriptionName),
-				reconcilertesting.HaveCondition(subscriptionNotCreatedCondition),
-			))
-
-			By("Marking subscription as not ready")
-			getSubscription(ctx, givenSubscription).Should(And(
-				reconcilertesting.HaveSubscriptionName(subscriptionName),
-				Not(reconcilertesting.HaveSubscriptionReady()),
-			))
-
-			By("Deleting the object to not provoke more reconciliation requests")
-			Expect(k8sClient.Delete(ctx, givenSubscription)).Should(BeNil())
-			getSubscription(ctx, givenSubscription).ShouldNot(reconcilertesting.HaveSubscriptionFinalizer(eventingv1alpha2.Finalizer))
-
-			By("Sending at least one creation request for the Subscription")
-			_, creationRequests, _ := countEventMeshRequests(nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace), reconcilertesting.EventMeshOrderCreatedV1Type)
-			Expect(creationRequests).Should(reconcilertestingv1.BeGreaterThanOrEqual(1))
-		})
-	})
-
-	When("EventMesh subscription is set to paused after creation", func() {
-		It("Should not mark the subscription as active", func() {
-			subscriptionName := "test-subscription-event-mesh-not-status-not-ready-2"
-
-			// Ensuring subscriber subscriberSvc
-			subscriberSvc := reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
-			ensureSubscriberSvcCreated(ctx, subscriberSvc)
-
-			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
-				reconcilertesting.WithNotCleanSource(),
-				reconcilertesting.WithWebhookAuthForBEB(),
-				reconcilertesting.WithNotCleanType(),
-				reconcilertesting.WithSinkURLFromSvc(subscriberSvc),
-			)
-
-			isEventMeshSubscriptionCreated := false
-
-			By("preparing mock to simulate a non ready EventMesh subscription")
-			eventMeshMock.GetResponse = func(w http.ResponseWriter, subscriptionName string) {
-				// until the EventMesh subscription creation call was performed, send successful get requests
-				if !isEventMeshSubscriptionCreated {
-					reconcilertestingv1.BEBGetSuccess(w, nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace))
-				} else {
-					// after the EventMesh subscription was created, set the status to paused
-					w.WriteHeader(http.StatusOK)
-					s := eventMeshtypes.Subscription{
-						Name: nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace),
-						// ups ... EventMesh Subscription status is now paused
-						SubscriptionStatus: eventMeshtypes.SubscriptionStatusPaused,
-					}
-					err := json.NewEncoder(w).Encode(s)
-					Expect(err).ShouldNot(HaveOccurred())
-				}
-			}
-			eventMeshMock.CreateResponse = func(w http.ResponseWriter) {
-				isEventMeshSubscriptionCreated = true
-				reconcilertestingv1.BEBCreateSuccess(w)
-			}
-
-			// Create subscription
-			ensureSubscriptionCreated(ctx, givenSubscription)
-
-			By("Creating a valid APIRule")
-			getAPIRuleForASvc(ctx, subscriberSvc).Should(reconcilertestingv1.HaveNotEmptyAPIRule())
-
-			By("Updating the APIRule(replicating apigateway controller) status to be Ready")
-			apiRuleCreated := filterAPIRulesForASvc(getAPIRules(ctx, subscriberSvc), subscriberSvc)
-			ensureAPIRuleStatusUpdatedWithStatusReady(ctx, &apiRuleCreated).Should(BeNil())
-
-			By("Setting APIRule status to Ready")
-			subscriptionAPIReadyCondition := eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionAPIRuleStatus, eventingv1alpha2.ConditionReasonAPIRuleStatusReady, corev1.ConditionTrue, "")
-			getSubscription(ctx, givenSubscription).Should(And(
-				reconcilertesting.HaveSubscriptionName(subscriptionName),
-				reconcilertesting.HaveCondition(subscriptionAPIReadyCondition),
-			))
-
-			By("Setting a subscription not active condition")
-			subscriptionNotActiveCondition := eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionSubscriptionActive,
-				eventingv1alpha2.ConditionReasonSubscriptionNotActive, corev1.ConditionFalse, "Waiting for subscription to be active")
-			getSubscription(ctx, givenSubscription).Should(And(
-				reconcilertesting.HaveSubscriptionName(subscriptionName),
-				reconcilertesting.HaveCondition(subscriptionNotActiveCondition),
-			))
-
-			By("Marking it as not ready")
-			getSubscription(ctx, givenSubscription).Should(And(
-				reconcilertesting.HaveSubscriptionName(subscriptionName),
-				Not(reconcilertesting.HaveSubscriptionReady()),
-			))
-
-			By("Deleting the object to not provoke more reconciliation requests")
-			Expect(k8sClient.Delete(ctx, givenSubscription)).Should(BeNil())
-			getSubscription(ctx, givenSubscription).ShouldNot(reconcilertesting.HaveSubscriptionFinalizer(eventingv1alpha2.Finalizer))
-
-			By("Sending at least one creation request for the Subscription")
-			_, creationRequests, _ := countEventMeshRequests(nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace), reconcilertesting.EventMeshOrderCreatedV1Type)
-			Expect(creationRequests).Should(reconcilertestingv1.BeGreaterThanOrEqual(1))
-		})
 	})
 
 	When("EventMesh subscription is set to have `lastFailedDelivery` and `lastFailedDeliveryReason`='Webhook endpoint response code: 401' after creation", func() {
@@ -331,52 +190,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			Expect(creationRequests).Should(reconcilertestingv1.BeGreaterThanOrEqual(1))
 		})
 	})
-
-	DescribeTable("Schema tests: ensuring required fields are not treated as optional",
-		func(subscription *eventingv1alpha2.Subscription) {
-			subscription.Namespace = namespaceName
-
-			By("Letting the APIServer reject the custom resource")
-			ensureSubscriptionCreationFails(ctx, subscription)
-		},
-		Entry("types missing",
-			func() *eventingv1alpha2.Subscription {
-				subscription := reconcilertesting.NewSubscription("schema-types-missing", "")
-				subscription.Spec.Types = nil
-				return subscription
-			}()),
-	)
-
-	// @TODO: Update this tests once protocol settings is implemented
-	//DescribeTable("Schema tests: ensuring optional fields are not treated as required",
-	//	func(subscription *eventingv1alpha2.Subscription) {
-	//		subscription.Namespace = namespaceName
-	//
-	//		By("Letting the APIServer reject the custom resource")
-	//		ensureSubscriptionCreationFails(ctx, subscription)
-	//	},
-	//	Entry("protocolsettings.webhookauth missing",
-	//		func() *eventingv1alpha2.Subscription {
-	//			subscription := reconcilertesting.NewSubscription("schema-protocolsettings-missing", "",
-	//				reconcilertesting.WithWebhookAuthForBEB(),
-	//				reconcilertesting.WithProtocolBEB(),
-	//				reconcilertesting.WithProtocolSettings(
-	//					reconcilertesting.NewProtocolSettings(
-	//						reconcilertesting.WithBinaryContentMode(),
-	//						reconcilertesting.WithExemptHandshake(),
-	//						reconcilertesting.WithAtLeastOnceQOS()),
-	//				),
-	//			)
-	//			return subscription
-	//		}()),
-	//)
 })
-
-func updateAPIRuleStatus(ctx context.Context, apiRule *apigatewayv1beta1.APIRule) AsyncAssertion {
-	return Eventually(func() error {
-		return k8sClient.Status().Update(ctx, apiRule)
-	}, bigTimeOut, bigPollingInterval)
-}
 
 // getSubscription fetches a subscription using the lookupKey and allows making assertions on it.
 func getSubscription(ctx context.Context, subscription *eventingv1alpha2.Subscription) AsyncAssertion {
@@ -392,19 +206,6 @@ func getSubscription(ctx context.Context, subscription *eventingv1alpha2.Subscri
 		log.Printf("[Subscription] name:%s ns:%s apiRule:%s", subscription.Name, subscription.Namespace, subscription.Status.Backend.APIRuleName)
 		return subscription
 	}, bigTimeOut, bigPollingInterval)
-}
-
-// getK8sEvents returns all kubernetes events for the given namespace.
-// The result can be used in a gomega assertion.
-func getK8sEvents(eventList *corev1.EventList, namespace string) AsyncAssertion {
-	ctx := context.TODO()
-	return Eventually(func() corev1.EventList {
-		err := k8sClient.List(ctx, eventList, client.InNamespace(namespace))
-		if err != nil {
-			return corev1.EventList{}
-		}
-		return *eventList
-	})
 }
 
 // ensureAPIRuleStatusUpdated updates the status fof the APIRule(mocking APIGateway controller).
@@ -461,33 +262,6 @@ func ensureSubscriberSvcCreated(ctx context.Context, svc *corev1.Service) {
 
 	By(fmt.Sprintf("Ensuring the subscriber service %q is created", svc.Name))
 	Expect(k8sClient.Create(ctx, svc)).Should(Succeed())
-}
-
-// getEventMeshSubscriptionCreationRequests filters the http requests made against EventMesh and returns the EventMesh Subscriptions.
-func getEventMeshSubscriptionCreationRequests(eventMeshSubscriptions []eventMeshtypes.Subscription) AsyncAssertion {
-	return Eventually(func() []eventMeshtypes.Subscription {
-		for req, sub := range eventMeshMock.Requests.GetSubscriptions() {
-			if reconcilertestingv1.IsBEBSubscriptionCreate(req) {
-				eventMeshSubscriptions = append(eventMeshSubscriptions, sub)
-			}
-		}
-		return eventMeshSubscriptions
-	}, bigTimeOut, bigPollingInterval)
-}
-
-// ensureSubscriptionCreationFails creates a Subscription in the k8s cluster and ensures that it is rejected because of invalid schema.
-func ensureSubscriptionCreationFails(ctx context.Context, subscription *eventingv1alpha2.Subscription) {
-	if subscription.Namespace != "default " {
-		namespace := fixtureNamespace(subscription.Namespace)
-		Expect(k8sClient.Create(ctx, namespace)).Should(Succeed())
-	}
-	Expect(k8sClient.Create(ctx, subscription)).Should(
-		And(
-			// prevent nil-pointer stacktrace
-			Not(BeNil()),
-			reconcilertestingv1.IsK8sUnprocessableEntity(),
-		),
-	)
 }
 
 func fixtureNamespace(name string) *corev1.Namespace {
@@ -560,15 +334,6 @@ func getAPIRuleForASvc(ctx context.Context, svc *corev1.Service) AsyncAssertion 
 		apiRules := getAPIRules(ctx, svc)
 		return filterAPIRulesForASvc(apiRules, svc)
 	}, smallTimeOut, smallPollingInterval)
-}
-
-func updateSubscription(ctx context.Context, subscription *eventingv1alpha2.Subscription) AsyncAssertion {
-	return Eventually(func() *eventingv1alpha2.Subscription {
-		if err := k8sClient.Update(ctx, subscription); err != nil {
-			return &eventingv1alpha2.Subscription{}
-		}
-		return subscription
-	}, time.Second*10, time.Second)
 }
 
 // //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -723,30 +488,6 @@ func startEventMeshMock() *reconcilertestingv1.BEBMock {
 	return eventMeshMock
 }
 
-// createSubscriptionObjectsAndWaitForReadiness creates the given Subscription and the given Service. It then performs the following steps:
-// - wait until an APIRule is linked in the Subscription
-// - mark the APIRule as ready
-// - wait until the Subscription is ready
-// - as soon as both the APIRule and Subscription are ready, the function returns both objects.
-func createSubscriptionObjectsAndWaitForReadiness(ctx context.Context, givenSubscription *eventingv1alpha2.Subscription, service *corev1.Service) (*eventingv1alpha2.Subscription, *apigatewayv1beta1.APIRule) {
-	ensureSubscriberSvcCreated(ctx, service)
-	ensureSubscriptionCreated(ctx, givenSubscription)
-
-	By("Given subscription with none empty APIRule name")
-	sub := &eventingv1alpha2.Subscription{ObjectMeta: metav1.ObjectMeta{Name: givenSubscription.Name, Namespace: givenSubscription.Namespace}}
-	// wait for APIRule to be set in Subscription
-	getSubscription(ctx, sub).Should(reconcilertesting.HaveNoneEmptyAPIRuleName())
-	apiRule := &apigatewayv1beta1.APIRule{ObjectMeta: metav1.ObjectMeta{Name: sub.Status.Backend.APIRuleName, Namespace: sub.Namespace}}
-	getAPIRule(ctx, apiRule).Should(reconcilertestingv1.HaveNotEmptyAPIRule())
-	reconcilertesting.MarkReady(apiRule)
-	updateAPIRuleStatus(ctx, apiRule).ShouldNot(HaveOccurred())
-
-	By("Given subscription is ready")
-	getSubscription(ctx, sub).Should(reconcilertesting.HaveSubscriptionReady())
-
-	return sub, apiRule
-}
-
 // countEventMeshRequests returns how many requests for a given subscription are sent for each HTTP method
 //
 //nolint:unparam
@@ -776,16 +517,4 @@ func countEventMeshRequests(subscriptionName, eventType string) (countGet, count
 			}
 		})
 	return countGet, countPost, countDelete
-}
-
-// wasSubscriptionCreated returns a func that determines if a given Subscription was actually created.
-func wasSubscriptionCreated(givenSubscription *eventingv1alpha2.Subscription) func() bool {
-	return func() bool {
-		for request, name := range eventMeshMock.Requests.GetSubscriptionNames() {
-			if reconcilertestingv1.IsBEBSubscriptionCreate(request) {
-				return nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace) == name
-			}
-		}
-		return false
-	}
 }
