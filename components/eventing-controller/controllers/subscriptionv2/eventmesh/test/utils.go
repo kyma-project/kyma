@@ -302,6 +302,7 @@ func ensureK8sSubscriptionUpdated(ctx context.Context, t *testing.T, subscriptio
 		require.NoError(t, emTestEnsemble.k8sClient.Get(ctx, lookupKey, latestSubscription))
 		require.NotEmpty(t, latestSubscription.Name)
 		latestSubscription.Spec = subscription.Spec
+		latestSubscription.Labels = subscription.Labels
 		require.NoError(t, emTestEnsemble.k8sClient.Update(ctx, latestSubscription))
 		return true
 	}, bigTimeOut, bigPollingInterval)
