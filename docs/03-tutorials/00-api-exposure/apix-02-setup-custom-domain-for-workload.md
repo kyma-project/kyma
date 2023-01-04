@@ -2,7 +2,9 @@
 title: Set up a custom domain for a workload
 ---
 
-This tutorial shows how to set up a custom domain and prepare a certificate required for exposing a workload. Skip this tutorial if you want to use a Kyma domain instead of your custom domain.
+This tutorial shows how to set up a custom domain and prepare a certificate required for exposing a workload. 
+
+>**NOTE:** Skip this tutorial if you use a Kyma domain instead of your custom domain.
 
 ## Prerequisites
 

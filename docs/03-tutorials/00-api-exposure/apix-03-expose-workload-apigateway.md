@@ -4,7 +4,7 @@ title: Expose a workload
 
 This tutorial shows how to expose an unsecured instance of the HttpBin service or an unsecured sample Function and call their endpoints.
 
-   > **WARNING:** Exposing a workload to the outside world causes a potential security vulnerability, so tread carefully. In a production environment, always secure the workload you expose with [OAuth2](./apix-05-expose-and-secure-workload-oauth2.md) or [JWT](./apix-08-expose-and-secure-workload-jwt.md).
+   > **CAUTION:** Exposing a workload to the outside world causes a potential security vulnerability, so tread carefully. In a production environment, always secure the workload you expose with [OAuth2](./apix-05-expose-and-secure-workload-oauth2.md) or [JWT](./apix-08-expose-and-secure-workload-jwt.md).
 
 ## Prerequisites
 
