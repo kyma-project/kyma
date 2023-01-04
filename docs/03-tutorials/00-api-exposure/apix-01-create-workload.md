@@ -15,16 +15,16 @@ This tutorial explains how to create a sample HttpBin service deployment and a s
    ```
 2. Deploy an instance of the HttpBin service or a sample Function.
    
-<div tabs name="deploy" group="create-workload">
+<div tabs name="create">
 
   <details>
   <summary>
   HttpBin
   </summary>
 
-To deploy an instance of the HttpBin service in your Namespace using the [sample code](https://raw.githubusercontent.com/istio/istio/master/samples/httpbin/httpbin.yaml), run:
+  To deploy an instance of the HttpBin service in your Namespace using the [sample code](https://raw.githubusercontent.com/istio/istio/master/samples/httpbin/httpbin.yaml), run:
 
-   ```bash
+   ```shell
    kubectl -n $NAMESPACE create -f https://raw.githubusercontent.com/istio/istio/master/samples/httpbin/httpbin.yaml
    ```
 
@@ -44,26 +44,26 @@ To create a Function in your Namespace using the [sample code](./assets/function
   </details>
 </div>
 
-2. Verify if an instance of the HttpBin service or a sample Function was successfully created.
+3. Verify if an instance of the HttpBin service or a sample Function was successfully created.
    
-<div tabs name="verify" group="create-workload">
+<div tabs name="verify">
 
-  <details>
+<details>
   <summary>
   HttpBin
   </summary>
 
   To verify if an instance of the HttpBin service was created, run:
 
-    ```shell
+  ```shell
     kubectl get pods -l app=httpbin -n $NAMESPACE
-    ```
+  ```
   You should get a result similar to this one:
   
-    ```shell
-      NAME             READY    STATUS     RESTARTS    AGE
-      httpbin-test     2/2      Running    0           96s
-    ```
+  ```shell
+    NAME             READY    STATUS     RESTARTS    AGE
+    httpbin-test     2/2      Running    0           96s
+  ```
 
   </details>
 
@@ -74,15 +74,15 @@ To create a Function in your Namespace using the [sample code](./assets/function
 
   To verify if a Function was created, run:
 
-    ```shell
+  ```shell
     kubectl get functions $NAME -n $NAMESPACE
     ```
 
   You should get a result similar to this one:
   
-    ```shell
+  ```shell
     NAME            CONFIGURED   BUILT     RUNNING   RUNTIME    VERSION   AGE
     test-function   True         True      True      nodejs14   1         96s
-    ```
+  ```
   </details>
 </div>
