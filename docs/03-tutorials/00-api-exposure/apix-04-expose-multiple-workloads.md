@@ -2,77 +2,18 @@
 title: Expose multiple workloads on the same host
 ---
 
-This tutorial shows how to expose multiple workloads that share the same host on different paths.
+This tutorial shows how to expose multiple workloads on different paths by defining a service at the root level and defining services on each path separately.
 
-You can either define a service at the root level, which is applied to all paths except the ones you've explicitly set service for at the rules level, or you can just define different services on each path separately without the need to define a root service.
-   > **CAUTION:** Exposing a workload to the outside world is always a potential security vulnerability, so tread carefully. In a production environment, always secure the workload you expose with [OAuth2](./apix-05-expose-and-secure-workload-oauth2.md) or [JWT](./apix-08-expose-and-secure-workload-jwt.md).
-
-The tutorial may be a follow-up to the [Set up a custom domain for a workload](./apix-02-setup-custom-domain-for-workload.md) tutorial.
+   > **WARNING:** Exposing a workload to the outside world is always a potential security vulnerability, so tread carefully. In a production environment, remember to secure the workload you expose with [OAuth2](./apix-05-expose-and-secure-workload-oauth2.md) or [JWT](./apix-08-expose-and-secure-workload-jwt.md).
 
 ## Prerequisites
 
-This tutorial is based on a sample HttpBin service deployment and a sample Function. To deploy or create those workloads, follow the [Create a workload](./apix-01-create-workload.md) tutorial.
+* [A sample HttpBin service deployment and a sample Function](./apix-01-create-workload.md)
+* If you want to use your custom domain instead of a Kyma domain, follow [this tutorial](./apix-02-setup-custom-domain-for-workload.md) to learn how to set it up.
 
-## Root level service definition and multiple services definition on different paths
+## Define multiple services on different paths at the `spec.rules` level
 
-Follow the instructions to expose your instance of the HttpBin service and your sample Function on different paths with a service defined at the root level - HttpBin in the following example. 
-  >**NOTE:** The service definitions at the **spec.rules** level have higher precedence than the service definition at the **spec.service** level.
-
-
-1. Export the following value as an environment variable:
-
-   ```bash
-   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} 
-   export GATEWAY=$NAMESPACE/httpbin-gateway 
-   ```
-   >**NOTE:** `DOMAIN_NAME` is the domain that you own, for example, api.mydomain.com. If you don't want to use your custom domain, replace `DOMAIN_NAME` with a Kyma domain and `$NAMESPACE/httpbin-gateway` with Kyma's default Gateway `kyma-system/kyma-gateway`
-
-2. To expose the instance of the HttpBin service and the instance of the sample Function, create an API Rule CR in your Namespace.
-In the following example, the services definition at the **spec.rules** level overwrites the service definition at the **spec.service** level. Run:
-
-   ```yaml
-   cat <<EOF | kubectl apply -f -
-   apiVersion: gateway.kyma-project.io/v1beta1
-   kind: APIRule
-   metadata:
-     name: multiple-service
-     namespace: $NAMESPACE
-     labels:
-       app: multiple-service
-       example: multiple-service
-   spec:
-     host: multiple-service-example.$DOMAIN_TO_EXPOSE_WORKLOADS
-     gateway: $GATEWAY
-     service:
-       name: httpbin
-       port: 8000
-     rules:
-       - path: /headers
-         methods: ["GET"]
-         accessStrategies:
-           - handler: noop
-       - path: /function
-         methods: ["GET"]
-         accessStrategies:
-           - handler: noop
-         service:
-           name: function
-           port: 80
-   EOF
-   ```
-
-3. To call the endpoints, send `GET` requests to the HttpBin service and the sample Function:
-
-   ```bash
-   curl -ik -X GET https://multiple-service-example.$DOMAIN_TO_EXPOSE_WORKLOADS/headers  # Send a GET request to the HttpBin
-   curl -ik -X GET https://multiple-service-example.$DOMAIN_TO_EXPOSE_WORKLOADS/function  # Send a GET request to the Function
-
-   ```
-   These calls return the code 200 response.
-
-## Multiple services definition on different paths
-
-Follow the instruction to expose your instance of the HttpBin service and your sample Function at the same time on different paths.
+Follow the instructions to expose the instance of the HttpBin service and the sample Function on different paths, without a root service defined.
 
 1. Export the following value as an environment variable:
 
@@ -115,13 +56,51 @@ Follow the instruction to expose your instance of the HttpBin service and your s
    EOF
    ```
 
-
 3. To call the endpoints, send `GET` requests to the HttpBin service and the sample Function:
 
-   ```bash
-   curl -ik -X GET https://multiple-service-example.$DOMAIN_TO_EXPOSE_WORKLOADS/headers  # Send a GET request to the HttpBin
-   curl -ik -X GET https://multiple-service-example.$DOMAIN_TO_EXPOSE_WORKLOADS/function  # Send a GET request to the Function
+    ```bash
+    curl -ik -X GET https://multiple-service-example.$DOMAIN_TO_EXPOSE_WORKLOADS/headers
 
+    curl -ik -X GET https://multiple-service-example.$DOMAIN_TO_EXPOSE_WORKLOADS/function 
+    ```
+  The above calls should return the code `200` response.
+
+## Define a service at the root level
+
+A service can be also defined at the root level. Such a definition is applied to all the paths specified at the `spec.rules` which do not have their own services defined. 
+ 
+ > **NOTE:**Services definitions at the `spec.rules` level have higher precedence than service definition at the `spec.service` level.
+
+Here's an example of the API Rule CR in which a service is defined at the `spec.service` level:
+
+   ```yaml
+   cat <<EOF | kubectl apply -f -
+   apiVersion: gateway.kyma-project.io/v1beta1
+   kind: APIRule
+   metadata:
+     name: multiple-service
+     namespace: $NAMESPACE
+     labels:
+       app: multiple-service
+       example: multiple-service
+   spec:
+     host: multiple-service-example.$DOMAIN_TO_EXPOSE_WORKLOADS
+     gateway: $GATEWAY
+     service:
+       name: httpbin
+       port: 8000
+     rules:
+       - path: /headers
+         methods: ["GET"]
+         accessStrategies:
+           - handler: noop
+       - path: /function
+         methods: ["GET"]
+         accessStrategies:
+           - handler: noop
+         service:
+           name: function
+           port: 80
+   EOF
    ```
-   These calls return the code 200 response.
-
+  In the above APIRule the HttpBin service on port 8000 is defined at the `spec.service` level. This service definition is applied to the `/headers` path. The `/function` path has the service definition overwritten.

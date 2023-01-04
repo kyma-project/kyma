@@ -3,12 +3,12 @@ title: Expose workloads in multiple Namespaces with a single APIRule definition
 ---
 
 This tutorial shows how to expose service endpoints in multiple Namespaces using API Gateway Controller.
-   > **CAUTION:** Exposing a workload to the outside world is always a potential security vulnerability, so tread carefully. In a production environment, always secure the workload you expose with [OAuth2](./apix-05-expose-and-secure-workload-oauth2.md) or [JWT](./apix-08-expose-and-secure-workload-jwt.md).
+   > **WARNING:** Exposing a workload to the outside world causes a potential security vulnerability, so tread carefully. In a production environment, secure the workload you expose with [OAuth2](./apix-05-expose-and-secure-workload-oauth2.md) or [JWT](./apix-08-expose-and-secure-workload-jwt.md).
 
 
-## Expose and access your workloads in multiple Namespaces
+##  Prerequisites
 
-Follow the instructions to expose and access your unsecured instance of the HttpBin service and unsecured sample Function.
+Create a sample HttpBin service deployment and a sample Function in the separate Namespaces:
 
 1. Create a Namespace for the HttpBin service and export its value as an environment variable. Run:
 
@@ -26,21 +26,21 @@ Follow the instructions to expose and access your unsecured instance of the Http
    kubectl label namespace $NAMESPACE_FUNCTION istio-injection=enabled --overwrite
    ```
 
-3. Deploy an instance of the HttpBin service in its Namespace:
+3. Deploy an instance of the HttpBin service in its Namespace using the [sample code](https://raw.githubusercontent.com/istio/istio/master/samples/httpbin/httpbin.yaml):
 
    ```bash
    kubectl -n $NAMESPACE_HTTPBIN create -f https://raw.githubusercontent.com/istio/istio/master/samples/httpbin/httpbin.yaml
    ```
 
-4. Create a Function using the [supplied code](./assets/function.yaml) in its Namespace:
+4. Create a Function in its Namespace using the [sample code](./assets/function.yaml):
 
    ```bash
    kubectl -n $NAMESPACE_FUNCTION apply -f https://raw.githubusercontent.com/kyma-project/kyma/main/docs/03-tutorials/assets/function.yaml
    ```
 
-## Next steps
+## Expose and access your workloads in multiple Namespaces
 
-1. Create a Namespace for the Gateway and APIRule CRs. Run:
+1. Create a Namespace for the Gateway and APIRule CRs and export its value as the environment variable. Run:
 
    >**NOTE:** Skip this step if you already have a Namespace.
 
@@ -58,7 +58,7 @@ Follow the instructions to expose and access your unsecured instance of the Http
    ```
    >**NOTE:** `DOMAIN_NAME` is the domain that you own, for example, api.mydomain.com. If you don't want to use your custom domain, replace `DOMAIN_NAME` with a Kyma domain and `$NAMESPACE/httpbin-gateway` with Kyma's default Gateway `kyma-system/kyma-gateway`.
 
-3. Expose the HttpBin and Function services in their respective Namespaces by creating an APIRule CR which is in its own Namespace. Run:
+3. Expose the HttpBin and Function services in their respective Namespaces by creating an APIRule CR in its own Namespace. Run:
 
    ```bash
    cat <<EOF | kubectl apply -f -
@@ -102,10 +102,12 @@ Follow the instructions to expose and access your unsecured instance of the Http
    curl -ik -X GET https://httpbin-and-function.$DOMAIN_TO_EXPOSE_WORKLOADS/headers
    ```
 
+   The call should return the code `200` response.
+
 5. Call the Function endpoint by sending a `GET` request to the Function service:
 
    ```bash
    curl -ik -X GET https://httpbin-and-function.$DOMAIN_TO_EXPOSE_WORKLOADS/function
    ```
 
-   These calls return the code `200` response.
+   The call should return the code `200` response.
