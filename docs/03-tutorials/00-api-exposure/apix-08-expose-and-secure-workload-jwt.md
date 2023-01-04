@@ -9,7 +9,7 @@ You can use it as a follow-up to the [Set up a custom domain for a workload](./a
 ## Prerequisites
 
 * [Sample HttpBin service and sample Function](./apix-01-create-workload.md) deployed
-* [JSON Web Token (JWT)](./apix-06-get-jwt.md).
+* [JSON Web Token (JWT)](./apix-06-get-jwt.md)
 * If you want to use your custom domain instead of a Kyma domain, follow [this tutorial](./apix-02-setup-custom-domain-for-workload.md) to learn how to set it up.
   
 

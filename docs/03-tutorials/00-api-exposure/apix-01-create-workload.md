@@ -76,7 +76,7 @@ To create a Function in your Namespace using the [sample code](./assets/function
 
   ```shell
     kubectl get functions $NAME -n $NAMESPACE
-    ```
+  ```
 
   You should get a result similar to this one:
   
