@@ -6,9 +6,9 @@ This tutorial shows how to expose and secure a workload using Istio built-in sec
 
 ## Prerequisites
 
-- You have got a JSON Web Token (JWT). For more information, see [Get a JWT](./apix-06-get-jwt.md).
-
-This tutorial is based on a sample HttpBin service deployment and a sample Function. To deploy or create one of those, follow the [Create a workload](./apix-01-create-workload.md) tutorial. It can also be a follow-up to the [Set up a custom domain for a workload](./apix-02-setup-custom-domain-for-workload.md) tutorial.
+* [A sample HttpBin service deployment and a sample Function](./apix-01-create-workload.md)
+* [JSON Web Token (JWT)](./apix-06-get-jwt.md).
+* If you want to use your custom domain instead of a Kyma domain, follow [this tutorial](./apix-02-setup-custom-domain-for-workload.md) to learn how to set it up.
 
 ## Expose your workload using a Virtual Service
 
@@ -100,7 +100,7 @@ Follow the instructions in the tabs to expose the HttpBin workload or the Functi
 
 ## Secure a workload or the Function using a JWT
 
-To secure the Httpbin workload or the Function using a JWT, create a Request Authentication with Authorization Policy. Workloads that have the **matchLabels** parameter specified require a JWT for all requests. Follow the instructions in the tabs:
+To secure the Httpbin workload or the Function using a JWT, create a Request Authentication with Authorization Policy. Workloads that have the `matchLabels` parameter specified require a JWT for all requests. Follow the instructions in the tabs:
 
 <div tabs>
 
@@ -142,13 +142,13 @@ To secure the Httpbin workload or the Function using a JWT, create a Request Aut
    EOF
    ```
 
-2. Access the workload you secured. You will get the `403 Forbidden` error.
+2. Access the workload you secured. The request returns the `403 Forbidden` error.
 
    ```shell
    curl -ik -X GET https://httpbin.$DOMAIN_TO_EXPOSE_WORKLOADS/status/200
    ```
 
-3. Now, access the secured workload using the correct JWT. You will get the `200 OK` response.
+3. Now, access the secured workload using the correct JWT. The request return the `200 OK` response.
 
    ```shell
    curl -ik -X GET https://httpbin.$DOMAIN_TO_EXPOSE_WORKLOADS/status/200 --header "Authorization:Bearer $ACCESS_TOKEN"

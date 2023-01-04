@@ -55,15 +55,15 @@ To create a Function in your Namespace using the [sample code](./assets/function
 
   To verify if an instance of the HttpBin service was created, run:
 
-   ```bash
-   kubectl get pods -l app=httpbin -n $NAMESPACE
-  ```
+    ```shell
+    kubectl get pods -l app=httpbin -n $NAMESPACE
+    ```
   You should get a result similar to this one:
   
-  ```bash
-    NAME             READY    STATUS     RESTARTS    AGE
-    httpbin-test     2/2      Running    0           96s
-  ```
+    ```shell
+      NAME             READY    STATUS     RESTARTS    AGE
+      httpbin-test     2/2      Running    0           96s
+    ```
 
   </details>
 
@@ -74,15 +74,15 @@ To create a Function in your Namespace using the [sample code](./assets/function
 
   To verify if a Function was created, run:
 
-   ```shell
-   kubectl get functions $NAME -n $NAMESPACE
-   ```
+    ```shell
+    kubectl get functions $NAME -n $NAMESPACE
+    ```
 
   You should get a result similar to this one:
   
-  ```bash
+    ```shell
     NAME            CONFIGURED   BUILT     RUNNING   RUNTIME    VERSION   AGE
     test-function   True         True      True      nodejs14   1         96s
-  ```
+    ```
   </details>
 </div>

@@ -6,7 +6,7 @@ This tutorial shows how to get a JSON Web Token (JWT), which can be used to acce
 
 ## Prerequisites
 
-You are using an OpenID Connect-compliant (OIDC-compliant) identity provider.
+* Use an OpenID Connect-compliant (OIDC-compliant) identity provider
 
 ## Get a JWT
 
@@ -25,7 +25,7 @@ You are using an OpenID Connect-compliant (OIDC-compliant) identity provider.
    export ENCODED_CREDENTIALS=$(echo -n "$CLIENT_ID:$CLIENT_SECRET" | base64)
    ```
 
-3. In your browser, go to `https://YOUR_OIDC_COMPLIANT_IDENTITY_PROVIDER_INSTANCE/.well-known/openid-configuration`, save the values of the **token_endpoint**, **jwks_uri** and **issuer** parameters, and export them as environment variables:
+3. In your browser, go to `https://YOUR_OIDC_COMPLIANT_IDENTITY_PROVIDER_INSTANCE/.well-known/openid-configuration`, save the values of the `token_endpoint`, `jwks_uri` and `issuer` parameters, and export them as environment variables:
 
    ```bash
    export TOKEN_ENDPOINT={YOUR_TOKEN_ENDPOINT}
@@ -44,13 +44,3 @@ You are using an OpenID Connect-compliant (OIDC-compliant) identity provider.
    ```bash
    export ACCESS_TOKEN={YOUR_ACCESSS_TOKEN}
    ```
-## Result
-
-You have created your access token.
-
-## Next steps
-
-You can use your access token in the following tutorials:
-
-- [Expose and secure a workload with Istio](./apix-07-expose-and-secure-workload-istio.md)
-- [Expose and secure a workload with JWT](./apix-08-expose-and-secure-workload-jwt.md)

@@ -8,12 +8,13 @@ This tutorial shows how to expose and secure a workload with mutual authenticati
 
 * [A sample HttpBin service deployment and a sample Function](./apix-01-create-workload.md)
 * [Your custom domain](./apix-02-setup-custom-domain-for-workload.md)
-* [mTLS Gateway](../00-security/sec-03-setup-mtls-gateway.md) to allow mutual authentication in Kyma and make sure that you exported the [bundle certificates](../00-security/sec-03-setup-mtls-gateway#steps).
+* [mTLS Gateway](../00-security/sec-03-setup-mtls-gateway.md), to allow mutual authentication in Kyma 
+* Make sure you exported the [bundle certificates](../00-security/sec-03-setup-mtls-gateway#steps).
 * To learn how to create your own self-signed Client Root CA and Certificate, see [this tutorial](../00-security/sec-02-mtls-selfsign-client-certicate.md). This step is optional.
 
 ## Authorize a client with a certificate
 
-The following instructions describe how to secure the mTLS service or Function. 
+The following instructions describe how to secure an mTLS service or a Function. 
 >**NOTE:** Create AuthorizationPolicy to check if the client's common name in the certificate matches.
 
 1. Export the following values as environment variables:
