@@ -2,13 +2,16 @@ package registry
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/docker/distribution/reference"
 	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -101,4 +104,29 @@ func getConfigSecretData(k8sClient client.Client, secretName, namespace string) 
 		Password: string(s.Data[PasswordSecretKeyName]),
 		URL:      string(s.Data[URLSecretKeyName]),
 	}, nil
+}
+
+func FunctionFromImageName(image string) (function, namespace string, err error) {
+	if strings.Contains(image, "/cache") {
+		return "", "", errors.New("invalid image name: cache image names can't be used")
+	}
+	parts := strings.Split(image, "-")
+	if len(parts) != 2 {
+		return "", "", errors.New("invalid image name")
+	}
+	return parts[0], parts[1], nil
+}
+
+func IsFunctionUpdating(config *rest.Config, name, namespace string) (bool, error) {
+	scheme := runtime.NewScheme()
+	_ = v1alpha2.AddToScheme(scheme)
+	k8sClient, err := client.New(config, client.Options{Scheme: scheme})
+	if err != nil {
+		return false, fmt.Errorf("failed to create Kubernetes Client: %v", err)
+	}
+	function := &v1alpha2.Function{}
+	if err := k8sClient.Get(context.Background(), types.NamespacedName{Namespace: namespace, Name: name}, function); err != nil {
+		return false, fmt.Errorf("failed to get function: %v", err)
+	}
+	return function.IsUpdating(), nil
 }

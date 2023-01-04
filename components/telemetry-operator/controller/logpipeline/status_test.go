@@ -58,7 +58,7 @@ func TestUpdateStatus(t *testing.T) {
 		_ = fakeClient.Get(context.Background(), types.NamespacedName{Name: pipelineName}, &updatedPipeline)
 		require.Len(t, updatedPipeline.Status.Conditions, 1)
 		require.Equal(t, updatedPipeline.Status.Conditions[0].Type, telemetryv1alpha1.LogPipelinePending)
-		require.Equal(t, updatedPipeline.Status.Conditions[0].Reason, telemetryv1alpha1.ReferencedSecretMissingReason)
+		require.Equal(t, updatedPipeline.Status.Conditions[0].Reason, reasonReferencedSecretMissing)
 	})
 
 	t.Run("should add pending condition if referenced secret exists but fluent bit is not ready", func(t *testing.T) {
@@ -108,7 +108,7 @@ func TestUpdateStatus(t *testing.T) {
 		_ = fakeClient.Get(context.Background(), types.NamespacedName{Name: pipelineName}, &updatedPipeline)
 		require.Len(t, updatedPipeline.Status.Conditions, 1)
 		require.Equal(t, updatedPipeline.Status.Conditions[0].Type, telemetryv1alpha1.LogPipelinePending)
-		require.Equal(t, updatedPipeline.Status.Conditions[0].Reason, telemetryv1alpha1.FluentBitDSNotReadyReason)
+		require.Equal(t, updatedPipeline.Status.Conditions[0].Reason, reasonFluentBitDSNotReady)
 	})
 
 	t.Run("should add running condition if referenced secret exists and fluent bit is ready", func(t *testing.T) {
@@ -158,7 +158,7 @@ func TestUpdateStatus(t *testing.T) {
 		_ = fakeClient.Get(context.Background(), types.NamespacedName{Name: pipelineName}, &updatedPipeline)
 		require.Len(t, updatedPipeline.Status.Conditions, 1)
 		require.Equal(t, updatedPipeline.Status.Conditions[0].Type, telemetryv1alpha1.LogPipelineRunning)
-		require.Equal(t, updatedPipeline.Status.Conditions[0].Reason, telemetryv1alpha1.FluentBitDSReadyReason)
+		require.Equal(t, updatedPipeline.Status.Conditions[0].Reason, reasonFluentBitDSReady)
 	})
 
 	t.Run("should reset conditions and add pending if fluent bit becomes not ready again", func(t *testing.T) {
@@ -169,8 +169,8 @@ func TestUpdateStatus(t *testing.T) {
 			},
 			Status: telemetryv1alpha1.LogPipelineStatus{
 				Conditions: []telemetryv1alpha1.LogPipelineCondition{
-					{Reason: telemetryv1alpha1.FluentBitDSNotReadyReason, Type: telemetryv1alpha1.LogPipelinePending},
-					{Reason: telemetryv1alpha1.FluentBitDSReadyReason, Type: telemetryv1alpha1.LogPipelineRunning},
+					{Reason: reasonFluentBitDSNotReady, Type: telemetryv1alpha1.LogPipelinePending},
+					{Reason: reasonFluentBitDSReady, Type: telemetryv1alpha1.LogPipelineRunning},
 				},
 			},
 			Spec: telemetryv1alpha1.LogPipelineSpec{
@@ -214,7 +214,7 @@ func TestUpdateStatus(t *testing.T) {
 		_ = fakeClient.Get(context.Background(), types.NamespacedName{Name: pipelineName}, &updatedPipeline)
 		require.Len(t, updatedPipeline.Status.Conditions, 1)
 		require.Equal(t, updatedPipeline.Status.Conditions[0].Type, telemetryv1alpha1.LogPipelinePending)
-		require.Equal(t, updatedPipeline.Status.Conditions[0].Reason, telemetryv1alpha1.FluentBitDSNotReadyReason)
+		require.Equal(t, updatedPipeline.Status.Conditions[0].Reason, reasonFluentBitDSNotReady)
 	})
 
 	t.Run("should reset conditions and add pending if some referenced secret does not exist anymore", func(t *testing.T) {
@@ -225,8 +225,8 @@ func TestUpdateStatus(t *testing.T) {
 			},
 			Status: telemetryv1alpha1.LogPipelineStatus{
 				Conditions: []telemetryv1alpha1.LogPipelineCondition{
-					{Reason: telemetryv1alpha1.FluentBitDSNotReadyReason, Type: telemetryv1alpha1.LogPipelinePending},
-					{Reason: telemetryv1alpha1.FluentBitDSReadyReason, Type: telemetryv1alpha1.LogPipelineRunning},
+					{Reason: reasonFluentBitDSNotReady, Type: telemetryv1alpha1.LogPipelinePending},
+					{Reason: reasonFluentBitDSReady, Type: telemetryv1alpha1.LogPipelineRunning},
 				},
 			},
 			Spec: telemetryv1alpha1.LogPipelineSpec{
@@ -259,7 +259,7 @@ func TestUpdateStatus(t *testing.T) {
 		_ = fakeClient.Get(context.Background(), types.NamespacedName{Name: pipelineName}, &updatedPipeline)
 		require.Len(t, updatedPipeline.Status.Conditions, 1)
 		require.Equal(t, updatedPipeline.Status.Conditions[0].Type, telemetryv1alpha1.LogPipelinePending)
-		require.Equal(t, updatedPipeline.Status.Conditions[0].Reason, telemetryv1alpha1.ReferencedSecretMissingReason)
+		require.Equal(t, updatedPipeline.Status.Conditions[0].Reason, reasonReferencedSecretMissing)
 	})
 
 	t.Run("should set status UnsupportedMode true if contains custom plugin", func(t *testing.T) {
@@ -270,7 +270,7 @@ func TestUpdateStatus(t *testing.T) {
 			},
 			Status: telemetryv1alpha1.LogPipelineStatus{
 				Conditions: []telemetryv1alpha1.LogPipelineCondition{
-					{Reason: telemetryv1alpha1.FluentBitDSReadyReason, Type: telemetryv1alpha1.LogPipelineRunning},
+					{Reason: reasonFluentBitDSReady, Type: telemetryv1alpha1.LogPipelineRunning},
 				},
 				UnsupportedMode: false,
 			},
@@ -304,7 +304,7 @@ func TestUpdateStatus(t *testing.T) {
 			},
 			Status: telemetryv1alpha1.LogPipelineStatus{
 				Conditions: []telemetryv1alpha1.LogPipelineCondition{
-					{Reason: telemetryv1alpha1.FluentBitDSReadyReason, Type: telemetryv1alpha1.LogPipelineRunning},
+					{Reason: reasonFluentBitDSReady, Type: telemetryv1alpha1.LogPipelineRunning},
 				},
 				UnsupportedMode: true,
 			},

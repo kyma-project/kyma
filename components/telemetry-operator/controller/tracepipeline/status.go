@@ -11,11 +11,14 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-func (r *Reconciler) updateStatus(ctx context.Context, pipelineName string) error {
-	return r.updateStatusConditions(ctx, pipelineName)
-}
+const (
+	reasonTraceCollectorDeploymentNotReady = "TraceCollectorDeploymentNotReady"
+	reasonTraceCollectorDeploymentReady    = "TraceCollectorDeploymentReady"
+	reasonReferencedSecretMissingReason    = "ReferencedSecretMissing"
+	reasonWaitingForLock                   = "WaitingForLock"
+)
 
-func (r *Reconciler) updateStatusConditions(ctx context.Context, pipelineName string) error {
+func (r *Reconciler) updateStatus(ctx context.Context, pipelineName string, lockAcquired bool) error {
 	log := logf.FromContext(ctx)
 
 	var pipeline telemetryv1alpha1.TracePipeline
@@ -31,12 +34,20 @@ func (r *Reconciler) updateStatusConditions(ctx context.Context, pipelineName st
 		return nil
 	}
 
+	if !lockAcquired {
+		pending := telemetryv1alpha1.NewTracePipelineCondition(reasonWaitingForLock, telemetryv1alpha1.TracePipelinePending)
+
+		if pipeline.Status.HasCondition(telemetryv1alpha1.TracePipelineRunning) {
+			log.V(1).Info(fmt.Sprintf("Updating the status of %s to %s. Resetting previous conditions", pipeline.Name, pending.Type))
+			pipeline.Status.Conditions = []telemetryv1alpha1.TracePipelineCondition{}
+		}
+
+		return setCondition(ctx, r.Client, &pipeline, pending)
+	}
+
 	secretsMissing := checkForMissingSecrets(ctx, r.Client, &pipeline)
 	if secretsMissing {
-		pending := telemetryv1alpha1.NewTracePipelineCondition(
-			telemetryv1alpha1.OTReferencedSecretMissingReason,
-			telemetryv1alpha1.TracePipelinePending,
-		)
+		pending := telemetryv1alpha1.NewTracePipelineCondition(reasonReferencedSecretMissingReason, telemetryv1alpha1.TracePipelinePending)
 
 		if pipeline.Status.HasCondition(telemetryv1alpha1.TracePipelineRunning) {
 			log.V(1).Info(fmt.Sprintf("Updating the status of %s to %s. Resetting previous conditions", pipeline.Name, pending.Type))
@@ -56,18 +67,11 @@ func (r *Reconciler) updateStatusConditions(ctx context.Context, pipelineName st
 			return nil
 		}
 
-		running := telemetryv1alpha1.NewTracePipelineCondition(
-			telemetryv1alpha1.OpenTelemetryDReadyReason,
-			telemetryv1alpha1.TracePipelineRunning,
-		)
-
+		running := telemetryv1alpha1.NewTracePipelineCondition(reasonTraceCollectorDeploymentReady, telemetryv1alpha1.TracePipelineRunning)
 		return setCondition(ctx, r.Client, &pipeline, running)
 	}
 
-	pending := telemetryv1alpha1.NewTracePipelineCondition(
-		telemetryv1alpha1.OpenTelemetryDNotReadyReason,
-		telemetryv1alpha1.TracePipelinePending,
-	)
+	pending := telemetryv1alpha1.NewTracePipelineCondition(reasonTraceCollectorDeploymentNotReady, telemetryv1alpha1.TracePipelinePending)
 
 	if pipeline.Status.HasCondition(telemetryv1alpha1.TracePipelineRunning) {
 		log.V(1).Info(fmt.Sprintf("Updating the status of %s to %s. Resetting previous conditions", pipeline.Name, pending.Type))

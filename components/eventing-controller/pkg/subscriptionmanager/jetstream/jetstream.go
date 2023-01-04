@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
 	sinkv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink/v2"
 	backendutilsv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils/v2"
 
@@ -64,7 +65,7 @@ func AddV1Alpha2ToScheme(scheme *runtime.Scheme) error {
 
 type SubscriptionManager struct {
 	cancel           context.CancelFunc
-	envCfg           env.NatsConfig
+	envCfg           backendnats.Config
 	restCfg          *rest.Config
 	metricsAddr      string
 	metricsCollector *backendmetrics.Collector
@@ -75,7 +76,8 @@ type SubscriptionManager struct {
 }
 
 // NewSubscriptionManager creates the subscription manager for JetStream.
-func NewSubscriptionManager(restCfg *rest.Config, natsConfig env.NatsConfig, metricsAddr string, metricsCollector *backendmetrics.Collector, logger *logger.Logger) *SubscriptionManager {
+func NewSubscriptionManager(restCfg *rest.Config, natsConfig backendnats.Config, metricsAddr string,
+	metricsCollector *backendmetrics.Collector, logger *logger.Logger) *SubscriptionManager {
 	return &SubscriptionManager{
 		envCfg:           natsConfig,
 		restCfg:          restCfg,

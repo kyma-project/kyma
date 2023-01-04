@@ -1,3 +1,5 @@
+//go:build unit
+
 package jetstreamv2
 
 import (

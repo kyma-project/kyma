@@ -123,6 +123,8 @@ app.all("*", (req, res) => {
                 } else {
                     callback(200, out)
                 }
+            } else {
+                res.sendStatus(204)
             }
         } catch (err) {
             helper.handleError(err.status || 500, err, span, callback)

@@ -5,21 +5,20 @@ import (
 	"log"
 
 	"github.com/go-logr/zapr"
-	"k8s.io/apimachinery/pkg/runtime"
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/healthz"
-
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/backend"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/options"
 	backendmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager/beb"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager/jetstream"
+	"k8s.io/apimachinery/pkg/runtime"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/healthz"
 )
 
 func main() {
@@ -52,7 +51,8 @@ func main() {
 	metricsCollector.RegisterMetrics()
 
 	var natsSubMgr subscriptionmanager.Manager
-	natsConfig, err := env.GetNatsConfig(opts.MaxReconnects, opts.ReconnectWait)
+
+	natsConfig, err := backendnats.GetNATSConfig(opts.MaxReconnects, opts.ReconnectWait)
 	if err != nil {
 		setupLogger.Fatalw("Failed to load configuration", "error", err)
 	}

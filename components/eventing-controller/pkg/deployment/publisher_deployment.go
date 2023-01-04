@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -60,7 +61,7 @@ func NewBEBPublisherDeployment(publisherConfig env.PublisherConfig) *appsv1.Depl
 		WithLogEnvVars(publisherConfig),
 	)
 }
-func NewNATSPublisherDeployment(natsConfig env.NatsConfig, publisherConfig env.PublisherConfig) *appsv1.Deployment {
+func NewNATSPublisherDeployment(natsConfig backendnats.Config, publisherConfig env.PublisherConfig) *appsv1.Deployment {
 	return NewDeployment(
 		publisherConfig,
 		WithLabels(v1alpha1.NatsBackendType),
@@ -166,7 +167,7 @@ func WithLogEnvVars(publisherConfig env.PublisherConfig) DeployOpt {
 	}
 }
 
-func WithNATSEnvVars(natsConfig env.NatsConfig, publisherConfig env.PublisherConfig) DeployOpt {
+func WithNATSEnvVars(natsConfig backendnats.Config, publisherConfig env.PublisherConfig) DeployOpt {
 	return func(d *appsv1.Deployment) {
 		for i, container := range d.Spec.Template.Spec.Containers {
 			if strings.EqualFold(container.Name, PublisherName) {
@@ -323,7 +324,7 @@ func getBEBEnvVars(publisherConfig env.PublisherConfig) []v1.EnvVar {
 	}
 }
 
-func getNATSEnvVars(natsConfig env.NatsConfig, publisherConfig env.PublisherConfig) []v1.EnvVar {
+func getNATSEnvVars(natsConfig backendnats.Config, publisherConfig env.PublisherConfig) []v1.EnvVar {
 	return []v1.EnvVar{
 		{Name: "BACKEND", Value: "nats"},
 		{Name: "PORT", Value: strconv.Itoa(int(publisherPortNum))},

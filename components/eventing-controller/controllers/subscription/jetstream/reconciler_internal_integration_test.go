@@ -26,7 +26,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/fake"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
+	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
 	backendjetstream "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats/jetstream"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
@@ -761,7 +761,7 @@ func startReconciler(eventTypePrefix string, ens *utils.JetStreamTestEnsemble) *
 	})
 	g.Expect(err).ToNot(gomega.HaveOccurred())
 
-	envConf := env.NatsConfig{
+	envConf := backendnats.Config{
 		URL:                     ens.NatsServer.ClientURL(),
 		MaxReconnects:           10,
 		ReconnectWait:           time.Second,
@@ -830,7 +830,7 @@ func getSubscriptionFromJetStream(ens *utils.JetStreamTestEnsemble,
 	subscription *eventingv1alpha1.Subscription, subject string) gomega.AsyncAssertion {
 	g := ens.G
 
-	return g.Eventually(func() nats.Subscriber {
+	return g.Eventually(func() backendnats.Subscriber {
 		subscriptions := ens.JetStreamBackend.GetAllSubscriptions()
 		subscriptionSubject := backendjetstream.NewSubscriptionSubjectIdentifier(subscription, subject)
 		for key, sub := range subscriptions {

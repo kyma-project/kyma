@@ -25,10 +25,9 @@ import (
 type Runtime string
 
 const (
-	Python39       Runtime = "python39"
-	NodeJs14       Runtime = "nodejs14"
-	NodeJs16       Runtime = "nodejs16"
-	Java17JvmAlpha Runtime = "java17-jvm-alpha"
+	Python39 Runtime = "python39"
+	NodeJs14 Runtime = "nodejs14"
+	NodeJs16 Runtime = "nodejs16"
 )
 
 type FunctionType string
@@ -314,6 +313,17 @@ func init() {
 		&Function{},
 		&FunctionList{},
 	)
+}
+
+func (f Function) IsUpdating() bool {
+	conditions := []ConditionType{ConditionBuildReady, ConditionConfigurationReady, ConditionRunning}
+	status := f.Status
+	for _, c := range conditions {
+		if !status.Condition(c).IsTrue() {
+			return true
+		}
+	}
+	return false
 }
 
 func (s *FunctionStatus) Condition(c ConditionType) *Condition {

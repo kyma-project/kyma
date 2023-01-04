@@ -1,4 +1,4 @@
-package env
+package nats
 
 import (
 	"time"
@@ -6,8 +6,11 @@ import (
 	"github.com/kelseyhightower/envconfig"
 )
 
+// TODO(nils): move the content of this file to backend/jetstreamv2/config.go
+// as soon as jetstreamv2 is the only backend!
+
 // NatsConfig represents the environment config for the Eventing Controller with Nats.
-type NatsConfig struct {
+type Config struct {
 	// Following details are for eventing-controller to communicate to Nats
 	URL           string `envconfig:"NATS_URL" required:"true"`
 	MaxReconnects int
@@ -26,7 +29,7 @@ type NatsConfig struct {
 	// JetStream-specific configs
 	// Name of the JetStream stream where all events are stored.
 	JSStreamName string `envconfig:"JS_STREAM_NAME" required:"true"`
-	// Prefix for the subjects in the stream
+	// Prefix for the subjects in the stream.
 	JSSubjectPrefix string `envconfig:"JS_STREAM_SUBJECT_PREFIX" required:"true"`
 	// Storage type of the stream, memory or file.
 	JSStreamStorageType string `envconfig:"JS_STREAM_STORAGE_TYPE" default:"memory"`
@@ -59,13 +62,13 @@ type NatsConfig struct {
 	EnableNewCRDVersion bool `envconfig:"ENABLE_NEW_CRD_VERSION" default:"false"`
 }
 
-func GetNatsConfig(maxReconnects int, reconnectWait time.Duration) (NatsConfig, error) {
-	cfg := NatsConfig{
+func GetNATSConfig(maxReconnects int, reconnectWait time.Duration) (Config, error) {
+	cfg := Config{
 		MaxReconnects: maxReconnects,
 		ReconnectWait: reconnectWait,
 	}
 	if err := envconfig.Process("", &cfg); err != nil {
-		return NatsConfig{}, err
+		return Config{}, err
 	}
 	return cfg, nil
 }

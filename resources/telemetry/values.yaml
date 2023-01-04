@@ -4,10 +4,10 @@ global:
   images:
     directory_size_exporter:
       name: "directory-size-exporter"
-      version: "v20221020-e314a071"
+      version: "v20230102-4a803570"
     telemetry_operator:
       name: "telemetry-operator"
-      version: "PR-16387"
+      version: "v20221228-741994c3"
     telemetry_webhook_cert_init:
       name: "webhook-cert-init"
       version: "v20221122-200937b4"

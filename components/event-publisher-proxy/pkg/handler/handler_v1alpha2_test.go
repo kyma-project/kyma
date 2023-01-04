@@ -2,12 +2,18 @@ package handler
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy/api"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy/legacytest"
+	"github.com/stretchr/testify/require"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application/applicationtest"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application/fake"
@@ -23,7 +29,8 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics/metricstest"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender/beb"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender/eventmesh"
+	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 )
 
 func TestHandler_publishCloudEventsV1Alpha2(t *testing.T) {
@@ -54,7 +61,7 @@ func TestHandler_publishCloudEventsV1Alpha2(t *testing.T) {
 			fields: fields{
 				Sender: &GenericSenderStub{
 					Err: nil,
-					Result: beb.HTTPPublishResult{
+					Result: eventmesh.HTTPPublishResult{
 						Status: 204,
 						Body:   []byte(""),
 					},
@@ -96,7 +103,7 @@ func TestHandler_publishCloudEventsV1Alpha2(t *testing.T) {
 			fields: fields{
 				Sender: &GenericSenderStub{
 					Err: nil,
-					Result: beb.HTTPPublishResult{
+					Result: eventmesh.HTTPPublishResult{
 						Status: 204,
 						Body:   []byte(""),
 					},
@@ -139,7 +146,7 @@ func TestHandler_publishCloudEventsV1Alpha2(t *testing.T) {
 			fields: fields{
 				Sender: &GenericSenderStub{
 					Err: nil,
-					Result: beb.HTTPPublishResult{
+					Result: eventmesh.HTTPPublishResult{
 						Status: 204,
 						Body:   []byte(""),
 					},
@@ -181,7 +188,7 @@ func TestHandler_publishCloudEventsV1Alpha2(t *testing.T) {
 			fields: fields{
 				Sender: &GenericSenderStub{
 					Err: nil,
-					Result: beb.HTTPPublishResult{
+					Result: eventmesh.HTTPPublishResult{
 						Status: 204,
 						Body:   []byte(""),
 					},
@@ -303,6 +310,7 @@ func TestHandler_publishCloudEventsV1Alpha2(t *testing.T) {
 				Options: &options.Options{
 					Env: options.Env{EnableNewCRDVersion: true},
 				},
+				OldEventTypePrefix: testingutils.OldEventTypePrefix,
 			}
 			writer := httptest.NewRecorder()
 
@@ -315,6 +323,168 @@ func TestHandler_publishCloudEventsV1Alpha2(t *testing.T) {
 			assert.NoError(t, err)
 			if tt.wantBody != nil {
 				assert.Equal(t, tt.wantBody, body)
+			}
+
+			metricstest.EnsureMetricMatchesTextExpositionFormat(t, h.collector, tt.wantTEF)
+		})
+	}
+}
+
+func TestHandler_publishLegacyEventsAsCEV1alpha2(t *testing.T) {
+	// define common given variables
+	appLister := NewApplicationListerOrDie(context.Background(), "testapp")
+
+	// set mock for latency metrics
+	latency := new(mocks.BucketsProvider)
+	latency.On("Buckets").Return(nil)
+
+	tests := []struct {
+		name                   string
+		givenSender            sender.GenericSender
+		givenLegacyTransformer legacy.RequestToCETransformer
+		givenCollector         metrics.PublishingMetricsCollector
+		givenRequest           *http.Request
+		wantHttpStatus         int
+		wantTEF                string
+	}{
+		{
+			name: "Send valid legacy event",
+			givenSender: &GenericSenderStub{
+				Result: eventmesh.HTTPPublishResult{
+					Status: 204,
+				},
+				BackendURL: "FOO",
+			},
+			givenLegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", appLister),
+			givenCollector:         metrics.NewCollector(latency),
+			givenRequest:           legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
+			wantHttpStatus:         http.StatusOK,
+			wantTEF: `
+					# HELP eventing_epp_event_type_published_total The total number of events published for a given eventTypeLabel
+					# TYPE eventing_epp_event_type_published_total counter
+					eventing_epp_event_type_published_total{code="204",event_source="testapp",event_type="prefix.testapp.object.created.v1"} 1
+
+					# HELP eventing_epp_backend_duration_milliseconds The duration of sending events to the messaging server in milliseconds
+					# TYPE eventing_epp_backend_duration_milliseconds histogram
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.005"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.01"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.025"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.05"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.1"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.25"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.5"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="1"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="2.5"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="5"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="10"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="+Inf"} 1
+					eventing_epp_backend_duration_milliseconds_sum{destination_service="FOO",code="204"} 0
+					eventing_epp_backend_duration_milliseconds_count{code="204",destination_service="FOO"} 1
+
+					# HELP eventing_epp_backend_requests_total The total number of backend requests
+					# TYPE eventing_epp_backend_requests_total counter
+					eventing_epp_backend_requests_total{code="204",destination_service="FOO"} 1
+				`,
+		},
+		{
+			name: "Send valid legacy event but cannot send to backend due to target not found (e.g. stream missing)",
+			givenSender: &GenericSenderStub{
+				Err:        fmt.Errorf("oh no, i cannot send: %w", sender.ErrBackendTargetNotFound),
+				BackendURL: "FOO",
+			},
+			givenLegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", appLister),
+			givenCollector:         metrics.NewCollector(latency),
+			givenRequest:           legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
+			wantHttpStatus:         http.StatusBadGateway,
+			wantTEF: `
+					# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
+					# TYPE eventing_epp_backend_errors_total counter
+					eventing_epp_backend_errors_total 1
+				`,
+		},
+		{
+			name: "Send valid legacy event but cannot send to backend due to full storage",
+			givenSender: &GenericSenderStub{
+				Err:        fmt.Errorf("oh no, i cannot send: %w", sender.ErrInsufficientStorage),
+				BackendURL: "FOO",
+			},
+			givenLegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", appLister),
+			givenCollector:         metrics.NewCollector(latency),
+			givenRequest:           legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
+			wantHttpStatus:         507,
+			wantTEF: `
+					# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
+					# TYPE eventing_epp_backend_errors_total counter
+					eventing_epp_backend_errors_total 1
+				`,
+		},
+		{
+			name: "Send valid legacy event but cannot send to backend",
+			givenSender: &GenericSenderStub{
+				Err:        fmt.Errorf("i cannot send"),
+				BackendURL: "FOO",
+			},
+			givenLegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", appLister),
+			givenCollector:         metrics.NewCollector(latency),
+			givenRequest:           legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
+			wantHttpStatus:         500,
+			wantTEF: `
+					# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
+					# TYPE eventing_epp_backend_errors_total counter
+					eventing_epp_backend_errors_total 1
+				`,
+		},
+		{
+			name: "Send invalid legacy event",
+			givenSender: &GenericSenderStub{
+				Result: eventmesh.HTTPPublishResult{
+					Status: 204,
+				},
+				BackendURL: "FOO",
+			},
+			givenLegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", appLister),
+			givenCollector:         metrics.NewCollector(latency),
+			givenRequest:           legacytest.InvalidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
+			wantHttpStatus:         400,
+			wantTEF:                "", // this is a client error. We do record an error metric for requests that cannot even be decoded correctly.
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// given
+			logger, err := eclogger.New("text", "debug")
+			require.NoError(t, err)
+
+			ceBuilder := builder.NewGenericBuilder("prefix", cleaner.NewJetStreamCleaner(logger), appLister, logger)
+
+			h := &Handler{
+				Sender:            tt.givenSender,
+				Logger:            logger,
+				LegacyTransformer: tt.givenLegacyTransformer,
+				collector:         tt.givenCollector,
+				ceBuilder:         ceBuilder,
+				Options: &options.Options{
+					Env: options.Env{EnableNewCRDVersion: true},
+				},
+			}
+			writer := httptest.NewRecorder()
+
+			// when
+			h.publishLegacyEventsAsCE(writer, tt.givenRequest)
+
+			// then
+			require.Equal(t, tt.wantHttpStatus, writer.Result().StatusCode)
+			body, err := io.ReadAll(writer.Result().Body)
+			require.NoError(t, err)
+
+			if tt.wantHttpStatus == http.StatusOK {
+				ok := &api.PublishResponse{}
+				err = json.Unmarshal(body, ok)
+				require.NoError(t, err)
+			} else {
+				nok := &api.Error{}
+				err = json.Unmarshal(body, nok)
+				require.NoError(t, err)
 			}
 
 			metricstest.EnsureMetricMatchesTextExpositionFormat(t, h.collector, tt.wantTEF)
