@@ -80,7 +80,7 @@ global:
       directory: "tpi"
     function_controller:
       name: "function-controller"
-      version: "v20230117-0d3f0156"
+      version: "PR-16489"
     function_webhook:
       name: "function-webhook"
       version: "v20230117-0d3f0156"
