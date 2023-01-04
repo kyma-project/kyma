@@ -66,7 +66,7 @@ To create a Function in your Namespace using the [sample code](./assets/function
   ```
 
   </details>
-
+  
   <details>
   <summary>
   Function

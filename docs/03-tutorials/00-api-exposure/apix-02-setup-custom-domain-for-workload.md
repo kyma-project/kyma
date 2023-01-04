@@ -20,7 +20,7 @@ This tutorial shows how to set up a custom domain and prepare a certificate requ
     export SECRET={SECRET_NAME}
     ```
 
-1. Create a `DNSProvider` custom resource (CR).
+2. Create a `DNSProvider` custom resource (CR).
 
   * Export the following values as environment variables. As the `SPEC_TYPE`, use the relevant provider type. The `DOMAIN_NAME` value specifies the name of a domain that you own, for example, `mydomain.com`. 
 
@@ -78,7 +78,7 @@ This tutorial shows how to set up a custom domain and prepare a certificate requ
     EOF
     ```
 
-1. Create Issuer CR.
+4. Create Issuer CR.
 
   * Export the following values as environment variables:
 
@@ -141,7 +141,7 @@ This tutorial shows how to set up a custom domain and prepare a certificate requ
     `kubectl get certificate httpbin-cert -n istio-system`
     ```
 
-1. Create Gateway CR. Run:
+6. Create Gateway CR. Run:
 
    >**NOTE:** Skip this step, if you're creating the mTLS gateway. 
 
