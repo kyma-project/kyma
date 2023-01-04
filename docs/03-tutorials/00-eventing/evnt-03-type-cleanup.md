@@ -142,7 +142,7 @@ Next, you see that you can still publish events with the original Event name (i.
    
       ```bash
       cloudevents send http://localhost:3000/publish \
-         --type order.payment*success.v1 \
+         --type "order.payment*success.v1" \
          --id e4bcc616-c3a9-4840-9321-763aa23851fc \
          --source myapp \
          --datacontenttype application/json \

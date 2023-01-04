@@ -80,24 +80,15 @@ Create a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01
 
 1. In Kyma Dashboard, go to the view of your Function `lastorder`.
 2. Go to **Configuration** > **Create Subscription+**.
-3. Switch to the **Advanced** tab, and replace the yaml with the following:
-   ```bash
-   apiVersion: eventing.kyma-project.io/v1alpha2
-   kind: Subscription
-   metadata:
-     name: lastorder-sub
-     namespace: default
-   spec:
-     config:
-       maxInFlightMessages: 5
-     sink: 'http://lastorder.default.svc.cluster.local'
-     source: myapp
-     types:
-       - order.received.v1
-   ```
-
-4. Click **Create**.
-5. Wait a few seconds for the Subscription to have status `READY`.
+3. Switch to the **Advanced** tab, and provide the following parameters:
+   - **Subscription name**: `lastorder-sub`
+   - **Type matching:**: `standard`
+   - **Source**: `myapp`
+   - **Type**: `order.received.v1`
+   - **Config**: `maxInFlightMessages: 5`
+     
+5. Click **Create**.
+6. Wait a few seconds for the Subscription to have status `READY`.
 
   </details>
   <details>
@@ -115,7 +106,7 @@ cat <<EOF | kubectl apply -f -
      namespace: default
    spec:
      config:
-       maxInFlightMessages: 5
+       maxInFlightMessages: "5"
      sink: 'http://lastorder.default.svc.cluster.local'
      source: myapp
      types:

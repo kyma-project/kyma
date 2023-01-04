@@ -28,7 +28,7 @@ spec:
     - order.created.v1
   sink: http://test.test.svc.cluster.local
   config:
-    maxInFlightMessages: 10
+    maxInFlightMessages: "10"
 ```
 
 ## Custom resource parameters
