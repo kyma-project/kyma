@@ -1,0 +1,449 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/name: tracepipelines.telemetry.kyma-project.io
+    busola.io/extension: resource
+    busola.io/extension-version: "0.5"
+  name: tracepipelines.telemetry.kyma-project.io
+  namespace: kube-public
+data:
+  details: |-
+    {
+      "header": [
+         {
+          "source": "$each(spec.output, function($v, $k) {$v.url.value or $v.url.valueFrom.secretKeyRef.name or $v.host.value or $v.host.valueFrom.secretKeyRef.name ? $k})",
+          "placeholder": "custom",
+          "type": "string",
+          "name": "Type",
+          "isSelected": true,
+          "widget": "Text"
+        },
+        {
+          "name": "Unsupported-Mode",
+          "source": "status.unsupportedMode",
+          "widget": "Badge",
+          "highlights": {
+            "positive": ["false"],
+            "negative": ["true"]
+          }
+        },
+        {
+          "source": "status.conditions[-1].type",
+          "name": "Status",
+          "widget": "Badge"
+        }
+      ],
+      "body":
+        [
+          {
+            "widget": "Panel",
+            "name": "Applications",
+            "children":
+              [
+                {
+                  "widget": "Panel",
+                  "name": "Namespaces",
+                  "children":
+                    [
+                      {
+                        "name": "Include",
+                        "widget": "JoinedArray",
+                        "source": "spec.input.application.namespaces.include",
+                        "separator": ", "
+                      },
+                      {
+                        "name": "Exclude",
+                        "widget": "JoinedArray",
+                        "source": "spec.input.application.namespaces.exclude",
+                        "separator": ", "
+                      },
+                      {
+                        "name": "System Namespaces",
+                        "source": "spec.input.application.namespaces.system"
+                      }
+                  ]
+                },
+                {
+                  "widget": "Panel",
+                  "name": "Containers",
+                  "children":
+                    [
+                      {
+                        "name": "Include",
+                        "widget": "JoinedArray",
+                        "source": "spec.input.application.containers.include",
+                        "separator": ", "
+                      },
+                      {
+                        "name": "Exclude",
+                        "widget": "JoinedArray",
+                        "source": "spec.input.application.containers.exclude",
+                        "separator": ", "
+                      }
+                    ]
+                },
+                {
+                  "widget": "Panel",
+                  "name": "Other Settings",
+                  "children": [
+                    {
+                      "name": "Keep Annotations",
+                      "source": "spec.input.application.keepAnnotations"
+                    },
+                    {
+                      "name": "Drop Labels",
+                      "source": "spec.input.application.dropLabels"
+                    }
+                  ]
+                }
+              ]
+          },
+          {
+            "widget": "Panel",
+            "name": "Output",
+            "children":
+              [
+                {
+                  "name": "Custom",
+                  "widget": "CodeViewer",
+                  "language": "'plaintext'",
+                  "source": "spec.output.custom",
+                  "visibility": "$exists(spec.output.custom)",
+                },
+                {
+                  "name": "OTLP",
+                  "widget": "Panel",
+                  "visibility": "$exists(spec.output.otlp)",
+                  "children": [
+                    {
+                      "name": "Value",
+                      "source": "spec.output.otlp.endpoint.value",
+                      "visibility": "$exists(spec.output.otlp.endpoint.value)",
+                    },
+                    {
+                      "name": "Protocol",
+                      "source": "spec.output.otlp.protocol",
+                      "visibility": "$exists(spec.output.otlp.protocol)",
+                    },
+                    {
+                      "name": "User",
+                      "widget": "Panel",
+                      "visibility": "$exists(spec.output.otlp.authentication.basic.user)",
+                      "children": [
+                        {
+                          "name": "Value",
+                          "source": "spec.output.otlp.authentication.basic.user.value",
+                          "visibility": "$exists(spec.output.otlp.authentication.basic.user.value)"
+                        },
+                        {
+                          "name": "Value From Secret",
+                          "widget": "ResourceRefs",
+                          "source": "spec.output.otlp.authentication.basic.user.valueFrom.secretKeyRef",
+                          "kind": "Secret",
+                          "visibility": "$exists(spec.output.otlp.authentication.basic.user.valueFrom.secretKeyRef.name)"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Password",
+                      "widget": "Panel",
+                      "visibility": "$exists(spec.output.otlp.authentication.basic.password)",
+                      "children": [
+                        {
+                          "name": "Value",
+                          "source": "spec.output.otlp.authentication.basic.password.value",
+                          "visibility": "$exists(spec.output.otlp.authentication.basic.password.value)"
+                        },
+                        {
+                          "name": "Value From Secret",
+                          "widget": "ResourceRefs",
+                          "source": "spec.output.otlp.authentication.basic.password.valueFrom.secretKeyRef",
+                          "kind": "Secret",
+                          "visibility": "$exists(spec.output.otlp.authentication.basic.password.valueFrom.secretKeyRef.name)"
+                        }
+                      ]
+                    }
+                  ]
+                },
+              ]
+          }
+        ]
+    }
+  form: |
+    [
+      {
+        "path": "spec.input",
+        "widget": "FormGroup",
+        "defaultExpanded": true,
+        "simple": true,
+        "children":
+          [
+            {
+              "name": "Include Namespaces",
+              "widget": "SimpleList",
+              "path": "application.namespaces.include",
+              "defaultExpanded": true,
+              "inputInfo": "Include container logs from selected namespaces",
+              "children":
+                [
+                  {
+                    "path": "[]",
+                    "widget": "Resource",
+                    "resource":
+                      { "scope": "cluster", "kind": "Namespace", "version": "v1" },
+                  },
+                ]
+            },
+            {
+              "name": "Exclude Namespaces",
+              "widget": "SimpleList",
+              "path": "application.namespaces.exclude",
+              "children":
+                [
+                  {
+                    "path": "[]",
+                    "widget": "Resource",
+                    "resource":
+                      { "scope": "cluster", "kind": "Namespace", "version": "v1" }
+                  }
+                ]
+            },
+            {
+              "name": "Include System Namespaces",
+              "path": "application.namespaces.system"
+            },
+            {
+              "name": "Include Containers",
+              "widget": "SimpleList",
+              "path": "application.containers.include"
+            },
+            {
+              "name": "Exclude Containers",
+              "widget": "SimpleList",
+              "path": "application.containers.exclude"
+            },
+            {
+              "name": "Keep Annotations",
+              "path": "application.keepAnnotations"
+            },
+            {
+              "name": "Drop Labels",
+              "path": "application.dropLabels"
+            }
+          ]
+      },
+      {
+        "name": "Filters",
+        "widget": "SimpleList",
+        "path": "spec.filters",
+        "children":
+          [
+            {
+              "widget": "FormGroup",
+              "path": "[]",
+              "children":
+                [
+                  {
+                    "widget": "CodeEditor",
+                    "path": "custom"
+                  }
+                ]
+            }
+          ]
+      },
+      {
+        "path": "spec.output",
+        "widget": "FormGroup",
+        "path": "spec.output",
+        "defaultExpanded": true,
+        "simple": true,
+        "children":
+          [
+            {
+              "name": "Custom",
+              "path": "custom",
+              "widget": "CodeEditor",
+              "advanced": true,
+              "inputInfo": "Note: If you use a custom output, you put the TracePipeline in unsupported mode (https://kyma-project.io/docs/kyma/latest/01-overview/main-areas/observability/obsv-04-telemetry-in-kyma/#unsupported-mode)"
+            },
+            {
+              "name": "HTTP",
+              "path": "http",
+              "widget": "FormGroup",
+              "defaultExpanded": true,
+              "simple": true,
+              "children":
+                [
+                  {
+                    "name": "Host",
+                    "path": "host",
+                    "widget": "FormGroup",
+                    "children":
+                      [
+                        {
+                          "name": "Value",
+                          "path": "value",
+                          "widget": "Text"
+                        },
+                        {
+                          "name": "Secret Reference",
+                          "path": "valueFrom.secretKeyRef",
+                          "widget": "ResourceRef",
+                          "resource": {
+                             "kind": "secret",
+                             "version": "v1",
+                          },
+                          "children": [{
+                              "path": "key",
+                              "enum": "$keys($secret.data)",
+                          },
+                          ],
+                        }
+                      ]
+                  },
+                  {
+                    "name": "User",
+                    "path": "user",
+                    "widget": "FormGroup",
+                    "children":
+                      [
+                        {
+                          "name": "Value",
+                          "path": "value",
+                          "widget": "Text"
+                        },
+                        {
+                          "name": "Secret Reference",
+                          "path": "valueFrom.secretKeyRef",
+                          "widget": "ResourceRef",
+                          "resource": {
+                             "kind": "secret",
+                             "version": "v1",
+                          },
+                          "children": [{
+                              "path": "key",
+                              "enum": "$keys($secret.data)",
+                          },
+                          ],
+                        }
+                      ]
+                  },
+                  {
+                    "name": "Password",
+                    "path": "password",
+                    "widget": "FormGroup",
+                    "children":
+                      [
+                        {
+                          "name": "Value",
+                          "path": "value",
+                          "widget": "Text"
+                        },
+                        {
+                          "name": "Secret Reference",
+                          "path": "valueFrom.secretKeyRef",
+                          "widget": "ResourceRef",
+                          "resource": {
+                             "kind": "secret",
+                             "version": "v1",
+                          },
+                          "children": [{
+                              "path": "key",
+                              "enum": "$keys($secret.data)",
+                          },
+                          ],
+                        }
+                      ]
+                  },
+                  {
+                    "name": "TLS",
+                    "widget": "FormGroup",
+                    "path": "tls",
+                    "children":
+                      [
+                        {
+                          "name": "Disabled",
+                          "path": "disabled"
+                        },
+                        {
+                          "name": "Skip Certificate Validation",
+                          "path": "skipCertificateValidation"
+                        }
+                      ]
+                  },
+                  {
+                    "name": "URI",
+                    "path": "uri",
+                    "widget": "Text"
+                  },
+                  {
+                    "name": "Port",
+                    "path": "port",
+                    "widget": "Text"
+                  },
+                  {
+                    "name": "Compress",
+                    "path": "compress",
+                    "widget": "Text"
+                  },
+                  {
+                    "name": "Format",
+                    "path": "format",
+                    "widget": "Text"
+                  },
+                  {
+                    "name": "Dedot",
+                    "path": "dedot"
+                  },
+                ]
+            },
+          ]
+      }
+    ]
+  general: |-
+    {
+      "resource": {
+        "kind": "TracePipeline",
+        "group": "telemetry.kyma-project.io",
+        "version": "v1alpha1"
+      },
+      "name": "Trace Pipelines",
+      "category": "Observability",
+      "urlPath": "tracepipelines",
+      "scope": "cluster",
+      "description": "Configure log selection, filters, and outputs",
+    }
+  list: |-
+    [
+       {
+        "source": "$each(spec.output, function($v, $k) {$v.url.value or $v.url.valueFrom.secretKeyRef.name or $v.host.value or $v.host.valueFrom.secretKeyRef.name ? $k})",
+         "placeholder": "custom",
+        "type": "string",
+        "name": "Type",
+        "isSelected": true,
+        "widget": "Text"
+      },
+      {
+        "name": "Unsupported-Mode",
+        "source": "status.unsupportedMode",
+        "widget": "Badge",
+        "highlights": {
+          "positive": ["false"],
+          "negative": ["true"]
+        }
+      },
+      {
+        "source": "status.conditions[-1].type",
+        "name": "Status",
+        "widget": "Badge"
+      }
+    ]
+  translations: |-
+    {
+      "en": {
+        "metadata.annotations": "Annotations",
+        "metadata.labels": "Labels",
+        "metadata.creationTimestamp": "Created at"
+      }
+    }
