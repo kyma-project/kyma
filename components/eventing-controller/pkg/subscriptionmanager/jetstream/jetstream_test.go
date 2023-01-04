@@ -61,7 +61,7 @@ type TestEnvironment struct {
 	jsCtx         nats.JetStreamContext
 	natsServer    *server.Server
 	subscriber    *controllertesting.Subscriber
-	envConf       env.NatsConfig
+	envConf       backendnats.Config
 	defaultLogger *logger.Logger
 }
 
@@ -82,27 +82,19 @@ func getJetStreamClient(t *testing.T, natsURL string) nats.JetStreamContext {
 	return jsClient
 }
 
-func getNATSConf(natsURL string) env.NatsConfig {
-	return env.NatsConfig{
+func getNATSConf(natsURL string, natsPort int) backendnats.Config {
+	streamName := fmt.Sprintf("%s%d", controllertesting.JSStreamName, natsPort)
+	return backendnats.Config{
 		URL:                     natsURL,
 		MaxReconnects:           10,
 		ReconnectWait:           time.Second,
 		EventTypePrefix:         controllertesting.EventTypePrefix,
-		JSStreamName:            controllertesting.EventTypePrefix,
+		JSStreamName:            streamName,
+		JSSubjectPrefix:         streamName,
 		JSStreamStorageType:     backendjetstream.StorageTypeMemory,
 		JSStreamRetentionPolicy: backendjetstream.RetentionPolicyInterest,
 		JSStreamDiscardPolicy:   backendjetstream.DiscardPolicyNew,
 	}
-}
-
-func setUpNATSServer(t *testing.T) *server.Server {
-	// create NATS Server with JetStream enabled
-	natsPort, err := controllertesting.GetFreePort()
-	require.NoError(t, err)
-	natsServer := controllertesting.RunNatsServerOnPort(
-		controllertesting.WithPort(natsPort),
-		controllertesting.WithJetStreamEnabled())
-	return natsServer
 }
 
 func createAndSyncSubscription(t *testing.T, sinkURL string, jsBackend *backendjetstream.JetStream) *eventingv1alpha1.Subscription {
@@ -165,12 +157,15 @@ func setUpTestEnvironment(t *testing.T) *TestEnvironment {
 	ctx := context.Background()
 	// create a test subscriber and natsServer
 	subscriber := controllertesting.NewSubscriber()
-	natsServer := setUpNATSServer(t)
+	// create NATS Server with JetStream enabled
+	natsPort, err := controllertesting.GetFreePort()
+	require.NoError(t, err)
+	natsServer := controllertesting.StartDefaultJetStreamServer(natsPort)
 
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	require.NoError(t, err)
 
-	envConf := getNATSConf(natsServer.ClientURL())
+	envConf := getNATSConf(natsServer.ClientURL(), natsPort)
 	jsClient := getJetStreamClient(t, natsServer.ClientURL())
 
 	// init the metrics collector

@@ -44,8 +44,8 @@ func is2XXStatusCode(statusCode int) bool {
 	return statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices
 }
 
-// writeJSONResponse writes a JSON response
-func writeJSONResponse(w http.ResponseWriter, resp *api.PublishEventResponses) {
+// WriteJSONResponse writes a JSON response.
+func WriteJSONResponse(w http.ResponseWriter, resp *api.PublishEventResponses) {
 	encoder := json.NewEncoder(w)
 	w.Header().Set(internal.HeaderContentType, internal.ContentTypeApplicationJSON)
 

@@ -3,6 +3,7 @@ package v1alpha1
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"time"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
@@ -27,12 +28,13 @@ import (
 type Function struct {
 	resCli      *resource.Resource
 	function    *serverlessv1alpha1.Function
+	FunctionURL *url.URL
 	waitTimeout time.Duration
 	log         *logrus.Entry
 	verbose     bool
 }
 
-func NewFunction(name string, c shared.Container) *Function {
+func NewFunction(name string, proxyEnabled bool, c shared.Container) *Function {
 	function := &serverlessv1alpha1.Function{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Function",
@@ -44,12 +46,18 @@ func NewFunction(name string, c shared.Container) *Function {
 		},
 	}
 
+	fnURL, err := helpers.GetSvcURL(name, c.Namespace, proxyEnabled)
+	if err != nil {
+		panic(err)
+	}
+
 	return &Function{
 		resCli:      resource.New(c.DynamicCli, serverlessv1alpha1.GroupVersion.WithResource("functions"), c.Namespace, c.Log, c.Verbose),
 		waitTimeout: c.WaitTimeout,
 		log:         c.Log,
 		verbose:     c.Verbose,
 		function:    function,
+		FunctionURL: fnURL,
 	}
 }
 

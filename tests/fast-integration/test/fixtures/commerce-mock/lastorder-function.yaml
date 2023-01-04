@@ -14,23 +14,29 @@ spec:
     let lastEvent = {};
     let inAppEvent = {};
     const axios = require('axios');
-    function sendEvent(type, data, encoding, isLegacyEvent) {
-        const event = getEventPayloadAndHeaders(type, data, encoding, isLegacyEvent)
+    const crypto = require('crypto')
+    function sendEvent(type, source, data, encoding, isLegacyEvent) {
+        const event = getEventPayloadAndHeaders(type, source, data, encoding, isLegacyEvent)
         console.log("Headers:", event.headers)
         console.log("Payload:", event.payload)
         let eppUrl = "http://eventing-event-publisher-proxy.kyma-system/publish"
         if (isLegacyEvent) {
           eppUrl = "http://eventing-event-publisher-proxy.kyma-system/inapp/v1/events"
         }
+        if (isLegacyEvent && source !== "") {
+          eppUrl = `http://eventing-event-publisher-proxy.kyma-system/${source}/v1/events`
+        }
         console.log("forwarding event to EPP: " + eppUrl)
-        return axios.post(eppUrl, event.payload, {headers:event.headers})
+        const response = axios.post(eppUrl, event.payload, {headers:event.headers})
+        console.log(`In-app event sent. Publisher proxy response: ${response.status}`);
+        return response
     }
-    function getEventPayloadAndHeaders(type, data, encoding, isLegacyEvent) {
+    function getEventPayloadAndHeaders(type, source, data, encoding, isLegacyEvent) {
       //// Legacy events
       if(isLegacyEvent) {
         return {
           payload: {
-             "event-type": "order.received",
+             "event-type": type? type: "order.received",
              "event-type-version": "v1",
              "event-time": "2020-09-28T14:47:16.491Z",
              data
@@ -41,16 +47,25 @@ spec:
         }
       }
       //// Cloud events
+      let ceType = "sap.kyma.custom.inapp.order.received.v1"
+      if (type !== "") {
+        ceType = type
+      }
+      let ceSource = "%%BEB_NAMESPACE%%"
+      if (source !== "") {
+        ceSource = source
+      }
+
       // binary encoding
       if(encoding==='binary') {
         return {
           payload: data,
           headers: {
-            "ce-source": "%%BEB_NAMESPACE%%",
+            "ce-source": ceSource,
             "ce-specversion": "1.0",
             "ce-eventtypeversion": "v1",
             "ce-id": (data.id || "dummyId"),
-            "ce-type": type,
+            "ce-type": ceType,
             "Content-Type": "application/json"
           }
         }
@@ -58,12 +73,12 @@ spec:
       // structured encoding
       return {
         payload: {
-          source: "%%BEB_NAMESPACE%%",
+          source: ceSource,
           specversion: "1.0",
           eventtypeversion: "v1",
           datacontenttype: "application/json",
           id: (data.id || "dummyId"),
-          type,
+          type: ceType,
           data
         },
         headers: {
@@ -74,7 +89,14 @@ spec:
     async function getOrder(code) {
       let url = %%URL%%;
       console.log("URL: %s", url);
-      let response = await axios.get(url, { headers: { "X-B3-Sampled": 1 } }).catch((e)=>{
+
+      const version = Buffer.alloc(1).toString('hex')
+      const traceId = crypto.randomBytes(16).toString('hex')
+      const id = crypto.randomBytes(8).toString('hex')
+      const flags = '01'
+      const traceParentHeader = `${version}-${traceId}-${id}-${flags}`
+
+      let response = await axios.get(url, { headers: { "traceparent": traceParentHeader } }).catch((e)=>{
         return e.response.data;
       })
       return response.data;
@@ -104,24 +126,32 @@ spec:
           try {
             const encoding = event.extensions.request.query.encoding
             const isLegacyEvent = event.extensions.request.query.isLegacyEvent
-            let eventType = "sap.kyma.custom.inapp.order.received.v1"
+            let eventType = ""
+            let eventSource = ""
             if (event.data.type) {
               eventType = event.data.type
             }
-            const response = await sendEvent(eventType, event.data, encoding, isLegacyEvent);
-            console.log(`In-app event (${eventType}) sent. Publisher proxy response: ${response.status}`);
+            if (event.data.source) {
+              eventSource = event.data.source
+            }
+            const response = await sendEvent(eventType, eventSource, event.data, encoding, isLegacyEvent);
           } catch (e) {
             console.dir(e);
             return { eventPublishError: true, statusText: e.message }
           }
         } else if (event.extensions.request.query.inappevent) {
+          console.log("Printing event data: ", event.data);
+          console.log("Printing event header: ", event.headers);
           return {event:inAppEvent[event.extensions.request.query.inappevent], podName: process.env.HOSTNAME};
-        } else if (event["ce-type"] && event["ce-type"].includes("order.received")){
+        } else if (event["ce-type"] && (event["ce-type"].includes("order.received") || event["ce-type"].includes("order.completed"))){
           console.log("Got in-app event:", event.data);
           inAppEvent[event.data.id] = { ...cloudEventHeaders(event), shipped:true, ...event.data, headers:event.extensions.request.headers };
-        } else if (event["ce-type"] && (event["ce-type"].includes("order.created") || event.data.save)) {
-          console.log("Order created event:", event.data)
+        } else if (event["ce-type"] && event["ce-type"].includes("order.created")) {
+          console.log("Saving last event:", event.data)
           lastEvent = { ...cloudEventHeaders(event), data: event.data, headers:event.extensions.request.headers };
+        } else {
+          console.log("Discarding event with ce-type:", event["ce-type"])
+          console.log("Discarding event with data:", event.data)
         }
         if (event.data && event.data.orderCode) {
           lastOrder = await getOrder(event.data.orderCode);

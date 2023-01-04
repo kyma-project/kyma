@@ -8,17 +8,21 @@ require (
 	github.com/go-git/go-git/v5 v5.2.0
 	github.com/hashicorp/errwrap v1.0.0
 	github.com/hashicorp/go-multierror v1.1.0
-	github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20220915084356-1d9b39c6797a
 	github.com/kyma-project/kyma/components/function-controller v0.0.0-20221012075513-f3e30e39496e
 	github.com/onsi/gomega v1.20.2
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/pflag v1.0.5
+	github.com/stretchr/testify v1.8.0 // indirect
 	github.com/vrischmann/envconfig v1.3.0
+	golang.org/x/crypto v0.0.0-20220331220935-ae2d96664a29 // indirect
+	golang.org/x/oauth2 v0.0.0-20220822191816-0ebed06d0094 // indirect
 	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
+	google.golang.org/protobuf v1.28.1 // indirect
 	k8s.io/api v0.25.0
 	k8s.io/apimachinery v0.25.0
 	k8s.io/client-go v0.25.0
+	sigs.k8s.io/controller-runtime v0.13.0 // indirect
 )
 
 replace (

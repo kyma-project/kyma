@@ -29,7 +29,7 @@ type Config struct {
 	DirectorProxy                director.ProxyConfig
 	MetricsLoggingTimeInterval   time.Duration `envconfig:"default=30m"`
 	HealthPort                   string        `envconfig:"default=8090"`
-	IntegrationNamespace         string        `envconfig:"default=kyma-integration"`
+	IntegrationNamespace         string        `envconfig:"default=kyma-system"`
 	CaCertSecretToMigrate        string        `envconfig:"default=''"`
 	CaCertSecretKeysToMigrate    string        `envconfig:"default='cacert'"`
 	Runtime                      director.RuntimeURLsConfig

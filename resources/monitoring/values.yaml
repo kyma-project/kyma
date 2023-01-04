@@ -132,7 +132,7 @@ global:
       sha: ""
     prometheus:
       name: "prometheus"
-      version: "v2.40.5"
+      version: "v2.40.7"
       directory: "external/quay.io/prometheus"
       sha: ""
     pushgateway:
@@ -160,7 +160,7 @@ global:
       sha: ""
     k8s_sidecar:
       name: "k8s-sidecar"
-      version: "1.15.9-fe935387"
+      version: "1.15.9-e8a2955d"
       directory: "tpi"
       sha: ""
     oauth2_proxy:

@@ -15,11 +15,11 @@ import (
 	cleanerv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
+	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
 	sinkv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink/v2"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	v1 "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	v2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
-	natsserver "github.com/nats-io/nats-server/v2/server"
 	"github.com/onsi/gomega"
 	gomegatypes "github.com/onsi/gomega/types"
 	"github.com/stretchr/testify/require"
@@ -38,6 +38,7 @@ const (
 type jetStreamTestEnsemble struct {
 	Reconciler       *Reconciler
 	jetStreamBackend *jetstreamv2.JetStream
+	JSStreamName     string
 	*reconcilertestingv2.TestEnsemble
 }
 
@@ -47,6 +48,8 @@ func setupTestEnsemble(t *testing.T) *jetStreamTestEnsemble {
 	useExistingCluster := useExistingCluster
 	natsPort, err := v2.GetFreePort()
 	require.NoError(t, err)
+	natsServer := v1.StartDefaultJetStreamServer(natsPort)
+	log.Printf("NATS server with JetStream started %v", natsServer.ClientURL())
 
 	ens := &reconcilertestingv2.TestEnsemble{
 		Ctx: ctx,
@@ -56,7 +59,7 @@ func setupTestEnsemble(t *testing.T) *jetStreamTestEnsemble {
 			MaxInFlightMessages: 1,
 		},
 		NatsPort:   natsPort,
-		NatsServer: startJetStream(natsPort),
+		NatsServer: natsServer,
 		TestEnv: &envtest.Environment{
 			CRDDirectoryPaths: []string{
 				filepath.Join("../../../", "config", "crd", "bases", "eventing.kyma-project.io_eventingbackends.yaml"),
@@ -73,6 +76,7 @@ func setupTestEnsemble(t *testing.T) *jetStreamTestEnsemble {
 
 	jsTestEnsemble := &jetStreamTestEnsemble{
 		TestEnsemble: ens,
+		JSStreamName: fmt.Sprintf("%s%d", v2.JSStreamName, natsPort),
 	}
 
 	reconcilertestingv2.StartTestEnv(ens)
@@ -80,15 +84,6 @@ func setupTestEnsemble(t *testing.T) *jetStreamTestEnsemble {
 	reconcilertestingv2.StartSubscriberSvc(ens)
 
 	return jsTestEnsemble
-}
-
-func startJetStream(port int) *natsserver.Server {
-	natsServer := v1.RunNatsServerOnPort(
-		v1.WithPort(port),
-		v1.WithJetStreamEnabled(),
-	)
-	log.Printf("NATS server with JetStream started %v", natsServer.ClientURL())
-	return natsServer
 }
 
 func startReconciler(ens *jetStreamTestEnsemble) *jetStreamTestEnsemble {
@@ -114,13 +109,14 @@ func startReconciler(ens *jetStreamTestEnsemble) *jetStreamTestEnsemble {
 	})
 	require.NoError(ens.T, err)
 
-	envConf := env.NatsConfig{
+	envConf := backendnats.Config{
 		URL:                     ens.NatsServer.ClientURL(),
 		MaxReconnects:           reconcilertestingv2.MaxReconnects,
 		ReconnectWait:           time.Second,
 		EventTypePrefix:         v2.EventTypePrefix,
 		JSStreamDiscardPolicy:   jetstreamv2.DiscardPolicyNew,
-		JSStreamName:            v2.JSStreamName,
+		JSStreamName:            ens.JSStreamName,
+		JSSubjectPrefix:         ens.JSStreamName,
 		JSStreamStorageType:     jetstreamv2.StorageTypeMemory,
 		JSStreamMaxBytes:        "-1",
 		JSStreamMaxMessages:     -1,
@@ -178,7 +174,9 @@ func cleanupResources(ens *jetStreamTestEnsemble) {
 	reconcilertestingv2.StopTestEnv(ens.TestEnsemble)
 
 	jsCtx := ens.Reconciler.Backend.GetJetStreamContext()
-	require.NoError(ens.T, jsCtx.DeleteStream(v2.JSStreamName))
+	require.NoError(ens.T, jsCtx.DeleteStream(ens.JSStreamName))
+
+	v1.ShutDownNATSServer(ens.NatsServer)
 }
 
 func testSubscriptionOnNATS(ens *jetStreamTestEnsemble, subscription *eventingv1alpha2.Subscription,

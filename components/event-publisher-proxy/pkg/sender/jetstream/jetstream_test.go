@@ -8,6 +8,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 
 	"github.com/stretchr/testify/require"
@@ -83,7 +85,7 @@ func TestJetStreamMessageSender(t *testing.T) {
 			ce := createCloudEvent(t)
 
 			ctx := context.Background()
-			sender := NewSender(context.Background(), connection, testEnv.Config, mockedLogger)
+			sender := NewSender(context.Background(), connection, testEnv.Config, &options.Options{}, mockedLogger)
 
 			if tc.givenNATSConnectionClosed {
 				connection.Close()
@@ -201,9 +203,10 @@ func addConsumer(t *testing.T, connection *nats.Conn, sc *nats.StreamConfig, con
 
 func CreateNATSJsConfig(url string) *env.NATSConfig {
 	return &env.NATSConfig{
-		JSStreamName:  testingutils.StreamName,
-		URL:           url,
-		ReconnectWait: time.Second,
+		JSStreamName:    testingutils.StreamName,
+		URL:             url,
+		ReconnectWait:   time.Second,
+		EventTypePrefix: testingutils.OldEventTypePrefix,
 	}
 }
 
@@ -232,6 +235,62 @@ func TestSender_URL(t *testing.T) {
 				envCfg: tt.fields.envCfg,
 			}
 			assert.Equalf(t, tt.want, s.URL(), "URL()")
+		})
+	}
+}
+
+func TestSender_getJsSubjectToPublish(t *testing.T) {
+	t.Parallel()
+
+	type fields struct {
+		opts *options.Options
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		subject string
+		want    string
+	}{
+		{
+			name:    "Appends JS prefix for v1alpha1 subscription",
+			subject: "sap.kyma.custom.noapp.order.created.v1",
+			want:    "kyma.sap.kyma.custom.noapp.order.created.v1",
+			fields: fields{
+				opts: &options.Options{},
+			},
+		},
+		{
+			name:    "Appends JS prefix for v1alpha2 exact type matching subscription",
+			subject: "sap.kyma.custom.noapp.order.created.v1",
+			want:    "kyma.sap.kyma.custom.noapp.order.created.v1",
+			fields: fields{
+				opts: &options.Options{
+					Env: options.Env{EnableNewCRDVersion: true},
+				},
+			},
+		},
+		{
+			name:    "Does not append JS prefix for v1alpha2 standard type matching subscription",
+			subject: "kyma.noapp.order.created.v1",
+			want:    "kyma.noapp.order.created.v1",
+			fields: fields{
+				opts: &options.Options{
+					Env: options.Env{EnableNewCRDVersion: true},
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		tc := tt
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			s := &Sender{
+				opts:   tc.fields.opts,
+				envCfg: CreateNATSJsConfig(""),
+			}
+			assert.Equal(t, tc.want, s.getJsSubjectToPublish(tc.subject))
 		})
 	}
 }

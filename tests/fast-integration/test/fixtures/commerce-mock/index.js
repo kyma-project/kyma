@@ -1,9 +1,10 @@
 const k8s = require('@kubernetes/client-node');
 const fs = require('fs');
 const path = require('path');
-const {expect} = require('chai');
+const {expect, assert} = require('chai');
 const https = require('https');
 const axios = require('axios').default;
+const crypto = require('crypto');
 const httpsAgent = new https.Agent({
   rejectUnauthorized: false, // curl -k
 });
@@ -75,6 +76,8 @@ const lastorderFunctionYaml = fs.readFileSync(
     },
 );
 
+const eventTypeOrderCompleted = 'order.completed.v1';
+const eventSourceInApp = 'inapp';
 const applicationObjs = k8s.loadAllYaml(applicationMockYaml);
 const lastorderObjs = k8s.loadAllYaml(lastorderFunctionYaml);
 let eventMeshSourceNamespace = '/default/sap.kyma/tunas-prow';
@@ -252,12 +255,29 @@ async function sendCloudEventBinaryModeAndCheckResponse(backendType = 'nats', mo
   return await sendEventAndCheckResponse('cloud event binary', body, params, mockNamespace);
 }
 
+async function getTraceId(data) {
+  // Extract traceId from response
+  // Second part of traceparent header contains trace-id. See https://www.w3.org/TR/trace-context/#traceparent-header
+  const traceParent = data.event.headers['traceparent'];
+  debug(`Traceparent header is: ${traceParent}`);
+  let traceId;
+  if (traceParent == null) {
+    debug('traceID using traceparent is not present. Trying to fetch traceID using b3');
+    traceId = data.event.headers['x-b3-traceid'];
+    assert.isNotEmpty(traceId, 'neither traceparent or b3 header is present in the response header');
+  } else {
+    traceId = data.event.headers['traceparent'].split('-')[1];
+  }
+  debug(`got the traceId: ${traceId}`);
+  return traceId;
+}
+
 async function checkEventTracing(targetNamespace = 'test', res) {
-  expect(res.data).to.have.nested.property('event.headers.x-b3-traceid');
+  expect(res.data).to.have.nested.property('event.headers.traceparent');
   expect(res.data).to.have.nested.property('podName');
 
   // Extract traceId from response
-  const traceId = res.data.event.headers['x-b3-traceid'];
+  const traceId = getTraceId(res.data);
 
   // Define expected trace data
   const correctTraceProcessSequence = [
@@ -299,11 +319,10 @@ async function sendCloudEventBinaryModeAndCheckTracing(targetNamespace = 'test',
 
 async function checkInClusterEventTracing(targetNamespace) {
   const res = await checkInClusterEventDeliveryHelper(targetNamespace, 'structured');
-  expect(res.data).to.have.nested.property('event.headers.x-b3-traceid');
+  expect(res.data).to.have.nested.property('event.headers.traceparent');
   expect(res.data).to.have.nested.property('podName');
 
-  // Extract traceId from response
-  const traceId = res.data.event.headers['x-b3-traceid'];
+  const traceId = await getTraceId(res.data);
 
   // Define expected trace data
   const correctTraceProcessSequence = [
@@ -315,8 +334,9 @@ async function checkInClusterEventTracing(targetNamespace) {
     `lastorder-${res.data.podName.split('-')[1]}.${targetNamespace}`,
   ];
 
-  // wait sometime for jaeger to complete tracing data
-  await sleep(10_000);
+  // wait sometime for jaeger to complete tracing data.
+  // Arrival of traces might be delayed by otel-collectors batch timeout.
+  await sleep(20_000);
   await checkTrace(traceId, correctTraceProcessSequence);
 }
 
@@ -646,8 +666,8 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
   if (testSubscriptionV1Alpha2) {
     debug('creating v1alpha2 subscription CR');
     const orderCompletedV1Alpha2Sub = eventingSubscriptionV1Alpha2(
-        'order.completed.v1alpha2',
-        'fi-tests',
+        eventTypeOrderCompleted,
+        eventSourceInApp,
         `http://lastorder.${targetNamespace}.svc.cluster.local`,
         'order-completed',
         targetNamespace,
@@ -746,22 +766,34 @@ async function checkInClusterEventDelivery(targetNamespace, testSubscriptionV1Al
   await checkInClusterLegacyEvent(targetNamespace, testSubscriptionV1Alpha2);
 }
 
+async function generateTraceParentHeader() {
+  const version = Buffer.alloc(1).toString('hex');
+  const traceId = crypto.randomBytes(16).toString('hex');
+  const id = crypto.randomBytes(8).toString('hex');
+  const flags = '01';
+  const traceParentHeader = `${version}-${traceId}-${id}-${flags}`;
+  return traceParentHeader;
+}
+
 // send event using function query parameter send=true
-async function sendInClusterEventWithRetry(mockHost, eventId, encoding, eventType='', retriesLeft = 10) {
+async function sendInClusterEventWithRetry(mockHost, eventId, encoding, eventType='',
+    eventSource='', retriesLeft = 10) {
   const eventData = {id: eventId};
   if (eventType) {
     eventData.save = true;
     eventData.type = eventType;
+    eventData.source = eventSource;
   }
 
   await retryPromise(async () => {
+    const traceParentHeader = await generateTraceParentHeader();
     const response = await axios.post(`https://${mockHost}`, eventData, {
       params: {
         send: true,
         encoding: encoding,
       },
       headers: {
-        'X-B3-Sampled': 1,
+        'traceparent': traceParentHeader,
       },
     });
 
@@ -781,15 +813,18 @@ async function sendInClusterEventWithRetry(mockHost, eventId, encoding, eventTyp
 }
 
 // send legacy event using function query parameter send=true
-async function sendInClusterLegacyEventWithRetry(mockHost, eventData, retriesLeft = 10) {
+async function sendInClusterLegacyEventWithRetry(mockHost, eventData, eventType, eventSource, retriesLeft = 10) {
+  if (eventType) {
+    eventData.save = true;
+    eventData.type = eventType;
+    eventData.source = eventSource;
+  }
+
   await retryPromise(async () => {
     const response = await axios.post(`https://${mockHost}`, eventData, {
       params: {
         send: true,
         isLegacyEvent: true,
-      },
-      headers: {
-        'X-B3-Sampled': 1,
       },
     });
 
@@ -863,8 +898,7 @@ async function ensureInClusterLegacyEventReceivedWithRetry(mockHost, eventId, ev
 
     if (eventType) {
       debug(`checking if received event type is: ${eventType}`);
-      expect(response.data).to.have.nested.property(
-          'event.type', eventType, 'The same event type expected in the result');
+      expect(response.data).to.have.nested.property('event.ce-type').that.contains(eventType);
     } else {
       expect(response.data).to.have.nested.property('event.ce-type').that.contains('order.received');
     }
@@ -887,14 +921,15 @@ async function getVirtualServiceHost(targetNamespace, funcName) {
 
 async function checkInClusterEventDeliveryHelper(targetNamespace, encoding, testSubscriptionV1Alpha2=false) {
   const eventId = getRandomEventId(encoding);
-  const eventType = testSubscriptionV1Alpha2? 'order.completed.v1alpha2': '';
+  const eventType = testSubscriptionV1Alpha2? eventTypeOrderCompleted: '';
+  const eventSource = testSubscriptionV1Alpha2? eventSourceInApp: '';
   const mockHost = await getVirtualServiceHost(targetNamespace, 'lastorder');
 
   if (isDebugEnabled()) {
     await printStatusOfInClusterEventingInfrastructure(targetNamespace, encoding, 'lastorder');
   }
 
-  await sendInClusterEventWithRetry(mockHost, eventId, encoding, eventType);
+  await sendInClusterEventWithRetry(mockHost, eventId, encoding, eventType, eventSource);
   return ensureInClusterEventReceivedWithRetry(mockHost, eventId, eventType);
 }
 
@@ -907,13 +942,10 @@ async function checkInClusterLegacyEvent(targetNamespace, testSubscriptionV1Alph
   }
 
   const eventData = {'id': eventId, 'legacyOrder': '987'};
-  const eventType = testSubscriptionV1Alpha2? 'order.completed.v1alpha2': '';
-  if (testSubscriptionV1Alpha2) {
-    eventData.save = true;
-    eventData.type = eventType;
-  }
+  const eventType = testSubscriptionV1Alpha2? eventTypeOrderCompleted.replace('.v1', ''): '';
+  const eventSource = testSubscriptionV1Alpha2? eventSourceInApp: '';
 
-  await sendInClusterLegacyEventWithRetry(mockHost, eventData);
+  await sendInClusterLegacyEventWithRetry(mockHost, eventData, eventType, eventSource);
   return ensureInClusterLegacyEventReceivedWithRetry(mockHost, eventId, eventType);
 }
 
@@ -943,4 +975,5 @@ module.exports = {
   getVirtualServiceHost,
   sendInClusterEventWithRetry,
   ensureInClusterEventReceivedWithRetry,
+  prepareFunction,
 };

@@ -5,6 +5,7 @@ import (
 
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2"
+	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
 	"github.com/onsi/gomega"
 	gomegatypes "github.com/onsi/gomega/types"
 )
@@ -26,13 +27,15 @@ func BeNatsSubWithMaxPending(expectedMaxAckPending int) gomegatypes.GomegaMatche
 }
 
 func BeJetStreamSubscriptionWithSubject(source, subject string,
-	typeMatching eventingv1alpha2.TypeMatching) gomegatypes.GomegaMatcher {
+	typeMatching eventingv1alpha2.TypeMatching, natsConfig backendnats.Config) gomegatypes.GomegaMatcher {
 	return gomega.WithTransform(func(subscriber jetstreamv2.Subscriber) (bool, error) {
 		info, err := subscriber.ConsumerInfo()
 		if err != nil {
 			return false, err
 		}
-		js := jetstreamv2.JetStream{}
+		js := jetstreamv2.JetStream{
+			Config: natsConfig,
+		}
 		result := info.Config.FilterSubject == js.GetJetStreamSubject(source, subject, typeMatching)
 		if !result {
 			return false, fmt.Errorf(

@@ -41,15 +41,19 @@ meshConfig:
   accessLogFile: /dev/stdout
   accessLogEncoding: JSON
   trustDomain: cluster.local
+  defaultProviders:
+    tracing: []
   defaultConfig:
     holdApplicationUntilProxyStarts: true
-    tracing:
-      sampling: 1
-      zipkin:
-        address: "zipkin.kyma-system:9411"
   enablePrometheusMerge: false
   enableTracing: "{{ .Values.global.tracing.enabled }}"
   extensionProviders:
+    - name: kyma-traces
+      opencensus:
+        service: "telemetry-trace-collector-internal.kyma-system.svc.cluster.local"
+        port: 55678
+        context:
+          - W3C_TRACE_CONTEXT
     - name: envoy
       envoyFileAccessLog:
         path: "/dev/stdout"
@@ -152,17 +156,17 @@ global:
     # these definitions aren't used by the chart, but they are required by external tool for list generation
     istio_proxyv2:
       name: "proxyv2"
-      version: "1.15.3-distroless"
+      version: "1.16.1-distroless"
       directory: "external/istio"
       containerRegistryPath: "eu.gcr.io/kyma-project"
     istio_pilot:
       name: "pilot"
-      version: "1.15.3-distroless"
+      version: "1.16.1-distroless"
       directory: "external/istio"
       containerRegistryPath: "eu.gcr.io/kyma-project"
     istio_install-cni:
       name: "install-cni"
-      version: "1.15.3-distroless"
+      version: "1.16.1-distroless"
       directory: "external/istio"
       containerRegistryPath: "eu.gcr.io/kyma-project"
   tracing:

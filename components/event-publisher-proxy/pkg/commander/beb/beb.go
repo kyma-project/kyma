@@ -2,6 +2,10 @@ package beb
 
 import (
 	"context"
+
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/builder"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 	"k8s.io/client-go/tools/cache"
 
 	"github.com/kelseyhightower/envconfig"
@@ -24,7 +28,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/oauth"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/receiver"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender/beb"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender/eventmesh"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/signals"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/subscribed"
 )
@@ -37,7 +41,7 @@ const (
 // Commander implements the Commander interface.
 type Commander struct {
 	cancel           context.CancelFunc
-	envCfg           *env.BEBConfig
+	envCfg           *env.EventMeshConfig
 	logger           *logger.Logger
 	metricsCollector *metrics.Collector
 	opts             *options.Options
@@ -48,7 +52,7 @@ func NewCommander(opts *options.Options, metricsCollector *metrics.Collector, lo
 	return &Commander{
 		metricsCollector: metricsCollector,
 		logger:           logger,
-		envCfg:           new(env.BEBConfig),
+		envCfg:           new(env.EventMeshConfig),
 		opts:             opts,
 	}
 }
@@ -77,7 +81,7 @@ func (c *Commander) Start() error {
 	defer client.CloseIdleConnections()
 
 	// configure message sender
-	messageSender := beb.NewSender(c.envCfg.EmsPublishURL, client)
+	messageSender := eventmesh.NewSender(c.envCfg.EmsPublishURL, client)
 
 	// cluster config
 	k8sConfig := config.GetConfigOrDie()
@@ -88,7 +92,7 @@ func (c *Commander) Start() error {
 
 	// configure legacyTransformer
 	legacyTransformer := legacy.NewTransformer(
-		c.envCfg.BEBNamespace,
+		c.envCfg.EventMeshNamespace,
 		c.envCfg.EventTypePrefix,
 		applicationLister,
 	)
@@ -104,7 +108,7 @@ func (c *Commander) Start() error {
 	subscribedProcessor := &subscribed.Processor{
 		SubscriptionLister: &subLister,
 		Prefix:             c.envCfg.EventTypePrefix,
-		Namespace:          c.envCfg.BEBNamespace,
+		Namespace:          c.envCfg.EventMeshNamespace,
 		Logger:             c.logger,
 	}
 	// Sync informer cache or die
@@ -113,11 +117,18 @@ func (c *Commander) Start() error {
 	c.namedLogger().Info("Informers were successfully synced")
 
 	// configure event type cleaner
-	eventTypeCleaner := eventtype.NewCleaner(c.envCfg.EventTypePrefix, applicationLister, c.logger)
+	eventTypeCleanerV1 := eventtype.NewCleaner(c.envCfg.EventTypePrefix, applicationLister, c.logger)
+
+	// configure event type cleaner for subscription CRD v1alpha2
+	eventTypeCleaner := cleaner.NewEventMeshCleaner(c.logger)
+
+	// configure cloud event builder for subscription CRD v1alpha2
+	ceBuilder := builder.NewEventMeshBuilder(c.envCfg.EventTypePrefix, c.envCfg.EventMeshNamespace, eventTypeCleaner,
+		applicationLister, c.logger)
 
 	// start handler which blocks until it receives a shutdown signal
 	if err := handler.NewHandler(messageReceiver, messageSender, health.NewChecker(), c.envCfg.RequestTimeout, legacyTransformer, c.opts,
-		subscribedProcessor, c.logger, c.metricsCollector, eventTypeCleaner).Start(ctx); err != nil {
+		subscribedProcessor, c.logger, c.metricsCollector, eventTypeCleanerV1, ceBuilder, c.envCfg.EventTypePrefix, env.EventMeshBackend).Start(ctx); err != nil {
 		return xerrors.Errorf("failed to start handler for %s : %v", bebCommanderName, err)
 	}
 	c.namedLogger().Info("Event Publisher was shut down")

@@ -110,8 +110,9 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 		return err
 	}
 
-	if r.config.ManageFluentBit && pipeline.DeletionTimestamp.IsZero() {
-		if err = r.installOrUpgradeFluentBit(ctx, r.config.DaemonSet); err != nil {
+	if r.config.ManageFluentBit {
+		name := r.config.DaemonSet
+		if err = r.reconcileFluentBit(ctx, name, pipeline); err != nil {
 			return err
 		}
 	}
@@ -136,22 +137,34 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 	return err
 }
 
-func (r *Reconciler) installOrUpgradeFluentBit(ctx context.Context, name types.NamespacedName) error {
-	daemonSet := resources.MakeDaemonSet(name)
-	if err := utils.CreateOrUpdateDaemonSet(ctx, r, daemonSet); err != nil {
-		return fmt.Errorf("failed to create fluent bit daemonset: %w", err)
+func (r *Reconciler) reconcileFluentBit(ctx context.Context, name types.NamespacedName, pipeline *telemetryv1alpha1.LogPipeline) error {
+	if isNotMarkedForDeletion(pipeline) {
+		ds := resources.MakeDaemonSet(name)
+		if err := utils.CreateOrUpdateDaemonSet(ctx, r, ds); err != nil {
+			return fmt.Errorf("failed to reconcile fluent bit daemonset: %w", err)
+		}
+		service := resources.MakeService(name)
+		if err := utils.CreateOrUpdateService(ctx, r, service); err != nil {
+			return fmt.Errorf("failed to reconcile fluent bit service: %w", err)
+		}
+		cm := resources.MakeConfigMap(name)
+		if err := utils.CreateOrUpdateConfigMap(ctx, r, cm); err != nil {
+			return fmt.Errorf("failed to reconcile fluent bit configmap: %w", err)
+		}
+		luaCm := resources.MakeLuaConfigMap(name)
+		if err := utils.CreateOrUpdateConfigMap(ctx, r, luaCm); err != nil {
+			return fmt.Errorf("failed to reconcile fluent bit lua configmap: %w", err)
+		}
+		return nil
 	}
-	service := resources.MakeService(name)
-	if err := utils.CreateOrUpdateService(ctx, r, service); err != nil {
-		return fmt.Errorf("failed to create fluent bit service: %w", err)
+
+	var allPipelines telemetryv1alpha1.LogPipelineList
+	if err := r.List(ctx, &allPipelines); err != nil {
+		return fmt.Errorf("failed to determine condition for deleting fluent bit: %w", err)
 	}
-	configMap := resources.MakeConfigMap(name)
-	if err := utils.CreateOrUpdateConfigMap(ctx, r, configMap); err != nil {
-		return fmt.Errorf("failed to create fluent bit configmap: %w", err)
-	}
-	luaConfigMap := resources.MakeLuaConfigMap(name)
-	if err := utils.CreateOrUpdateConfigMap(ctx, r, luaConfigMap); err != nil {
-		return fmt.Errorf("failed to create fluent bit lua configmap: %w", err)
+
+	if len(allPipelines.Items) == 1 && allPipelines.Items[0].Name == pipeline.Name {
+		return utils.DeleteFluentBit(ctx, r, name)
 	}
 
 	return nil
@@ -182,7 +195,7 @@ func count(pipelines *telemetryv1alpha1.LogPipelineList, keep keepFunc) int {
 }
 
 func isNotMarkedForDeletion(pipeline *telemetryv1alpha1.LogPipeline) bool {
-	return pipeline.DeletionTimestamp.IsZero()
+	return pipeline.ObjectMeta.DeletionTimestamp.IsZero()
 }
 
 func isUnsupported(pipeline *telemetryv1alpha1.LogPipeline) bool {

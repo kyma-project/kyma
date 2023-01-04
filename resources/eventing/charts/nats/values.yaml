@@ -192,6 +192,18 @@ nats:
       annotations:
       # key: "value"
 
+# Authentication setup
+auth:
+  enabled: true
+  resolver:
+    ##############################
+    #                            #
+    # Memory resolver settings   #
+    #                            #
+    ##############################
+    type: memory
+
+
 nameOverride: ""
 
 # Toggle whether to use setup a Pod Security Context
@@ -211,9 +223,14 @@ affinity:
           labelSelector:
             matchLabels:
               nats_cluster: eventing-nats
+          topologyKey: topology.kubernetes.io/zone
+        weight: 70
+      - podAffinityTerm:
+          labelSelector:
+            matchLabels:
+              nats_cluster: eventing-nats
           topologyKey: kubernetes.io/hostname
-        weight: 100
-
+        weight: 35
 # Annotations to add to the NATS pods
 # ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
 podAnnotations: {

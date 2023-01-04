@@ -2,6 +2,7 @@ package kubernetes
 
 import (
 	"context"
+	"fmt"
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	apiequality "k8s.io/apimachinery/pkg/api/equality"
@@ -64,10 +65,8 @@ func CreateOrUpdateDeployment(ctx context.Context, c client.Client, desired *app
 		return c.Create(ctx, desired)
 	}
 
-	mutated := existing.DeepCopy()
-	mergeMetadata(&desired.ObjectMeta, mutated.ObjectMeta)
-	// Propagate annotations set by kubectl on spec.template.annotations. e.g. performing a rolling restart.
-	mergeKubectlAnnotations(&existing.Spec.Template.ObjectMeta, desired.Spec.Template.ObjectMeta)
+	mergeMetadata(&desired.ObjectMeta, existing.ObjectMeta)
+	mergeKubectlAnnotations(&desired.Spec.Template.ObjectMeta, existing.Spec.Template.ObjectMeta)
 	return c.Update(ctx, desired)
 }
 
@@ -82,9 +81,9 @@ func CreateOrUpdateDaemonSet(ctx context.Context, c client.Client, desired *apps
 		return c.Create(ctx, desired)
 	}
 
-	mutated := existing.DeepCopy()
-	mergeMetadata(&desired.ObjectMeta, mutated.ObjectMeta)
-	mergeKubectlAnnotations(&existing.Spec.Template.ObjectMeta, desired.Spec.Template.ObjectMeta)
+	mergeMetadata(&desired.ObjectMeta, existing.ObjectMeta)
+	mergeKubectlAnnotations(&desired.Spec.Template.ObjectMeta, existing.Spec.Template.ObjectMeta)
+	mergeChecksumAnnotations(&desired.Spec.Template.ObjectMeta, existing.Spec.Template.ObjectMeta)
 	return c.Update(ctx, desired)
 }
 
@@ -110,6 +109,51 @@ func CreateOrUpdateService(ctx context.Context, c client.Client, desired *corev1
 	return c.Update(ctx, desired)
 }
 
+func DeleteFluentBit(ctx context.Context, c client.Client, name types.NamespacedName) error {
+	var ds appsv1.DaemonSet
+	err := c.Get(ctx, name, &ds)
+	if err == nil {
+		if err = c.Delete(ctx, &ds); err != nil && !errors.IsNotFound(err) {
+			return err
+		}
+	} else if !errors.IsNotFound(err) {
+		return err
+	}
+
+	var service corev1.Service
+	err = c.Get(ctx, name, &service)
+	if err == nil {
+		if err = c.Delete(ctx, &service); err != nil && !errors.IsNotFound(err) {
+			return err
+		}
+	} else if !errors.IsNotFound(err) {
+		return err
+	}
+
+	var cm corev1.ConfigMap
+	err = c.Get(ctx, name, &cm)
+	if err == nil {
+		if err = c.Delete(ctx, &cm); err != nil && !errors.IsNotFound(err) {
+			return err
+		}
+	} else if !errors.IsNotFound(err) {
+		return err
+	}
+
+	var luaCm corev1.ConfigMap
+	name.Name = fmt.Sprintf("%s-luascripts", name.Name)
+	err = c.Get(ctx, name, &luaCm)
+	if err == nil {
+		if err = c.Delete(ctx, &luaCm); err != nil && !errors.IsNotFound(err) {
+			return err
+		}
+	} else if !errors.IsNotFound(err) {
+		return err
+	}
+
+	return nil
+}
+
 func mergeMetadata(new *metav1.ObjectMeta, old metav1.ObjectMeta) {
 	new.ResourceVersion = old.ResourceVersion
 
@@ -121,26 +165,30 @@ func mergeMaps(new map[string]string, old map[string]string) map[string]string {
 	return mergeMapsByPrefix(new, old, "")
 }
 
-func mergeKubectlAnnotations(from *metav1.ObjectMeta, to metav1.ObjectMeta) {
-	from.SetAnnotations(mergeMapsByPrefix(from.Annotations, to.Annotations, "kubectl.kubernetes.io/"))
+func mergeKubectlAnnotations(new *metav1.ObjectMeta, old metav1.ObjectMeta) {
+	new.SetAnnotations(mergeMapsByPrefix(new.Annotations, old.Annotations, "kubectl.kubernetes.io/"))
 }
 
-func mergeMapsByPrefix(from map[string]string, to map[string]string, prefix string) map[string]string {
-	if to == nil {
-		to = make(map[string]string)
+func mergeChecksumAnnotations(new *metav1.ObjectMeta, old metav1.ObjectMeta) {
+	new.SetAnnotations(mergeMapsByPrefix(new.Annotations, old.Annotations, "checksum/"))
+}
+
+func mergeMapsByPrefix(new map[string]string, old map[string]string, prefix string) map[string]string {
+	if old == nil {
+		old = make(map[string]string)
 	}
 
-	if from == nil {
-		from = make(map[string]string)
+	if new == nil {
+		new = make(map[string]string)
 	}
 
-	for k, v := range from {
+	for k, v := range new {
 		if strings.HasPrefix(k, prefix) {
-			to[k] = v
+			old[k] = v
 		}
 	}
 
-	return to
+	return old
 }
 
 func CreateOrUpdateServiceMonitor(ctx context.Context, c client.Client, desired *monitoringv1.ServiceMonitor) error {
