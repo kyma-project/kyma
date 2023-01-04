@@ -31,7 +31,6 @@ type Client interface {
 	AssignRuntimeToFormation(runtimeId, formationName string) error
 	GetConnectionToken(runtimeID string) (string, string, error)
 	UpdateApplication(id, newDesc string) (string, error)
-	AddBundle(appID string) (string, error)
 }
 
 type directorClient struct {
@@ -152,7 +151,10 @@ func (cc *directorClient) RegisterApplication(appName, displayName string) (stri
 	if err != nil {
 		return "", err
 	}
-	return result.Result.ID, err
+
+	id := result.Result.ID
+	_, err = cc.AddBundle(id)
+	return id, err
 }
 
 func (cc *directorClient) AddBundle(appID string) (string, error) {
