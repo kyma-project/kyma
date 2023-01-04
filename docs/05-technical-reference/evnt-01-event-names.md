@@ -26,4 +26,4 @@ To conform to Cloud Event specifications, sometimes Eventing must modify the eve
 
 If the Event's name contains any prohibited characters as per [NATS JetStream specifications](https://docs.nats.io/running-a-nats-service/nats_admin/jetstream_admin/naming), the underlying Eventing services use a clean name with allowed characters only; for example, `system>prod*` becomes `systemprod`.
 
-This could lead to a naming collision. For example, both `system>prod` and `systemprod` become `systemprod`. While this won't result in an error, it can cause Eventing to not work as expected. Take a look into this [troubleshooting guide](../04-operation-guides/troubleshooting/eventing/evnt-03-type-collision.md) for more information.
+This can lead to a naming collision. For example, both `system>prod` and `systemprod` become `systemprod`. While this doesn't result in an error, it can cause Eventing to not work as expected. Take a look into this [troubleshooting guide](../04-operation-guides/troubleshooting/eventing/evnt-03-type-collision.md) for more information.
