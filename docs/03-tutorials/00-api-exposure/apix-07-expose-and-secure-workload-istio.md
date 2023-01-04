@@ -6,7 +6,7 @@ This tutorial shows how to expose and secure a workload using Istio built-in sec
 
 ## Prerequisites
 
-* [A sample HttpBin service deployment and a sample Function](./apix-01-create-workload.md)
+* [Sample HttpBin service and sample Function](./apix-01-create-workload.md) deployed
 * [JSON Web Token (JWT)](./apix-06-get-jwt.md).
 * If you want to use your custom domain instead of a Kyma domain, follow [this tutorial](./apix-02-setup-custom-domain-for-workload.md) to learn how to set it up.
 
@@ -142,13 +142,13 @@ To secure the Httpbin workload or the Function using a JWT, create a Request Aut
    EOF
    ```
 
-2. Access the workload you secured. The request returns the `403 Forbidden` error.
+2. Access the workload you secured. You will get the `403 Forbidden` error.
 
    ```shell
    curl -ik -X GET https://httpbin.$DOMAIN_TO_EXPOSE_WORKLOADS/status/200
    ```
 
-3. Now, access the secured workload using the correct JWT. The request return the `200 OK` response.
+3. Now, access the secured workload using the correct JWT. You will get the `200 OK` response.
 
    ```shell
    curl -ik -X GET https://httpbin.$DOMAIN_TO_EXPOSE_WORKLOADS/status/200 --header "Authorization:Bearer $ACCESS_TOKEN"

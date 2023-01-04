@@ -8,7 +8,7 @@ This tutorial shows how to set up a custom domain and prepare a certificate requ
 
 ## Prerequisites
 
-* [A sample HttpBin service deployment and a sample Function](./apix-01-create-workload.md)
+* [Sample HttpBin service and sample Function](./apix-01-create-workload.md) deployed
 * If you use a cluster not managed by Gardener, install the [External DNS Management](https://github.com/gardener/external-dns-management#quick-start) and [Certificate Management](https://github.com/gardener/cert-management) components manually in a dedicated Namespace.
 
 ## Steps

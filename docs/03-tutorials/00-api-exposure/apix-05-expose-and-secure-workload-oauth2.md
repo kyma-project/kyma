@@ -6,7 +6,7 @@ This tutorial shows how to expose and secure services or Functions using API Gat
 
 ## Prerequisites
 
-* [A sample HttpBin service deployment and a sample Function](./apix-01-create-workload.md)
+* [Sample HttpBin service and sample Function](./apix-01-create-workload.md) deployed
 * If you want to use your custom domain instead of a Kyma domain, follow [this tutorial](./apix-02-setup-custom-domain-for-workload.md) to set it up.
 
 ## Register an OAuth2 client and get tokens

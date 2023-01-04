@@ -8,8 +8,10 @@ You can use it as a follow-up to the [Set up a custom domain for a workload](./a
 
 ## Prerequisites
 
-This tutorial is based on a sample HttpBin service deployment and a sample Function. To deploy or create them, follow the [Create a workload](./apix-01-create-workload.md) tutorial.
-To obtain JWT take a look at [Get a JWT](./apix-06-get-jwt.md) tutorial.
+* [Sample HttpBin service and sample Function](./apix-01-create-workload.md) deployed
+* [JSON Web Token (JWT)](./apix-06-get-jwt.md).
+* If you want to use your custom domain instead of a Kyma domain, follow [this tutorial](./apix-02-setup-custom-domain-for-workload.md) to learn how to set it up.
+  
 
 ## Expose, secure, and access your workload
 
