@@ -15,7 +15,7 @@ This tutorial explains how to create a sample HttpBin service deployment and a s
    ```
 2. Deploy an instance of the HttpBin service or a sample Function.
    
-<div tabs>
+<div tabs name="deploy" group="create-workload">
 
   <details>
   <summary>
@@ -46,7 +46,7 @@ To create a Function in your Namespace using the [sample code](./assets/function
 
 2. Verify if an instance of the HttpBin service or a sample Function was successfully created.
    
-<div tabs>
+<div tabs name="verify" group="create-workload">
 
   <details>
   <summary>
@@ -66,7 +66,7 @@ To create a Function in your Namespace using the [sample code](./assets/function
   ```
 
   </details>
-  
+
   <details>
   <summary>
   Function
