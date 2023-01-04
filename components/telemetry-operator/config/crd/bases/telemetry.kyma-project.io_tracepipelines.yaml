@@ -119,6 +119,9 @@ spec:
                       protocol:
                         default: grpc
                         description: Defines the OTLP protocol (http or grpc).
+                        enum:
+                        - grpc
+                        - http
                         minLength: 1
                         type: string
                     required:
