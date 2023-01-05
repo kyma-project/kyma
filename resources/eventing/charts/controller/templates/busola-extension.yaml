@@ -114,6 +114,12 @@ data:
       source: 'status.ready = false ? "error" : "ready"'
       widget: Badge
       description: status.conditions.message
+  presets: |-
+    - name: Default Type Matching
+      default: true
+      value: 
+        spec:
+          typeMatching: standard
   translations: |-
     en:
       inputInfo.sink: Sink structure, 'http://{SERVICE}.{NAMESPACE}.svc.cluster.local'
