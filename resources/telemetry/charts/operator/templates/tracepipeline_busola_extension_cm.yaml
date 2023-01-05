@@ -38,79 +38,9 @@ data:
         [
           {
             "widget": "Panel",
-            "name": "Applications",
-            "children":
-              [
-                {
-                  "widget": "Panel",
-                  "name": "Namespaces",
-                  "children":
-                    [
-                      {
-                        "name": "Include",
-                        "widget": "JoinedArray",
-                        "source": "spec.input.application.namespaces.include",
-                        "separator": ", "
-                      },
-                      {
-                        "name": "Exclude",
-                        "widget": "JoinedArray",
-                        "source": "spec.input.application.namespaces.exclude",
-                        "separator": ", "
-                      },
-                      {
-                        "name": "System Namespaces",
-                        "source": "spec.input.application.namespaces.system"
-                      }
-                  ]
-                },
-                {
-                  "widget": "Panel",
-                  "name": "Containers",
-                  "children":
-                    [
-                      {
-                        "name": "Include",
-                        "widget": "JoinedArray",
-                        "source": "spec.input.application.containers.include",
-                        "separator": ", "
-                      },
-                      {
-                        "name": "Exclude",
-                        "widget": "JoinedArray",
-                        "source": "spec.input.application.containers.exclude",
-                        "separator": ", "
-                      }
-                    ]
-                },
-                {
-                  "widget": "Panel",
-                  "name": "Other Settings",
-                  "children": [
-                    {
-                      "name": "Keep Annotations",
-                      "source": "spec.input.application.keepAnnotations"
-                    },
-                    {
-                      "name": "Drop Labels",
-                      "source": "spec.input.application.dropLabels"
-                    }
-                  ]
-                }
-              ]
-          },
-          {
-            "widget": "Panel",
             "name": "Output",
             "children":
               [
-                {
-                  "name": "Custom",
-                  "widget": "CodeViewer",
-                  "language": "'plaintext'",
-                  "source": "spec.output.custom",
-                  "visibility": "$exists(spec.output.custom)",
-                },
                 {
                   "name": "OTLP",
                   "widget": "Panel",
@@ -173,86 +103,6 @@ data:
   form: |
     [
       {
-        "path": "spec.input",
-        "widget": "FormGroup",
-        "defaultExpanded": true,
-        "simple": true,
-        "children":
-          [
-            {
-              "name": "Include Namespaces",
-              "widget": "SimpleList",
-              "path": "application.namespaces.include",
-              "defaultExpanded": true,
-              "inputInfo": "Include container logs from selected namespaces",
-              "children":
-                [
-                  {
-                    "path": "[]",
-                    "widget": "Resource",
-                    "resource":
-                      { "scope": "cluster", "kind": "Namespace", "version": "v1" },
-                  },
-                ]
-            },
-            {
-              "name": "Exclude Namespaces",
-              "widget": "SimpleList",
-              "path": "application.namespaces.exclude",
-              "children":
-                [
-                  {
-                    "path": "[]",
-                    "widget": "Resource",
-                    "resource":
-                      { "scope": "cluster", "kind": "Namespace", "version": "v1" }
-                  }
-                ]
-            },
-            {
-              "name": "Include System Namespaces",
-              "path": "application.namespaces.system"
-            },
-            {
-              "name": "Include Containers",
-              "widget": "SimpleList",
-              "path": "application.containers.include"
-            },
-            {
-              "name": "Exclude Containers",
-              "widget": "SimpleList",
-              "path": "application.containers.exclude"
-            },
-            {
-              "name": "Keep Annotations",
-              "path": "application.keepAnnotations"
-            },
-            {
-              "name": "Drop Labels",
-              "path": "application.dropLabels"
-            }
-          ]
-      },
-      {
-        "name": "Filters",
-        "widget": "SimpleList",
-        "path": "spec.filters",
-        "children":
-          [
-            {
-              "widget": "FormGroup",
-              "path": "[]",
-              "children":
-                [
-                  {
-                    "widget": "CodeEditor",
-                    "path": "custom"
-                  }
-                ]
-            }
-          ]
-      },
-      {
         "path": "spec.output",
         "widget": "FormGroup",
         "path": "spec.output",
@@ -261,23 +111,16 @@ data:
         "children":
           [
             {
-              "name": "Custom",
-              "path": "custom",
-              "widget": "CodeEditor",
-              "advanced": true,
-              "inputInfo": "Note: If you use a custom output, you put the TracePipeline in unsupported mode (https://kyma-project.io/docs/kyma/latest/01-overview/main-areas/observability/obsv-04-telemetry-in-kyma/#unsupported-mode)"
-            },
-            {
-              "name": "HTTP",
-              "path": "http",
+              "name": "OTLP",
+              "path": "otlp",
               "widget": "FormGroup",
               "defaultExpanded": true,
               "simple": true,
               "children":
                 [
                   {
-                    "name": "Host",
-                    "path": "host",
+                    "name": "Endpoint",
+                    "path": "endpoint",
                     "widget": "FormGroup",
                     "children":
                       [
@@ -303,8 +146,20 @@ data:
                       ]
                   },
                   {
+                    "name": "Protocol",
+                    "path": "protocol",
+                    "widget": "FormGroup",
+                    "children": 
+                      [
+                        {
+                          "name": "Value",
+                          "widget": "Text"
+                        }
+                      ]
+                  },
+                  {
                     "name": "User",
-                    "path": "user",
+                    "path": "authentication.basic.user",
                     "widget": "FormGroup",
                     "children":
                       [
@@ -331,7 +186,7 @@ data:
                   },
                   {
                     "name": "Password",
-                    "path": "password",
+                    "path": "authentication.basic.password",
                     "widget": "FormGroup",
                     "children":
                       [
