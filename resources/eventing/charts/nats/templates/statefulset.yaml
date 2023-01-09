@@ -58,6 +58,12 @@ spec:
 {{- end }}
       # Common volumes for the containers.
       volumes:
+      ### the secret that holds account data ###
+      {{- if and .Values.auth.enabled .Values.auth.resolver }}
+      - name: accounts-volume
+        secret:
+          secretName: {{ include "nats.fullname" . }}-secret
+      {{- end }}
       - name: config-volume
         configMap:
           name: {{ include "nats.fullname" . }}-config
@@ -98,11 +104,15 @@ spec:
           - "/var/run/nats/nats.pid"
           - "-config"
           - "/etc/nats-config/nats.conf"
+          - "-config"
+          - "/etc/nats-config/accounts/resolver.conf"
         volumeMounts:
           - name: config-volume
             mountPath: /etc/nats-config
           - name: pid
             mountPath: /var/run/nats
+          - name: accounts-volume
+            mountPath: /etc/nats-config/accounts
 
       ##############################
       #                            #
@@ -192,6 +202,13 @@ spec:
         {{- end }}
         {{- end }}
         volumeMounts:
+          ### the secret that holds account data ###
+          {{- if and .Values.auth.enabled .Values.auth.resolver }}
+          {{- if eq .Values.auth.resolver.type "memory" }}
+          - name: accounts-volume
+            mountPath: /etc/nats-config/accounts
+          {{- end }}
+          {{- end }}
           - name: config-volume
             mountPath: /etc/nats-config
           - name: pid
@@ -285,7 +302,7 @@ spec:
           {{- toYaml .Values.nats.jetstream.fileStorage.accessModes | nindent 10 }}
         resources:
           requests:
-            storage: {{ .Values.nats.jetstream.fileStorage.size }}
+            storage: {{ .Values.global.jetstream.fileStorage.size }}
         {{- if .Values.nats.jetstream.fileStorage.storageClassName }}
         storageClassName: {{ .Values.nats.jetstream.fileStorage.storageClassName | quote }}
         {{- end }}

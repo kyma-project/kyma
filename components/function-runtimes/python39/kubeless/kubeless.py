@@ -120,7 +120,12 @@ def preload():
 if __name__ == '__main__':
     import logging
     import multiprocessing as mp
+    from multiprocessing import util
     import requestlogger
+
+    # TODO: this is workaround for: CVE-2022-42919
+    # More details: https://github.com/python/cpython/issues/97514
+    util.abstract_sockets_supported = False
 
     mp_context = os.getenv('MP_CONTEXT', 'forkserver')
 

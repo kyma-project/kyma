@@ -5,7 +5,6 @@ import (
 	"strings"
 	"testing"
 
-	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -14,7 +13,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
-	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
 )
 
@@ -24,9 +22,7 @@ func TestSinkValidator(t *testing.T) {
 	fakeClient := fake.NewClientBuilder().WithScheme(scheme.Scheme).Build()
 	ctx := context.Background()
 	recorder := &record.FakeRecorder{}
-	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
-	require.NoError(t, err)
-	sinkValidator := NewValidator(ctx, fakeClient, recorder, defaultLogger)
+	sinkValidator := NewValidator(ctx, fakeClient, recorder)
 
 	testCases := []struct {
 		name                  string
@@ -35,34 +31,9 @@ func TestSinkValidator(t *testing.T) {
 		wantErrString         string
 	}{
 		{
-			name:                  "With invalid scheme",
-			givenSubscriptionSink: "invalid Sink",
-			wantErrString:         MissingSchemeErrMsg,
-		},
-		{
 			name:                  "With invalid URL",
 			givenSubscriptionSink: "http://invalid Sink",
 			wantErrString:         "failed to parse subscription sink URL",
-		},
-		{
-			name:                  "With invalid suffix",
-			givenSubscriptionSink: "https://svc2.test.local",
-			wantErrString:         "failed to validate subscription sink URL. It does not contain suffix",
-		},
-		{
-			name:                  "With invalid suffix and port",
-			givenSubscriptionSink: "https://svc2.test.local:8080",
-			wantErrString:         "failed to validate subscription sink URL. It does not contain suffix",
-		},
-		{
-			name:                  "With invalid number of subdomains",
-			givenSubscriptionSink: "https://svc.cluster.local:8080", // right suffix but 3 subdomains
-			wantErrString:         "failed to validate subscription sink URL. It should contain 5 sub-domains",
-		},
-		{
-			name:                  "With different namespaces in subscription and sink name",
-			givenSubscriptionSink: "https://eventing-nats.kyma-system.svc.cluster.local:8080", // sub is in test ns
-			wantErrString:         "namespace of subscription: test and the namespace of subscriber: kyma-system are different",
 		},
 		{
 			name:                  "With no existing svc in the cluster",
@@ -76,12 +47,7 @@ func TestSinkValidator(t *testing.T) {
 			wantErrString:         "failed to validate subscription sink URL. It is not a valid cluster local svc",
 		},
 		{
-			name:                  "With correct format but missing scheme",
-			givenSubscriptionSink: "eventing-nats.test.svc.cluster.local:8080",
-			wantErrString:         MissingSchemeErrMsg,
-		},
-		{
-			name:                  "With no existing svc in the cluster, service has the wrong name",
+			name:                  "With a valid sink",
 			givenSubscriptionSink: "https://eventing-nats.test.svc.cluster.local:8080",
 			givenSvcNameToCreate:  "eventing-nats",
 			wantErrString:         "",

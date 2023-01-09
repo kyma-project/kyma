@@ -29,7 +29,8 @@ type ConvertingWebhook struct {
 }
 
 const (
-	v1alpha1GitRepoNameAnnotation = "serverless.kyma-project.io/v1alpha1GitRepoName"
+	v1alpha1GitRepoNameAnnotation  = "serverless.kyma-project.io/v1alpha1GitRepoName"
+	v1alpha1SecretMountsAnnotation = "serverless.kyma-project.io/v1alpha1SecretMounts"
 )
 
 var _ http.Handler = &ConvertingWebhook{}
@@ -188,10 +189,26 @@ func (w *ConvertingWebhook) convertSpecV1Alpha1ToV1Alpha2(in *serverlessv1alpha1
 	convertResourcesV1Alpha1ToV1Alpha2(in, out)
 	convertTemplateLabelsV1alpha1ToV1Alpha2(in, out)
 
+	if err := convertSecretMountsV1Alpha1ToV1Aplha2(in, out); err != nil {
+		return fmt.Errorf("failed to convert secretMounts from v1alpha1 to v1alpha2: %v", err)
+	}
+
 	if err := w.convertSourceV1Alpha1ToV1Alpha2(in, out); err != nil {
 		return fmt.Errorf("failed to convert source from v1alpha1 to v1alpha2: %v", err)
 	}
 	return nil
+}
+
+func convertSecretMountsV1Alpha1ToV1Aplha2(in *serverlessv1alpha1.Function, out *serverlessv1alpha2.Function) error {
+	if in.ObjectMeta.Annotations == nil {
+		return nil
+	}
+	jsonSecretMounts, ok := in.ObjectMeta.Annotations[v1alpha1SecretMountsAnnotation]
+	if !ok {
+		return nil
+	}
+	err := json.Unmarshal([]byte(jsonSecretMounts), &out.Spec.SecretMounts)
+	return err
 }
 
 func convertTemplateLabelsV1alpha1ToV1Alpha2(in *serverlessv1alpha1.Function, out *serverlessv1alpha2.Function) {
@@ -341,10 +358,29 @@ func (w *ConvertingWebhook) convertSpecV1Alpha2ToV1Alpha1(in *serverlessv1alpha2
 
 	convertResourcesV1Alpha2ToV1Alpha1(in, out)
 
+	if err := convertSecretMountsV1Alpha2ToV1Alpha1(in, out); err != nil {
+		return fmt.Errorf("failed to convert secretMounts from v1alpha2 to v1alpha1: %v", err)
+	}
+
 	if in.Spec.Template != nil && in.Spec.Template.Labels != nil {
 		out.Spec.Labels = in.Spec.Template.Labels
 	}
 	return w.convertSourceV1Alpha2ToV1Alpha1(in, out)
+}
+
+func convertSecretMountsV1Alpha2ToV1Alpha1(in *serverlessv1alpha2.Function, out *serverlessv1alpha1.Function) error {
+	if len(in.Spec.SecretMounts) == 0 {
+		return nil
+	}
+	jsonSecretMounts, err := json.Marshal(in.Spec.SecretMounts)
+	if err != nil {
+		return err
+	}
+	if out.ObjectMeta.Annotations == nil {
+		out.ObjectMeta.Annotations = map[string]string{}
+	}
+	out.ObjectMeta.Annotations[v1alpha1SecretMountsAnnotation] = string(jsonSecretMounts)
+	return nil
 }
 
 func convertResourcesV1Alpha2ToV1Alpha1(in *serverlessv1alpha2.Function, out *serverlessv1alpha1.Function) {

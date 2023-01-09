@@ -133,7 +133,7 @@ func (c *SubscriptionManager) Start(_ env.DefaultSubscriptionConfig, params subs
 			eventMeshHandler,
 			oauth2credential,
 			nameMapper,
-			sinkv2.NewValidator(ctx, client, recorder, c.logger),
+			sinkv2.NewValidator(ctx, client, recorder),
 		)
 		c.eventMeshBackend = eventMeshReconciler.Backend
 		if err := eventMeshReconciler.SetupUnmanaged(c.mgr); err != nil {

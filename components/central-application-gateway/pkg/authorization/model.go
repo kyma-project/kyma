@@ -47,6 +47,7 @@ type CertificateGen struct {
 type OAuthWithCert struct {
 	URL               string
 	ClientID          string
+	ClientSecret      string
 	Certificate       []byte
 	PrivateKey        []byte
 	RequestParameters *RequestParameters

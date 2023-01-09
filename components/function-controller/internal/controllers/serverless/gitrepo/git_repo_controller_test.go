@@ -24,7 +24,7 @@ func TestGitRepoReconciler_updateV1Alpha2FunctionWithRepo(t *testing.T) {
 			Name: "test", Namespace: "test",
 		},
 		Spec: serverlessv1alpha2.FunctionSpec{
-			Runtime: serverlessv1alpha2.NodeJs12,
+			Runtime: serverlessv1alpha2.NodeJs16,
 			Source: serverlessv1alpha2.Source{
 				GitRepository: &serverlessv1alpha2.GitRepositorySource{
 					URL: "https://github.com/kyma-project/old-repo.git",
@@ -62,7 +62,7 @@ func TestGitRepoReconciler_updateV1Alpha2FunctionWithRepo(t *testing.T) {
 			v1alpha1Function: &serverlessv1alpha1.Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: serverlessv1alpha1.FunctionSpec{
-					Runtime: serverlessv1alpha1.Nodejs12,
+					Runtime: serverlessv1alpha1.Nodejs16,
 					Type:    serverlessv1alpha1.SourceTypeGit,
 					Source:  testRepoName,
 					Repository: serverlessv1alpha1.Repository{
@@ -86,7 +86,7 @@ func TestGitRepoReconciler_updateV1Alpha2FunctionWithRepo(t *testing.T) {
 					Name: "test", Namespace: "test",
 				},
 				Spec: serverlessv1alpha2.FunctionSpec{
-					Runtime: serverlessv1alpha2.NodeJs12,
+					Runtime: serverlessv1alpha2.NodeJs16,
 					Source: serverlessv1alpha2.Source{
 						GitRepository: &serverlessv1alpha2.GitRepositorySource{
 							URL: "https://github.com/kyma-project/new-repo.git",
@@ -109,7 +109,7 @@ func TestGitRepoReconciler_updateV1Alpha2FunctionWithRepo(t *testing.T) {
 			v1alpha1Function: &serverlessv1alpha1.Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: serverlessv1alpha1.FunctionSpec{
-					Runtime: serverlessv1alpha1.Nodejs12,
+					Runtime: serverlessv1alpha1.Nodejs16,
 					Type:    serverlessv1alpha1.SourceTypeGit,
 					Source:  testRepoName,
 					Repository: serverlessv1alpha1.Repository{
@@ -129,7 +129,7 @@ func TestGitRepoReconciler_updateV1Alpha2FunctionWithRepo(t *testing.T) {
 					Name: "test", Namespace: "test",
 				},
 				Spec: serverlessv1alpha2.FunctionSpec{
-					Runtime: serverlessv1alpha2.NodeJs12,
+					Runtime: serverlessv1alpha2.NodeJs16,
 					Source: serverlessv1alpha2.Source{
 						GitRepository: &serverlessv1alpha2.GitRepositorySource{
 							URL: "https://github.com/kyma-project/new-repo.git",
@@ -148,7 +148,7 @@ func TestGitRepoReconciler_updateV1Alpha2FunctionWithRepo(t *testing.T) {
 			v1alpha1Function: &serverlessv1alpha1.Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: serverlessv1alpha1.FunctionSpec{
-					Runtime: serverlessv1alpha1.Nodejs12,
+					Runtime: serverlessv1alpha1.Nodejs16,
 					Type:    serverlessv1alpha1.SourceTypeGit,
 					Source:  testRepoName,
 					Repository: serverlessv1alpha1.Repository{
@@ -168,7 +168,7 @@ func TestGitRepoReconciler_updateV1Alpha2FunctionWithRepo(t *testing.T) {
 					Name: "test", Namespace: "test",
 				},
 				Spec: serverlessv1alpha2.FunctionSpec{
-					Runtime: serverlessv1alpha2.NodeJs12,
+					Runtime: serverlessv1alpha2.NodeJs16,
 					Source: serverlessv1alpha2.Source{
 						GitRepository: &serverlessv1alpha2.GitRepositorySource{
 							URL: "https://github.com/kyma-project/new-repo.git",
@@ -187,7 +187,7 @@ func TestGitRepoReconciler_updateV1Alpha2FunctionWithRepo(t *testing.T) {
 			v1alpha1Function: &serverlessv1alpha1.Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: serverlessv1alpha1.FunctionSpec{
-					Runtime: serverlessv1alpha1.Nodejs12,
+					Runtime: serverlessv1alpha1.Nodejs16,
 					Type:    serverlessv1alpha1.SourceTypeGit,
 					Source:  testRepoName,
 					Repository: serverlessv1alpha1.Repository{
@@ -211,7 +211,7 @@ func TestGitRepoReconciler_updateV1Alpha2FunctionWithRepo(t *testing.T) {
 					Name: "test", Namespace: "test",
 				},
 				Spec: serverlessv1alpha2.FunctionSpec{
-					Runtime: serverlessv1alpha2.NodeJs12,
+					Runtime: serverlessv1alpha2.NodeJs16,
 					Source: serverlessv1alpha2.Source{
 						GitRepository: &serverlessv1alpha2.GitRepositorySource{
 							URL: "https://github.com/kyma-project/new-repo.git",

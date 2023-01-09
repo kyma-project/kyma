@@ -47,7 +47,7 @@ async function getOrProvisionSKR(options, skipProvisioning, provisioningTimeout)
 
 async function provisionSKRInstance(options, timeout) {
   try {
-    const btpOperatorCreds = BTPOperatorCreds.fromEnv();
+    const btpOperatorCreds = BTPOperatorCreds.dummy();
 
     console.log(`\nInstanceID ${options.instanceID}`,
         `Runtime ${options.runtimeName}`, `Application ${options.appName}`, `Suffix ${options.suffix}`);
@@ -68,7 +68,8 @@ async function provisionSKRInstance(options, timeout) {
   } finally {
     debug('Fetching runtime status...');
     const runtimeStatus = await kcp.getRuntimeStatusOperations(options.instanceID);
-    console.log(`\nRuntime status after provisioning: ${runtimeStatus}`);
+    const events = await kcp.getRuntimeEvents(options.instanceID);
+    console.log(`\nRuntime status after provisioning: ${runtimeStatus}\nEvents:\n${events}`);
     await kcp.reconcileInformationLog(runtimeStatus);
   }
 }

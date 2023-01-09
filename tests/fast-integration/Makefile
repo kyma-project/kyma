@@ -23,6 +23,11 @@ ci-skr:
 	npm install
 	npm run test-skr
 
+.PHONY: ci-skr-own-cluster
+ci-skr-own-cluster:
+	npm install
+	npm run test-skr-own-cluster
+
 .PHONY: ci-skr-provision
 ci-skr-provision:
 	npm install

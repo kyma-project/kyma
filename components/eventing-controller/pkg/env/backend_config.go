@@ -14,6 +14,11 @@ type BackendConfig struct {
 	BackendCRNamespace string `envconfig:"BACKEND_CR_NAMESPACE" default:"kyma-system"`
 	BackendCRName      string `envconfig:"BACKEND_CR_NAME" default:"eventing-backend"`
 
+	WebhookSecretName   string `envconfig:"WEBHOOK_SECRET_NAME" default:"eventing-webhook-server-cert"`
+	MutatingWebhookName string `envconfig:"MUTATING_WEBHOOK_NAME" default:"subscription-mutating-webhook-configuration"`
+	//nolint:lll
+	ValidatingWebhookName string `envconfig:"VALIDATING_WEBHOOK_NAME" default:"subscription-validating-webhook-configuration"`
+
 	DefaultSubscriptionConfig DefaultSubscriptionConfig
 }
 
@@ -31,8 +36,9 @@ type PublisherConfig struct {
 	LimitsMemory      string `envconfig:"PUBLISHER_LIMITS_MEMORY" default:"128Mi"`
 	PriorityClassName string `envconfig:"PUBLISHER_PRIORITY_CLASS_NAME" default:""`
 	// publisher takes the controller values
-	AppLogFormat string `envconfig:"APP_LOG_FORMAT" default:"json"`
-	AppLogLevel  string `envconfig:"APP_LOG_LEVEL" default:"info"`
+	AppLogFormat        string `envconfig:"APP_LOG_FORMAT" default:"json"`
+	AppLogLevel         string `envconfig:"APP_LOG_LEVEL" default:"info"`
+	EnableNewCRDVersion bool   `envconfig:"ENABLE_NEW_CRD_VERSION" default:"false"`
 }
 
 type DefaultSubscriptionConfig struct {

@@ -3,8 +3,20 @@ package compass_runtime_agent
 import (
 	"crypto/tls"
 	"fmt"
+	"net/http"
+	"os"
+	"testing"
+	"time"
+
 	cli "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	ccclientset "github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/client/clientset/versioned"
+	"github.com/pkg/errors"
+	"github.com/stretchr/testify/suite"
+	"github.com/vrischmann/envconfig"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
+
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/applications"
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/director"
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/graphql"
@@ -12,16 +24,6 @@ import (
 	compassruntimeagentinittypes "github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/init/types"
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/oauth"
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/random"
-	"github.com/pkg/errors"
-	"github.com/stretchr/testify/suite"
-	"github.com/vrischmann/envconfig"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
-	"net/http"
-	"os"
-	"testing"
-	"time"
 )
 
 type CompassRuntimeAgentSuite struct {
@@ -81,14 +83,16 @@ func (cs *CompassRuntimeAgentSuite) initKubernetesApis() {
 }
 
 func (cs *CompassRuntimeAgentSuite) initComparators() {
-	secretComparator, err := applications.NewSecretComparator(cs.Require(), cs.coreClientSet, cs.testConfig.OAuthCredentialsNamespace, cs.testConfig.IntegrationNamespace)
+	secretComparator, err := applications.NewSecretComparator(cs.coreClientSet, cs.testConfig.OAuthCredentialsNamespace, cs.testConfig.SystemNamespace)
 	cs.Require().NoError(err)
 
 	applicationGetter := cs.applicationsClientSet.ApplicationconnectorV1alpha1().Applications()
-	cs.appComparator, err = applications.NewComparator(cs.Assertions, secretComparator, applicationGetter, "kyma-integration", "kyma-integration")
+	cs.appComparator, err = applications.NewComparator(secretComparator, applicationGetter, "kyma-system", "kyma-system")
 }
 
 func (cs *CompassRuntimeAgentSuite) configureRuntimeAgent() {
+	cs.T().Helper()
+
 	var err error
 	runtimeName := "cratest"
 	cs.formationName = "cratest" + random.RandomString(5)

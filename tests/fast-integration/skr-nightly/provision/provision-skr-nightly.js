@@ -81,7 +81,8 @@ describe('SKR nightly', function() {
           provisioningTimeout);
 
       const runtimeStatus = await kcp.getRuntimeStatusOperations(options.instanceID);
-      console.log(`\nRuntime status after provisioning: ${runtimeStatus}`);
+      const events = await kcp.getRuntimeEvents(options.instanceID);
+      console.log(`\nRuntime status after provisioning: ${runtimeStatus}\nEvents:\n${events}`);
 
       shoot = skr.shoot;
       initializeK8sClient({kubeconfig: shoot.kubeconfig});

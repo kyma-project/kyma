@@ -25,7 +25,7 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: LogParser is the Schema for the logparsers API
+        description: LogParser is the Schema for the logparsers API.
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -40,15 +40,15 @@ spec:
           metadata:
             type: object
           spec:
-            description: LogParserSpec defines the desired state of LogParser
+            description: Defines the desired state of LogParser.
             properties:
               parser:
-                description: Parser allows defining user defined parsers to be applied
-                  to the logs
+                description: Configures a user defined Fluent Bit parser to be applied
+                  to the logs.
                 type: string
             type: object
           status:
-            description: LogParserStatus defines the observed state of LogParser
+            description: Shows the observed state of the LogParser.
             properties:
               conditions:
                 items:

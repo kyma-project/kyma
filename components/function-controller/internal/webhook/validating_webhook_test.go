@@ -120,7 +120,7 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 					AdmissionRequest: v1.AdmissionRequest{
 						Kind: metav1.GroupVersionKind{Kind: serverlessv1alpha2.FunctionKind, Version: serverlessv1alpha2.FunctionVersion},
 						Object: runtime.RawExtension{
-							Raw: []byte(ValidV1Alpha2Function(t)),
+							Raw: []byte(Marshall(t, ValidV1Alpha2Function())),
 						},
 					},
 				},

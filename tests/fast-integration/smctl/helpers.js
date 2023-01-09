@@ -198,6 +198,15 @@ class BTPOperatorCreds {
     );
   }
 
+  static dummy() {
+    return new BTPOperatorCreds(
+        'dummy_client_id',
+        'dummy_client_secret',
+        'dummy_url',
+        'dummy_token_url',
+    );
+  }
+
   constructor(clientid, clientsecret, smURL, url) {
     this.clientid = clientid;
     this.clientsecret = clientsecret;

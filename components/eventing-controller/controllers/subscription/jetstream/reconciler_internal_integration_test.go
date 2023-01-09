@@ -8,8 +8,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2"
+
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
-	natsserver "github.com/nats-io/nats-server/v2/server"
 	"github.com/onsi/gomega"
 	gomegatypes "github.com/onsi/gomega/types"
 	v1 "k8s.io/api/core/v1"
@@ -25,7 +26,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/fake"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
+	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
 	backendjetstream "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats/jetstream"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
@@ -39,12 +40,6 @@ const (
 	emptyEventSource         = ""
 )
 
-type jetStreamTestEnsemble struct {
-	reconciler       *subscriptionjetstream.Reconciler
-	jetStreamBackend *backendjetstream.JetStream
-	*utils.TestEnsemble
-}
-
 // TestUnavailableNATSServer tests if a subscription is reconciled properly when the NATS backend is unavailable.
 func TestUnavailableNATSServer(t *testing.T) {
 	ctx := context.Background()
@@ -53,7 +48,7 @@ func TestUnavailableNATSServer(t *testing.T) {
 	natsPort, err := reconcilertesting.GetFreePort()
 	g.Expect(err).ToNot(gomega.HaveOccurred())
 	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g, natsPort)
-	defer utils.StopTestEnv(ens.TestEnsemble)
+	defer utils.CleanupResources(t, ens)
 
 	sub := utils.CreateSubscription(ens.TestEnsemble,
 		reconcilertesting.WithFilter(emptyEventSource, utils.NewUncleanEventType("")),
@@ -71,13 +66,13 @@ func TestUnavailableNATSServer(t *testing.T) {
 		reconcilertesting.HaveSubscriptionNotReady(),
 	)
 
-	ens.NatsServer = startJetStream(natsPort)
+	ens.NatsServer = reconcilertesting.StartDefaultJetStreamServer(natsPort)
 	utils.TestSubscriptionOnK8s(ens.TestEnsemble, sub, reconcilertesting.HaveSubscriptionReady())
 
 	t.Cleanup(ens.Cancel)
 }
 
-// TestCreateSubscription tests if subscriptions get created properly by the reconciler.
+// TestCreateSubscription tests if subscriptions get created properly by the Reconciler.
 func TestCreateSubscription(t *testing.T) {
 	ctx := context.Background()
 	g := gomega.NewGomegaWithT(t)
@@ -86,7 +81,7 @@ func TestCreateSubscription(t *testing.T) {
 	g.Expect(err).ToNot(gomega.HaveOccurred())
 
 	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g, natsPort)
-	defer utils.StopTestEnv(ens.TestEnsemble)
+	defer utils.CleanupResources(t, ens)
 
 	var testCases = []struct {
 		name                  string
@@ -111,7 +106,8 @@ func TestCreateSubscription(t *testing.T) {
 					reconcilertesting.OrderCreatedEventType: {
 						natstesting.BeExistingSubscription(),
 						natstesting.BeValidSubscription(),
-						natstesting.BeJetStreamSubscriptionWithSubject(reconcilertesting.OrderCreatedEventType),
+						natstesting.BeJetStreamSubscriptionWithSubject(reconcilertesting.OrderCreatedEventType,
+							ens.JetStreamBackend.Config),
 					},
 				},
 			},
@@ -276,7 +272,8 @@ func TestCreateSubscription(t *testing.T) {
 					reconcilertesting.OrderCreatedEventType: {
 						natstesting.BeExistingSubscription(),
 						natstesting.BeValidSubscription(),
-						natstesting.BeJetStreamSubscriptionWithSubject(reconcilertesting.OrderCreatedEventType),
+						natstesting.BeJetStreamSubscriptionWithSubject(reconcilertesting.OrderCreatedEventType,
+							ens.JetStreamBackend.Config),
 					},
 				},
 			},
@@ -323,7 +320,7 @@ func TestChangeSubscription(t *testing.T) {
 	natsPort, err := reconcilertesting.GetFreePort()
 	g.Expect(err).ToNot(gomega.HaveOccurred())
 	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g, natsPort)
-	defer utils.StopTestEnv(ens.TestEnsemble)
+	defer utils.CleanupResources(t, ens)
 
 	var testCases = []struct {
 		name                  string
@@ -356,7 +353,8 @@ func TestChangeSubscription(t *testing.T) {
 					utils.NewCleanEventType("0"): {
 						natstesting.BeExistingSubscription(),
 						natstesting.BeValidSubscription(),
-						natstesting.BeJetStreamSubscriptionWithSubject(utils.NewCleanEventType("0")),
+						natstesting.BeJetStreamSubscriptionWithSubject(utils.NewCleanEventType("0"),
+							ens.JetStreamBackend.Config),
 					},
 				},
 			},
@@ -518,7 +516,8 @@ func TestChangeSubscription(t *testing.T) {
 					utils.NewCleanEventType(""): {
 						natstesting.BeExistingSubscription(),
 						natstesting.BeValidSubscription(),
-						natstesting.BeJetStreamSubscriptionWithSubject(utils.NewCleanEventType("")),
+						natstesting.BeJetStreamSubscriptionWithSubject(utils.NewCleanEventType(""),
+							ens.JetStreamBackend.Config),
 					},
 				},
 			},
@@ -648,7 +647,7 @@ func TestEmptyEventTypePrefix(t *testing.T) {
 	natsPort, err := reconcilertesting.GetFreePort()
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefixEmpty, g, natsPort)
-	defer utils.StopTestEnv(ens.TestEnsemble)
+	defer utils.CleanupResources(t, ens)
 
 	// when
 	sub := utils.CreateSubscription(ens.TestEnsemble,
@@ -667,7 +666,8 @@ func TestEmptyEventTypePrefix(t *testing.T) {
 	expectedNatsSubscription := []gomegatypes.GomegaMatcher{
 		natstesting.BeExistingSubscription(),
 		natstesting.BeValidSubscription(),
-		natstesting.BeJetStreamSubscriptionWithSubject(reconcilertesting.OrderCreatedEventTypePrefixEmpty),
+		natstesting.BeJetStreamSubscriptionWithSubject(reconcilertesting.OrderCreatedEventTypePrefixEmpty,
+			ens.JetStreamBackend.Config),
 	}
 
 	testSubscriptionOnNATS(ens, sub, reconcilertesting.OrderCreatedEventTypePrefixEmpty, expectedNatsSubscription...)
@@ -678,35 +678,46 @@ func TestEmptyEventTypePrefix(t *testing.T) {
 	t.Cleanup(ens.Cancel)
 }
 
-func testSubscriptionOnNATS(ens *jetStreamTestEnsemble, subscription *eventingv1alpha1.Subscription, subject string, expectations ...gomegatypes.GomegaMatcher) {
+func testSubscriptionOnNATS(ens *utils.JetStreamTestEnsemble,
+	subscription *eventingv1alpha1.Subscription, subject string, expectations ...gomegatypes.GomegaMatcher) {
 	description := "Failed to match nats subscriptions"
-	getSubscriptionFromJetStream(ens, subscription, ens.jetStreamBackend.GetJetStreamSubject(subject)).Should(gomega.And(expectations...), description)
+	getSubscriptionFromJetStream(ens,
+		subscription,
+		ens.JetStreamBackend.GetJetStreamSubject(subject)).
+		Should(gomega.And(expectations...), description)
 }
 
 // testSubscriptionDeletion deletes the subscription and ensures it is not found anymore on the apiserver.
-func testSubscriptionDeletion(ens *jetStreamTestEnsemble, subscription *eventingv1alpha1.Subscription) {
+func testSubscriptionDeletion(ens *utils.JetStreamTestEnsemble, subscription *eventingv1alpha1.Subscription) {
 	g := ens.G
 	g.Eventually(func() error {
 		return ens.K8sClient.Delete(ens.Ctx, subscription)
 	}, utils.SmallTimeout, utils.SmallPollingInterval).ShouldNot(gomega.HaveOccurred())
-	utils.IsSubscriptionDeletedOnK8s(ens.TestEnsemble, subscription).Should(reconcilertesting.HaveNotFoundSubscription(), "Failed to delete subscription")
+	utils.IsSubscriptionDeletedOnK8s(ens.TestEnsemble, subscription).
+		Should(reconcilertesting.HaveNotFoundSubscription(), "Failed to delete subscription")
 }
 
 // ensureNATSSubscriptionIsDeleted ensures that the NATS subscription is not found anymore.
 // This ensures the controller did delete it correctly then the Subscription was deleted.
-func ensureNATSSubscriptionIsDeleted(ens *jetStreamTestEnsemble, subscription *eventingv1alpha1.Subscription, subject string) {
-	getSubscriptionFromJetStream(ens, subscription, subject).ShouldNot(natstesting.BeExistingSubscription(), "Failed to delete NATS subscription")
+func ensureNATSSubscriptionIsDeleted(ens *utils.JetStreamTestEnsemble,
+	subscription *eventingv1alpha1.Subscription, subject string) {
+	getSubscriptionFromJetStream(ens, subscription, subject).
+		ShouldNot(natstesting.BeExistingSubscription(), "Failed to delete NATS subscription")
 }
 
-func setupTestEnsemble(ctx context.Context, eventTypePrefix string, g *gomega.GomegaWithT, natsPort int) *jetStreamTestEnsemble {
+func setupTestEnsemble(ctx context.Context, eventTypePrefix string,
+	g *gomega.GomegaWithT, natsPort int) *utils.JetStreamTestEnsemble {
 	useExistingCluster := useExistingCluster
+	natsServer := reconcilertesting.StartDefaultJetStreamServer(natsPort)
+	log.Printf("NATS server with JetStream started %v", natsServer.ClientURL())
+
 	ens := &utils.TestEnsemble{
 		Ctx: ctx,
 		G:   g,
 		DefaultSubscriptionConfig: env.DefaultSubscriptionConfig{
 			MaxInFlightMessages: 1,
 		},
-		NatsServer: startJetStream(natsPort),
+		NatsServer: natsServer,
 		TestEnv: &envtest.Environment{
 			CRDDirectoryPaths: []string{
 				filepath.Join("../../../", "config", "crd", "bases"),
@@ -717,8 +728,9 @@ func setupTestEnsemble(ctx context.Context, eventTypePrefix string, g *gomega.Go
 		},
 	}
 
-	jsTestEnsemble := &jetStreamTestEnsemble{
+	jsTestEnsemble := &utils.JetStreamTestEnsemble{
 		TestEnsemble: ens,
+		JSStreamName: fmt.Sprintf("%s%d", reconcilertesting.JSStreamName, natsPort),
 	}
 
 	utils.StartTestEnv(ens)
@@ -728,16 +740,7 @@ func setupTestEnsemble(ctx context.Context, eventTypePrefix string, g *gomega.Go
 	return jsTestEnsemble
 }
 
-func startJetStream(port int) *natsserver.Server {
-	natsServer := reconcilertesting.RunNatsServerOnPort(
-		reconcilertesting.WithPort(port),
-		reconcilertesting.WithJetStreamEnabled(),
-	)
-	log.Printf("NATS server with JetStream started %v", natsServer.ClientURL())
-	return natsServer
-}
-
-func startReconciler(eventTypePrefix string, ens *jetStreamTestEnsemble) *jetStreamTestEnsemble {
+func startReconciler(eventTypePrefix string, ens *utils.JetStreamTestEnsemble) *utils.JetStreamTestEnsemble {
 	g := ens.G
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -758,16 +761,18 @@ func startReconciler(eventTypePrefix string, ens *jetStreamTestEnsemble) *jetStr
 	})
 	g.Expect(err).ToNot(gomega.HaveOccurred())
 
-	envConf := env.NatsConfig{
+	envConf := backendnats.Config{
 		URL:                     ens.NatsServer.ClientURL(),
 		MaxReconnects:           10,
 		ReconnectWait:           time.Second,
 		EventTypePrefix:         eventTypePrefix,
-		JSStreamName:            reconcilertesting.JSStreamName,
-		JSStreamStorageType:     "memory",
-		JSStreamMaxBytes:        -1,
+		JSStreamName:            ens.JSStreamName,
+		JSSubjectPrefix:         ens.JSStreamName,
+		JSStreamStorageType:     jetstreamv2.StorageTypeMemory,
+		JSStreamMaxBytes:        "-1",
 		JSStreamMaxMessages:     -1,
 		JSStreamRetentionPolicy: "interest",
+		JSStreamDiscardPolicy:   "new",
 	}
 
 	// prepare application-lister
@@ -779,14 +784,14 @@ func startReconciler(eventTypePrefix string, ens *jetStreamTestEnsemble) *jetStr
 
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	g.Expect(err).To(gomega.BeNil())
-
-	jetStreamHandler := backendjetstream.NewJetStream(envConf, metricsCollector, defaultLogger)
 	cleaner := eventtype.NewCleaner(envConf.EventTypePrefix, applicationLister, defaultLogger)
+
+	jetStreamHandler := backendjetstream.NewJetStream(envConf, metricsCollector, cleaner, defaultLogger)
 
 	k8sClient := k8sManager.GetClient()
 	recorder := k8sManager.GetEventRecorderFor("eventing-controller-nats")
 
-	ens.reconciler = subscriptionjetstream.NewReconciler(
+	ens.Reconciler = subscriptionjetstream.NewReconciler(
 		ctx,
 		k8sClient,
 		jetStreamHandler,
@@ -797,10 +802,14 @@ func startReconciler(eventTypePrefix string, ens *jetStreamTestEnsemble) *jetStr
 		sink.NewValidator(ctx, k8sClient, recorder, defaultLogger),
 	)
 
-	err = ens.reconciler.SetupUnmanaged(k8sManager)
+	err = ens.Reconciler.SetupUnmanaged(k8sManager)
 	g.Expect(err).ToNot(gomega.HaveOccurred())
 
-	ens.jetStreamBackend = ens.reconciler.Backend.(*backendjetstream.JetStream)
+	var ok bool
+	ens.JetStreamBackend, ok = ens.Reconciler.Backend.(*backendjetstream.JetStream)
+	if !ok {
+		panic("cannot convert the Backend interface to JetStream")
+	}
 
 	go func() {
 		err = k8sManager.Start(ctx)
@@ -814,13 +823,15 @@ func startReconciler(eventTypePrefix string, ens *jetStreamTestEnsemble) *jetStr
 }
 
 // getSubscriptionFromJetStream returns a NATS subscription for a given subscription and subject.
-// NOTE: We need to give the controller enough time to react on the changes. Otherwise, the returned NATS subscription could have the wrong state.
+// NOTE: We need to give the controller enough time to react on the changes.
+// Otherwise, the returned NATS subscription could have the wrong state.
 // For this reason Eventually is used here.
-func getSubscriptionFromJetStream(ens *jetStreamTestEnsemble, subscription *eventingv1alpha1.Subscription, subject string) gomega.AsyncAssertion {
+func getSubscriptionFromJetStream(ens *utils.JetStreamTestEnsemble,
+	subscription *eventingv1alpha1.Subscription, subject string) gomega.AsyncAssertion {
 	g := ens.G
 
-	return g.Eventually(func() nats.Subscriber {
-		subscriptions := ens.jetStreamBackend.GetAllSubscriptions()
+	return g.Eventually(func() backendnats.Subscriber {
+		subscriptions := ens.JetStreamBackend.GetAllSubscriptions()
 		subscriptionSubject := backendjetstream.NewSubscriptionSubjectIdentifier(subscription, subject)
 		for key, sub := range subscriptions {
 			if key.ConsumerName() == subscriptionSubject.ConsumerName() {

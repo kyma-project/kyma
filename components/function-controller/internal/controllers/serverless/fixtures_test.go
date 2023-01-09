@@ -36,7 +36,7 @@ func newTestGitFunction(namespace, name string, auth *serverlessv1alpha2.Reposit
 					Auth: auth,
 				},
 			},
-			Runtime: serverlessv1alpha2.NodeJs12,
+			Runtime: serverlessv1alpha2.NodeJs16,
 			Env: []corev1.EnvVar{
 				{
 					Name:  "TEST_1",
@@ -61,6 +61,16 @@ func newTestGitFunction(namespace, name string, auth *serverlessv1alpha2.Reposit
 					testBindingLabel1: "foobar",
 					testBindingLabel2: testBindingLabelValue,
 					"foo":             "bar",
+				},
+			},
+			SecretMounts: []serverlessv1alpha2.SecretMount{
+				{
+					SecretName: "secret-name-1",
+					MountPath:  "/mount/path/1",
+				},
+				{
+					SecretName: "secret-name-2",
+					MountPath:  "/mount/path/2",
 				},
 			},
 		},
@@ -91,7 +101,7 @@ func newFixFunction(namespace, name string, minReplicas, maxReplicas int) *serve
 					Dependencies: "   ",
 				},
 			},
-			Runtime: serverlessv1alpha2.NodeJs12,
+			Runtime: serverlessv1alpha2.NodeJs16,
 			Env: []corev1.EnvVar{
 				{
 					Name:  "TEST_1",
@@ -116,6 +126,16 @@ func newFixFunction(namespace, name string, minReplicas, maxReplicas int) *serve
 					testBindingLabel1: "foobar",
 					testBindingLabel2: testBindingLabelValue,
 					"foo":             "bar",
+				},
+			},
+			SecretMounts: []serverlessv1alpha2.SecretMount{
+				{
+					SecretName: "secret-name-1",
+					MountPath:  "/mount/path/1",
+				},
+				{
+					SecretName: "secret-name-2",
+					MountPath:  "/mount/path/2",
 				},
 			},
 		},

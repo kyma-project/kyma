@@ -15,8 +15,8 @@ First, let's create a Deployment that provides the microservice definition and l
   Kyma Dashboard
   </summary>
 
-1. From the left navigation, go to **Deployments**.
-2. Click on **Create Deployment +**.
+1. From the left navigation, go to **Workloads > Deployments**.
+2. Click on **Create Deployment**.
 3. Provide the following parameters:
     - **Name**: `orders-service`
     - **Containers**: enter Docker image `eu.gcr.io/kyma-project/develop/orders-service:68a58069`  
@@ -93,7 +93,7 @@ The operation was successful if the returned number of **readyReplicas** is `1`.
 
 ### Create the Service
 
-Now that we have the Deployment, let's deploy the Kubernetes [Service](https://kubernetes.io/docs/concepts/services-networking/service/) to allow other Kubernetes resources to communicate with your microservice.
+Now that we have the Deployment, let's deploy the [Kubernetes Service](https://kubernetes.io/docs/concepts/services-networking/service/) to allow other Kubernetes resources to communicate with your microservice.
 
 <div tabs name="Create a Service" group="deploy-expose-microservice">
   <details open>
@@ -102,7 +102,7 @@ Now that we have the Deployment, let's deploy the Kubernetes [Service](https://k
   </summary>
 
 1. From the left navigation, go to **Discovery and Network > Services**.
-2. Click on **Create Service +**.
+2. Click on **Create Service**.
 3. In the **Create Service** view, paste the following values to your YAML file:  
 
    ```yaml
@@ -176,10 +176,12 @@ To expose our microservice, we must create an [APIRule](../05-technical-referenc
   Kyma Dashboard
   </summary>
 
-1. In your Services's view, click on **Create API Rule +**.
-2. Provide the **Name** (`orders-service`) and **Subdomain** (`orders-service`) and click **Create**.
+1. Go to **Discovery and Network** > **API Rules**, and click on **Create API Rule**.
+2. Provide the **Name** (`orders-service`)
+3. Choose `orders-service` from the **Service Name** dropdown.
+4. Choose your host from the **Host** dropdown and replace the asterix (*) with the name of your subdomain (`orders-service`).
+5. Click **Create**.
 
-> **NOTE:** Alternatively, from the left navigation go to **Discovery and Network** > **API Rules**, click on **Create API Rule +**, and continue with step 2, selecting the appropriate **Service** from the dropdown menu.
   </details>
   <details>
   <summary label="kubectl">
@@ -226,7 +228,7 @@ Now let's check that the microservice has been exposed successfully.
   Kyma Dashboard
   </summary>
 
-1. From your Services's view, get the APIRule's **Host**.
+1. From your Service's view, get the APIRule's **Host**.
 
    > **NOTE:** Alternatively, from the left navigation go to **API Rules** and get the **Host** URL from there.
 

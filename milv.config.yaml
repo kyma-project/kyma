@@ -56,3 +56,6 @@ files:
   - path: "./kyma/tests/components/application-connector/README.md"
     config:
       internal-links-to-ignore: [ "./resources/charts/gateway-test/templates/service-account.yml#L2" ]
+  - path: "./kyma/tests/components/application-connector/docs/compass-runtime-agent-tests.md"
+    config:
+      external-links-to-ignore: [ "https://compass-gateway-auth-oauth.{COMPASS_HOST}/director/graphql"]

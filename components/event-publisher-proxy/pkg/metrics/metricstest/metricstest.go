@@ -2,29 +2,67 @@
 package metricstest
 
 import (
+	"strings"
 	"testing"
+	"time"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/testutil"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics"
-	"github.com/prometheus/client_golang/prometheus/testutil"
 )
 
-// EnsureMetricErrors ensures metric errors exists
-func EnsureMetricErrors(t *testing.T, collector *metrics.Collector) {
-	ensureMetricCount(t, collector, metrics.ErrorsKey, 1)
+// EnsureMetricErrors ensures metric eventing_epp_backend_errors_total exists.
+func EnsureMetricErrors(t *testing.T, collector metrics.PublishingMetricsCollector, count int) {
+	ensureMetricCount(t, collector, metrics.BackendErrorsKey, count)
 }
 
-// EnsureMetricLatency ensures metric latency exists
-func EnsureMetricLatency(t *testing.T, collector *metrics.Collector) {
-	ensureMetricCount(t, collector, metrics.LatencyKey, 1)
+// EnsureMetricLatency ensures metric eventing_epp_backend_duration_seconds exists.
+func EnsureMetricLatency(t *testing.T, collector metrics.PublishingMetricsCollector, count int) {
+	ensureMetricCount(t, collector, metrics.BackendLatencyKey, count)
 }
 
-// EnsureMetricEventTypePublished ensures metric eventType exists
-func EnsureMetricEventTypePublished(t *testing.T, collector *metrics.Collector) {
-	ensureMetricCount(t, collector, metrics.EventTypePublishedMetricKey, 1)
+// EnsureMetricEventTypePublished ensures metric eventing_epp_event_type_published_total exists.
+func EnsureMetricEventTypePublished(t *testing.T, collector metrics.PublishingMetricsCollector, count int) {
+	ensureMetricCount(t, collector, metrics.EventTypePublishedMetricKey, count)
 }
 
-func ensureMetricCount(t *testing.T, collector *metrics.Collector, metric string, expectedCount int) {
+// EnsureMetricTotalRequests ensures metric eventing_epp_backend_requests_total exists.
+func EnsureMetricTotalRequests(t *testing.T, collector metrics.PublishingMetricsCollector, count int) {
+	ensureMetricCount(t, collector, metrics.BackendRequestsKey, count)
+}
+
+func ensureMetricCount(t *testing.T, collector metrics.PublishingMetricsCollector, metric string, expectedCount int) {
 	if count := testutil.CollectAndCount(collector, metric); count != expectedCount {
 		t.Fatalf("invalid count for metric:%s, want:%d, got:%d", metric, expectedCount, count)
 	}
+}
+
+// EnsureMetricMatchesTextExpositionFormat ensures that metrics collected by the given collector match the given metric output in TextExpositionFormat.
+// This is useful to compare metrics with their given labels.
+func EnsureMetricMatchesTextExpositionFormat(t *testing.T, collector metrics.PublishingMetricsCollector, tef string, metricNames ...string) {
+	if err := testutil.CollectAndCompare(collector, strings.NewReader(tef), metricNames...); err != nil {
+		t.Fatalf("%v", err)
+	}
+}
+
+type PublishingMetricsCollectorStub struct {
+}
+
+func (p PublishingMetricsCollectorStub) Describe(_ chan<- *prometheus.Desc) {
+}
+
+func (p PublishingMetricsCollectorStub) Collect(_ chan<- prometheus.Metric) {
+}
+
+func (p PublishingMetricsCollectorStub) RecordError() {
+}
+
+func (p PublishingMetricsCollectorStub) RecordLatency(_ time.Duration, _ int, _ string) {
+}
+
+func (p PublishingMetricsCollectorStub) RecordEventType(_, _ string, _ int) {
+}
+
+func (p PublishingMetricsCollectorStub) RecordRequests(_ int, _ string) {
 }

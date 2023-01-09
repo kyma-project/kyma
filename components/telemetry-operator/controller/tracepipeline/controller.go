@@ -18,14 +18,18 @@ package tracepipeline
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/resource"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/controller"
-	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
-	appsv1 "k8s.io/api/apps/v1"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configchecksum"
+	utils "github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -34,108 +38,175 @@ import (
 
 type Config struct {
 	CreateServiceMonitor bool
-	CollectorNamespace   string
-	ResourceName         string
-	CollectorImage       string
+	BaseName             string
+	Namespace            string
+
+	Deployment DeploymentConfig
+	Service    ServiceConfig
 }
 
-// Reconciler reconciles a TracePipeline object
+type DeploymentConfig struct {
+	Image             string
+	PriorityClassName string
+	CPULimit          resource.Quantity
+	MemoryLimit       resource.Quantity
+	CPURequest        resource.Quantity
+	MemoryRequest     resource.Quantity
+}
+
+type ServiceConfig struct {
+	OTLPServiceName string
+}
+
+//go:generate mockery --name DeploymentProber --filename deployment_prober.go
+type DeploymentProber interface {
+	IsReady(ctx context.Context, name types.NamespacedName) (bool, error)
+}
+
 type Reconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
 	config Config
+	Scheme *runtime.Scheme
+	prober DeploymentProber
 }
 
-func NewReconciler(
-	client client.Client,
-	config Config,
-	scheme *runtime.Scheme,
-) *Reconciler {
+func NewReconciler(client client.Client, config Config, prober DeploymentProber, scheme *runtime.Scheme) *Reconciler {
 	var r Reconciler
 	r.Client = client
 	r.config = config
 	r.Scheme = scheme
+	r.prober = prober
 	return &r
 }
 
-//+kubebuilder:rbac:groups=telemetry.kyma-project.io,resources=tracepipelines,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=telemetry.kyma-project.io,resources=tracepipelines/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=core,resources=services,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=monitoring.coreos.com,resources=servicemonitors,verbs=get;list;watch;create;update;patch;delete
-
-func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (reconcileResult ctrl.Result, reconcileErr error) {
 	logger := logf.FromContext(ctx)
 
-	logger.Info("Reconciliation triggered")
+	logger.V(1).Info("Reconciliation triggered")
 
 	var tracePipeline telemetryv1alpha1.TracePipeline
 	if err := r.Get(ctx, req.NamespacedName, &tracePipeline); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	err := r.installOrUpgradeOtelCollector(ctx, &tracePipeline)
-	return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, err
+	return ctrl.Result{}, r.doReconcile(ctx, &tracePipeline)
 }
 
-func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
-	newReconciler := ctrl.NewControllerManagedBy(mgr).
-		For(&telemetryv1alpha1.TracePipeline{}).
-		Owns(&corev1.ConfigMap{}).
-		Owns(&appsv1.Deployment{}).
-		Owns(&corev1.Service{})
+func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha1.TracePipeline) error {
+	var err error
+	lockAcquired := true
 
-	if r.config.CreateServiceMonitor {
-		newReconciler.Owns(&monitoringv1.ServiceMonitor{})
-	}
+	defer func() {
+		if statusErr := r.updateStatus(ctx, pipeline.Name, lockAcquired); statusErr != nil {
+			if err != nil {
+				err = fmt.Errorf("failed while updating status: %v: %v", statusErr, err)
+			} else {
+				err = fmt.Errorf("failed to update status: %v", statusErr)
+			}
+		}
+	}()
 
-	return newReconciler.Complete(r)
-}
-
-func (r *Reconciler) installOrUpgradeOtelCollector(ctx context.Context, tracing *telemetryv1alpha1.TracePipeline) error {
-	configMap := makeConfigMap(r.config, tracing.Spec.Output)
-	if err := controllerutil.SetControllerReference(tracing, configMap, r.Scheme); err != nil {
+	if err = r.tryAcquireLock(ctx, pipeline); err != nil {
+		lockAcquired = false
 		return err
 	}
-	if err := createOrUpdateConfigMap(ctx, r.Client, configMap); err != nil {
+
+	var secretData map[string][]byte
+	if secretData, err = fetchSecretData(ctx, r, pipeline.Spec.Output.Otlp); err != nil {
+		return err
+	}
+	secret := makeSecret(r.config, secretData)
+	if err = controllerutil.SetControllerReference(pipeline, secret, r.Scheme); err != nil {
+		return err
+	}
+	if err = utils.CreateOrUpdateSecret(ctx, r.Client, secret); err != nil {
+		return err
+	}
+
+	configMap := makeConfigMap(r.config, pipeline.Spec.Output)
+	if err = controllerutil.SetControllerReference(pipeline, configMap, r.Scheme); err != nil {
+		return err
+	}
+	if err = utils.CreateOrUpdateConfigMap(ctx, r.Client, configMap); err != nil {
 		return fmt.Errorf("failed to create otel collector configmap: %w", err)
 	}
 
-	deployment := makeDeployment(r.config)
-	if err := controllerutil.SetControllerReference(tracing, deployment, r.Scheme); err != nil {
+	configHash := configchecksum.Calculate([]corev1.ConfigMap{*configMap}, []corev1.Secret{*secret})
+	deployment := makeDeployment(r.config, configHash)
+	if err = controllerutil.SetControllerReference(pipeline, deployment, r.Scheme); err != nil {
 		return err
 	}
-	if err := createOrUpdateDeployment(ctx, r.Client, deployment); err != nil {
+	if err = utils.CreateOrUpdateDeployment(ctx, r.Client, deployment); err != nil {
 		return fmt.Errorf("failed to create otel collector deployment: %w", err)
 	}
 
-	service := makeCollectorService(r.config)
-	if err := controllerutil.SetControllerReference(tracing, service, r.Scheme); err != nil {
+	otlpService := makeOTLPService(r.config)
+	if err = controllerutil.SetControllerReference(pipeline, otlpService, r.Scheme); err != nil {
 		return err
 	}
-	if err := createOrUpdateService(ctx, r.Client, service); err != nil {
-		return fmt.Errorf("failed to create otel collector service: %w", err)
+	if err = utils.CreateOrUpdateService(ctx, r.Client, otlpService); err != nil {
+		return fmt.Errorf("failed to create otel collector otlp service: %w", err)
+	}
+
+	openCensusService := makeOpenCensusService(r.config)
+	if err = controllerutil.SetControllerReference(pipeline, openCensusService, r.Scheme); err != nil {
+		return err
+	}
+	if err = utils.CreateOrUpdateService(ctx, r.Client, openCensusService); err != nil {
+		return fmt.Errorf("failed to create otel collector open census service: %w", err)
 	}
 
 	if r.config.CreateServiceMonitor {
 		serviceMonitor := makeServiceMonitor(r.config)
-		if err := controllerutil.SetControllerReference(tracing, serviceMonitor, r.Scheme); err != nil {
+		if err = controllerutil.SetControllerReference(pipeline, serviceMonitor, r.Scheme); err != nil {
 			return err
 		}
 
-		if err := createOrUpdateServiceMonitor(ctx, r.Client, serviceMonitor); err != nil {
+		if err = utils.CreateOrUpdateServiceMonitor(ctx, r.Client, serviceMonitor); err != nil {
 			return fmt.Errorf("failed to create otel collector prometheus service monitor: %w", err)
 		}
 
 		metricsService := makeMetricsService(r.config)
-		if err := controllerutil.SetControllerReference(tracing, metricsService, r.Scheme); err != nil {
+		if err = controllerutil.SetControllerReference(pipeline, metricsService, r.Scheme); err != nil {
 			return err
 		}
-		if err := createOrUpdateService(ctx, r.Client, metricsService); err != nil {
+		if err = utils.CreateOrUpdateService(ctx, r.Client, metricsService); err != nil {
 			return fmt.Errorf("failed to create otel collector metrics service: %w", err)
 		}
 	}
 
+	return nil
+}
+
+func (r *Reconciler) tryAcquireLock(ctx context.Context, pipeline *telemetryv1alpha1.TracePipeline) error {
+	lockName := types.NamespacedName{Name: "telemetry-tracepipeline-lock", Namespace: r.config.Namespace}
+	var lock corev1.ConfigMap
+	if err := r.Get(ctx, lockName, &lock); err != nil {
+		if apierrors.IsNotFound(err) {
+			return r.createLock(ctx, lockName, pipeline)
+		}
+		return fmt.Errorf("failed to get lock: %v", err)
+	}
+
+	for _, ref := range lock.GetOwnerReferences() {
+		if ref.Name == pipeline.Name && ref.UID == pipeline.UID {
+			return nil
+		}
+	}
+
+	return errors.New("lock is already acquired by another TracePipeline")
+}
+
+func (r *Reconciler) createLock(ctx context.Context, name types.NamespacedName, owner *telemetryv1alpha1.TracePipeline) error {
+	lock := corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name.Name,
+			Namespace: name.Namespace,
+		},
+	}
+	controllerutil.SetControllerReference(owner, &lock, r.Scheme)
+	if err := r.Create(ctx, &lock); err != nil {
+		return fmt.Errorf("failed to create lock: %v", err)
+	}
 	return nil
 }

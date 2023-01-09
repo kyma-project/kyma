@@ -4,7 +4,12 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"testing"
 	"time"
+
+	subscriptionjetstream "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/jetstream"
+	backendjetstream "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats/jetstream"
+	"github.com/stretchr/testify/require"
 
 	"github.com/avast/retry-go/v3"
 	natsserver "github.com/nats-io/nats-server/v2/server"
@@ -30,6 +35,13 @@ const (
 	SmallPollingInterval   = 1 * time.Second
 	subscriptionNameFormat = "nats-sub-%d"
 )
+
+type JetStreamTestEnsemble struct {
+	Reconciler       *subscriptionjetstream.Reconciler
+	JetStreamBackend *backendjetstream.JetStream
+	JSStreamName     string
+	*TestEnsemble
+}
 
 type TestEnsemble struct {
 	testID                    int
@@ -187,6 +199,15 @@ func StopTestEnv(ens *TestEnsemble) {
 	}
 }
 
+func CleanupResources(t *testing.T, ens *JetStreamTestEnsemble) {
+	StopTestEnv(ens.TestEnsemble)
+
+	jsCtx := ens.Reconciler.Backend.GetJetStreamContext()
+	require.NoError(t, jsCtx.DeleteStream(ens.JSStreamName))
+
+	reconcilertesting.ShutDownNATSServer(ens.NatsServer)
+}
+
 func StartSubscriberSvc(ens *TestEnsemble) {
 	ens.SubscriberSvc = reconcilertesting.NewSubscriberSvc("test-subscriber", "test")
 	createSubscriberSvcInK8s(ens)
@@ -254,12 +275,9 @@ func fixtureNamespace(name string) *v1.Namespace {
 }
 
 // getSubscriptionOnK8S fetches a subscription using the lookupKey and allows making assertions on it.
-func getSubscriptionOnK8S(ens *TestEnsemble, subscription *eventingv1alpha1.Subscription, intervals ...interface{}) gomega.AsyncAssertion {
+func getSubscriptionOnK8S(ens *TestEnsemble, subscription *eventingv1alpha1.Subscription) gomega.AsyncAssertion {
 	g := ens.G
 
-	if len(intervals) == 0 {
-		intervals = []interface{}{SmallTimeout, SmallPollingInterval}
-	}
 	return g.Eventually(func() *eventingv1alpha1.Subscription {
 		lookupKey := types.NamespacedName{
 			Namespace: subscription.Namespace,
@@ -269,7 +287,7 @@ func getSubscriptionOnK8S(ens *TestEnsemble, subscription *eventingv1alpha1.Subs
 			return &eventingv1alpha1.Subscription{}
 		}
 		return subscription
-	}, intervals...)
+	}, SmallTimeout, SmallPollingInterval)
 }
 
 // getK8sEvents returns all kubernetes events for the given namespace.

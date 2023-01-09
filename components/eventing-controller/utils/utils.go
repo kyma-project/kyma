@@ -7,8 +7,11 @@ import (
 	"strings"
 	"time"
 
+	pkgerrors "github.com/kyma-project/kyma/components/eventing-controller/pkg/errors"
 	"github.com/pkg/errors"
 )
+
+var ErrParseSink = errors.Errorf("failed to parse subscription sink URL")
 
 // GetPortNumberFromURL converts string port from url.URL to uint32 port.
 func GetPortNumberFromURL(u url.URL) (uint32, error) {
@@ -64,18 +67,6 @@ func StringPtr(s string) *string {
 	return &s
 }
 
-func BoolPtrEqual(b1, b2 *bool) bool {
-	if b1 == nil && b2 == nil {
-		return true
-	}
-
-	if b1 != nil && b2 != nil {
-		return *b1 == *b2
-	}
-
-	return false
-}
-
 // for Random string generation.
 const charset = "abcdefghijklmnopqrstuvwxyz0123456789"
 
@@ -88,4 +79,19 @@ func GetRandString(length int) string {
 		b[i] = charset[seededRand.Intn(len(charset))]
 	}
 	return string(b)
+}
+
+// IsValidScheme returns true if the sink scheme is http or https, otherwise returns false.
+func IsValidScheme(sink string) bool {
+	return strings.HasPrefix(sink, "http://") || strings.HasPrefix(sink, "https://")
+}
+
+func GetSinkData(sink string) (string, []string, error) {
+	sURL, err := url.ParseRequestURI(sink)
+	if err != nil {
+		return "", nil, pkgerrors.MakeError(ErrParseSink, err)
+	}
+	trimmedHost := strings.Split(sURL.Host, ":")[0]
+	subDomains := strings.Split(trimmedHost, ".")
+	return trimmedHost, subDomains, nil
 }

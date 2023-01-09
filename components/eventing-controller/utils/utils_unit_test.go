@@ -5,6 +5,8 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
 
@@ -142,5 +144,72 @@ func TestGetRandSuffix(t *testing.T) {
 			t.Fatalf("generated string already exists: %s", result)
 		}
 		results[result] = true
+	}
+}
+
+func TestIsValidScheme(t *testing.T) {
+	t.Parallel()
+	testCases := []struct {
+		name      string
+		givenSink string
+		wantValid bool
+	}{
+		{
+			name:      "invalid scheme should return false",
+			givenSink: "invalid",
+			wantValid: false,
+		},
+		{
+			name:      "valid scheme http should return true",
+			givenSink: "http://valid",
+			wantValid: true,
+		},
+		{
+			name:      "valid scheme https should return true",
+			givenSink: "https://valid",
+			wantValid: true,
+		},
+	}
+	for _, testCase := range testCases {
+		tc := testCase
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			gotValid := utils.IsValidScheme(tc.givenSink)
+			require.Equal(t, gotValid, tc.wantValid)
+		})
+	}
+}
+
+func TestGetSinkData(t *testing.T) {
+	t.Parallel()
+	testCases := []struct {
+		name            string
+		givenSink       string
+		wantTrimmedHost string
+		wantSubDomains  []string
+		wantError       error
+	}{
+		{
+			name:      "invalid uri should return error",
+			givenSink: "http://invalid sink",
+			wantError: utils.ErrParseSink,
+		},
+		{
+			name:            "valid uri should not return error",
+			givenSink:       "http://valid1.valid2",
+			wantError:       nil,
+			wantTrimmedHost: "valid1.valid2",
+			wantSubDomains:  []string{"valid1", "valid2"},
+		},
+	}
+	for _, testCase := range testCases {
+		tc := testCase
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			gotTrimmedHost, gotSubDomain, gotErr := utils.GetSinkData(tc.givenSink)
+			require.ErrorIs(t, gotErr, tc.wantError)
+			require.Equal(t, gotTrimmedHost, tc.wantTrimmedHost)
+			require.Equal(t, gotSubDomain, tc.wantSubDomains)
+		})
 	}
 }

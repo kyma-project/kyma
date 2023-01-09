@@ -3,6 +3,7 @@ package jetstreamv2
 import (
 	"sync"
 
+	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
 	backendutilsv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils/v2"
 
 	cev2 "github.com/cloudevents/sdk-go/v2"
@@ -30,10 +31,16 @@ type Backend interface {
 
 	// GetJetStreamSubjects returns a list of subjects appended with stream name and source as prefix if needed
 	GetJetStreamSubjects(source string, subjects []string, typeMatching eventingv1alpha2.TypeMatching) []string
+
+	// DeleteInvalidConsumers deletes all JetStream consumers having no subscription types in subscription resources
+	DeleteInvalidConsumers(subscriptions []eventingv1alpha2.Subscription) error
+
+	// GetJetStreamContext returns the current JetStreamContext
+	GetJetStreamContext() nats.JetStreamContext
 }
 
 type JetStream struct {
-	Config        env.NatsConfig
+	Config        backendnats.Config
 	Conn          *nats.Conn
 	jsCtx         nats.JetStreamContext
 	client        cev2.Client
@@ -48,6 +55,7 @@ type JetStream struct {
 }
 
 type Subscriber interface {
+	SubscriptionSubject() string
 	ConsumerInfo() (*nats.ConsumerInfo, error)
 	IsValid() bool
 	Unsubscribe() error
@@ -74,4 +82,8 @@ type DefaultSubOpts []nats.SubOpt
 type jetStreamClient struct {
 	nats.JetStreamContext
 	natsConn *nats.Conn
+}
+
+func (js Subscription) SubscriptionSubject() string {
+	return js.Subject
 }

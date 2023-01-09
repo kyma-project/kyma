@@ -49,7 +49,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 						MinReplicas: pointer.Int32(1),
 						MaxReplicas: pointer.Int32(1),
 					},
-					Runtime: NodeJs12,
+					Runtime: NodeJs16,
 					ResourceConfiguration: &ResourceConfiguration{
 						Function: &ResourceRequirements{
 							Resources: &corev1.ResourceRequirements{Limits: corev1.ResourceList{
@@ -89,7 +89,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							Dependencies: " { test }     \t\n",
 						},
 					},
-					Runtime: NodeJs12,
+					Runtime: NodeJs16,
 					Env: []corev1.EnvVar{
 						{
 							Name:  "test",
@@ -134,6 +134,16 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 									corev1.ResourceMemory: resource.MustParse("200Mi"),
 								},
 							},
+						},
+					},
+					SecretMounts: []SecretMount{
+						{
+							SecretName: "secret-name-1",
+							MountPath:  "/mount/path/1",
+						},
+						{
+							SecretName: "secret-name-2",
+							MountPath:  "/mount/path/2",
 						},
 					},
 				},
@@ -181,7 +191,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
-					Runtime: NodeJs12,
+					Runtime: NodeJs16,
 					Source: Source{
 						Inline: &InlineSource{
 							Source:       "test-source",
@@ -205,7 +215,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
-					Runtime: NodeJs12,
+					Runtime: NodeJs16,
 					Source:  Source{},
 				},
 			},
@@ -220,7 +230,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
-					Runtime: NodeJs12,
+					Runtime: NodeJs16,
 					Source: Source{
 						Inline: &InlineSource{
 							Source:       "test-source",
@@ -240,7 +250,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
-					Runtime: NodeJs12,
+					Runtime: NodeJs16,
 					Source: Source{
 						Inline: &InlineSource{
 							Source: "test-source",
@@ -269,7 +279,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
-					Runtime: NodeJs12,
+					Runtime: NodeJs16,
 					Source: Source{
 						Inline: &InlineSource{
 							Source: "test-source",
@@ -294,7 +304,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
-					Runtime: NodeJs12,
+					Runtime: NodeJs16,
 					Source: Source{
 						Inline: &InlineSource{
 							Source: "test-source",
@@ -317,7 +327,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
-					Runtime: NodeJs12,
+					Runtime: NodeJs16,
 					Source: Source{
 						Inline: &InlineSource{
 							Source: "test-source",
@@ -340,7 +350,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
-					Runtime: NodeJs12,
+					Runtime: NodeJs16,
 					Source: Source{
 						Inline: &InlineSource{
 							Source: "test-source",
@@ -376,7 +386,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
-					Runtime: NodeJs12,
+					Runtime: NodeJs16,
 					Source: Source{
 						Inline: &InlineSource{
 							Source: "test-source",
@@ -426,7 +436,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 						MinReplicas: pointer.Int32(0),
 						MaxReplicas: pointer.Int32(0),
 					},
-					Runtime: NodeJs12,
+					Runtime: NodeJs16,
 					Source: Source{
 						Inline: &InlineSource{
 							Source: "test-source",
@@ -517,7 +527,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 						MinReplicas: pointer.Int32(1),
 						MaxReplicas: pointer.Int32(1),
 					},
-					Runtime: NodeJs12,
+					Runtime: NodeJs16,
 				},
 			},
 			expectedError: gomega.BeNil(),
@@ -561,7 +571,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 						MinReplicas: pointer.Int32(1),
 						MaxReplicas: pointer.Int32(1),
 					},
-					Runtime: NodeJs12,
+					Runtime: NodeJs16,
 				},
 			},
 			specifiedExpectedError: gomega.And(
@@ -624,7 +634,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							Dependencies: " { test }",
 						},
 					},
-					Runtime: NodeJs12,
+					Runtime: NodeJs16,
 					ResourceConfiguration: &ResourceConfiguration{
 						Function: &ResourceRequirements{
 							Profile: "function-profile",
@@ -656,6 +666,89 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 				},
 			},
 			expectedError: gomega.BeNil(),
+		},
+		"Should return error when validate invalid secretName in secretMounts": {
+			givenFunc: Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: FunctionSpec{
+					Runtime: NodeJs16,
+					Source: Source{
+						Inline: &InlineSource{
+							Source: "test-source",
+						},
+					},
+					SecretMounts: []SecretMount{
+						{
+							SecretName: "secret-name-1",
+							MountPath:  "/mount/path/1",
+						},
+						{
+							SecretName: "invalid secret name - not DNS subdomain name as defined in RFC 1123",
+							MountPath:  "/mount/path/2",
+						},
+					},
+				},
+			},
+			expectedError: gomega.HaveOccurred(),
+			specifiedExpectedError: gomega.And(
+				gomega.ContainSubstring("spec.secretMounts"),
+				gomega.ContainSubstring("RFC 1123 subdomain"),
+			),
+		},
+		"Should return error when validate non unique secretName in secretMounts": {
+			givenFunc: Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: FunctionSpec{
+					Runtime: NodeJs16,
+					Source: Source{
+						Inline: &InlineSource{
+							Source: "test-source",
+						},
+					},
+					SecretMounts: []SecretMount{
+						{
+							SecretName: "secret-name-1",
+							MountPath:  "/mount/path/1",
+						},
+						{
+							SecretName: "non-unique-secret-name",
+							MountPath:  "/mount/path/2",
+						},
+						{
+							SecretName: "non-unique-secret-name",
+							MountPath:  "/mount/path/3",
+						},
+					},
+				},
+			},
+			expectedError: gomega.HaveOccurred(),
+			specifiedExpectedError: gomega.And(
+				gomega.ContainSubstring("spec.secretMounts"),
+				gomega.ContainSubstring("secretNames should be unique"),
+			),
+		},
+		"Should return error when validate empty mountPath in secretMounts": {
+			givenFunc: Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: FunctionSpec{
+					Runtime: NodeJs16,
+					Source: Source{
+						Inline: &InlineSource{
+							Source: "test-source",
+						},
+					},
+					SecretMounts: []SecretMount{
+						{
+							SecretName: "secret-name-1",
+						},
+					},
+				},
+			},
+			expectedError: gomega.HaveOccurred(),
+			specifiedExpectedError: gomega.And(
+				gomega.ContainSubstring("spec.secretMounts"),
+				gomega.ContainSubstring("mountPath should not be empty"),
+			),
 		},
 	} {
 		t.Run(testName, func(t *testing.T) {

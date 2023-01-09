@@ -161,3 +161,25 @@ ifeq ($(JOB_TYPE), postsubmit)
 else
 	@echo "Image signing skipped"
 endif
+
+
+######## registry-gc 
+REGISTRY_GC_NAME = registry-gc
+REGISTRY_GC_IMG_NAME = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(REGISTRY_GC_NAME)
+
+
+PHONY: build-image-registry-gc push-registry-gc
+build-image-registry-gc:
+	docker build -t $(REGISTRY_GC_NAME) -f $(ROOT)/deploy/registry-gc/Dockerfile .
+
+push-registry-gc:
+	docker tag $(REGISTRY_GC_NAME) $(REGISTRY_GC_IMG_NAME):$(DOCKER_TAG)
+	docker push $(REGISTRY_GC_IMG_NAME):$(DOCKER_TAG)
+ifeq ($(JOB_TYPE), postsubmit)
+	@echo "Sign image with Cosign"
+	cosign version
+	cosign sign -key ${KMS_KEY_URL} $(REGISTRY_GC_IMG_NAME):$(DOCKER_TAG)
+else
+	@echo "Image signing skipped"
+endif
+

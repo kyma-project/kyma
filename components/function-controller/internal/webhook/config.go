@@ -8,10 +8,11 @@ import (
 )
 
 type Config struct {
-	SystemNamespace    string `envconfig:"default=kyma-system"`
-	WebhookServiceName string `envconfig:"default=serverless-webhook"`
-	WebhookSecretName  string `envconfig:"default=serverless-webhook"`
-	WebhookPort        int    `envconfig:"default=8443"`
+	SystemNamespace string `envconfig:"default=kyma-system"`
+	ServiceName     string `envconfig:"default=serverless-webhook"`
+	SecretName      string `envconfig:"default=serverless-webhook"`
+	Port            int    `envconfig:"default=8443"`
+	ConfigPath      string `envconfig:"default=/appdata/config.yaml"`
 }
 
 // TODO: We should split configuration to seperate env or use file to pass configuration per version.

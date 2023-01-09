@@ -5,15 +5,16 @@ import (
 	"reflect"
 	"time"
 
+	pkgerrors "github.com/kyma-project/kyma/components/eventing-controller/pkg/errors"
+	"github.com/nats-io/nats.go"
+
 	"github.com/pkg/errors"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 	sinkv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink/v2"
 	backendutilsv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils/v2"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
-	"github.com/nats-io/nats.go"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 	"go.uber.org/zap"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -71,12 +72,14 @@ func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
 		return err
 	}
 
-	if err := ctru.Watch(&source.Kind{Type: &eventingv1alpha2.Subscription{}}, &handler.EnqueueRequestForObject{}); err != nil {
+	if err := ctru.Watch(&source.Kind{Type: &eventingv1alpha2.Subscription{}},
+		&handler.EnqueueRequestForObject{}); err != nil {
 		r.namedLogger().Errorw("Failed to setup watch for subscriptions", "error", err)
 		return err
 	}
 
-	if err := ctru.Watch(&source.Channel{Source: r.customEventsChannel}, &handler.EnqueueRequestForObject{}); err != nil {
+	if err := ctru.Watch(&source.Channel{Source: r.customEventsChannel},
+		&handler.EnqueueRequestForObject{}); err != nil {
 		r.namedLogger().Errorw("Failed to setup watch for custom channel", "error", err)
 		return err
 	}
@@ -90,6 +93,7 @@ func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
 	return nil
 }
 
+//nolint:lll
 // +kubebuilder:rbac:groups=eventing.kyma-project.io,resources=subscriptions,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=eventing.kyma-project.io,resources=subscriptions/status,verbs=get;update;patch
 // Generate required RBAC to emit kubernetes events in the controller.
@@ -137,13 +141,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	// update the cleanEventTypes and config values in the subscription status, if changed
-	statusChanged, err := r.syncInitialStatus(desiredSubscription)
-	if err != nil {
-		if syncErr := r.syncSubscriptionStatus(ctx, desiredSubscription, statusChanged, err); syncErr != nil {
-			return ctrl.Result{}, syncErr
-		}
-		return ctrl.Result{}, err
-	}
+	statusChanged := r.syncInitialStatus(desiredSubscription)
 
 	// Check for valid sink
 	if validateErr := r.sinkValidator.Validate(desiredSubscription); validateErr != nil {
@@ -217,7 +215,7 @@ func (r *Reconciler) syncSubscriptionStatus(ctx context.Context,
 	if updateStatus || readyStatusChanged {
 		if updateErr := r.Client.Status().Update(ctx, sub, &client.UpdateOptions{}); updateErr != nil {
 			events.Warn(r.recorder, sub, events.ReasonUpdateFailed, "Update Subscription status failed %s", sub.Name)
-			return utils.MakeError(errFailedToUpdateStatus, updateErr)
+			return pkgerrors.MakeError(errFailedToUpdateStatus, updateErr)
 		}
 		events.Normal(r.recorder, sub, events.ReasonUpdate, "Update Subscription status succeeded %s", sub.Name)
 	}
@@ -231,7 +229,7 @@ func (r *Reconciler) handleSubscriptionDeletion(ctx context.Context,
 		if err := r.Backend.DeleteSubscription(subscription); err != nil {
 			// if failed to delete the external dependency here, return with error
 			// so that it can be retried
-			return utils.MakeError(errFailedToDeleteSub, err)
+			return pkgerrors.MakeError(errFailedToDeleteSub, err)
 		}
 
 		// remove our finalizer from the list and update it.
@@ -239,7 +237,7 @@ func (r *Reconciler) handleSubscriptionDeletion(ctx context.Context,
 			eventingv1alpha2.Finalizer)
 		if err := r.Client.Update(ctx, subscription); err != nil {
 			events.Warn(r.recorder, subscription, events.ReasonUpdateFailed, "Update Subscription failed %s", subscription.Name)
-			return utils.MakeError(errFailedToRemoveFinalizer, err)
+			return pkgerrors.MakeError(errFailedToRemoveFinalizer, err)
 		}
 		log.Debug("Removed finalizer from subscription")
 	}
@@ -251,20 +249,16 @@ func (r *Reconciler) addFinalizerToSubscription(sub *eventingv1alpha2.Subscripti
 	sub.ObjectMeta.Finalizers = append(sub.ObjectMeta.Finalizers, eventingv1alpha2.Finalizer)
 	// to avoid a dangling subscription, we update the subscription as soon as the finalizer is added to it
 	if err := r.Client.Update(context.Background(), sub); err != nil {
-		return utils.MakeError(errFailedToAddFinalizer, err)
+		return pkgerrors.MakeError(errFailedToAddFinalizer, err)
 	}
 	log.Debug("Added finalizer to subscription")
 	return nil
 }
 
 // syncInitialStatus keeps the latest cleaned EventTypes and jetStreamTypes in the subscription.
-func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha2.Subscription) (bool, error) {
+func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha2.Subscription) bool {
 	statusChanged := false
-	cleanedTypes, err := jetstream.GetCleanEventTypes(subscription, r.cleaner)
-	if err != nil {
-		subscription.Status.InitializeEventTypes()
-		return true, utils.MakeError(errFailedToGetCleanEventTypes, err)
-	}
+	cleanedTypes := jetstream.GetCleanEventTypes(subscription, r.cleaner)
 	if !reflect.DeepEqual(subscription.Status.Types, cleanedTypes) {
 		subscription.Status.Types = cleanedTypes
 		statusChanged = true
@@ -277,7 +271,7 @@ func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha2.Subscripti
 		subscription.Status.Backend.Types = jsTypes
 		statusChanged = true
 	}
-	return statusChanged, nil
+	return statusChanged
 }
 
 func (r *Reconciler) namedLogger() *zap.SugaredLogger {

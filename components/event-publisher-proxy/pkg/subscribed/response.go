@@ -8,7 +8,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/internal"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy"
 )
 
 const responseName = "response"

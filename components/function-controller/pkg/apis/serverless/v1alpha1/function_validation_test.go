@@ -28,7 +28,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 					Source:      "test-source",
 					MinReplicas: pointer.Int32(1),
 					MaxReplicas: pointer.Int32(1),
-					Runtime:     Nodejs12,
+					Runtime:     Nodejs16,
 					Resources: corev1.ResourceRequirements{
 						Limits: corev1.ResourceList{
 							corev1.ResourceCPU:    resource.MustParse("100m"),
@@ -59,7 +59,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 				Spec: FunctionSpec{
 					Source:  "test-source",
 					Deps:    " { test }     \t\n",
-					Runtime: Nodejs12,
+					Runtime: Nodejs16,
 					Env: []corev1.EnvVar{
 						{
 							Name:  "test",
@@ -120,7 +120,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
 					Source:  "test-source",
-					Runtime: Nodejs12,
+					Runtime: Nodejs16,
 					Deps:    "{",
 				},
 			},
@@ -136,7 +136,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
 					Source:  "test-source",
-					Runtime: Nodejs12,
+					Runtime: Nodejs16,
 					Env: []corev1.EnvVar{
 						{
 							Name:  "test",
@@ -161,7 +161,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
 					Source:  "test-source",
-					Runtime: Nodejs12,
+					Runtime: Nodejs16,
 					Labels: map[string]string{
 						"shoul-be-ok":      "test",
 						"should BE not OK": "test",
@@ -180,7 +180,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
 					Source:      "test-source",
-					Runtime:     Nodejs12,
+					Runtime:     Nodejs16,
 					MinReplicas: pointer.Int32(1),
 					MaxReplicas: pointer.Int32(-1),
 				},
@@ -197,7 +197,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
 					Source:      "test-source",
-					Runtime:     Nodejs12,
+					Runtime:     Nodejs16,
 					MinReplicas: pointer.Int32(0), // HPA needs this value to be greater then 0
 					MaxReplicas: pointer.Int32(1),
 				},
@@ -214,7 +214,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
 					Source:  "test-source",
-					Runtime: Nodejs12,
+					Runtime: Nodejs16,
 					Resources: corev1.ResourceRequirements{
 						Limits: corev1.ResourceList{
 							corev1.ResourceCPU:    resource.MustParse("50m"),
@@ -242,7 +242,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
 					Source:  "test-source",
-					Runtime: Nodejs12,
+					Runtime: Nodejs16,
 					Resources: corev1.ResourceRequirements{
 						Limits: corev1.ResourceList{
 							corev1.ResourceCPU:    resource.MustParse("100m"),
@@ -280,7 +280,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 					Source:      "test-source",
 					MinReplicas: pointer.Int32(0),
 					MaxReplicas: pointer.Int32(0),
-					Runtime:     Nodejs12,
+					Runtime:     Nodejs16,
 					Resources: corev1.ResourceRequirements{
 						Limits: corev1.ResourceList{
 							corev1.ResourceCPU:    resource.MustParse("9m"),
@@ -345,7 +345,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 					MinReplicas: pointer.Int32(1),
 					MaxReplicas: pointer.Int32(1),
 					Type:        SourceTypeGit,
-					Runtime:     Nodejs12,
+					Runtime:     Nodejs16,
 					Repository: Repository{
 						BaseDir:   "/",
 						Reference: "test-me",
@@ -371,7 +371,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 					},
 					MinReplicas: pointer.Int32(1),
 					MaxReplicas: pointer.Int32(1),
-					Runtime:     Nodejs12,
+					Runtime:     Nodejs16,
 					Type:        SourceTypeGit,
 				},
 			},

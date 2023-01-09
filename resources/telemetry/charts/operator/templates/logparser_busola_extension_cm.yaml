@@ -1,4 +1,3 @@
-{{ if .Values.dashboardExtension.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -21,7 +20,8 @@ data:
       "body": [
         {
           "source": "spec.parser",
-          "widget": "CodeViewer"
+          "widget": "CodeViewer",
+          "language": "'plaintext'"
         }
       ]
     }
@@ -30,7 +30,8 @@ data:
       {
         "widget": "CodeEditor",
         "path": "spec.parser",
-        "simple": true
+        "simple": true,
+        "language": "'plaintext'"
       }
     ]
   general: |-
@@ -62,4 +63,3 @@ data:
         "metadata.creationTimestamp": "Created at"
       }
     }
-{{ end }}

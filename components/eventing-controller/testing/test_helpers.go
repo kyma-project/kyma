@@ -215,6 +215,17 @@ func WithDefaultWebhookAuth() ProtoOpt {
 	}
 }
 
+func WithRequiredWebhookAuth() ProtoOpt {
+	return func(p *eventingv1alpha1.ProtocolSettings) {
+		p.WebhookAuth = &eventingv1alpha1.WebhookAuth{
+			GrantType:    "client_credentials",
+			ClientID:     "xxx",
+			ClientSecret: "xxx",
+			TokenURL:     "https://oauth2.xxx.com/oauth2/token",
+		}
+	}
+}
+
 type SubscriptionOpt func(subscription *eventingv1alpha1.Subscription)
 
 func NewSubscription(name, namespace string, opts ...SubscriptionOpt) *eventingv1alpha1.Subscription {
@@ -397,6 +408,20 @@ func WithEmptyFilter() SubscriptionOpt {
 		subscription.Spec.Filter = &eventingv1alpha1.BEBFilters{
 			Filters: []*eventingv1alpha1.BEBFilter{},
 		}
+	}
+}
+
+func WithEmptyStatus() SubscriptionOpt {
+	return func(subscription *eventingv1alpha1.Subscription) {
+		subscription.Status = eventingv1alpha1.SubscriptionStatus{
+			CleanEventTypes: []string{},
+		}
+	}
+}
+
+func WithEmptyConfig() SubscriptionOpt {
+	return func(subscription *eventingv1alpha1.Subscription) {
+		subscription.Spec.Config = nil
 	}
 }
 

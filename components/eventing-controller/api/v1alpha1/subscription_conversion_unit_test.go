@@ -3,6 +3,8 @@ package v1alpha1_test
 import (
 	"testing"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
+
 	testingv1 "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	testingv2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
 
@@ -22,6 +24,18 @@ func Test_Conversion(t *testing.T) {
 	}
 
 	testCases := []TestCase{
+		{
+			name: "Converting NATS Subscription with empty Status",
+			alpha1Sub: newDefaultSubscription(
+				testingv1.WithEmptyFilter(),
+				testingv1.WithEmptyConfig(),
+				testingv1.WithEmptyStatus(),
+			),
+			alpha2Sub: newV2DefaultSubscription(
+				testingv2.WithEmptyStatus(),
+				testingv2.WithEmptyConfig(),
+			),
+		},
 		{
 			name: "Converting NATS Subscription with empty Filters",
 			alpha1Sub: newDefaultSubscription(
@@ -139,6 +153,43 @@ func Test_Conversion(t *testing.T) {
 				v2WithBEBStatusFields(),
 			),
 		},
+		{
+			name: "Converting Subscription with Protocol, ProtocolSettings and WebhookAuth",
+			alpha1Sub: newDefaultSubscription(
+				testingv1.WithProtocolBEB(),
+				testingv1.WithProtocolSettings(
+					testingv1.NewProtocolSettings(
+						testingv1.WithAtLeastOnceQOS(),
+						testingv1.WithRequiredWebhookAuth())),
+				testingv1.WithFilter(eventSource, orderCreatedEventType),
+				testingv1.WithStatusCleanEventTypes([]string{
+					orderCreatedEventType,
+				}),
+			),
+			alpha2Sub: newV2DefaultSubscription(
+				testingv2.WithEventSource(eventSource),
+				testingv2.WithTypes([]string{
+					orderCreatedEventType,
+				}),
+				testingv2.WithProtocolBEB(),
+				testingv2.WithConfigValue(v1alpha2.ProtocolSettingsQos,
+					string(types.QosAtLeastOnce)),
+				testingv2.WithConfigValue(v1alpha2.WebhookAuthGrantType,
+					"client_credentials"),
+				testingv2.WithConfigValue(v1alpha2.WebhookAuthClientID,
+					"xxx"),
+				testingv2.WithConfigValue(v1alpha2.WebhookAuthClientSecret,
+					"xxx"),
+				testingv2.WithConfigValue(v1alpha2.WebhookAuthTokenURL,
+					"https://oauth2.xxx.com/oauth2/token"),
+				v2WithStatusTypes([]v1alpha2.EventType{
+					{
+						OriginalType: orderCreatedEventType,
+						CleanType:    orderCreatedEventType,
+					},
+				}),
+			),
+		},
 	}
 
 	for _, testCase := range testCases {
@@ -189,13 +240,6 @@ func v1ToV2Assertions(t *testing.T, wantSub, convertedSub *v1alpha2.Subscription
 	assert.Equal(t, wantSub.Spec.Source, convertedSub.Spec.Source)
 	assert.Equal(t, wantSub.Spec.Types, convertedSub.Spec.Types)
 	assert.Equal(t, wantSub.Spec.Config, convertedSub.Spec.Config)
-
-	// Status
-	assert.Equal(t, wantSub.Status.Ready, convertedSub.Status.Ready)
-	assert.Equal(t, wantSub.Status.Conditions, convertedSub.Status.Conditions)
-	assert.Equal(t, wantSub.Status.Types, convertedSub.Status.Types)
-
-	assert.Equal(t, wantSub.Status.Backend, convertedSub.Status.Backend)
 }
 
 func v2ToV1Assertions(t *testing.T, wantSub, convertedSub *v1alpha1.Subscription) {

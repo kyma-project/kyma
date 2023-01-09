@@ -4,10 +4,17 @@ global:
   images:
     directory_size_exporter:
       name: "directory-size-exporter"
-      version: "PR-15860"
+      version: "v20230102-4a803570"
     telemetry_operator:
       name: "telemetry-operator"
-      version: "PR-15857"
+      version: "v20230104-cb006ba2"
+    telemetry_webhook_cert_init:
+      name: "webhook-cert-init"
+      version: "v20221122-200937b4"
+    telemetry_otel_collector:
+      name: "otel-collector"
+      version: "0.66.0-a80d981f"
+      directory: "tpi"
     fluent_bit:
       name: "fluent-bit"
       version: "1.9.9-cf0a130c"
@@ -20,3 +27,4 @@ global:
   log:
     format: "json"
     level: "info"
+  operatorManagedFluentBit: false

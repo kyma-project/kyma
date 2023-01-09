@@ -8,7 +8,6 @@ import (
 	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	"github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -62,46 +61,6 @@ func newFixBaseServiceAccount(namespace, name string) *corev1.ServiceAccount {
 		Secrets:                      []corev1.ObjectReference{{Name: "test1"}, {Name: "test2"}},
 		ImagePullSecrets:             []corev1.LocalObjectReference{{Name: "test-ips-1"}, {Name: "test-ips-2"}},
 		AutomountServiceAccountToken: &falseValue,
-	}
-}
-
-func newFixBaseRole(namespace, name string) *rbacv1.Role {
-	return &rbacv1.Role{
-		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: fmt.Sprintf("%s-", name),
-			Namespace:    namespace,
-			Labels:       map[string]string{RbacLabel: RoleLabelValue},
-		},
-		Rules: []rbacv1.PolicyRule{
-			{
-				Verbs:         []string{"use"},
-				APIGroups:     []string{"policy"},
-				Resources:     []string{"podsecuritypolicies"},
-				ResourceNames: []string{"serverless-build"},
-			},
-		},
-	}
-}
-
-func newFixBaseRoleBinding(namespace, name, subjectNamespace string) *rbacv1.RoleBinding {
-	return &rbacv1.RoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: fmt.Sprintf("%s-", name),
-			Namespace:    namespace,
-			Labels:       map[string]string{RbacLabel: RoleBindingLabelValue},
-		},
-		Subjects: []rbacv1.Subject{
-			{
-				Kind:      "ServiceAccount",
-				Name:      "serverless",
-				Namespace: subjectNamespace,
-			},
-		},
-		RoleRef: rbacv1.RoleRef{
-			APIGroup: "rbac.authorization.k8s.io",
-			Kind:     "Role",
-			Name:     "serverless-build",
-		},
 	}
 }
 

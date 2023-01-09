@@ -26,7 +26,6 @@ type Runtime string
 
 const (
 	Python39 Runtime = "python39"
-	NodeJs12 Runtime = "nodejs12"
 	NodeJs14 Runtime = "nodejs14"
 	NodeJs16 Runtime = "nodejs16"
 )
@@ -39,14 +38,20 @@ const (
 )
 
 type Source struct {
+	// GitRepository defines Function as git-sourced. Can't be used at the same time with Inline.
 	// +optional
 	GitRepository *GitRepositorySource `json:"gitRepository,omitempty"`
+
+	// Inline defines Function as the inline Function. Can't be used at the same time with GitRepository.
 	// +optional
 	Inline *InlineSource `json:"inline,omitempty"`
 }
 
 type InlineSource struct {
+	// Source provides the Function's full source code.
 	Source string `json:"source"`
+
+	// Dependencies specifies the Function's dependencies.
 	//+optional
 	Dependencies string `json:"dependencies,omitempty"`
 }
@@ -54,10 +59,12 @@ type InlineSource struct {
 type GitRepositorySource struct {
 	// +kubebuilder:validation:Required
 
-	// URL is the address of GIT repository
+	// URL provides the address to the Git repository with the Function's code and dependencies.
+	// Depending on whether the repository is public or private and what authentication method is used to access it,
+	// the URL must start with the `http(s)`, `git`, or `ssh` prefix.
 	URL string `json:"url"`
 
-	// Auth is the optional definition of authentication that should be used for repository operations
+	// Auth specifies that you must authenticate to the Git repository. Required for SSH.
 	// +optional
 	Auth *RepositoryAuth `json:"auth,omitempty"`
 
@@ -66,12 +73,15 @@ type GitRepositorySource struct {
 
 // RepositoryAuth defines authentication method used for repository operations
 type RepositoryAuth struct {
-	// Type is the type of authentication
+	// RepositoryAuthType defines if you must authenticate to the repository with a password or token (`basic`),
+	// or an SSH key (`key`). For SSH, this parameter must be set to `key`.
 	Type RepositoryAuthType `json:"type"`
 
 	// +kubebuilder:validation:Required
 
-	// SecretName is the name of Kubernetes Secret containing credentials used for authentication
+	// SecretName specifies the name of the Secret with credentials used by the Function Controller
+	// to authenticate to the Git repository in order to fetch the Function's source code and dependencies.
+	// This Secret must be stored in the same Namespace as the Function CR.
 	SecretName string `json:"secretName"`
 }
 
@@ -84,11 +94,6 @@ const (
 	RepositoryAuthSSHKey RepositoryAuthType = "key"
 )
 
-type ConfigMapRef struct {
-	Name      string `json:"name"`
-	Namespace string `json:"namespace"`
-}
-
 type Template struct {
 	// +optional
 	Labels map[string]string `json:"labels,omitempty"`
@@ -97,25 +102,43 @@ type Template struct {
 }
 
 type ResourceRequirements struct {
+	// Profile defines name of predefined set of values of resource. Can't be used at the same time with Resources.
 	// +optional
 	Profile string `json:"profile,omitempty"`
+
+	// Resources defines amount of resources available for the Pod to use. Can't be used at the same time with Profile.
 	// +optional
 	Resources *v1.ResourceRequirements `json:"resources,omitempty"`
 }
 
 type ScaleConfig struct {
+	// MinReplicas defines the minimum number of Function's Pods to run at a time.
 	// +kubebuilder:validation:Minimum:=1
 	MinReplicas *int32 `json:"minReplicas"`
 
+	// MaxReplicas defines the maximum number of Function's Pods to run at a time.
 	// +kubebuilder:validation:Minimum:=1
 	MaxReplicas *int32 `json:"maxReplicas"`
 }
 
 type ResourceConfiguration struct {
+	// Build specifies resources requested by the build Job's Pod.
 	// +optional
 	Build *ResourceRequirements `json:"build,omitempty"`
+
+	// Function specifies resources requested by the Function's Pod.
 	// +optional
 	Function *ResourceRequirements `json:"function,omitempty"`
+}
+
+type SecretMount struct {
+	// SecretName specifies name of the Secret in the Function's Namespace to use.
+	// +kubebuilder:validation:Required
+	SecretName string `json:"secretName"`
+
+	// MountPath specifies path within the container at which the Secret should be mounted.
+	// +kubebuilder:validation:Required
+	MountPath string `json:"mountPath"`
 }
 
 const (
@@ -125,30 +148,41 @@ const (
 
 // FunctionSpec defines the desired state of Function
 type FunctionSpec struct {
+	// Runtime specifies the runtime of the Function. The available values are `nodejs14`, `nodejs16`, and `python39`.
 	Runtime Runtime `json:"runtime"`
 
-	//+optional
-	CustomRuntimeConfiguration *ConfigMapRef `json:"customRuntimeConfiguration,omitempty"`
-
+	// RuntimeImageOverride specifies the runtimes image which must be used instead of the default one.
 	// +optional
 	RuntimeImageOverride string `json:"runtimeImageOverride,omitempty"`
 
+	// Source contains the Function's specification.
 	Source Source `json:"source"`
 
-	// Env defines an array of key value pairs need to be used as env variable for a function
+	// Env specifies an array of key-value pairs to be used as environment variables for the Function.
+	// You can define values as static strings or reference values from ConfigMaps or Secrets.
 	Env []v1.EnvVar `json:"env,omitempty"`
 
+	// ResourceConfiguration specifies resources requested by Function and build Job.
 	// +optional
 	ResourceConfiguration *ResourceConfiguration `json:"resourceConfiguration,omitempty"`
 
+	// ScaleConfig defines minimum and maximum number of Function's Pods to run at a time.
+	// When it is configured, a HorizontalPodAutoscaler will be deployed and will control the Replicas field
+	// to scale Function based on the CPU utilisation.
 	// +optional
 	ScaleConfig *ScaleConfig `json:"scaleConfig,omitempty"`
 
+	// Replicas defines the exact number of Function's Pods to run at a time.
+	// If ScaleConfig is configured, or if Function is targeted by an external scaler,
+	// then the Replicas field is used by the relevant HorizontalPodAutoscaler to control the number of active replicas.
 	// +optional
 	Replicas *int32 `json:"replicas,omitempty"`
 
 	// +optional
 	Template *Template `json:"template,omitempty"`
+
+	// SecretMounts specifies Secrets to mount into the Function's container filesystem.
+	SecretMounts []SecretMount `json:"secretMounts,omitempty"`
 }
 
 // TODO: Status related things needs to be developed.
@@ -194,7 +228,12 @@ type Condition struct {
 }
 
 type Repository struct {
-	BaseDir   string `json:"baseDir,omitempty"`
+	// BaseDir specifies the relative path to the Git directory that contains the source code
+	// from which the Function is built.
+	BaseDir string `json:"baseDir,omitempty"`
+
+	// Reference specifies either the branch name, tag or the commit revision from which the Function Controller
+	// automatically fetches the changes in the Function's code and dependencies.
 	Reference string `json:"reference,omitempty"`
 }
 
@@ -230,6 +269,13 @@ const (
 //+kubebuilder:printcolumn:name="Version",type="integer",JSONPath=".metadata.generation"
 //+kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 
+// A simple code snippet that you can run without provisioning or managing servers.
+// It implements the exact business logic you define.
+// A Function is based on the Function custom resource (CR) and can be written in either Node.js or Python.
+// A Function can perform a business logic of its own. You can also bind it to an instance of a service
+// and configure it to be triggered whenever it receives a particular event type from the service
+// or a call is made to the service's API.
+// Functions are executed only if they are triggered by an event or an API call.
 type Function struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -267,6 +313,17 @@ func init() {
 		&Function{},
 		&FunctionList{},
 	)
+}
+
+func (f Function) IsUpdating() bool {
+	conditions := []ConditionType{ConditionBuildReady, ConditionConfigurationReady, ConditionRunning}
+	status := f.Status
+	for _, c := range conditions {
+		if !status.Condition(c).IsTrue() {
+			return true
+		}
+	}
+	return false
 }
 
 func (s *FunctionStatus) Condition(c ConditionType) *Condition {

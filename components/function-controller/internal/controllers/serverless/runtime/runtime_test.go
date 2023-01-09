@@ -15,18 +15,6 @@ func TestGetRuntimeConfig(t *testing.T) {
 		runtime serverlessv1alpha2.Runtime
 		want    runtime.Config
 	}{
-		"nodejs12": {
-			name:    "nodejs12",
-			runtime: serverlessv1alpha2.NodeJs12,
-			want: runtime.Config{
-				Runtime:                 serverlessv1alpha2.NodeJs12,
-				DependencyFile:          "package.json",
-				FunctionFile:            "handler.js",
-				DockerfileConfigMapName: "dockerfile-nodejs12",
-				RuntimeEnvs: []corev1.EnvVar{{Name: "NODE_PATH", Value: "$(KUBELESS_INSTALL_VOLUME)/node_modules"},
-					{Name: "FUNC_RUNTIME", Value: "nodejs12"}},
-			},
-		},
 		"python39": {
 			name:    "python39",
 			runtime: serverlessv1alpha2.Python39,

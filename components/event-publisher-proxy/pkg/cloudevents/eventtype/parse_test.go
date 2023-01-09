@@ -24,6 +24,12 @@ func TestParser(t *testing.T) {
 			wantError:      true,
 		},
 		{
+			name:           "should fail if prefix is duplicated",
+			givenEventType: "one.two.one.two.prefix.test.app.name.123.order.created.v1",
+			givenPrefix:    "one.two",
+			wantError:      true,
+		},
+		{
 			name:           "should fail if event-type is incomplete",
 			givenEventType: "prefix.order.created.v1",
 			givenPrefix:    "prefix",

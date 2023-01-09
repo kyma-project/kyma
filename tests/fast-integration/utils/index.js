@@ -261,7 +261,7 @@ async function getFunction(name, namespace) {
   return JSON.parse(response.body);
 }
 
-async function getConfigMap(name, namespace) {
+async function getConfigMap(name, namespace='default') {
   const path = `/api/v1/namespaces/${namespace}/configmaps/${name}`;
   const response = await k8sDynamicApi.requestPromise({
     url: k8sDynamicApi.basePath + path,
@@ -304,6 +304,7 @@ async function k8sApply(resources, namespace, patch = true) {
             debug(resource.kind, resource.metadata.name, 'created');
           } catch (createError) {
             debug(resource.kind, resource.metadata.name, 'failed to create');
+            debug(JSON.stringify(createError, null, 4));
             throw createError;
           }
         } else {
@@ -314,12 +315,13 @@ async function k8sApply(resources, namespace, patch = true) {
   }
 }
 
-function waitForK8sObject(path, query, checkFn, timeout, timeoutMsg) {
+// Allows to pass watch with different than global K8S context.
+function waitForK8sObject(path, query, checkFn, timeout, timeoutMsg, watcher = watch) {
   debug('waiting for', path);
   let res;
   let timer;
   return new Promise((resolve, reject) => {
-    watch.watch(
+    watcher.watch(
         path,
         query,
         (type, apiObj, watchObj) => {
@@ -419,9 +421,9 @@ function waitForFunction(name, namespace = 'default', timeout = 90_000) {
   );
 }
 
-async function getAllSubscriptions(namespace = 'default') {
+async function getAllSubscriptions(namespace = 'default', crdVersion='v1alpha1') {
   try {
-    const path = `/apis/eventing.kyma-project.io/v1alpha1/namespaces/${namespace}/subscriptions`;
+    const path = `/apis/eventing.kyma-project.io/${crdVersion}/namespaces/${namespace}/subscriptions`;
     const response = await k8sDynamicApi.requestPromise({
       url: k8sDynamicApi.basePath + path,
       qs: {limit: 500},
@@ -466,9 +468,9 @@ async function getEventingBackend(namespace = 'kyma-system') {
   return '';
 }
 
-function waitForSubscription(name, namespace = 'default', timeout = 180_000) {
+function waitForSubscription(name, namespace = 'default', crdVersion='v1alpha1', timeout = 180_000) {
   return waitForK8sObject(
-      `/apis/eventing.kyma-project.io/v1alpha1/namespaces/${namespace}/subscriptions`,
+      `/apis/eventing.kyma-project.io/${crdVersion}/namespaces/${namespace}/subscriptions`,
       {},
       (_type, _apiObj, watchObj) => {
         return (
@@ -1350,11 +1352,25 @@ function eventingSubscription(eventType, sink, name, namespace) {
           },
         ],
       },
-      protocol: 'BEB',
-      protocolsettings: {
-        exemptHandshake: true,
-        qos: 'AT-LEAST-ONCE',
-      },
+      sink: sink /* http://lastorder.test.svc.cluster.local*/,
+    },
+  };
+}
+
+function eventingSubscriptionV1Alpha2(eventType, source, sink, name, namespace, typeMatching='standard') {
+  return {
+    apiVersion: 'eventing.kyma-project.io/v1alpha2',
+    kind: 'Subscription',
+    metadata: {
+      name: `${name}`,
+      namespace: namespace,
+    },
+    spec: {
+      source: source,
+      typeMatching: typeMatching,
+      types: [
+        eventType,
+      ],
       sink: sink /* http://lastorder.test.svc.cluster.local*/,
     },
   };
@@ -1449,6 +1465,106 @@ function deleteEventingBackendK8sSecret(name, namespace='default') {
   };
 
   return k8sDelete([secretJson], namespace);
+}
+
+/**
+ * Creates apirule for the service specified
+ * @param {string} name - name of the configmap
+ * @param {string} namespace - namespace where to create the configmap
+ * @param {string} svcName - service to expose as apirule
+ * @param {int} port - port of the service to expose as apirule
+ */
+async function createApiRuleForService(name, namespace='default', svcName, port) {
+  const apiRuleJson = {
+    apiVersion: 'gateway.kyma-project.io/v1beta1',
+    kind: 'APIRule',
+    metadata: {
+      name,
+      namespace,
+    },
+    spec: {
+      gateway: 'kyma-gateway.kyma-system.svc.cluster.local',
+      host: svcName,
+      service: {
+        name: svcName,
+        port: port,
+      },
+      rules: [{
+        accessStrategies: [{
+          config: {},
+          handler: 'allow',
+        }],
+        methods: ['GET'],
+        path: '/.*',
+      }],
+    },
+  };
+
+  // apply to k8s
+  await k8sApply([apiRuleJson], namespace, true);
+
+  return waitForVirtualService(namespace, name);
+}
+
+/**
+ * Deletes apirule
+ * @param {string} name - name of the apirule
+ * @param {string} namespace - namespace where the apirule exists
+ * @return {Promise<void>}
+ */
+function deleteApiRule(name, namespace='default') {
+  const apiRuleJson = {
+    apiVersion: 'gateway.kyma-project.io/v1beta1',
+    kind: 'APIRule',
+    metadata: {
+      name,
+      namespace,
+    },
+  };
+
+  return k8sDelete([apiRuleJson], namespace);
+}
+
+/**
+ * Creates configmap with the data passed as argument
+ * @param {Object} data - host name of the virtual service exposed to obtain the information
+ * @param {string} name - name of the configmap
+ * @param {string} namespace - namespace where to create the configmap
+ */
+async function createK8sConfigMap(data, name, namespace='default') {
+  const configMapJson = {
+    apiVersion: 'v1',
+    kind: 'ConfigMap',
+    metadata: {
+      name,
+      namespace,
+    },
+    data: data,
+  };
+
+  // apply to k8s
+  await k8sApply([configMapJson], namespace, true);
+
+  return waitForConfigMap(name, namespace);
+}
+
+/**
+ * Deletes configmap
+ * @param {string} name - name of the configmap
+ * @param {string} namespace - namespace where the configmap exists
+ * @return {Promise<void>}
+ */
+function deleteK8sConfigMap(name, namespace='default') {
+  const configMapJson = {
+    apiVersion: 'v1',
+    kind: 'ConfigMap',
+    metadata: {
+      name,
+      namespace,
+    },
+  };
+
+  return k8sDelete([configMapJson], namespace);
 }
 
 /**
@@ -1610,10 +1726,10 @@ async function printEventingPublisherProxyLogs() {
   }
 }
 
-async function printAllSubscriptions(testNamespace) {
+async function printAllSubscriptions(testNamespace, crdVersion='v1alpha1') {
   try {
     debug(`Printing all subscriptions from namespace: ${testNamespace}`);
-    const subs = await getAllSubscriptions(testNamespace);
+    const subs = await getAllSubscriptions(testNamespace, crdVersion);
     debug(JSON.stringify(subs, null, 4));
   } catch (err) {
     error(err);
@@ -1624,7 +1740,16 @@ async function printAllSubscriptions(testNamespace) {
 // getTraceDAG returns a DAG for the provided Jaeger tracing data
 async function getTraceDAG(trace) {
   // Find root spans which are not child of any other span
-  const rootSpans = trace['spans'].filter((s) => !(s['references'].find((r) => r['refType'] === 'CHILD_OF')));
+  const rootSpans = [];
+  for (const span of trace['spans']) {
+    if (span['references'].length === 0) {
+      rootSpans.push(span);
+    }
+
+    if (!trace['spans'].find((s) => s['spanID'] === span['references'][0]['spanID'])) {
+      rootSpans.push(span);
+    }
+  }
 
   // Find and attach child spans for each root span
   for (const root of rootSpans) {
@@ -1710,6 +1835,7 @@ module.exports = {
   wait,
   patchApplicationGateway,
   eventingSubscription,
+  eventingSubscriptionV1Alpha2,
   getVirtualService,
   getPersistentVolumeClaim,
   waitForApplicationCr,
@@ -1730,6 +1856,10 @@ module.exports = {
   printEventingPublisherProxyLogs,
   createEventingBackendK8sSecret,
   deleteEventingBackendK8sSecret,
+  createK8sConfigMap,
+  deleteK8sConfigMap,
+  createApiRuleForService,
+  deleteApiRule,
   getTraceDAG,
   printStatusOfInClusterEventingInfrastructure,
   getFunction,

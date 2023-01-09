@@ -1,4 +1,4 @@
-FROM golang:1.19.2 AS build
+FROM golang:1.19.4 AS build
 
 WORKDIR /src/
 COPY main.go go.* /src/

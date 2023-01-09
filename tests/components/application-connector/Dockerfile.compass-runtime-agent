@@ -13,4 +13,4 @@ FROM scratch
 
 COPY --from=builder /compass-test/compass-test /
 ENTRYPOINT [ "/compass-test" ]
-CMD ["-test.v"]
+CMD ["-test.v", "-test.parallel", "1"]

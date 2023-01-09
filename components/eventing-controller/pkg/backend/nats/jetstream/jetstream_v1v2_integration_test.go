@@ -1,10 +1,14 @@
 package jetstream
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	"testing"
 	"time"
+
+	"github.com/nats-io/nats.go"
+	"github.com/stretchr/testify/require"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
@@ -12,80 +16,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	evtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	evtestingv2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
-	"github.com/nats-io/nats.go"
-	"github.com/pkg/errors"
-	"github.com/stretchr/testify/require"
 )
-
-// TestJetStreamInitialize_NoStreamExists tests if a stream is
-// created when no stream exists in JetStream.
-func TestJetStreamInitialize_NoStreamExists(t *testing.T) {
-	// given
-	for _, newCRD := range []bool{true, false} {
-		t.Run(fmt.Sprintf("Enabled New Crd Version: %v", newCRD), func(t *testing.T) {
-			testEnvironment := setupTestEnvironment(t, newCRD)
-			natsConfig, jsClient := testEnvironment.natsConfig, testEnvironment.jsClient
-			defer testEnvironment.natsServer.Shutdown()
-			defer jsClient.natsConn.Close()
-
-			// No stream exists
-			_, err := jsClient.StreamInfo(natsConfig.JSStreamName)
-			require.True(t, errors.Is(err, nats.ErrStreamNotFound))
-
-			// when
-			var initErr error
-			if newCRD {
-				initErr = testEnvironment.jsBackendv2.Initialize(nil)
-			} else {
-				initErr = testEnvironment.jsBackend.Initialize(nil)
-			}
-
-			// then
-			// A stream is created
-			require.NoError(t, initErr)
-			streamInfo, err := jsClient.StreamInfo(natsConfig.JSStreamName)
-			require.NoError(t, err)
-			require.NotNil(t, streamInfo)
-		})
-	}
-}
-
-// TestJetStreamInitialize_StreamExists tests if a stream is
-// reused and not created when a stream exists in JetStream.
-func TestJetStreamInitialize_StreamExists(t *testing.T) {
-	// given
-	for _, newCRD := range []bool{true, false} {
-		t.Run(fmt.Sprintf("Enabled New Crd Version: %v", newCRD), func(t *testing.T) {
-			testEnvironment := setupTestEnvironment(t, newCRD)
-			natsConfig, jsClient := testEnvironment.natsConfig, testEnvironment.jsClient
-			defer testEnvironment.natsServer.Shutdown()
-			defer jsClient.natsConn.Close()
-
-			// A stream already exists
-			createdStreamInfo, err := jsClient.AddStream(&nats.StreamConfig{
-				Name:    natsConfig.JSStreamName,
-				Storage: nats.MemoryStorage,
-			})
-			require.NotNil(t, createdStreamInfo)
-			require.NoError(t, err)
-
-			// when
-			var initErr error
-			if newCRD {
-				initErr = testEnvironment.jsBackendv2.Initialize(nil)
-			} else {
-				initErr = testEnvironment.jsBackend.Initialize(nil)
-			}
-
-			// then
-			// No new stream should be created
-			require.NoError(t, initErr)
-			reusedStreamInfo, err := jsClient.StreamInfo(natsConfig.JSStreamName)
-			require.NoError(t, err)
-			require.Equal(t, reusedStreamInfo.Created, createdStreamInfo.Created)
-		})
-	}
-}
 
 // TestJetStream_ServerRestart tests that eventing works when NATS server is restarted
 // for scenarios involving the stream storage type and when reconnect attempts are exhausted or not.
@@ -159,7 +90,7 @@ func TestJetStream_ServerRestart(t *testing.T) { //nolint:gocognit
 			testEnvironment := setupTestEnvironment(t, tc.givenEnableCRDVersion)
 			defer testEnvironment.natsServer.Shutdown()
 			defer testEnvironment.jsClient.natsConn.Close()
-			defer func() { _ = testEnvironment.jsClient.DeleteStream(defaultStreamName) }()
+			defer func() { _ = testEnvironment.jsClient.DeleteStream(testEnvironment.natsConfig.JSStreamName) }()
 			var err error
 			if tc.givenEnableCRDVersion {
 				testEnvironment.jsBackendv2.Config.JSStreamStorageType = tc.givenStorageType
@@ -183,7 +114,7 @@ func TestJetStream_ServerRestart(t *testing.T) { //nolint:gocognit
 					evtestingv2.WithTypeMatchingStandard(),
 					evtestingv2.WithMaxInFlight(defaultMaxInFlights),
 				)
-				require.NoError(t, jetstreamv2.AddJSCleanEventTypesToStatus(subv2, testEnvironment.cleanerv2))
+				jetstreamv2.AddJSCleanEventTypesToStatus(subv2, testEnvironment.cleanerv2)
 
 				// when
 				err = testEnvironment.jsBackendv2.SyncSubscription(subv2)
@@ -235,7 +166,7 @@ func TestJetStream_ServerRestart(t *testing.T) { //nolint:gocognit
 				}, 30*time.Second, 2*time.Second)
 			}
 
-			_, err = testEnvironment.jsClient.StreamInfo(defaultStreamName)
+			_, err = testEnvironment.jsClient.StreamInfo(testEnvironment.natsConfig.JSStreamName)
 			if tc.givenStorageType == StorageTypeMemory && tc.givenMaxReconnects == 0 {
 				// for memory storage with reconnects disabled
 				require.True(t, errors.Is(err, nats.ErrStreamNotFound))
@@ -255,7 +186,7 @@ func TestJetStream_ServerRestart(t *testing.T) { //nolint:gocognit
 			require.NoError(t, err)
 
 			// stream exists
-			_, err = testEnvironment.jsClient.StreamInfo(defaultStreamName)
+			_, err = testEnvironment.jsClient.StreamInfo(testEnvironment.natsConfig.JSStreamName)
 			require.NoError(t, err)
 
 			ev2data := fmt.Sprintf("%s%d", "newsampledata", id)
@@ -286,7 +217,7 @@ func TestJetStream_ServerAndSinkRestart(t *testing.T) {
 			testEnvironment := setupTestEnvironment(t, newCRD)
 			defer testEnvironment.natsServer.Shutdown()
 			defer testEnvironment.jsClient.natsConn.Close()
-			defer func() { _ = testEnvironment.jsClient.DeleteStream(defaultStreamName) }()
+			defer func() { _ = testEnvironment.jsClient.DeleteStream(testEnvironment.natsConfig.JSStreamName) }()
 
 			var err error
 			if newCRD {
@@ -309,7 +240,7 @@ func TestJetStream_ServerAndSinkRestart(t *testing.T) {
 					evtestingv2.WithTypeMatchingStandard(),
 					evtestingv2.WithMaxInFlight(defaultMaxInFlights),
 				)
-				require.NoError(t, jetstreamv2.AddJSCleanEventTypesToStatus(subv2, testEnvironment.cleanerv2))
+				jetstreamv2.AddJSCleanEventTypesToStatus(subv2, testEnvironment.cleanerv2)
 
 				// when
 				err = testEnvironment.jsBackendv2.SyncSubscription(subv2)
@@ -351,7 +282,7 @@ func TestJetStream_ServerAndSinkRestart(t *testing.T) {
 			var info *nats.StreamInfo
 
 			require.Eventually(t, func() bool {
-				info, err = testEnvironment.jsClient.StreamInfo(defaultStreamName)
+				info, err = testEnvironment.jsClient.StreamInfo(testEnvironment.natsConfig.JSStreamName)
 				require.NoError(t, err)
 				return info.State.Msgs == expectedNotAcknowledgedMsgs
 			}, 60*time.Second, 5*time.Second)
@@ -372,7 +303,7 @@ func TestJetStream_ServerAndSinkRestart(t *testing.T) {
 				evtesting.WithJetStreamEnabled())
 			// the unacknowledged message must still be present in the stream
 			require.Eventually(t, func() bool {
-				info, err = testEnvironment.jsClient.StreamInfo(defaultStreamName)
+				info, err = testEnvironment.jsClient.StreamInfo(testEnvironment.natsConfig.JSStreamName)
 				require.NoError(t, err)
 				return info.State.Msgs == expectedNotAcknowledgedMsgs
 			}, 60*time.Second, 5*time.Second)
@@ -393,7 +324,7 @@ func TestJetStream_ServerAndSinkRestart(t *testing.T) {
 			// then
 			// no messages should be present in the stream
 			require.Eventually(t, func() bool {
-				info, err = testEnvironment.jsClient.StreamInfo(defaultStreamName)
+				info, err = testEnvironment.jsClient.StreamInfo(testEnvironment.natsConfig.JSStreamName)
 				require.NoError(t, err)
 				return info.State.Msgs == uint64(0)
 			}, 60*time.Second, 5*time.Second)

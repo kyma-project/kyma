@@ -14,28 +14,23 @@ import (
 )
 
 type NamespaceReconciler struct {
-	Log                *zap.SugaredLogger
-	client             client.Client
-	config             Config
-	configMapSvc       ConfigMapService
-	secretSvc          SecretService
-	serviceAccountSvc  ServiceAccountService
-	roleService        RoleService
-	roleBindingService RoleBindingService
+	Log               *zap.SugaredLogger
+	client            client.Client
+	config            Config
+	configMapSvc      ConfigMapService
+	secretSvc         SecretService
+	serviceAccountSvc ServiceAccountService
 }
 
 func NewNamespace(client client.Client, log *zap.SugaredLogger, config Config,
-	configMapSvc ConfigMapService, secretSvc SecretService, serviceAccountSvc ServiceAccountService,
-	roleService RoleService, roleBindingService RoleBindingService) *NamespaceReconciler {
+	configMapSvc ConfigMapService, secretSvc SecretService, serviceAccountSvc ServiceAccountService) *NamespaceReconciler {
 	return &NamespaceReconciler{
-		client:             client,
-		Log:                log,
-		config:             config,
-		configMapSvc:       configMapSvc,
-		secretSvc:          secretSvc,
-		serviceAccountSvc:  serviceAccountSvc,
-		roleService:        roleService,
-		roleBindingService: roleBindingService,
+		client:            client,
+		Log:               log,
+		config:            config,
+		configMapSvc:      configMapSvc,
+		secretSvc:         secretSvc,
+		serviceAccountSvc: serviceAccountSvc,
 	}
 }
 
@@ -102,32 +97,6 @@ func (r *NamespaceReconciler) Reconcile(ctx context.Context, request ctrl.Reques
 	for _, secret := range secrets {
 		s := secret
 		if err := r.secretSvc.UpdateNamespace(ctx, logger, instance.GetName(), &s); err != nil {
-			return ctrl.Result{}, err
-		}
-	}
-
-	logger.Info(fmt.Sprintf("Updating Roles in namespace '%s'", instance.GetName()))
-	roles, err := r.roleService.ListBase(ctx)
-	if err != nil {
-		logger.Error(err, "Listing base Roles failed")
-		return ctrl.Result{}, err
-	}
-	for _, role := range roles {
-		rr := role
-		if err := r.roleService.UpdateNamespace(ctx, logger, instance.GetName(), &rr); err != nil {
-			return ctrl.Result{}, err
-		}
-	}
-
-	logger.Info(fmt.Sprintf("Updating RoleBindings in namespace '%s'", instance.GetName()))
-	roleBindings, err := r.roleBindingService.ListBase(ctx)
-	if err != nil {
-		logger.Error(err, "Listing base RoleBindings failed")
-		return ctrl.Result{}, err
-	}
-	for _, roleBinding := range roleBindings {
-		rb := roleBinding
-		if err := r.roleBindingService.UpdateNamespace(ctx, logger, instance.GetName(), &rb); err != nil {
 			return ctrl.Result{}, err
 		}
 	}

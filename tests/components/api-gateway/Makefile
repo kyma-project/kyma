@@ -21,11 +21,10 @@ all: help
 ## Test:
 
 test: ## Run the tests of the project
-ifeq ($(EXPORT_RESULT), true)
-	$(GOTEST) -v -race . --godog.format=pretty,junit:junit-report.xml,cucumber:cucumber-report.json
-else
-	$(GOTEST) -v -race .
-endif
+	$(GOTEST) -run TestApiGateway . -v -race
+
+test-custom-domain:
+	GODEBUG=netdns=cgo CGO_ENABLED=1 $(GOTEST) -run "^TestCustomDomain$$" . -v -race
 
 test-k3d: ## Prepare k3d and run tests
 	export KYMA_DOMAIN="local.kyma.dev"
@@ -44,6 +43,15 @@ test-k3d: ## Prepare k3d and run tests
 ## Prerequisites:
 setup: ## Setup local installation with the same configuration as pipeline
 	./prepare_local.sh
+
+setup-custom-domain: ## Setup local installation with the same configuration as pipeline
+	export TEST_HYDRA_ADDRESS="https://oauth2.$(TEST_DOMAIN)"
+	export TEST_REQUEST_TIMEOUT="180"
+	export TEST_REQUEST_DELAY="2"
+	export TEST_CLIENT_TIMEOUT=30s
+	export TEST_CONCURENCY="1"
+	export EXPORT_RESULT="true"
+
 ## Help:
 help: ## Show this help.
 	@echo ''

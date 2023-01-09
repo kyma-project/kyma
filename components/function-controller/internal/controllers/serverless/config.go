@@ -12,7 +12,6 @@ type FunctionConfig struct {
 	ImageRegistryExternalDockerConfigSecretName string        `envconfig:"default=serverless-registry-config"`
 	PackageRegistryConfigSecretName             string        `envconfig:"default=serverless-package-registry-config"`
 	ImagePullAccountName                        string        `envconfig:"default=serverless-function"`
-	BuildServiceAccountName                     string        `envconfig:"default=serverless-build"`
 	TargetCPUUtilizationPercentage              int32         `envconfig:"default=50"`
 	RequeueDuration                             time.Duration `envconfig:"default=1m"`
 	FunctionReadyRequeueDuration                time.Duration `envconfig:"default=5m"`

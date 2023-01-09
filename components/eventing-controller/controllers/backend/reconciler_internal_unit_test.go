@@ -1,8 +1,19 @@
 package backend
 
 import (
+	"context"
 	"errors"
+	"math/rand"
 	"testing"
+
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+
+	"github.com/stretchr/testify/require"
+	admissionv1 "k8s.io/api/admissionregistration/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	"github.com/stretchr/testify/assert"
 
@@ -88,5 +99,286 @@ func TestGetSecretForPublisher(t *testing.T) {
 			assert.Nil(t, err)
 			assert.Equal(t, tc.expectedSecret, *gotPublisherSecret, "invalid publisher secret")
 		})
+	}
+}
+
+// TestGetSecretForPublisher verifies the successful and failing retrieval
+// of secrets.
+func TestCreateDeleteNATSSecret(t *testing.T) {
+	ctx := context.Background()
+
+	testCases := []struct {
+		name        string
+		givenSecret *corev1.Secret
+	}{
+		{
+			name:        "create secret when secret does not exist",
+			givenSecret: &corev1.Secret{},
+		},
+		{
+			name:        "do not recreate secret when secret exists",
+			givenSecret: constructNATSSecret(),
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			// given
+			r := setup(tc.givenSecret)
+
+			// when
+			err := r.createNATSSecret(ctx)
+
+			// then
+			assert.NoError(t, err)
+			gotSecret := corev1.Secret{}
+			err = r.Client.Get(ctx, client.ObjectKey{Name: natsSecretName, Namespace: kymaSystemNamespace}, &gotSecret)
+			assert.NoError(t, err)
+
+			if tc.givenSecret.ObjectMeta.Name == natsSecretName {
+				assert.Equal(t, gotSecret.Data, tc.givenSecret.Data)
+			} else {
+				assert.NotNil(t, gotSecret.Data)
+			}
+
+			// when
+			err = r.deleteNATSSecret(ctx)
+
+			// then
+			assert.NoError(t, err)
+			gotSecret = corev1.Secret{}
+			err = r.Client.Get(ctx, client.ObjectKey{Name: natsSecretName, Namespace: kymaSystemNamespace}, &gotSecret)
+			assert.True(t, k8serrors.IsNotFound(err))
+		})
+	}
+}
+
+func Test_updateMutatingValidatingWebhookWithCABundle(t *testing.T) {
+	// given
+	ctx := context.Background()
+	dummyCABundle := make([]byte, 20)
+	rand.Read(dummyCABundle)
+	newCABundle := make([]byte, 20)
+	rand.Read(newCABundle)
+
+	testCases := []struct {
+		name             string
+		givenObjects     []client.Object
+		wantMutatingWH   *admissionv1.MutatingWebhookConfiguration
+		wantValidatingWH *admissionv1.ValidatingWebhookConfiguration
+		wantError        error
+	}{
+		{
+			name:      "secret does not exist",
+			wantError: errObjectNotFound,
+		},
+		{
+			name: "secret exits but mutatingWH does not exist",
+			givenObjects: []client.Object{
+				getSecretWithTLSSecret(nil),
+			},
+			wantError: errObjectNotFound,
+		},
+		{
+			name: "mutatingWH exists, validatingWH does not exist",
+			givenObjects: []client.Object{
+				getSecretWithTLSSecret(nil),
+				getMutatingWebhookConfig([]admissionv1.MutatingWebhook{
+					{
+						ClientConfig: admissionv1.WebhookClientConfig{},
+					},
+				}),
+			},
+			wantError: errObjectNotFound,
+		},
+		{
+			name: "mutatingWH, validatingWH exists but does not contain webhooks",
+			givenObjects: []client.Object{
+				getSecretWithTLSSecret(nil),
+				getMutatingWebhookConfig(nil),
+				getValidatingWebhookConfig(nil),
+			},
+			wantError: errInvalidObject,
+		},
+		{
+			name: "validatingWH does not contain webhooks",
+			givenObjects: []client.Object{
+				getSecretWithTLSSecret(nil),
+				getMutatingWebhookConfig([]admissionv1.MutatingWebhook{
+					{
+						ClientConfig: admissionv1.WebhookClientConfig{},
+					},
+				}),
+				getValidatingWebhookConfig(nil),
+			},
+			wantError: errInvalidObject,
+		},
+		{
+			name: "WH does not contain valid CABundle",
+			givenObjects: []client.Object{
+				getSecretWithTLSSecret(dummyCABundle),
+				getMutatingWebhookConfig([]admissionv1.MutatingWebhook{
+					{
+						ClientConfig: admissionv1.WebhookClientConfig{},
+					},
+				}),
+				getValidatingWebhookConfig([]admissionv1.ValidatingWebhook{
+					{
+						ClientConfig: admissionv1.WebhookClientConfig{},
+					},
+				}),
+			},
+			wantMutatingWH: getMutatingWebhookConfig([]admissionv1.MutatingWebhook{
+				{
+					ClientConfig: admissionv1.WebhookClientConfig{
+						CABundle: dummyCABundle,
+					},
+				},
+			}),
+			wantValidatingWH: getValidatingWebhookConfig([]admissionv1.ValidatingWebhook{
+				{
+					ClientConfig: admissionv1.WebhookClientConfig{
+						CABundle: dummyCABundle,
+					},
+				},
+			}),
+			wantError: nil,
+		},
+		{
+			name: "WH contains valid CABundle",
+			givenObjects: []client.Object{
+				getSecretWithTLSSecret(dummyCABundle),
+				getMutatingWebhookConfig([]admissionv1.MutatingWebhook{
+					{
+						ClientConfig: admissionv1.WebhookClientConfig{
+							CABundle: dummyCABundle,
+						},
+					},
+				}),
+				getValidatingWebhookConfig([]admissionv1.ValidatingWebhook{
+					{
+						ClientConfig: admissionv1.WebhookClientConfig{
+							CABundle: dummyCABundle,
+						},
+					},
+				}),
+			},
+			wantMutatingWH: getMutatingWebhookConfig([]admissionv1.MutatingWebhook{
+				{
+					ClientConfig: admissionv1.WebhookClientConfig{
+						CABundle: dummyCABundle,
+					},
+				},
+			}),
+			wantValidatingWH: getValidatingWebhookConfig([]admissionv1.ValidatingWebhook{
+				{
+					ClientConfig: admissionv1.WebhookClientConfig{
+						CABundle: dummyCABundle,
+					},
+				},
+			}),
+			wantError: nil,
+		},
+		{
+			name: "WH contains outdated valid CABundle",
+			givenObjects: []client.Object{
+				getSecretWithTLSSecret(newCABundle),
+				getMutatingWebhookConfig([]admissionv1.MutatingWebhook{
+					{
+						ClientConfig: admissionv1.WebhookClientConfig{
+							CABundle: dummyCABundle,
+						},
+					},
+				}),
+				getValidatingWebhookConfig([]admissionv1.ValidatingWebhook{
+					{
+						ClientConfig: admissionv1.WebhookClientConfig{
+							CABundle: dummyCABundle,
+						},
+					},
+				}),
+			},
+			wantMutatingWH: getMutatingWebhookConfig([]admissionv1.MutatingWebhook{
+				{
+					ClientConfig: admissionv1.WebhookClientConfig{
+						CABundle: newCABundle,
+					},
+				},
+			}),
+			wantValidatingWH: getValidatingWebhookConfig([]admissionv1.ValidatingWebhook{
+				{
+					ClientConfig: admissionv1.WebhookClientConfig{
+						CABundle: newCABundle,
+					},
+				},
+			}),
+			wantError: nil,
+		},
+	}
+
+	for _, tC := range testCases {
+		testCase := tC
+		t.Run(testCase.name, func(t *testing.T) {
+			// given
+			r := setup(tC.givenObjects...)
+
+			// when
+			err := r.updateMutatingValidatingWebhookWithCABundle(ctx)
+
+			// then
+			require.ErrorIs(t, err, tC.wantError)
+			if tC.wantError == nil {
+				mutatingWH, validatingWH, newErr := r.getMutatingAndValidatingWebHookConfig(ctx)
+				require.NoError(t, newErr)
+				require.Equal(t, mutatingWH.Webhooks[0], tC.wantMutatingWH.Webhooks[0])
+				require.Equal(t, validatingWH.Webhooks[0], tC.wantValidatingWH.Webhooks[0])
+			}
+		})
+	}
+}
+
+func setup(objs ...client.Object) Reconciler {
+	fakeClient := fake.NewClientBuilder().WithObjects(objs...).Build()
+	return Reconciler{
+		Client: fakeClient,
+		cfg:    getTestBackendConfig(),
+	}
+}
+
+func getSecretWithTLSSecret(dummyCABundle []byte) *corev1.Secret {
+	return &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      getTestBackendConfig().WebhookSecretName,
+			Namespace: kymaSystemNamespace,
+		},
+		Data: map[string][]byte{
+			tlsCertField: dummyCABundle,
+		},
+	}
+}
+
+func getMutatingWebhookConfig(webhook []admissionv1.MutatingWebhook) *admissionv1.MutatingWebhookConfiguration {
+	return &admissionv1.MutatingWebhookConfiguration{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: getTestBackendConfig().MutatingWebhookName,
+		},
+		Webhooks: webhook,
+	}
+}
+
+func getValidatingWebhookConfig(webhook []admissionv1.ValidatingWebhook) *admissionv1.ValidatingWebhookConfiguration {
+	return &admissionv1.ValidatingWebhookConfiguration{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: getTestBackendConfig().ValidatingWebhookName,
+		},
+		Webhooks: webhook,
+	}
+}
+
+func getTestBackendConfig() env.BackendConfig {
+	return env.BackendConfig{
+		WebhookSecretName:     "webhookSecret",
+		MutatingWebhookName:   "mutatingWH",
+		ValidatingWebhookName: "validatingWH",
 	}
 }

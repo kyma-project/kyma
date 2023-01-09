@@ -13,15 +13,21 @@ deployment:
       memory: 64Mi
   securityContext:
     allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
     capabilities:
       drop:
       - ALL
-    privileged: false
     runAsGroup: 65534
     runAsNonRoot: true
     runAsUser: 65534
+    seccompProfile:
+      type: RuntimeDefault
 
 config:
+  reconciliation:
+    # In seconds
+    defaultPeriod: 3600
+    errorPeriod: 60
   oathkeeper:
     service: ory-oathkeeper-proxy.kyma-system.svc.cluster.local
     port: 4455
@@ -79,10 +85,6 @@ config:
 # Configure node affinity
 affinity: {}
 
-# Configure PodSecurityPolicy
-podSecurityPolicy:
-  enabled: true
-
 tests:
   enabled: true
   labels:
@@ -102,6 +104,9 @@ tests:
     runAsNonRoot: true
     runAsGroup: 65534
 
+webhook:
+  crdName: "apirules.gateway.kyma-project.io"
+
 global:
   domainName: kyma.example.com
   containerRegistry:
@@ -109,7 +114,7 @@ global:
   images:
     api_gateway_controller:
       name: "api-gateway-controller"
-      version: "1.1.0"
+      version: "1.2.0"
     api_gateway_webhook_certificates:
       name: "api-gateway-webhook-certificates"
-      version: "1.1.0"
+      version: "1.2.0"

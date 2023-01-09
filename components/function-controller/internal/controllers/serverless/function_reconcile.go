@@ -23,6 +23,10 @@ import (
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 )
 
+const (
+	healthCheckTimeout = time.Second
+)
+
 //go:generate mockery --name=GitClient --output=automock --outpkg=automock --case=underscore
 type GitClient interface {
 	LastCommit(options git.Options) (string, error)
@@ -98,10 +102,7 @@ func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) (controller.Cont
 
 func (r *FunctionReconciler) Reconcile(ctx context.Context, request ctrl.Request) (ctrl.Result, error) {
 	if IsHealthCheckRequest(request) {
-		r.Log.Debug("health check request received")
-		r.healthCh <- true
-
-		r.Log.Debug("health check request responded")
+		r.sendHealthCheck()
 		return ctrl.Result{}, nil
 	}
 
@@ -156,6 +157,17 @@ func (r *FunctionReconciler) Reconcile(ctx context.Context, request ctrl.Request
 	return stateReconciler.reconcile(ctx, instance)
 }
 
+func (r *FunctionReconciler) sendHealthCheck() {
+	r.Log.Debug("health check request received")
+
+	select {
+	case r.healthCh <- true:
+		r.Log.Debug("health check request responded")
+	case <-time.After(healthCheckTimeout):
+		r.Log.Warn(errors.New("timeout when responding to health check"))
+	}
+}
+
 func (r *FunctionReconciler) readDockerConfig(ctx context.Context, instance *serverlessv1alpha2.Function) (DockerConfig, error) {
 	var secret corev1.Secret
 	// try reading user config
@@ -183,7 +195,6 @@ func (r *FunctionReconciler) readDockerConfig(ctx context.Context, instance *ser
 			PushAddress:                    data["registryAddress"],
 			PullAddress:                    data["registryAddress"],
 		}, nil
-
 	}
 
 	return DockerConfig{}, errors.Errorf("Docker registry configuration not found, none of configuration secrets (%s, %s) found in function namespace", r.config.ImageRegistryDefaultDockerConfigSecretName, r.config.ImageRegistryExternalDockerConfigSecretName)

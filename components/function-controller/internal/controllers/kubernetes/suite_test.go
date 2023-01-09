@@ -3,8 +3,6 @@ package kubernetes
 import (
 	"path/filepath"
 
-	rbacv1 "k8s.io/api/rbac/v1"
-
 	"github.com/onsi/gomega"
 	"github.com/vrischmann/envconfig"
 	corev1 "k8s.io/api/core/v1"
@@ -64,17 +62,4 @@ func compareServiceAccounts(g *gomega.WithT, actual, expected *corev1.ServiceAcc
 	g.Expect(actual.Secrets).To(gomega.Equal(expected.Secrets))
 	g.Expect(actual.ImagePullSecrets).To(gomega.Equal(expected.ImagePullSecrets))
 	g.Expect(actual.AutomountServiceAccountToken).To(gomega.Equal(expected.AutomountServiceAccountToken))
-}
-
-func compareRole(g *gomega.WithT, actual, expected *rbacv1.Role) {
-	g.Expect(actual.GetLabels()).To(gomega.Equal(expected.GetLabels()))
-	g.Expect(actual.GetAnnotations()).To(gomega.Equal(expected.GetAnnotations()))
-	g.Expect(actual.Rules).To(gomega.Equal(expected.Rules))
-}
-
-func compareRoleBinding(g *gomega.WithT, actual, expected *rbacv1.RoleBinding) {
-	g.Expect(actual.GetLabels()).To(gomega.Equal(expected.GetLabels()))
-	g.Expect(actual.GetAnnotations()).To(gomega.Equal(expected.GetAnnotations()))
-	g.Expect(actual.RoleRef).To(gomega.Equal(expected.RoleRef))
-	g.Expect(actual.Subjects).To(gomega.Equal(expected.Subjects))
 }

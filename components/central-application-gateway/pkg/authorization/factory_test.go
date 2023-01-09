@@ -2,6 +2,7 @@ package authorization
 
 import (
 	"crypto/tls"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/testconsts"
 	"net/http"
 	"testing"
 
@@ -147,19 +148,17 @@ func TestStrategyFactory(t *testing.T) {
 
 	t.Run("should create oauth with cert strategy", func(t *testing.T) {
 		// given
-		pair, err := tls.X509KeyPair(certificate, privateKey)
-		require.NoError(t, err)
-
 		oauthClientMock := &oauthMocks.Client{}
-		oauthClientMock.On("GetTokenMTLS", "clientId", "www.example.com/token", pair, (*map[string][]string)(nil), (*map[string][]string)(nil), false).Return("token", nil)
+		oauthClientMock.On("GetTokenMTLS", "clientId", "www.example.com/token", []byte(testconsts.Certificate), []byte(testconsts.PrivateKey), (*map[string][]string)(nil), (*map[string][]string)(nil), false).Return("token", nil)
 
 		factory := authorizationStrategyFactory{oauthClient: oauthClientMock}
 		credentials := &Credentials{
 			OAuthWithCert: &OAuthWithCert{
-				ClientID:    "clientId",
-				Certificate: certificate,
-				PrivateKey:  privateKey,
-				URL:         "www.example.com/token",
+				ClientID:     "clientId",
+				ClientSecret: "clientSecret",
+				Certificate:  certificate,
+				PrivateKey:   privateKey,
+				URL:          "www.example.com/token",
 			},
 		}
 

@@ -14,6 +14,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"go.uber.org/zap/zaptest/observer"
 )
 
@@ -41,6 +42,26 @@ func TestLogger(t *testing.T) {
 		// then
 		require.NotEqual(t, 0, observedLogs.Len())
 		t.Log(observedLogs.All())
+	})
+
+	t.Run("should log debug log after changing atomic level", func(t *testing.T) {
+		// given
+		atomic := zap.NewAtomicLevel()
+		atomic.SetLevel(zapcore.WarnLevel)
+		core, observedLogs := observer.New(atomic)
+		log, err := logger.NewWithAtomicLevel(logger.JSON, atomic, core)
+		require.NoError(t, err)
+		zapLogger := log.WithContext()
+
+		// when
+		zapLogger.Info("log anything")
+		require.Equal(t, 0, observedLogs.Len())
+
+		atomic.SetLevel(zapcore.InfoLevel)
+		zapLogger.Info("log anything 2")
+
+		// then
+		require.Equal(t, 1, observedLogs.Len())
 	})
 
 	t.Run("should log in the right json format", func(t *testing.T) {

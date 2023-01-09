@@ -10,8 +10,6 @@ import (
 	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
 	"k8s.io/client-go/kubernetes/scheme"
 
-	rbacv1 "k8s.io/api/rbac/v1"
-
 	"github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -31,8 +29,6 @@ func TestNamespaceReconciler_Reconcile(t *testing.T) {
 	configMapSvc := NewConfigMapService(resourceClient, testCfg)
 	secretSvc := NewSecretService(resourceClient, testCfg)
 	serviceAccountSvc := NewServiceAccountService(resourceClient, testCfg)
-	roleSvc := NewRoleService(resourceClient, testCfg)
-	roleBindingSvc := NewRoleBindingService(resourceClient, testCfg)
 
 	cfgNamespace := newFixNamespace(testCfg.BaseNamespace)
 	g.Expect(k8sClient.Create(context.TODO(), cfgNamespace)).To(gomega.Succeed())
@@ -49,14 +45,8 @@ func TestNamespaceReconciler_Reconcile(t *testing.T) {
 	baseServiceAccount := newFixBaseServiceAccount(testCfg.BaseNamespace, "ah-tak-przeciez")
 	g.Expect(k8sClient.Create(context.TODO(), baseServiceAccount)).To(gomega.Succeed())
 
-	baseRole := newFixBaseRole(testCfg.BaseNamespace, "ah-tak-przeciez")
-	g.Expect(k8sClient.Create(context.TODO(), baseRole)).To(gomega.Succeed())
-
-	baseRoleBinding := newFixBaseRoleBinding(testCfg.BaseNamespace, "ah-tak-przeciez", userNamespace.GetName())
-	g.Expect(k8sClient.Create(context.TODO(), baseRoleBinding)).To(gomega.Succeed())
-
 	request := ctrl.Request{NamespacedName: types.NamespacedName{Name: userNamespace.GetName()}}
-	reconciler := NewNamespace(k8sClient, zap.NewNop().Sugar(), testCfg, configMapSvc, secretSvc, serviceAccountSvc, roleSvc, roleBindingSvc)
+	reconciler := NewNamespace(k8sClient, zap.NewNop().Sugar(), testCfg, configMapSvc, secretSvc, serviceAccountSvc)
 	namespace := userNamespace.GetName()
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -85,14 +75,6 @@ func TestNamespaceReconciler_Reconcile(t *testing.T) {
 	g.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseServiceAccount.GetName()}, serviceAccount)).To(gomega.Succeed())
 	compareServiceAccounts(g, serviceAccount, baseServiceAccount)
 
-	role := &rbacv1.Role{}
-	g.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseRole.GetName()}, role)).To(gomega.Succeed())
-	compareRole(g, role, baseRole)
-
-	roleBinding := &rbacv1.RoleBinding{}
-	g.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseRoleBinding.GetName()}, roleBinding)).To(gomega.Succeed())
-	compareRoleBinding(g, roleBinding, baseRoleBinding)
-
 	t.Log("one more time reconciling the Namespace")
 	result, err = reconciler.Reconcile(ctx, request)
 	g.Expect(err).To(gomega.BeNil())
@@ -110,14 +92,6 @@ func TestNamespaceReconciler_Reconcile(t *testing.T) {
 	serviceAccount = &corev1.ServiceAccount{}
 	g.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseServiceAccount.GetName()}, serviceAccount)).To(gomega.Succeed())
 	compareServiceAccounts(g, serviceAccount, baseServiceAccount)
-
-	role = &rbacv1.Role{}
-	g.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseRole.GetName()}, role)).To(gomega.Succeed())
-	compareRole(g, role, baseRole)
-
-	roleBinding = &rbacv1.RoleBinding{}
-	g.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseRoleBinding.GetName()}, roleBinding)).To(gomega.Succeed())
-	compareRoleBinding(g, roleBinding, baseRoleBinding)
 }
 
 func TestNamespaceReconciler_predicate(t *testing.T) {

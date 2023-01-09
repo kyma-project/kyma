@@ -59,23 +59,26 @@ This tutorial shows only one possible use case. There are many more use cases on
 >**NOTE:** In this example, there's no sanitization logic. The `sanitize` Function is just a placeholder.
 
    ```js
-   const { v4: uuidv4 } = require('uuid');
-   require('axios');
    module.exports = {
-       main: function (event, context) {
-           let sanitsedData = sanitise(event.data)
-           var eventOut=event.buildResponseCloudEvent(uuidv4(), "sap.kyma.custom.acme.payload.sanitised.v1", sanitisedData);
-           eventOut.source="kyma"
-           eventOut.specversion="1.0"
-           event.publishCloudEvent(eventOut);
-           console.log(`Payload pushed to sap.kyma.custom.acme.payload.sanitised.v1`,eventOut)
-           return eventOut;
-       }
+      main: async function (event, context) {
+         let sanitisedData = sanitise(event.data)
+
+         const eventType = "sap.kyma.custom.acme.payload.sanitised.v1";
+         const eventSource = "kyma";
+         
+         return await event.emitCloudEvent(eventType, eventSource, sanitisedData)
+               .then(resp => {
+                  return "Event sent";
+               }).catch(err=> {
+                  console.error(err)
+                  return err;
+               });
+      }
    }
    let sanitise = (data)=>{
-       console.log(`sanitising data...`)
-       console.log(data)
-       return data
+      console.log(`sanitising data...`)
+      console.log(data)
+      return data
    }
    ```
    >**NOTE:** The `sap.kyma.custom.acme.payload.sanitised.v1` is a sample event type declared by the emitter Function when publishing events. You can choose a different one that better suits your use case. Keep in mind the constraints described on the [Event names](../../05-technical-reference/evnt-01-event-names.md) page. The receiver subscribes to the event type to consume the events.
@@ -96,7 +99,7 @@ This tutorial shows only one possible use case. There are many more use cases on
       export KYMA_DOMAIN={KYMA_DOMAIN_VARIABLE}
       
       curl -X POST https://incoming.${KYMA_DOMAIN}
-      -H 'Content-Type: application/cloudevents+json'
+      -H 'Content-Type: application/json'
       -d '{"foo":"bar"}'
       ```
 ### Create the receiver Function
@@ -111,7 +114,7 @@ This tutorial shows only one possible use case. There are many more use cases on
     ```yaml
     name: event-receiver
     namespace: default
-    runtime: nodejs14
+    runtime: nodejs16
     source:
        sourceType: inline
     subscriptions:

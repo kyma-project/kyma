@@ -59,6 +59,7 @@ func (fn *Function) getBasicValidations() []validationFunction {
 		fn.Spec.validateFunctionResources,
 		fn.Spec.validateBuildResources,
 		fn.Spec.validateSources,
+		fn.Spec.validateSecretMounts,
 	}
 }
 
@@ -152,7 +153,7 @@ func (spec *FunctionSpec) validateGitAuthSecretName(_ *ValidationConfig) error {
 	return nil
 }
 
-var ErrInvalidGitRepositoryAuthType = fmt.Errorf("invalid git reposiotry authentication type")
+var ErrInvalidGitRepositoryAuthType = fmt.Errorf("invalid git repository authentication type")
 
 func (spec *FunctionSpec) validateGitAuthType(_ *ValidationConfig) error {
 	switch spec.Source.GitRepository.Auth.Type {
@@ -166,7 +167,7 @@ func (spec *FunctionSpec) validateGitAuthType(_ *ValidationConfig) error {
 func (spec *FunctionSpec) validateRuntime(_ *ValidationConfig) error {
 	runtimeName := spec.Runtime
 	switch runtimeName {
-	case Python39, NodeJs12, NodeJs14, NodeJs16:
+	case Python39, NodeJs14, NodeJs16:
 		return nil
 	}
 	return fmt.Errorf("spec.runtime contains unsupported value")
@@ -325,6 +326,42 @@ func (spec *FunctionSpec) validateLabels(_ *ValidationConfig) error {
 
 	errs := v1validation.ValidateLabels(labels, fieldPath)
 	return errs.ToAggregate()
+}
+
+func (spec *FunctionSpec) validateSecretMounts(_ *ValidationConfig) error {
+	var allErrs []string
+	secretMounts := spec.SecretMounts
+	for _, secretMount := range secretMounts {
+		allErrs = append(allErrs,
+			utilvalidation.IsDNS1123Subdomain(secretMount.SecretName)...)
+	}
+
+	if !secretNamesAreUnique(secretMounts) {
+		allErrs = append(allErrs, "secretNames should be unique")
+	}
+
+	if !secretMountPathAreNotEmpty(secretMounts) {
+		allErrs = append(allErrs, "mountPath should not be empty")
+	}
+
+	return returnAllErrs("invalid spec.secretMounts", allErrs)
+}
+
+func secretNamesAreUnique(secretMounts []SecretMount) bool {
+	uniqueSecretNames := make(map[string]bool)
+	for _, secretMount := range secretMounts {
+		uniqueSecretNames[secretMount.SecretName] = true
+	}
+	return len(uniqueSecretNames) == len(secretMounts)
+}
+
+func secretMountPathAreNotEmpty(secretMounts []SecretMount) bool {
+	for _, secretMount := range secretMounts {
+		if secretMount.MountPath == "" {
+			return false
+		}
+	}
+	return true
 }
 
 type property struct {
