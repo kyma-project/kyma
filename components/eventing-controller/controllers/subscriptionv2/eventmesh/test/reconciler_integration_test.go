@@ -257,7 +257,7 @@ func Test_CreateSubscription(t *testing.T) {
 			wantSubActiveEventCheck:  true,
 		},
 		{
-			name: "should mark a non-cleaned Subscription as ready",
+			name: "should mark a non-clean Subscription as ready",
 			givenSubscriptionFunc: func(namespace string) *eventingv1alpha2.Subscription {
 				return reconcilertesting.NewSubscription(testName, namespace,
 					reconcilertesting.WithNotCleanSource(),
