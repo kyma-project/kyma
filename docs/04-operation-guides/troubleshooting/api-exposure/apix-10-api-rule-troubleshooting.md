@@ -269,7 +269,7 @@ Please refer to the technical reference documentation for the [blocklisted servi
 ---
 ## Issue - Host already occupied
 
-If your APIRule specifies a host that is already used in another APIRule, e.g. having two APIRules specifying same host:
+If your APIRule specifies a host that is already used in another APIRule or Virtual Service, e.g. having two APIRules specifying same host:
 
 ```yaml
 spec:
