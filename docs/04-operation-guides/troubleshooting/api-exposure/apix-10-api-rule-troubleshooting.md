@@ -323,7 +323,6 @@ You will get the following `APIRuleStatus` error:
 You should use `noop` and `allow` handlers without any configurations, e.g.
 
 ```yaml
-```yaml
 spec:
   ...
   rules:
