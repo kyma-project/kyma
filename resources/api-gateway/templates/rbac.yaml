@@ -25,6 +25,15 @@ rules:
   - apiGroups: ["oathkeeper.ory.sh"]
     resources: ["rules"]
     verbs: ["create", "delete", "get", "patch", "list", "watch", "update"]
+  - apiGroups: ["security.istio.io"]
+    resources: ["authorizationpolicies"]
+    verbs: ["create", "delete", "get", "patch", "list", "watch", "update"]
+  - apiGroups: ["security.istio.io"]
+    resources: ["requestauthentications"]
+    verbs: ["create", "delete", "get", "patch", "list", "watch", "update"]
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["create", "get", "patch", "list", "watch", "update"]
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
