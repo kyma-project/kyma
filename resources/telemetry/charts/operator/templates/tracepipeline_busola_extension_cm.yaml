@@ -267,27 +267,10 @@ data:
       "category": "Observability",
       "urlPath": "tracepipelines",
       "scope": "cluster",
-      "description": "Configure log selection, filters, and outputs",
+      "description": "Configure custom Trace Pipeline",
     }
   list: |-
     [
-       {
-        "source": "$each(spec.output, function($v, $k) {$v.url.value or $v.url.valueFrom.secretKeyRef.name or $v.host.value or $v.host.valueFrom.secretKeyRef.name ? $k})",
-         "placeholder": "custom",
-        "type": "string",
-        "name": "Type",
-        "isSelected": true,
-        "widget": "Text"
-      },
-      {
-        "name": "Unsupported-Mode",
-        "source": "status.unsupportedMode",
-        "widget": "Badge",
-        "highlights": {
-          "positive": ["false"],
-          "negative": ["true"]
-        }
-      },
       {
         "source": "status.conditions[-1].type",
         "name": "Status",
