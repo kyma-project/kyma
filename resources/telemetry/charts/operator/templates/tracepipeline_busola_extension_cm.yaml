@@ -1,3 +1,4 @@
+{{- if .Values.controllers.tracing.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -12,7 +13,7 @@ data:
     {
       "header": [
          {
-          "source": "$each(spec.output, function($v, $k) {$v.url.value or $v.url.valueFrom.secretKeyRef.name or $v.host.value or $v.host.valueFrom.secretKeyRef.name ? $k})",
+          "source": "$each(spec.output, function($v, $k) {$v.endpoint.value or $v.endpoint.valueFrom.secretKeyRef.name ? $k})",
           "placeholder": "custom",
           "type": "string",
           "name": "Type",
@@ -48,40 +49,47 @@ data:
                       "visibility": "$exists(spec.output.otlp.protocol)",
                     },
                     {
-                      "name": "User",
+                      "name": "Authentication",
                       "widget": "Panel",
-                      "visibility": "$exists(spec.output.otlp.authentication.basic.user)",
+                      "visibility": "$exists(spec.output.otlp.authentication)",
                       "children": [
                         {
-                          "name": "Value",
-                          "source": "spec.output.otlp.authentication.basic.user.value",
-                          "visibility": "$exists(spec.output.otlp.authentication.basic.user.value)"
+                          "name": "User",
+                          "widget": "Panel",
+                          "visibility": "$exists(spec.output.otlp.authentication.basic.user)",
+                          "children": [
+                            {
+                              "name": "Value",
+                              "source": "spec.output.otlp.authentication.basic.user.value",
+                              "visibility": "$exists(spec.output.otlp.authentication.basic.user.value)"
+                            },
+                            {
+                              "name": "Value From Secret",
+                              "widget": "ResourceRefs",
+                              "source": "spec.output.otlp.authentication.basic.user.valueFrom.secretKeyRef",
+                              "kind": "Secret",
+                              "visibility": "$exists(spec.output.otlp.authentication.basic.user.valueFrom.secretKeyRef.name)"
+                            }
+                          ]
                         },
                         {
-                          "name": "Value From Secret",
-                          "widget": "ResourceRefs",
-                          "source": "spec.output.otlp.authentication.basic.user.valueFrom.secretKeyRef",
-                          "kind": "Secret",
-                          "visibility": "$exists(spec.output.otlp.authentication.basic.user.valueFrom.secretKeyRef.name)"
-                        }
-                      ]
-                    },
-                    {
-                      "name": "Password",
-                      "widget": "Panel",
-                      "visibility": "$exists(spec.output.otlp.authentication.basic.password)",
-                      "children": [
-                        {
-                          "name": "Value",
-                          "source": "spec.output.otlp.authentication.basic.password.value",
-                          "visibility": "$exists(spec.output.otlp.authentication.basic.password.value)"
-                        },
-                        {
-                          "name": "Value From Secret",
-                          "widget": "ResourceRefs",
-                          "source": "spec.output.otlp.authentication.basic.password.valueFrom.secretKeyRef",
-                          "kind": "Secret",
-                          "visibility": "$exists(spec.output.otlp.authentication.basic.password.valueFrom.secretKeyRef.name)"
+                          "name": "Password",
+                          "widget": "Panel",
+                          "visibility": "$exists(spec.output.otlp.authentication.basic.password)",
+                          "children": [
+                            {
+                              "name": "Value",
+                              "source": "spec.output.otlp.authentication.basic.password.value",
+                              "visibility": "$exists(spec.output.otlp.authentication.basic.password.value)"
+                            },
+                            {
+                              "name": "Value From Secret",
+                              "widget": "ResourceRefs",
+                              "source": "spec.output.otlp.authentication.basic.password.valueFrom.secretKeyRef",
+                              "kind": "Secret",
+                              "visibility": "$exists(spec.output.otlp.authentication.basic.password.valueFrom.secretKeyRef.name)"
+                            }
+                          ]
                         }
                       ]
                     }
@@ -113,17 +121,20 @@ data:
                     "name": "Endpoint",
                     "path": "endpoint",
                     "widget": "FormGroup",
+                    "simple": true,
                     "children":
                       [
                         {
                           "name": "Value",
                           "path": "value",
-                          "widget": "Text"
+                          "widget": "Text",
+                          "simple": true,
                         },
                         {
                           "name": "Secret Reference",
                           "path": "valueFrom.secretKeyRef",
                           "widget": "ResourceRef",
+                          "simple": true,
                           "resource": {
                              "kind": "secret",
                              "version": "v1",
@@ -139,6 +150,7 @@ data:
                   {
                     "name": "Protocol",
                     "path": "protocol",
+                    "simple": true,
                     "widget": "FormGroup",
                     "children": 
                       [
@@ -152,12 +164,14 @@ data:
                     "name": "User",
                     "path": "authentication.basic.user",
                     "widget": "FormGroup",
+                    "simple": true,
                     "children":
                       [
                         {
                           "name": "Value",
                           "path": "value",
-                          "widget": "Text"
+                          "widget": "Text",
+                          "simple": true,
                         },
                         {
                           "name": "Secret Reference",
@@ -167,6 +181,7 @@ data:
                              "kind": "secret",
                              "version": "v1",
                           },
+                          "simple": true,
                           "children": [{
                               "path": "key",
                               "enum": "$keys($secret.data)",
@@ -179,12 +194,14 @@ data:
                     "name": "Password",
                     "path": "authentication.basic.password",
                     "widget": "FormGroup",
+                    "simple": true,
                     "children":
                       [
                         {
                           "name": "Value",
                           "path": "value",
-                          "widget": "Text"
+                          "widget": "Text",
+                          "simple": true,
                         },
                         {
                           "name": "Secret Reference",
@@ -194,6 +211,7 @@ data:
                              "kind": "secret",
                              "version": "v1",
                           },
+                          "simple": true,
                           "children": [{
                               "path": "key",
                               "enum": "$keys($secret.data)",
@@ -263,8 +281,8 @@ data:
   list: |-
     [
       {
-        "source": "$each(spec.output, function($v, $k) {$v.url.value or $v.url.valueFrom.secretKeyRef.name or $v.host.value or $v.host.valueFrom.secretKeyRef.name ? $k})",
-         "placeholder": "custom",
+        "source": "$each(spec.output, function($v, $k) {$v.endpoint.value or $v.endpoint.valueFrom.secretKeyRef.name ? $k})",
+        "placeholder": "custom",
         "type": "string",
         "name": "Type",
         "isSelected": true,
@@ -284,3 +302,4 @@ data:
         "metadata.creationTimestamp": "Created at"
       }
     }
+{{- end }}
