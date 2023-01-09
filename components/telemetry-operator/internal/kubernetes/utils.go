@@ -3,11 +3,12 @@ package kubernetes
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	apiequality "k8s.io/apimachinery/pkg/api/equality"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	"strings"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -182,13 +183,14 @@ func mergeMapsByPrefix(new map[string]string, old map[string]string, prefix stri
 		new = make(map[string]string)
 	}
 
-	for k, v := range new {
-		if strings.HasPrefix(k, prefix) {
-			old[k] = v
+	for k, v := range old {
+		_, hasValue := new[k]
+		if strings.HasPrefix(k, prefix) && !hasValue {
+			new[k] = v
 		}
 	}
 
-	return old
+	return new
 }
 
 func CreateOrUpdateServiceMonitor(ctx context.Context, c client.Client, desired *monitoringv1.ServiceMonitor) error {
