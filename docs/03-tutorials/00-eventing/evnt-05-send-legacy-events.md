@@ -30,7 +30,7 @@ To subscribe to events, we need a [Subscription](../../05-technical-reference/00
    - **Service**: `lastorder`
    - **Type matching:**: `standard`
    - **Source**: `myapp`
-   - **Type**: `order.received.v1`
+   - **Types**: `order.received.v1`
 
 4. Click **Create**.
 5. Wait a few seconds for the Subscription to have status `READY`.

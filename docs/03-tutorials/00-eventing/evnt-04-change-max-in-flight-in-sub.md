@@ -85,7 +85,7 @@ Create a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01
    - **Service**: `lastorder`
    - **Type matching:**: `standard`
    - **Source**: `myapp`
-   - **Type**: `order.received.v1`
+   - **Types**: `order.received.v1`
    - **Config**: `maxInFlightMessages: 5`
      
 5. Click **Create**.

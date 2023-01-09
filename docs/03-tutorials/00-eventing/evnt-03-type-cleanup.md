@@ -79,7 +79,7 @@ Create a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01
    - **Service**: `lastorder`
    - **Type matching:**: `standard`
    - **Source**: `myapp`
-   - **Type**: `order.payment*success.v1`
+   - **Types**: `order.payment*success.v1`
 
 4. Click **Create**.
 5. Wait a few seconds for the Subscription to have status `READY`.

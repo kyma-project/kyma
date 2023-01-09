@@ -28,7 +28,7 @@ To subscribe to multiple events, you need a [Subscription](../../05-technical-re
    - **Service**: `lastorder`
    - **Type matching:**: `standard`
    - **Source**: `myapp`
-   - **Type**: `order.received.v1` and `order.changed.v1`
+   - **Types**: `order.received.v1` and `order.changed.v1`
 
    > **NOTE:** You can add more types to your subscription if you want to subscribe to more event types.
 
