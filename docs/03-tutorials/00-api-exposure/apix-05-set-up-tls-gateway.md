@@ -27,7 +27,7 @@ This tutorial shows how to set up a TLS Gateway in both manual and simple modes.
 
     <details>
     <summary>
-    `simple` mode
+    simple mode
     </summary>
 
     * To create a TLS Gateway in simple mode, run:
@@ -59,7 +59,7 @@ This tutorial shows how to set up a TLS Gateway in both manual and simple modes.
 
     <details>
     <summary>
-    `mutual` mode
+    mutual mode
     </summary>
 
     * Export the name of the mTLS Gateway and the client root Certificate Authority (CA) crt file path as environment variables:
