@@ -56,7 +56,7 @@ spec:
             trusted_issuers: ["https://dev.kyma.local"]
 ```
 ---
-## Issue - Having wrong handler configuration
+## Issue - Invalid trusted_issuer for `jwt` handler
 
 If your APIRule is having wrong configuration, e.g. for `jwt` handler:
 
