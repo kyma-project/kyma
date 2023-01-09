@@ -125,7 +125,7 @@ You will get the following `APIRuleStatus` error:
 
 ## Remedy
 
-You should decide to `allow` access to the specific path or restrict it via `jwt` security token. Both at the same time is not allowed.
+You should decide to `allow` access to the specific path or restrict it via `jwt` security token. Using both at the same time is not allowed.
 
 ---
 ## Issue - Using Istio `jwt` handler configuration for Ory `jwt` handler
