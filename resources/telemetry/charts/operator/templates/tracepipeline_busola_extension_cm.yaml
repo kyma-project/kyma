@@ -20,15 +20,6 @@ data:
           "widget": "Text"
         },
         {
-          "name": "Unsupported-Mode",
-          "source": "status.unsupportedMode",
-          "widget": "Badge",
-          "highlights": {
-            "positive": ["false"],
-            "negative": ["true"]
-          }
-        },
-        {
           "source": "status.conditions[-1].type",
           "name": "Status",
           "widget": "Badge"
@@ -271,6 +262,14 @@ data:
     }
   list: |-
     [
+      {
+        "source": "$each(spec.output, function($v, $k) {$v.url.value or $v.url.valueFrom.secretKeyRef.name or $v.host.value or $v.host.valueFrom.secretKeyRef.name ? $k})",
+         "placeholder": "custom",
+        "type": "string",
+        "name": "Type",
+        "isSelected": true,
+        "widget": "Text"
+      },
       {
         "source": "status.conditions[-1].type",
         "name": "Status",
