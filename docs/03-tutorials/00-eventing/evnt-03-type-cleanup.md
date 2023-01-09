@@ -72,10 +72,11 @@ Create a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01
   Kyma Dashboard
   </summary>
 
-1. In Kyma Dashboard, go to the view of your Function `lastorder`.
-2. Go to **Configuration** > **Create Subscription+**.
+1. Go to **Namespaces** and select the default Namespace.
+2. Go to **Configuration** > **Subscriptions** and click **Create Subscription+**.
 3. Provide the following parameters:
    - **Subscription name**: `lastorder-payment-sub`
+   - **Service**: `lastorder`
    - **Type matching:**: `standard`
    - **Source**: `myapp`
    - **Type**: `order.payment*success.v1`

@@ -16,9 +16,8 @@ First, create a sample Function that prints out the received event to console:
   </summary>
 
 1. Go to **Namespaces** and select the default Namespace.
-2. Go to **Workloads** > **Functions** and click **Create Function +**.
-3. Name the Function `lastorder` and click **Create**.
-4. In the inline editor for the Function, replace its source with the following code:
+2. Go to **Workloads** > **Functions** and switch to **Advanced** tab.
+3. Name the Function `lastorder` and in the inline editor for the Function, replace its source with the following code:
     ```js
     module.exports = {
       main: async function (event, context) {
@@ -27,7 +26,7 @@ First, create a sample Function that prints out the received event to console:
       } 
     }
     ```
-5. Save your changes.
+5. Click **Create**.
 6. Wait a few seconds for the Function to have status `RUNNING`.
 
   </details>
@@ -91,15 +90,17 @@ All the published events of this type are then forwarded to an HTTP endpoint cal
   Kyma Dashboard
   </summary>
 
-1. In your Function's view, go to **Configuration** and click **Create Subscription+**.
-2. Provide the following parameters:
+1. Go to **Namespaces** and select the default Namespace.
+2. Go to **Configuration** > **Subscriptions** and click **Create Subscription+**.
+3. Provide the following parameters:
    - **Subscription name**: `lastorder-sub`
+   - **Service**: `lastorder`
    - **Type matching:**: `standard`
    - **Source**: `myapp`
-   - **Type**: `order.received.v1`
+   - **Types**: `order.received.v1`
 
-3. Click **Create**.
-4. Wait a few seconds for the Subscription to have status `READY`.
+4. Click **Create**.
+5. Wait a few seconds for the Subscription to have status `READY`.
 
   </details>
   <details>

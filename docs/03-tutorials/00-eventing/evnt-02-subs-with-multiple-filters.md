@@ -21,18 +21,19 @@ To subscribe to multiple events, you need a [Subscription](../../05-technical-re
   Kyma Dashboard
   </summary>
 
-1. In Kyma Dashboard, go to the view of your Function `lastorder`.
-2. Go to **Configuration** > **Create Subscription+**.
+1. Go to **Namespaces** and select the default Namespace.
+2. Go to **Configuration** > **Subscriptions** and click **Create Subscription+**.
 3. Provide the following parameters:
    - **Subscription name**: `lastorder-sub`
+   - **Service**: `lastorder`
    - **Type matching:**: `standard`
    - **Source**: `myapp`
    - **Type**: `order.received.v1` and `order.changed.v1`
 
    > **NOTE:** You can add more types to your subscription if you want to subscribe to more event types.
 
-7. Click **Create**.
-8. Wait a few seconds for the Subscription to have status `READY`.
+4. Click **Create**.
+5. Wait a few seconds for the Subscription to have status `READY`.
 
   </details>
   <details>
