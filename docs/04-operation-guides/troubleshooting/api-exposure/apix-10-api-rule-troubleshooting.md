@@ -128,122 +128,6 @@ You will get the following `APIRuleStatus` error:
 You should decide to `allow` access to the specific path or restrict it via `jwt` security token. Using both at the same time is not allowed.
 
 ---
-## Issue - Using Istio `jwt` handler configuration for Ory `jwt` handler
-
-If your APIRule is having Istio `jwt` handler configuration but you use Ory as `jwt` handler, e.g.:
-
-```yaml
-spec:
-  ...
-  rules:
-    - path: /.*
-      methods: ["GET"]
-      accessStrategies:
-        - handler: jwt
-          config:
-            authentications:
-            - issuer: "https://example.com"
-              jwksUri: "https://example.com/.well-known/jwks.json"
-```
-
-and API Gateway ConfigMap is having `ory` for `jwtHandler`, run:
-
-```bash
-kubectl get configmap/api-gateway-config -n kyma-system -o=jsonpath='{.data.api-gateway-config}'
-
-jwtHandler: "ory"
-```
-
-You will get the following `APIRuleStatus` error:
-
-```
-{"code":"ERROR","desc":"Validation error: Attribute \".spec.rules[0].accessStrategies[0].config.authentications\": Configuration for authentications is not supported with Ory handler"}
-```
-
-## Remedy
-
-- If you want to use Istio `jwt` handler you should switch to it in the `api-gateway-config` ConfigMap, run:
-
-```bash
-kubectl patch configmap/api-gateway-config -n kyma-system --type merge -p '{"data":{"api-gateway-config":"jwtHandler: istio"}}'
-```
-
-- If you want to use Ory `jwt` handler you should use correct configuration, e.g.:
-
-```yaml
-spec:
-  ...
-  rules:
-    - path: /.*
-      methods: ["GET"]
-      accessStrategies:
-        - handler: jwt
-          config:
-            trusted_issuers: ["https://example.com"]
-            jwks_urls: ["https://example.com/.well-known/jwks.json"]
-```
-
-You should always refer to the technical reference documentation for the [APIRule CR](https://kyma-project.io/docs/kyma/latest/05-technical-reference/00-custom-resources/apix-01-apirule/)
-
----
-## Issue - Using Ory `jwt` handler configuration for Istio `jwt` handler
-
-If your APIRule is having Ory `jwt` handler configuration but you use Istio as `jwt` handler, e.g.:
-
-```yaml
-spec:
-  ...
-  rules:
-    - path: /.*
-      methods: ["GET"]
-      accessStrategies:
-        - handler: jwt
-          config:
-            trusted_issuers: ["https://example.com"]
-            jwks_urls: ["https://example.com/.well-known/jwks.json"]
-```
-
-and API Gateway ConfigMap is having `istio` for `jwtHandler`, run:
-
-```bash
-kubectl get configmap/api-gateway-config -n kyma-system -o=jsonpath='{.data.api-gateway-config}'
-
-jwtHandler: "istio"
-```
-
-You will get the following `APIRuleStatus` error:
-
-```
-{"code":"ERROR","desc":"Multiple validation errors: \nAttribute \".spec.rules[0].accessStrategies[0].config.jwks_urls\": Configuration for jwks_urls is not supported with Istio handler\nAttribute \".spec.rules[0].accessStrategies[0].config.trusted_issuers\": Configuration for trusted_issuers is not supported with Istio handler"}
-```
-
-## Remedy
-
-- If you want to use Ory `jwt` handler you should switch to it in the `api-gateway-config` ConfigMap, run:
-
-```bash
-kubectl patch configmap/api-gateway-config -n kyma-system --type merge -p '{"data":{"api-gateway-config":"jwtHandler: ory"}}'
-```
-
-- If you want to use Istio `jwt` handler you should use correct configuration, e.g.:
-
-```yaml
-spec:
-  ...
-  rules:
-    - path: /.*
-      methods: ["GET"]
-      accessStrategies:
-        - handler: jwt
-          config:
-            authentications:
-            - issuer: "https://example.com"
-              jwksUri: "https://example.com/.well-known/jwks.json"
-```
-
-You should always refer to the technical reference documentation for the [APIRule CR](https://kyma-project.io/docs/kyma/latest/05-technical-reference/00-custom-resources/apix-01-apirule/)
-
----
 ## Issue - Service in APIRule is blocklisted
 
 If your APIRule specifies a service that is blocklisted, e.g.:
@@ -252,14 +136,14 @@ If your APIRule specifies a service that is blocklisted, e.g.:
 spec:
   ...
   service:
-    name: apiserver-proxy
-    namespace: kyma-system
+    name: istio-ingressgateway
+    namespace: istio-system
 ```
 
 You will get the following `APIRuleStatus` error:
 
 ```
-{"code":"ERROR","desc":"Validation error: Attribute \".spec.service.name\": Service apiserver-proxy in namespace kyma-system is blocklisted"}
+{"code":"ERROR","desc":"Validation error: Attribute \".spec.service.name\": Service istio-ingressgateway in namespace istio-system is blocklisted"}
 ```
 
 ## Remedy
