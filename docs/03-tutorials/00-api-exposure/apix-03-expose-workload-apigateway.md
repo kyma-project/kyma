@@ -28,7 +28,7 @@ Follow these steps:
    export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
    export GATEWAY=$NAMESPACE/httpbin-gateway
    ```
-   >**NOTE:** `DOMAIN_NAME` is the domain that you own, for example, api.mydomain.com. If you don't want to use your custom domain, replace `DOMAIN_NAME` with a Kyma domain and `$NAMESPACE/httpbin-gateway` with Kyma's default Gateway `kyma-system/kyma-gateway`.
+   >**NOTE:** The `DOMAIN_NAME` refers to the domain that you own, for example, api.mydomain.com. If you don't want to use your custom domain, replace the `DOMAIN_NAME` with a Kyma domain and the `$NAMESPACE/httpbin-gateway` with Kyma's default Gateway `kyma-system/kyma-gateway`.
 
 2. Expose an instance of the HttpBin service by creating APIRule CR in your Namespace. Run:
 
@@ -93,7 +93,7 @@ Follow these steps:
    export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
    export GATEWAY=$NAMESPACE/httpbin-gateway 
    ```
-   >**NOTE:** `DOMAIN_NAME` is the domain that you own, for example, api.mydomain.com. If you don't want to use your custom domain, replace `DOMAIN_NAME` with a Kyma domain and `$NAMESPACE/httpbin-gateway` with Kyma's default Gateway `kyma-system/kyma-gateway`.
+   >**NOTE:** The `DOMAIN_NAME` refers to the domain that you own, for example, api.mydomain.com. If you don't want to use your custom domain, replace the `DOMAIN_NAME` with a Kyma domain and the `$NAMESPACE/httpbin-gateway` with Kyma's default Gateway `kyma-system/kyma-gateway`.
 
 2. Expose the sample Function by creating APIRule CR in your Namespace. Run:
 

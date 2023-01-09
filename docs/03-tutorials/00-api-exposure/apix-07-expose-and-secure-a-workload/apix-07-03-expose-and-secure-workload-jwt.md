@@ -4,8 +4,6 @@ title: Expose and secure a workload with JWT
 
 This tutorial shows how to expose and secure services or Functions using API Gateway Controller. The Controller reacts to an instance of the APIRule custom resource (CR) and creates an Istio VirtualService and [Oathkeeper Access Rules](https://www.ory.sh/docs/oathkeeper/api-access-rules) according to the details specified in the CR. To interact with the secured workloads, the tutorial uses a JWT token.
 
-You can use it as a follow-up to the [Set up a custom domain for a workload](./apix-02-setup-custom-domain-for-workload.md) tutorial.
-
 ## Prerequisites
 
 * [Sample HttpBin service and sample Function](./apix-01-create-workload.md) deployed
@@ -28,7 +26,7 @@ You can use it as a follow-up to the [Set up a custom domain for a workload](./a
    export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
    export GATEWAY=$NAMESPACE/httpbin-gateway 
    ```
-   >**NOTE:** `DOMAIN_NAME` is the domain that you own, for example, api.mydomain.com. If you don't want to use your custom domain, replace `DOMAIN_NAME` with a Kyma domain and `$NAMESPACE/httpbin-gateway` with Kyma's default Gateway `kyma-system/kyma-gateway`
+   >**NOTE:** The `DOMAIN_NAME` refers to the domain that you own, for example, api.mydomain.com. If you don't want to use your custom domain, replace the `DOMAIN_NAME` with a Kyma domain and the `$NAMESPACE/httpbin-gateway` with Kyma's default Gateway `kyma-system/kyma-gateway`.
 
 2. Expose the service and secure it by creating an APIRule CR in your Namespace. Run:
 
@@ -80,7 +78,7 @@ You can use it as a follow-up to the [Set up a custom domain for a workload](./a
    export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
    export GATEWAY=$NAMESPACE/httpbin-gateway 
    ```
-   >**NOTE:** `DOMAIN_NAME` is the domain that you own, for example, api.mydomain.com. If you don't want to use your custom domain, replace `DOMAIN_NAME` with a Kyma domain and `$NAMESPACE/httpbin-gateway` with Kyma's default Gateway `kyma-system/kyma-gateway`
+   >**NOTE:** The `DOMAIN_NAME` refers to the domain that you own, for example, api.mydomain.com. If you don't want to use your custom domain, replace the `DOMAIN_NAME` with a Kyma domain and the `$NAMESPACE/httpbin-gateway` with Kyma's default Gateway `kyma-system/kyma-gateway`.
 
 2. Expose the Function and secure it by creating an APIRule CR in your Namespace. Run:
 

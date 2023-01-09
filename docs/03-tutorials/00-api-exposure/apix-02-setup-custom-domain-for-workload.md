@@ -113,14 +113,18 @@ This tutorial shows how to set up a custom domain and prepare a certificate requ
 
 5. Create a Certificate CR.
 
-  * Export the following values as environment variables. The `TLS_SECRET` value signifies the name of the TLS Secret, and the `ISSUER` value signifies the name of the Issuer CR.
+  * Export the following values as environment variables:
+
+  >**NOTE:** The `TLS_SECRET` is the name of the TLS Secret, for example `httpbin-tls-credentials`. The `ISSUER` value is the name of the Issuer CR, for example, `letsencrypt-staging`.
 
     ```bash
-    export TLS_SECRET={TLS_SECRET_NAME} # The name of the TLS Secret that will be created in this step, for example, httpbin-tls-credentials
-    export ISSUER={ISSUER_NAME} # The name of the Issuer CR, for example,letsencrypt-staging
+    export TLS_SECRET={TLS_SECRET_NAME}
+    export ISSUER={ISSUER_NAME}
     ```
 
   * To create a Certificate CR, run:
+
+  >**NOTE:** 
 
     ```bash
     cat <<EOF | kubectl apply -f -
@@ -143,31 +147,6 @@ This tutorial shows how to set up a custom domain and prepare a certificate requ
     `kubectl get certificate httpbin-cert -n istio-system`
     ```
 
-6. Create Gateway CR. Run:
-
-   >**NOTE:** Skip this step, if you're creating the mTLS gateway. 
-
-    ```bash
-    cat <<EOF | kubectl apply -f -
-    apiVersion: networking.istio.io/v1alpha3
-    kind: Gateway
-    metadata:
-      name: httpbin-gateway
-      namespace: $NAMESPACE
-    spec:
-      selector:
-        istio: ingressgateway # Use Istio Ingress Gateway as default
-      servers:
-        - port:
-            number: 443
-            name: https
-            protocol: HTTPS
-          tls:
-            mode: SIMPLE
-            credentialName: $TLS_SECRET
-          hosts:
-            - "*.$DOMAIN_TO_EXPOSE_WORKLOADS"
-    EOF
-    ```
+1. Follow [this tutorial](./apix-05-set-up-tls-gateway.md) to set up a TLS Gateway.
 
 To see more examples of custom resources for services and ingresses, visit the [Gardener external DNS management documentation](https://github.com/gardener/external-dns-management/tree/master/examples).
