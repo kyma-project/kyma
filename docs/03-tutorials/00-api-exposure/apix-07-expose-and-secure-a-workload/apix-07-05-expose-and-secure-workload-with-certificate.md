@@ -6,10 +6,10 @@ This tutorial shows how to expose and secure a workload with mutual authenticati
 
 ## Prerequisites
 
-* [Sample HttpBin service and sample Function](./apix-01-create-workload.md) deployed
-* [Custom domain](./apix-02-setup-custom-domain-for-workload.md) set up
-* [Mutual TLS Gateway](../00-security/sec-03-setup-mtls-gateway.md) set up with the [bundle certificates](../00-security/sec-03-setup-mtls-gateway#steps) exported
-* To learn how to create your own self-signed Client Root CA and Certificate, see [this tutorial](../00-security/sec-02-mtls-selfsign-client-certicate.md). This step is optional.
+* [Sample HttpBin service and sample Function](../apix-01-create-workload.md) deployed
+* [Custom domain](../apix-02-setup-custom-domain-for-workload.md) set up
+* [Mutual TLS Gateway](../apix-05-set-up-tls-gateway.md) set up with the bundle certificates exported
+* To learn how to create your own self-signed Client Root CA and Certificate, see [this tutorial](../../00-security/sec-02-mtls-selfsign-client-certicate.md). This step is optional.
 
 ## Authorize a client with a certificate
 

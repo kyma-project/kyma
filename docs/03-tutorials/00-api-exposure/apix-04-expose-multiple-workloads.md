@@ -4,7 +4,7 @@ title: Expose multiple workloads on the same host
 
 This tutorial shows how to expose multiple workloads on different paths by defining a service at the root level and by defining services on each path separately.
 
-   > **CAUTION:** Exposing a workload to the outside world is always a potential security vulnerability, so tread carefully. In a production environment, remember to secure the workload you expose with [OAuth2](./apix-05-expose-and-secure-workload-oauth2.md) or [JWT](./apix-08-expose-and-secure-workload-jwt.md).
+   > **CAUTION:** Exposing a workload to the outside world is always a potential security vulnerability, so tread carefully. In a production environment, remember to secure the workload you expose with [OAuth2](./apix-07-expose-and-secure-a-workload/apix-07-01-expose-and-secure-workload-oauth2.md) or [JWT](./apix-07-expose-and-secure-a-workload/apix-07-03-expose-and-secure-workload-jwt.md).
 
 ## Prerequisites
 
@@ -113,7 +113,7 @@ Follow the instructions to expose the instance of the HttpBin service and the sa
            port: 80
    EOF
    ```
-  In the above APIRule the HttpBin service on port 8000 is defined at the `spec.service` level. This service definition is applied to the `/headers` path. The `/function` path has the service definition overwritten.
+  In the above APIRule, the HttpBin service on port 8000 is defined at the `spec.service` level. This service definition is applied to the `/headers` path. The `/function` path has the service definition overwritten.
 
   3. To call the endpoints, send `GET` requests to the HttpBin service and the sample Function:
 

@@ -6,8 +6,8 @@ This tutorial shows how to expose and secure services or Functions using API Gat
 
 ## Prerequisites
 
-* [Sample HttpBin service and sample Function](./apix-01-create-workload.md) deployed
-* If you want to use your custom domain instead of a Kyma domain, follow [this tutorial](./apix-02-setup-custom-domain-for-workload.md) to set it up.
+* [Sample HttpBin service and sample Function](../apix-01-create-workload.md) deployed
+* If you want to use your custom domain instead of a Kyma domain, follow [this tutorial](../apix-02-setup-custom-domain-for-workload.md) to set it up.
 
 ## Register an OAuth2 client and get tokens
 
@@ -246,4 +246,4 @@ This call should return the code `200` response. If you call the Function withou
   </details>
 </div>
 
-To learn more about the security options, read the document describing [authorization configuration](../../05-technical-reference/apix-01-config-authorizations-apigateway.md).
+To learn more about the security options, read the document describing [authorization configuration](../../../05-technical-reference/apix-01-config-authorizations-apigateway.md).
