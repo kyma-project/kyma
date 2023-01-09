@@ -124,8 +124,6 @@ This tutorial shows how to set up a custom domain and prepare a certificate requ
 
   * To create a Certificate CR, run:
 
-  >**NOTE:** 
-
     ```bash
     cat <<EOF | kubectl apply -f -
     apiVersion: cert.gardener.cloud/v1alpha1
@@ -146,7 +144,7 @@ This tutorial shows how to set up a custom domain and prepare a certificate requ
     ```bash
     `kubectl get certificate httpbin-cert -n istio-system`
     ```
-
-1. Follow [this tutorial](./apix-05-set-up-tls-gateway.md) to set up a TLS Gateway.
+    
+6. Follow [this tutorial](./apix-05-set-up-tls-gateway.md) to set up a TLS Gateway.
 
 To see more examples of custom resources for services and ingresses, visit the [Gardener external DNS management documentation](https://github.com/gardener/external-dns-management/tree/master/examples).
