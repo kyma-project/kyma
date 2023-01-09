@@ -266,6 +266,8 @@ You will get the following `APIRuleStatus` error:
 
 Please refer to the technical reference documentation for the [blocklisted services in API Gateway](https://kyma-project.io/docs/kyma/latest/05-technical-reference/apix-03-blacklisted-services/)
 
+Also you may check the [serviceBlockList](https://github.com/kyma-project/kyma/blob/main/resources/api-gateway/values.yaml) defaults definition in Kyma.
+
 ---
 ## Issue - Host already occupied
 
