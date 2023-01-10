@@ -76,7 +76,7 @@ spec:
       accessStrategies:
         - handler: jwt
           config:
-            trusted_issuers: ["some-url"]
+            trusted_issuers: ["http://unsecured.or.not.valid.url"]
 EOF
 ```
 
