@@ -169,7 +169,7 @@ spec:
   host: httpbin.xxx.shoot.canary.k8s-hana.ondemand.com
 ```
 
-You will get the following `APIRuleStatus` error:
+If your APIRule specifies a host that is already used by another APIRule or Virtual Service, the following `APIRuleStatus` error appears:
 
 ```
 {"code":"ERROR","desc":"Validation error: Attribute \".spec.host\": This host is occupied by another Virtual Service"}
