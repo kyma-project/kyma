@@ -160,7 +160,7 @@ To see which services are blocked in Kyma by default, check the [serviceBlockLis
 ## Occupied host
 #### Cause
 
-If your APIRule specifies a host that is already used in another APIRule or Virtual Service, e.g. having two APIRules specifying same host:
+The following APIRules use the same host:
 
 ```yaml
 spec:
