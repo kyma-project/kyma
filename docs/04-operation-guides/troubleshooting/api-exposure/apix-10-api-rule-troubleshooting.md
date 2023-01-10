@@ -134,7 +134,7 @@ Decide on one configuration you want to use. You can either `allow` access to th
 ## Service defined in APIRule is on the block list
 #### Cause
 
-If your APIRule specifies a service that is blocklisted, e.g.:
+The following APIRule has the `istio-ingressgateway` service specified:
 
 ```yaml
 spec:
