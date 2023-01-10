@@ -190,7 +190,7 @@ spec:
 #### Cause
 with configuration
 
-If your APIRule have a `noop` or `allow` handler and specifies some configuration, e.g.:
+Int the following APIRule, the `noop` handler has also the `trusted-issuers` field configured:
 
 ```yaml
 spec:
