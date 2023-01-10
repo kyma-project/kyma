@@ -157,7 +157,8 @@ Read [this technical reference](https://kyma-project.io/docs/kyma/latest/05-tech
 To see which services are blocked in Kyma by default, check the [serviceBlockList](https://github.com/kyma-project/kyma/blob/main/resources/api-gateway/values.yaml).
 
 ---
-## Issue - Host already occupied
+## Occupied host
+#### Cause
 
 If your APIRule specifies a host that is already used in another APIRule or Virtual Service, e.g. having two APIRules specifying same host:
 
