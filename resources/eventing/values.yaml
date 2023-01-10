@@ -9,7 +9,7 @@ global:
       pullPolicy: "IfNotPresent"
     publisher_proxy:
       name: event-publisher-proxy
-      version: v20221230-5e8bc6ca
+      version: PR-16510
     nats:
       name: nats
       version: 2.9.9-alpine3.17
