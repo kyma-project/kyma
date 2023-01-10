@@ -11,3 +11,61 @@ spec:
       targetPort: 9443
   selector:
 {{ include "api-gateway.labels" . | indent 4 }}
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  creationTimestamp: null
+  name: api-gateway-mutating-webhook-configuration
+  annotations:
+    cert-manager.io/inject-apiserver-ca: "true"
+webhooks:
+- admissionReviewVersions:
+  - v1beta1
+  clientConfig:
+    service:
+      name: {{ include "api-gateway.fullname" . }}-webhook-service
+      namespace: {{ .Release.Namespace }}
+      path: /mutate-gateway-kyma-project-io-v1beta1-apirule
+  failurePolicy: Fail
+  name: mapirule.kb.io
+  rules:
+  - apiGroups:
+    - gateway.kyma-project.io
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - apirules
+  sideEffects: None
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  creationTimestamp: null
+  name: api-gateway-validating-webhook-configuration
+  annotations:
+    cert-manager.io/inject-apiserver-ca: "true"
+webhooks:
+- admissionReviewVersions:
+  - v1beta1
+  clientConfig:
+    service:
+      name: {{ include "api-gateway.fullname" . }}-webhook-service
+      namespace: {{ .Release.Namespace }}
+      path: /validate-gateway-kyma-project-io-v1beta1-apirule
+  failurePolicy: Fail
+  name: vapirule.kb.io
+  rules:
+  - apiGroups:
+    - gateway.kyma-project.io
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - apirules
+  sideEffects: None
