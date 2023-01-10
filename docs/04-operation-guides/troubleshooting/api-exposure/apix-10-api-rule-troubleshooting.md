@@ -175,7 +175,7 @@ If your APIRule specifies a host that is already used by another APIRule or Virt
 {"code":"ERROR","desc":"Validation error: Attribute \".spec.host\": This host is occupied by another Virtual Service"}
 ```
 
-## Remedy
+#### Remedy
 
 You should use different host for the second APIRule, e.g.:
 
