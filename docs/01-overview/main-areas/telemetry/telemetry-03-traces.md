@@ -27,7 +27,7 @@ The telemetry module provides an in-cluster central deployment of an [OTel Colle
 1. An end-to-end request is triggered and populates across the distributed application. Every involved component is propagating the trace context using the [W3C Trace Context](https://www.w3.org/TR/trace-context/) protocol.
 2. The involved components which have contributed a new span to the trace send the related span data to the trace collector using the `telemetry-otlp-traces` service. The communication happens based on the [OTLP](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/otlp.md) protocol either using GRPC or HTTP.
 1. The trace collector enriches the span data with relevant metadata, typical for sources running on Kubernetes, like Pod identifiers.
-1. With the `LogPipeline` resource, the trace collector is configured with a target backend.
+1. With the `TracePipeline` resource, the trace collector is configured with a target backend.
 1. The backend can run in-cluster.
 1. The backend can also run out-cluster, having a proper way of authentication in place.
 1. The trace data can be consumed using the backend system.
@@ -77,7 +77,7 @@ This configures the underlying OTel Collector with a pipeline for traces. The re
 
 3. Check that the status of the TracePipeline in your cluster is `Ready`:
     ```bash
-    kubectl get logpipeline
+    kubectl get tracepipeline
     NAME              STATUS    AGE
     http-backend      Ready     44s
     ```
