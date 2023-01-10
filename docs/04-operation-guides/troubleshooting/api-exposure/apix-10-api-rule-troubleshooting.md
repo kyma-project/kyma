@@ -177,7 +177,7 @@ If your APIRule specifies a host that is already used by another APIRule or Virt
 
 #### Remedy
 
-You should use different host for the second APIRule, e.g.:
+Use a different host for the second APIRule, for example:
 
 ```yaml
 spec:
