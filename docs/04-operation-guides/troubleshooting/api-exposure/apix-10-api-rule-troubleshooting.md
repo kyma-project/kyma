@@ -43,7 +43,7 @@ If your APIRule is missing the `trusted_issuers` configuration for the JWT handl
 
 ## Remedy
 
-Supply `jwt` configuration for `trusted_issuers` or ``, e.g.:
+Add JWT configuration for the `trusted_issuers` or ``. Here's an example of a valid configuration:
 
 ```yaml
 spec:
