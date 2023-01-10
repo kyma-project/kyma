@@ -10,4 +10,3 @@ components:
   - name: "istio-resources"
   - name: "application-connector"
   - name: "compass-runtime-agent"
-    namespace: "compass-system"

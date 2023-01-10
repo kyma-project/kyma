@@ -29,7 +29,7 @@ const (
 
 var (
 	secretNamespacedName = types.NamespacedName{
-		Namespace: "compass-system",
+		Namespace: "kyma-system",
 		Name:      secretName,
 	}
 )
@@ -44,7 +44,7 @@ func TestProvider(t *testing.T) {
 	}
 
 	validConfigSecret := &v1.Secret{
-		ObjectMeta: metav1.ObjectMeta{Name: secretName, Namespace: "compass-system"},
+		ObjectMeta: metav1.ObjectMeta{Name: secretName, Namespace: "kyma-system"},
 		Data:       configMapData,
 	}
 

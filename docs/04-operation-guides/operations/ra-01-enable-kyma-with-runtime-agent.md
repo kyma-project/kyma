@@ -6,7 +6,7 @@ title: Enable Kyma with Runtime Agent
 By default, Kyma uses the [standalone Application Connectivity mode](../../01-overview/main-areas/application-connectivity/README.md), which does not support integration with Compass.
 Because of this, on installation, you must:
 - Disable the components used in the standalone mode by setting the **global.disableLegacyConnectivity** value to `true`, and 
-- Add the `compass-runtime-agent` module in the `compass-system` Namespace to the [list of components](https://github.com/kyma-project/kyma/blob/main/installation/resources/components.yaml)
+- Add the `compass-runtime-agent` module in the `kyma-system` Namespace to the [list of components](https://github.com/kyma-project/kyma/blob/main/installation/resources/components.yaml)
 
 ```yaml
 kyma deploy --value global.disableLegacyConnectivity="true" --components-file {YOUR_COMPONENTS_FILE_PATH}

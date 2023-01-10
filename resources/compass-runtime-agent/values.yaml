@@ -31,14 +31,14 @@ compassRuntimeAgent:
     skipAppsTLSVerification: false
     secret:
       name: compass-agent-configuration
-      namespace: compass-system
+      namespace: kyma-system
   certificates:
     renewal:
       validityThreshold: "0.3"
     clientCertificate:
       secret:
         name: cluster-client-certificates
-        namespace: compass-system
+        namespace: kyma-system
     caCertificate:
       secret:
         name: kyma-gateway-certs-cacert
