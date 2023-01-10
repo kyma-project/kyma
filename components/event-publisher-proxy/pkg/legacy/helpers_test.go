@@ -16,10 +16,16 @@ func TestParseApplicationNameFromPath(t *testing.T) {
 			name:           "should return application when correct path is used",
 			givenInputPath: "/application/v1/events",
 			wantAppName:    "application",
-		}, {
+		},
+		{
 			name:           "should return application when extra slash is in the path",
 			givenInputPath: "//application/v1/events",
 			wantAppName:    "application",
+		},
+		{
+			name:           "should return empty string when no slash contained in cleaned up path",
+			givenInputPath: "//events",
+			wantAppName:    "",
 		},
 	}
 	for _, tc := range testCases {
