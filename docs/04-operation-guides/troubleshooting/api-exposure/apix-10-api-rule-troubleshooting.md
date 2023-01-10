@@ -120,7 +120,7 @@ spec:
             trusted_issuers: ["https://dev.kyma.local"]
 ```
 
-You will get the following `APIRuleStatus` error:
+The handlers' combination in the above example is not supported. If an APIRule has an unsupported handlers' combination defined **on the same path**, the following `APIRuleStatus` error appears:
 
 ```
 {"code":"ERROR","desc":"Validation error: Attribute \".spec.rules[0].accessStrategies.accessStrategies[0].handler\": allow access strategy is not allowed in combination with other access strategies"}
