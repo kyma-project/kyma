@@ -161,63 +161,72 @@ data:
                       ]
                   },
                   {
-                    "name": "User",
-                    "path": "authentication.basic.user",
+                    "name": "Authentication",
+                    "path": "authentication",
                     "widget": "FormGroup",
                     "simple": true,
                     "children":
                       [
                         {
-                          "name": "Value",
-                          "path": "value",
-                          "widget": "Text",
+                          "name": "User",
+                          "path": "basic.user",
+                          "widget": "FormGroup",
                           "simple": true,
+                          "children":
+                            [
+                              {
+                                "name": "Value",
+                                "path": "value",
+                                "widget": "Text",
+                                "simple": true,
+                              },
+                              {
+                                "name": "Secret Reference",
+                                "path": "valueFrom.secretKeyRef",
+                                "widget": "ResourceRef",
+                                "resource": {
+                                  "kind": "secret",
+                                  "version": "v1",
+                                },
+                                "simple": true,
+                                "children": [{
+                                    "path": "key",
+                                    "enum": "$keys($secret.data)",
+                                },
+                                ],
+                              }
+                            ]
                         },
                         {
-                          "name": "Secret Reference",
-                          "path": "valueFrom.secretKeyRef",
-                          "widget": "ResourceRef",
-                          "resource": {
-                             "kind": "secret",
-                             "version": "v1",
-                          },
+                          "name": "Password",
+                          "path": "basic.password",
+                          "widget": "FormGroup",
                           "simple": true,
-                          "children": [{
-                              "path": "key",
-                              "enum": "$keys($secret.data)",
-                          },
-                          ],
-                        }
-                      ]
-                  },
-                  {
-                    "name": "Password",
-                    "path": "authentication.basic.password",
-                    "widget": "FormGroup",
-                    "simple": true,
-                    "children":
-                      [
-                        {
-                          "name": "Value",
-                          "path": "value",
-                          "widget": "Text",
-                          "simple": true,
+                          "children":
+                            [
+                              {
+                                "name": "Value",
+                                "path": "value",
+                                "widget": "Text",
+                                "simple": true,
+                              },
+                              {
+                                "name": "Secret Reference",
+                                "path": "valueFrom.secretKeyRef",
+                                "widget": "ResourceRef",
+                                "resource": {
+                                  "kind": "secret",
+                                  "version": "v1",
+                                },
+                                "simple": true,
+                                "children": [{
+                                    "path": "key",
+                                    "enum": "$keys($secret.data)",
+                                },
+                                ],
+                              }
+                            ]
                         },
-                        {
-                          "name": "Secret Reference",
-                          "path": "valueFrom.secretKeyRef",
-                          "widget": "ResourceRef",
-                          "resource": {
-                             "kind": "secret",
-                             "version": "v1",
-                          },
-                          "simple": true,
-                          "children": [{
-                              "path": "key",
-                              "enum": "$keys($secret.data)",
-                          },
-                          ],
-                        }
                       ]
                   },
                   {
