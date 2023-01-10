@@ -140,6 +140,7 @@ data:
                              "version": "v1",
                           },
                           "children": [{
+                              "simple": true,
                               "path": "key",
                               "enum": "$keys($secret.data)",
                           },
@@ -190,6 +191,7 @@ data:
                                 },
                                 "simple": true,
                                 "children": [{
+                                    "simple": true,
                                     "path": "key",
                                     "enum": "$keys($secret.data)",
                                 },
@@ -220,6 +222,7 @@ data:
                                 },
                                 "simple": true,
                                 "children": [{
+                                    "simple": true,
                                     "path": "key",
                                     "enum": "$keys($secret.data)",
                                 },
