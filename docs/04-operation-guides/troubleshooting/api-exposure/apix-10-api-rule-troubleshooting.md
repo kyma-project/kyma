@@ -4,7 +4,7 @@ title: Issues when creating an APIRule - Various reasons
 
 ## Symptom
 
-When you create an APIRule, you get an instant validation error or your APIRule custom resource (CR) have `ERROR` status, e.g.
+When you create an APIRule, an instant validation error appears, or the APIRule custom resource (CR) has the `ERROR` status, for example:
 
 ```bash
 kubectl get apirule httpbin
