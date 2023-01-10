@@ -192,7 +192,7 @@ To verify that the event was properly delivered, check the logs of the Function:
 
 1. In Kyma Dashboard, return to the view of your `lastorder` Function.
 2. Go to **Code** and find the **Replicas of the Function** section.
-3. Click on **View Logs**.
+3. Open the Function Replica and Click on **View Logs** in the **Containers** section.
 4. You see the received event in the logs:
    ```
    Received event: { orderCode: '3211213' }
