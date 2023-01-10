@@ -80,7 +80,7 @@ spec:
 EOF
 ```
 
-You will get an instant error and APIRule resource won't be created:
+If the `trusted_issuer` URL is an unsecured HTTP URL, or the `trusted_issuer` URL is not valid, you get an instant error, and the APIRule resource is not created:
 
 ```
 The APIRule "httpbin" is invalid: spec.rules[0].accessStrategies[0].config.trusted_issuers[0]: Invalid value: "some-url": spec.rules[0].accessStrategies[0].config.trusted_issuers[0] in body should match '^(https://|file://).*$'
