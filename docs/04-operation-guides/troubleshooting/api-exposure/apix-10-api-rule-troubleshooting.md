@@ -203,7 +203,7 @@ spec:
             trusted_issuers: ["https://dex.kyma.local"]
 ```
 
-If your APIRule uses either the `noop` or the `allow` handler and has  some further handler's configuration defined, you get the following `APIRuleStatus` error:
+If your APIRule uses either the `noop` or `allow` handler and has some further handler's configuration defined, you get the following `APIRuleStatus` error:
 
 ```
 {"code":"ERROR","desc":"Validation error: Attribute \".spec.rules[0].accessStrategies[0].config\": strategy: noop does not support configuration"}
