@@ -212,7 +212,7 @@ If your APIRule uses either the `noop` or the `allow` handler and has  some furt
 
 #### Remedy
 
-You should use `noop` and `allow` handlers without any configurations, e.g.
+Use the `noop` and `allow` handlers without any further configuration, for example:
 
 ```yaml
 spec:
