@@ -57,7 +57,7 @@ spec:
             trusted_issuers: ["https://dev.kyma.local"]
 ```
 ---
-## Invalid `trusted_issuer` for the JWT handler
+## Invalid `trusted_issuers` for the JWT handler
 #### Cause
 
 Here's an example of an APIRule with the `trusted_issuers` URL configured:
