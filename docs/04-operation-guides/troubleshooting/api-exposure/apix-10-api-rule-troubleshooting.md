@@ -189,7 +189,7 @@ spec:
 ## Configuration of `noop` and `allow` handlers 
 #### Cause
 
-Int the following APIRule, the `noop` handler has also the `trusted-issuers` field configured:
+In the following APIRule, the `noop` handler has the `trusted-issuers` field configured:
 
 ```yaml
 spec:
