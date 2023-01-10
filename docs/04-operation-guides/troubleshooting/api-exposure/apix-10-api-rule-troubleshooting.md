@@ -13,7 +13,7 @@ NAME      STATUS   HOST
 httpbin   ERROR    httpbin.xxx.shoot.canary.k8s-hana.ondemand.com
 ```
 
-This may result in an inconsistent state with missing Ory and/or Istio CRs. Your service won't be properly exposed. There are various reasons for it.
+The error may result in an inconsistent state of the APIRule resource in which Ory CR, Istio CR, or both are missing. Your service then cannot be properly exposed.
 You can check the error message of the APIRule resource, run:
 
 ```bash
