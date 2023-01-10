@@ -128,7 +128,7 @@ The handlers' combination in the above example is not supported. If an APIRule h
 
 #### Remedy
 
-You should decide to `allow` access to the specific path or restrict it via `jwt` security token. Using both at the same time is not allowed.
+Decide on one configuration you want to use. You can either `allow` access to the specific path or restrict it using the JWT security token. Defining both configuration methods on the same path is not allowed.
 
 ---
 ## Issue - Service in APIRule is blocklisted
