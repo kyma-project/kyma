@@ -33,7 +33,7 @@ async function registerKymaInCompass(client, runtimeName, scenarioName) {
       TOKEN: toBase64(pairingData.token),
     },
   };
-  await k8sApply([compassAgentCfg], 'compass-system');
+  await k8sApply([compassAgentCfg], 'kyma-system');
   await waitForCompassConnection('compass-connection');
 }
 
@@ -48,7 +48,7 @@ async function unregisterKymaFromCompass(client, scenarioName) {
   // TODO: refactor this step to cover runtime agent deleting the application from Kyma
   // and then remove the runtime from compass
 
-  deleteAllK8sResources('/api/v1/namespaces/compass-system/secrets/compass-agent-configuration');
+  deleteAllK8sResources('/api/v1/namespaces/kyma-system/secrets/compass-agent-configuration');
   deleteAllK8sResources('/apis/compass.kyma-project.io/v1alpha1/compassconnections/compass-connection');
 
   const runtimes = await queryRuntimesForScenario(client, scenarioName);

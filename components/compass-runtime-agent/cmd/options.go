@@ -15,11 +15,11 @@ const (
 )
 
 type Config struct {
-	AgentConfigurationSecret     string        `envconfig:"default=compass-system/compass-agent-configuration"`
+	AgentConfigurationSecret     string        `envconfig:"default=kyma-system/compass-agent-configuration"`
 	ControllerSyncPeriod         time.Duration `envconfig:"default=20s"`
 	MinimalCompassSyncTime       time.Duration `envconfig:"default=10s"`
 	CertValidityRenewalThreshold float64       `envconfig:"default=0.3"`
-	ClusterCertificatesSecret    string        `envconfig:"default=compass-system/cluster-client-certificates"`
+	ClusterCertificatesSecret    string        `envconfig:"default=kyma-system/cluster-client-certificates"`
 	CaCertificatesSecret         string        `envconfig:"default=istio-system/ca-certificates"`
 	SkipCompassTLSVerify         bool          `envconfig:"default=false"`
 	GatewayPort                  int           `envconfig:"default=8080"`
