@@ -188,7 +188,6 @@ spec:
 ---
 ## Configuration of `noop` and `allow` handlers 
 #### Cause
-with configuration
 
 Int the following APIRule, the `noop` handler has also the `trusted-issuers` field configured:
 
