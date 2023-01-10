@@ -60,7 +60,7 @@ spec:
 ## Invalid `trusted_issuer` for the JWT handler
 #### Cause
 
-Here's an example of the APIRule with a `trusted_issuer` URL configured:
+Here's an example of an APIRule with the `trusted_issuers` URL configured:
 
 ```bash
 cat <<EOF | kubectl apply -f -
