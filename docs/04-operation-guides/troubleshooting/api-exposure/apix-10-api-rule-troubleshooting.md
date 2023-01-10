@@ -105,7 +105,7 @@ spec:
 ## Unsupported handlers' combination
 #### Cause
 
-If your APIRule is having unsupported handler combination on the **same** path, e.g. `allow` and `jwt` handlers:
+The following APIRule has both `allow` and `jwt` handlers defined on the same path:
 
 ```yaml
 spec:
