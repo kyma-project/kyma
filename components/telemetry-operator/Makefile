@@ -48,6 +48,7 @@ manifests-local: controller-gen-local
 copy-manifests-local: manifests-local
 	@cp ./config/crd/bases/telemetry.kyma-project.io_logpipelines.yaml ./../../installation/resources/crds/telemetry/logpipelines.crd.yaml
 	@cp ./config/crd/bases/telemetry.kyma-project.io_logparsers.yaml ./../../installation/resources/crds/telemetry/logparsers.crd.yaml
+	@cp ./config/crd/bases/telemetry.kyma-project.io_tracepipelines.yaml ./../../installation/resources/crds/telemetry/tracepipelines.crd.yaml
 	@cp ./config/rbac/role.yaml ./../../resources/telemetry/charts/operator/templates/role.yaml
 
 

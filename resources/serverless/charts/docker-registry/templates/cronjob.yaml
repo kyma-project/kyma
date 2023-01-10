@@ -1,4 +1,4 @@
-{{- if eq .Values.storage "filesystem" }}
+{{- if ( and ( .Values.garbageCollection.enabled )  ( eq .Values.storage "filesystem" ) )}}
 apiVersion: batch/v1
 kind: CronJob
 metadata:

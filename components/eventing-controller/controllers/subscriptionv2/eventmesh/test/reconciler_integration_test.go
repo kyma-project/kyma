@@ -260,7 +260,7 @@ func Test_CreateSubscription(t *testing.T) {
 			wantSubActiveEventCheck:  true,
 		},
 		{
-			name: "should mark a non-cleaned Subscription as ready",
+			name: "should mark a non-clean Subscription as ready",
 			givenSubscriptionFunc: func(namespace string) *eventingv1alpha2.Subscription {
 				return reconcilertesting.NewSubscription(testName, namespace,
 					reconcilertesting.WithNotCleanSource(),
@@ -595,11 +595,6 @@ func Test_DeleteSubscription(t *testing.T) {
 	// check if corresponding subscription on EventMesh server was also deleted
 	emSub = getEventMeshSubFromMock(givenSubscription.Name, givenSubscription.Namespace)
 	g.Expect(emSub).Should(gomega.BeNil())
-
-	// @TODO: Check if we should be deleting the APIRule on subscription deletion
-	// or atleast removing the owner from APIRule
-	// check if corresponding APIRule was also deleted
-	// ensureAPIRuleNotFound(ctx, t, apiRule)
 }
 
 func Test_FixingSinkAndApiRule(t *testing.T) {

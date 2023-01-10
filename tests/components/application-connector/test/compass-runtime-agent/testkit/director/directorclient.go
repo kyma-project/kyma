@@ -151,6 +151,24 @@ func (cc *directorClient) RegisterApplication(appName, displayName string) (stri
 	if err != nil {
 		return "", err
 	}
+
+	id := result.Result.ID
+	_, err = cc.AddBundle(id)
+	return id, err
+}
+
+func (cc *directorClient) AddBundle(appID string) (string, error) {
+	log.Infof("Adding Bundle to Application")
+
+	queryFunc := func() string { return cc.queryProvider.addBundleMutation(appID) }
+	execFunc := getExecGraphQLFunc[graphql.Application](cc)
+	operationDescription := "add bundle"
+	successfulLogMessage := fmt.Sprintf("Successfully added bundle to application with ID %s in Director for tenant %s", appID, cc.tenant)
+
+	result, err := executeQuery(queryFunc, execFunc, operationDescription, successfulLogMessage)
+	if err != nil {
+		return "", err
+	}
 	return result.Result.ID, err
 }
 

@@ -40,7 +40,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: TracePipelineSpec defines the desired state of TracePipeline
+            description: Defines the desired state of TracePipeline
             properties:
               output:
                 description: Configures the trace receiver of a TracePipeline.
@@ -92,6 +92,9 @@ spec:
                                         type: object
                                     type: object
                                 type: object
+                            required:
+                            - password
+                            - user
                             type: object
                         type: object
                       endpoint:
@@ -114,18 +117,29 @@ spec:
                             type: object
                         type: object
                       protocol:
+                        default: grpc
                         description: Defines the OTLP protocol (http or grpc).
+                        enum:
+                        - grpc
+                        - http
+                        minLength: 1
                         type: string
+                    required:
+                    - endpoint
                     type: object
+                required:
+                - otlp
                 type: object
+            required:
+            - output
             type: object
           status:
-            description: TracePipelineStatus defines the observed state of TracePipeline
+            description: Shows the observed state of the TracePipeline
             properties:
               conditions:
                 items:
-                  description: LogPipelineCondition contains details for the current
-                    condition of this LogPipeline
+                  description: Contains details for the current condition of this
+                    TracePipeline
                   properties:
                     lastTransitionTime:
                       format: date-time
