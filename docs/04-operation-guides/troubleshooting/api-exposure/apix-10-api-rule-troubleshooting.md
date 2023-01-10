@@ -186,7 +186,8 @@ spec:
 ```
 
 ---
-## Issue - noop or allow handlers 
+## Configuration of `noop` and `allow` handlers 
+#### Cause
 with configuration
 
 If your APIRule have a `noop` or `allow` handler and specifies some configuration, e.g.:
