@@ -14,7 +14,7 @@ httpbin   ERROR    httpbin.xxx.shoot.canary.k8s-hana.ondemand.com
 ```
 
 The error may result in an inconsistent state of the APIRule resource in which Ory CR, Istio CR, or both are missing. Your service then cannot be properly exposed.
-You can check the error message of the APIRule resource, run:
+To check the error message of the APIRule resource, run:
 
 ```bash
 kubectl get apirule -n <namespace> <api-rule-name> -o=jsonpath='{.status.APIRuleStatus}'
