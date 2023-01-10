@@ -35,7 +35,7 @@ spec:
         - handler: jwt
 ```
 
-You will get the following `APIRuleStatus` error:
+If your APIRule is missing the `trusted_issuers` configuration for the JWT handler, the following `APIRuleStatus` error appears:
 
 ```
 {"code":"ERROR","desc":"Validation error: Attribute \".spec.rules[0].accessStrategies[0].config\": supplied config cannot be empty"}
