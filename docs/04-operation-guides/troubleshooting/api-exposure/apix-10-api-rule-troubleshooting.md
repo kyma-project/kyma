@@ -102,7 +102,8 @@ spec:
             trusted_issuers: ["https://dev.kyma.local"]
 ```
 ---
-## Issue - Unsupported handler combination
+## Unsupported handlers' combination
+#### Cause
 
 If your APIRule is having unsupported handler combination on the **same** path, e.g. `allow` and `jwt` handlers:
 
