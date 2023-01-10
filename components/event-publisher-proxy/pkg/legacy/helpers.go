@@ -27,16 +27,16 @@ const (
 
 // ParseApplicationNameFromPath returns application name from the URL.
 // The format of the URL is: /:application-name/v1/...
+// returns empty string if application-name cannot be found
 func ParseApplicationNameFromPath(path string) string {
 	// Assumption: Clients(application validator which has a flag for the path (https://github.com/kyma-project/kyma/blob/main/components/application-connectivity-validator/cmd/applicationconnectivityvalidator/applicationconnectivityvalidator.go#L49) using this endpoint must be sending request to path /:application/v1/events
 	// Hence it should be safe to return 0th index as the application name
-	pathSegments := make([]string, 0)
-	for _, segment := range strings.Split(path, "/") {
-		if strings.TrimSpace(segment) != "" {
-			pathSegments = append(pathSegments, segment)
-		}
+	path = strings.TrimLeft(path, "/")
+	application, _, ok := strings.Cut(path, "/")
+	if ok {
+		return application
 	}
-	return pathSegments[0]
+	return ""
 }
 
 // is2XXStatusCode checks whether status code is a 2XX status code
