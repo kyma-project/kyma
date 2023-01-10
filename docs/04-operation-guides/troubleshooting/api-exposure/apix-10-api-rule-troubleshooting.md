@@ -150,7 +150,7 @@ The `istio-ingressgateway` service is included in the block list. If your APIRul
 {"code":"ERROR","desc":"Validation error: Attribute \".spec.service.name\": Service istio-ingressgateway in namespace istio-system is blocklisted"}
 ```
 
-## Remedy
+#### Remedy
 
 Please refer to the technical reference documentation for the [blocklisted services in API Gateway](https://kyma-project.io/docs/kyma/latest/05-technical-reference/apix-03-blacklisted-services/)
 
