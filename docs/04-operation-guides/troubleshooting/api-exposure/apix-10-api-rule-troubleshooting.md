@@ -20,7 +20,8 @@ You can check the error message of the APIRule resource, run:
 kubectl get apirule -n <namespace> <api-rule-name> -o=jsonpath='{.status.APIRuleStatus}'
 ```
 ---
-## Issue - Missing jwt handler `trusted_issuers` configuration
+## JWT handler's `trusted_issuers` configuration is missing
+#### Cause
 
 If your APIRule is missing `trusted_issuers` configuration for `jwt` handler, e.g. :
 
