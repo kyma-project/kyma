@@ -41,7 +41,7 @@ If your APIRule is missing the `trusted_issuers` configuration for the JWT handl
 {"code":"ERROR","desc":"Validation error: Attribute \".spec.rules[0].accessStrategies[0].config\": supplied config cannot be empty"}
 ```
 
-## Remedy
+#### Remedy
 
 Add JWT configuration for the `trusted_issuers` or ``. Here's an example of a valid configuration:
 
