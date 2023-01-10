@@ -23,7 +23,7 @@ kubectl get apirule -n <namespace> <api-rule-name> -o=jsonpath='{.status.APIRule
 ## JWT handler's `trusted_issuers` configuration is missing
 #### Cause
 
-If your APIRule is missing `trusted_issuers` configuration for `jwt` handler, e.g. :
+The following APIRule is missing the `trusted_issuers` configuration for the JWT handler:
 
 ```yaml
 spec:
