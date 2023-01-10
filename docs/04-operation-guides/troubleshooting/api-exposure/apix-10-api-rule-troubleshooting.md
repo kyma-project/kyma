@@ -210,7 +210,7 @@ If your APIRule uses either the `noop` or the `allow` handler and has  some furt
 {"code":"ERROR","desc":"Validation error: Attribute \".spec.rules[0].accessStrategies[0].config\": strategy: noop does not support configuration"}
 ```
 
-## Remedy
+#### Remedy
 
 You should use `noop` and `allow` handlers without any configurations, e.g.
 
