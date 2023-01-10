@@ -144,7 +144,7 @@ spec:
     namespace: istio-system
 ```
 
-You will get the following `APIRuleStatus` error:
+The `istio-ingressgateway` service is included in the block list. If your APIRule has a blocked service defined, the following `APIRuleStatus` error appears:
 
 ```
 {"code":"ERROR","desc":"Validation error: Attribute \".spec.service.name\": Service istio-ingressgateway in namespace istio-system is blocklisted"}
