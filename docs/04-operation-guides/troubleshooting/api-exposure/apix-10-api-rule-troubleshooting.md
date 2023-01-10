@@ -88,7 +88,7 @@ The APIRule "httpbin" is invalid: spec.rules[0].accessStrategies[0].config.trust
 
 #### Remedy
 
-The JWT `trusted-issuer` must be a valid HTTPS URL, for example:
+The JWT `trusted-issuers` must be a valid HTTPS URL, for example:
 
 ```yaml
 spec:
