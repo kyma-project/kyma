@@ -10,7 +10,7 @@ import (
 
 const (
 	// latencyMetricKey name of the dispatch_duration metric
-	latencyMetricKey = "eventing_ec_subscriber_dispatch_duration_seconds"
+	latencyMetricKey = "eventing_ec_subscriber_dispatch_duration_milliseconds"
 	// latencyMetricHelp help text for the dispatch_duration metric
 	latencyMetricHelp = "The duration of sending an incoming nats message to the subscriber (not including processing the message in the dispatcher)"
 	// deliveryMetricKey name of the delivery per subscription metric.
@@ -44,7 +44,7 @@ func NewCollector() *Collector {
 			prometheus.HistogramOpts{
 				Name:    latencyMetricKey,
 				Help:    latencyMetricHelp,
-				Buckets: prometheus.ExponentialBuckets(0.002, 1.5, 12),
+				Buckets: prometheus.ExponentialBuckets(2, 2, 10),
 			},
 			[]string{"subscription_name", "event_type", "sink", "response_code"},
 		),
@@ -84,9 +84,9 @@ func (c *Collector) RecordDeliveryPerSubscription(subscriptionName, eventType, s
 	c.deliveryPerSubscription.WithLabelValues(subscriptionName, eventType, fmt.Sprintf("%v", sink), fmt.Sprintf("%v", statusCode)).Inc()
 }
 
-// RecordLatencyPerSubscription records a eventing_ec_subscriber_dispatch_duration_seconds
+// RecordLatencyPerSubscription records a eventing_ec_subscriber_dispatch_duration_milliseconds
 func (c *Collector) RecordLatencyPerSubscription(duration time.Duration, subscriptionName, eventType, sink string, statusCode int) {
-	c.latencyPerSubscriber.WithLabelValues(subscriptionName, eventType, fmt.Sprintf("%v", sink), fmt.Sprintf("%v", statusCode)).Observe(duration.Seconds())
+	c.latencyPerSubscriber.WithLabelValues(subscriptionName, eventType, fmt.Sprintf("%v", sink), fmt.Sprintf("%v", statusCode)).Observe(float64(duration.Milliseconds()))
 }
 
 // RecordEventTypes records a nats_ec_event_type_subscribed_total metric.
