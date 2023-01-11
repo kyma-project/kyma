@@ -2,9 +2,10 @@ package kubernetes
 
 import (
 	"context"
+	"testing"
+
 	v1 "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"testing"
 
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -100,6 +101,7 @@ func TestMergeKubectlAnnotations(t *testing.T) {
 				"kubectl.kubernetes.io/2": "b",
 				"kubectl.kubernetes.io/3": "3",
 				"kubectl.kubernetes.io/4": "4",
+				"unrelated":               "4",
 			},
 		},
 		Spec:   v1.DeploymentSpec{},
@@ -108,15 +110,17 @@ func TestMergeKubectlAnnotations(t *testing.T) {
 
 	mergeKubectlAnnotations(&desired.ObjectMeta, existing.ObjectMeta)
 
-	require.Equal(t, len(desired.Annotations), 4)
+	require.Equal(t, len(desired.Annotations), 5)
 	require.Contains(t, desired.Annotations, "kubectl.kubernetes.io/1")
 	require.Contains(t, desired.Annotations, "kubectl.kubernetes.io/2")
 	require.Contains(t, desired.Annotations, "kubectl.kubernetes.io/3")
 	require.Contains(t, desired.Annotations, "kubectl.kubernetes.io/4")
+	require.Contains(t, desired.Annotations, "unrelated")
 	require.Equal(t, desired.Annotations["kubectl.kubernetes.io/1"], "1")
 	require.Equal(t, desired.Annotations["kubectl.kubernetes.io/2"], "b")
 	require.Equal(t, desired.Annotations["kubectl.kubernetes.io/3"], "3")
 	require.Equal(t, desired.Annotations["kubectl.kubernetes.io/4"], "4")
+	require.Equal(t, desired.Annotations["unrelated"], "4")
 }
 
 func TestMergeChecksumAnnotations(t *testing.T) {
