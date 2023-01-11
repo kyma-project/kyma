@@ -40,6 +40,7 @@ type Config struct {
 	CreateServiceMonitor bool
 	BaseName             string
 	Namespace            string
+	OverrideConfig       TelemetryOverrideConfig
 
 	Deployment DeploymentConfig
 	Service    ServiceConfig
@@ -56,6 +57,12 @@ type DeploymentConfig struct {
 
 type ServiceConfig struct {
 	OTLPServiceName string
+}
+
+type TelemetryOverrideConfig struct {
+	Paused   bool
+	LogLevel string
+	//TracePipelineOverrides TracePipelineOverrideConfig
 }
 
 //go:generate mockery --name DeploymentProber --filename deployment_prober.go

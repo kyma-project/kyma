@@ -8,6 +8,7 @@ import (
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -28,7 +29,13 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 			&source.Kind{Type: &corev1.Secret{}},
 			handler.EnqueueRequestsFromMapFunc(r.mapSecret),
 			builder.WithPredicates(setup.CreateOrUpdate()),
-		)
+		).
+		Watches(
+			&source.Kind{Type: &corev1.ConfigMap{
+				ObjectMeta: metav1.ObjectMeta{},
+			}},
+			handler.EnqueueRequestsFromMapFunc(r.overrideConfigMap),
+			builder.WithPredicates(setup.CreateOrUpdateorDelete()))
 
 	if r.config.CreateServiceMonitor {
 		newReconciler.Owns(&monitoringv1.ServiceMonitor{})
@@ -37,7 +44,42 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return newReconciler.Complete(r)
 }
 
+func (r *Reconciler) overrideConfigMap(object client.Object) []reconcile.Request {
+	var requests []reconcile.Request
+
+	cm := object.(*corev1.ConfigMap)
+	if cm.Namespace != "kyma-system" || cm.Name != "override-config-tracepipeline" {
+		return requests
+	}
+	ctrl.Log.Info(fmt.Sprintf("Got configmap Name: %s", cm.Name))
+	cmData, ok := cm.Data["telemetry.conf"]
+	if !ok {
+		ctrl.Log.Error(err, "Override config UpdateEvent: fetching TracePipelineList failed!", err.Error())
+		return requests
+	}
+	// Update overrideConfig
+	r.config.OverrideConfig = cm.Data
+	//Reconcile all tracepipelines
+
+	ctrl.Log.Info(fmt.Sprintf("Got configmap data: %v", r.config.OverrideConfig))
+	var pipelines telemetryv1alpha1.TracePipelineList
+	err := r.List(context.Background(), &pipelines)
+	if err != nil {
+		ctrl.Log.Error(err, "Override config UpdateEvent: fetching TracePipelineList failed!", err.Error())
+		return requests
+	}
+	ctrl.Log.V(1).Info(fmt.Sprintf("Override config UpdateEvent: handling Override Config: override-config-tracePipeline"))
+	for i := range pipelines.Items {
+		var pipeline = pipelines.Items[i]
+		requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: pipeline.Name}})
+	}
+	return requests
+}
+
 func (r *Reconciler) mapSecret(object client.Object) []reconcile.Request {
+
+	ctrl.Log.Info("Map secret triggered")
+
 	secret := object.(*corev1.Secret)
 	var pipelines telemetryv1alpha1.TracePipelineList
 	var requests []reconcile.Request
