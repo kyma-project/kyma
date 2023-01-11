@@ -8,11 +8,12 @@ type config struct {
 	OAuthCredentialsNamespace         string `envconfig:"default=test"`
 	SystemNamespace                   string `envconfig:"default=kyma-system"`
 	CompassRuntimeAgentDeploymentName string `envconfig:"default=compass-runtime-agent"`
+	CompassNamespace                  string `envconfig:"default=kyma-system"`
 	OAuthCredentialsSecretName        string `envconfig:"default=oauth-compass-credentials"`
 	TestingTenant                     string `envconfig:"default=tenant"`
 }
 
 func (c *config) String() string {
-	return fmt.Sprintf("DirectorURL: %s, SkipDirectorCertVerification: %v, OAuthCredentialsNamespace: %s, IntegrationNamespace: %s, OAuthCredentialsSecretName: %s, TestingTenant %s",
-		c.DirectorURL, c.SkipDirectorCertVerification, c.OAuthCredentialsNamespace, c.SystemNamespace, c.OAuthCredentialsSecretName, c.TestingTenant)
+	return fmt.Sprintf("DirectorURL: %s, SkipDirectorCertVerification: %v, OAuthCredentialsNamespace: %s, IntegrationNamespace: %s, CompassNamespace: %s, OAuthCredentialsSecretName: %s, TestingTenant %s",
+		c.DirectorURL, c.SkipDirectorCertVerification, c.OAuthCredentialsNamespace, c.SystemNamespace, c.CompassNamespace, c.OAuthCredentialsSecretName, c.TestingTenant)
 }
