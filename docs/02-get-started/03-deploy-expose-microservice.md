@@ -17,11 +17,11 @@ First, let's create a Deployment that provides the microservice definition and l
 
 1. From the left navigation, go to **Workloads > Deployments**.
 2. Click on **Create Deployment**.
-3. Provide the following parameters:
+3. Go to **Advanced** and provide the following parameters:
     - **Name**: `orders-service`
-    - **Containers**: enter Docker image `eu.gcr.io/kyma-project/develop/orders-service:68a58069`  
+    - **Docker Image**: `eu.gcr.io/kyma-project/develop/orders-service:68a58069`  
   
-    _Optionally_, to save resources, go to the **Advanced** view and modify these parameters:
+    _Optionally_, to save resources, modify these parameters:
     - **Memory requests**: `10Mi`
     - **Memory limits**: `32Mi`
     - **CPU requests (m)**: `16m`

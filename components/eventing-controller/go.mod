@@ -13,7 +13,7 @@ require (
 	github.com/kyma-project/kyma/common/logging v0.0.0-20221118103320-ffe096ff3455
 	github.com/kyma-project/kyma/components/application-operator v0.0.0-20221118103320-ffe096ff3455
 	github.com/mitchellh/hashstructure/v2 v2.0.2
-	github.com/nats-io/nats-server/v2 v2.9.10
+	github.com/nats-io/nats-server/v2 v2.9.11
 	github.com/nats-io/nats.go v1.22.1
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.24.2
@@ -72,9 +72,9 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/stretchr/objx v0.5.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
-	golang.org/x/crypto v0.0.0-20220926161630-eccd6366d1be // indirect
+	golang.org/x/crypto v0.5.0 // indirect
 	golang.org/x/net v0.4.0 // indirect
-	golang.org/x/sys v0.3.0 // indirect
+	golang.org/x/sys v0.4.0 // indirect
 	golang.org/x/term v0.3.0 // indirect
 	golang.org/x/text v0.5.0 // indirect
 	golang.org/x/time v0.0.0-20220922220347-f3bd1da661af // indirect
