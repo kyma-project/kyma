@@ -46,7 +46,7 @@ func NewCollector() *Collector {
 				Help:    latencyMetricHelp,
 				Buckets: prometheus.ExponentialBuckets(2, 2, 10),
 			},
-			[]string{"subscription_name", "sink", "event_type", "response_code"},
+			[]string{"subscription_name", "event_type", "sink", "response_code"},
 		),
 		eventTypes: prometheus.NewCounterVec(
 			prometheus.CounterOpts{
