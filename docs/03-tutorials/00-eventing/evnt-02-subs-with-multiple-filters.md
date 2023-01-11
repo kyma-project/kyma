@@ -25,10 +25,10 @@ To subscribe to multiple events, you need a [Subscription](../../05-technical-re
 2. Go to **Configuration** > **Subscriptions** and click **Create Subscription+**.
 3. Provide the following parameters:
    - **Subscription name**: `lastorder-sub`
+   - **Types**: `order.received.v1` and `order.changed.v1`
    - **Service**: `lastorder`
    - **Type matching:**: `standard`
    - **Source**: `myapp`
-   - **Types**: `order.received.v1` and `order.changed.v1`
 
    > **NOTE:** You can add more types to your subscription if you want to subscribe to more event types.
 

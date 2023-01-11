@@ -76,10 +76,10 @@ Create a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01
 2. Go to **Configuration** > **Subscriptions** and click **Create Subscription+**.
 3. Provide the following parameters:
    - **Subscription name**: `lastorder-payment-sub`
+   - **Types**: `order.payment*success.v1`
    - **Service**: `lastorder`
    - **Type matching:**: `standard`
    - **Source**: `myapp`
-   - **Types**: `order.payment*success.v1`
 
 4. Click **Create**.
 5. Wait a few seconds for the Subscription to have status `READY`.

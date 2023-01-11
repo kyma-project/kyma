@@ -82,11 +82,11 @@ Create a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01
 2. Go to **Configuration** > **Subscriptions** and click **Create Subscription+**.
 3. Switch to the **Advanced** tab, and provide the following parameters:
    - **Subscription name**: `lastorder-sub`
+   - **Config**: `maxInFlightMessages: 5`
+   - **Types**: `order.received.v1`
    - **Service**: `lastorder`
    - **Type matching:**: `standard`
    - **Source**: `myapp`
-   - **Types**: `order.received.v1`
-   - **Config**: `maxInFlightMessages: 5`
      
 5. Click **Create**.
 6. Wait a few seconds for the Subscription to have status `READY`.

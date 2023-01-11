@@ -94,10 +94,10 @@ All the published events of this type are then forwarded to an HTTP endpoint cal
 2. Go to **Configuration** > **Subscriptions** and click **Create Subscription+**.
 3. Provide the following parameters:
    - **Subscription name**: `lastorder-sub`
-   - **Service**: `lastorder`
+   - **Types**: `order.received.v1`
+   - **Service**: `lastorder` (The sink field will be populated automatically.)
    - **Type matching:**: `standard`
    - **Source**: `myapp`
-   - **Types**: `order.received.v1`
 
 4. Click **Create**.
 5. Wait a few seconds for the Subscription to have status `READY`.
@@ -192,7 +192,7 @@ To verify that the event was properly delivered, check the logs of the Function:
 
 1. In Kyma Dashboard, return to the view of your `lastorder` Function.
 2. Go to **Code** and find the **Replicas of the Function** section.
-3. Open the Function Replica and Click on **View Logs** in the **Containers** section.
+3. Open the Function Pod and Click on **View Logs** in the **Containers** section.
 4. You see the received event in the logs:
    ```
    Received event: { orderCode: '3211213' }
