@@ -26,7 +26,7 @@ To subscribe to multiple events, you need a [Subscription](../../05-technical-re
 3. Provide the following parameters:
    - **Subscription name**: `lastorder-sub`
    - **Types**: `order.received.v1` and `order.changed.v1`
-   - **Service**: `lastorder`
+   - **Service**: `lastorder` (The sink field will be populated automatically.)
    - **Type matching:**: `standard`
    - **Source**: `myapp`
 

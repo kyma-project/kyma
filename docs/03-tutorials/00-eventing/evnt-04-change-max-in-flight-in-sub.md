@@ -84,7 +84,7 @@ Create a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01
    - **Subscription name**: `lastorder-sub`
    - **Config**: `maxInFlightMessages: 5`
    - **Types**: `order.received.v1`
-   - **Service**: `lastorder`
+   - **Service**: `lastorder` (The sink field will be populated automatically.)
    - **Type matching:**: `standard`
    - **Source**: `myapp`
      

@@ -77,7 +77,7 @@ Create a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01
 3. Provide the following parameters:
    - **Subscription name**: `lastorder-payment-sub`
    - **Types**: `order.payment*success.v1`
-   - **Service**: `lastorder`
+   - **Service**: `lastorder` (The sink field will be populated automatically.)
    - **Type matching:**: `standard`
    - **Source**: `myapp`
 
