@@ -108,13 +108,7 @@ func (t *Transformer) ExtractPublishRequestData(request *http.Request) (*apiv1.P
 		return nil, checkResp, errors.New(checkResp.Error.Message)
 	}
 
-	// validate the application name
 	appName := ParseApplicationNameFromPath(request.URL.Path)
-	if !application.IsCleanName(appName) {
-		err := errors.New("application name should be cleaned from non-alphanumeric characters")
-		return nil, ErrorResponse(http.StatusInternalServerError, err), err
-	}
-
 	publishRequestData := &apiv1.PublishRequestData{
 		PublishEventParameters: parameters,
 		ApplicationName:        appName,
