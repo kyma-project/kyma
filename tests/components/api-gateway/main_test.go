@@ -115,12 +115,11 @@ func TestCustomDomain(t *testing.T) {
 func TestIstioJwt(t *testing.T) {
 	InitTestSuite()
 	SetupCommonResources("istio-jwt")
+
 	apiGatewayIstioJwtOpts := goDogOpts
-	apiGatewayIstioJwtOpts.Paths = []string{"features/api-gateway/istio_jwt.feature"}
+	apiGatewayIstioJwtOpts.Paths = []string{"features/istio-jwt/istio_jwt.feature"}
 	apiGatewayIstioJwtOpts.Concurrency = conf.TestConcurency
-	if os.Getenv(exportResultVar) == "true" {
-		apiGatewayIstioJwtOpts.Format = "pretty,junit:junit-report.xml,cucumber:cucumber-report.json"
-	}
+
 	apiGatewayIstioJwtSuite := godog.TestSuite{
 		Name:                 "istio-jwt",
 		TestSuiteInitializer: InitializeIstioJwtTests,
@@ -135,6 +134,7 @@ func TestIstioJwt(t *testing.T) {
 	//Remove namespace
 	res := schema.GroupVersionResource{Group: "", Version: "v1", Resource: "namespaces"}
 	err := k8sClient.Resource(res).Delete(context.Background(), namespace, v1.DeleteOptions{})
+
 	if err != nil {
 		log.Print(err.Error())
 	}
