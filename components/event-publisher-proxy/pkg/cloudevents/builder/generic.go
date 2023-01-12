@@ -57,6 +57,9 @@ func (gb *GenericBuilder) Build(event cev2event.Event) (*cev2event.Event, error)
 	namedLogger.Debugf("using event type: %s", finalEventType)
 
 	ceEvent := event.Clone()
+	// set original type header
+	ceEvent.SetExtension(OriginalTypeHeaderName, event.Type())
+	// set prefixed type
 	ceEvent.SetType(finalEventType)
 	ceEvent.SetSource(cleanSource)
 
