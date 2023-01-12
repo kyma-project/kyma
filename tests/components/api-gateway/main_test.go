@@ -134,7 +134,7 @@ func TestIstioJwt(t *testing.T) {
 
 	//Remove namespace
 	res := schema.GroupVersionResource{Group: "", Version: "v1", Resource: "namespaces"}
-	err = k8sClient.Resource(res).Delete(context.Background(), namespace, v1.DeleteOptions{})
+	err := k8sClient.Resource(res).Delete(context.Background(), namespace, v1.DeleteOptions{})
 	if err != nil {
 		log.Print(err.Error())
 	}
