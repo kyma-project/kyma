@@ -146,43 +146,46 @@ func FilterEventTypeVersionsV1alpha1(eventTypePrefix, bebNs, appName string, fil
 			continue
 		}
 
-		var prefix string
-		if len(strings.TrimSpace(eventTypePrefix)) == 0 {
-			prefix = strings.ToLower(fmt.Sprintf("%s.", appName))
-		} else {
-			prefix = strings.ToLower(fmt.Sprintf("%s.%s.", eventTypePrefix, appName))
+		prefix := preparePrefix(eventTypePrefix, appName)
+
+		if filter.EventSource == nil || filter.EventType == nil {
+			continue
 		}
 
-		if filter.EventSource != nil && filter.EventType != nil {
-			// TODO revisit the filtration logic as part of https://github.com/kyma-project/kyma/issues/10761
+		// TODO revisit the filtration logic as part of https://github.com/kyma-project/kyma/issues/10761
 
-			// filter by event-source if exists
-			if len(strings.TrimSpace(filter.EventSource.Value)) > 0 && !strings.EqualFold(filter.EventSource.Value, bebNs) {
-				continue
-			}
-
-			if strings.HasPrefix(filter.EventType.Value, prefix) {
-				eventTypeVersion := strings.ReplaceAll(filter.EventType.Value, prefix, "")
-				eventTypeVersionArr := strings.Split(eventTypeVersion, ".")
-				version := eventTypeVersionArr[len(eventTypeVersionArr)-1]
-				eventType := ""
-				for i, part := range eventTypeVersionArr {
-					if i == 0 {
-						eventType = part
-						continue
-					}
-					// Adding the segments till last but 1 as the last one is the version
-					if i < (len(eventTypeVersionArr) - 1) {
-						eventType = fmt.Sprintf("%s.%s", eventType, part)
-					}
-				}
-				event := Event{
-					Name:    eventType,
-					Version: version,
-				}
-				events = append(events, event)
-			}
+		// filter by event-source if exists
+		if len(strings.TrimSpace(filter.EventSource.Value)) > 0 && !strings.EqualFold(filter.EventSource.Value, bebNs) {
+			continue
 		}
+
+		if !strings.HasPrefix(filter.EventType.Value, prefix) {
+			continue
+		}
+
+		// remove the prefix
+		eventTypeVersion := strings.TrimPrefix(filter.EventType.Value, prefix)
+
+		eventTypeVersionArr := strings.Split(eventTypeVersion, ".")
+
+		// join all segments except the last to form the eventType
+		eventType := strings.Join(eventTypeVersionArr[:len(eventTypeVersionArr)-1], ".")
+
+		// the last segment is the version
+		version := eventTypeVersionArr[len(eventTypeVersionArr)-1]
+
+		event := Event{
+			Name:    eventType,
+			Version: version,
+		}
+		events = append(events, event)
 	}
 	return events
+}
+
+func preparePrefix(eventTypePrefix string, appName string) string {
+	if len(strings.TrimSpace(eventTypePrefix)) == 0 {
+		return strings.ToLower(fmt.Sprintf("%s.", appName))
+	}
+	return strings.ToLower(fmt.Sprintf("%s.%s.", eventTypePrefix, appName))
 }
