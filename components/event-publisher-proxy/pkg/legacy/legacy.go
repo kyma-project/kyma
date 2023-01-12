@@ -240,7 +240,7 @@ func (t *Transformer) convertPublishRequestToCloudEvent(appName string, publishR
 }
 
 // combineEventNameSegments returns an eventName with exactly two segments separated by "." if the given event-type
-// has more than two segments separated by "." (e.g. "Account.Order.Created" becomes "AccountOrder.Created")
+// has more than two segments separated by "." (e.g. "Account.Order.Created" becomes "AccountOrder.Created").
 func combineEventNameSegments(eventName string) string {
 	parts := strings.Split(eventName, ".")
 	if len(parts) > 2 {
@@ -251,7 +251,7 @@ func combineEventNameSegments(eventName string) string {
 	return eventName
 }
 
-// removeNonAlphanumeric returns an eventName without any non-alphanumerical character besides dot (".")
+// removeNonAlphanumeric returns an eventName without any non-alphanumerical character besides dot (".").
 func removeNonAlphanumeric(eventType string) string {
 	return regexp.MustCompile("[^a-zA-Z0-9.]+").ReplaceAllString(eventType, "")
 }

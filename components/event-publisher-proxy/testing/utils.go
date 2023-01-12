@@ -12,7 +12,7 @@ import (
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 )
 
-// binary cloudevent headers
+// binary cloudevent headers.
 const (
 	CeIDHeader          = "ce-id"
 	CeTypeHeader        = "ce-type"
@@ -22,7 +22,7 @@ const (
 
 type SubscriptionOpt func(*eventingv1alpha1.Subscription)
 
-// GeneratePortOrDie generates a random 5 digit port or fail
+// GeneratePortOrDie generates a random 5 digit port or fail.
 func GeneratePortOrDie() int {
 	tick := time.NewTicker(time.Second / 2)
 	defer tick.Stop()
@@ -79,7 +79,7 @@ func generatePort() (int, error) {
 
 var table = [...]byte{'1', '2', '3', '4', '5', '6', '7', '8', '9'}
 
-// isPortAvailable returns true if the port is available for use, otherwise returns false
+// isPortAvailable returns true if the port is available for use, otherwise returns false.
 func isPortAvailable(port int) bool {
 	address := fmt.Sprintf("localhost:%d", port)
 	listener, err := net.Listen("tcp", address)

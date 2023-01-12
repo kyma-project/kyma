@@ -576,7 +576,6 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 			}
 
 			metricstest.EnsureMetricMatchesTextExpositionFormat(t, h.collector, tt.wantTEF)
-
 		})
 	}
 }

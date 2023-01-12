@@ -1,12 +1,12 @@
 package legacy
 
-// Allowed patterns for the Event components
+// Allowed patterns for the Event components.
 const (
 	AllowedEventTypeVersionChars = `[a-zA-Z0-9]+`
 	AllowedEventIDChars          = `^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$`
 )
 
-// Error messages
+// Error messages.
 const (
 	ErrorMessageBadPayload          = "Bad payload syntax"
 	ErrorMessageRequestBodyTooLarge = "Request body too large"
@@ -14,7 +14,7 @@ const (
 	ErrorMessageInvalidField        = "Invalid field"
 )
 
-// Error type definition
+// Error type definitions.
 const (
 	ErrorTypeBadPayload          = "bad_payload_syntax"
 	ErrorTypeRequestBodyTooLarge = "request_body_too_large"
@@ -23,7 +23,7 @@ const (
 	ErrorTypeInvalidField        = "invalid_field"
 )
 
-// Field definition
+// Field definitions.
 const (
 	FieldEventID          = "event-id"
 	FieldEventTime        = "event-time"

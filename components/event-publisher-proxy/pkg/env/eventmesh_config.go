@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// compile time check
+// compile time check.
 var _ fmt.Stringer = &EventMeshConfig{}
 
 // EventMeshConfig represents the environment config for the Event Publisher to EventMesh.
@@ -32,7 +32,7 @@ func (c *EventMeshConfig) ConfigureTransport(transport *http.Transport) {
 	transport.MaxIdleConnsPerHost = c.MaxIdleConnsPerHost
 }
 
-// String implements the fmt.Stringer interface
+// String implements the fmt.Stringer interface.
 func (c *EventMeshConfig) String() string {
 	return fmt.Sprintf("EventMeshConfig{ Port: %v; TokenEndPoint: %v; EmsPublishURL: %v; "+
 		"MaxIdleConns: %v; MaxIdleConnsPerHost: %v; RequestTimeout: %v; BEBNamespace: %v; EventTypePrefix: %v }",

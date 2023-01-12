@@ -28,7 +28,7 @@ const (
 )
 
 // TestTransformLegacyRequestsToCE ensures that TransformLegacyRequestsToCE transforms a http request containing
-// a legacy request to a valid cloud event by creating mock http requests
+// a legacy request to a valid cloud event by creating mock http requests.
 func TestTransformLegacyRequestsToCE(t *testing.T) {
 	testCases := []struct {
 		name string

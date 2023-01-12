@@ -353,7 +353,6 @@ func WithOneBEBFilter(bebFilters *eventingv1alpha1.BEBFilters) {
 	bebFilters.Filters = []*eventingv1alpha1.BEBFilter{
 		NewBEBFilter(evSource, evType),
 	}
-
 }
 
 func WithMultipleBEBFiltersFromSameSource(bebFilters *eventingv1alpha1.BEBFilters) {
