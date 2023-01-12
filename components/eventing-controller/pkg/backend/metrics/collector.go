@@ -41,8 +41,8 @@ func NewCollector() *Collector {
 			[]string{"subscription_name", "event_type", "sink", "response_code"},
 		),
 		latencyPerSubscriber: prometheus.NewHistogramVec(
+			// nolint:promlinter //disabling linter as we want to use milliseconds as the unit. This follow the same pattern as metrics exposed by istio
 			prometheus.HistogramOpts{
-				Name:    latencyMetricKey,
 				Help:    latencyMetricHelp,
 				Buckets: prometheus.ExponentialBuckets(2, 2, 10),
 			},
