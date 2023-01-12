@@ -7,7 +7,7 @@ If you're interested in learning more about the Serverless area, follow these li
 - Perform some simple and more advances tasks:
 
   - Create an [inline](../../../03-tutorials/00-serverless/svls-01-create-inline-function.md) or a [Git](../../../03-tutorials/00-serverless/svls-02-create-git-function.md) Function
-  - [Expose the Function](../../../03-tutorials/00-serverless/svls-04-expose-function.md)
+  - [Expose the Function](../../../03-tutorials/00-serverless/svls-03-expose-function.md)
   - [Manage Functions through Kyma CLI](../../../03-tutorials/00-serverless/svls-04-manage-functions-with-kyma-cli.md)
   - [Debug a Function](../../../03-tutorials/00-serverless/svls-05-debug-function.md)
   - [Synchronize Functions in a GitOps fashion](../../../03-tutorials/00-serverless/svls-06-sync-function-with-gitops.md)
