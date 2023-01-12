@@ -31,7 +31,7 @@ func InitializeCustomDomainTests(ctx *godog.TestSuiteContext) {
 	InitializeScenarioCustomDomain(ctx.ScenarioContext())
 }
 
-func InitializeApiGatewayIstioJwtTest(ctx *godog.TestSuiteContext) {
+func InitializeIstioJwtTests(ctx *godog.TestSuiteContext) {
 	InitializeScenarioIstioJWT(ctx.ScenarioContext())
 }
 
@@ -123,7 +123,7 @@ func TestIstioJwt(t *testing.T) {
 	}
 	apiGatewayIstioJwtSuite := godog.TestSuite{
 		Name:                 "istio-jwt",
-		TestSuiteInitializer: InitializeApiGatewayIstioJwtTests,
+		TestSuiteInitializer: InitializeIstioJwtTests,
 		Options:              &apiGatewayIstioJwtOpts,
 	}
 
