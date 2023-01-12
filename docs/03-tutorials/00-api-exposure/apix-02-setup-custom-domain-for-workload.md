@@ -145,6 +145,6 @@ This tutorial shows how to set up a custom domain and prepare a certificate requ
     `kubectl get certificate httpbin-cert -n istio-system`
     ```
     
-6. Follow [this tutorial](./apix-05-set-up-tls-gateway.md) to set up a TLS Gateway.
+6. Follow [this tutorial](./apix-03-set-up-tls-gateway.md) to set up a TLS Gateway.
 
 To see more examples of custom resources for services and ingresses, visit the [Gardener external DNS management documentation](https://github.com/gardener/external-dns-management/tree/master/examples).

@@ -7,8 +7,8 @@ If you're interested in learning more about API Exposure in Kyma, follow these l
 - Perform some simple and more advanced tasks:
   - [Create a workload](../../../03-tutorials/00-api-exposure/apix-01-create-workload.md)
   - [Set up a custom domain for a workload](../../../03-tutorials/00-api-exposure/apix-02-setup-custom-domain-for-workload.md)
-  - [Expose a workload](../../../03-tutorials/00-api-exposure/apix-03-expose-workload-apigateway.md)
-  - [Expose multiple workloads on the same host](../../../03-tutorials/00-api-exposure/apix-04-expose-multiple-workloads.md)
+  - [Expose a workload](../../../03-tutorials/00-api-exposure/apix-04-expose-workload-apigateway.md)
+  - [Expose multiple workloads on the same host](../../../03-tutorials/00-api-exposure/apix-05-expose-multiple-workloads.md)
   - [Expose and secure a workload with OAuth2](../../../03-tutorials/00-api-exposure/apix-07-expose-and-secure-a-workload/apix-07-01-expose-and-secure-workload-oauth2.md)
   - [Get a JWT](../../../03-tutorials/00-api-exposure/apix-07-expose-and-secure-a-workload/apix-07-02-get-jwt.md)
   - [Expose and secure a workload with Istio](../../../03-tutorials/00-api-exposure/apix-07-expose-and-secure-a-workload/apix-07-04-expose-and-secure-workload-istio.md)
