@@ -70,12 +70,6 @@ const (
 	authorizationHeaderName        = "Authorization"
 	defaultNS                      = "kyma-system"
 	configMapName                  = "api-gateway-config"
-
-	configMapGVR = schema.GroupVersionResource{
-		Group:    "apps",
-		Version:  "v1",
-		Resource: "configmaps",
-	}
 )
 
 var (
@@ -541,9 +535,14 @@ func SwitchJwtHandler(jwtHandler string) error {
 			},
 		},
 	}
-	_, err := resourceManager.CreateResource(k8sClient, configMapGVR, defaultNS, configMapName, configMap)
+	configMapGVR := schema.GroupVersionResource{
+		Group:    "apps",
+		Version:  "v1",
+		Resource: "configmaps",
+	}
+	err := resourceManager.CreateResource(k8sClient, configMapGVR, defaultNS, configMapName, configMap)
 	if err != nil {
-		_, err = resourceManager.UpdateResource(k8sClient, configMapGVR, defaultNS, configMapName, configMap)
+		err = resourceManager.UpdateResource(k8sClient, configMapGVR, defaultNS, configMapName, configMap)
 	}
 	return err
 }
