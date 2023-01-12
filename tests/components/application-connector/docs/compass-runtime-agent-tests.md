@@ -60,7 +60,7 @@ Pipelines run the tests using the **test-compass-runtime-agent** target from the
 2. Install the minimal set of components required to run Compass Runtime Agent **for Kyma SKR (Compass mode)**:
 
     ```bash
-    kyma deploy --components-file ./resources/installation-config/mini-kyma-skr.yaml --value global.disableLegacyConnectivity=true
+    kyma deploy --components-file ./resources/installation-config/mini-kyma-skr.yaml --value global.disableLegacyConnectivity=true --value compassRuntimeAgent.director.proxy.insecureSkipVerify=true
     ```
 
    >**TIP:** Read more about [Kyma installation](https://kyma-project.io/docs/kyma/latest/02-get-started/01-quick-install/#install-kyma).
