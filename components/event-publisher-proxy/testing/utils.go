@@ -54,6 +54,7 @@ func GeneratePortOrDie() int {
 }
 
 func generatePort() (int, error) {
+	table := [...]byte{'1', '2', '3', '4', '5', '6', '7', '8', '9'}
 	max := 4
 	// Add 4 as prefix to make it 5 digits but less than 65535
 	add4AsPrefix := "4"
@@ -76,8 +77,6 @@ func generatePort() (int, error) {
 
 	return num, nil
 }
-
-var table = [...]byte{'1', '2', '3', '4', '5', '6', '7', '8', '9'}
 
 // isPortAvailable returns true if the port is available for use, otherwise returns false.
 func isPortAvailable(port int) bool {

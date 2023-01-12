@@ -36,5 +36,6 @@ func (c *EventMeshConfig) ConfigureTransport(transport *http.Transport) {
 func (c *EventMeshConfig) String() string {
 	return fmt.Sprintf("EventMeshConfig{ Port: %v; TokenEndPoint: %v; EmsPublishURL: %v; "+
 		"MaxIdleConns: %v; MaxIdleConnsPerHost: %v; RequestTimeout: %v; BEBNamespace: %v; EventTypePrefix: %v }",
-		c.Port, c.TokenEndpoint, c.EmsPublishURL, c.MaxIdleConns, c.MaxIdleConnsPerHost, c.RequestTimeout, c.EventMeshNamespace, c.EventTypePrefix)
+		c.Port, c.TokenEndpoint, c.EmsPublishURL, c.MaxIdleConns,
+		c.MaxIdleConnsPerHost, c.RequestTimeout, c.EventMeshNamespace, c.EventTypePrefix)
 }

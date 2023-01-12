@@ -63,7 +63,6 @@ func (t *Transformer) checkParameters(parameters *apiv1.PublishEventParametersV1
 		return ErrorResponseWrongEventTypeVersion()
 	}
 	if len(parameters.PublishrequestV1.EventTime) == 0 {
-
 		return ErrorResponseMissingFieldEventTime()
 	}
 	if _, err := time.Parse(time.RFC3339, parameters.PublishrequestV1.EventTime); err != nil {

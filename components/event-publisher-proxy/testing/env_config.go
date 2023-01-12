@@ -7,7 +7,12 @@ import (
 )
 
 func NewEnvConfig(emsCEURL, authURL string, opts ...EnvConfigOption) *env.EventMeshConfig {
-	envConfig := &env.EventMeshConfig{Port: 8080, EmsPublishURL: emsCEURL, TokenEndpoint: authURL, RequestTimeout: time.Minute}
+	envConfig := &env.EventMeshConfig{
+		Port:           8080,
+		EmsPublishURL:  emsCEURL,
+		TokenEndpoint:  authURL,
+		RequestTimeout: time.Minute,
+	}
 	for _, opt := range opts {
 		opt(envConfig)
 	}

@@ -173,7 +173,8 @@ func (c *Collector) RecordBackendRequests(statusCode int, destSvc string) {
 	c.backendRequests.WithLabelValues(fmt.Sprint(statusCode), destSvc).Inc()
 }
 
-// MetricsMiddleware returns a http.Handler that can be used as middleware in gorilla.mux to track latencies for all handled paths in the gorilla router.
+// MetricsMiddleware returns a http.Handler that can be used as middleware in gorilla.mux to track
+// latencies for all handled paths in the gorilla router.
 func (c *Collector) MetricsMiddleware() mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -184,6 +185,5 @@ func (c *Collector) MetricsMiddleware() mux.MiddlewareFunc {
 				promhttp.InstrumentHandlerCounter(c.requests.MustCurryWith(prometheus.Labels{pathLabel: path}), next),
 			).ServeHTTP(w, r)
 		})
-
 	}
 }
