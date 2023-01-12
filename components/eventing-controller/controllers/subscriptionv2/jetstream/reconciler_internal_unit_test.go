@@ -2,6 +2,8 @@ package jetstream
 
 import (
 	"context"
+	apierr "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"testing"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
@@ -27,6 +29,11 @@ import (
 const (
 	subscriptionName = "testSubscription"
 	namespaceName    = "test"
+)
+
+var (
+	eventingFinalizer = []string{eventingv1alpha2.Finalizer}
+	emptyFinalizer    []string
 )
 
 // Test_Reconcile tests the return values of the Reconcile() method of the reconciler.
@@ -220,13 +227,6 @@ func Test_handleSubscriptionDeletion(t *testing.T) {
 			wantFinalizers:  []string{eventingv1alpha2.Finalizer},
 			wantError:       errFailedToDeleteSub,
 		},
-		{
-			name:            "With Update Subscription returning an error, the finalizer still remains",
-			givenFinalizers: []string{eventingv1alpha2.Finalizer},
-			wantDeleteCall:  true,
-			wantFinalizers:  []string{eventingv1alpha2.Finalizer},
-			wantError:       errFailedToRemoveFinalizer,
-		},
 	}
 
 	for _, tC := range testCases {
@@ -238,10 +238,6 @@ func Test_handleSubscriptionDeletion(t *testing.T) {
 			)
 			err := r.Client.Create(testEnvironment.Context, sub)
 			require.NoError(t, err)
-
-			if errors.Is(testCase.wantError, errFailedToRemoveFinalizer) {
-				sub.ObjectMeta.ResourceVersion = ""
-			}
 
 			if testCase.wantDeleteCall {
 				if errors.Is(testCase.wantError, errFailedToDeleteSub) {
@@ -258,11 +254,7 @@ func Test_handleSubscriptionDeletion(t *testing.T) {
 			// then
 			mockedBackend.AssertExpectations(t)
 
-			if errors.Is(testCase.wantError, errFailedToRemoveFinalizer) {
-				ensureFinalizerMatch(t, sub, nil)
-			} else {
-				ensureFinalizerMatch(t, sub, testCase.wantFinalizers)
-			}
+			ensureFinalizerMatch(t, sub, testCase.wantFinalizers)
 
 			// check the changes were made on the kubernetes server
 			fetchedSub, err := fetchTestSubscription(ctx, r)
@@ -275,6 +267,62 @@ func Test_handleSubscriptionDeletion(t *testing.T) {
 			require.NoError(t, err)
 			err = r.Client.Delete(ctx, &fetchedSub)
 			require.NoError(t, err)
+		})
+	}
+}
+
+func Test_addFinalizerToSubscription(t *testing.T) {
+	// given
+	ctx := context.Background()
+	sub := controllertesting.NewSubscription(subscriptionName, namespaceName)
+	testEnvironment := setupTestEnvironment(t, sub)
+	r := testEnvironment.Reconciler
+	fakeSub := controllertesting.NewSubscription("fake", namespaceName)
+
+	testCases := []struct {
+		name             string
+		givenFinalizers  []string
+		wantErrorMessage string
+	}{
+		{
+			name:            "A Subscription should be updated with the eventing finalizer if it is missing",
+			givenFinalizers: emptyFinalizer,
+		},
+		{
+			name:            "addFinalizer() should propagate the error returned by syncSubscriptionStatus",
+			givenFinalizers: eventingFinalizer,
+			wantErrorMessage: apierr.NewNotFound(
+				schema.GroupResource{
+					Group:    "eventing.kyma-project.io",
+					Resource: "subscriptions",
+				},
+				fakeSub.Name).Error(),
+		},
+	}
+
+	for _, tC := range testCases {
+		testCase := tC
+		t.Run(testCase.name, func(t *testing.T) {
+
+			// in case syncSubscriptionStatus throws an error
+			if tC.wantErrorMessage != "" {
+				_, err := r.addFinalizer(ctx, fakeSub, r.namedLogger())
+				require.ErrorContains(t, err, tC.wantErrorMessage)
+				return
+			} else {
+				sub.Finalizers = tC.givenFinalizers
+				_, err := r.addFinalizer(ctx, sub, r.namedLogger())
+				require.NoError(t, err)
+			}
+
+			fetchedSub, err := fetchTestSubscription(testEnvironment.Context, r)
+			require.NoError(t, err)
+
+			if tC.wantErrorMessage != "" {
+				ensureFinalizerMatch(t, &fetchedSub, emptyFinalizer)
+			} else {
+				ensureFinalizerMatch(t, &fetchedSub, eventingFinalizer)
+			}
 		})
 	}
 }
@@ -292,13 +340,11 @@ func Test_syncSubscriptionStatus(t *testing.T) {
 		corev1.ConditionTrue, "")
 
 	testCases := []struct {
-		name              string
-		givenSub          *eventingv1alpha2.Subscription
-		givenNatsSubReady bool
-		givenUpdateStatus bool
-		givenError        error
-		wantConditions    []eventingv1alpha2.Condition
-		wantStatus        bool
+		name           string
+		givenSub       *eventingv1alpha2.Subscription
+		givenError     error
+		wantConditions []eventingv1alpha2.Condition
+		wantStatus     bool
 	}{
 		{
 			name: "Subscription with no conditions should stay not ready with false condition",
@@ -306,11 +352,9 @@ func Test_syncSubscriptionStatus(t *testing.T) {
 				controllertesting.WithConditions([]eventingv1alpha2.Condition{}),
 				controllertesting.WithStatus(true),
 			),
-			givenNatsSubReady: false,
-			givenUpdateStatus: false,
-			givenError:        jetStreamError,
-			wantConditions:    []eventingv1alpha2.Condition{falseNatsSubActiveCondition},
-			wantStatus:        false,
+			givenError:     jetStreamError,
+			wantConditions: []eventingv1alpha2.Condition{falseNatsSubActiveCondition},
+			wantStatus:     false,
 		},
 		{
 			name: "Subscription with false ready condition should stay not ready with false condition",
@@ -318,23 +362,19 @@ func Test_syncSubscriptionStatus(t *testing.T) {
 				controllertesting.WithConditions([]eventingv1alpha2.Condition{falseNatsSubActiveCondition}),
 				controllertesting.WithStatus(false),
 			),
-			givenNatsSubReady: false,
-			givenUpdateStatus: false,
-			givenError:        jetStreamError,
-			wantConditions:    []eventingv1alpha2.Condition{falseNatsSubActiveCondition},
-			wantStatus:        false,
+			givenError:     jetStreamError,
+			wantConditions: []eventingv1alpha2.Condition{falseNatsSubActiveCondition},
+			wantStatus:     false,
 		},
 		{
-			name: "Subscription should become ready because of isNatsSubReady flag",
+			name: "Subscription should become ready because because, there is no reconciliation error",
 			givenSub: controllertesting.NewSubscription(subscriptionName, namespaceName,
 				controllertesting.WithConditions([]eventingv1alpha2.Condition{falseNatsSubActiveCondition}),
 				controllertesting.WithStatus(false),
 			),
-			givenNatsSubReady: true, // isNatsSubReady
-			givenUpdateStatus: false,
-			givenError:        nil,
-			wantConditions:    []eventingv1alpha2.Condition{trueNatsSubActiveCondition},
-			wantStatus:        true,
+			givenError:     nil,
+			wantConditions: []eventingv1alpha2.Condition{trueNatsSubActiveCondition},
+			wantStatus:     true,
 		},
 		{
 			name: "Subscription should stay with ready condition and status",
@@ -342,35 +382,19 @@ func Test_syncSubscriptionStatus(t *testing.T) {
 				controllertesting.WithConditions([]eventingv1alpha2.Condition{trueNatsSubActiveCondition}),
 				controllertesting.WithStatus(true),
 			),
-			givenNatsSubReady: true,
-			givenUpdateStatus: false,
-			givenError:        nil,
-			wantConditions:    []eventingv1alpha2.Condition{trueNatsSubActiveCondition},
-			wantStatus:        true,
+			givenError:     nil,
+			wantConditions: []eventingv1alpha2.Condition{trueNatsSubActiveCondition},
+			wantStatus:     true,
 		},
 		{
-			name: "Subscription should become not ready because of false isNatsSubReady flag",
+			name: "Subscription should become not ready because of the occurred error",
 			givenSub: controllertesting.NewSubscription(subscriptionName, namespaceName,
 				controllertesting.WithConditions([]eventingv1alpha2.Condition{trueNatsSubActiveCondition}),
 				controllertesting.WithStatus(true),
 			),
-			givenNatsSubReady: false, // isNatsSubReady
-			givenUpdateStatus: false,
-			givenError:        jetStreamError,
-			wantConditions:    []eventingv1alpha2.Condition{falseNatsSubActiveCondition},
-			wantStatus:        false,
-		},
-		{
-			name: "Subscription should stay with the same condition, but still updated because of the forceUpdateStatus flag",
-			givenSub: controllertesting.NewSubscription(subscriptionName, namespaceName,
-				controllertesting.WithConditions([]eventingv1alpha2.Condition{trueNatsSubActiveCondition}),
-				controllertesting.WithStatus(true),
-			),
-			givenNatsSubReady: true,
-			givenUpdateStatus: true,
-			givenError:        nil,
-			wantConditions:    []eventingv1alpha2.Condition{trueNatsSubActiveCondition},
-			wantStatus:        true,
+			givenError:     jetStreamError,
+			wantConditions: []eventingv1alpha2.Condition{falseNatsSubActiveCondition},
+			wantStatus:     false,
 		},
 	}
 	for _, tC := range testCases {
@@ -497,47 +521,163 @@ func Test_syncEventTypes(t *testing.T) {
 	}
 }
 
-func Test_addFinalizerToSubscription(t *testing.T) {
-	// given
+func Test_updateStatus(t *testing.T) {
+	sub := controllertesting.NewSubscription(subscriptionName, namespaceName, controllertesting.WithStatus(true))
+
 	ctx := context.Background()
-	sub := controllertesting.NewSubscription(subscriptionName, namespaceName)
-	fakeSub := controllertesting.NewSubscription("fake", namespaceName)
 	testEnvironment := setupTestEnvironment(t, sub)
 	r := testEnvironment.Reconciler
-	fetchedSub, err := fetchTestSubscription(testEnvironment.Context, r)
-	require.NoError(t, err)
-	ensureFinalizerMatch(t, &fetchedSub, []string{})
 
 	testCases := []struct {
-		name      string
-		givenSub  *eventingv1alpha2.Subscription
-		wantError error
+		name       string
+		oldStatus  eventingv1alpha2.SubscriptionStatus
+		newStatus  eventingv1alpha2.SubscriptionStatus
+		wantError  error
+		wantChange bool
 	}{
 		{
-			name:      "A new Subscription must be updated with cleanEventTypes and backend jstypes and return true",
-			givenSub:  sub,
-			wantError: nil,
+			name:       "No update should happen in case when the statuses are equal",
+			oldStatus:  eventingv1alpha2.SubscriptionStatus{Ready: true},
+			newStatus:  eventingv1alpha2.SubscriptionStatus{Ready: true},
+			wantChange: false,
 		},
 		{
-			name:      "A new Subscription must be updated with cleanEventTypes and backend jstypes and return true",
-			givenSub:  fakeSub,
-			wantError: errFailedToAddFinalizer,
+			name:       "An Update should happen in case when the statuses are equal",
+			oldStatus:  eventingv1alpha2.SubscriptionStatus{Ready: true},
+			newStatus:  eventingv1alpha2.SubscriptionStatus{Ready: false},
+			wantChange: true,
+		},
+		{
+			name:       "The error message from the update operation should fail the whole function",
+			oldStatus:  eventingv1alpha2.SubscriptionStatus{Ready: true},
+			newStatus:  eventingv1alpha2.SubscriptionStatus{Ready: false},
+			wantChange: true,
+			wantError:  errFailedToUpdateStatus,
 		},
 	}
 
 	for _, tC := range testCases {
 		testCase := tC
 		t.Run(testCase.name, func(t *testing.T) {
+			// given
+			resourceVersionBefore := sub.ResourceVersion
+			sub.Status = tC.oldStatus
+			newSub := sub.DeepCopy()
+			newSub.Status = tC.newStatus
+
+			// simulate the update error
+			if tC.wantError != nil {
+				require.NoError(t, r.Client.Delete(ctx, sub))
+			}
+
 			// when
-			_, err = r.addFinalizer(ctx, testCase.givenSub, r.namedLogger())
+			updateStatusErr := r.updateStatus(ctx, sub, newSub, r.namedLogger())
 
 			// then
-			require.ErrorIs(t, err, testCase.wantError)
-			if testCase.wantError == nil {
-				fetchedSub, err = fetchTestSubscription(testEnvironment.Context, r)
-				require.NoError(t, err)
-				ensureFinalizerMatch(t, &fetchedSub, []string{eventingv1alpha2.Finalizer})
+			// in case the function should fail
+			if tC.wantError != nil {
+				require.ErrorIs(t, updateStatusErr, tC.wantError)
+				return
 			}
+
+			// then
+			require.NoError(t, updateStatusErr)
+			fetchedSub, err := fetchTestSubscription(testEnvironment.Context, r)
+			require.NoError(t, err)
+
+			require.Equal(t, tC.wantChange, fetchedSub.ResourceVersion != resourceVersionBefore)
+			require.Equal(t, newSub.Status.Ready, fetchedSub.Status.Ready)
+			require.Equal(t, newSub.Status.Conditions, fetchedSub.Status.Conditions)
+		})
+	}
+}
+
+func Test_updateSubscription(t *testing.T) {
+	// given
+	sub := controllertesting.NewSubscription(subscriptionName, namespaceName,
+		controllertesting.WithStatusTypes([]eventingv1alpha2.EventType{
+			{OriginalType: "order.created.v1", CleanType: "order.created.v1"},
+		}),
+	)
+	sub.Finalizers = emptyFinalizer
+
+	subWithDifferentStatus := sub.DeepCopy()
+	subWithDifferentStatus.Status.Ready = !sub.Status.Ready
+
+	subWithDifferentFinalizer := sub.DeepCopy()
+	subWithDifferentFinalizer.Finalizers = eventingFinalizer
+
+	ctx := context.Background()
+	testEnvironment := setupTestEnvironment(t)
+	r := testEnvironment.Reconciler
+
+	testCases := []struct {
+		name             string
+		actualSub        *eventingv1alpha2.Subscription
+		desiredSub       *eventingv1alpha2.Subscription
+		wantErrorMessage string
+		wantChange       bool
+		wantSubStatus    *eventingv1alpha2.SubscriptionStatus
+		wantFinalizer    []string
+	}{
+		{
+			name:       "When Subscription cannot be fetched from the api server the function should return an error",
+			actualSub:  sub,
+			desiredSub: sub,
+			wantErrorMessage: apierr.NewNotFound(
+				eventingv1alpha2.SubscriptionGroupVersionResource().GroupResource(),
+				subscriptionName).Error(),
+		},
+		{
+			name:       "updateSubscription() should be idempotent",
+			actualSub:  sub,
+			desiredSub: sub,
+			wantChange: false,
+		},
+		{
+			name:       "Subscription's status should be updated on difference",
+			actualSub:  sub,
+			desiredSub: subWithDifferentStatus,
+			wantChange: true,
+		},
+		{
+			name:       "Subscription's finalizer should be updated on difference",
+			actualSub:  sub,
+			desiredSub: subWithDifferentFinalizer,
+			wantChange: true,
+		},
+	}
+
+	for _, tC := range testCases {
+		testCase := tC
+		t.Run(testCase.name, func(t *testing.T) {
+			if tC.wantErrorMessage == "" {
+				sub.ResourceVersion = ""
+				require.NoError(t, r.Client.Create(ctx, sub))
+			}
+			resourceVersionBefore := sub.ResourceVersion
+
+			// when
+			err := r.updateSubscription(ctx, tC.desiredSub, r.namedLogger())
+
+			// then
+			// in case the subscription doesn't exist
+			if tC.wantErrorMessage != "" {
+				require.ErrorContains(t, err, testCase.wantErrorMessage)
+				return
+			}
+
+			// then
+			fetchedSub, err := fetchTestSubscription(testEnvironment.Context, r)
+			require.NoError(t, err)
+
+			require.Equal(t, tC.wantChange, fetchedSub.ResourceVersion != resourceVersionBefore)
+			ensureFinalizerMatch(t, &fetchedSub, testCase.desiredSub.Finalizers)
+			require.Equal(t, testCase.desiredSub.Status.Ready, fetchedSub.Status.Ready)
+			require.Equal(t, testCase.desiredSub.Status.Conditions, fetchedSub.Status.Conditions)
+
+			// clean up
+			require.NoError(t, r.Client.Delete(ctx, sub))
 		})
 	}
 }

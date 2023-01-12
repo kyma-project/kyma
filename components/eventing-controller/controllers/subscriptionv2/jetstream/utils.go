@@ -14,12 +14,3 @@ func isInDeletion(subscription *eventingv1alpha2.Subscription) bool {
 func containsFinalizer(sub *eventingv1alpha2.Subscription) bool {
 	return utils.ContainsString(sub.ObjectMeta.Finalizers, eventingv1alpha2.Finalizer)
 }
-
-// setSubReadyStatus returns true if the subscription ready status has changed.
-func setSubReadyStatus(desiredSubscriptionStatus *eventingv1alpha2.SubscriptionStatus, isReady bool) bool {
-	if desiredSubscriptionStatus.Ready != isReady {
-		desiredSubscriptionStatus.Ready = isReady
-		return true
-	}
-	return false
-}
