@@ -9,7 +9,7 @@ Feature: Exposing endpoint with a custom domain
     Given there is an unsecured endpoint
     Then calling the endpoint without a token should result in status between 200 and 299
     And calling the endpoint with any token should result in status between 200 and 299
- 
+
   Scenario: Calling a secured API with OAuth2 with custom domain
     Given endpoint is secured with OAuth2
     Then calling the endpoint without a token should result in status beetween 400 and 403

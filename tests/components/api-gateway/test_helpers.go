@@ -59,6 +59,7 @@ const (
 	oauthStrategyApiruleFile       = "oauth-strategy.yaml"
 	jwtAndOauthStrategyApiruleFile = "jwt-oauth-strategy.yaml"
 	jwtAndOauthOnePathApiruleFile  = "jwt-oauth-one-path-strategy.yaml"
+	istioJwtApiruleFile            = "istio-jwt-strategy.yaml"
 	resourceSeparator              = "---"
 	defaultHeaderName              = "Authorization"
 	customDomainEnv                = "TEST_CUSTOM_DOMAIN"
