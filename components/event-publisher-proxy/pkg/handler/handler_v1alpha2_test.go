@@ -352,7 +352,7 @@ func TestHandler_publishLegacyEventsAsCEV1alpha2(t *testing.T) {
 		givenLegacyTransformer legacy.RequestToCETransformer
 		givenCollector         metrics.PublishingMetricsCollector
 		givenRequest           *http.Request
-		wantHttpStatus         int
+		wantHTTPStatus         int
 		wantTEF                string
 	}{
 		{
@@ -366,7 +366,7 @@ func TestHandler_publishLegacyEventsAsCEV1alpha2(t *testing.T) {
 			givenLegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", appLister),
 			givenCollector:         metrics.NewCollector(latency),
 			givenRequest:           legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
-			wantHttpStatus:         http.StatusOK,
+			wantHTTPStatus:         http.StatusOK,
 			//nolint:lll // output directly from prometheus
 			wantTEF: `
 					# HELP eventing_epp_event_type_published_total The total number of events published for a given eventTypeLabel
@@ -404,7 +404,7 @@ func TestHandler_publishLegacyEventsAsCEV1alpha2(t *testing.T) {
 			givenLegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", appLister),
 			givenCollector:         metrics.NewCollector(latency),
 			givenRequest:           legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
-			wantHttpStatus:         http.StatusBadGateway,
+			wantHTTPStatus:         http.StatusBadGateway,
 			//nolint:lll // output directly from prometheus
 			wantTEF: `
 					# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
@@ -421,7 +421,7 @@ func TestHandler_publishLegacyEventsAsCEV1alpha2(t *testing.T) {
 			givenLegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", appLister),
 			givenCollector:         metrics.NewCollector(latency),
 			givenRequest:           legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
-			wantHttpStatus:         507,
+			wantHTTPStatus:         507,
 			//nolint:lll // output directly from prometheus
 			wantTEF: `
 					# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
@@ -438,7 +438,7 @@ func TestHandler_publishLegacyEventsAsCEV1alpha2(t *testing.T) {
 			givenLegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", appLister),
 			givenCollector:         metrics.NewCollector(latency),
 			givenRequest:           legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
-			wantHttpStatus:         500,
+			wantHTTPStatus:         500,
 			//nolint:lll // output directly from prometheus
 			wantTEF: `
 					# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
@@ -457,7 +457,7 @@ func TestHandler_publishLegacyEventsAsCEV1alpha2(t *testing.T) {
 			givenLegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", appLister),
 			givenCollector:         metrics.NewCollector(latency),
 			givenRequest:           legacytest.InvalidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
-			wantHttpStatus:         400,
+			wantHTTPStatus:         400,
 			// this is a client error. We do record an error metric for requests that cannot even be decoded correctly.
 			wantTEF: "",
 		},
@@ -486,11 +486,11 @@ func TestHandler_publishLegacyEventsAsCEV1alpha2(t *testing.T) {
 			h.publishLegacyEventsAsCE(writer, tt.givenRequest)
 
 			// then
-			require.Equal(t, tt.wantHttpStatus, writer.Result().StatusCode)
+			require.Equal(t, tt.wantHTTPStatus, writer.Result().StatusCode)
 			body, err := io.ReadAll(writer.Result().Body)
 			require.NoError(t, err)
 
-			if tt.wantHttpStatus == http.StatusOK {
+			if tt.wantHTTPStatus == http.StatusOK {
 				ok := &api.PublishResponse{}
 				err = json.Unmarshal(body, ok)
 				require.NoError(t, err)
