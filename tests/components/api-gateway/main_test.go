@@ -65,6 +65,7 @@ func InitializeApiGatewayTests(ctx *godog.TestSuiteContext) {
 	InitializeScenarioOAuth2JWTTwoPaths(ctx.ScenarioContext())
 	InitializeScenarioApiruleWithOverrides(ctx.ScenarioContext())
 	InitializeScenarioServicePerPath(ctx.ScenarioContext())
+	InitializeScenarioIstioJWT(ctx.ScenarioContext())
 }
 
 func InitializeCustomDomainTests(ctx *godog.TestSuiteContext) {
