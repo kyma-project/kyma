@@ -23,8 +23,13 @@ all: help
 test: ## Run the tests of the project
 	$(GOTEST) -run TestApiGateway . -v -race
 
+	make test-istio-jwt
+
 test-custom-domain:
 	GODEBUG=netdns=cgo CGO_ENABLED=1 $(GOTEST) -run "^TestCustomDomain$$" . -v -race
+
+test-istio-jwt:
+	$(GOTEST) -run TestIstioJwt . -v -race
 
 test-k3d: ## Prepare k3d and run tests
 	export KYMA_DOMAIN="local.kyma.dev"

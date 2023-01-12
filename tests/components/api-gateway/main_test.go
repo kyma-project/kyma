@@ -15,6 +15,26 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 )
 
+func InitializeApiGatewayTests(ctx *godog.TestSuiteContext) {
+	InitializeScenarioOAuth2Endpoint(ctx.ScenarioContext())
+	InitializeScenarioSecuredToUnsecuredEndpoint(ctx.ScenarioContext())
+	InitializeScenarioUnsecuredEndpoint(ctx.ScenarioContext())
+	InitializeScenarioUnsecuredToSecuredEndpoint(ctx.ScenarioContext())
+	InitializeScenarioUnsecuredToSecuredEndpointJWT(ctx.ScenarioContext())
+	InitializeScenarioOAuth2JWTOnePath(ctx.ScenarioContext())
+	InitializeScenarioOAuth2JWTTwoPaths(ctx.ScenarioContext())
+	InitializeScenarioApiruleWithOverrides(ctx.ScenarioContext())
+	InitializeScenarioServicePerPath(ctx.ScenarioContext())
+}
+
+func InitializeCustomDomainTests(ctx *godog.TestSuiteContext) {
+	InitializeScenarioCustomDomain(ctx.ScenarioContext())
+}
+
+func InitializeApiGatewayIstioJwtTest(ctx *godog.TestSuiteContext) {
+	InitializeScenarioIstioJWT(ctx.ScenarioContext())
+}
+
 func TestApiGateway(t *testing.T) {
 	InitTestSuite()
 	SetupCommonResources("api-gateway-tests")
@@ -55,22 +75,6 @@ func TestApiGateway(t *testing.T) {
 	}
 }
 
-func InitializeApiGatewayTests(ctx *godog.TestSuiteContext) {
-	InitializeScenarioOAuth2Endpoint(ctx.ScenarioContext())
-	InitializeScenarioSecuredToUnsecuredEndpoint(ctx.ScenarioContext())
-	InitializeScenarioUnsecuredEndpoint(ctx.ScenarioContext())
-	InitializeScenarioUnsecuredToSecuredEndpoint(ctx.ScenarioContext())
-	InitializeScenarioUnsecuredToSecuredEndpointJWT(ctx.ScenarioContext())
-	InitializeScenarioOAuth2JWTOnePath(ctx.ScenarioContext())
-	InitializeScenarioOAuth2JWTTwoPaths(ctx.ScenarioContext())
-	InitializeScenarioApiruleWithOverrides(ctx.ScenarioContext())
-	InitializeScenarioServicePerPath(ctx.ScenarioContext())
-	InitializeScenarioIstioJWT(ctx.ScenarioContext())
-}
-
-func InitializeCustomDomainTests(ctx *godog.TestSuiteContext) {
-	InitializeScenarioCustomDomain(ctx.ScenarioContext())
-}
 func TestCustomDomain(t *testing.T) {
 	InitTestSuite()
 	SetupCommonResources("custom-domain")
@@ -95,6 +99,42 @@ func TestCustomDomain(t *testing.T) {
 	//Remove namespace
 	res := schema.GroupVersionResource{Group: "", Version: "v1", Resource: "namespaces"}
 	err := k8sClient.Resource(res).Delete(context.Background(), namespace, v1.DeleteOptions{})
+	if err != nil {
+		log.Print(err.Error())
+	}
+
+	if os.Getenv(exportResultVar) == "true" {
+		generateReport()
+	}
+
+	if testExitCode != 0 {
+		t.Fatalf("non-zero status returned, failed to run feature tests, Pod list: %s\n APIRules: %s\n", podReport, apiRules)
+	}
+}
+
+func TestIstioJwt(t *testing.T) {
+	InitTestSuite()
+	SetupCommonResources("istio-jwt")
+	apiGatewayIstioJwtOpts := goDogOpts
+	apiGatewayIstioJwtOpts.Paths = []string{"features/api-gateway/istio_jwt.feature"}
+	apiGatewayIstioJwtOpts.Concurrency = conf.TestConcurency
+	if os.Getenv(exportResultVar) == "true" {
+		apiGatewayIstioJwtOpts.Format = "pretty,junit:junit-report.xml,cucumber:cucumber-report.json"
+	}
+	apiGatewayIstioJwtSuite := godog.TestSuite{
+		Name:                 "istio-jwt",
+		TestSuiteInitializer: InitializeApiGatewayIstioJwtTests,
+		Options:              &apiGatewayIstioJwtOpts,
+	}
+
+	testExitCode := apiGatewayIstioJwtSuite.Run()
+
+	podReport := getPodListReport()
+	apiRules := getApiRules()
+
+	//Remove namespace
+	res := schema.GroupVersionResource{Group: "", Version: "v1", Resource: "namespaces"}
+	err = k8sClient.Resource(res).Delete(context.Background(), namespace, v1.DeleteOptions{})
 	if err != nil {
 		log.Print(err.Error())
 	}
