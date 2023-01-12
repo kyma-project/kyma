@@ -18,8 +18,8 @@ import (
 )
 
 var (
-	isValidEventTypeVersion = regexp.MustCompile(AllowedEventTypeVersionChars).MatchString
-	isValidEventID          = regexp.MustCompile(AllowedEventIDChars).MatchString
+	validEventTypeVersion = regexp.MustCompile(AllowedEventTypeVersionChars)
+	validEventID          = regexp.MustCompile(AllowedEventIDChars)
 )
 
 const (
@@ -59,7 +59,7 @@ func (t *Transformer) checkParameters(parameters *apiv1.PublishEventParametersV1
 	if len(parameters.PublishrequestV1.EventTypeVersion) == 0 {
 		return ErrorResponseMissingFieldEventTypeVersion()
 	}
-	if !isValidEventTypeVersion(parameters.PublishrequestV1.EventTypeVersion) {
+	if !validEventTypeVersion.MatchString(parameters.PublishrequestV1.EventTypeVersion) {
 		return ErrorResponseWrongEventTypeVersion()
 	}
 	if len(parameters.PublishrequestV1.EventTime) == 0 {
@@ -68,7 +68,7 @@ func (t *Transformer) checkParameters(parameters *apiv1.PublishEventParametersV1
 	if _, err := time.Parse(time.RFC3339, parameters.PublishrequestV1.EventTime); err != nil {
 		return ErrorResponseWrongEventTime()
 	}
-	if len(parameters.PublishrequestV1.EventID) > 0 && !isValidEventID(parameters.PublishrequestV1.EventID) {
+	if len(parameters.PublishrequestV1.EventID) > 0 && !validEventID.MatchString(parameters.PublishrequestV1.EventID) {
 		return ErrorResponseWrongEventID()
 	}
 	if parameters.PublishrequestV1.Data == nil {

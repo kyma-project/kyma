@@ -92,6 +92,7 @@ func NewCollector(latency histogram.BucketsProvider) *Collector {
 			},
 			[]string{},
 		),
+		//nolint:promlinter // we follow the same pattern as istio. so a millisecond unit if fine here
 		backendLatency: prometheus.NewHistogramVec(
 			prometheus.HistogramOpts{
 				Name:    BackendLatencyKey,
@@ -116,6 +117,7 @@ func NewCollector(latency histogram.BucketsProvider) *Collector {
 			[]string{eventTypeLabel, eventSourceLabel, responseCodeLabel},
 		),
 
+		//nolint:promlinter // we follow the same pattern as istio. so a millisecond unit if fine here
 		duration: prometheus.NewHistogramVec(
 			prometheus.HistogramOpts{
 				Name:    durationKey,

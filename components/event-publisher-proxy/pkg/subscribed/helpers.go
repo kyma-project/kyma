@@ -45,7 +45,8 @@ func ConvertRuntimeObjToSubscriptionV1alpha1(sObj runtime.Object) (*eventingv1al
 	return sub, nil
 }
 
-// ConvertRuntimeObjToSubscription converts a runtime.Object to a Subscription object by converting to unstructured in between.
+// ConvertRuntimeObjToSubscription converts a runtime.Object to a Subscription object
+// by converting to unstructured in between.
 func ConvertRuntimeObjToSubscription(sObj runtime.Object) (*eventingv1alpha2.Subscription, error) {
 	sub := &eventingv1alpha2.Subscription{}
 	if subUnstructured, ok := sObj.(*unstructured.Unstructured); ok {

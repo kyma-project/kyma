@@ -29,8 +29,6 @@ const (
 // The format of the URL is: /:application-name/v1/...
 // returns empty string if application-name cannot be found.
 func ParseApplicationNameFromPath(path string) string {
-	// Assumption: Clients(application validator which has a flag for the path (https://github.com/kyma-project/kyma/blob/main/components/application-connectivity-validator/cmd/applicationconnectivityvalidator/applicationconnectivityvalidator.go#L49) using this endpoint must be sending request to path /:application/v1/events
-	// Hence it should be safe to return 0th index as the application name
 	path = strings.TrimLeft(path, "/")
 	application, _, ok := strings.Cut(path, "/")
 	if ok {

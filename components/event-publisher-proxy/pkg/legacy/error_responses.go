@@ -43,7 +43,8 @@ func ErrorResponseMissingFieldEventType() *api.PublishEventResponses {
 	return CreateMissingFieldError(FieldEventType)
 }
 
-// ErrorResponseMissingFieldEventTypeVersion returns an error of type PublishEventResponses for missing EventTypeVersion field.
+// ErrorResponseMissingFieldEventTypeVersion returns an error of type PublishEventResponses
+// for missing EventTypeVersion field.
 func ErrorResponseMissingFieldEventTypeVersion() *api.PublishEventResponses {
 	return CreateMissingFieldError(FieldEventTypeVersion)
 }

@@ -15,7 +15,9 @@ var (
 	// invalidEventTypeSegment used to match and replace none-alphanumeric characters in the event-type segments
 	// as per SAP Event spec https://github.tools.sap/CentralEngineering/sap-event-specification#type.
 	invalidEventTypeSegment = regexp.MustCompile("[^a-zA-Z0-9.]")
+)
 
+const (
 	// cleanerName used as the logger name.
 	cleanerName = "event-type-cleaner"
 )
