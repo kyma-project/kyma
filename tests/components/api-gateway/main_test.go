@@ -114,6 +114,7 @@ func TestCustomDomain(t *testing.T) {
 
 func TestIstioJwt(t *testing.T) {
 	InitTestSuite()
+	SwitchJwtHandler("istio")
 	SetupCommonResources("istio-jwt")
 
 	apiGatewayIstioJwtOpts := goDogOpts

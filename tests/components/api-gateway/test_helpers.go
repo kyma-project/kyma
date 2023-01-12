@@ -68,6 +68,14 @@ const (
 	cucumberFileName               = "cucumber-report.json"
 	anyToken                       = "any"
 	authorizationHeaderName        = "Authorization"
+	defaultNS                      = "kyma-system"
+	configMapName                  = "api-gateway-config"
+
+	configMapGVR = schema.GroupVersionResource{
+		Group:    "apps",
+		Version:  "v1",
+		Resource: "configmaps",
+	}
 )
 
 var (
@@ -517,4 +525,25 @@ func getPodListReport() string {
 	}
 	toPrint, _ := json.Marshal(p)
 	return string(pretty.Pretty(toPrint))
+}
+
+func SwitchJwtHandler(jwtHandler string) error {
+	configMap := unstructured.Unstructured{
+		Object: map[string]interface{}{
+			"kind":       "ConfigMap",
+			"apiVersion": "v1",
+			"metadata": map[string]interface{}{
+				"name":      configMapName,
+				"namespace": defaultNS,
+			},
+			"data": map[string]interface{}{
+				"api-gateway-config": "jwtHandler: " + jwtHandler,
+			},
+		},
+	}
+	_, err := resourceManager.CreateResource(k8sClient, configMapGVR, defaultNS, configMapName, configMap)
+	if err != nil {
+		_, err = resourceManager.UpdateResource(k8sClient, configMapGVR, defaultNS, configMapName, configMap)
+	}
+	return err
 }
