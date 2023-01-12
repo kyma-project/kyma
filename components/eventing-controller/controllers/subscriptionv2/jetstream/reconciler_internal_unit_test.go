@@ -32,8 +32,8 @@ const (
 )
 
 var (
-	eventingFinalizer = []string{eventingv1alpha2.Finalizer}
-	emptyFinalizer    []string
+	eventingFinalizer = []string{eventingv1alpha2.Finalizer} //nolint:gochecknoglobals
+	emptyFinalizer    []string                               //nolint:gochecknoglobals
 )
 
 // Test_Reconcile tests the return values of the Reconcile() method of the reconciler.
@@ -303,17 +303,15 @@ func Test_addFinalizerToSubscription(t *testing.T) {
 	for _, tC := range testCases {
 		testCase := tC
 		t.Run(testCase.name, func(t *testing.T) {
-
 			// in case syncSubscriptionStatus throws an error
 			if tC.wantErrorMessage != "" {
 				_, err := r.addFinalizer(ctx, fakeSub, r.namedLogger())
 				require.ErrorContains(t, err, tC.wantErrorMessage)
 				return
-			} else {
-				sub.Finalizers = tC.givenFinalizers
-				_, err := r.addFinalizer(ctx, sub, r.namedLogger())
-				require.NoError(t, err)
 			}
+			sub.Finalizers = tC.givenFinalizers
+			_, err := r.addFinalizer(ctx, sub, r.namedLogger())
+			require.NoError(t, err)
 
 			fetchedSub, err := fetchTestSubscription(testEnvironment.Context, r)
 			require.NoError(t, err)
