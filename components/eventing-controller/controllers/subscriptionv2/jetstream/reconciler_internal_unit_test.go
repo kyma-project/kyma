@@ -252,7 +252,7 @@ func Test_handleSubscriptionDeletion(t *testing.T) {
 			}
 
 			// when
-			err = r.handleSubscriptionDeletion(ctx, sub, r.namedLogger())
+			_, err = r.handleSubscriptionDeletion(ctx, sub, r.namedLogger())
 			require.ErrorIs(t, err, testCase.wantError)
 
 			// then
@@ -382,7 +382,7 @@ func Test_syncSubscriptionStatus(t *testing.T) {
 			require.NoError(t, err)
 
 			// when
-			err = r.syncSubscriptionStatus(ctx, sub, testCase.givenUpdateStatus, testCase.givenError)
+			err = r.syncSubscriptionStatus(ctx, sub, testCase.givenError, r.namedLogger())
 			require.NoError(t, err)
 
 			// then
@@ -400,7 +400,7 @@ func Test_syncSubscriptionStatus(t *testing.T) {
 	}
 }
 
-func Test_syncInitialStatus(t *testing.T) {
+func Test_syncEventTypes(t *testing.T) {
 	testEnvironment := setupTestEnvironment(t)
 	r := testEnvironment.Reconciler
 
@@ -426,7 +426,6 @@ func Test_syncInitialStatus(t *testing.T) {
 		name          string
 		givenSub      *eventingv1alpha2.Subscription
 		wantSubStatus eventingv1alpha2.SubscriptionStatus
-		wantStatus    bool
 	}{
 		{
 			name: "A new Subscription must be updated with cleanEventTypes and backend jstypes and return true",
@@ -439,7 +438,6 @@ func Test_syncInitialStatus(t *testing.T) {
 				Types:   eventTypes,
 				Backend: backendStatus,
 			},
-			wantStatus: true,
 		},
 		{
 			name: "A subscription with the same cleanEventTypes and jsTypes must return false",
@@ -454,7 +452,6 @@ func Test_syncInitialStatus(t *testing.T) {
 				Types:   eventTypes,
 				Backend: backendStatus,
 			},
-			wantStatus: false,
 		},
 		{
 			name: "A subscription with the same eventTypes and new jsTypes must return true",
@@ -468,7 +465,6 @@ func Test_syncInitialStatus(t *testing.T) {
 				Types:   eventTypes,
 				Backend: backendStatus,
 			},
-			wantStatus: true,
 		},
 		{
 			name: "A subscription with changed eventTypes and the same jsTypes must return true",
@@ -482,7 +478,6 @@ func Test_syncInitialStatus(t *testing.T) {
 				Types:   eventTypes,
 				Backend: backendStatus,
 			},
-			wantStatus: true,
 		},
 	}
 	for _, tC := range testCases {
@@ -492,19 +487,19 @@ func Test_syncInitialStatus(t *testing.T) {
 			sub := testCase.givenSub
 
 			// when
-			gotStatus := r.syncInitialStatus(sub)
+			r.syncEventTypes(sub)
 
 			// then
 			require.Equal(t, testCase.wantSubStatus.Types, sub.Status.Types)
 			require.Equal(t, testCase.wantSubStatus.Backend, sub.Status.Backend)
 			require.Equal(t, testCase.wantSubStatus.Ready, sub.Status.Ready)
-			require.Equal(t, testCase.wantStatus, gotStatus)
 		})
 	}
 }
 
 func Test_addFinalizerToSubscription(t *testing.T) {
 	// given
+	ctx := context.Background()
 	sub := controllertesting.NewSubscription(subscriptionName, namespaceName)
 	fakeSub := controllertesting.NewSubscription("fake", namespaceName)
 	testEnvironment := setupTestEnvironment(t, sub)
@@ -534,7 +529,7 @@ func Test_addFinalizerToSubscription(t *testing.T) {
 		testCase := tC
 		t.Run(testCase.name, func(t *testing.T) {
 			// when
-			err = r.addFinalizerToSubscription(testCase.givenSub, r.namedLogger())
+			_, err = r.addFinalizer(ctx, testCase.givenSub, r.namedLogger())
 
 			// then
 			require.ErrorIs(t, err, testCase.wantError)

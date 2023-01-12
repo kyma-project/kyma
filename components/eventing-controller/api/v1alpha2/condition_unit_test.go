@@ -1,6 +1,7 @@
 package v1alpha2_test
 
 import (
+	"github.com/pkg/errors"
 	"reflect"
 	"testing"
 	"time"
@@ -468,6 +469,46 @@ func Test_CreateMessageForConditionReasonSubscriptionCreated(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			require.Equal(t, tc.wantName, v1alpha2.CreateMessageForConditionReasonSubscriptionCreated(tc.givenName))
+		})
+	}
+}
+
+func Test_SetConditionSubscriptionActive(t *testing.T) {
+	err := errors.New("some error")
+	conditionReady := v1alpha2.MakeCondition(
+		v1alpha2.ConditionSubscriptionActive,
+		v1alpha2.ConditionReasonNATSSubscriptionActive,
+		corev1.ConditionTrue, "")
+	conditionNotReady := v1alpha2.MakeCondition(
+		v1alpha2.ConditionSubscriptionActive,
+		v1alpha2.ConditionReasonNATSSubscriptionNotActive,
+		corev1.ConditionFalse, err.Error())
+
+	testCases := []struct {
+		name            string
+		givenConditions []v1alpha2.Condition
+		givenError      error
+		wantConditions  []v1alpha2.Condition
+	}{
+		{
+			name:           "no error should set the condition to ready",
+			givenError:     nil,
+			wantConditions: []v1alpha2.Condition{conditionReady},
+		},
+		{
+			name:           "error should set the condition to not ready",
+			givenError:     err,
+			wantConditions: []v1alpha2.Condition{conditionNotReady},
+		},
+	}
+	for _, testCase := range testCases {
+		tc := testCase
+		t.Run(tc.name, func(t *testing.T) {
+			// when
+			conditions := v1alpha2.GetSubscriptionActiveCondition(tc.givenError)
+
+			// then
+			require.True(t, v1alpha2.ConditionsEquals(conditions, tc.wantConditions))
 		})
 	}
 }

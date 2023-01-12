@@ -110,7 +110,7 @@ func TestUnavailableNATSServer(t *testing.T) {
 		testingv2.WithSinkURLFromSvc(ens.SubscriberSvc),
 	)
 
-	// test the subscription was reconciled properly and has the expected status
+	t.Log("test the subscription was reconciled properly and has the expected status")
 	reconcilertestingv2.TestSubscriptionOnK8s(ens.TestEnsemble, sub,
 		testingv2.HaveCondition(testingv2.DefaultReadyCondition()),
 		testingv2.HaveSubscriptionReady(),
@@ -122,13 +122,14 @@ func TestUnavailableNATSServer(t *testing.T) {
 		}),
 	)
 
-	// stopping NATS server should trigger the subscription become un-ready
+	t.Log("stopping NATS server should trigger the subscription become un-ready")
 	ens.NatsServer.Shutdown()
 	reconcilertestingv2.TestSubscriptionOnK8s(ens.TestEnsemble, sub,
 		testingv2.HaveSubscriptionNotReady(),
 	)
 
 	// should trigger the subscription become ready again
+	t.Log("startup the NATS Server and test that sub becomes ready")
 	ens.NatsServer = testingv1.StartDefaultJetStreamServer(ens.NatsPort)
 	reconcilertestingv2.TestSubscriptionOnK8s(ens.TestEnsemble, sub, testingv2.HaveSubscriptionReady())
 
