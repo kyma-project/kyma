@@ -540,7 +540,7 @@ func SwitchJwtHandler(jwtHandler string) error {
 		Version:  "v1",
 		Resource: "configmaps",
 	}
-	err := resourceManager.CreateResource(k8sClient, configMapGVR, defaultNS, configMapName, configMap)
+	err := resourceManager.CreateResource(k8sClient, configMapGVR, defaultNS, configMap)
 	if err != nil {
 		err = resourceManager.UpdateResource(k8sClient, configMapGVR, defaultNS, configMapName, configMap)
 	}
