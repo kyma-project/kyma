@@ -1,10 +1,8 @@
 ---
-title: Access and Expose Kiali, Grafana, and Jaeger
+title: Access and Expose Grafana and Jaeger
 ---
 
-> **NOTE:** Kiali is [deprecated](https://kyma-project.io/blog/kiali-deprecation) and is planned to be removed with Kyma release 2.11. If you want to use Kiali, follow the steps to deploy Kiali yourself from our [examples](https://github.com/kyma-project/examples/blob/main/kiali/README.md).
-
-By default, Kyma does not expose Kiali, Grafana, and Jaeger. However, you can still access them using port forwarding. If you want to expose Kiali, Grafana, and Jaeger securely, use an identity provider of your choice.
+By default, Kyma does not expose Grafana and Jaeger. However, you can still access them using port forwarding. If you want to expose Grafana and Jaeger securely, use an identity provider of your choice.
 
 ![Access services flow](./assets/obsv-access-services.svg)
 
@@ -13,23 +11,13 @@ By default, Kyma does not expose Kiali, Grafana, and Jaeger. However, you can st
 - You have defined the kubeconfig file for your cluster as default (see [Kubernetes: Organizing Cluster Access Using kubeconfig Files](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/)).
 - To expose the services securely with OAuth, you must have a registered OAuth application with one of the [supported providers](https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider#github-auth-provider).
 
-## Access Kiali, Grafana, and Jaeger
+## Access Grafana and Jaeger
 
 ### Steps
 
 1. To forward a local port to a port on the service's Pod, run the following command:
 
 <div tabs>
-  <details>
-  <summary>
-  Kiali
-  </summary>
-
-  ```bash
-  kubectl -n kyma-system port-forward svc/kiali 20001:20001
-  ```
-
-  </details>
   <details>
   <summary>
   Grafana
@@ -54,21 +42,21 @@ By default, Kyma does not expose Kiali, Grafana, and Jaeger. However, you can st
 
 >**NOTE:** `kubectl port-forward` does not return. To stop port forwarding, cancel it with `Ctrl`+`C`.
 
-2. To access the respective service's UI, open `http://localhost:20001` (for Kiali), `http://localhost:3000` (for Grafana), or `http://localhost:16686` (for Jaeger) in your browser.
+2. To access the respective service's UI, open `http://localhost:3000` (for Grafana) or `http://localhost:16686` (for Jaeger) in your browser.
 
-## Expose Kiali, Grafana, and Jaeger securely
+## Expose Grafana and Jaeger securely
 
-Kyma manages an [OAuth2 Proxy](https://oauth2-proxy.github.io/oauth2-proxy/) instance to secure access to Kiali, Grafana, and Jaeger. To make the services accessible, configure OAuth2 Proxy by creating a Kubernetes Secret with your identity provider credentials.
+Kyma manages an [OAuth2 Proxy](https://oauth2-proxy.github.io/oauth2-proxy/) instance to secure access to Grafana and Jaeger. To make the services accessible, configure OAuth2 Proxy by creating a Kubernetes Secret with your identity provider credentials.
 
 ### Steps
 
-The following example shows how to use an OpenID Connect (OIDC) compliant identity provider for Kiali, Grafana, and Jaeger.
+The following example shows how to use an OpenID Connect (OIDC) compliant identity provider for Grafana and Jaeger.
 
 >**NOTE:** The OAuth2 Proxy supports a wide range of other well-known authentication services or OpenID Connect for custom solutions. To find instructions for other authentication services, see the [list of supported providers](https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider).
 
 1. Create a new OpenID Connect application for your identity provider and set the callback URL to the `/oauth2/callback` path of your service.
 
-   For example, if your Kyma cluster is reachable under `kyma.example.com`, use `https://kiali.kyma.example.com/oauth2/callback` for Kiali.
+   For example, if your Kyma cluster is reachable under `kyma.example.com`, use `https://grafana.kyma.example.com/oauth2/callback` for Grafana.
 
    > **TIP:** The subdomain is already exposed by default. Simply change the root domain to your cluster domain.
 
@@ -83,23 +71,6 @@ The following example shows how to use an OpenID Connect (OIDC) compliant identi
    - The following code works on Linux and macOS. If you are using Windows, replace the `` \ `` character by `` ` `` (PowerShell) or `` ^ `` (CMD) for multi-line commands.
 
 <div tabs>
-  <details>
-  <summary>
-  Kiali
-  </summary>
-
-  ```bash
-  kubectl -n kyma-system create secret generic kiali-auth-proxy-user \
-    --from-literal="OAUTH2_PROXY_CLIENT_ID=<my-client-id>" \
-    --from-literal="OAUTH2_PROXY_CLIENT_SECRET=<my-client-secret>" \
-    --from-literal="OAUTH2_PROXY_OIDC_ISSUER_URL=<my-token-issuer>" \
-    --from-literal="OAUTH2_PROXY_PROVIDER=oidc" \
-    --from-literal="OAUTH2_PROXY_SCOPE=openid email" \
-    --from-literal="OAUTH2_PROXY_ALLOWED_GROUPS=<my-groups>" \
-    --from-literal="OAUTH2_PROXY_SKIP_PROVIDER_BUTTON=true"
-  ```
-
-  </details>
   <details>
   <summary>
   Grafana
@@ -141,16 +112,6 @@ The following example shows how to use an OpenID Connect (OIDC) compliant identi
 3. Restart the OAuth2 Proxy pod:
 
 <div tabs>
-  <details>
-  <summary>
-  Kiali
-  </summary>
-
-  ```bash
-  kubectl -n kyma-system rollout restart deployment kiali-auth-proxy
-  ```
-
-  </details>
   <details>
   <summary>
   Grafana
