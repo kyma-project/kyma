@@ -242,7 +242,7 @@ func (t *Transformer) convertPublishRequestToCloudEvent(appName string, publishR
 // has more than two segments separated by "." (e.g. "Account.Order.Created" becomes "AccountOrder.Created").
 func combineEventNameSegments(eventName string) string {
 	parts := strings.Split(eventName, ".")
-	if len(parts) > 2 {
+	if len(parts) > 1 {
 		businessObject := strings.Join(parts[0:len(parts)-1], "")
 		operation := parts[len(parts)-1]
 		eventName = fmt.Sprintf("%s.%s", businessObject, operation)

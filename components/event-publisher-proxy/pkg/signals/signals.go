@@ -28,6 +28,7 @@ func SetupSignalHandler() (stopCh <-chan struct{}) {
 
 func setupStopChannel() (stopCh <-chan struct{}) {
 	stop := make(chan struct{})
+	//nolint:gomnd // sending a signal will trigger a graceful shutdown, sending a second signal will force stop
 	osSignal := make(chan os.Signal, 2)
 	signal.Notify(osSignal, shutdownSignals...)
 	go func() {

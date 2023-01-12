@@ -24,7 +24,7 @@ type SubscriptionOpt func(*eventingv1alpha1.Subscription)
 
 // GeneratePortOrDie generates a random 5 digit port or fail.
 func GeneratePortOrDie() int {
-	tick := time.NewTicker(time.Second / 2)
+	tick := time.NewTicker(500 * time.Millisecond) //nolint:gomnd //the tickerinterval is only required here
 	defer tick.Stop()
 
 	timeout := time.NewTimer(time.Minute)

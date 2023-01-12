@@ -6,9 +6,13 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
 )
 
+const (
+	defaultPort = 8080
+)
+
 func NewEnvConfig(emsCEURL, authURL string, opts ...EnvConfigOption) *env.EventMeshConfig {
 	envConfig := &env.EventMeshConfig{
-		Port:           8080,
+		Port:           defaultPort,
 		EmsPublishURL:  emsCEURL,
 		TokenEndpoint:  authURL,
 		RequestTimeout: time.Minute,
