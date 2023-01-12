@@ -13,7 +13,7 @@ type HTTPErrorResponse struct {
 }
 
 // ErrorResponseBadRequest returns an error of type PublishEventResponses with BadRequest status code.
-func ErrorResponseBadRequest(moreInfo string) (response *api.PublishEventResponses) {
+func ErrorResponseBadRequest(moreInfo string) *api.PublishEventResponses {
 	var details []api.ErrorDetail
 	apiError := api.Error{
 		Status:   http.StatusBadRequest,
@@ -26,7 +26,7 @@ func ErrorResponseBadRequest(moreInfo string) (response *api.PublishEventRespons
 }
 
 // ErrorResponseRequestBodyTooLarge returns an error of type PublishEventResponses with BadRequest status code.
-func ErrorResponseRequestBodyTooLarge(moreInfo string) (response *api.PublishEventResponses) {
+func ErrorResponseRequestBodyTooLarge(moreInfo string) *api.PublishEventResponses {
 	var details []api.ErrorDetail
 	apiError := api.Error{
 		Status:   http.StatusRequestEntityTooLarge,
@@ -39,37 +39,37 @@ func ErrorResponseRequestBodyTooLarge(moreInfo string) (response *api.PublishEve
 }
 
 // ErrorResponseMissingFieldEventType returns an error of type PublishEventResponses for missing EventType field.
-func ErrorResponseMissingFieldEventType() (response *api.PublishEventResponses) {
+func ErrorResponseMissingFieldEventType() *api.PublishEventResponses {
 	return CreateMissingFieldError(FieldEventType)
 }
 
 // ErrorResponseMissingFieldEventTypeVersion returns an error of type PublishEventResponses for missing EventTypeVersion field.
-func ErrorResponseMissingFieldEventTypeVersion() (response *api.PublishEventResponses) {
+func ErrorResponseMissingFieldEventTypeVersion() *api.PublishEventResponses {
 	return CreateMissingFieldError(FieldEventTypeVersion)
 }
 
 // ErrorResponseWrongEventTypeVersion returns an error of type PublishEventResponses for wrong EventTypeVersion field.
-func ErrorResponseWrongEventTypeVersion() (response *api.PublishEventResponses) {
+func ErrorResponseWrongEventTypeVersion() *api.PublishEventResponses {
 	return CreateInvalidFieldError(FieldEventTypeVersion)
 }
 
 // ErrorResponseMissingFieldEventTime returns an error of type PublishEventResponses for missing EventTime field.
-func ErrorResponseMissingFieldEventTime() (response *api.PublishEventResponses) {
+func ErrorResponseMissingFieldEventTime() *api.PublishEventResponses {
 	return CreateMissingFieldError(FieldEventTime)
 }
 
 // ErrorResponseWrongEventTime returns an error of type PublishEventResponses for wrong EventTime field.
-func ErrorResponseWrongEventTime() (response *api.PublishEventResponses) {
+func ErrorResponseWrongEventTime() *api.PublishEventResponses {
 	return CreateInvalidFieldError(FieldEventTime)
 }
 
 // ErrorResponseWrongEventID returns an error of type PublishEventResponses for wrong EventID field.
-func ErrorResponseWrongEventID() (response *api.PublishEventResponses) {
+func ErrorResponseWrongEventID() *api.PublishEventResponses {
 	return CreateInvalidFieldError(FieldEventID)
 }
 
 // ErrorResponseMissingFieldData returns an error of type PublishEventResponses for missing Data field.
-func ErrorResponseMissingFieldData() (response *api.PublishEventResponses) {
+func ErrorResponseMissingFieldData() *api.PublishEventResponses {
 	return CreateMissingFieldError(FieldData)
 }
 
@@ -79,7 +79,7 @@ func ErrorResponse(status int, err error) *api.PublishEventResponses {
 }
 
 // CreateMissingFieldError creates an error for a missing field.
-func CreateMissingFieldError(field interface{}) (response *api.PublishEventResponses) {
+func CreateMissingFieldError(field interface{}) *api.PublishEventResponses {
 	apiErrorDetail := api.ErrorDetail{
 		Field:    field.(string),
 		Type:     ErrorTypeMissingField,
@@ -98,7 +98,7 @@ func CreateMissingFieldError(field interface{}) (response *api.PublishEventRespo
 }
 
 // CreateInvalidFieldError creates an error for an invalid field.
-func CreateInvalidFieldError(field interface{}) (response *api.PublishEventResponses) {
+func CreateInvalidFieldError(field interface{}) *api.PublishEventResponses {
 	apiErrorDetail := api.ErrorDetail{
 		Field:    field.(string),
 		Type:     ErrorTypeInvalidField,
