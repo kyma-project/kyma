@@ -47,7 +47,6 @@ func GeneratePortOrDie() int {
 			}
 		case <-timeout.C:
 			{
-				timeout.Stop()
 				log.Fatal("Failed to generate port")
 			}
 		}
