@@ -2,10 +2,11 @@ package jetstream
 
 import (
 	"context"
-	objectv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/object/v2"
-	k8stypes "k8s.io/apimachinery/pkg/types"
 	"reflect"
 	"time"
+
+	objectv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/object/v2"
+	k8stypes "k8s.io/apimachinery/pkg/types"
 
 	pkgerrors "github.com/kyma-project/kyma/components/eventing-controller/pkg/errors"
 	"github.com/nats-io/nats.go"

@@ -1,11 +1,12 @@
 package v1alpha2_test
 
 import (
-	v2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
-	"github.com/pkg/errors"
 	"reflect"
 	"testing"
 	"time"
+
+	v2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
+	"github.com/pkg/errors"
 
 	"github.com/stretchr/testify/require"
 

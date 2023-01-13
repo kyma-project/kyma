@@ -2,9 +2,10 @@ package jetstream
 
 import (
 	"context"
+	"testing"
+
 	apierr "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"testing"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
@@ -29,11 +30,6 @@ import (
 const (
 	subscriptionName = "testSubscription"
 	namespaceName    = "test"
-)
-
-var (
-	eventingFinalizer = []string{eventingv1alpha2.Finalizer} //nolint:gochecknoglobals
-	emptyFinalizer    []string                               //nolint:gochecknoglobals
 )
 
 // Test_Reconcile tests the return values of the Reconcile() method of the reconciler.
@@ -274,6 +270,8 @@ func Test_handleSubscriptionDeletion(t *testing.T) {
 func Test_addFinalizerToSubscription(t *testing.T) {
 	// given
 	ctx := context.Background()
+	eventingFinalizer := []string{eventingv1alpha2.Finalizer}
+	var emptyFinalizer []string
 	sub := controllertesting.NewSubscription(subscriptionName, namespaceName)
 	testEnvironment := setupTestEnvironment(t, sub)
 	r := testEnvironment.Reconciler
@@ -592,6 +590,8 @@ func Test_updateStatus(t *testing.T) {
 
 func Test_updateSubscription(t *testing.T) {
 	// given
+	eventingFinalizer := []string{eventingv1alpha2.Finalizer}
+	var emptyFinalizer []string
 	sub := controllertesting.NewSubscription(subscriptionName, namespaceName,
 		controllertesting.WithStatusTypes([]eventingv1alpha2.EventType{
 			{OriginalType: "order.created.v1", CleanType: "order.created.v1"},
