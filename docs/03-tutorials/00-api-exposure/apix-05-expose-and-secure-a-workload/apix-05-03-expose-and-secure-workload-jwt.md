@@ -8,7 +8,7 @@ This tutorial shows how to expose and secure services or Functions using API Gat
 
 * [Sample HttpBin service and sample Function](../apix-01-create-workload.md) deployed
 * [JSON Web Token (JWT)](./apix-05-02-get-jwt.md)
-* Set up [your custom domain](./apix-02-setup-custom-domain-for-workload.md) or use a Kyma domain instead. 
+* Set up [your custom domain](../apix-02-setup-custom-domain-for-workload.md) or use a Kyma domain instead. 
 * Depending on whether you use your custom domain or a Kyma domain, export the necessary values as environment variables:
   
   <div tabs name="export-values">
