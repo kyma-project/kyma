@@ -540,9 +540,21 @@ func SwitchJwtHandler(jwtHandler string) error {
 		Version:  "v1",
 		Resource: "configmaps",
 	}
+	log.Printf("-->Try to create CM")
 	err := resourceManager.CreateResource(k8sClient, configMapGVR, defaultNS, configMap)
 	if err != nil {
+		log.Printf("-->Try to update CM")
 		err = resourceManager.UpdateResource(k8sClient, configMapGVR, defaultNS, configMapName, configMap)
 	}
+	res, err := resourceManager.GetResource(k8sClient, configMapGVR, defaultNS, configMapName)
+	if err != nil {
+		log.Fatalf("-->Unable to get configmap: %v", err)
+		return err
+	}
+	value, found, err := unstructured.NestedMap(res.Object, "jwtHandler")
+	if err != nil || !found {
+		log.Fatalf("-->Could not find config map jwtHandler:\n %+v", err)
+	}
+	log.Printf("-->Current: %s", value)
 	return err
 }
