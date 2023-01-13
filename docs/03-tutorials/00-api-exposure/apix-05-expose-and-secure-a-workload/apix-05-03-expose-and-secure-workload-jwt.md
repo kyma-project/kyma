@@ -8,8 +8,32 @@ This tutorial shows how to expose and secure services or Functions using API Gat
 
 * [Sample HttpBin service and sample Function](../apix-01-create-workload.md) deployed
 * [JSON Web Token (JWT)](./apix-05-02-get-jwt.md)
-* If you want to use your custom domain instead of a Kyma domain, follow [this tutorial](../apix-02-setup-custom-domain-for-workload.md) to learn how to set it up.
+* Set up [your custom domain](./apix-02-setup-custom-domain-for-workload.md) or use a Kyma domain instead. 
+* Depending on whether you use your custom domain or a Kyma domain, export the necessary values as environment variables:
   
+  <div tabs name="export-values">
+
+    <details>
+    <summary>
+    Custom domain
+    </summary>
+    
+    ```bash
+    export GATEWAY=$NAMESPACE/httpbin-gateway
+    ```
+    </details>
+
+    <details>
+    <summary>
+    Kyma domain
+    </summary>
+
+    ```bash
+    export DOMAIN_TO_EXPOSE_WORKLOADS={KYMA_DOMAIN_NAME}
+    export GATEWAY=kyma-system/kyma-gateway
+    ```
+    </details>
+  </div>  
 
 ## Expose, secure, and access your workload
 
@@ -20,15 +44,7 @@ This tutorial shows how to expose and secure services or Functions using API Gat
   HttpBin
   </summary>
 
-1. Export the following value as an environment variable:
-
-   ```bash
-   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
-   export GATEWAY=$NAMESPACE/httpbin-gateway 
-   ```
-   >**NOTE:** The `DOMAIN_NAME` refers to the domain that you own, for example, api.mydomain.com. If you don't want to use your custom domain, replace the `DOMAIN_NAME` with a Kyma domain and the `$NAMESPACE/httpbin-gateway` with Kyma's default Gateway `kyma-system/kyma-gateway`.
-
-2. Expose the service and secure it by creating an APIRule CR in your Namespace. Run:
+1. Expose the service and secure it by creating an APIRule CR in your Namespace. Run:
 
    ```bash
    cat <<EOF | kubectl apply -f -
@@ -57,13 +73,13 @@ This tutorial shows how to expose and secure services or Functions using API Gat
 
    >**NOTE:** If you are running Kyma on k3d, add `httpbin.kyma.local` to the entry with k3d IP in your system's `/etc/hosts` file.
 
-3. To access the secured service, call it using the JWT access token:
+2. To access the secured service, call it using the JWT access token:
 
    ```bash
    curl -ik https://httpbin.$DOMAIN_TO_EXPOSE_WORKLOADS/headers -H "Authorization: Bearer $ACCESS_TOKEN"
    ```
 
-   This call returns the code `200` response.
+  If successful, the call returns the code `200 OK` response.
    
   </details>
 
@@ -72,15 +88,7 @@ This tutorial shows how to expose and secure services or Functions using API Gat
   Function
   </summary>
 
-1. Export the following value as an environment variable:
-
-   ```bash
-   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
-   export GATEWAY=$NAMESPACE/httpbin-gateway 
-   ```
-   >**NOTE:** The `DOMAIN_NAME` refers to the domain that you own, for example, api.mydomain.com. If you don't want to use your custom domain, replace the `DOMAIN_NAME` with a Kyma domain and the `$NAMESPACE/httpbin-gateway` with Kyma's default Gateway `kyma-system/kyma-gateway`.
-
-2. Expose the Function and secure it by creating an APIRule CR in your Namespace. Run:
+1. Expose the Function and secure it by creating an APIRule CR in your Namespace. Run:
 
    ```bash
    cat <<EOF | kubectl apply -f -
@@ -113,7 +121,7 @@ This tutorial shows how to expose and secure services or Functions using API Gat
    curl -ik https://function-example.$DOMAIN_TO_EXPOSE_WORKLOADS/function -H "Authorization: Bearer $ACCESS_TOKEN"
    ```
 
-   This call returns the code `200` response.
+  If successful, the call returns the code `200 OK` response.
 
   </details>
 </div>

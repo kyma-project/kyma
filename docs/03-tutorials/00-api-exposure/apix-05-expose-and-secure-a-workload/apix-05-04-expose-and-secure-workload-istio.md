@@ -8,7 +8,32 @@ This tutorial shows how to expose and secure a workload using Istio's built-in s
 
 * [Sample HttpBin service and sample Function](../apix-01-create-workload.md) deployed
 * [JSON Web Token (JWT)](./apix-05-02-get-jwt.md).
-* If you want to use your custom domain instead of a Kyma domain, follow [this tutorial](../apix-02-setup-custom-domain-for-workload.md) to learn how to set it up.
+* Set up [your custom domain](./apix-02-setup-custom-domain-for-workload.md) or use a Kyma domain instead. 
+* Depending on whether you use your custom domain or a Kyma domain, export the necessary values as environment variables:
+  
+  <div tabs name="export-values">
+
+    <details>
+    <summary>
+    Custom domain
+    </summary>
+    
+    ```bash
+    export GATEWAY=$NAMESPACE/httpbin-gateway
+    ```
+    </details>
+
+    <details>
+    <summary>
+    Kyma domain
+    </summary>
+
+    ```bash
+    export DOMAIN_TO_EXPOSE_WORKLOADS={KYMA_DOMAIN_NAME}
+    export GATEWAY=kyma-system/kyma-gateway
+    ```
+    </details>
+  </div>  
 
 ## Expose your workload using a Virtual Service
 
@@ -21,15 +46,7 @@ Follow the instructions in the tabs to expose the HttpBin workload or the Functi
   Expose the HttpBin workload
   </summary>
 
-1. Export your domain name and gateway name as environment variables:
-
-   ```shell
-   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
-   export GATEWAY=$NAMESPACE/httpbin-gateway 
-   ```
-   >**NOTE:** The `DOMAIN_NAME` refers to the domain that you own, for example, api.mydomain.com. If you don't want to use your custom domain, replace the `DOMAIN_NAME` with a Kyma domain and the `$NAMESPACE/httpbin-gateway` with Kyma's default Gateway `kyma-system/kyma-gateway`.
-
-2. Create a VirtualService:
+1. Create a VirtualService:
 
    ```shell
    cat <<EOF | kubectl apply -f -
@@ -61,15 +78,7 @@ Follow the instructions in the tabs to expose the HttpBin workload or the Functi
   Expose the Function
   </summary>
 
-1. Export your domain name and gateway name as environment variables:
-
-   ```shell
-   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
-   export GATEWAY=$NAMESPACE/httpbin-gateway 
-   ```
-   >**NOTE:** The `DOMAIN_NAME` refers to the domain that you own, for example, api.mydomain.com. If you don't want to use your custom domain, replace the `DOMAIN_NAME` with a Kyma domain and the `$NAMESPACE/httpbin-gateway` with Kyma's default Gateway `kyma-system/kyma-gateway`.
-
-2. Create a VirtualService:
+1. Create a VirtualService:
 
    ```shell
    cat <<EOF | kubectl apply -f -
@@ -142,13 +151,13 @@ To secure the Httpbin workload or the Function using a JWT, create a Request Aut
    EOF
    ```
 
-2. Access the workload you secured. You will get the `403 Forbidden` error.
+2. Access the workload you secured. You should get the code `403 Forbidden` error.
 
    ```shell
    curl -ik -X GET https://httpbin.$DOMAIN_TO_EXPOSE_WORKLOADS/status/200
    ```
 
-3. Now, access the secured workload using the correct JWT. You will get the `200 OK` response.
+3. Now, access the secured workload using the correct JWT. You should get the code `200 OK` response.
 
    ```shell
    curl -ik -X GET https://httpbin.$DOMAIN_TO_EXPOSE_WORKLOADS/status/200 --header "Authorization:Bearer $ACCESS_TOKEN"
@@ -193,13 +202,13 @@ To secure the Httpbin workload or the Function using a JWT, create a Request Aut
    EOF
    ```
 
-2. Access the workload you secured. You will get the `403 Forbidden` error.
+2. Access the workload you secured. You should get the code `403 Forbidden` error.
 
    ```shell
    curl -ik -X GET https://function.$DOMAIN_TO_EXPOSE_WORKLOADS/status/200
    ```
 
-3. Now, access the secured workload using the correct JWT. You will get the `200 OK` response.
+3. Now, access the secured workload using the correct JWT. You should get the code `200 OK` response.
 
    ```shell
    curl -ik -X GET https://function.$DOMAIN_TO_EXPOSE_WORKLOADS/status/200 --header "Authorization:Bearer $ACCESS_TOKEN"

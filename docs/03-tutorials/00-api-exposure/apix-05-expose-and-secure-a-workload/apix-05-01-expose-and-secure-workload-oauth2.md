@@ -6,8 +6,33 @@ This tutorial shows how to expose and secure services or Functions using API Gat
 
 ## Prerequisites
 
-* [Sample HttpBin service and sample Function](../apix-01-create-workload.md) deployed
-* If you want to use your custom domain instead of a Kyma domain, follow [this tutorial](../apix-02-setup-custom-domain-for-workload.md) to set it up.
+* Deploy [a sample HttpBin service and a sample Function](./apix-01-create-workload.md).
+* Set up [your custom domain](./apix-02-setup-custom-domain-for-workload.md) or use a Kyma domain instead. 
+* Depending on whether you use your custom domain or a Kyma domain, export the necessary values as environment variables:
+  
+  <div tabs name="export-values">
+
+    <details>
+    <summary>
+    Custom domain
+    </summary>
+    
+    ```bash
+    export GATEWAY=$NAMESPACE/httpbin-gateway
+    ```
+    </details>
+
+    <details>
+    <summary>
+    Kyma domain
+    </summary>
+
+    ```bash
+    export DOMAIN_TO_EXPOSE_WORKLOADS={KYMA_DOMAIN_NAME}
+    export GATEWAY=kyma-system/kyma-gateway
+    ```
+    </details>
+  </div>  
 
 ## Register an OAuth2 client and get tokens
 
@@ -111,15 +136,7 @@ Follow the instructions to expose an instance of the HttpBin service or a sample
   HttpBin
   </summary>
 
-1. Export the following value as an environment variable:
-
-   ```bash
-   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
-   export GATEWAY=$NAMESPACE/httpbin-gateway
-   ```
-   >**NOTE:** The `DOMAIN_NAME` refers to the domain that you own, for example, api.mydomain.com. If you don't want to use your custom domain, replace the `DOMAIN_NAME` with a Kyma domain and the `$NAMESPACE/httpbin-gateway` with Kyma's default Gateway `kyma-system/kyma-gateway`.
-
-2. Expose the service and secure it by creating an APIRule CR in your Namespace. Run:
+1. Expose the service and secure it by creating an APIRule CR in your Namespace. Run:
 
    ```shell
    cat <<EOF | kubectl apply -f -
@@ -152,7 +169,7 @@ Follow the instructions to expose an instance of the HttpBin service or a sample
 
    >**NOTE:** If you are running Kyma on k3d, add `httpbin.kyma.local` to the entry with k3d IP in your system's `/etc/hosts` file.
 
-   The exposed service requires tokens with `read` scope for `GET` requests in the entire service, and tokens with `write` scope for `POST` requests to the `/post` endpoint of the service.
+  The exposed service requires tokens with `read` scope for `GET` requests in the entire service, and tokens with `write` scope for `POST` requests to the `/post` endpoint of the service.
 
   </details>
 
@@ -161,15 +178,7 @@ Follow the instructions to expose an instance of the HttpBin service or a sample
   Function
   </summary>
 
-1. Export the following values as environment variables:
-
-   ```bash
-   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
-   export GATEWAY=$NAMESPACE/httpbin-gateway 
-   ```
-   >**NOTE:** The `DOMAIN_NAME` refers to the domain that you own, for example, api.mydomain.com. If you don't want to use your custom domain, replace the `DOMAIN_NAME` with a Kyma domain and the `$NAMESPACE/httpbin-gateway` with Kyma's default Gateway `kyma-system/kyma-gateway`.
-
-2. Expose the Function and secure it by creating an APIRule CR in your Namespace. Run:
+1. Expose the Function and secure it by creating an APIRule CR in your Namespace. Run:
 
    ```shell
    cat <<EOF | kubectl apply -f -
@@ -226,7 +235,7 @@ Follow the instructions to call the secured service or Functions using the token
    curl -ik -X POST https://httpbin.$DOMAIN_TO_EXPOSE_WORKLOADS/post -d "test data" -H "Authorization: bearer $ACCESS_TOKEN_WRITE"
    ```
 
-This call should return the code `200` response. If you call the service without a token, you get the code `401` response. If you call the service or its secured endpoint with a token with the wrong scope, you get the code `403` response.
+If successful, the call returns the code `200 OK` response. If you call the service without a token, you get the code `401` response. If you call the service or its secured endpoint with a token with the wrong scope, you get the code `403` response.
 
   </details>
 
@@ -241,7 +250,7 @@ Send a `GET` request with a token that has the `read` scope to the Function:
    curl -ik https://function-example.$DOMAIN_TO_EXPOSE_WORKLOADS/function -H "Authorization: bearer $ACCESS_TOKEN_READ"
    ```
 
-This call should return the code `200` response. If you call the Function without a token, you get the code `401` response. If you call the Function with a token with the wrong scope, you get the code `403` response.
+If successful, the call returns the code `200 OK` response. If you call the Function without a token, you get the code `401` response. If you call the Function with a token with the wrong scope, you get the code `403` response.
 
   </details>
 </div>

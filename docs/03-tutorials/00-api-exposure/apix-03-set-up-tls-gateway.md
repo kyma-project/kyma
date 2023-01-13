@@ -6,31 +6,37 @@ This tutorial shows how to set up a TLS Gateway in both manual and simple modes.
 
 ## Prerequisites
 
-* [Custom domain](../00-api-exposure/apix-02-setup-custom-domain-for-workload.md) set up
-
-## Set up a TLS Gateway
-
-1. Export the following values as environment variables:
-
-   ```bash
-   export NAMESPACE={NAMESPACE_NAME}
-   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} 
-   export TLS_SECRET={TLS_SECRET_NAME}
-   ```
-   >**NOTE:** The `DOMAIN_NAME` refers to the domain that you own, for example, `api.mydomain.com`. The `TLS_SECRET` is the name of the TLS Secret created during the setup of the custom domain, for example, `httpbin-tls-credentials`. 
-
-2. Create a TLS Gateway.
-
-  Follow the instructions to create a TLS Gateway either in simple or in mutual mode.
+* Deploy [a sample HttpBin service and a sample Function](./apix-01-create-workload.md).
+* Set up [your custom domain](./apix-02-setup-custom-domain-for-workload.md) or use a Kyma domain instead. 
+* Depending on whether you use your custom domain or a Kyma domain, export the necessary values as environment variables:
   
-  <div tabs>
+  <div tabs name="export-values">
 
     <details>
     <summary>
-    simple mode
+    Custom domain
+    </summary>
+    
+    ```bash
+    export GATEWAY=$NAMESPACE/httpbin-gateway
+    ```
+    </details>
+
+    <details>
+    <summary>
+    Kyma domain
     </summary>
 
-    * To create a TLS Gateway in simple mode, run:
+    ```bash
+    export DOMAIN_TO_EXPOSE_WORKLOADS={KYMA_DOMAIN_NAME}
+    export GATEWAY=kyma-system/kyma-gateway
+    ```
+    </details>
+  </div>   
+   
+## Set up a TLS Gateway in simple mode
+
+1. Create a TLS Gateway in simple mode. Run:
 
     ```bash
       cat <<EOF | kubectl apply -f -
@@ -52,23 +58,12 @@ This tutorial shows how to set up a TLS Gateway in both manual and simple modes.
               credentialName: $TLS_SECRET
             hosts:
               - "*.$DOMAIN_TO_EXPOSE_WORKLOADS"
-      EOF
+    EOF
     ```
     
-    </details>
-
-    <details>
-    <summary>
-    mutual mode
-    </summary>
-
-    * Export the name of the mTLS Gateway and the client root Certificate Authority (CA) crt file path as environment variables:
-
-      ```bash
-      export MTLS_GATEWAY_NAME=mtls-gateway
-      export CLIENT_ROOT_CA_CRT_FILE={CLIENT_ROOT_CA_CRT_FILE}
-
-    * To create a mutual TLS Gateway, run:
+## Set up a TLS Gateway in mutual mode
+  
+  1. Create a mutual TLS Gateway. Run:
     
     ```bash
       cat <<EOF | kubectl apply -f -
@@ -109,13 +104,13 @@ This tutorial shows how to set up a TLS Gateway in both manual and simple modes.
               - '*.${DOMAIN_TO_EXPOSE_WORKLOADS}'
     EOF
     ```
-    * Export the following value as an environment variable:
+  2. Export the following value as an environment variable:
 
-      ```bash
-      export CLIENT_ROOT_CA_CRT_ENCODED=$(cat ${CLIENT_ROOT_CA_CRT_FILE}| base64)
-      ```
+    ```bash
+    export CLIENT_ROOT_CA_CRT_ENCODED=$(cat ${CLIENT_ROOT_CA_CRT_FILE}| base64)
+    ```
 
-    * Add client root CA to the CA cert bundle Secret for mTLS Gateway. Run:
+  3. Add client root CA to the CA cert bundle Secret for mTLS Gateway. Run:
 
     ```bash
       cat <<EOF | kubectl apply -f -
@@ -130,5 +125,3 @@ This tutorial shows how to set up a TLS Gateway in both manual and simple modes.
         cacert: ${CLIENT_ROOT_CA_CRT_ENCODED}
     EOF
     ```
-    </details>
-  </div>

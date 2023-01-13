@@ -35,7 +35,7 @@ This tutorial explains how to create a sample HttpBin service deployment and a s
   Function
   </summary>
 
-To create a Function in your Namespace using the [sample code](./assets/function.yaml), run:
+  To create a Function in your Namespace using the [sample code](./assets/function.yaml), run:
 
    ```shell
    kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/kyma-project/kyma/main/docs/03-tutorials/assets/function.yaml
@@ -44,7 +44,7 @@ To create a Function in your Namespace using the [sample code](./assets/function
   </details>
 </div>
 
-3. Verify if an instance of the HttpBin service or a sample Function was successfully created.
+3. Verify if an instance of the HttpBin service or a sample Function is successfully created.
    
 <div tabs name="verify">
 
@@ -53,17 +53,17 @@ To create a Function in your Namespace using the [sample code](./assets/function
   HttpBin
   </summary>
 
-  To verify if an instance of the HttpBin service was created, run:
+  * To verify if an instance of the HttpBin service is created, run:
 
-  ```shell
-    kubectl get pods -l app=httpbin -n $NAMESPACE
-  ```
-  You should get a result similar to this one:
+    ```shell
+      kubectl get pods -l app=httpbin -n $NAMESPACE
+    ```
+  * You should get a result similar to this one:
   
-  ```shell
-    NAME             READY    STATUS     RESTARTS    AGE
-    httpbin-test     2/2      Running    0           96s
-  ```
+    ```shell
+      NAME             READY    STATUS     RESTARTS    AGE
+      httpbin-test     2/2      Running    0           96s
+    ```
 
   </details>
 
@@ -72,17 +72,17 @@ To create a Function in your Namespace using the [sample code](./assets/function
   Function
   </summary>
 
-  To verify if a Function was created, run:
+  * To verify if a Function is created, run:
 
-  ```shell
-    kubectl get functions $NAME -n $NAMESPACE
-  ```
+    ```shell
+      kubectl get functions $NAME -n $NAMESPACE
+    ```
 
-  You should get a result similar to this one:
+  * You should get a result similar to this one:
   
-  ```shell
-    NAME            CONFIGURED   BUILT     RUNNING   RUNTIME    VERSION   AGE
-    test-function   True         True      True      nodejs14   1         96s
-  ```
+    ```shell
+      NAME            CONFIGURED   BUILT     RUNNING   RUNTIME    VERSION   AGE
+      test-function   True         True      True      nodejs14   1         96s
+    ```
   </details>
 </div>

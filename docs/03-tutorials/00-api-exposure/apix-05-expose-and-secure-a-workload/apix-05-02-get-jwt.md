@@ -6,7 +6,7 @@ This tutorial shows how to get a JSON Web Token (JWT), which can be used to acce
 
 ## Prerequisites
 
-* Use an OpenID Connect-compliant (OIDC-compliant) identity provider
+* Use an OpenID Connect-compliant (OIDC-compliant) identity provider.
 
 ## Get a JWT
 

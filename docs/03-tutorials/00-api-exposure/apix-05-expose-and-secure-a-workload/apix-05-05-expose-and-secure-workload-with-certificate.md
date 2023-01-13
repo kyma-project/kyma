@@ -6,9 +6,9 @@ This tutorial shows how to expose and secure a workload with mutual authenticati
 
 ## Prerequisites
 
-* [Sample HttpBin service and sample Function](../apix-01-create-workload.md) deployed
-* [Custom domain](../apix-02-setup-custom-domain-for-workload.md) set up
-* [Mutual TLS Gateway](../apix-03-set-up-tls-gateway.md) set up with the bundle certificates exported
+* Deploy [a sample HttpBin service and sample Function](../apix-01-create-workload.md).
+* Set up [your custom domain](../apix-02-setup-custom-domain-for-workload.md).
+* Set up [a mutual TLS Gateway](../apix-03-set-up-tls-gateway.md) and export the bundle certificates.
 * To learn how to create your own self-signed Client Root CA and Certificate, see [this tutorial](../../00-security/sec-02-mtls-selfsign-client-certicate.md). This step is optional.
 
 ## Authorize a client with a certificate
@@ -170,7 +170,7 @@ Send a `GET` request to the HttpBin service with the client certificates that yo
         -ik -X GET https://httpbin-vs.$DOMAIN_TO_EXPOSE_WORKLOADS/headers
    ```
 
-The successful call returns the code `200` response. If you call the service without the proper certificates or with invalid ones, you get the code `403` response.
+If successful, the call returns the code `200 OK` response. If you call the service without the proper certificates or with invalid ones, you get the code `403` response.
 
   </details>
 
@@ -188,6 +188,6 @@ Send a `GET` request to the Function with the client certificates that you used 
         -ik -X GET https://function-vs.$DOMAIN_TO_EXPOSE_WORKLOADS/function
    ```
 
-The successful call returns the code `200` response. If you call the Function without the proper certificates or with invalid ones, you get the code `403` response.
+If successful, the call returns the code `200 OK` response. If you call the Function without the proper certificates or with invalid ones, you get the code `403` response.
   </details>
 </div>
