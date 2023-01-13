@@ -39,11 +39,6 @@ data:
                   "visibility": "$exists(spec.output.otlp)",
                   "children": [
                     {
-                      "name": "Protocol",
-                      "source": "spec.output.otlp.protocol",
-                      "visibility": "$exists(spec.output.otlp.protocol)",
-                    },
-                    {
                       "name": "Endpoint",
                       "widget": "Panel",
                       "visibility": "$exists(spec.output.otlp.endpoint)",
@@ -104,6 +99,16 @@ data:
                               "visibility": "$exists(spec.output.otlp.authentication.basic.password.valueFrom.secretKeyRef.name)"
                             }
                           ]
+                        }
+                      ]
+                    },
+                    {
+                      "widget": "Panel",
+                      "name": "Other Settings",
+                      "children": [
+                        {
+                          "name": "Protocol",
+                          "source": "spec.output.otlp.protocol"
                         }
                       ]
                     }
