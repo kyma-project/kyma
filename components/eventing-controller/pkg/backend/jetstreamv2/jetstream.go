@@ -311,7 +311,7 @@ func (js *JetStream) initCloudEventClient(config backendnats.Config) error {
 func (js *JetStream) checkJetStreamConnection() error {
 	if js.Conn.Status() != nats.CONNECTED {
 		if err := js.Initialize(js.connClosedHandler); err != nil {
-			return fmt.Errorf("failed to connect to JetStream with status %d: %w", js.Conn.Status(), err)
+			return fmt.Errorf("failed to connect to JetStream with status %d: %v", js.Conn.Status(), err)
 		}
 	}
 	return nil
