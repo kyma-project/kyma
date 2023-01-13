@@ -28,7 +28,7 @@ Configure a dedicated client (often referred to as an application) at your ident
 - `clientSecret`
 
 2. Add `http://localhost:8000` to the allowed redirect URIs that are required for the OIDC login plugin.
-3. Configure the name of the `username` and `group` claims.
+3. Configure the name of the **username** and **group** claims.
 4. Enable the Proof Key for Code Exchange (PKCE) authentication flow.
 
 ### Configure your identity provider as the OIDC server
@@ -49,20 +49,20 @@ For example, if you use Gardener as a managed Kubernetes offering, see the [OIDC
 
 ### Configure role-based access to identities provided by your OIDC server
 
-Including the JWT token in the call to the API server, enables the API server to validate and extract the associated identity from the `username` and `group` claims of the JWT token.
+Including the JWT token in the call to the API server, enables the API server to validate and extract the associated identity from the **username** and **group** claims of the JWT token.
 
 Now, define which individuals or groups should have access to which Kyma resources. The default setup does not provide access to any. You need to model permissions using the [RBAC concept](https://kubernetes.io/docs/reference/access-authn-authz/rbac/).
 
 By default, Kyma comes with the following ClusterRoles:
 
-- `kyma-admin` - gives full admin access to the entire cluster
-- `kyma-namespace-admin` - gives full admin access to the specific Namespace
-- `kyma-edit` - gives full access to all Kyma-managed resources
-- `kyma-developer` - gives full access to Kyma-managed resources and basic Kubernetes resources
-- `kyma-view` - allows viewing and listing all of the resources in the cluster
-- `kyma-essentials` - gives a set of minimal view access right to use in Kyma Dashboard
+- **kyma-admin** - gives full admin access to the entire cluster
+- **kyma-namespace-admin** - gives full admin access to the specific Namespace
+- **kyma-edit** - gives full access to all Kyma-managed resources
+- **kyma-developer** - gives full access to Kyma-managed resources and basic Kubernetes resources
+- **kyma-view** - allows viewing and listing all of the resources in the cluster
+- **kyma-essentials** - gives a set of minimal view access right to use in Kyma Dashboard
 
-To bind a user to the `kyma-admin` ClusterRole, run this command:
+To bind a user to the **kyma-admin** ClusterRole, run this command:
 
 ```
 kubectl create clusterrolebinding {BINDING_NAME} --clusterrole=kyma-admin --user={USERNAME AS IDENTIFIED AT YOUR IDP}
@@ -74,7 +74,7 @@ To check if the binding is created, run:
 kubectl get clusterrolebinding {BINDING_NAME}
 ```
 
-To bind a group of users to the `kyma-admin` ClusterRole, run this command:
+To bind a group of users to the **kyma-admin** ClusterRole, run this command:
 
 ```
 kubectl create clusterrolebinding {BINDING_NAME} --clusterrole=kyma-admin --group={GROUPNAME}
