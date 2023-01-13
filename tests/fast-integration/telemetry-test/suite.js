@@ -354,13 +354,13 @@ describe('Telemetry Operator', function() {
         });
 
         it(`Should reflect secret ref change in telemetry-trace-collector secret and pod restart`, async function() {
-           const podRes = await k8sCoreV1Api.listNamespacedPod(
-            'kyma-system',
-            'true',
-            undefined,
-            undefined,
-            undefined,
-            'app.kubernetes.io/name=telemetry-trace-collector',
+          const podRes = await k8sCoreV1Api.listNamespacedPod(
+              'kyma-system',
+              'true',
+              undefined,
+              undefined,
+              undefined,
+              'app.kubernetes.io/name=telemetry-trace-collector',
           );
           const podList = podRes.body.items;
 
@@ -370,15 +370,19 @@ describe('Telemetry Operator', function() {
           assert.equal(secret.data.OTLP_ENDPOINT, 'aHR0cDovL2Fub3RoZXItZW5kcG9pbnQ=');
 
           const newPodRes = await k8sCoreV1Api.listNamespacedPod(
-            'kyma-system',
-            'true',
-            undefined,
-            undefined,
-            undefined,
-            'app.kubernetes.io/name=telemetry-trace-collector',
+              'kyma-system',
+              'true',
+              undefined,
+              undefined,
+              undefined,
+              'app.kubernetes.io/name=telemetry-trace-collector',
           );
           const newPodList = newPodRes.body.items;
-          assert.notDeepEqual(newPodList, podList, "telemetry-trace-collector has not been  restarted after Secret change");
+          assert.notDeepEqual(
+              newPodList,
+              podList,
+              'telemetry-trace-collector has not been  restarted after Secret change',
+          );
         });
 
         const secondPipeline = loadTestData('tracepipeline-output-otlp-secret-ref-2.yaml');
