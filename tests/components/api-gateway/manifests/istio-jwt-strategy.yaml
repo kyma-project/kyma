@@ -16,4 +16,6 @@ spec:
       accessStrategies:
         - handler: jwt
           config:
-            trusted_issuers: ["https://oauth2.{{ .Domain }}/"]
+            authentications:
+            - issuer: "https://oauth2.{{ .Domain }}/"
+              jwksUri: "https://oauth2.{{ .Domain }}/.well-known/jwks.json"

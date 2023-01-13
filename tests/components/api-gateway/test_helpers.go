@@ -15,6 +15,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"strings"
 	"testing"
 	"time"
 
@@ -521,40 +522,37 @@ func getPodListReport() string {
 	return string(pretty.Pretty(toPrint))
 }
 
-func SwitchJwtHandler(jwtHandler string) error {
-	configMap := unstructured.Unstructured{
-		Object: map[string]interface{}{
-			"kind":       "ConfigMap",
-			"apiVersion": "v1",
-			"metadata": map[string]interface{}{
-				"name":      configMapName,
-				"namespace": defaultNS,
-			},
-			"data": map[string]interface{}{
-				"api-gateway-config": "jwtHandler: " + jwtHandler,
-			},
-		},
-	}
-	configMapGVR := schema.GroupVersionResource{
-		Group:    "apps",
-		Version:  "v1",
-		Resource: "configmaps",
-	}
-	log.Printf("-->Try to create CM")
-	err := resourceManager.CreateResource(k8sClient, configMapGVR, defaultNS, configMap)
+func SwitchJwtHandler(jwtHandler string) (string, error) {
+	mapper, err := client.GetDiscoveryMapper()
 	if err != nil {
-		log.Printf("-->Try to update CM")
-		err = resourceManager.UpdateResource(k8sClient, configMapGVR, defaultNS, configMapName, configMap)
+		return "", err
 	}
-	res, err := resourceManager.GetResource(k8sClient, configMapGVR, defaultNS, configMapName)
+	mapping, err := mapper.RESTMapping(schema.ParseGroupKind("ConfigMap"))
 	if err != nil {
-		log.Fatalf("-->Unable to get configmap: %v", err)
-		return err
+		return "", err
 	}
-	value, found, err := unstructured.NestedMap(res.Object, "jwtHandler")
+	currentJwtHandler, configMap, err := getConfigMapJwtHandler(mapping.Resource)
+	if err != nil {
+		return "", fmt.Errorf("could not get jwtHandler config:\n %+v", err)
+	}
+	if currentJwtHandler != jwtHandler {
+		configMap.Object["data"].(map[string]interface{})["api-gateway-config"] = "jwtHandler: " + jwtHandler
+		err = resourceManager.UpdateResource(k8sClient, mapping.Resource, defaultNS, configMapName, *configMap)
+		if err != nil {
+			return "", fmt.Errorf("unable to update ConfigMap:\n %+v", err)
+		}
+	}
+	return currentJwtHandler, err
+}
+
+func getConfigMapJwtHandler(gvr schema.GroupVersionResource) (string, *unstructured.Unstructured, error) {
+	res, err := resourceManager.GetResource(k8sClient, gvr, defaultNS, configMapName)
+	if err != nil {
+		return "", res, fmt.Errorf("could not get ConfigMap:\n %+v", err)
+	}
+	data, found, err := unstructured.NestedMap(res.Object, "data")
 	if err != nil || !found {
-		log.Fatalf("-->Could not find config map jwtHandler:\n %+v", err)
+		return "", res, fmt.Errorf("could not find data in the ConfigMap:\n %+v", err)
 	}
-	log.Printf("-->Current: %s", value)
-	return err
+	return strings.Split(data["api-gateway-config"].(string), ": ")[1], res, nil
 }

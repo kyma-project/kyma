@@ -114,7 +114,13 @@ func TestCustomDomain(t *testing.T) {
 
 func TestIstioJwt(t *testing.T) {
 	InitTestSuite()
-	SwitchJwtHandler("istio")
+
+	orgJwtHandler, err := SwitchJwtHandler("istio")
+	if err != nil {
+		log.Print(err.Error())
+		t.Fatalf("unable to switch to Istio jwtHandler")
+	}
+
 	SetupCommonResources("istio-jwt")
 
 	apiGatewayIstioJwtOpts := goDogOpts
@@ -134,7 +140,7 @@ func TestIstioJwt(t *testing.T) {
 
 	//Remove namespace
 	res := schema.GroupVersionResource{Group: "", Version: "v1", Resource: "namespaces"}
-	err := k8sClient.Resource(res).Delete(context.Background(), namespace, v1.DeleteOptions{})
+	err = k8sClient.Resource(res).Delete(context.Background(), namespace, v1.DeleteOptions{})
 
 	if err != nil {
 		log.Print(err.Error())
@@ -146,5 +152,11 @@ func TestIstioJwt(t *testing.T) {
 
 	if testExitCode != 0 {
 		t.Fatalf("non-zero status returned, failed to run feature tests, Pod list: %s\n APIRules: %s\n", podReport, apiRules)
+	}
+
+	_, err = SwitchJwtHandler(orgJwtHandler)
+	if err != nil {
+		log.Print(err.Error())
+		t.Fatalf("unable to switch back to original jwtHandler")
 	}
 }
