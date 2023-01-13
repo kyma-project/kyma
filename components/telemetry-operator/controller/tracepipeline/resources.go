@@ -61,7 +61,7 @@ func makeConfigMap(config Config, output v1alpha1.TracePipelineOutput) *corev1.C
 			"pipelines": map[string]any{
 				"traces": map[string]any{
 					"receivers":  []any{"opencensus", "otlp"},
-					"processors": []any{"memory_limiter", "k8sattributes", "resource", "batch"},
+					"processors": []any{"memory_limiter", "filter", "k8sattributes", "resource", "batch"},
 					"exporters":  []any{outputType},
 				},
 			},
@@ -177,6 +177,7 @@ func makeProcessorsConfig() map[string]any {
 			"timeout":             "10s",
 			"send_batch_max_size": 512,
 		},
+		"filter": makeFilterProcessorConfig(),
 		"memory_limiter": map[string]any{
 			"check_interval":         "1s",
 			"limit_percentage":       75,
@@ -197,6 +198,24 @@ func makeProcessorsConfig() map[string]any {
 					"key":    "k8s.cluster.name",
 					"value":  "${KUBERNETES_SERVICE_HOST}",
 				},
+			},
+		},
+	}
+}
+
+func makeFilterProcessorConfig() map[string]any {
+	return map[string]any{
+		"traces": map[string]any{
+			"span": []any{
+				"(attributes[\"http.method\"] == \"GET\") and (attributes[\"component\"] == \"proxy\") and (attributes[\"OperationName\"] == \"Egress\") and (resource.attributes[\"service.name\"] == \"jaeger.kyma-system\")",
+				"(attributes[\"http.method\"] == \"GET\") and (attributes[\"component\"] == \"proxy\") and (attributes[\"OperationName\"] == \"Egress\") and (resource.attributes[\"service.name\"] == \"grafana.kyma-system\")",
+				"(attributes[\"http.method\"] == \"GET\") and (attributes[\"component\"] == \"proxy\") and (attributes[\"OperationName\"] == \"Ingress\") and (IsMatch(attributes[\"http.url\"], \".+/metrics\") == true)",
+				"(attributes[\"http.method\"] == \"GET\") and (attributes[\"component\"] == \"proxy\") and (attributes[\"OperationName\"] == \"Ingress\") and (IsMatch(attributes[\"http.url\"], \".+/healthz(/.*)?\") == true)",
+				"(attributes[\"http.method\"] == \"GET\") and (attributes[\"component\"] == \"proxy\") and (attributes[\"OperationName\"] == \"Ingress\") and (attributes[\"user_agent\"] == \"vm_promscrape\")",
+				"(attributes[\"http.method\"] == \"POST\") and (attributes[\"component\"] == \"proxy\") and (attributes[\"OperationName\"] == \"Egress\") and (IsMatch(attributes[\"http.url\"], \"http(s)?:\\\\/\\\\/telemetry-otlp-traces\\\\.kyma-system(\\\\..*)?:(4318|4317).*\") == true)",
+				"(attributes[\"http.method\"] == \"POST\") and (attributes[\"component\"] == \"proxy\") and (attributes[\"OperationName\"] == \"Egress\") and (IsMatch(attributes[\"http.url\"], \"http(s)?:\\\\/\\\\/telemetry-trace-collector-internal\\\\.kyma-system(\\\\..*)?:(55678).*\") == true)",
+				"(attributes[\"http.method\"] == \"POST\") and (attributes[\"component\"] == \"proxy\") and (attributes[\"OperationName\"] == \"Ingress\") and (resource.attributes[\"service.name\"] == \"loki.kyma-system\")",
+				"(attributes[\"http.method\"] == \"POST\") and (attributes[\"component\"] == \"proxy\") and (attributes[\"OperationName\"] == \"Egress\") and (resource.attributes[\"service.name\"] == \"telemetry-fluent-bit.kyma-system\")",
 			},
 		},
 	}
