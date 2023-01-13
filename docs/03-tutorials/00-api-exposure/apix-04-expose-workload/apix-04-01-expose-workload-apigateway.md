@@ -4,12 +4,12 @@ title: Expose a workload
 
 This tutorial shows how to expose an unsecured instance of the HttpBin service or an unsecured sample Function and call their endpoints.
 
-   > **CAUTION:** Exposing a workload to the outside world is always a potential security vulnerability, so tread carefully. In a production environment, always secure the workload you expose with [OAuth2](../00-api-exposure/apix-07-expose-and-secure-a-workload/apix-05-01-expose-and-secure-workload-oauth2.md) or [JWT](../00-api-exposure/apix-07-expose-and-secure-a-workload/apix-05-03-expose-and-secure-workload-jwt.md).
+   > **CAUTION:** Exposing a workload to the outside world is always a potential security vulnerability, so tread carefully. In a production environment, always secure the workload you expose with [OAuth2](../apix-05-expose-and-secure-a-workload/apix-05-01-expose-and-secure-workload-oauth2.md) or [JWT](../apix-05-expose-and-secure-a-workload/apix-05-03-expose-and-secure-workload-jwt.md)).
 
 ## Prerequisites
 
-* Deploy [a sample HttpBin service and a sample Function](./apix-01-create-workload.md).
-* Set up [your custom domain](./apix-02-setup-custom-domain-for-workload.md) or use a Kyma domain instead. 
+* Deploy [a sample HttpBin service and a sample Function](../apix-01-create-workload.md).
+* Set up [your custom domain](../apix-02-setup-custom-domain-for-workload.md) or use a Kyma domain instead. 
 * Depending on whether you use your custom domain or a Kyma domain, export the necessary values as environment variables:
   
   <div tabs name="export-values">

@@ -3,7 +3,7 @@ title: Expose workloads in multiple Namespaces with a single APIRule definition
 ---
 
 This tutorial shows how to expose service endpoints in multiple Namespaces using API Gateway Controller.
-   > **CAUTION:** Exposing a workload to the outside world causes a potential security vulnerability, so tread carefully. In a production environment, secure the workload you expose with [OAuth2](../00-api-exposure/apix-07-expose-and-secure-a-workload/apix-05-01-expose-and-secure-workload-oauth2.md) or [JWT](../00-api-exposure/apix-07-expose-and-secure-a-workload/apix-05-03-expose-and-secure-workload-jwt.md).
+   > **CAUTION:** Exposing a workload to the outside world causes a potential security vulnerability, so tread carefully. In a production environment, secure the workload you expose with [OAuth2](../apix-05-expose-and-secure-a-workload/apix-05-01-expose-and-secure-workload-oauth2.md) or [JWT](../apix-05-expose-and-secure-a-workload/apix-05-03-expose-and-secure-workload-jwt.mds).
 
 
 ##  Prerequisites
@@ -32,7 +32,7 @@ This tutorial shows how to expose service endpoints in multiple Namespaces using
      kubectl -n $NAMESPACE_HTTPBIN create -f https://raw.githubusercontent.com/istio/istio/master/samples/httpbin/httpbin.yaml
      ```
 
-   * Create a Function in its Namespace using the [sample code](./assets/function.yaml):
+   * Create a Function in its Namespace using the [sample code](../assets/function.yaml):
 
      ```bash
      kubectl -n $NAMESPACE_FUNCTION apply -f https://raw.githubusercontent.com/kyma-project/kyma/main/docs/03-tutorials/assets/function.yaml

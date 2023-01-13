@@ -10,8 +10,8 @@ One of the strategies enables you to use your own identity provider. This is ver
 
 ## Prerequisites
 
-* `kubeconfig` file generated for the Kubernetes cluster that hosts the Kyma instance
-* OIDC-compliant identity provider
+* Generate a `kubeconfig` file for the Kubernetes cluster that hosts the Kyma instance.
+* Use an OIDC-compliant identity provider.
 
 ## Steps
 
