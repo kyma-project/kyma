@@ -12,6 +12,7 @@ FROM alpine@sha256:c0d488a800e4127c334ad20d61d7bc21b4097540327217dfab52262adc023
 
 SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 
+
 # ensure local python is preferred over distribution python
 ENV PATH /usr/local/bin:$PATH
 
