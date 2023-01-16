@@ -28,7 +28,9 @@ nats:
     # Enable liveness checks.  If this fails, then the NATS Server will restarted.
     liveness:
       enabled: true
-
+      # `/healthz?js-server-only=true` will only check if JetStream server is current or not.
+      # It will not check further the streams and consumers.
+      endpoint: "/healthz?js-server-only=true"
       initialDelaySeconds: 10
       timeoutSeconds: 5
       # NOTE: liveness check + terminationGracePeriodSeconds can introduce unecessarily long outages
@@ -56,7 +58,9 @@ nats:
     # as the liveness check.
     readiness:
       enabled: true
-
+      # `/healthz?js-server-only=true` will only check if JetStream server is current or not.
+      # It will not check further the streams and consumers.
+      endpoint: "/healthz?js-server-only=true"
       initialDelaySeconds: 10
       timeoutSeconds: 5
       periodSeconds: 10
@@ -67,11 +71,11 @@ nats:
     # This is recommended for JetStream deployments since in cluster mode
     # it will try to ensure that the server is ready to serve streams.
 
-    # since this check is recommended to use in cluster mode and the cluster mode ist disabled per default
-    # this check is also defaulted to false
+    # since this check is recommended to use in cluster mode
+    # it will be enabled when cluster mode is enabled.
     startup:
-      enabled: false
-
+      # `/healthz` will check if JetStream server, streams and consumers are current or not.
+      endpoint: "/healthz"
       initialDelaySeconds: 10
       timeoutSeconds: 5
       periodSeconds: 10
