@@ -67,10 +67,6 @@ type Handler struct {
 	OldEventTypePrefix string
 }
 
-const (
-	originalTypeHeaderName = "ce-original-type"
-)
-
 // NewHandler returns a new HTTP Handler instance.
 func NewHandler(receiver *receiver.HTTPMessageReceiver, sender sender.GenericSender, healthChecker health.Checker, requestTimeout time.Duration,
 	legacyTransformer legacy.RequestToCETransformer, opts *options.Options, subscribedProcessor *subscribed.Processor,
@@ -157,9 +153,6 @@ func (h *Handler) handlePublishLegacyEvent(writer http.ResponseWriter, publishDa
 		legacy.WriteJSONResponse(writer, legacy.ErrorResponse(http.StatusInternalServerError, err))
 		return nil, nil
 	}
-
-	// set original type header
-	ceEvent.SetExtension(originalTypeHeaderName, ceEvent.Type())
 
 	// build a new cloud event instance as per specifications per backend
 	event, err := h.ceBuilder.Build(*ceEvent)
@@ -252,7 +245,6 @@ func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.R
 	}
 
 	eventTypeOriginal := event.Type()
-	event.SetExtension(originalTypeHeaderName, eventTypeOriginal)
 
 	if h.Options.EnableNewCRDVersion && !strings.HasPrefix(eventTypeOriginal, h.OldEventTypePrefix) {
 		// build a new cloud event instance as per specifications per backend

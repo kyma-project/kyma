@@ -10,14 +10,13 @@ spec:
   rules:
   - to:
       - operation:
-          ports: # Jaeger query port, limit to auth-proxy, Kiali and Grafana
+          ports: # Jaeger query port, limit to auth-proxy and Grafana
           - "16686"
 {{ if .Values.authProxy.enabled }}
     from:
     - source:
         principals:
           - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ include "jaeger-operator.fullname" . }}-auth-proxy
-          - cluster.local/ns/{{ .Release.Namespace }}/sa/kiali
           - cluster.local/ns/{{ .Release.Namespace }}/sa/monitoring-grafana
 {{- with .Values.authorizationPolicy.query.extraPrincipals }}
   {{- toYaml . | nindent 10 }}
