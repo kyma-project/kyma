@@ -264,6 +264,12 @@ The trace collector setup is designed using the following assumptions:
 - An unavailability of a destination must be survived for 5 minutes without direct loss of trace data
 - An average span consists of 40 attributes with 64 character length
 
+The trace collector setup is configured filter out following traces and spans:
+- `/healtz` endpoint of any component deployed on `kyma-system` namespace
+- `/metrics` endpoint of any component deployed on `kyma-system namespace
+- All traces generated from Grafana and Jaeger deployments
+- All traces in reference to `fluent-bit` and `loki` communication 
+
 It results in the following limitations:
 ### Throughput
 The maximum throughput is 4200 span/sec ~= 15.000.000 spans/hour. If more data needs to be ingested, it can result in a refusal of more data.
