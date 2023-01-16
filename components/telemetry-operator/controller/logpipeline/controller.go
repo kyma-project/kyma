@@ -20,11 +20,13 @@ import (
 	"context"
 	"fmt"
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/ConfigureLogger"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configchecksum"
 	configbuilder "github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
 	utils "github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 	resources "github.com/kyma-project/kyma/components/telemetry-operator/internal/resources/logpipeline"
 	"github.com/prometheus/client_golang/prometheus"
+	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -40,6 +42,7 @@ type Config struct {
 	SectionsConfigMap types.NamespacedName
 	FilesConfigMap    types.NamespacedName
 	EnvSecret         types.NamespacedName
+	OverrideConfigMap types.NamespacedName
 	PipelineDefaults  configbuilder.PipelineDefaults
 	ManageFluentBit   bool
 }
@@ -54,26 +57,34 @@ type DaemonSetAnnotator interface {
 	SetAnnotation(ctx context.Context, name types.NamespacedName, key, value string) error
 }
 
+type ConfigMapProber interface {
+	IsPresent(ctx context.Context, name types.NamespacedName) (map[string]interface{}, error)
+}
+
 type Reconciler struct {
 	client.Client
 	config                  Config
 	prober                  DaemonSetProber
+	cmProber                ConfigMapProber
 	annotator               DaemonSetAnnotator
 	allLogPipelines         prometheus.Gauge
 	unsupportedLogPipelines prometheus.Gauge
 	syncer                  syncer
+	logLevel                *ConfigureLogger.LogLevel
 }
 
-func NewReconciler(client client.Client, config Config, prober DaemonSetProber, annotator DaemonSetAnnotator) *Reconciler {
+func NewReconciler(client client.Client, config Config, prober DaemonSetProber, annotator DaemonSetAnnotator, cmProber ConfigMapProber, dynamicLoglevel zap.AtomicLevel) *Reconciler {
 	var r Reconciler
 	r.Client = client
 	r.config = config
 	r.prober = prober
+	r.cmProber = cmProber
 	r.annotator = annotator
 	r.allLogPipelines = prometheus.NewGauge(prometheus.GaugeOpts{Name: "telemetry_all_logpipelines", Help: "Number of log pipelines."})
 	r.unsupportedLogPipelines = prometheus.NewGauge(prometheus.GaugeOpts{Name: "telemetry_unsupported_logpipelines", Help: "Number of log pipelines with custom filters or outputs."})
 	metrics.Registry.MustRegister(r.allLogPipelines, r.unsupportedLogPipelines)
 	r.syncer = syncer{client, config}
+	r.logLevel = ConfigureLogger.New(dynamicLoglevel)
 
 	return &r
 }
@@ -81,6 +92,23 @@ func NewReconciler(client client.Client, config Config, prober DaemonSetProber, 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := logf.FromContext(ctx)
 	log.V(1).Info("Reconciliation triggered")
+
+	overrideConfig, err := r.UpdateOverrideConfig(ctx)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	fmt.Printf("[LOGPIPELINE] OverrideConfig: %v\n", overrideConfig)
+	if err := r.reconfigureLogLevel(overrideConfig); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if r.pauseReconciliation(overrideConfig) {
+		log.V(1).Info("[LOGPIPELINE]  I am printed in debug mode.")
+		return ctrl.Result{}, nil
+	}
+
+	log.V(1).Info("[LOGPIPELINE] I should be printed in debug mode and when pipeline is unpaused")
 
 	if err := r.updateMetrics(ctx); err != nil {
 		log.Error(err, "Failed to get all LogPipelines while updating metrics")

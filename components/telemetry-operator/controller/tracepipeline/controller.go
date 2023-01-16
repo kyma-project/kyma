@@ -20,14 +20,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/ConfigureLogger"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configchecksum"
+	utils "github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
+	"go.uber.org/zap"
+	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configchecksum"
-	utils "github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -40,7 +41,7 @@ type Config struct {
 	CreateServiceMonitor bool
 	BaseName             string
 	Namespace            string
-	OverrideConfig       TelemetryOverrideConfig
+	OverrideConfigMap    types.NamespacedName
 
 	Deployment DeploymentConfig
 	Service    ServiceConfig
@@ -59,30 +60,32 @@ type ServiceConfig struct {
 	OTLPServiceName string
 }
 
-type TelemetryOverrideConfig struct {
-	Paused   bool
-	LogLevel string
-	//TracePipelineOverrides TracePipelineOverrideConfig
-}
-
 //go:generate mockery --name DeploymentProber --filename deployment_prober.go
 type DeploymentProber interface {
 	IsReady(ctx context.Context, name types.NamespacedName) (bool, error)
 }
 
-type Reconciler struct {
-	client.Client
-	config Config
-	Scheme *runtime.Scheme
-	prober DeploymentProber
+type ConfigMapProber interface {
+	IsPresent(ctx context.Context, name types.NamespacedName) (map[string]interface{}, error)
 }
 
-func NewReconciler(client client.Client, config Config, prober DeploymentProber, scheme *runtime.Scheme) *Reconciler {
+type Reconciler struct {
+	client.Client
+	config   Config
+	Scheme   *runtime.Scheme
+	prober   DeploymentProber
+	cmProber ConfigMapProber
+	logLevel *ConfigureLogger.LogLevel
+}
+
+func NewReconciler(client client.Client, config Config, prober DeploymentProber, cmProber ConfigMapProber, scheme *runtime.Scheme, dynamicLoglevel zap.AtomicLevel) *Reconciler {
 	var r Reconciler
 	r.Client = client
 	r.config = config
 	r.Scheme = scheme
 	r.prober = prober
+	r.cmProber = cmProber
+	r.logLevel = ConfigureLogger.New(dynamicLoglevel)
 	return &r
 }
 
@@ -90,6 +93,23 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (reconcile
 	logger := logf.FromContext(ctx)
 
 	logger.V(1).Info("Reconciliation triggered")
+
+	overrideConfig, err := r.UpdateOverrideConfig(ctx)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	fmt.Printf("[TRACEPIPELINE]  OverrideConfig: %v\n", overrideConfig)
+	if err := r.reconfigureLogLevel(overrideConfig); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if r.pauseReconciliation(overrideConfig) {
+		logger.V(1).Info("[TRACEPIPELINE] I am printed in debug mode.")
+		return ctrl.Result{}, nil
+	}
+
+	logger.V(1).Info("[TRACEPIPELINE] I should be printed in debug mode and when pipeline is unpaused")
 
 	var tracePipeline telemetryv1alpha1.TracePipeline
 	if err := r.Get(ctx, req.NamespacedName, &tracePipeline); err != nil {

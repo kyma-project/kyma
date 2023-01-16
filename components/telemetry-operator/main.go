@@ -19,6 +19,8 @@ package main
 import (
 	"errors"
 	"flag"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"os"
 	"strings"
 	"time"
@@ -72,6 +74,7 @@ var (
 	setupLog               = ctrl.Log.WithName("setup")
 	syncPeriod             time.Duration
 	telemetryNamespace     string
+	dynamicLoglevel        = zap.NewAtomicLevel()
 
 	traceCollectorCreateServiceMonitor bool
 	traceCollectorBaseName             string
@@ -98,7 +101,9 @@ var (
 	maxLogPipelines            int
 )
 
-const otelImage = "eu.gcr.io/kyma-project/tpi/otel-collector:0.66.0-a80d981f"
+const (
+	otelImage = "eu.gcr.io/kyma-project/tpi/otel-collector:0.66.0-a80d981f"
+)
 
 //nolint:gochecknoinits
 func init() {
@@ -181,7 +186,14 @@ func main() {
 		os.Exit(1)
 	}
 
-	ctrLogger, err := logger.New(logFormat, logLevel)
+	parsedLevel, err := zapcore.ParseLevel(logLevel)
+	if err != nil {
+		setupLog.Error(err, "unable to parse logger level")
+		os.Exit(1)
+	}
+	dynamicLoglevel.SetLevel(parsedLevel)
+
+	ctrLogger, err := logger.New(logFormat, logLevel, dynamicLoglevel)
 	ctrl.SetLogger(zapr.NewLogger(ctrLogger.WithContext().Desugar()))
 	if err != nil {
 		setupLog.Error(err, "Failed to initialize logger")
@@ -222,6 +234,7 @@ func main() {
 			setupLog.Error(err, "Failed to create controller", "controller", "LogParser")
 			os.Exit(1)
 		}
+
 	}
 
 	if enableTracing {
@@ -251,6 +264,7 @@ func main() {
 		setupLog.Error(err, "Failed to run manager")
 		os.Exit(1)
 	}
+
 }
 
 func validateFlags() error {
@@ -288,15 +302,17 @@ func validateFlags() error {
 }
 
 func createLogPipelineReconciler(client client.Client) *logpipelinecontroller.Reconciler {
+
 	config := logpipelinecontroller.Config{
 		SectionsConfigMap: types.NamespacedName{Name: fluentBitSectionsConfigMap, Namespace: telemetryNamespace},
 		FilesConfigMap:    types.NamespacedName{Name: fluentBitFilesConfigMap, Namespace: telemetryNamespace},
 		EnvSecret:         types.NamespacedName{Name: fluentBitEnvSecret, Namespace: telemetryNamespace},
 		DaemonSet:         types.NamespacedName{Namespace: telemetryNamespace, Name: fluentBitDaemonSet},
+		OverrideConfigMap: types.NamespacedName{Name: "override-config", Namespace: telemetryNamespace},
 		PipelineDefaults:  createPipelineDefaults(),
 		ManageFluentBit:   enableManagedFluentBit,
 	}
-	return logpipelinecontroller.NewReconciler(client, config, &kubernetes.DaemonSetProber{Client: client}, &kubernetes.DaemonSetAnnotator{Client: client})
+	return logpipelinecontroller.NewReconciler(client, config, &kubernetes.DaemonSetProber{Client: client}, &kubernetes.DaemonSetAnnotator{Client: client}, &kubernetes.ConfigmapProber{Client: client}, dynamicLoglevel)
 }
 
 func createLogParserReconciler(client client.Client) *logparsercontroller.Reconciler {
@@ -327,6 +343,8 @@ func createLogParserValidator(client client.Client) *logparserwebhook.Validating
 }
 
 func createTracePipelineReconciler(client client.Client) *tracepipelinereconciler.Reconciler {
+	//overrideConfig := make(map[string]interface{})
+
 	config := tracepipelinereconciler.Config{
 		CreateServiceMonitor: traceCollectorCreateServiceMonitor,
 		Namespace:            telemetryNamespace,
@@ -342,8 +360,10 @@ func createTracePipelineReconciler(client client.Client) *tracepipelinereconcile
 		Service: tracepipelinereconciler.ServiceConfig{
 			OTLPServiceName: traceCollectorOTLPServiceName,
 		},
+		OverrideConfigMap: types.NamespacedName{Name: "override-config", Namespace: telemetryNamespace},
+		//OverrideConfig: overrideConfig,
 	}
-	return tracepipelinereconciler.NewReconciler(client, config, &kubernetes.DeploymentProber{Client: client}, scheme)
+	return tracepipelinereconciler.NewReconciler(client, config, &kubernetes.DeploymentProber{Client: client}, &kubernetes.ConfigmapProber{Client: client}, scheme, dynamicLoglevel)
 }
 
 func createDryRunConfig() dryrun.Config {
