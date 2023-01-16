@@ -27,4 +27,4 @@ Follow these steps to detect if naming collision is the source of the problem:
     kubectl get subscriptions.eventing.kyma-project.io -A | grep {CLEAN_TYPE}
     ```
     
-3. If you find that the `CleanType` collides with some other Subscription, a solution for this would be to use a different event type. 
+3. If you find that the `CleanType` collides with some other Subscription, a solution for this is to use a different event type. 
