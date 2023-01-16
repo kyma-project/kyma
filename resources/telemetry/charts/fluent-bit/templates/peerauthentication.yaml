@@ -9,7 +9,12 @@ metadata:
     {{- end }}
 spec:
   mtls:
-    mode: PERMISSIVE
+    mode: STRICT
+  portLevelMtls:
+    2020:
+      mode: PERMISSIVE
+    2021:
+      mode: PERMISSIVE
   selector:
     matchLabels:
       {{- include "fluent-bit.selectorLabels" . | nindent 4 }}
