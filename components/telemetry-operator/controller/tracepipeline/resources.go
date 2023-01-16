@@ -136,7 +136,7 @@ func makeExporterConfig(output v1alpha1.TracePipelineOutput) map[string]any {
 			},
 		},
 		"logging": map[string]any{
-			"loglevel": "info",
+			"verbosity": "basic",
 		},
 	}
 }
