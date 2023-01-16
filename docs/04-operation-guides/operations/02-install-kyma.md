@@ -68,6 +68,9 @@ A profile is defined globally for the whole Kyma installation. It's not possible
 
 If you install Kyma on a remote cluster, you can use the out-of-the box `kyma.example.com` domain. All you need to do is get your load balancer IP address and add the following line to the `hosts` file:
 
+> **CAUTION:** Jaeger is [deprecated](?PLACEHOLDER?) and is planned to be removed. If you want to install a custom Jaeger stack, take a look at [this tutorial](https://github.com/kyma-project/examples/tree/main/jaeger).
+
+
   ```bash
   {load_balancer_IP} grafana.kyma.example.com oauth2.kyma.example.com registry.kyma.example.com jaeger.kyma.example.com connector-service.kyma.example.com gateway.kyma.example.com
   ```

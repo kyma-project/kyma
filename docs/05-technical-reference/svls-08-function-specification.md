@@ -112,6 +112,8 @@ See the detailed descriptions of these fields:
 | **tracer** | Fully configured OpenTelemetry [tracer](https://opentelemetry.io/docs/reference/specification/trace/api/#tracer) object that allows you to communicate with the Jaeger service to share tracing data. For more information on how to use the tracer object see [Use the OpenTelemetry standard](../03-tutorials/00-serverless/svls-12-use-opentelemetry-client.md) |
 | **extensions** | JSON object that can contain event payload, a Function's incoming request, or an outgoing response |
 
+> **CAUTION:** Jaeger is [deprecated](?PLACEHOLDER?) and is planned to be removed. If you want to install a custom Jaeger stack, take a look at [this tutorial](https://github.com/kyma-project/examples/tree/main/jaeger).
+
 ### Event object SDK
 
 The `event` object is extended by methods making some operations easier. You can use every method by providing `event.{FUNCTION_NAME(ARGUMENTS...)}`.
