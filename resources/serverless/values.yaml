@@ -80,13 +80,13 @@ global:
       directory: "tpi"
     function_controller:
       name: "function-controller"
-      version: "v20230105-80b16f50"
+      version: "PR-16576"
     function_webhook:
       name: "function-webhook"
-      version: "v20230105-80b16f50"
+      version: "PR-16576"
     function_build_init:
       name: "function-build-init"
-      version: "v20230105-80b16f50"
+      version: "PR-16576"
     function_runtime_nodejs14:
       name: "function-runtime-nodejs14"
       version: "v20221221-c4e979d1"
@@ -106,7 +106,7 @@ global:
       directory: "tpi"
     function_registry_gc:
       name: "function-registry-gc"
-      version: "v20230105-80b16f50"
+      version: "PR-16576"
     google_pause:
       name: "pause-amd64"
       version: "3.2"
