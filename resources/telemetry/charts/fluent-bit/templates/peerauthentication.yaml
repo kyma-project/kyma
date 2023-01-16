@@ -11,9 +11,9 @@ spec:
   mtls:
     mode: STRICT
   portLevelMtls:
-    2020:
-      mode: PERMISSIVE
     2021:
+      mode: PERMISSIVE
+    2020:
       mode: PERMISSIVE
   selector:
     matchLabels:
