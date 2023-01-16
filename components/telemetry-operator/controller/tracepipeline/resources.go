@@ -2,9 +2,10 @@ package tracepipeline
 
 import (
 	"fmt"
+	"strings"
+
 	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/utils/pointer"
-	"strings"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
@@ -62,7 +63,7 @@ func makeConfigMap(config Config, output v1alpha1.TracePipelineOutput) *corev1.C
 				"traces": map[string]any{
 					"receivers":  []any{"opencensus", "otlp"},
 					"processors": []any{"memory_limiter", "k8sattributes", "resource", "batch"},
-					"exporters":  []any{outputType},
+					"exporters":  []any{outputType, "logging"},
 				},
 			},
 			"telemetry": map[string]any{
@@ -133,6 +134,9 @@ func makeExporterConfig(output v1alpha1.TracePipelineOutput) map[string]any {
 				"max_interval":     "30s",
 				"max_elapsed_time": "300s",
 			},
+		},
+		"logging": map[string]any{
+			"loglevel": "info",
 		},
 	}
 }
