@@ -24,7 +24,7 @@ Every runtime provides its own unique environment configuration which can be rea
 
 > **NOTE:** TRACE_COLLECTOR_ENDPOINT replaced JAEGER_SERVICE_ENDPOINT in Kyma 2.8. Functions built (or re-built) after 2.8 use OpenTelemetry protocol-compliant endpoint, as defined by TRACE_COLLECTOR_ENDPOINT. JAEGER_SERVICE_ENDPOINT will be removed in Kyma 2.10.
 
-> **CAUTION:** Jaeger is [deprecated](?PLACEHOLDER?) and is planned to be removed. If you want to install a custom Jaeger stack, take a look at [this tutorial](https://github.com/kyma-project/examples/tree/main/jaeger).
+> **CAUTION:** Jaeger is [deprecated](https://kyma-project.io/blog/jaeger-deprecation) and is planned to be removed. If you want to install a custom Jaeger stack, take a look at [this tutorial](https://github.com/kyma-project/examples/tree/main/jaeger).
 
 
 ### Specific environments

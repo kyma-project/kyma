@@ -51,7 +51,7 @@ Furthermore, the operator manages the full lifecycle of the OTel Collector Deplo
 
 ## Setting up a TracePipeline
 
-> **CAUTION:** Jaeger is [deprecated](?PLACEHOLDER?) and is planned to be removed. If you want to install a custom Jaeger stack, take a look at [this tutorial](https://github.com/kyma-project/examples/tree/main/jaeger).
+> **CAUTION:** Jaeger is [deprecated](https://kyma-project.io/blog/jaeger-deprecation) and is planned to be removed. If you want to install a custom Jaeger stack, take a look at [this tutorial](https://github.com/kyma-project/examples/tree/main/jaeger).
 
 In the following steps, you can see how to set up a typical TracePipeline. For an overview of all available attributes, see the [reference document](./../../../05-technical-reference/00-custom-resources/telemetry-03-tracepipeline.md).
 
