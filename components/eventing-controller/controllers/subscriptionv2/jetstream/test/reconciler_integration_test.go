@@ -105,12 +105,12 @@ func Test_ValidationWebhook(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			t.Log("creating the k8s subscription")
-			sub := NewSubscription(jsTestEnsemble.TestEnsemble, tc.givenSubscriptionOpts...)
+			sub := NewSubscription(jsTestEnsemble.Ensemble, tc.givenSubscriptionOpts...)
 
-			EnsureNamespaceCreatedForSub(t, jsTestEnsemble.TestEnsemble, sub)
+			EnsureNamespaceCreatedForSub(t, jsTestEnsemble.Ensemble, sub)
 
 			// attempt to create subscription
-			EnsureK8sResourceNotCreated(t, jsTestEnsemble.TestEnsemble, sub, tc.wantError(sub.Name))
+			EnsureK8sResourceNotCreated(t, jsTestEnsemble.Ensemble, sub, tc.wantError(sub.Name))
 		})
 	}
 }
@@ -120,13 +120,13 @@ func Test_UnavailableNATSServer(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
 	// prepare the subscription
-	sub := CreateSubscription(t, jsTestEnsemble.TestEnsemble,
+	sub := CreateSubscription(t, jsTestEnsemble.Ensemble,
 		testingv2.WithSourceAndType(testingv2.EventSourceClean, testingv2.OrderCreatedEventType),
 		testingv2.WithSinkURLFromSvc(jsTestEnsemble.SubscriberSvc),
 	)
 
 	// test the subscription was reconciled properly and has the expected status
-	TestSubscriptionOnK8s(g, jsTestEnsemble.TestEnsemble, sub,
+	CheckSubscriptionOnK8s(g, jsTestEnsemble.Ensemble, sub,
 		testingv2.HaveCondition(testingv2.DefaultReadyCondition()),
 		testingv2.HaveSubscriptionReady(),
 		testingv2.HaveStatusTypes([]eventingv1alpha2.EventType{
@@ -139,13 +139,13 @@ func Test_UnavailableNATSServer(t *testing.T) {
 
 	// stopping NATS server should trigger the subscription become un-ready
 	jsTestEnsemble.NatsServer.Shutdown()
-	TestSubscriptionOnK8s(g, jsTestEnsemble.TestEnsemble, sub,
+	CheckSubscriptionOnK8s(g, jsTestEnsemble.Ensemble, sub,
 		testingv2.HaveSubscriptionNotReady(),
 	)
 
 	// should trigger the subscription become ready again
 	jsTestEnsemble.NatsServer = testingv1.StartDefaultJetStreamServer(jsTestEnsemble.NatsPort)
-	TestSubscriptionOnK8s(g, jsTestEnsemble.TestEnsemble, sub, testingv2.HaveSubscriptionReady())
+	CheckSubscriptionOnK8s(g, jsTestEnsemble.Ensemble, sub, testingv2.HaveSubscriptionReady())
 }
 
 // Check the reconciler idempotency by adding a label to the Kyma subscription.
@@ -153,7 +153,7 @@ func Test_Idempotency(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
 	t.Log("create the subscription")
-	sub := CreateSubscription(t, jsTestEnsemble.TestEnsemble,
+	sub := CreateSubscription(t, jsTestEnsemble.Ensemble,
 		testingv2.WithTypeMatchingExact(),
 		testingv2.WithSourceAndType(testingv2.EventSourceClean, testingv2.OrderCreatedEventType),
 		testingv2.WithMaxInFlight(jsTestEnsemble.DefaultSubscriptionConfig.MaxInFlightMessages),
@@ -161,7 +161,7 @@ func Test_Idempotency(t *testing.T) {
 	)
 
 	t.Log("test the subscription was properly reconciled")
-	TestSubscriptionOnK8s(g, jsTestEnsemble.TestEnsemble, sub,
+	CheckSubscriptionOnK8s(g, jsTestEnsemble.Ensemble, sub,
 		testingv2.HaveCondition(testingv2.DefaultReadyCondition()),
 		testingv2.HaveSubscriptionReady(),
 		testingv2.HaveStatusTypes([]eventingv1alpha2.EventType{
@@ -242,7 +242,7 @@ func Test_CreateSubscription(t *testing.T) {
 			givenSubscriptionOpts: []testingv2.SubscriptionOpt{
 				testingv2.WithTypeMatchingExact(),
 				testingv2.WithSourceAndType(emptyEventSource, NewUncleanEventType("0")),
-				testingv2.WithSinkURL(ValidSinkURL(jsTestEnsemble.TestEnsemble, ":8080", "/myEndpoint")),
+				testingv2.WithSinkURL(ValidSinkURL(jsTestEnsemble.Ensemble, ":8080", "/myEndpoint")),
 			},
 			want: Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
@@ -306,13 +306,13 @@ func Test_CreateSubscription(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
 
 			t.Log("creating the k8s subscription")
-			sub := CreateSubscription(t, jsTestEnsemble.TestEnsemble, tc.givenSubscriptionOpts...)
+			sub := CreateSubscription(t, jsTestEnsemble.Ensemble, tc.givenSubscriptionOpts...)
 
 			t.Log("testing the k8s subscription")
-			TestSubscriptionOnK8s(g, jsTestEnsemble.TestEnsemble, sub, tc.want.K8sSubscription...)
+			CheckSubscriptionOnK8s(g, jsTestEnsemble.Ensemble, sub, tc.want.K8sSubscription...)
 
 			t.Log("testing the k8s events")
-			TestEventsOnK8s(g, jsTestEnsemble.TestEnsemble, tc.want.K8sEvents...)
+			CheckEventsOnK8s(g, jsTestEnsemble.Ensemble, tc.want.K8sEvents...)
 
 			t.Log("testing the nats subscriptions")
 			for eventType, matchers := range tc.want.NatsSubscriptions {
@@ -521,13 +521,13 @@ func Test_ChangeSubscription(t *testing.T) {
 
 			// given
 			t.Log("creating the k8s subscription")
-			sub := CreateSubscription(t, jsTestEnsemble.TestEnsemble, tc.givenSubscriptionOpts...)
+			sub := CreateSubscription(t, jsTestEnsemble.Ensemble, tc.givenSubscriptionOpts...)
 
 			t.Log("testing the k8s subscription")
-			TestSubscriptionOnK8s(g, jsTestEnsemble.TestEnsemble, sub, tc.wantBefore.K8sSubscription...)
+			CheckSubscriptionOnK8s(g, jsTestEnsemble.Ensemble, sub, tc.wantBefore.K8sSubscription...)
 
 			t.Log("testing the k8s events")
-			TestEventsOnK8s(g, jsTestEnsemble.TestEnsemble, tc.wantBefore.K8sEvents...)
+			CheckEventsOnK8s(g, jsTestEnsemble.Ensemble, tc.wantBefore.K8sEvents...)
 
 			t.Log("testing the nats subscriptions")
 			for eventType, matchers := range tc.wantBefore.NatsSubscriptions {
@@ -536,7 +536,7 @@ func Test_ChangeSubscription(t *testing.T) {
 
 			// when
 			t.Log("change and update the subscription")
-			require.NoError(t, EventuallyUpdateSubscriptionOnK8s(jsTestEnsemble.Ctx, jsTestEnsemble.TestEnsemble,
+			require.NoError(t, EventuallyUpdateSubscriptionOnK8s(jsTestEnsemble.Ctx, jsTestEnsemble.Ensemble,
 				sub, func(sub *eventingv1alpha2.Subscription) error {
 					tc.changeSubscription(sub)
 					return jsTestEnsemble.K8sClient.Update(jsTestEnsemble.Ctx, sub)
@@ -544,10 +544,10 @@ func Test_ChangeSubscription(t *testing.T) {
 
 			// then
 			t.Log("testing the k8s subscription")
-			TestSubscriptionOnK8s(g, jsTestEnsemble.TestEnsemble, sub, tc.wantAfter.K8sSubscription...)
+			CheckSubscriptionOnK8s(g, jsTestEnsemble.Ensemble, sub, tc.wantAfter.K8sSubscription...)
 
 			t.Log("testing the k8s events")
-			TestEventsOnK8s(g, jsTestEnsemble.TestEnsemble, tc.wantAfter.K8sEvents...)
+			CheckEventsOnK8s(g, jsTestEnsemble.Ensemble, tc.wantAfter.K8sEvents...)
 
 			t.Log("testing the nats subscriptions")
 			for eventType, matchers := range tc.wantAfter.NatsSubscriptions {
@@ -571,14 +571,14 @@ func Test_EmptyEventTypePrefix(t *testing.T) {
 
 	// when
 	sub := CreateSubscription(t,
-		jsTestEnsemble.TestEnsemble,
+		jsTestEnsemble.Ensemble,
 		testingv2.WithTypeMatchingExact(),
 		testingv2.WithSourceAndType(emptyEventSource, testingv2.OrderCreatedEventTypePrefixEmpty),
 		testingv2.WithSinkURLFromSvc(jsTestEnsemble.SubscriberSvc),
 	)
 
 	// then
-	TestSubscriptionOnK8s(g, jsTestEnsemble.TestEnsemble, sub,
+	CheckSubscriptionOnK8s(g, jsTestEnsemble.Ensemble, sub,
 		testingv2.HaveTypes([]string{testingv2.OrderCreatedEventTypePrefixEmpty}),
 		testingv2.HaveCondition(testingv2.DefaultReadyCondition()),
 		testingv2.HaveSubscriptionReady(),
