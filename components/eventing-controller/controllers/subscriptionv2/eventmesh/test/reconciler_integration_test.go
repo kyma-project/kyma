@@ -12,7 +12,6 @@ import (
 
 	eventMeshtypes "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 
-	testingv2 "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscriptionv2/reconcilertesting"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
 	reconcilertestingv1 "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	"github.com/stretchr/testify/assert"
@@ -73,7 +72,7 @@ func Test_ValidationWebhook(t *testing.T) {
 					reconcilertesting.WithValidSink(namespace, "svc"),
 				)
 			},
-			wantError: testingv2.GenerateInvalidSubscriptionError(testName,
+			wantError: GenerateInvalidSubscriptionError(testName,
 				eventingv1alpha2.EmptyErrDetail, eventingv1alpha2.SourcePath),
 		},
 		{
@@ -86,7 +85,7 @@ func Test_ValidationWebhook(t *testing.T) {
 					reconcilertesting.WithValidSink(namespace, "svc"),
 				)
 			},
-			wantError: testingv2.GenerateInvalidSubscriptionError(testName,
+			wantError: GenerateInvalidSubscriptionError(testName,
 				eventingv1alpha2.EmptyErrDetail, eventingv1alpha2.TypesPath),
 		},
 		{
@@ -99,7 +98,7 @@ func Test_ValidationWebhook(t *testing.T) {
 					reconcilertesting.WithSink("https://svc2.test.local"),
 				)
 			},
-			wantError: testingv2.GenerateInvalidSubscriptionError(testName,
+			wantError: GenerateInvalidSubscriptionError(testName,
 				eventingv1alpha2.SuffixMissingErrDetail, eventingv1alpha2.SinkPath),
 		},
 	}

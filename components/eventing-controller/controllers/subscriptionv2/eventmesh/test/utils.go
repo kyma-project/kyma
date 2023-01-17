@@ -8,6 +8,8 @@ import (
 	"strings"
 	"testing"
 
+	"k8s.io/apimachinery/pkg/util/validation/field"
+
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	"github.com/stretchr/testify/require"
@@ -267,6 +269,15 @@ func startNewEventMeshMock() *reconcilertestingv1.BEBMock {
 	emMock := reconcilertestingv1.NewBEBMock()
 	emMock.Start()
 	return emMock
+}
+
+func GenerateInvalidSubscriptionError(subName, errType string, path *field.Path) error {
+	webhookErr := "admission webhook \"vsubscription.kb.io\" denied the request: "
+	givenError := k8serrors.NewInvalid(
+		eventingv1alpha2.GroupKind, subName,
+		field.ErrorList{eventingv1alpha2.MakeInvalidFieldError(path, subName, errType)})
+	givenError.ErrStatus.Message = webhookErr + givenError.ErrStatus.Message
+	return givenError
 }
 
 func getTestNamespace() string {
