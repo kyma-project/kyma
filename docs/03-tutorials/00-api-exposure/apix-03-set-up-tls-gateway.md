@@ -18,6 +18,7 @@ This tutorial shows how to set up a TLS Gateway in both manual and simple modes.
     </summary>
     
     ```bash
+    export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
     export GATEWAY=$NAMESPACE/httpbin-gateway
     ```
     </details>

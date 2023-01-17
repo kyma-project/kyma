@@ -19,6 +19,7 @@ This tutorial shows how to expose and secure services or Functions using API Gat
     </summary>
     
     ```bash
+    export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
     export GATEWAY=$NAMESPACE/httpbin-gateway
     ```
     </details>

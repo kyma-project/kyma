@@ -20,6 +20,7 @@ This tutorial shows how to expose multiple workloads on different paths by defin
     </summary>
     
     ```bash
+    export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
     export GATEWAY=$NAMESPACE/httpbin-gateway
     ```
     </details>

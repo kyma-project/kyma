@@ -19,6 +19,7 @@ This tutorial shows how to expose and secure a workload using Istio's built-in s
     </summary>
     
     ```bash
+    export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
     export GATEWAY=$NAMESPACE/httpbin-gateway
     ```
     </details>

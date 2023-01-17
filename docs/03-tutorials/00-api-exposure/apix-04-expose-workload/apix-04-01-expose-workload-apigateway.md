@@ -20,6 +20,7 @@ This tutorial shows how to expose an unsecured instance of the HttpBin service o
     </summary>
     
     ```bash
+    export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
     export GATEWAY=$NAMESPACE/httpbin-gateway
     ```
     </details>
