@@ -264,12 +264,6 @@ The trace collector setup is designed using the following assumptions:
 - An unavailability of a destination must be survived for 5 minutes without direct loss of trace data
 - An average span consists of 40 attributes with 64 character length
 
-### System span filtering
-System related spans reported by Istio will be filtered out without option to opt-out, especially the following:
-- `/healtz` endpoint of any component deployed on `kyma-system` namespace
-- `/metrics` endpoint of any component deployed on `kyma-system` namespace
-- All outgoing spans reported by Grafana and Jaeger
-- All spans in reference to `fluent-bit` and `loki` communication 
 It results in the following limitations:
 ### Throughput
 The maximum throughput is 4200 span/sec ~= 15.000.000 spans/hour. If more data needs to be ingested, it can result in a refusal of more data.
@@ -283,6 +277,13 @@ The used buffers are volatile, and the data can be lost on the otel-collector in
 ### Single TracePipeline support
 
 Only one TracePipeline resource at a time is supported at the moment.
+
+### System span filtering
+System related spans reported by Istio will be filtered out without option to opt-out, especially the following:
+- `/healtz` endpoint of any component deployed on `kyma-system` namespace
+- `/metrics` endpoint of any component deployed on `kyma-system` namespace
+- All outgoing spans reported by Grafana and Jaeger
+- All spans in reference to `fluent-bit` and `loki` communication
 
 ## Frequently Asked Questions
 
