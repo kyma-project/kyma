@@ -69,6 +69,7 @@ const (
 	domain                   = "domain.com"
 	namespacePrefixLength    = 5
 	syncPeriodSeconds        = 2
+	eventMeshMockKeyPrefix   = "/messaging/events/subscriptions"
 )
 
 //nolint:gochecknoglobals // only used in tests
@@ -407,11 +408,11 @@ func getEventMeshSubFromMock(subscriptionName, subscriptionNamespace string) *ev
 
 func getEventMeshSubKeyForMock(subscriptionName, subscriptionNamespace string) string {
 	nm1 := emTestEnsemble.nameMapper.MapSubscriptionName(subscriptionName, subscriptionNamespace)
-	return fmt.Sprintf("%s/%s", reconcilertestingv1.EventMeshMockKeyPrefix, nm1)
+	return fmt.Sprintf("%s/%s", eventMeshMockKeyPrefix, nm1)
 }
 
 func getEventMeshKeyForMock(name string) string {
-	return fmt.Sprintf("%s/%s", reconcilertestingv1.EventMeshMockKeyPrefix, name)
+	return fmt.Sprintf("%s/%s", eventMeshMockKeyPrefix, name)
 }
 
 // ensureK8sEventReceived checks if a certain event have triggered for the given namespace.
