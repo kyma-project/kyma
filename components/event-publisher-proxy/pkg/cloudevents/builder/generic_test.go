@@ -116,6 +116,11 @@ func Test_Build(t *testing.T) {
 				require.NoError(t, err)
 				require.Equal(t, tc.wantSource, buildEvent.Source())
 				require.Equal(t, tc.wantType, buildEvent.Type())
+
+				// check that original type header exists
+				originalType, ok := buildEvent.Extensions()[OriginalTypeHeaderName]
+				require.True(t, ok)
+				require.Equal(t, tc.givenType, originalType)
 			}
 		})
 	}
