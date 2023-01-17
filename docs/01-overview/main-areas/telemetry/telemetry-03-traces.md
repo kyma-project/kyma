@@ -264,6 +264,7 @@ The trace collector setup is designed using the following assumptions:
 - An unavailability of a destination must be survived for 5 minutes without direct loss of trace data
 - An average span consists of 40 attributes with 64 character length
 
+### System span filtering
 System related spans reported by Istio will be filtered out without option to opt-out, especially the following:
 - `/healtz` endpoint of any component deployed on `kyma-system` namespace
 - `/metrics` endpoint of any component deployed on `kyma-system` namespace
