@@ -6,7 +6,6 @@ import (
 	"os"
 	"testing"
 
-	reconcilertestingv2 "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscriptionv2/reconcilertesting"
 	testingv1 "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	testingv2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
 	"github.com/onsi/gomega"
@@ -55,7 +54,7 @@ func Test_ValidationWebhook(t *testing.T) {
 				testingv2.WithSinkURLFromSvc(jsTestEnsemble.SubscriberSvc),
 			},
 			wantError: func(subName string) error {
-				return reconcilertestingv2.GenerateInvalidSubscriptionError(subName,
+				return GenerateInvalidSubscriptionError(subName,
 					eventingv1alpha2.EmptyErrDetail, eventingv1alpha2.SourcePath)
 			},
 		},
@@ -68,7 +67,7 @@ func Test_ValidationWebhook(t *testing.T) {
 				testingv2.WithSinkURLFromSvc(jsTestEnsemble.SubscriberSvc),
 			},
 			wantError: func(subName string) error {
-				return reconcilertestingv2.GenerateInvalidSubscriptionError(subName,
+				return GenerateInvalidSubscriptionError(subName,
 					eventingv1alpha2.EmptyErrDetail, eventingv1alpha2.TypesPath)
 			},
 		},
@@ -82,7 +81,7 @@ func Test_ValidationWebhook(t *testing.T) {
 				testingv2.WithMaxInFlightMessages("invalid"),
 			},
 			wantError: func(subName string) error {
-				return reconcilertestingv2.GenerateInvalidSubscriptionError(subName,
+				return GenerateInvalidSubscriptionError(subName,
 					eventingv1alpha2.StringIntErrDetail, eventingv1alpha2.ConfigPath)
 			},
 		},
@@ -95,7 +94,7 @@ func Test_ValidationWebhook(t *testing.T) {
 				testingv2.WithSink("https://svc2.test.local"),
 			},
 			wantError: func(subName string) error {
-				return reconcilertestingv2.GenerateInvalidSubscriptionError(subName,
+				return GenerateInvalidSubscriptionError(subName,
 					eventingv1alpha2.SuffixMissingErrDetail, eventingv1alpha2.SinkPath)
 			},
 		},
@@ -106,12 +105,12 @@ func Test_ValidationWebhook(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			t.Log("creating the k8s subscription")
-			sub := reconcilertestingv2.NewSubscription(jsTestEnsemble.TestEnsemble, tc.givenSubscriptionOpts...)
+			sub := NewSubscription(jsTestEnsemble.TestEnsemble, tc.givenSubscriptionOpts...)
 
-			reconcilertestingv2.EnsureNamespaceCreatedForSub(t, jsTestEnsemble.TestEnsemble, sub)
+			EnsureNamespaceCreatedForSub(t, jsTestEnsemble.TestEnsemble, sub)
 
 			// attempt to create subscription
-			reconcilertestingv2.EnsureK8sResourceNotCreated(t, jsTestEnsemble.TestEnsemble, sub, tc.wantError(sub.Name))
+			EnsureK8sResourceNotCreated(t, jsTestEnsemble.TestEnsemble, sub, tc.wantError(sub.Name))
 		})
 	}
 }
@@ -121,13 +120,13 @@ func Test_UnavailableNATSServer(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
 	// prepare the subscription
-	sub := reconcilertestingv2.CreateSubscription(t, jsTestEnsemble.TestEnsemble,
+	sub := CreateSubscription(t, jsTestEnsemble.TestEnsemble,
 		testingv2.WithSourceAndType(testingv2.EventSourceClean, testingv2.OrderCreatedEventType),
 		testingv2.WithSinkURLFromSvc(jsTestEnsemble.SubscriberSvc),
 	)
 
 	// test the subscription was reconciled properly and has the expected status
-	reconcilertestingv2.TestSubscriptionOnK8s(g, jsTestEnsemble.TestEnsemble, sub,
+	TestSubscriptionOnK8s(g, jsTestEnsemble.TestEnsemble, sub,
 		testingv2.HaveCondition(testingv2.DefaultReadyCondition()),
 		testingv2.HaveSubscriptionReady(),
 		testingv2.HaveStatusTypes([]eventingv1alpha2.EventType{
@@ -140,13 +139,13 @@ func Test_UnavailableNATSServer(t *testing.T) {
 
 	// stopping NATS server should trigger the subscription become un-ready
 	jsTestEnsemble.NatsServer.Shutdown()
-	reconcilertestingv2.TestSubscriptionOnK8s(g, jsTestEnsemble.TestEnsemble, sub,
+	TestSubscriptionOnK8s(g, jsTestEnsemble.TestEnsemble, sub,
 		testingv2.HaveSubscriptionNotReady(),
 	)
 
 	// should trigger the subscription become ready again
 	jsTestEnsemble.NatsServer = testingv1.StartDefaultJetStreamServer(jsTestEnsemble.NatsPort)
-	reconcilertestingv2.TestSubscriptionOnK8s(g, jsTestEnsemble.TestEnsemble, sub, testingv2.HaveSubscriptionReady())
+	TestSubscriptionOnK8s(g, jsTestEnsemble.TestEnsemble, sub, testingv2.HaveSubscriptionReady())
 }
 
 // Check the reconciler idempotency by adding a label to the Kyma subscription.
@@ -154,7 +153,7 @@ func Test_Idempotency(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
 	t.Log("create the subscription")
-	sub := reconcilertestingv2.CreateSubscription(t, jsTestEnsemble.TestEnsemble,
+	sub := CreateSubscription(t, jsTestEnsemble.TestEnsemble,
 		testingv2.WithTypeMatchingExact(),
 		testingv2.WithSourceAndType(testingv2.EventSourceClean, testingv2.OrderCreatedEventType),
 		testingv2.WithMaxInFlight(jsTestEnsemble.DefaultSubscriptionConfig.MaxInFlightMessages),
@@ -162,7 +161,7 @@ func Test_Idempotency(t *testing.T) {
 	)
 
 	t.Log("test the subscription was properly reconciled")
-	reconcilertestingv2.TestSubscriptionOnK8s(g, jsTestEnsemble.TestEnsemble, sub,
+	TestSubscriptionOnK8s(g, jsTestEnsemble.TestEnsemble, sub,
 		testingv2.HaveCondition(testingv2.DefaultReadyCondition()),
 		testingv2.HaveSubscriptionReady(),
 		testingv2.HaveStatusTypes([]eventingv1alpha2.EventType{
@@ -176,10 +175,10 @@ func Test_Idempotency(t *testing.T) {
 	t.Log("test the subscription on NATS was created as expected")
 	testNatsSub := func() {
 		testSubscriptionOnNATS(g, sub, testingv2.OrderCreatedEventType,
-			reconcilertestingv2.BeExistingSubscription(),
-			reconcilertestingv2.BeValidSubscription(),
-			reconcilertestingv2.BeNatsSubWithMaxPending(jsTestEnsemble.DefaultSubscriptionConfig.MaxInFlightMessages),
-			reconcilertestingv2.BeJetStreamSubscriptionWithSubject(testingv2.EventSource,
+			BeExistingSubscription(),
+			BeValidSubscription(),
+			BeNatsSubWithMaxPending(jsTestEnsemble.DefaultSubscriptionConfig.MaxInFlightMessages),
+			BeJetStreamSubscriptionWithSubject(testingv2.EventSource,
 				testingv2.OrderCreatedEventType, eventingv1alpha2.TypeMatchingExact, jsTestEnsemble.jetStreamBackend.Config),
 		)
 	}
@@ -209,7 +208,7 @@ func Test_CreateSubscription(t *testing.T) {
 	var testCases = []struct {
 		name                  string
 		givenSubscriptionOpts []testingv2.SubscriptionOpt
-		want                  reconcilertestingv2.Want
+		want                  Want
 	}{
 		{
 			name: "create and delete",
@@ -221,7 +220,7 @@ func Test_CreateSubscription(t *testing.T) {
 				testingv2.WithWebhookForNATS(),
 				testingv2.WithFinalizers([]string{}),
 			},
-			want: reconcilertestingv2.Want{
+			want: Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					testingv2.HaveCondition(testingv2.DefaultReadyCondition()),
 					testingv2.HaveMaxInFlight(jsTestEnsemble.DefaultSubscriptionConfig.MaxInFlightMessages),
@@ -229,9 +228,9 @@ func Test_CreateSubscription(t *testing.T) {
 				},
 				NatsSubscriptions: map[string][]gomegatypes.GomegaMatcher{
 					testingv2.OrderCreatedEventType: {
-						reconcilertestingv2.BeExistingSubscription(),
-						reconcilertestingv2.BeValidSubscription(),
-						reconcilertestingv2.BeJetStreamSubscriptionWithSubject(testingv2.EventSource,
+						BeExistingSubscription(),
+						BeValidSubscription(),
+						BeJetStreamSubscriptionWithSubject(testingv2.EventSource,
 							testingv2.OrderCreatedEventType, eventingv1alpha2.TypeMatchingExact,
 							jsTestEnsemble.jetStreamBackend.Config),
 					},
@@ -242,10 +241,10 @@ func Test_CreateSubscription(t *testing.T) {
 			name: "valid sink; with port and endpoint",
 			givenSubscriptionOpts: []testingv2.SubscriptionOpt{
 				testingv2.WithTypeMatchingExact(),
-				testingv2.WithSourceAndType(emptyEventSource, reconcilertestingv2.NewUncleanEventType("0")),
-				testingv2.WithSinkURL(reconcilertestingv2.ValidSinkURL(jsTestEnsemble.TestEnsemble, ":8080", "/myEndpoint")),
+				testingv2.WithSourceAndType(emptyEventSource, NewUncleanEventType("0")),
+				testingv2.WithSinkURL(ValidSinkURL(jsTestEnsemble.TestEnsemble, ":8080", "/myEndpoint")),
 			},
-			want: reconcilertestingv2.Want{
+			want: Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					testingv2.HaveCondition(testingv2.DefaultReadyCondition()),
 					testingv2.HaveSubscriptionReady(),
@@ -256,21 +255,21 @@ func Test_CreateSubscription(t *testing.T) {
 			name: "invalid sink; not a valid cluster local service",
 			givenSubscriptionOpts: []testingv2.SubscriptionOpt{
 				testingv2.WithTypeMatchingExact(),
-				testingv2.WithSourceAndType(testingv2.EventSource, reconcilertestingv2.NewUncleanEventType("0")),
+				testingv2.WithSourceAndType(testingv2.EventSource, NewUncleanEventType("0")),
 				testingv2.WithWebhookForNATS(),
 				testingv2.WithSinkURL(
 					testingv2.ValidSinkURL(jsTestEnsemble.SubscriberSvc.Namespace, "testapp"),
 				),
 			},
-			want: reconcilertestingv2.Want{
+			want: Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					testingv2.HaveCondition(
-						reconcilertestingv2.ConditionInvalidSink(
+						ConditionInvalidSink(
 							"failed to validate subscription sink URL. It is not a valid cluster local svc: Service \"testapp\" not found",
 						)),
 				},
 				K8sEvents: []corev1.Event{
-					reconcilertestingv2.EventInvalidSink("Sink does not correspond to a valid cluster local svc")},
+					EventInvalidSink("Sink does not correspond to a valid cluster local svc")},
 			},
 		},
 		{
@@ -281,15 +280,15 @@ func Test_CreateSubscription(t *testing.T) {
 				testingv2.WithSinkURLFromSvc(jsTestEnsemble.SubscriberSvc),
 				testingv2.WithFinalizers([]string{}),
 			},
-			want: reconcilertestingv2.Want{
+			want: Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					testingv2.HaveCondition(testingv2.DefaultReadyCondition()),
 				},
 				NatsSubscriptions: map[string][]gomegatypes.GomegaMatcher{
 					testingv2.OrderCreatedEventType: {
-						reconcilertestingv2.BeExistingSubscription(),
-						reconcilertestingv2.BeValidSubscription(),
-						reconcilertestingv2.BeJetStreamSubscriptionWithSubject(
+						BeExistingSubscription(),
+						BeValidSubscription(),
+						BeJetStreamSubscriptionWithSubject(
 							testingv2.EventTypePrefixEmpty,
 							testingv2.OrderCreatedEventType,
 							eventingv1alpha2.TypeMatchingExact,
@@ -307,13 +306,13 @@ func Test_CreateSubscription(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
 
 			t.Log("creating the k8s subscription")
-			sub := reconcilertestingv2.CreateSubscription(t, jsTestEnsemble.TestEnsemble, tc.givenSubscriptionOpts...)
+			sub := CreateSubscription(t, jsTestEnsemble.TestEnsemble, tc.givenSubscriptionOpts...)
 
 			t.Log("testing the k8s subscription")
-			reconcilertestingv2.TestSubscriptionOnK8s(g, jsTestEnsemble.TestEnsemble, sub, tc.want.K8sSubscription...)
+			TestSubscriptionOnK8s(g, jsTestEnsemble.TestEnsemble, sub, tc.want.K8sSubscription...)
 
 			t.Log("testing the k8s events")
-			reconcilertestingv2.TestEventsOnK8s(g, jsTestEnsemble.TestEnsemble, tc.want.K8sEvents...)
+			TestEventsOnK8s(g, jsTestEnsemble.TestEnsemble, tc.want.K8sEvents...)
 
 			t.Log("testing the nats subscriptions")
 			for eventType, matchers := range tc.want.NatsSubscriptions {
@@ -338,9 +337,9 @@ func Test_ChangeSubscription(t *testing.T) {
 	var testCases = []struct {
 		name                  string
 		givenSubscriptionOpts []testingv2.SubscriptionOpt
-		wantBefore            reconcilertestingv2.Want
+		wantBefore            Want
 		changeSubscription    func(subscription *eventingv1alpha2.Subscription)
-		wantAfter             reconcilertestingv2.Want
+		wantAfter             Want
 	}{
 		{
 			// Ensure subscriptions on NATS are not added when adding
@@ -351,55 +350,55 @@ func Test_ChangeSubscription(t *testing.T) {
 			name: "Disallow the creation of a NATS subscription with an invalid sink",
 			givenSubscriptionOpts: []testingv2.SubscriptionOpt{
 				testingv2.WithTypeMatchingExact(),
-				testingv2.WithSourceAndType(testingv2.EventSource, reconcilertestingv2.NewCleanEventType("0")),
+				testingv2.WithSourceAndType(testingv2.EventSource, NewCleanEventType("0")),
 				// valid sink
 				testingv2.WithSinkURLFromSvc(jsTestEnsemble.SubscriberSvc),
 			},
-			wantBefore: reconcilertestingv2.Want{
+			wantBefore: Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					testingv2.HaveSubscriptionReady(),
 					// for each filter we want to have a clean event type
 					testingv2.HaveTypes([]string{
-						reconcilertestingv2.NewCleanEventType("0"),
+						NewCleanEventType("0"),
 					}),
 				},
 				K8sEvents: nil,
 				// ensure that each filter results in a NATS consumer
 				NatsSubscriptions: map[string][]gomegatypes.GomegaMatcher{
-					reconcilertestingv2.NewCleanEventType("0"): {
-						reconcilertestingv2.BeExistingSubscription(),
-						reconcilertestingv2.BeValidSubscription(),
-						reconcilertestingv2.BeJetStreamSubscriptionWithSubject(
-							testingv2.EventTypePrefix, reconcilertestingv2.NewCleanEventType("0"),
+					NewCleanEventType("0"): {
+						BeExistingSubscription(),
+						BeValidSubscription(),
+						BeJetStreamSubscriptionWithSubject(
+							testingv2.EventTypePrefix, NewCleanEventType("0"),
 							eventingv1alpha2.TypeMatchingExact, jsTestEnsemble.jetStreamBackend.Config,
 						),
 					},
 				},
 			},
 			changeSubscription: func(subscription *eventingv1alpha2.Subscription) {
-				testingv2.AddEventType(reconcilertestingv2.NewCleanEventType("1"), subscription)
+				testingv2.AddEventType(NewCleanEventType("1"), subscription)
 
 				// induce an error by making the sink invalid
 				subscription.Spec.Sink = testingv2.ValidSinkURL(subscription.Namespace, "invalid")
 			},
-			wantAfter: reconcilertestingv2.Want{
+			wantAfter: Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					testingv2.HaveSubscriptionNotReady(),
 					// for each filter we want to have a clean event type
 					testingv2.HaveTypes([]string{
-						reconcilertestingv2.NewCleanEventType("0"),
-						reconcilertestingv2.NewCleanEventType("1"),
+						NewCleanEventType("0"),
+						NewCleanEventType("1"),
 					}),
 				},
 				K8sEvents: nil,
 				// ensure that each filter results in a NATS consumer
 				NatsSubscriptions: map[string][]gomegatypes.GomegaMatcher{
-					reconcilertestingv2.NewCleanEventType("0"): {
-						reconcilertestingv2.BeExistingSubscription(),
+					NewCleanEventType("0"): {
+						BeExistingSubscription(),
 					},
 					// the newly added filter is not synced to NATS as the sink is invalid
-					reconcilertestingv2.NewCleanEventType("1"): {
-						gomega.Not(reconcilertestingv2.BeExistingSubscription()),
+					NewCleanEventType("1"): {
+						gomega.Not(BeExistingSubscription()),
 					},
 				},
 			},
@@ -408,17 +407,17 @@ func Test_ChangeSubscription(t *testing.T) {
 			name: "CleanEventTypes; change filters",
 			givenSubscriptionOpts: []testingv2.SubscriptionOpt{
 				testingv2.WithTypeMatchingExact(),
-				testingv2.WithSourceAndType(testingv2.EventSource, reconcilertestingv2.NewCleanEventType("0")),
-				testingv2.WithSourceAndType(testingv2.EventSource, reconcilertestingv2.NewCleanEventType("1")),
+				testingv2.WithSourceAndType(testingv2.EventSource, NewCleanEventType("0")),
+				testingv2.WithSourceAndType(testingv2.EventSource, NewCleanEventType("1")),
 				testingv2.WithWebhookForNATS(),
 				testingv2.WithSinkURLFromSvc(jsTestEnsemble.SubscriberSvc),
 			},
-			wantBefore: reconcilertestingv2.Want{
+			wantBefore: Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					testingv2.HaveCondition(testingv2.DefaultReadyCondition()),
 					testingv2.HaveTypes([]string{
-						reconcilertestingv2.NewCleanEventType("0"),
-						reconcilertestingv2.NewCleanEventType("1"),
+						NewCleanEventType("0"),
+						NewCleanEventType("1"),
 					}),
 				},
 			},
@@ -428,12 +427,12 @@ func Test_ChangeSubscription(t *testing.T) {
 					subscription.Spec.Types[i] = fmt.Sprintf("%salpha", eventType)
 				}
 			},
-			wantAfter: reconcilertestingv2.Want{
+			wantAfter: Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					testingv2.HaveCondition(testingv2.DefaultReadyCondition()),
 					testingv2.HaveTypes([]string{
-						reconcilertestingv2.NewCleanEventType("0alpha"),
-						reconcilertestingv2.NewCleanEventType("1alpha"),
+						NewCleanEventType("0alpha"),
+						NewCleanEventType("1alpha"),
 					}),
 				},
 			},
@@ -442,28 +441,28 @@ func Test_ChangeSubscription(t *testing.T) {
 			name: "CleanEventTypes; delete a filter",
 			givenSubscriptionOpts: []testingv2.SubscriptionOpt{
 				testingv2.WithTypeMatchingExact(),
-				testingv2.WithSourceAndType(testingv2.EventSource, reconcilertestingv2.NewCleanEventType("0")),
-				testingv2.WithSourceAndType(testingv2.EventSource, reconcilertestingv2.NewCleanEventType("1")),
+				testingv2.WithSourceAndType(testingv2.EventSource, NewCleanEventType("0")),
+				testingv2.WithSourceAndType(testingv2.EventSource, NewCleanEventType("1")),
 				testingv2.WithWebhookForNATS(),
 				testingv2.WithSinkURLFromSvc(jsTestEnsemble.SubscriberSvc),
 			},
-			wantBefore: reconcilertestingv2.Want{
+			wantBefore: Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					testingv2.HaveCondition(testingv2.DefaultReadyCondition()),
 					testingv2.HaveTypes([]string{
-						reconcilertestingv2.NewCleanEventType("0"),
-						reconcilertestingv2.NewCleanEventType("1"),
+						NewCleanEventType("0"),
+						NewCleanEventType("1"),
 					}),
 				},
 			},
 			changeSubscription: func(subscription *eventingv1alpha2.Subscription) {
 				subscription.Spec.Types = subscription.Spec.Types[:1]
 			},
-			wantAfter: reconcilertestingv2.Want{
+			wantAfter: Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					testingv2.HaveCondition(testingv2.DefaultReadyCondition()),
 					testingv2.HaveTypes([]string{
-						reconcilertestingv2.NewCleanEventType("0"),
+						NewCleanEventType("0"),
 					}),
 				},
 			},
@@ -477,16 +476,16 @@ func Test_ChangeSubscription(t *testing.T) {
 				testingv2.WithWebhookForNATS(),
 				testingv2.WithSinkURLFromSvc(jsTestEnsemble.SubscriberSvc),
 			},
-			wantBefore: reconcilertestingv2.Want{
+			wantBefore: Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					testingv2.HaveCondition(testingv2.DefaultReadyCondition()),
 					testingv2.HaveMaxInFlight(jsTestEnsemble.DefaultSubscriptionConfig.MaxInFlightMessages),
 				},
 				NatsSubscriptions: map[string][]gomegatypes.GomegaMatcher{
 					testingv2.OrderCreatedEventType: {
-						reconcilertestingv2.BeExistingSubscription(),
-						reconcilertestingv2.BeValidSubscription(),
-						reconcilertestingv2.BeNatsSubWithMaxPending(jsTestEnsemble.DefaultSubscriptionConfig.MaxInFlightMessages),
+						BeExistingSubscription(),
+						BeValidSubscription(),
+						BeNatsSubWithMaxPending(jsTestEnsemble.DefaultSubscriptionConfig.MaxInFlightMessages),
 					},
 				},
 			},
@@ -495,20 +494,20 @@ func Test_ChangeSubscription(t *testing.T) {
 					eventingv1alpha2.MaxInFlightMessages: "101",
 				}
 			},
-			wantAfter: reconcilertestingv2.Want{
+			wantAfter: Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					testingv2.HaveCondition(testingv2.DefaultReadyCondition()),
 					testingv2.HaveMaxInFlight(101),
 				},
 				NatsSubscriptions: map[string][]gomegatypes.GomegaMatcher{
 					testingv2.OrderCreatedEventType: {
-						reconcilertestingv2.BeExistingSubscription(),
-						reconcilertestingv2.BeValidSubscription(),
-						reconcilertestingv2.BeJetStreamSubscriptionWithSubject(
+						BeExistingSubscription(),
+						BeValidSubscription(),
+						BeJetStreamSubscriptionWithSubject(
 							testingv2.EventTypePrefix, testingv2.OrderCreatedEventType, eventingv1alpha2.TypeMatchingExact,
 							jsTestEnsemble.jetStreamBackend.Config,
 						),
-						reconcilertestingv2.BeNatsSubWithMaxPending(101),
+						BeNatsSubWithMaxPending(101),
 					},
 				},
 			},
@@ -522,13 +521,13 @@ func Test_ChangeSubscription(t *testing.T) {
 
 			// given
 			t.Log("creating the k8s subscription")
-			sub := reconcilertestingv2.CreateSubscription(t, jsTestEnsemble.TestEnsemble, tc.givenSubscriptionOpts...)
+			sub := CreateSubscription(t, jsTestEnsemble.TestEnsemble, tc.givenSubscriptionOpts...)
 
 			t.Log("testing the k8s subscription")
-			reconcilertestingv2.TestSubscriptionOnK8s(g, jsTestEnsemble.TestEnsemble, sub, tc.wantBefore.K8sSubscription...)
+			TestSubscriptionOnK8s(g, jsTestEnsemble.TestEnsemble, sub, tc.wantBefore.K8sSubscription...)
 
 			t.Log("testing the k8s events")
-			reconcilertestingv2.TestEventsOnK8s(g, jsTestEnsemble.TestEnsemble, tc.wantBefore.K8sEvents...)
+			TestEventsOnK8s(g, jsTestEnsemble.TestEnsemble, tc.wantBefore.K8sEvents...)
 
 			t.Log("testing the nats subscriptions")
 			for eventType, matchers := range tc.wantBefore.NatsSubscriptions {
@@ -537,7 +536,7 @@ func Test_ChangeSubscription(t *testing.T) {
 
 			// when
 			t.Log("change and update the subscription")
-			require.NoError(t, reconcilertestingv2.EventuallyUpdateSubscriptionOnK8s(jsTestEnsemble.Ctx, jsTestEnsemble.TestEnsemble,
+			require.NoError(t, EventuallyUpdateSubscriptionOnK8s(jsTestEnsemble.Ctx, jsTestEnsemble.TestEnsemble,
 				sub, func(sub *eventingv1alpha2.Subscription) error {
 					tc.changeSubscription(sub)
 					return jsTestEnsemble.K8sClient.Update(jsTestEnsemble.Ctx, sub)
@@ -545,10 +544,10 @@ func Test_ChangeSubscription(t *testing.T) {
 
 			// then
 			t.Log("testing the k8s subscription")
-			reconcilertestingv2.TestSubscriptionOnK8s(g, jsTestEnsemble.TestEnsemble, sub, tc.wantAfter.K8sSubscription...)
+			TestSubscriptionOnK8s(g, jsTestEnsemble.TestEnsemble, sub, tc.wantAfter.K8sSubscription...)
 
 			t.Log("testing the k8s events")
-			reconcilertestingv2.TestEventsOnK8s(g, jsTestEnsemble.TestEnsemble, tc.wantAfter.K8sEvents...)
+			TestEventsOnK8s(g, jsTestEnsemble.TestEnsemble, tc.wantAfter.K8sEvents...)
 
 			t.Log("testing the nats subscriptions")
 			for eventType, matchers := range tc.wantAfter.NatsSubscriptions {
@@ -571,7 +570,7 @@ func Test_EmptyEventTypePrefix(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
 	// when
-	sub := reconcilertestingv2.CreateSubscription(t,
+	sub := CreateSubscription(t,
 		jsTestEnsemble.TestEnsemble,
 		testingv2.WithTypeMatchingExact(),
 		testingv2.WithSourceAndType(emptyEventSource, testingv2.OrderCreatedEventTypePrefixEmpty),
@@ -579,17 +578,20 @@ func Test_EmptyEventTypePrefix(t *testing.T) {
 	)
 
 	// then
-	reconcilertestingv2.TestSubscriptionOnK8s(g, jsTestEnsemble.TestEnsemble, sub,
+	TestSubscriptionOnK8s(g, jsTestEnsemble.TestEnsemble, sub,
 		testingv2.HaveTypes([]string{testingv2.OrderCreatedEventTypePrefixEmpty}),
 		testingv2.HaveCondition(testingv2.DefaultReadyCondition()),
 		testingv2.HaveSubscriptionReady(),
 	)
 
 	expectedNatsSubscription := []gomegatypes.GomegaMatcher{
-		reconcilertestingv2.BeExistingSubscription(),
-		reconcilertestingv2.BeValidSubscription(),
-		reconcilertestingv2.BeJetStreamSubscriptionWithSubject(testingv2.EventSource,
-			testingv2.OrderCreatedEventTypePrefixEmpty, eventingv1alpha2.TypeMatchingExact, jsTestEnsemble.jetStreamBackend.Config),
+		BeExistingSubscription(),
+		BeValidSubscription(),
+		BeJetStreamSubscriptionWithSubject(testingv2.EventSource,
+			testingv2.OrderCreatedEventTypePrefixEmpty,
+			eventingv1alpha2.TypeMatchingExact,
+			jsTestEnsemble.jetStreamBackend.Config,
+		),
 	}
 
 	testSubscriptionOnNATS(g, sub, testingv2.OrderCreatedEventTypePrefixEmpty, expectedNatsSubscription...)
