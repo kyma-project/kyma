@@ -18,6 +18,7 @@ package logpipeline
 
 import (
 	"context"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configureLogger"
 	"path/filepath"
 	"testing"
 
@@ -28,6 +29,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	zapLog "go.uber.org/zap"
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
@@ -55,6 +57,7 @@ var (
 		SectionsConfigMap: types.NamespacedName{Name: "test-telemetry-fluent-bit-sections", Namespace: "default"},
 		FilesConfigMap:    types.NamespacedName{Name: "test-telemetry-fluent-bit-files", Namespace: "default"},
 		EnvSecret:         types.NamespacedName{Name: "test-telemetry-fluent-bit-env", Namespace: "default"},
+		OverrideConfigMap: types.NamespacedName{Name: "override-config", Namespace: "default"},
 		PipelineDefaults: builder.PipelineDefaults{
 			InputTag:          "kube",
 			MemoryBufferLimit: "10M",
@@ -72,6 +75,8 @@ func TestAPIs(t *testing.T) {
 
 var _ = BeforeSuite(func() {
 	logf.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
+	dynamicLoglevel := zapLog.NewAtomicLevel()
+	configureLogLevelOnFly := configureLogger.New(dynamicLoglevel)
 
 	ctx, cancel = context.WithCancel(context.TODO())
 
@@ -105,7 +110,7 @@ var _ = BeforeSuite(func() {
 	Expect(err).ToNot(HaveOccurred())
 
 	client := mgr.GetClient()
-	reconciler := NewReconciler(client, testConfig, &kubernetes.DaemonSetProber{Client: client}, &kubernetes.DaemonSetAnnotator{Client: client})
+	reconciler := NewReconciler(client, testConfig, &kubernetes.DaemonSetProber{Client: client}, &kubernetes.DaemonSetAnnotator{Client: client}, &kubernetes.ConfigmapProber{Client: client}, configureLogLevelOnFly)
 	err = reconciler.SetupWithManager(mgr)
 	Expect(err).ToNot(HaveOccurred())
 

@@ -63,10 +63,3 @@ func (r *Reconciler) pauseReconciliation(overrideConfig map[string]interface{}) 
 	}
 	return false
 }
-
-func (r *Reconciler) reconfigureLogLevel(overrideConfig map[string]interface{}) error {
-	if logLevel, ok := overrideConfig["logLevel"].(string); ok {
-		return r.logLevel.ChangeLogLevel(logLevel)
-	}
-	return nil
-}

@@ -34,20 +34,3 @@ func (cmp *ConfigmapProber) IsPresent(ctx context.Context, name types.Namespaced
 	}
 	return config, nil
 }
-
-//func (cmp *ConfigmapProber) GetData(ctx context.Context, name types.NamespacedName) (map[string]interface{}, error) {
-//	var cm corev1.ConfigMap
-//	config := make(map[string]interface{})
-//	if err := cmp.Get(ctx, name, &cm); err != nil {
-//		return config, fmt.Errorf("failed to get %s/%s Configmap: %v", name.Namespace, name.Name, err)
-//	}
-//
-//	if _, ok := cm.Data["override-config"]; ok {
-//		if err := yaml.Unmarshal([]byte(cm.Data["override-config"]), &config); err != nil {
-//			return config, err
-//		}
-//		return config, nil
-//	}
-//	return config, nil
-//
-//}

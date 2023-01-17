@@ -21,10 +21,10 @@ import (
 	"errors"
 	"fmt"
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/ConfigureLogger"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configchecksum"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configureLogger"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/globalConfig"
 	utils "github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
-	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -65,51 +65,52 @@ type DeploymentProber interface {
 	IsReady(ctx context.Context, name types.NamespacedName) (bool, error)
 }
 
+//go:generate mockery --name ConfigMapProber --filename configmap_prober.go
 type ConfigMapProber interface {
 	IsPresent(ctx context.Context, name types.NamespacedName) (map[string]interface{}, error)
 }
 
-type Reconciler struct {
-	client.Client
-	config   Config
-	Scheme   *runtime.Scheme
-	prober   DeploymentProber
-	cmProber ConfigMapProber
-	logLevel *ConfigureLogger.LogLevel
+type ManagerGlobalConfig interface {
+	CheckGlobalConfig(config map[string]interface{}) error
 }
 
-func NewReconciler(client client.Client, config Config, prober DeploymentProber, cmProber ConfigMapProber, scheme *runtime.Scheme, dynamicLoglevel zap.AtomicLevel) *Reconciler {
+type Reconciler struct {
+	client.Client
+	config       Config
+	Scheme       *runtime.Scheme
+	prober       DeploymentProber
+	cmProber     ConfigMapProber
+	globalConfig ManagerGlobalConfig
+}
+
+func NewReconciler(client client.Client, config Config, prober DeploymentProber, cmProber ConfigMapProber, scheme *runtime.Scheme, dynamicLoglevel *configureLogger.LogLevel) *Reconciler {
 	var r Reconciler
 	r.Client = client
 	r.config = config
 	r.Scheme = scheme
 	r.prober = prober
 	r.cmProber = cmProber
-	r.logLevel = ConfigureLogger.New(dynamicLoglevel)
+	r.globalConfig = globalConfig.New(dynamicLoglevel)
 	return &r
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (reconcileResult ctrl.Result, reconcileErr error) {
-	logger := logf.FromContext(ctx)
+	log := logf.FromContext(ctx)
 
-	logger.V(1).Info("Reconciliation triggered")
+	log.V(1).Info("Reconciliation triggered")
 
 	overrideConfig, err := r.UpdateOverrideConfig(ctx)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
 
-	fmt.Printf("[TRACEPIPELINE]  OverrideConfig: %v\n", overrideConfig)
-	if err := r.reconfigureLogLevel(overrideConfig); err != nil {
+	if err := r.globalConfig.CheckGlobalConfig(overrideConfig); err != nil {
 		return ctrl.Result{}, err
 	}
-
-	if r.pauseReconciliation(overrideConfig) {
-		logger.V(1).Info("[TRACEPIPELINE] I am printed in debug mode.")
+	if err != nil {
+		log.V(1).Info("Skipping reconciliation of tracepipeline as reconciliation is paused")
 		return ctrl.Result{}, nil
 	}
-
-	logger.V(1).Info("[TRACEPIPELINE] I should be printed in debug mode and when pipeline is unpaused")
 
 	var tracePipeline telemetryv1alpha1.TracePipeline
 	if err := r.Get(ctx, req.NamespacedName, &tracePipeline); err != nil {

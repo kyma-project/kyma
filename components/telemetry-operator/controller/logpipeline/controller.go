@@ -20,13 +20,13 @@ import (
 	"context"
 	"fmt"
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/ConfigureLogger"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configchecksum"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configureLogger"
 	configbuilder "github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/globalConfig"
 	utils "github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 	resources "github.com/kyma-project/kyma/components/telemetry-operator/internal/resources/logpipeline"
 	"github.com/prometheus/client_golang/prometheus"
-	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -57,8 +57,13 @@ type DaemonSetAnnotator interface {
 	SetAnnotation(ctx context.Context, name types.NamespacedName, key, value string) error
 }
 
+//go:generate mockery --name ConfigMapProber --filename configmap_prober.go
 type ConfigMapProber interface {
 	IsPresent(ctx context.Context, name types.NamespacedName) (map[string]interface{}, error)
+}
+
+type ManagerGlobalConfig interface {
+	CheckGlobalConfig(config map[string]interface{}) error
 }
 
 type Reconciler struct {
@@ -70,10 +75,10 @@ type Reconciler struct {
 	allLogPipelines         prometheus.Gauge
 	unsupportedLogPipelines prometheus.Gauge
 	syncer                  syncer
-	logLevel                *ConfigureLogger.LogLevel
+	globalConfig            ManagerGlobalConfig
 }
 
-func NewReconciler(client client.Client, config Config, prober DaemonSetProber, annotator DaemonSetAnnotator, cmProber ConfigMapProber, dynamicLoglevel zap.AtomicLevel) *Reconciler {
+func NewReconciler(client client.Client, config Config, prober DaemonSetProber, annotator DaemonSetAnnotator, cmProber ConfigMapProber, dynamicLoglevel *configureLogger.LogLevel) *Reconciler {
 	var r Reconciler
 	r.Client = client
 	r.config = config
@@ -84,7 +89,7 @@ func NewReconciler(client client.Client, config Config, prober DaemonSetProber, 
 	r.unsupportedLogPipelines = prometheus.NewGauge(prometheus.GaugeOpts{Name: "telemetry_unsupported_logpipelines", Help: "Number of log pipelines with custom filters or outputs."})
 	metrics.Registry.MustRegister(r.allLogPipelines, r.unsupportedLogPipelines)
 	r.syncer = syncer{client, config}
-	r.logLevel = ConfigureLogger.New(dynamicLoglevel)
+	r.globalConfig = globalConfig.New(dynamicLoglevel)
 
 	return &r
 }
@@ -98,17 +103,14 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, err
 	}
 
-	fmt.Printf("[LOGPIPELINE] OverrideConfig: %v\n", overrideConfig)
-	if err := r.reconfigureLogLevel(overrideConfig); err != nil {
+	if err := r.globalConfig.CheckGlobalConfig(overrideConfig); err != nil {
 		return ctrl.Result{}, err
 	}
 
 	if r.pauseReconciliation(overrideConfig) {
-		log.V(1).Info("[LOGPIPELINE]  I am printed in debug mode.")
+		log.V(1).Info("Skipping reconciliation of logpipeline as reconciliation is paused.")
 		return ctrl.Result{}, nil
 	}
-
-	log.V(1).Info("[LOGPIPELINE] I should be printed in debug mode and when pipeline is unpaused")
 
 	if err := r.updateMetrics(ctx); err != nil {
 		log.Error(err, "Failed to get all LogPipelines while updating metrics")

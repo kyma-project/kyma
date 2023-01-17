@@ -35,6 +35,7 @@ import (
 	logparsercontroller "github.com/kyma-project/kyma/components/telemetry-operator/controller/logparser"
 	logpipelinecontroller "github.com/kyma-project/kyma/components/telemetry-operator/controller/logpipeline"
 	tracepipelinereconciler "github.com/kyma-project/kyma/components/telemetry-operator/controller/tracepipeline"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configureLogger"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/logger"
 	"github.com/kyma-project/kyma/components/telemetry-operator/webhook/dryrun"
@@ -75,6 +76,7 @@ var (
 	syncPeriod             time.Duration
 	telemetryNamespace     string
 	dynamicLoglevel        = zap.NewAtomicLevel()
+	configureLogLevelOnFly *configureLogger.LogLevel
 
 	traceCollectorCreateServiceMonitor bool
 	traceCollectorBaseName             string
@@ -102,7 +104,8 @@ var (
 )
 
 const (
-	otelImage = "eu.gcr.io/kyma-project/tpi/otel-collector:0.66.0-a80d981f"
+	otelImage             = "eu.gcr.io/kyma-project/tpi/otel-collector:0.66.0-a80d981f"
+	overrideConfigMapName = "override-config"
 )
 
 //nolint:gochecknoinits
@@ -192,6 +195,7 @@ func main() {
 		os.Exit(1)
 	}
 	dynamicLoglevel.SetLevel(parsedLevel)
+	configureLogLevelOnFly = configureLogger.New(dynamicLoglevel)
 
 	ctrLogger, err := logger.New(logFormat, logLevel, dynamicLoglevel)
 	ctrl.SetLogger(zapr.NewLogger(ctrLogger.WithContext().Desugar()))
@@ -308,11 +312,11 @@ func createLogPipelineReconciler(client client.Client) *logpipelinecontroller.Re
 		FilesConfigMap:    types.NamespacedName{Name: fluentBitFilesConfigMap, Namespace: telemetryNamespace},
 		EnvSecret:         types.NamespacedName{Name: fluentBitEnvSecret, Namespace: telemetryNamespace},
 		DaemonSet:         types.NamespacedName{Namespace: telemetryNamespace, Name: fluentBitDaemonSet},
-		OverrideConfigMap: types.NamespacedName{Name: "override-config", Namespace: telemetryNamespace},
+		OverrideConfigMap: types.NamespacedName{Name: overrideConfigMapName, Namespace: telemetryNamespace},
 		PipelineDefaults:  createPipelineDefaults(),
 		ManageFluentBit:   enableManagedFluentBit,
 	}
-	return logpipelinecontroller.NewReconciler(client, config, &kubernetes.DaemonSetProber{Client: client}, &kubernetes.DaemonSetAnnotator{Client: client}, &kubernetes.ConfigmapProber{Client: client}, dynamicLoglevel)
+	return logpipelinecontroller.NewReconciler(client, config, &kubernetes.DaemonSetProber{Client: client}, &kubernetes.DaemonSetAnnotator{Client: client}, &kubernetes.ConfigmapProber{Client: client}, configureLogLevelOnFly)
 }
 
 func createLogParserReconciler(client client.Client) *logparsercontroller.Reconciler {
@@ -343,8 +347,6 @@ func createLogParserValidator(client client.Client) *logparserwebhook.Validating
 }
 
 func createTracePipelineReconciler(client client.Client) *tracepipelinereconciler.Reconciler {
-	//overrideConfig := make(map[string]interface{})
-
 	config := tracepipelinereconciler.Config{
 		CreateServiceMonitor: traceCollectorCreateServiceMonitor,
 		Namespace:            telemetryNamespace,
@@ -360,10 +362,10 @@ func createTracePipelineReconciler(client client.Client) *tracepipelinereconcile
 		Service: tracepipelinereconciler.ServiceConfig{
 			OTLPServiceName: traceCollectorOTLPServiceName,
 		},
-		OverrideConfigMap: types.NamespacedName{Name: "override-config", Namespace: telemetryNamespace},
-		//OverrideConfig: overrideConfig,
+		OverrideConfigMap: types.NamespacedName{Name: overrideConfigMapName, Namespace: telemetryNamespace},
 	}
-	return tracepipelinereconciler.NewReconciler(client, config, &kubernetes.DeploymentProber{Client: client}, &kubernetes.ConfigmapProber{Client: client}, scheme, dynamicLoglevel)
+
+	return tracepipelinereconciler.NewReconciler(client, config, &kubernetes.DeploymentProber{Client: client}, &kubernetes.ConfigmapProber{Client: client}, scheme, configureLogLevelOnFly)
 }
 
 func createDryRunConfig() dryrun.Config {
