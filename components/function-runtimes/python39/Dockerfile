@@ -12,7 +12,6 @@ FROM alpine@sha256:c0d488a800e4127c334ad20d61d7bc21b4097540327217dfab52262adc023
 
 SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 
-
 # ensure local python is preferred over distribution python
 ENV PATH /usr/local/bin:$PATH
 
@@ -51,8 +50,8 @@ RUN set -ex \
 	&& rm python.tar.xz \
 	\
 	&& apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/edge/main \
-		sqlite-dev=3.40.0-r0 \
-		binutils=2.39-r2 \
+		sqlite-dev \
+		binutils \
 	&& apk add --no-cache --virtual .build-deps  \
 		bluez-dev \
 		bzip2-dev \
