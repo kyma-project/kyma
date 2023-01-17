@@ -7,33 +7,12 @@ This tutorial shows how to set up a TLS Gateway in both manual and simple modes.
 ## Prerequisites
 
 * Deploy [a sample HttpBin service and a sample Function](./apix-01-create-workload.md).
-* Set up [your custom domain](./apix-02-setup-custom-domain-for-workload.md) or use a Kyma domain instead. 
-* Depending on whether you use your custom domain or a Kyma domain, export the necessary values as environment variables:
-  
-  <div tabs name="export-values">
+* Set up [your custom domain](./apix-02-setup-custom-domain-for-workload.md) and export the following values as environment variables:
 
-    <details>
-    <summary>
-    Custom domain
-    </summary>
-    
     ```bash
     export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
     export GATEWAY=$NAMESPACE/httpbin-gateway
     ```
-    </details>
-
-    <details>
-    <summary>
-    Kyma domain
-    </summary>
-
-    ```bash
-    export DOMAIN_TO_EXPOSE_WORKLOADS={KYMA_DOMAIN_NAME}
-    export GATEWAY=kyma-system/kyma-gateway
-    ```
-    </details>
-  </div>   
    
 ## Set up a TLS Gateway in simple mode
 
