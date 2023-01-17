@@ -144,8 +144,12 @@ func (r *Reconciler) reconcileFluentBit(ctx context.Context, name types.Namespac
 		if err := utils.CreateOrUpdateDaemonSet(ctx, r, ds); err != nil {
 			return fmt.Errorf("failed to reconcile fluent bit daemonset: %w", err)
 		}
-		service := resources.MakeService(name)
-		if err := utils.CreateOrUpdateService(ctx, r, service); err != nil {
+		exporterMetricsService := resources.MakeExporterMetricsService(name)
+		if err := utils.CreateOrUpdateService(ctx, r, exporterMetricsService); err != nil {
+			return fmt.Errorf("failed to reconcile fluent bit service: %w", err)
+		}
+		metricsService := resources.MakeMetricsService(name)
+		if err := utils.CreateOrUpdateService(ctx, r, metricsService); err != nil {
 			return fmt.Errorf("failed to reconcile fluent bit service: %w", err)
 		}
 		cm := resources.MakeConfigMap(name)
