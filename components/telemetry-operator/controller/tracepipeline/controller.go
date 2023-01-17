@@ -20,6 +20,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
+
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -123,7 +125,9 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 		return err
 	}
 
-	configMap := makeConfigMap(r.config, pipeline.Spec.Output)
+	isInsecure := isInsecureOutput(pipeline.Spec.Output.Otlp)
+	collectorConfig := makeOtelCollectorConfig(pipeline.Spec.Output, isInsecure)
+	configMap := makeConfigMap(r.config, collectorConfig)
 	if err = controllerutil.SetControllerReference(pipeline, configMap, r.Scheme); err != nil {
 		return err
 	}
@@ -176,6 +180,10 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 	}
 
 	return nil
+}
+
+func isInsecureOutput(output *telemetryv1alpha1.OtlpOutput) bool {
+	return len(strings.TrimSpace(output.Endpoint.Value)) > 0 && strings.HasPrefix(output.Endpoint.Value, "http://")
 }
 
 func (r *Reconciler) tryAcquireLock(ctx context.Context, pipeline *telemetryv1alpha1.TracePipeline) error {

@@ -3,8 +3,10 @@ package tracepipeline
 import (
 	"context"
 	"fmt"
-	"k8s.io/apimachinery/pkg/types"
 	"time"
+
+	"gopkg.in/yaml.v2"
+	"k8s.io/apimachinery/pkg/types"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	. "github.com/onsi/ginkgo/v2"
@@ -45,7 +47,7 @@ var _ = Describe("Deploying a TracePipeline", func() {
 			Spec: telemetryv1alpha1.TracePipelineSpec{
 				Output: telemetryv1alpha1.TracePipelineOutput{
 					Otlp: &telemetryv1alpha1.OtlpOutput{
-						Endpoint: telemetryv1alpha1.ValueType{Value: "localhost"},
+						Endpoint: telemetryv1alpha1.ValueType{Value: "http://localhost"},
 						Authentication: &telemetryv1alpha1.AuthenticationOptions{
 							Basic: &telemetryv1alpha1.BasicAuthOptions{
 								User: telemetryv1alpha1.ValueType{
@@ -123,6 +125,9 @@ var _ = Describe("Deploying a TracePipeline", func() {
 				if err := validateOwnerReferences(otelCollectorConfigMap.OwnerReferences); err != nil {
 					return err
 				}
+				if err := validateCollectorConfig(otelCollectorConfigMap.Data["relay.conf"]); err != nil {
+					return err
+				}
 				return nil
 			}, timeout, interval).Should(BeNil())
 
@@ -190,5 +195,18 @@ func validateOwnerReferences(ownerRefernces []metav1.OwnerReference) error {
 	if !*ownerReference.BlockOwnerDeletion {
 		return fmt.Errorf("owner reference does not block owner deletion")
 	}
+	return nil
+}
+
+func validateCollectorConfig(configData string) error {
+	var config OtelCollectorConfig
+	if err := yaml.Unmarshal([]byte(configData), &config); err != nil {
+		return err
+	}
+
+	if !config.Exporters.Otlp.Tls.Insecure {
+		return fmt.Errorf("Insecure flag not set")
+	}
+
 	return nil
 }
