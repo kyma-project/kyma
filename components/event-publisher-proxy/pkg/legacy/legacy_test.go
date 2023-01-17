@@ -62,6 +62,15 @@ func TestTransformLegacyRequestsToCE(t *testing.T) {
 			wantType:         "pre1.pre2.pre3.app.object.do.v1",
 		},
 		{
+			name:             "not clean app name",
+			givenPrefix:      "pre1.pre2.pre3",
+			givenApplication: "no-app",
+			givenTypeLabel:   "",
+			givenEventName:   "object.do",
+			wantVersion:      "v1",
+			wantType:         "pre1.pre2.pre3.noapp.object.do.v1",
+		},
+		{
 			name:             "event name too many segments",
 			givenPrefix:      "pre1.pre2.pre3",
 			givenApplication: "app",
@@ -257,18 +266,6 @@ func TestExtractPublishRequestData(t *testing.T) {
 			wantErrorResponse: ErrorResponseMissingFieldEventType(),
 		},
 		{
-			name: "should fail if application name is not cleaned  from non-alphanumeric characters",
-			givenLegacyRequestFunc: func() (*http.Request, error) {
-				return legacytest.ValidLegacyRequest(givenVersion, "app^^*&", givenEventName)
-			},
-			wantErrorResponse: &legacyapi.PublishEventResponses{
-				Error: &legacyapi.Error{
-					Status:  http.StatusInternalServerError,
-					Message: "application name should be cleaned from non-alphanumeric characters",
-				},
-			},
-		},
-		{
 			name: "should succeed if request body is valid",
 			givenLegacyRequestFunc: func() (*http.Request, error) {
 				return legacytest.ValidLegacyRequest(givenVersion, givenApplication, givenEventName)
@@ -284,6 +281,24 @@ func TestExtractPublishRequestData(t *testing.T) {
 				},
 				ApplicationName: "app",
 				URLPath:         "/app/v1/events",
+			},
+		},
+		{
+			name: "should succeed if app name has a special character",
+			givenLegacyRequestFunc: func() (*http.Request, error) {
+				return legacytest.ValidLegacyRequest(givenVersion, "no-app", givenEventName)
+			},
+			wantPublishRequestData: &legacyapi.PublishRequestData{
+				PublishEventParameters: &legacyapi.PublishEventParametersV1{
+					PublishrequestV1: legacyapi.PublishRequestV1{
+						EventType:        "object.do",
+						EventTypeVersion: "v1",
+						EventTime:        "2020-04-02T21:37:00Z",
+						Data:             "{\"legacy\":\"event\"}",
+					},
+				},
+				ApplicationName: "no-app",
+				URLPath:         "/no-app/v1/events",
 			},
 		},
 	}
