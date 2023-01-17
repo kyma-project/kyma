@@ -5,6 +5,7 @@ metadata:
   annotations:
     prometheus.io/scrape: "true"
     prometheus.io/port: {{ .Values.port.metrics | quote }}
+    prometheus.io/scheme: http
   labels:
 {{ include "hydra-maester.labels" . | indent 4 }}
   name: {{ include "hydra-maester.fullname" . }}-metrics
