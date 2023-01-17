@@ -4,13 +4,13 @@ global:
   images:
     directory_size_exporter:
       name: "directory-size-exporter"
-      version: "v20230102-4a803570"
+      version: "PR-16573"
     telemetry_operator:
       name: "telemetry-operator"
-      version: "PR-16517"
+      version: "PR-16573"
     telemetry_webhook_cert_init:
       name: "webhook-cert-init"
-      version: "v20221122-200937b4"
+      version: "PR-16573"
     telemetry_otel_collector:
       name: "otel-collector"
       version: "0.66.0-a80d981f"
