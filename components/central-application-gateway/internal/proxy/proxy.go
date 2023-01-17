@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"time"
@@ -22,7 +23,6 @@ import (
 
 type proxy struct {
 	cache                        Cache
-	skipVerify                   bool
 	proxyTimeout                 int
 	authorizationStrategyFactory authorization.StrategyFactory
 	csrfTokenStrategyFactory     csrf.TokenStrategyFactory
@@ -44,19 +44,28 @@ type Config struct {
 }
 
 func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	log.Printf("URL1: %q\n", r.URL)
 	apiIdentifier, path, gwURL, err := p.extractPath(r.URL)
 	if err != nil {
 		handleErrors(w, err)
 		return
 	}
 
-	r.URL.Path = path
+	// r.URL.Path = path
+	// r.URL.RawPath = path
 
 	serviceAPI, err := p.apiExtractor.Get(apiIdentifier)
 	if err != nil {
 		handleErrors(w, err)
 		return
 	}
+
+	r.URL.Path = path.Path
+	if !serviceAPI.EncodeUrl {
+		r.URL.RawPath = path.RawPath
+	}
+
+	log.Printf("URL2: %q\n", serviceAPI.TargetUrl)
 
 	cacheEntry, err := p.getOrCreateCacheEntry(apiIdentifier, *serviceAPI)
 	if err != nil {
@@ -66,6 +75,8 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	newRequest, cancel := p.setRequestTimeout(r)
 	defer cancel()
+
+	log.Printf("URL3: %q\n", newRequest.URL.String())
 
 	err = p.addAuthorization(newRequest, cacheEntry, serviceAPI.SkipVerify)
 	if err != nil {
@@ -77,10 +88,10 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	cacheEntry.Proxy.ServeHTTP(w, newRequest)
 }
 
-func (p *proxy) extractPath(u *url.URL) (model.APIIdentifier, string, *url.URL, apperrors.AppError) {
+func (p *proxy) extractPath(u *url.URL) (model.APIIdentifier, *url.URL, *url.URL, apperrors.AppError) {
 	apiIdentifier, path, gwURL, err := p.extractPathFunc(u)
 	if err != nil {
-		return model.APIIdentifier{}, "", nil, apperrors.WrongInput("failed to extract API Identifier from path")
+		return model.APIIdentifier{}, nil, nil, apperrors.WrongInput("failed to extract API Identifier from path")
 	}
 
 	return apiIdentifier, path, gwURL, nil
