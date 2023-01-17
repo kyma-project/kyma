@@ -24,8 +24,9 @@ import (
 )
 
 const (
-	TokenURLPath     = "/auth"
-	MessagingURLPath = "/messaging"
+	TokenURLPath           = "/auth"
+	MessagingURLPath       = "/messaging"
+	EventMeshMockKeyPrefix = "/messaging/events/subscriptions"
 )
 
 // BEBMock implements a programmable mock for BEB.

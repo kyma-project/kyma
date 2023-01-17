@@ -407,11 +407,11 @@ func getEventMeshSubFromMock(subscriptionName, subscriptionNamespace string) *ev
 
 func getEventMeshSubKeyForMock(subscriptionName, subscriptionNamespace string) string {
 	nm1 := emTestEnsemble.nameMapper.MapSubscriptionName(subscriptionName, subscriptionNamespace)
-	return fmt.Sprintf("%s/%s", "/messaging/events/subscriptions", nm1)
+	return fmt.Sprintf("%s/%s", reconcilertestingv1.EventMeshMockKeyPrefix, nm1)
 }
 
 func getEventMeshKeyForMock(name string) string {
-	return fmt.Sprintf("%s/%s", "/messaging/events/subscriptions", name)
+	return fmt.Sprintf("%s/%s", reconcilertestingv1.EventMeshMockKeyPrefix, name)
 }
 
 // ensureK8sEventReceived checks if a certain event have triggered for the given namespace.
