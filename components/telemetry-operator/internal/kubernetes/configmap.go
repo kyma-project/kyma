@@ -3,7 +3,6 @@ package kubernetes
 import (
 	"context"
 	"fmt"
-	"gopkg.in/yaml.v3"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
@@ -15,22 +14,20 @@ type ConfigmapProber struct {
 	client.Client
 }
 
-func (cmp *ConfigmapProber) IsPresent(ctx context.Context, name types.NamespacedName) (map[string]interface{}, error) {
+const overrideConfigFileName = "override-config"
+
+func (cmp *ConfigmapProber) IsPresent(ctx context.Context, name types.NamespacedName) (string, error) {
 	log := logf.FromContext(ctx)
-	config := make(map[string]interface{})
 	var cm corev1.ConfigMap
 	if err := cmp.Get(ctx, name, &cm); err != nil {
 		log.V(1).Info(fmt.Sprintf("failed to get  %s/%s Configmap", name.Namespace, name.Name))
 		if apierrors.IsNotFound(err) {
-			return config, nil
+			return "", nil
 		}
-		return config, fmt.Errorf("failed to get %s/%s Configmap: %v", name.Namespace, name.Name, err)
+		return "", fmt.Errorf("failed to get %s/%s Configmap: %v", name.Namespace, name.Name, err)
 	}
-	if _, ok := cm.Data["override-config"]; ok {
-		if err := yaml.Unmarshal([]byte(cm.Data["override-config"]), &config); err != nil {
-			return config, err
-		}
-		return config, nil
+	if _, ok := cm.Data[overrideConfigFileName]; ok {
+		return cm.Data[overrideConfigFileName], nil
 	}
-	return config, nil
+	return "", nil
 }

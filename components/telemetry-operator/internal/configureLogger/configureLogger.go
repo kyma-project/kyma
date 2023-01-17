@@ -17,11 +17,7 @@ func New(atomic zap.AtomicLevel) *LogLevel {
 	return &l
 }
 
-func (l *LogLevel) ReconfigureLogLevel(config map[string]interface{}) error {
-	if logLevel, ok := config["logLevel"].(string); ok {
-		return l.ChangeLogLevel(logLevel)
-	}
-	// We would need to set the log level back when we remove the override config
+func (l *LogLevel) SetDefaultLogLevel() error {
 	return l.ChangeLogLevel(l.Default)
 }
 

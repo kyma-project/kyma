@@ -47,6 +47,15 @@ type Config struct {
 	ManageFluentBit   bool
 }
 
+type OverrideConfig struct {
+	Logging LoggingConfig
+	Global  globalConfig.OverrideConfig
+}
+
+type LoggingConfig struct {
+	Paused bool `yaml:"paused,omitempty"`
+}
+
 //go:generate mockery --name DaemonSetProber --filename daemon_set_prober.go
 type DaemonSetProber interface {
 	IsReady(ctx context.Context, name types.NamespacedName) (bool, error)
@@ -59,11 +68,11 @@ type DaemonSetAnnotator interface {
 
 //go:generate mockery --name ConfigMapProber --filename configmap_prober.go
 type ConfigMapProber interface {
-	IsPresent(ctx context.Context, name types.NamespacedName) (map[string]interface{}, error)
+	IsPresent(ctx context.Context, name types.NamespacedName) (string, error)
 }
 
 type ManagerGlobalConfig interface {
-	CheckGlobalConfig(config map[string]interface{}) error
+	CheckGlobalConfig(config globalConfig.OverrideConfig) error
 }
 
 type Reconciler struct {
@@ -103,11 +112,11 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, err
 	}
 
-	if err := r.globalConfig.CheckGlobalConfig(overrideConfig); err != nil {
+	if err := r.globalConfig.CheckGlobalConfig(overrideConfig.Global); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	if r.pauseReconciliation(overrideConfig) {
+	if r.pauseReconciliation(overrideConfig.Logging) {
 		log.V(1).Info("Skipping reconciliation of logpipeline as reconciliation is paused.")
 		return ctrl.Result{}, nil
 	}

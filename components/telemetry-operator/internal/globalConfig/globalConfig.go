@@ -5,7 +5,12 @@ import (
 )
 
 type LogLevelChanger interface {
-	ReconfigureLogLevel(level map[string]interface{}) error
+	ChangeLogLevel(level string) error
+	SetDefaultLogLevel() error
+}
+
+type OverrideConfig struct {
+	LogLevel string `yaml:"logLevel,omitempty"`
 }
 
 type ManagerGlobalConfig struct {
@@ -18,6 +23,9 @@ func New(loglevelChanger *configureLogger.LogLevel) *ManagerGlobalConfig {
 	return &m
 }
 
-func (m *ManagerGlobalConfig) CheckGlobalConfig(config map[string]interface{}) error {
-	return m.logLevelChanger.ReconfigureLogLevel(config)
+func (m *ManagerGlobalConfig) CheckGlobalConfig(config OverrideConfig) error {
+	if config.LogLevel == "" {
+		m.logLevelChanger.SetDefaultLogLevel()
+	}
+	return m.logLevelChanger.ChangeLogLevel(config.LogLevel)
 }
