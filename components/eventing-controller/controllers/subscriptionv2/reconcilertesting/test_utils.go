@@ -69,8 +69,8 @@ type Want struct {
 // To avoid a 409 conflict, the subscription CR data is read from the apiserver before a new update is performed.
 // This conflict can happen if another entity such as the eventing-controller changed the sub in the meantime.
 func EventuallyUpdateSubscriptionOnK8s(ctx context.Context, ens *TestEnsemble,
-	sub *eventingv1alpha2.Subscription, updateFunc func(*eventingv1alpha2.Subscription) error) {
-	ens.G.Eventually(func() error {
+	sub *eventingv1alpha2.Subscription, updateFunc func(*eventingv1alpha2.Subscription) error) error {
+	return doRetry(func() error {
 		// get a fresh version of the Subscription
 		lookupKey := types.NamespacedName{
 			Namespace: sub.Namespace,
@@ -83,7 +83,7 @@ func EventuallyUpdateSubscriptionOnK8s(ctx context.Context, ens *TestEnsemble,
 			return err
 		}
 		return nil
-	}, SmallTimeout, SmallPollingInterval).ShouldNot(gomega.HaveOccurred(), "error while updating the subscription")
+	}, "Failed to update the subscription on k8s")
 }
 
 func NewSubscription(ens *TestEnsemble, subscriptionOpts ...v2.SubscriptionOpt) *eventingv1alpha2.Subscription {
@@ -93,23 +93,24 @@ func NewSubscription(ens *TestEnsemble, subscriptionOpts ...v2.SubscriptionOpt) 
 	return subscription
 }
 
-func CreateSubscription(ens *TestEnsemble, subscriptionOpts ...v2.SubscriptionOpt) *eventingv1alpha2.Subscription {
+func CreateSubscription(t *testing.T, ens *TestEnsemble,
+	subscriptionOpts ...v2.SubscriptionOpt) *eventingv1alpha2.Subscription {
 	subscription := NewSubscription(ens, subscriptionOpts...)
-	EnsureNamespaceCreatedForSub(ens, subscription)
-	ensureSubscriptionCreated(ens, subscription)
+	EnsureNamespaceCreatedForSub(t, ens, subscription)
+	require.NoError(t, ensureSubscriptionCreated(ens, subscription))
 	return subscription
 }
 
-func TestSubscriptionOnK8s(ens *TestEnsemble, subscription *eventingv1alpha2.Subscription,
+func TestSubscriptionOnK8s(g *gomega.WithT, ens *TestEnsemble, subscription *eventingv1alpha2.Subscription,
 	expectations ...gomegatypes.GomegaMatcher) {
 	description := "Failed to match the eventing subscription"
 	expectations = append(expectations, v2.HaveSubscriptionName(subscription.Name))
-	getSubscriptionOnK8S(ens, subscription).Should(gomega.And(expectations...), description)
+	getSubscriptionOnK8S(g, ens, subscription).Should(gomega.And(expectations...), description)
 }
 
-func TestEventsOnK8s(ens *TestEnsemble, expectations ...v1.Event) {
+func TestEventsOnK8s(g *gomega.WithT, ens *TestEnsemble, expectations ...v1.Event) {
 	for _, event := range expectations {
-		getK8sEvents(ens).Should(v2.HaveEvent(event), "Failed to match k8s events")
+		getK8sEvents(g, ens).Should(v2.HaveEvent(event), "Failed to match k8s events")
 	}
 }
 
@@ -122,9 +123,8 @@ func ValidSinkURL(ens *TestEnsemble, additions ...string) string {
 }
 
 // IsSubscriptionDeletedOnK8s checks a subscription is deleted and allows making assertions on it.
-func IsSubscriptionDeletedOnK8s(ens *TestEnsemble, subscription *eventingv1alpha2.Subscription) gomega.AsyncAssertion {
-	g := ens.G
-
+func IsSubscriptionDeletedOnK8s(g *gomega.WithT, ens *TestEnsemble,
+	subscription *eventingv1alpha2.Subscription) gomega.AsyncAssertion {
 	return g.Eventually(func() bool {
 		lookupKey := types.NamespacedName{
 			Namespace: subscription.Namespace,
@@ -152,7 +152,7 @@ func EventInvalidSink(msg string) v1.Event {
 	}
 }
 
-func StartTestEnv(ens *TestEnsemble) {
+func StartTestEnv(ens *TestEnsemble) error {
 	var err error
 	var k8sCfg *rest.Config
 
@@ -177,9 +177,15 @@ func StartTestEnv(ens *TestEnsemble) {
 		}),
 	)
 
-	require.NoError(ens.T, err)
-	require.NotNil(ens.T, k8sCfg)
+	if err != nil {
+		return err
+	}
+	if k8sCfg == nil {
+		return errors.New("k8s config cannot be nil")
+	}
 	ens.Cfg = k8sCfg
+
+	return nil
 }
 
 func StopTestEnv(ens *TestEnsemble) {
@@ -194,63 +200,58 @@ func StopTestEnv(ens *TestEnsemble) {
 	}
 }
 
-func StartSubscriberSvc(ens *TestEnsemble) {
+func StartSubscriberSvc(ens *TestEnsemble) error {
 	ens.SubscriberSvc = v2.NewSubscriberSvc("test-subscriber", "test")
-	createSubscriberSvcInK8s(ens)
+	return createSubscriberSvcInK8s(ens)
 }
 
 // createSubscriberSvcInK8s ensures the subscriber service in the k8s cluster is created successfully.
 // The subscriber service is taken from the TestEnsemble struct and should not be nil.
 // If the namespace of the subscriber service does not exist, it will be created.
-func createSubscriberSvcInK8s(ens *TestEnsemble) {
-	g := ens.G
-
+func createSubscriberSvcInK8s(ens *TestEnsemble) error {
 	// if the namespace is not "default" create it on the cluster
 	if ens.SubscriberSvc.Namespace != "default " {
 		namespace := fixtureNamespace(ens.SubscriberSvc.Namespace)
-		if namespace.Name != "default" {
-			g.Eventually(func() error {
-				if err := ens.K8sClient.Create(ens.Ctx, namespace); !k8serrors.IsAlreadyExists(err) {
-					return err
-				}
-				return nil
-			}, SmallTimeout, SmallPollingInterval).
-				ShouldNot(gomega.HaveOccurred(), "Failed to to create the namespace for the subscriber")
+		err := doRetry(func() error {
+			if err := ens.K8sClient.Create(ens.Ctx, namespace); !k8serrors.IsAlreadyExists(err) {
+				return err
+			}
+			return nil
+		}, "Failed to to create the namespace for the subscriber")
+		if err != nil {
+			return err
 		}
 	}
 
-	g.Eventually(func() error {
-		// create subscriber svc on cluster
+	return doRetry(func() error {
 		return ens.K8sClient.Create(ens.Ctx, ens.SubscriberSvc)
-	}, SmallTimeout, SmallPollingInterval).ShouldNot(gomega.HaveOccurred(), "Failed to create the subscriber service")
+	}, "Failed to create the subscriber service")
 }
 
 // EnsureNamespaceCreatedForSub creates the namespace for subscription if it does not exist.
-func EnsureNamespaceCreatedForSub(ens *TestEnsemble, subscription *eventingv1alpha2.Subscription) {
+func EnsureNamespaceCreatedForSub(t *testing.T, ens *TestEnsemble, subscription *eventingv1alpha2.Subscription) {
 	// create subscription on cluster
 	if subscription.Namespace != "default " {
 		// create testing namespace
 		namespace := fixtureNamespace(subscription.Namespace)
-		if namespace.Name != "default" {
-			err := ens.K8sClient.Create(ens.Ctx, namespace)
-			if !k8serrors.IsAlreadyExists(err) {
-				require.NoError(ens.T, err)
-			}
+		err := ens.K8sClient.Create(ens.Ctx, namespace)
+		if !k8serrors.IsAlreadyExists(err) {
+			require.NoError(t, err)
 		}
 	}
 }
 
 // ensureSubscriptionCreated creates a Subscription on the K8s client of the testEnsemble. All the reconciliation
 // happening will be reflected in the subscription.
-func ensureSubscriptionCreated(ens *TestEnsemble, subscription *eventingv1alpha2.Subscription) {
+func ensureSubscriptionCreated(ens *TestEnsemble, subscription *eventingv1alpha2.Subscription) error {
 	// create subscription on cluster
-	ens.G.Eventually(func() error {
+	return doRetry(func() error {
 		return ens.K8sClient.Create(ens.Ctx, subscription)
-	}, SmallTimeout, SmallPollingInterval).ShouldNot(gomega.HaveOccurred(), "Failed to create subscription")
+	}, "failed to create a subscription")
 }
 
 // EnsureK8sResourceNotCreated ensures that the obj creation in K8s fails.
-func EnsureK8sResourceNotCreated(ens *TestEnsemble, t *testing.T, obj client.Object, err error) {
+func EnsureK8sResourceNotCreated(t *testing.T, ens *TestEnsemble, obj client.Object, err error) {
 	require.Equal(t, ens.K8sClient.Create(ens.Ctx, obj), err)
 }
 
@@ -268,9 +269,8 @@ func fixtureNamespace(name string) *v1.Namespace {
 }
 
 // getSubscriptionOnK8S fetches a subscription using the lookupKey and allows making assertions on it.
-func getSubscriptionOnK8S(ens *TestEnsemble, subscription *eventingv1alpha2.Subscription) gomega.AsyncAssertion {
-	g := ens.G
-
+func getSubscriptionOnK8S(g *gomega.WithT, ens *TestEnsemble,
+	subscription *eventingv1alpha2.Subscription) gomega.AsyncAssertion {
 	return g.Eventually(func() *eventingv1alpha2.Subscription {
 		lookupKey := types.NamespacedName{
 			Namespace: subscription.Namespace,
@@ -285,9 +285,7 @@ func getSubscriptionOnK8S(ens *TestEnsemble, subscription *eventingv1alpha2.Subs
 
 // getK8sEvents returns all kubernetes events for the given namespace.
 // The result can be used in a gomega assertion.
-func getK8sEvents(ens *TestEnsemble) gomega.AsyncAssertion {
-	g := ens.G
-
+func getK8sEvents(g *gomega.WithT, ens *TestEnsemble) gomega.AsyncAssertion {
 	eventList := v1.EventList{}
 	return g.Eventually(func() v1.EventList {
 		err := ens.K8sClient.List(ens.Ctx, &eventList, client.InNamespace(ens.SubscriberSvc.Namespace))
@@ -328,8 +326,21 @@ func StartAndWaitForWebhookServer(k8sManager manager.Manager, webhookInstallOpts
 		if connErr != nil {
 			return connErr
 		}
-		conn.Close()
-		return nil
+		return conn.Close()
 	}, retry.Attempts(MaxReconnects))
 	return err
+}
+
+func doRetry(function func() error, errString string) error {
+	err := retry.Do(function,
+		retry.Delay(time.Minute),
+		retry.Attempts(retryAttempts),
+		retry.OnRetry(func(n uint, err error) {
+			log.Printf("[%v] %s: %s", n, errString, err)
+		}),
+	)
+	if err != nil {
+		return err
+	}
+	return nil
 }

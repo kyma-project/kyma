@@ -1,11 +1,12 @@
-package jetstream
+package test
 
 import (
 	"context"
 	"fmt"
+	"github.com/kyma-project/kyma/components/eventing-controller/controllers/subscriptionv2/jetstream"
+	"github.com/pkg/errors"
 	"log"
 	"path/filepath"
-	"testing"
 	"time"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
@@ -22,7 +23,6 @@ import (
 	v2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
 	"github.com/onsi/gomega"
 	gomegatypes "github.com/onsi/gomega/types"
-	"github.com/stretchr/testify/require"
 	"k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
@@ -35,26 +35,31 @@ const (
 	syncPeriod               = time.Second * 2
 )
 
+var (
+	k8sCancelFn    context.CancelFunc
+	jsTestEnsemble *jetStreamTestEnsemble
+)
+
 type jetStreamTestEnsemble struct {
-	Reconciler       *Reconciler
+	Reconciler       *jetstream.Reconciler
 	jetStreamBackend *jetstreamv2.JetStream
 	JSStreamName     string
 	*reconcilertestingv2.TestEnsemble
 }
 
-func setupTestEnsemble(t *testing.T) *jetStreamTestEnsemble {
+func setupSuite() error {
 	ctx := context.Background()
-	g := gomega.NewGomegaWithT(t)
 	useExistingCluster := useExistingCluster
+
 	natsPort, err := v2.GetFreePort()
-	require.NoError(t, err)
+	if err != nil {
+		return err
+	}
 	natsServer := v1.StartDefaultJetStreamServer(natsPort)
 	log.Printf("NATS server with JetStream started %v", natsServer.ClientURL())
 
 	ens := &reconcilertestingv2.TestEnsemble{
 		Ctx: ctx,
-		G:   g,
-		T:   t,
 		DefaultSubscriptionConfig: env.DefaultSubscriptionConfig{
 			MaxInFlightMessages: 1,
 		},
@@ -62,44 +67,50 @@ func setupTestEnsemble(t *testing.T) *jetStreamTestEnsemble {
 		NatsServer: natsServer,
 		TestEnv: &envtest.Environment{
 			CRDDirectoryPaths: []string{
-				filepath.Join("../../../", "config", "crd", "bases", "eventing.kyma-project.io_eventingbackends.yaml"),
-				filepath.Join("../../../", "config", "crd", "basesv1alpha2"),
-				filepath.Join("../../../", "config", "crd", "external"),
+				filepath.Join("../../../../", "config", "crd", "bases", "eventing.kyma-project.io_eventingbackends.yaml"),
+				filepath.Join("../../../../", "config", "crd", "basesv1alpha2"),
+				filepath.Join("../../../../", "config", "crd", "external"),
 			},
 			AttachControlPlaneOutput: attachControlPlaneOutput,
 			UseExistingCluster:       &useExistingCluster,
 			WebhookInstallOptions: envtest.WebhookInstallOptions{
-				Paths: []string{filepath.Join("../../../", "config", "webhook")},
+				Paths: []string{filepath.Join("../../../../", "config", "webhook")},
 			},
 		},
 	}
 
-	jsTestEnsemble := &jetStreamTestEnsemble{
+	jsTestEnsemble = &jetStreamTestEnsemble{
 		TestEnsemble: ens,
 		JSStreamName: fmt.Sprintf("%s%d", v2.JSStreamName, natsPort),
 	}
 
-	reconcilertestingv2.StartTestEnv(ens)
-	startReconciler(jsTestEnsemble)
-	reconcilertestingv2.StartSubscriberSvc(ens)
+	if err := reconcilertestingv2.StartTestEnv(ens); err != nil {
+		return err
+	}
 
-	return jsTestEnsemble
+	if err := startReconciler(); err != nil {
+		return err
+	}
+	return reconcilertestingv2.StartSubscriberSvc(ens)
 }
 
-func startReconciler(ens *jetStreamTestEnsemble) *jetStreamTestEnsemble {
+func startReconciler() error {
 	ctx, cancel := context.WithCancel(context.Background())
-	ens.Cancel = cancel
+	jsTestEnsemble.Cancel = cancel
 
-	err := eventingv1alpha2.AddToScheme(scheme.Scheme)
-	require.NoError(ens.T, err)
+	if err := eventingv1alpha2.AddToScheme(scheme.Scheme); err != nil {
+		return err
+	}
 
 	var metricsPort int
-	metricsPort, err = v2.GetFreePort()
-	require.NoError(ens.T, err)
+	metricsPort, err := v2.GetFreePort()
+	if err != nil {
+		return err
+	}
 
 	syncPeriod := syncPeriod
-	webhookInstallOptions := &ens.TestEnv.WebhookInstallOptions
-	k8sManager, err := ctrl.NewManager(ens.Cfg, ctrl.Options{
+	webhookInstallOptions := &jsTestEnsemble.TestEnv.WebhookInstallOptions
+	k8sManager, err := ctrl.NewManager(jsTestEnsemble.Cfg, ctrl.Options{
 		Scheme:             scheme.Scheme,
 		SyncPeriod:         &syncPeriod,
 		Host:               webhookInstallOptions.LocalServingHost,
@@ -107,16 +118,18 @@ func startReconciler(ens *jetStreamTestEnsemble) *jetStreamTestEnsemble {
 		CertDir:            webhookInstallOptions.LocalServingCertDir,
 		MetricsBindAddress: fmt.Sprintf("localhost:%v", metricsPort),
 	})
-	require.NoError(ens.T, err)
+	if err != nil {
+		return err
+	}
 
 	envConf := backendnats.Config{
-		URL:                     ens.NatsServer.ClientURL(),
+		URL:                     jsTestEnsemble.NatsServer.ClientURL(),
 		MaxReconnects:           reconcilertestingv2.MaxReconnects,
 		ReconnectWait:           time.Second,
 		EventTypePrefix:         v2.EventTypePrefix,
 		JSStreamDiscardPolicy:   jetstreamv2.DiscardPolicyNew,
-		JSStreamName:            ens.JSStreamName,
-		JSSubjectPrefix:         ens.JSStreamName,
+		JSStreamName:            jsTestEnsemble.JSStreamName,
+		JSSubjectPrefix:         jsTestEnsemble.JSStreamName,
 		JSStreamStorageType:     jetstreamv2.StorageTypeMemory,
 		JSStreamMaxBytes:        "-1",
 		JSStreamMaxMessages:     -1,
@@ -128,7 +141,9 @@ func startReconciler(ens *jetStreamTestEnsemble) *jetStreamTestEnsemble {
 	metricsCollector := metrics.NewCollector()
 
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
-	require.NoError(ens.T, err)
+	if err != nil {
+		return err
+	}
 
 	defaultSubConfig := env.DefaultSubscriptionConfig{}
 	cleaner := cleanerv1alpha2.NewJetStreamCleaner(defaultLogger)
@@ -137,7 +152,7 @@ func startReconciler(ens *jetStreamTestEnsemble) *jetStreamTestEnsemble {
 	k8sClient := k8sManager.GetClient()
 	recorder := k8sManager.GetEventRecorderFor("eventing-controller-jetstream")
 
-	ens.Reconciler = NewReconciler(ctx,
+	jsTestEnsemble.Reconciler = jetstream.NewReconciler(ctx,
 		k8sClient,
 		jetStreamHandler,
 		defaultLogger,
@@ -146,45 +161,62 @@ func startReconciler(ens *jetStreamTestEnsemble) *jetStreamTestEnsemble {
 		sinkv2.NewValidator(ctx, k8sClient, recorder),
 	)
 
-	err = ens.Reconciler.SetupUnmanaged(k8sManager)
-	require.NoError(ens.T, err)
-
-	jsBackend, ok := ens.Reconciler.Backend.(*jetstreamv2.JetStream)
-	if !ok {
-		panic("cannot convert the Backend interface to Jetstreamv2")
+	if err := jsTestEnsemble.Reconciler.SetupUnmanaged(k8sManager); err != nil {
+		return err
 	}
-	ens.jetStreamBackend = jsBackend
+
+	jsBackend, ok := jsTestEnsemble.Reconciler.Backend.(*jetstreamv2.JetStream)
+	if !ok {
+		return errors.New("cannot convert the Backend interface to Jetstreamv2")
+	}
+	jsTestEnsemble.jetStreamBackend = jsBackend
 
 	go func() {
-		err = k8sManager.Start(ctx)
-		require.NoError(ens.T, err)
+		if err := k8sManager.Start(ctx); err != nil {
+			panic(err)
+		}
 	}()
 
-	ens.K8sClient = k8sManager.GetClient()
-	require.NotNil(ens.T, ens.K8sClient)
+	jsTestEnsemble.K8sClient = k8sManager.GetClient()
+	if jsTestEnsemble.K8sClient == nil {
+		return errors.New("K8sClient cannot be nil")
+	}
 
-	err = reconcilertestingv2.StartAndWaitForWebhookServer(k8sManager, webhookInstallOptions)
-	require.NoError(ens.T, err)
+	if err := reconcilertestingv2.StartAndWaitForWebhookServer(k8sManager, webhookInstallOptions); err != nil {
+		return err
+	}
 
-	return ens
+	return nil
+}
+
+func tearDownSuite() error {
+	if k8sCancelFn != nil {
+		k8sCancelFn()
+	}
+	if err := cleanupResources(); err != nil {
+		return err
+	}
+	return nil
 }
 
 // cleanupResources stop the testEnv and removes the stream from NATS test server.
-func cleanupResources(ens *jetStreamTestEnsemble) {
-	reconcilertestingv2.StopTestEnv(ens.TestEnsemble)
+func cleanupResources() error {
+	reconcilertestingv2.StopTestEnv(jsTestEnsemble.TestEnsemble)
 
-	jsCtx := ens.Reconciler.Backend.GetJetStreamContext()
-	require.NoError(ens.T, jsCtx.DeleteStream(ens.JSStreamName))
+	jsCtx := jsTestEnsemble.Reconciler.Backend.GetJetStreamContext()
+	if err := jsCtx.DeleteStream(jsTestEnsemble.JSStreamName); err != nil {
+		return err
+	}
 
-	v1.ShutDownNATSServer(ens.NatsServer)
+	v1.ShutDownNATSServer(jsTestEnsemble.NatsServer)
+	return nil
 }
 
-func testSubscriptionOnNATS(ens *jetStreamTestEnsemble, subscription *eventingv1alpha2.Subscription,
+func testSubscriptionOnNATS(g *gomega.GomegaWithT, subscription *eventingv1alpha2.Subscription,
 	subject string, expectations ...gomegatypes.GomegaMatcher) {
 	description := "Failed to match nats subscriptions"
-	getSubscriptionFromJetStream(ens,
-		subscription,
-		ens.jetStreamBackend.GetJetStreamSubject(
+	getSubscriptionFromJetStream(g, subscription,
+		jsTestEnsemble.jetStreamBackend.GetJetStreamSubject(
 			subscription.Spec.Source,
 			subject,
 			subscription.Spec.TypeMatching),
@@ -192,20 +224,18 @@ func testSubscriptionOnNATS(ens *jetStreamTestEnsemble, subscription *eventingv1
 }
 
 // testSubscriptionDeletion deletes the subscription and ensures it is not found anymore on the apiserver.
-func testSubscriptionDeletion(ens *jetStreamTestEnsemble, subscription *eventingv1alpha2.Subscription) {
-	g := ens.G
+func testSubscriptionDeletion(g *gomega.GomegaWithT, subscription *eventingv1alpha2.Subscription) {
 	g.Eventually(func() error {
-		return ens.K8sClient.Delete(ens.Ctx, subscription)
+		return jsTestEnsemble.K8sClient.Delete(jsTestEnsemble.Ctx, subscription)
 	}, reconcilertestingv2.SmallTimeout, reconcilertestingv2.SmallPollingInterval).ShouldNot(gomega.HaveOccurred())
-	reconcilertestingv2.IsSubscriptionDeletedOnK8s(ens.TestEnsemble, subscription).
+	reconcilertestingv2.IsSubscriptionDeletedOnK8s(g, jsTestEnsemble.TestEnsemble, subscription).
 		Should(v2.HaveNotFoundSubscription(), "Failed to delete subscription")
 }
 
 // ensureNATSSubscriptionIsDeleted ensures that the NATS subscription is not found anymore.
 // This ensures the controller did delete it correctly then the Subscription was deleted.
-func ensureNATSSubscriptionIsDeleted(ens *jetStreamTestEnsemble,
-	subscription *eventingv1alpha2.Subscription, subject string) {
-	getSubscriptionFromJetStream(ens, subscription, subject).
+func ensureNATSSubscriptionIsDeleted(g *gomega.GomegaWithT, subscription *eventingv1alpha2.Subscription, subject string) {
+	getSubscriptionFromJetStream(g, subscription, subject).
 		ShouldNot(reconcilertestingv2.BeExistingSubscription(), "Failed to delete NATS subscription")
 }
 
@@ -213,12 +243,11 @@ func ensureNATSSubscriptionIsDeleted(ens *jetStreamTestEnsemble,
 // NOTE: We need to give the controller enough time to react on the changes.
 // Otherwise, the returned NATS subscription could have the wrong state.
 // For this reason Eventually is used here.
-func getSubscriptionFromJetStream(ens *jetStreamTestEnsemble, subscription *eventingv1alpha2.Subscription,
+func getSubscriptionFromJetStream(g *gomega.GomegaWithT, subscription *eventingv1alpha2.Subscription,
 	subject string) gomega.AsyncAssertion {
-	g := ens.G
 
 	return g.Eventually(func() jetstreamv2.Subscriber {
-		subscriptions := ens.jetStreamBackend.GetNATSSubscriptions()
+		subscriptions := jsTestEnsemble.jetStreamBackend.GetNATSSubscriptions()
 		subscriptionSubject := jetstreamv2.NewSubscriptionSubjectIdentifier(subscription, subject)
 		for key, sub := range subscriptions {
 			if key.ConsumerName() == subscriptionSubject.ConsumerName() {

@@ -1,8 +1,9 @@
-package jetstream
+package test
 
 import (
 	"fmt"
 	"log"
+	"os"
 	"testing"
 
 	reconcilertestingv2 "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscriptionv2/reconcilertesting"
@@ -17,10 +18,29 @@ import (
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 )
 
-func Test_ValidationWebhook(t *testing.T) {
-	ens := setupTestEnsemble(t)
-	defer cleanupResources(ens)
+// TestMain pre-hook and post-hook to run before and after all tests.
+func TestMain(m *testing.M) {
+	// Note: The setup will provision a single K8s env and
+	// all the tests need to create and use a separate namespace
 
+	// setup env test
+	if err := setupSuite(); err != nil {
+		panic(err)
+	}
+
+	// run tests
+	code := m.Run()
+
+	// tear down test env
+	if err := tearDownSuite(); err != nil {
+		panic(err)
+	}
+
+	os.Exit(code)
+}
+
+func Test_ValidationWebhook(t *testing.T) {
+	t.Parallel()
 	var testCases = []struct {
 		name                  string
 		givenSubscriptionOpts []testingv2.SubscriptionOpt
@@ -32,7 +52,7 @@ func Test_ValidationWebhook(t *testing.T) {
 				testingv2.WithStandardTypeMatching(),
 				testingv2.WithSource(""),
 				testingv2.WithOrderCreatedV1Event(),
-				testingv2.WithSinkURLFromSvc(ens.SubscriberSvc),
+				testingv2.WithSinkURLFromSvc(jsTestEnsemble.SubscriberSvc),
 			},
 			wantError: func(subName string) error {
 				return reconcilertestingv2.GenerateInvalidSubscriptionError(subName,
@@ -45,7 +65,7 @@ func Test_ValidationWebhook(t *testing.T) {
 				testingv2.WithStandardTypeMatching(),
 				testingv2.WithSource("source"),
 				testingv2.WithTypes([]string{}),
-				testingv2.WithSinkURLFromSvc(ens.SubscriberSvc),
+				testingv2.WithSinkURLFromSvc(jsTestEnsemble.SubscriberSvc),
 			},
 			wantError: func(subName string) error {
 				return reconcilertestingv2.GenerateInvalidSubscriptionError(subName,
@@ -58,7 +78,7 @@ func Test_ValidationWebhook(t *testing.T) {
 				testingv2.WithStandardTypeMatching(),
 				testingv2.WithSource("source"),
 				testingv2.WithOrderCreatedV1Event(),
-				testingv2.WithSinkURLFromSvc(ens.SubscriberSvc),
+				testingv2.WithSinkURLFromSvc(jsTestEnsemble.SubscriberSvc),
 				testingv2.WithMaxInFlightMessages("invalid"),
 			},
 			wantError: func(subName string) error {
@@ -84,34 +104,30 @@ func Test_ValidationWebhook(t *testing.T) {
 	for _, testCase := range testCases {
 		tc := testCase
 		t.Run(tc.name, func(t *testing.T) {
-			ens := ens
-
+			t.Parallel()
 			t.Log("creating the k8s subscription")
-			sub := reconcilertestingv2.NewSubscription(ens.TestEnsemble, tc.givenSubscriptionOpts...)
+			sub := reconcilertestingv2.NewSubscription(jsTestEnsemble.TestEnsemble, tc.givenSubscriptionOpts...)
 
-			reconcilertestingv2.EnsureNamespaceCreatedForSub(ens.TestEnsemble, sub)
+			reconcilertestingv2.EnsureNamespaceCreatedForSub(t, jsTestEnsemble.TestEnsemble, sub)
 
 			// attempt to create subscription
-			reconcilertestingv2.EnsureK8sResourceNotCreated(ens.TestEnsemble, t, sub, tc.wantError(sub.Name))
+			reconcilertestingv2.EnsureK8sResourceNotCreated(t, jsTestEnsemble.TestEnsemble, sub, tc.wantError(sub.Name))
 		})
 	}
-	t.Cleanup(ens.Cancel)
 }
 
 // TestUnavailableNATSServer tests if a subscription is reconciled properly when the NATS backend is unavailable.
-func TestUnavailableNATSServer(t *testing.T) {
-	// prepare the test resources and run test reconciler
-	ens := setupTestEnsemble(t)
-	defer cleanupResources(ens)
+func Test_UnavailableNATSServer(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
 
 	// prepare the subscription
-	sub := reconcilertestingv2.CreateSubscription(ens.TestEnsemble,
+	sub := reconcilertestingv2.CreateSubscription(t, jsTestEnsemble.TestEnsemble,
 		testingv2.WithSourceAndType(testingv2.EventSourceClean, testingv2.OrderCreatedEventType),
-		testingv2.WithSinkURLFromSvc(ens.SubscriberSvc),
+		testingv2.WithSinkURLFromSvc(jsTestEnsemble.SubscriberSvc),
 	)
 
 	// test the subscription was reconciled properly and has the expected status
-	reconcilertestingv2.TestSubscriptionOnK8s(ens.TestEnsemble, sub,
+	reconcilertestingv2.TestSubscriptionOnK8s(g, jsTestEnsemble.TestEnsemble, sub,
 		testingv2.HaveCondition(testingv2.DefaultReadyCondition()),
 		testingv2.HaveSubscriptionReady(),
 		testingv2.HaveStatusTypes([]eventingv1alpha2.EventType{
@@ -123,34 +139,30 @@ func TestUnavailableNATSServer(t *testing.T) {
 	)
 
 	// stopping NATS server should trigger the subscription become un-ready
-	ens.NatsServer.Shutdown()
-	reconcilertestingv2.TestSubscriptionOnK8s(ens.TestEnsemble, sub,
+	jsTestEnsemble.NatsServer.Shutdown()
+	reconcilertestingv2.TestSubscriptionOnK8s(g, jsTestEnsemble.TestEnsemble, sub,
 		testingv2.HaveSubscriptionNotReady(),
 	)
 
 	// should trigger the subscription become ready again
-	ens.NatsServer = testingv1.StartDefaultJetStreamServer(ens.NatsPort)
-	reconcilertestingv2.TestSubscriptionOnK8s(ens.TestEnsemble, sub, testingv2.HaveSubscriptionReady())
-
-	t.Cleanup(ens.Cancel)
+	jsTestEnsemble.NatsServer = testingv1.StartDefaultJetStreamServer(jsTestEnsemble.NatsPort)
+	reconcilertestingv2.TestSubscriptionOnK8s(g, jsTestEnsemble.TestEnsemble, sub, testingv2.HaveSubscriptionReady())
 }
 
 // Check the reconciler idempotency by adding a label to the Kyma subscription.
-func TestIdempotency(t *testing.T) {
-	// prepare the test resources and run test reconciler
-	ens := setupTestEnsemble(t)
-	defer cleanupResources(ens)
+func Test_Idempotency(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
 
 	t.Log("create the subscription")
-	sub := reconcilertestingv2.CreateSubscription(ens.TestEnsemble,
+	sub := reconcilertestingv2.CreateSubscription(t, jsTestEnsemble.TestEnsemble,
 		testingv2.WithTypeMatchingExact(),
 		testingv2.WithSourceAndType(testingv2.EventSourceClean, testingv2.OrderCreatedEventType),
-		testingv2.WithMaxInFlight(ens.DefaultSubscriptionConfig.MaxInFlightMessages),
-		testingv2.WithSinkURLFromSvc(ens.SubscriberSvc),
+		testingv2.WithMaxInFlight(jsTestEnsemble.DefaultSubscriptionConfig.MaxInFlightMessages),
+		testingv2.WithSinkURLFromSvc(jsTestEnsemble.SubscriberSvc),
 	)
 
 	t.Log("test the subscription was properly reconciled")
-	reconcilertestingv2.TestSubscriptionOnK8s(ens.TestEnsemble, sub,
+	reconcilertestingv2.TestSubscriptionOnK8s(g, jsTestEnsemble.TestEnsemble, sub,
 		testingv2.HaveCondition(testingv2.DefaultReadyCondition()),
 		testingv2.HaveSubscriptionReady(),
 		testingv2.HaveStatusTypes([]eventingv1alpha2.EventType{
@@ -163,12 +175,12 @@ func TestIdempotency(t *testing.T) {
 
 	t.Log("test the subscription on NATS was created as expected")
 	testNatsSub := func() {
-		testSubscriptionOnNATS(ens, sub, testingv2.OrderCreatedEventType,
+		testSubscriptionOnNATS(g, sub, testingv2.OrderCreatedEventType,
 			reconcilertestingv2.BeExistingSubscription(),
 			reconcilertestingv2.BeValidSubscription(),
-			reconcilertestingv2.BeNatsSubWithMaxPending(ens.DefaultSubscriptionConfig.MaxInFlightMessages),
+			reconcilertestingv2.BeNatsSubWithMaxPending(jsTestEnsemble.DefaultSubscriptionConfig.MaxInFlightMessages),
 			reconcilertestingv2.BeJetStreamSubscriptionWithSubject(testingv2.EventSource,
-				testingv2.OrderCreatedEventType, eventingv1alpha2.TypeMatchingExact, ens.jetStreamBackend.Config),
+				testingv2.OrderCreatedEventType, eventingv1alpha2.TypeMatchingExact, jsTestEnsemble.jetStreamBackend.Config),
 		)
 	}
 	testNatsSub()
@@ -179,7 +191,7 @@ func TestIdempotency(t *testing.T) {
 		"newLabel": "label",
 	}
 	sub.ObjectMeta.Labels = newLabels
-	require.NoError(t, ens.K8sClient.Update(ens.Ctx, sub))
+	require.NoError(t, jsTestEnsemble.K8sClient.Update(jsTestEnsemble.Ctx, sub))
 
 	// check the labels got updated
 	assert.Equal(t, sub.Labels, newLabels)
@@ -189,15 +201,11 @@ func TestIdempotency(t *testing.T) {
 	require.Equal(t, k8sSubBefore.Spec, sub.Spec)
 	require.Equal(t, k8sSubBefore.Status, sub.Status)
 	testNatsSub()
-
-	t.Cleanup(ens.Cancel)
 }
 
 // TestCreateSubscription tests if subscriptions get created properly by the reconciler.
-func TestCreateSubscription(t *testing.T) {
-	ens := setupTestEnsemble(t)
-	defer cleanupResources(ens)
-
+func Test_CreateSubscription(t *testing.T) {
+	t.Parallel()
 	var testCases = []struct {
 		name                  string
 		givenSubscriptionOpts []testingv2.SubscriptionOpt
@@ -208,15 +216,15 @@ func TestCreateSubscription(t *testing.T) {
 			givenSubscriptionOpts: []testingv2.SubscriptionOpt{
 				testingv2.WithTypeMatchingExact(),
 				testingv2.WithSourceAndType(testingv2.EventSource, testingv2.OrderCreatedEventType),
-				testingv2.WithSinkURLFromSvc(ens.SubscriberSvc),
-				testingv2.WithMaxInFlight(ens.DefaultSubscriptionConfig.MaxInFlightMessages),
+				testingv2.WithSinkURLFromSvc(jsTestEnsemble.SubscriberSvc),
+				testingv2.WithMaxInFlight(jsTestEnsemble.DefaultSubscriptionConfig.MaxInFlightMessages),
 				testingv2.WithWebhookForNATS(),
 				testingv2.WithFinalizers([]string{}),
 			},
 			want: reconcilertestingv2.Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					testingv2.HaveCondition(testingv2.DefaultReadyCondition()),
-					testingv2.HaveMaxInFlight(ens.DefaultSubscriptionConfig.MaxInFlightMessages),
+					testingv2.HaveMaxInFlight(jsTestEnsemble.DefaultSubscriptionConfig.MaxInFlightMessages),
 					testingv2.HaveSubscriptionFinalizer(eventingv1alpha2.Finalizer),
 				},
 				NatsSubscriptions: map[string][]gomegatypes.GomegaMatcher{
@@ -225,7 +233,7 @@ func TestCreateSubscription(t *testing.T) {
 						reconcilertestingv2.BeValidSubscription(),
 						reconcilertestingv2.BeJetStreamSubscriptionWithSubject(testingv2.EventSource,
 							testingv2.OrderCreatedEventType, eventingv1alpha2.TypeMatchingExact,
-							ens.jetStreamBackend.Config),
+							jsTestEnsemble.jetStreamBackend.Config),
 					},
 				},
 			},
@@ -235,7 +243,7 @@ func TestCreateSubscription(t *testing.T) {
 			givenSubscriptionOpts: []testingv2.SubscriptionOpt{
 				testingv2.WithTypeMatchingExact(),
 				testingv2.WithSourceAndType(emptyEventSource, reconcilertestingv2.NewUncleanEventType("0")),
-				testingv2.WithSinkURL(reconcilertestingv2.ValidSinkURL(ens.TestEnsemble, ":8080", "/myEndpoint")),
+				testingv2.WithSinkURL(reconcilertestingv2.ValidSinkURL(jsTestEnsemble.TestEnsemble, ":8080", "/myEndpoint")),
 			},
 			want: reconcilertestingv2.Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
@@ -251,7 +259,7 @@ func TestCreateSubscription(t *testing.T) {
 				testingv2.WithSourceAndType(testingv2.EventSource, reconcilertestingv2.NewUncleanEventType("0")),
 				testingv2.WithWebhookForNATS(),
 				testingv2.WithSinkURL(
-					testingv2.ValidSinkURL(ens.SubscriberSvc.Namespace, "testapp"),
+					testingv2.ValidSinkURL(jsTestEnsemble.SubscriberSvc.Namespace, "testapp"),
 				),
 			},
 			want: reconcilertestingv2.Want{
@@ -270,7 +278,7 @@ func TestCreateSubscription(t *testing.T) {
 			givenSubscriptionOpts: []testingv2.SubscriptionOpt{
 				testingv2.WithTypeMatchingExact(),
 				testingv2.WithSourceAndType(testingv2.EventSource, testingv2.OrderCreatedEventType),
-				testingv2.WithSinkURLFromSvc(ens.SubscriberSvc),
+				testingv2.WithSinkURLFromSvc(jsTestEnsemble.SubscriberSvc),
 				testingv2.WithFinalizers([]string{}),
 			},
 			want: reconcilertestingv2.Want{
@@ -285,7 +293,7 @@ func TestCreateSubscription(t *testing.T) {
 							testingv2.EventTypePrefixEmpty,
 							testingv2.OrderCreatedEventType,
 							eventingv1alpha2.TypeMatchingExact,
-							ens.jetStreamBackend.Config,
+							jsTestEnsemble.jetStreamBackend.Config,
 						),
 					},
 				},
@@ -295,43 +303,38 @@ func TestCreateSubscription(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			// The new t instance needs to be used for making assertions. If ignored, errors like this will be printed:
-			//	test executed panic(nil) or runtime.Goexit: subtest may have called FailNow on a parent test
-			ens := ens
-			ens.G = gomega.NewGomegaWithT(t)
+			t.Parallel()
+			g := gomega.NewGomegaWithT(t)
 
 			t.Log("creating the k8s subscription")
-			sub := reconcilertestingv2.CreateSubscription(ens.TestEnsemble, tc.givenSubscriptionOpts...)
+			sub := reconcilertestingv2.CreateSubscription(t, jsTestEnsemble.TestEnsemble, tc.givenSubscriptionOpts...)
 
 			t.Log("testing the k8s subscription")
-			reconcilertestingv2.TestSubscriptionOnK8s(ens.TestEnsemble, sub, tc.want.K8sSubscription...)
+			reconcilertestingv2.TestSubscriptionOnK8s(g, jsTestEnsemble.TestEnsemble, sub, tc.want.K8sSubscription...)
 
 			t.Log("testing the k8s events")
-			reconcilertestingv2.TestEventsOnK8s(ens.TestEnsemble, tc.want.K8sEvents...)
+			reconcilertestingv2.TestEventsOnK8s(g, jsTestEnsemble.TestEnsemble, tc.want.K8sEvents...)
 
 			t.Log("testing the nats subscriptions")
 			for eventType, matchers := range tc.want.NatsSubscriptions {
 				log.Printf("eventType: %v", eventType)
-				testSubscriptionOnNATS(ens, sub, eventType, matchers...)
+				testSubscriptionOnNATS(g, sub, eventType, matchers...)
 			}
 
 			t.Log("testing the deletion of the subscription")
-			testSubscriptionDeletion(ens, sub)
+			testSubscriptionDeletion(g, sub)
 
 			t.Log("testing the deletion of the NATS subscription(s)")
 			for _, eventType := range sub.Spec.Types {
-				ensureNATSSubscriptionIsDeleted(ens, sub, eventType)
+				ensureNATSSubscriptionIsDeleted(g, sub, eventType)
 			}
 		})
 	}
-	t.Cleanup(ens.Cancel)
 }
 
 // TestChangeSubscription tests if existing subscriptions are reconciled properly after getting changed.
-func TestChangeSubscription(t *testing.T) {
-	ens := setupTestEnsemble(t)
-	defer cleanupResources(ens)
-
+func Test_ChangeSubscription(t *testing.T) {
+	t.Parallel()
 	var testCases = []struct {
 		name                  string
 		givenSubscriptionOpts []testingv2.SubscriptionOpt
@@ -350,7 +353,7 @@ func TestChangeSubscription(t *testing.T) {
 				testingv2.WithTypeMatchingExact(),
 				testingv2.WithSourceAndType(testingv2.EventSource, reconcilertestingv2.NewCleanEventType("0")),
 				// valid sink
-				testingv2.WithSinkURLFromSvc(ens.SubscriberSvc),
+				testingv2.WithSinkURLFromSvc(jsTestEnsemble.SubscriberSvc),
 			},
 			wantBefore: reconcilertestingv2.Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
@@ -368,7 +371,7 @@ func TestChangeSubscription(t *testing.T) {
 						reconcilertestingv2.BeValidSubscription(),
 						reconcilertestingv2.BeJetStreamSubscriptionWithSubject(
 							testingv2.EventTypePrefix, reconcilertestingv2.NewCleanEventType("0"),
-							eventingv1alpha2.TypeMatchingExact, ens.jetStreamBackend.Config,
+							eventingv1alpha2.TypeMatchingExact, jsTestEnsemble.jetStreamBackend.Config,
 						),
 					},
 				},
@@ -408,7 +411,7 @@ func TestChangeSubscription(t *testing.T) {
 				testingv2.WithSourceAndType(testingv2.EventSource, reconcilertestingv2.NewCleanEventType("0")),
 				testingv2.WithSourceAndType(testingv2.EventSource, reconcilertestingv2.NewCleanEventType("1")),
 				testingv2.WithWebhookForNATS(),
-				testingv2.WithSinkURLFromSvc(ens.SubscriberSvc),
+				testingv2.WithSinkURLFromSvc(jsTestEnsemble.SubscriberSvc),
 			},
 			wantBefore: reconcilertestingv2.Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
@@ -442,7 +445,7 @@ func TestChangeSubscription(t *testing.T) {
 				testingv2.WithSourceAndType(testingv2.EventSource, reconcilertestingv2.NewCleanEventType("0")),
 				testingv2.WithSourceAndType(testingv2.EventSource, reconcilertestingv2.NewCleanEventType("1")),
 				testingv2.WithWebhookForNATS(),
-				testingv2.WithSinkURLFromSvc(ens.SubscriberSvc),
+				testingv2.WithSinkURLFromSvc(jsTestEnsemble.SubscriberSvc),
 			},
 			wantBefore: reconcilertestingv2.Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
@@ -470,20 +473,20 @@ func TestChangeSubscription(t *testing.T) {
 			givenSubscriptionOpts: []testingv2.SubscriptionOpt{
 				testingv2.WithTypeMatchingExact(),
 				testingv2.WithSourceAndType(testingv2.EventSource, testingv2.OrderCreatedEventType),
-				testingv2.WithMaxInFlight(ens.DefaultSubscriptionConfig.MaxInFlightMessages),
+				testingv2.WithMaxInFlight(jsTestEnsemble.DefaultSubscriptionConfig.MaxInFlightMessages),
 				testingv2.WithWebhookForNATS(),
-				testingv2.WithSinkURLFromSvc(ens.SubscriberSvc),
+				testingv2.WithSinkURLFromSvc(jsTestEnsemble.SubscriberSvc),
 			},
 			wantBefore: reconcilertestingv2.Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					testingv2.HaveCondition(testingv2.DefaultReadyCondition()),
-					testingv2.HaveMaxInFlight(ens.DefaultSubscriptionConfig.MaxInFlightMessages),
+					testingv2.HaveMaxInFlight(jsTestEnsemble.DefaultSubscriptionConfig.MaxInFlightMessages),
 				},
 				NatsSubscriptions: map[string][]gomegatypes.GomegaMatcher{
 					testingv2.OrderCreatedEventType: {
 						reconcilertestingv2.BeExistingSubscription(),
 						reconcilertestingv2.BeValidSubscription(),
-						reconcilertestingv2.BeNatsSubWithMaxPending(ens.DefaultSubscriptionConfig.MaxInFlightMessages),
+						reconcilertestingv2.BeNatsSubWithMaxPending(jsTestEnsemble.DefaultSubscriptionConfig.MaxInFlightMessages),
 					},
 				},
 			},
@@ -503,7 +506,7 @@ func TestChangeSubscription(t *testing.T) {
 						reconcilertestingv2.BeValidSubscription(),
 						reconcilertestingv2.BeJetStreamSubscriptionWithSubject(
 							testingv2.EventTypePrefix, testingv2.OrderCreatedEventType, eventingv1alpha2.TypeMatchingExact,
-							ens.jetStreamBackend.Config,
+							jsTestEnsemble.jetStreamBackend.Config,
 						),
 						reconcilertestingv2.BeNatsSubWithMaxPending(101),
 					},
@@ -514,72 +517,69 @@ func TestChangeSubscription(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			// The new t instance needs to be used for making assertions. If ignored, errors like this will be printed:
-			// testing.go:1336: test executed panic(nil) or runtime.Goexit: subtest may have called FailNow on a parent test
-			ens := ens
-			ens.G = gomega.NewGomegaWithT(t)
+			t.Parallel()
+			g := gomega.NewGomegaWithT(t)
 
 			// given
 			t.Log("creating the k8s subscription")
-			sub := reconcilertestingv2.CreateSubscription(ens.TestEnsemble, tc.givenSubscriptionOpts...)
+			sub := reconcilertestingv2.CreateSubscription(t, jsTestEnsemble.TestEnsemble, tc.givenSubscriptionOpts...)
 
 			t.Log("testing the k8s subscription")
-			reconcilertestingv2.TestSubscriptionOnK8s(ens.TestEnsemble, sub, tc.wantBefore.K8sSubscription...)
+			reconcilertestingv2.TestSubscriptionOnK8s(g, jsTestEnsemble.TestEnsemble, sub, tc.wantBefore.K8sSubscription...)
 
 			t.Log("testing the k8s events")
-			reconcilertestingv2.TestEventsOnK8s(ens.TestEnsemble, tc.wantBefore.K8sEvents...)
+			reconcilertestingv2.TestEventsOnK8s(g, jsTestEnsemble.TestEnsemble, tc.wantBefore.K8sEvents...)
 
 			t.Log("testing the nats subscriptions")
 			for eventType, matchers := range tc.wantBefore.NatsSubscriptions {
-				testSubscriptionOnNATS(ens, sub, eventType, matchers...)
+				testSubscriptionOnNATS(g, sub, eventType, matchers...)
 			}
 
 			// when
 			t.Log("change and update the subscription")
-			reconcilertestingv2.EventuallyUpdateSubscriptionOnK8s(ens.Ctx, ens.TestEnsemble,
+			require.NoError(t, reconcilertestingv2.EventuallyUpdateSubscriptionOnK8s(jsTestEnsemble.Ctx, jsTestEnsemble.TestEnsemble,
 				sub, func(sub *eventingv1alpha2.Subscription) error {
 					tc.changeSubscription(sub)
-					return ens.K8sClient.Update(ens.Ctx, sub)
-				})
+					return jsTestEnsemble.K8sClient.Update(jsTestEnsemble.Ctx, sub)
+				}))
 
 			// then
 			t.Log("testing the k8s subscription")
-			reconcilertestingv2.TestSubscriptionOnK8s(ens.TestEnsemble, sub, tc.wantAfter.K8sSubscription...)
+			reconcilertestingv2.TestSubscriptionOnK8s(g, jsTestEnsemble.TestEnsemble, sub, tc.wantAfter.K8sSubscription...)
 
 			t.Log("testing the k8s events")
-			reconcilertestingv2.TestEventsOnK8s(ens.TestEnsemble, tc.wantAfter.K8sEvents...)
+			reconcilertestingv2.TestEventsOnK8s(g, jsTestEnsemble.TestEnsemble, tc.wantAfter.K8sEvents...)
 
 			t.Log("testing the nats subscriptions")
 			for eventType, matchers := range tc.wantAfter.NatsSubscriptions {
-				testSubscriptionOnNATS(ens, sub, eventType, matchers...)
+				testSubscriptionOnNATS(g, sub, eventType, matchers...)
 			}
 
 			t.Log("testing the deletion of the subscription")
-			testSubscriptionDeletion(ens, sub)
+			testSubscriptionDeletion(g, sub)
 
 			t.Log("testing the deletion of the NATS subscription(s)")
 			for _, filter := range sub.Spec.Types {
-				ensureNATSSubscriptionIsDeleted(ens, sub, filter)
+				ensureNATSSubscriptionIsDeleted(g, sub, filter)
 			}
 		})
 	}
-	t.Cleanup(ens.Cancel)
 }
 
 // TestEmptyEventTypePrefix tests if a subscription is reconciled properly if the EventTypePrefix is empty.
-func TestEmptyEventTypePrefix(t *testing.T) {
-	ens := setupTestEnsemble(t)
-	defer cleanupResources(ens)
+func Test_EmptyEventTypePrefix(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
 
 	// when
-	sub := reconcilertestingv2.CreateSubscription(ens.TestEnsemble,
+	sub := reconcilertestingv2.CreateSubscription(t,
+		jsTestEnsemble.TestEnsemble,
 		testingv2.WithTypeMatchingExact(),
 		testingv2.WithSourceAndType(emptyEventSource, testingv2.OrderCreatedEventTypePrefixEmpty),
-		testingv2.WithSinkURLFromSvc(ens.SubscriberSvc),
+		testingv2.WithSinkURLFromSvc(jsTestEnsemble.SubscriberSvc),
 	)
 
 	// then
-	reconcilertestingv2.TestSubscriptionOnK8s(ens.TestEnsemble, sub,
+	reconcilertestingv2.TestSubscriptionOnK8s(g, jsTestEnsemble.TestEnsemble, sub,
 		testingv2.HaveTypes([]string{testingv2.OrderCreatedEventTypePrefixEmpty}),
 		testingv2.HaveCondition(testingv2.DefaultReadyCondition()),
 		testingv2.HaveSubscriptionReady(),
@@ -589,13 +589,11 @@ func TestEmptyEventTypePrefix(t *testing.T) {
 		reconcilertestingv2.BeExistingSubscription(),
 		reconcilertestingv2.BeValidSubscription(),
 		reconcilertestingv2.BeJetStreamSubscriptionWithSubject(testingv2.EventSource,
-			testingv2.OrderCreatedEventTypePrefixEmpty, eventingv1alpha2.TypeMatchingExact, ens.jetStreamBackend.Config),
+			testingv2.OrderCreatedEventTypePrefixEmpty, eventingv1alpha2.TypeMatchingExact, jsTestEnsemble.jetStreamBackend.Config),
 	}
 
-	testSubscriptionOnNATS(ens, sub, testingv2.OrderCreatedEventTypePrefixEmpty, expectedNatsSubscription...)
+	testSubscriptionOnNATS(g, sub, testingv2.OrderCreatedEventTypePrefixEmpty, expectedNatsSubscription...)
 
-	testSubscriptionDeletion(ens, sub)
-	ensureNATSSubscriptionIsDeleted(ens, sub, testingv2.OrderCreatedEventTypePrefixEmpty)
-
-	t.Cleanup(ens.Cancel)
+	testSubscriptionDeletion(g, sub)
+	ensureNATSSubscriptionIsDeleted(g, sub, testingv2.OrderCreatedEventTypePrefixEmpty)
 }
