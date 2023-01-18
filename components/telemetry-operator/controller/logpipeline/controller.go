@@ -49,7 +49,7 @@ type Config struct {
 
 type OverrideConfig struct {
 	Logging LoggingConfig
-	Global  globalConfig.OverrideConfig
+	Global  globalconfig.OverrideConfig
 }
 
 type LoggingConfig struct {
@@ -72,7 +72,7 @@ type ConfigMapProber interface {
 }
 
 type ManagerGlobalConfig interface {
-	CheckGlobalConfig(config globalConfig.OverrideConfig) error
+	CheckGlobalConfig(config globalconfig.OverrideConfig) error
 }
 
 type Reconciler struct {
@@ -98,7 +98,7 @@ func NewReconciler(client client.Client, config Config, prober DaemonSetProber, 
 	r.unsupportedLogPipelines = prometheus.NewGauge(prometheus.GaugeOpts{Name: "telemetry_unsupported_logpipelines", Help: "Number of log pipelines with custom filters or outputs."})
 	metrics.Registry.MustRegister(r.allLogPipelines, r.unsupportedLogPipelines)
 	r.syncer = syncer{client, config}
-	r.globalConfig = globalConfig.New(dynamicLoglevel)
+	r.globalConfig = globalconfig.New(dynamicLoglevel)
 
 	return &r
 }

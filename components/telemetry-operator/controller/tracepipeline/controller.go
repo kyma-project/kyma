@@ -64,7 +64,7 @@ type ServiceConfig struct {
 
 type OverrideConfig struct {
 	Tracing TracingConfig
-	Global  globalConfig.OverrideConfig
+	Global  globalconfig.OverrideConfig
 }
 
 type TracingConfig struct {
@@ -82,7 +82,7 @@ type ConfigMapProber interface {
 }
 
 type ManagerGlobalConfig interface {
-	CheckGlobalConfig(config globalConfig.OverrideConfig) error
+	CheckGlobalConfig(config globalconfig.OverrideConfig) error
 }
 
 type Reconciler struct {
@@ -101,7 +101,7 @@ func NewReconciler(client client.Client, config Config, prober DeploymentProber,
 	r.Scheme = scheme
 	r.prober = prober
 	r.cmProber = cmProber
-	r.globalConfig = globalConfig.New(dynamicLoglevel)
+	r.globalConfig = globalconfig.New(dynamicLoglevel)
 	return &r
 }
 

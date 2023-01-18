@@ -1,4 +1,4 @@
-package globalConfig
+package globalconfig
 
 import (
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configureLogger"
