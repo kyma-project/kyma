@@ -3,13 +3,13 @@ module github.com/kyma-project/kyma/components/event-publisher-proxy
 go 1.19
 
 require (
-	github.com/cloudevents/sdk-go/v2 v2.12.0
+	github.com/cloudevents/sdk-go/v2 v2.13.0
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/mux v1.8.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/kyma-project/kyma/components/application-operator v0.0.0-20221118103320-ffe096ff3455
 	github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20221221134059-d9a237e9ad4f
-	github.com/nats-io/nats-server/v2 v2.9.10
+	github.com/nats-io/nats-server/v2 v2.9.11
 	github.com/nats-io/nats.go v1.22.1
 	github.com/onsi/gomega v1.24.2
 	github.com/pkg/errors v0.9.1
@@ -17,7 +17,7 @@ require (
 	github.com/stretchr/testify v1.8.1
 	go.opencensus.io v0.24.0
 	go.uber.org/zap v1.24.0
-	golang.org/x/oauth2 v0.3.0
+	golang.org/x/oauth2 v0.4.0
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2
 	k8s.io/api v0.25.5
 	k8s.io/apimachinery v0.25.5
@@ -70,11 +70,11 @@ require (
 	github.com/stretchr/objx v0.5.0 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
-	golang.org/x/crypto v0.0.0-20220926161630-eccd6366d1be // indirect
-	golang.org/x/net v0.4.0 // indirect
-	golang.org/x/sys v0.3.0 // indirect
-	golang.org/x/term v0.3.0 // indirect
-	golang.org/x/text v0.5.0 // indirect
+	golang.org/x/crypto v0.5.0 // indirect
+	golang.org/x/net v0.5.0 // indirect
+	golang.org/x/sys v0.4.0 // indirect
+	golang.org/x/term v0.4.0 // indirect
+	golang.org/x/text v0.6.0 // indirect
 	golang.org/x/time v0.0.0-20220922220347-f3bd1da661af // indirect
 	gomodules.xyz/jsonpatch/v2 v2.2.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
