@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"time"
@@ -44,7 +43,6 @@ type Config struct {
 }
 
 func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	log.Printf("URL1: %q\n", r.URL)
 	apiIdentifier, path, gwURL, err := p.extractPath(r.URL)
 	if err != nil {
 		handleErrors(w, err)
@@ -65,8 +63,6 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		r.URL.RawPath = path.RawPath
 	}
 
-	log.Printf("URL2: %q\n", serviceAPI.TargetUrl)
-
 	cacheEntry, err := p.getOrCreateCacheEntry(apiIdentifier, *serviceAPI)
 	if err != nil {
 		handleErrors(w, err)
@@ -75,8 +71,6 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	newRequest, cancel := p.setRequestTimeout(r)
 	defer cancel()
-
-	log.Printf("URL3: %q\n", newRequest.URL.String())
 
 	err = p.addAuthorization(newRequest, cacheEntry, serviceAPI.SkipVerify)
 	if err != nil {
