@@ -29,7 +29,7 @@ func TestMakeSecret(t *testing.T) {
 	require.Equal(t, secret.Name, config.BaseName)
 	require.Equal(t, secret.Namespace, config.Namespace)
 
-	require.Equal(t, "otlpEndpoint", string(secret.Data[otlpEndpointVariable]), "Secret must contain OTLP endpoint")
+	require.Equal(t, "otlpEndpoint", string(secret.Data[otlpEndpointVariable]), "Secret must contain Otlp endpoint")
 	require.Equal(t, "basicAuthHeader", string(secret.Data[basicAuthHeaderVariable]), "Secret must contain basic auth header")
 }
 

@@ -199,12 +199,12 @@ func validateOwnerReferences(ownerRefernces []metav1.OwnerReference) error {
 }
 
 func validateCollectorConfig(configData string) error {
-	var config OtelCollectorConfig
+	var config OTELCollectorConfig
 	if err := yaml.Unmarshal([]byte(configData), &config); err != nil {
 		return err
 	}
 
-	if !config.Exporters.Otlp.Tls.Insecure {
+	if !config.Exporters.OTLP.TLS.Insecure {
 		return fmt.Errorf("Insecure flag not set")
 	}
 

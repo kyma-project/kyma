@@ -34,7 +34,7 @@ func makeDefaultLabels(config Config) map[string]string {
 	}
 }
 
-func makeConfigMap(config Config, collectorConfig OtelCollectorConfig) *corev1.ConfigMap {
+func makeConfigMap(config Config, collectorConfig OTELCollectorConfig) *corev1.ConfigMap {
 	bytes, _ := yaml.Marshal(collectorConfig)
 	confYAML := string(bytes)
 
