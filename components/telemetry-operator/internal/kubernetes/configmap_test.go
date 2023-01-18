@@ -19,7 +19,7 @@ tracing:
 `
 	configMap := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{Name: "foo", Namespace: "kyma-system"},
-		Data:       map[string]string{"override-config": conf},
+		Data:       map[string]string{"telemetry-override-config": conf},
 	}
 	fakeClient := fake.NewClientBuilder().WithObjects(configMap).Build()
 	sut := ConfigmapProber{fakeClient}

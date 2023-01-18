@@ -105,7 +105,7 @@ var (
 
 const (
 	otelImage             = "eu.gcr.io/kyma-project/tpi/otel-collector:0.66.0-a80d981f"
-	overrideConfigMapName = "override-config"
+	overrideConfigMapName = "telemetry-override-config"
 )
 
 //nolint:gochecknoinits

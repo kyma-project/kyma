@@ -2,6 +2,7 @@ package tracepipeline
 
 import (
 	"context"
+	"fmt"
 	"gopkg.in/yaml.v3"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
@@ -24,7 +25,7 @@ func (r *Reconciler) UpdateOverrideConfig(ctx context.Context) (OverrideConfig, 
 		return overrideConfig, err
 	}
 
-	log.V(1).Info("Override Config is: %v", overrideConfig)
+	log.V(1).Info(fmt.Sprintf("Override Config is: %v", overrideConfig))
 
 	return overrideConfig, nil
 }

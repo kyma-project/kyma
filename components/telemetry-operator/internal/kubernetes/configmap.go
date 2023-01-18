@@ -20,7 +20,7 @@ func (cmp *ConfigmapProber) IsPresent(ctx context.Context, name types.Namespaced
 	log := logf.FromContext(ctx)
 	var cm corev1.ConfigMap
 	if err := cmp.Get(ctx, name, &cm); err != nil {
-		log.V(1).Info(fmt.Sprintf("failed to get  %s/%s Configmap", name.Namespace, name.Name))
+		log.V(1).Info(fmt.Sprintf("Could not get  %s/%s Configmap, looks like its not present", name.Namespace, name.Name))
 		if apierrors.IsNotFound(err) {
 			return "", nil
 		}
