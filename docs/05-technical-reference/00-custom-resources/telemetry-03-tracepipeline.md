@@ -2,8 +2,6 @@
 title: Telemetry - TracePipeline
 ---
 
-> **CAUTION:** Jaeger is [deprecated](https://kyma-project.io/blog/jaeger-deprecation) and is planned to be removed. If you want to install a custom Jaeger stack, take a look at [this tutorial](https://github.com/kyma-project/examples/tree/main/jaeger).
-
 The `tracepipeline.telemetry.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to filter and ship trace data in Kyma. To get the up-to-date CRD and show the output in the YAML format, run this command:
 
 ```bash
@@ -23,7 +21,7 @@ spec:
   output:
     otlp:
       endpoint:
-        value: http://tracing-jaeger-collector.kyma-system.svc.cluster.local:4317
+        value: http://jaeger-collector.jaeger.svc.cluster.local:4317
 status:
   conditions:
   - lastTransitionTime: "2022-12-13T14:33:27Z"

@@ -51,8 +51,6 @@ Furthermore, the operator manages the full lifecycle of the OTel Collector Deplo
 
 ## Setting up a TracePipeline
 
-> **CAUTION:** Jaeger is [deprecated](https://kyma-project.io/blog/jaeger-deprecation) and is planned to be removed. If you want to install a custom Jaeger stack, take a look at [this tutorial](https://github.com/kyma-project/examples/tree/main/jaeger).
-
 In the following steps, you can see how to set up a typical TracePipeline. For an overview of all available attributes, see the [reference document](./../../../05-technical-reference/00-custom-resources/telemetry-03-tracepipeline.md).
 
 ### Step 1. Create a TracePipeline with an output
@@ -67,7 +65,7 @@ spec:
   output:
     otlp:
       endpoint:
-        value: http://tracing-jaeger-collector.kyma-system.svc.cluster.local:4317
+        value: http://jaeger-collector.jaeger.svc.cluster.local:4317
 ```
 
 This configures the underlying OTel Collector with a pipeline for traces. The receiver of the pipeline will be of the OTLP type and be accessible using the `telemetry-otlp-traces` service. As an exporter, an `otlp` or an `otlphttp` exporter is used, dependent on the configured protocol.
@@ -115,7 +113,7 @@ spec:
     otlp:
       protocol: http
       endpoint:
-        value: http://tracing-jaeger-collector.kyma-system.svc.cluster.local:4318
+        value: http://jaeger-collector.jaeger.svc.cluster.local:4318
 ```
 
 ### Step 4: Add authentication details
@@ -131,7 +129,7 @@ spec:
   output:
     otlp:
       endpoint:
-        value: http://tracing-jaeger-collector.kyma-system.svc.cluster.local:4317
+        value: http://jaeger-collector.jaeger.svc.cluster.local:4317
       authentication:
         basic:
           user:
