@@ -30,7 +30,7 @@ nats:
       enabled: true
       # `/healthz?js-server-only=true` will only check if JetStream server is current or not.
       # It will not check further the streams and consumers.
-      endpoint: "/healthz?js-server-only=true"
+      endpoint: "/healthz?js-enabled-only=true"
       initialDelaySeconds: 10
       timeoutSeconds: 5
       # NOTE: liveness check + terminationGracePeriodSeconds can introduce unecessarily long outages
@@ -74,7 +74,7 @@ nats:
     # since this check is recommended to use in cluster mode
     # it will be enabled when cluster mode is enabled.
     startup:
-      enabled: false
+      enabled: true
       # `/healthz` will check if JetStream server, streams and consumers are current or not.
       endpoint: "/healthz"
       initialDelaySeconds: 10
