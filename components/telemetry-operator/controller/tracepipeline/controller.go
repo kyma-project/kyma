@@ -124,8 +124,9 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 	if err = utils.CreateOrUpdateSecret(ctx, r.Client, secret); err != nil {
 		return err
 	}
+	endpoint := string(secretData[otlpEndpointVariable])
+	isInsecure := len(strings.TrimSpace(endpoint)) > 0 && strings.HasPrefix(endpoint, "http://")
 
-	isInsecure := isInsecureOutput(pipeline.Spec.Output.Otlp)
 	collectorConfig := makeOtelCollectorConfig(pipeline.Spec.Output, isInsecure)
 	configMap := makeConfigMap(r.config, collectorConfig)
 	if err = controllerutil.SetControllerReference(pipeline, configMap, r.Scheme); err != nil {
