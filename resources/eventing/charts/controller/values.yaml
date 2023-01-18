@@ -109,4 +109,4 @@ jetstream:
   maxMessages: -1 # no limit
   maxBytes: -1
 
-enableNewCRDVersion: false
+enableNewCRDVersion: true
