@@ -23,7 +23,7 @@ import (
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configchecksum"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configureLogger"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/globalConfig"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/globalconfig"
 	utils "github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 	corev1 "k8s.io/api/core/v1"
 	"strings"

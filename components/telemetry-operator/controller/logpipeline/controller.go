@@ -23,7 +23,7 @@ import (
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configchecksum"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configureLogger"
 	configbuilder "github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/globalConfig"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/globalconfig"
 	utils "github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 	resources "github.com/kyma-project/kyma/components/telemetry-operator/internal/resources/logpipeline"
 	"github.com/prometheus/client_golang/prometheus"
