@@ -48,7 +48,7 @@ nats:
       #
       periodSeconds: 30
       successThreshold: 1
-      failureThreshold: 3
+      failureThreshold: 5
       # Only for Kubernetes +1.22 that have pod level probes enabled.
       terminationGracePeriodSeconds:
 
@@ -74,6 +74,7 @@ nats:
     # since this check is recommended to use in cluster mode
     # it will be enabled when cluster mode is enabled.
     startup:
+      enabled: false
       # `/healthz` will check if JetStream server, streams and consumers are current or not.
       endpoint: "/healthz"
       initialDelaySeconds: 10
@@ -270,7 +271,7 @@ commonLabels: {}
 
 # podManagementPolicy controls how pods are created during initial scale up,
 # when replacing pods on nodes, or when scaling down.
-podManagementPolicy: Parallel
+podManagementPolicy: OrderedReady
 
 # Prometheus NATS Exporter configuration.
 exporter:

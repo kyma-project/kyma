@@ -256,8 +256,8 @@ spec:
         {{- end }}
         {{- end }}
 
-        {{- if .Values.cluster.enabled }}
         {{- with .Values.nats.healthcheck.startup }}
+        {{- if .enabled }}
         startupProbe:
           httpGet:
             path: {{ .endpoint }}
