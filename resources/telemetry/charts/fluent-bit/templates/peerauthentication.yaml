@@ -8,6 +8,8 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
+  mtls:
+    mode: STRICT
   portLevelMtls:
     2021:
       mode: PERMISSIVE
@@ -15,4 +17,4 @@ spec:
       mode: PERMISSIVE
   selector:
     matchLabels:
-      {{- include "fluent-bit.selectorLabels" . | nindent 4 }}
+      {{- include "fluent-bit.selectorLabels" . | nindent 6 }}
