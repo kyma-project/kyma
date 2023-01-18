@@ -23,7 +23,7 @@ func New(
 	config Config) http.Handler {
 
 	pathExtractor := func(u *url.URL) (model.APIIdentifier, *url.URL, *url.URL, apperrors.AppError) {
-		path := u.RawPath
+		path := u.EscapedPath()
 
 		trimmed := strings.Trim(path, "/")
 		split := strings.Split(trimmed, "/")
@@ -69,7 +69,7 @@ func NewForCompass(
 	config Config) http.Handler {
 
 	extractFunc := func(u *url.URL) (model.APIIdentifier, *url.URL, *url.URL, apperrors.AppError) {
-		path := u.RawPath
+		path := u.EscapedPath()
 		trimmed := strings.Trim(path, "/")
 		split := strings.Split(trimmed, "/")
 
