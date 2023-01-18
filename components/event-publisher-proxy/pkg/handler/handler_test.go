@@ -1,3 +1,4 @@
+//nolint:lll // this test uses many long lines directly from prometheus output
 package handler
 
 import (
@@ -207,7 +208,6 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 			},
 			wantStatus: 204,
 
-			//nolint:lll //this is output from prometheus
 			wantTEF: `
 				# HELP eventing_epp_event_type_published_total The total number of events published for a given eventTypeLabel
 				# TYPE eventing_epp_event_type_published_total counter
@@ -251,7 +251,6 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 			},
 			wantStatus: 204,
 
-			//nolint:lll //this is output from prometheus
 			wantTEF: `
 				# HELP eventing_epp_event_type_published_total The total number of events published for a given eventTypeLabel
 				# TYPE eventing_epp_event_type_published_total counter
@@ -333,7 +332,6 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 			},
 			wantStatus: 500,
 
-			//nolint:lll //this is output from prometheus
 			wantTEF: `
 				# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
 				# TYPE eventing_epp_backend_errors_total counter
@@ -353,7 +351,6 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 				request: CreateValidBinaryRequest(t),
 			},
 			wantStatus: 507,
-			//nolint:lll //this is output from prometheus
 			wantTEF: `
 				# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
 				# TYPE eventing_epp_backend_errors_total counter
@@ -438,7 +435,6 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 			wantStatus: 200,
 			wantOk:     true,
 
-			//nolint:lll //this is output from prometheus
 			wantTEF: `
 					# HELP eventing_epp_event_type_published_total The total number of events published for a given eventTypeLabel
 					# TYPE eventing_epp_event_type_published_total counter
@@ -485,7 +481,6 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 			},
 			wantStatus: http.StatusBadGateway,
 			wantOk:     false,
-			//nolint:lll //this is output from prometheus
 			wantTEF: `
 					# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
 					# TYPE eventing_epp_backend_errors_total counter
@@ -511,7 +506,6 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 			},
 			wantStatus: 507,
 			wantOk:     false,
-			//nolint:lll //this is output from prometheus
 			wantTEF: `
 					# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
 					# TYPE eventing_epp_backend_errors_total counter
@@ -537,7 +531,6 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 			},
 			wantStatus: 500,
 			wantOk:     false,
-			//nolint:lll //this is output from prometheus
 			wantTEF: `
 					# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
 					# TYPE eventing_epp_backend_errors_total counter
@@ -724,7 +717,6 @@ func TestHandler_sendEventAndRecordMetrics(t *testing.T) {
 				metricTotal:     1,
 				metricLatency:   1,
 				metricPublished: 1,
-				//nolint:lll //this is output from prometheus
 				metricLatencyTEF: `
 					# HELP eventing_epp_backend_duration_milliseconds The duration of sending events to the messaging server in milliseconds
 					# TYPE eventing_epp_backend_duration_milliseconds histogram

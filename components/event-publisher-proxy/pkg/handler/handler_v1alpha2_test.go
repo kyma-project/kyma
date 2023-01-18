@@ -1,3 +1,4 @@
+//nolint:lll // output directly from prometheus
 package handler
 
 import (
@@ -76,7 +77,6 @@ func TestHandler_publishCloudEventsV1Alpha2(t *testing.T) {
 				request: CreateValidStructuredRequest(t),
 			},
 			wantStatus: 204,
-			//nolint:lll // output directly from prometheus
 			wantTEF: `
 				# HELP eventing_epp_event_type_published_total The total number of events published for a given eventTypeLabel
 				# TYPE eventing_epp_event_type_published_total counter
@@ -119,7 +119,6 @@ func TestHandler_publishCloudEventsV1Alpha2(t *testing.T) {
 				request: CreateValidBinaryRequest(t),
 			},
 			wantStatus: 204,
-			//nolint:lll // output directly from prometheus
 			wantTEF: `
 				# HELP eventing_epp_event_type_published_total The total number of events published for a given eventTypeLabel
 				# TYPE eventing_epp_event_type_published_total counter
@@ -163,7 +162,6 @@ func TestHandler_publishCloudEventsV1Alpha2(t *testing.T) {
 				request: CreateValidStructuredRequestV1Alpha2(t),
 			},
 			wantStatus: 204,
-			//nolint:lll // output directly from prometheus
 			wantTEF: `
 				# HELP eventing_epp_event_type_published_total The total number of events published for a given eventTypeLabel
 				# TYPE eventing_epp_event_type_published_total counter
@@ -206,7 +204,6 @@ func TestHandler_publishCloudEventsV1Alpha2(t *testing.T) {
 				request: CreateValidBinaryRequestV1Alpha2(t),
 			},
 			wantStatus: 204,
-			//nolint:lll // output directly from prometheus
 			wantTEF: `
 				# HELP eventing_epp_event_type_published_total The total number of events published for a given eventTypeLabel
 				# TYPE eventing_epp_event_type_published_total counter
@@ -270,7 +267,6 @@ func TestHandler_publishCloudEventsV1Alpha2(t *testing.T) {
 				request: CreateValidBinaryRequestV1Alpha2(t),
 			},
 			wantStatus: 500,
-			//nolint:lll // output directly from prometheus
 			wantTEF: `
 				# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
 				# TYPE eventing_epp_backend_errors_total counter
@@ -290,7 +286,6 @@ func TestHandler_publishCloudEventsV1Alpha2(t *testing.T) {
 				request: CreateValidBinaryRequestV1Alpha2(t),
 			},
 			wantStatus: 507,
-			//nolint:lll // output directly from prometheus
 			wantTEF: `
 				# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
 				# TYPE eventing_epp_backend_errors_total counter
@@ -367,7 +362,6 @@ func TestHandler_publishLegacyEventsAsCEV1alpha2(t *testing.T) {
 			givenCollector:         metrics.NewCollector(latency),
 			givenRequest:           legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
 			wantHTTPStatus:         http.StatusOK,
-			//nolint:lll // output directly from prometheus
 			wantTEF: `
 					# HELP eventing_epp_event_type_published_total The total number of events published for a given eventTypeLabel
 					# TYPE eventing_epp_event_type_published_total counter
@@ -405,7 +399,6 @@ func TestHandler_publishLegacyEventsAsCEV1alpha2(t *testing.T) {
 			givenCollector:         metrics.NewCollector(latency),
 			givenRequest:           legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
 			wantHTTPStatus:         http.StatusBadGateway,
-			//nolint:lll // output directly from prometheus
 			wantTEF: `
 					# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
 					# TYPE eventing_epp_backend_errors_total counter
@@ -422,7 +415,6 @@ func TestHandler_publishLegacyEventsAsCEV1alpha2(t *testing.T) {
 			givenCollector:         metrics.NewCollector(latency),
 			givenRequest:           legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
 			wantHTTPStatus:         507,
-			//nolint:lll // output directly from prometheus
 			wantTEF: `
 					# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
 					# TYPE eventing_epp_backend_errors_total counter
@@ -439,7 +431,6 @@ func TestHandler_publishLegacyEventsAsCEV1alpha2(t *testing.T) {
 			givenCollector:         metrics.NewCollector(latency),
 			givenRequest:           legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
 			wantHTTPStatus:         500,
-			//nolint:lll // output directly from prometheus
 			wantTEF: `
 					# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
 					# TYPE eventing_epp_backend_errors_total counter

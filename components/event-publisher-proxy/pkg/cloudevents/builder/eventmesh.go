@@ -12,7 +12,7 @@ import (
 // Perform a compile-time check.
 var _ CloudEventBuilder = &EventMeshBuilder{}
 
-func NewEventMeshBuilder(prefix string, meshNamespace string, cleaner cleaner.Cleaner,
+func NewEventMeshBuilder(prefix string, eventMeshNamespace string, cleaner cleaner.Cleaner,
 	applicationLister *application.Lister, logger *logger.Logger) CloudEventBuilder {
 	genericBuilder := GenericBuilder{
 		typePrefix:        prefix,
@@ -23,7 +23,7 @@ func NewEventMeshBuilder(prefix string, meshNamespace string, cleaner cleaner.Cl
 
 	return &EventMeshBuilder{
 		genericBuilder:     &genericBuilder,
-		eventMeshNamespace: meshNamespace,
+		eventMeshNamespace: eventMeshNamespace,
 	}
 }
 
