@@ -183,10 +183,6 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 	return nil
 }
 
-func isInsecureOutput(output *telemetryv1alpha1.OtlpOutput) bool {
-	return len(strings.TrimSpace(output.Endpoint.Value)) > 0 && strings.HasPrefix(output.Endpoint.Value, "http://")
-}
-
 func (r *Reconciler) tryAcquireLock(ctx context.Context, pipeline *telemetryv1alpha1.TracePipeline) error {
 	lockName := types.NamespacedName{Name: "telemetry-tracepipeline-lock", Namespace: r.config.Namespace}
 	var lock corev1.ConfigMap
