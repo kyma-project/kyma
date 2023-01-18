@@ -30,9 +30,14 @@ type OTLPExporterConfig struct {
 	RetryOnFailure RetryOnFailureConfig `yaml:"retry_on_failure,omitempty"`
 }
 
+type LoggingExporterConfig struct {
+	Verbosity string `yaml:"verbosity"`
+}
+
 type ExporterConfig struct {
-	OTLP     OTLPExporterConfig `yaml:"otlp,omitempty"`
-	OTLPHTTP OTLPExporterConfig `yaml:"otlphttp,omitempty"`
+	OTLP     OTLPExporterConfig    `yaml:"otlp,omitempty"`
+	OTLPHTTP OTLPExporterConfig    `yaml:"otlphttp,omitempty"`
+	Logging  LoggingExporterConfig `yaml:"logging,omitempty"`
 }
 
 type ReceiverConfig struct {
@@ -170,13 +175,19 @@ func makeExporterConfig(output v1alpha1.TracePipelineOutput, insecureOutput bool
 		},
 	}
 
+	loggingExporter := LoggingExporterConfig{
+		Verbosity: "basic",
+	}
+
 	if outputType == "otlphttp" {
 		return ExporterConfig{
 			OTLPHTTP: otlpExporterConfig,
+			Logging:  loggingExporter,
 		}
 	}
 	return ExporterConfig{
-		OTLP: otlpExporterConfig,
+		OTLP:    otlpExporterConfig,
+		Logging: loggingExporter,
 	}
 }
 
@@ -254,7 +265,7 @@ func makeServiceConfig(outputType string) OTLPServiceConfig {
 			Traces: PipelineConfig{
 				Receivers:  []string{"opencensus", "otlp"},
 				Processors: []string{"memory_limiter", "k8sattributes", "resource", "batch"},
-				Exporters:  []string{outputType},
+				Exporters:  []string{outputType, "logging"},
 			},
 		},
 		Telemetry: TelemetryConfig{

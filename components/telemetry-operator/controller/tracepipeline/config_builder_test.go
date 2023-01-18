@@ -95,6 +95,8 @@ func TestMakeExporterConfig(t *testing.T) {
 	require.Equal(t, "5s", exporterConfig.OTLP.RetryOnFailure.InitialInterval)
 	require.Equal(t, "30s", exporterConfig.OTLP.RetryOnFailure.MaxInterval)
 	require.Equal(t, "300s", exporterConfig.OTLP.RetryOnFailure.MaxElapsedTime)
+
+	require.Equal(t, "basic", exporterConfig.Logging.Verbosity)
 }
 
 func TestMakeCollectorConfigEndpoint(t *testing.T) {
@@ -153,6 +155,7 @@ func TestMakeServiceConfig(t *testing.T) {
 	require.Contains(t, serviceConfig.Pipelines.Traces.Processors, "batch")
 
 	require.Contains(t, serviceConfig.Pipelines.Traces.Exporters, "otlp")
+	require.Contains(t, serviceConfig.Pipelines.Traces.Exporters, "logging")
 
 	require.Equal(t, "0.0.0.0:8888", serviceConfig.Telemetry.Metrics.Address)
 	require.Contains(t, serviceConfig.Extensions, "health_check")
@@ -231,6 +234,8 @@ exporters:
       initial_interval: 5s
       max_interval: 30s
       max_elapsed_time: 300s
+  logging:
+    verbosity: basic
 processors:
   batch:
     send_batch_size: 512
@@ -282,6 +287,7 @@ service:
       - batch
       exporters:
       - otlp
+      - logging
   telemetry:
     metrics:
       address: 0.0.0.0:8888
