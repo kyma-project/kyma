@@ -8,8 +8,6 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  mtls:
-    mode: STRICT
   portLevelMtls:
     2021:
       mode: PERMISSIVE
