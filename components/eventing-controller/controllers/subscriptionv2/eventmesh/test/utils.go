@@ -190,6 +190,7 @@ func StartAndWaitForWebhookServer(k8sManager manager.Manager, webhookInstallOpts
 	addrPort := fmt.Sprintf("%s:%d", webhookInstallOpts.LocalServingHost, webhookInstallOpts.LocalServingPort)
 	// wait for the webhook server to get ready
 	err := retry.Do(func() error {
+		//nolint:gosec
 		conn, connErr := tls.DialWithDialer(dialer, "tcp", addrPort, &tls.Config{InsecureSkipVerify: true})
 		if connErr != nil {
 			return connErr
