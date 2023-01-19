@@ -125,7 +125,7 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 		return err
 	}
 	endpoint := string(secretData[otlpEndpointVariable])
-	isInsecure := len(strings.TrimSpace(endpoint)) > 0 && strings.HasPrefix(endpoint, "http://")
+	isInsecure := isInsecureOutput(endpoint)
 
 	collectorConfig := makeOtelCollectorConfig(pipeline.Spec.Output, isInsecure)
 	configMap := makeConfigMap(r.config, collectorConfig)
@@ -181,6 +181,10 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 	}
 
 	return nil
+}
+
+func isInsecureOutput(endpoint string) bool {
+	return len(strings.TrimSpace(endpoint)) > 0 && strings.HasPrefix(endpoint, "http://")
 }
 
 func (r *Reconciler) tryAcquireLock(ctx context.Context, pipeline *telemetryv1alpha1.TracePipeline) error {
