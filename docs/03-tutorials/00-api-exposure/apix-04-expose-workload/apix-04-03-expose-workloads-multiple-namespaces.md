@@ -3,7 +3,7 @@ title: Expose workloads in multiple Namespaces with a single APIRule definition
 ---
 
 This tutorial shows how to expose service endpoints in multiple Namespaces using API Gateway Controller.
-   > **CAUTION:** Exposing a workload to the outside world causes a potential security vulnerability, so tread carefully. In a production environment, secure the workload you expose with [OAuth2](../apix-05-expose-and-secure-a-workload/apix-05-01-expose-and-secure-workload-oauth2.md) or [JWT](../apix-05-expose-and-secure-a-workload/apix-05-03-expose-and-secure-workload-jwt.mds).
+   > **CAUTION:** Exposing a workload to the outside world causes a potential security vulnerability, so tread carefully. In a production environment, secure the workload you expose with [OAuth2](../apix-05-expose-and-secure-a-workload/apix-05-01-expose-and-secure-workload-oauth2.md) or [JWT](../apix-05-expose-and-secure-a-workload/apix-05-03-expose-and-secure-workload-jwt.md).
 
 
 ##  Prerequisites
