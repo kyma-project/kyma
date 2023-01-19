@@ -279,7 +279,7 @@ The used buffers are volatile, and the data can be lost on the otel-collector in
 Only one TracePipeline resource at a time is supported at the moment.
 
 ### System span filtering
-System related spans reported by Istio will be filtered out without option to opt-out, especially the following:
+System-related spans reported by Istio are filtered out without the opt-out option. Here are a few examples of such spans:
 - `/healtz` endpoint of a component deployed in the `kyma-system` Namespace
 - `/metrics` endpoint of a component deployed in the `kyma-system` Namespace
 - All outgoing spans reported by Grafana and Jaeger
