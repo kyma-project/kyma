@@ -4,7 +4,7 @@ title: Set up a custom identity provider
 
 Kyma sits on top of Kubernetes and leverages [authentication strategies](https://kubernetes.io/docs/reference/access-authn-authz/authentication/) from it. The purpose of all of those authentication strategies is to associate the identity of the caller with the request to the API server and evaluate access based on roles (RBAC).
 
-One of the strategies enables you to use your own identity provider. This is very convenient because you can delegate the verification of who the users are to a separate user management entity and even re-use it in different systems.
+One of the strategies enables you to use your own identity provider. This is very convenient because you can delegate the verification of who the users are to a separate user management entity and even reuse it in different systems.
 
 > **NOTE:** Kubernetes supports OpenID Connect (OIDC) JWT Access tokens, so make sure your identity provider is OIDC-compliant.
 
@@ -27,7 +27,7 @@ Configure a dedicated client (often referred to as an application) at your ident
 - `clientId`
 - `clientSecret`
 
-2. Add `http://localhost:8000` to the allowed redirect URIs that are required for the OIDC login plugin.
+2. Add `http://localhost:8000` to the allowed redirect URLs that are required for the OIDC login plugin.
 3. Configure the name of the **username** and **group** claims.
 4. Enable the Proof Key for Code Exchange (PKCE) authentication flow.
 
@@ -60,7 +60,7 @@ By default, Kyma comes with the following ClusterRoles:
 - **kyma-edit** - gives full access to all Kyma-managed resources
 - **kyma-developer** - gives full access to Kyma-managed resources and basic Kubernetes resources
 - **kyma-view** - allows viewing and listing all of the resources in the cluster
-- **kyma-essentials** - gives a set of minimal view access right to use in Kyma Dashboard
+- **kyma-essentials** - gives a set of minimal view access rights to use in Kyma Dashboard
 
 To bind a user to the **kyma-admin** ClusterRole, run this command:
 

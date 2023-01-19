@@ -15,8 +15,13 @@ This tutorial shows how to set up a custom domain and prepare a certificate requ
 
 1. Create a Secret containing credentials for the DNS cloud service provider account in your Namespace.
 
+<<<<<<< HEAD
      * Choose your DNS cloud service provider and create a secret in your Namespace. To learn how to do it, follow [the guidelines](https://github.com/gardener/external-dns-management/blob/master/README.md#external-dns-management) provided in the External DNS Management documentation. 
      * Export the name of the created Secret as an environment variable:
+=======
+  * Choose your DNS cloud service provider and create a Secret in your Namespace. To learn how to do it, follow [the guidelines](https://github.com/gardener/external-dns-management/blob/master/README.md#external-dns-management) provided in the External DNS Management documentation. 
+  * Export the name of the created Secret as an environment variable:
+>>>>>>> f9b04d19bd2bd9aea1e14dca8ca3db3104964e43
 
        ```bash
        export SECRET={SECRET_NAME}

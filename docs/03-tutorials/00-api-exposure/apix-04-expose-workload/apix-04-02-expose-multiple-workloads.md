@@ -87,7 +87,7 @@ Follow the instructions to expose the instance of the HttpBin service and the sa
 
 A service can be also defined at the root level. Such a definition is applied to all the paths specified at the `spec.rules` which do not have their own services defined. 
  
- > **NOTE:**Services definitions at the `spec.rules` level have higher precedence than service definition at the `spec.service` level.
+ > **NOTE:** Services definitions at the `spec.rules` level have precedence over service definition at the `spec.service` level.
 
 Follow the instructions to expose the instance of the HttpBin service and the sample Function on different paths with a service defined at the root level.
 
