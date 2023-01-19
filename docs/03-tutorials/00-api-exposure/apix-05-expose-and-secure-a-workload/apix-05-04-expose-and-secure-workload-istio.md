@@ -152,13 +152,13 @@ To secure the Httpbin workload or the Function using a JWT, create a Request Aut
    EOF
    ```
 
-2. Access the workload you secured. You should get the code `403 Forbidden` error.
+2. Access the workload you secured. You get the code `403 Forbidden` error.
 
    ```shell
    curl -ik -X GET https://httpbin.$DOMAIN_TO_EXPOSE_WORKLOADS/status/200
    ```
 
-3. Now, access the secured workload using the correct JWT. You should get the code `200 OK` response.
+3. Now, access the secured workload using the correct JWT. You get the code `200 OK` response.
 
    ```shell
    curl -ik -X GET https://httpbin.$DOMAIN_TO_EXPOSE_WORKLOADS/status/200 --header "Authorization:Bearer $ACCESS_TOKEN"
@@ -203,13 +203,13 @@ To secure the Httpbin workload or the Function using a JWT, create a Request Aut
    EOF
    ```
 
-2. Access the workload you secured. You should get the code `403 Forbidden` error.
+2. Access the workload you secured. You get the code `403 Forbidden` error.
 
    ```shell
    curl -ik -X GET https://function.$DOMAIN_TO_EXPOSE_WORKLOADS/status/200
    ```
 
-3. Now, access the secured workload using the correct JWT. You should get the code `200 OK` response.
+3. Now, access the secured workload using the correct JWT. You get the code `200 OK` response.
 
    ```shell
    curl -ik -X GET https://function.$DOMAIN_TO_EXPOSE_WORKLOADS/status/200 --header "Authorization:Bearer $ACCESS_TOKEN"
