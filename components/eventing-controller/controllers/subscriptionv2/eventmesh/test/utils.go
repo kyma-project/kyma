@@ -190,7 +190,6 @@ func StartAndWaitForWebhookServer(k8sManager manager.Manager, webhookInstallOpts
 	addrPort := fmt.Sprintf("%s:%d", webhookInstallOpts.LocalServingHost, webhookInstallOpts.LocalServingPort)
 	// wait for the webhook server to get ready
 	err := retry.Do(func() error {
-		//nolint:gosec //the test certificate used will report as bad certificate and hence not perform the test
 		conn, connErr := tls.DialWithDialer(dialer, "tcp", addrPort, &tls.Config{InsecureSkipVerify: true})
 		if connErr != nil {
 			return connErr
@@ -315,10 +314,6 @@ func ensureK8sResourceCreated(ctx context.Context, t *testing.T, obj client.Obje
 
 func ensureK8sResourceNotCreated(ctx context.Context, t *testing.T, obj client.Object, err error) {
 	require.Equal(t, emTestEnsemble.k8sClient.Create(ctx, obj), err)
-}
-
-func ensureK8sResourceUpdated(ctx context.Context, t *testing.T, obj client.Object) {
-	require.NoError(t, emTestEnsemble.k8sClient.Update(ctx, obj))
 }
 
 func ensureK8sResourceDeleted(ctx context.Context, t *testing.T, obj client.Object) {
