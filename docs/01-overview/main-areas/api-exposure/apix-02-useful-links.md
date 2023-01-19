@@ -2,7 +2,7 @@
 title: Useful links
 ---
 
-If you're interested in learning more about API Exposure in Kyma, follow these links:
+If you're interested in learning more about API Exposure in Kyma, follow these links to:
 
 - Perform some simple and more advanced tasks:
   - [Create a workload](../../../03-tutorials/00-api-exposure/apix-01-create-workload.md)
