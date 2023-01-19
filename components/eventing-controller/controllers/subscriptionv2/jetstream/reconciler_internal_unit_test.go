@@ -267,7 +267,7 @@ func Test_handleSubscriptionDeletion(t *testing.T) {
 	}
 }
 
-func Test_addFinalizerToSubscription(t *testing.T) {
+func Test_addFinalizer(t *testing.T) {
 	// given
 	ctx := context.Background()
 	eventingFinalizer := []string{eventingv1alpha2.Finalizer}
@@ -287,7 +287,7 @@ func Test_addFinalizerToSubscription(t *testing.T) {
 			givenFinalizers: emptyFinalizer,
 		},
 		{
-			name:            "addFinalizer() should propagate the error returned by syncSubscriptionStatus",
+			name:            "addFinalizer() should propagate the error returned by the update operation",
 			givenFinalizers: eventingFinalizer,
 			wantErrorMessage: apierr.NewNotFound(
 				schema.GroupResource{
@@ -303,12 +303,12 @@ func Test_addFinalizerToSubscription(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			// in case syncSubscriptionStatus throws an error
 			if tC.wantErrorMessage != "" {
-				_, err := r.addFinalizer(ctx, fakeSub, r.namedLogger())
+				_, err := r.addFinalizer(ctx, fakeSub)
 				require.ErrorContains(t, err, tC.wantErrorMessage)
 				return
 			}
 			sub.Finalizers = tC.givenFinalizers
-			_, err := r.addFinalizer(ctx, sub, r.namedLogger())
+			_, err := r.addFinalizer(ctx, sub)
 			require.NoError(t, err)
 
 			fetchedSub, err := fetchTestSubscription(testEnvironment.Context, r)
@@ -590,20 +590,14 @@ func Test_updateStatus(t *testing.T) {
 
 func Test_updateSubscription(t *testing.T) {
 	// given
-	eventingFinalizer := []string{eventingv1alpha2.Finalizer}
-	var emptyFinalizer []string
 	sub := controllertesting.NewSubscription(subscriptionName, namespaceName,
 		controllertesting.WithStatusTypes([]eventingv1alpha2.EventType{
 			{OriginalType: "order.created.v1", CleanType: "order.created.v1"},
 		}),
 	)
-	sub.Finalizers = emptyFinalizer
 
 	subWithDifferentStatus := sub.DeepCopy()
 	subWithDifferentStatus.Status.Ready = !sub.Status.Ready
-
-	subWithDifferentFinalizer := sub.DeepCopy()
-	subWithDifferentFinalizer.Finalizers = eventingFinalizer
 
 	ctx := context.Background()
 	testEnvironment := setupTestEnvironment(t)
@@ -616,7 +610,6 @@ func Test_updateSubscription(t *testing.T) {
 		wantErrorMessage string
 		wantChange       bool
 		wantSubStatus    *eventingv1alpha2.SubscriptionStatus
-		wantFinalizer    []string
 	}{
 		{
 			name:       "When Subscription cannot be fetched from the api server the function should return an error",
@@ -636,12 +629,6 @@ func Test_updateSubscription(t *testing.T) {
 			name:       "Subscription's status should be updated on difference",
 			actualSub:  sub,
 			desiredSub: subWithDifferentStatus,
-			wantChange: true,
-		},
-		{
-			name:       "Subscription's finalizer should be updated on difference",
-			actualSub:  sub,
-			desiredSub: subWithDifferentFinalizer,
 			wantChange: true,
 		},
 	}

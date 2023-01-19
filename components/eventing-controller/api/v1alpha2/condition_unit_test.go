@@ -537,8 +537,10 @@ func Test_SetConditionSubscriptionActive(t *testing.T) {
 	for _, testCase := range testCases {
 		tc := testCase
 		t.Run(tc.name, func(t *testing.T) {
-			// when
+			// given
 			sub.Status.Conditions = tc.givenConditions
+
+			// when
 			conditions := v1alpha2.GetSubscriptionActiveCondition(sub, tc.givenError)
 
 			// then
