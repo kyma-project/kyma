@@ -111,19 +111,18 @@ function waitForPodWithLabel(
   );
 }
 
-async function createTracePipelineInline(pipelineName, label) {
+async function createTracePipelineInline(pipelineName, endpoint) {
   const tracePipeline = {
     apiVersion: 'telemetry.kyma-project.io/v1alpha1',
     kind: 'TracePipeline',
     metadata: {
       name: pipelineName,
-      labels: label,
     },
     spec: {
       output: {
         otlp: {
           endpoint: {
-            value: 'http://another-foo',
+            value: endpoint,
           },
         },
       },

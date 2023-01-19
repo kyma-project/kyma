@@ -368,7 +368,7 @@ describe('Telemetry Operator', function() {
           await k8sApply(loadTestData('secret-patched-trace-endpoint.yaml'), 'default');
           await sleep(5*1000);
           const secret = await getSecret('telemetry-trace-collector', 'kyma-system');
-          assert.equal(secret.data.OTLP_ENDPOINT, 'http://another-endpoint');
+          assert.equal(secret.data.OTLP_ENDPOINT, 'aHR0cDovL2Fub3RoZXItZW5kcG9pbnQ=');
 
           const newPodRes = await k8sCoreV1Api.listNamespacedPod(
               'kyma-system',
@@ -413,40 +413,43 @@ describe('Telemetry Operator', function() {
         const overrideConfig = loadTestData('override-config.yaml');
         const pipelineName = 'test-trace';
         it(`Creates a tracepipeline`, async function() {
-          const labels = '';
-          await createTracePipelineInline(pipelineName, labels);
-          await k8sApply(pipeline);
+          await createTracePipelineInline(pipelineName, 'http://foo-bar');
           await waitForTracePipeline(pipelineName);
           await waitForTracePipelineStatusRunning(pipelineName);
         });
+
         it('Should have created telemetry-trace-collector secret', async () => {
           const secret = await getSecret('telemetry-trace-collector', 'kyma-system');
           assert.equal(secret.data.OTLP_ENDPOINT, 'aHR0cDovL2Zvby1iYXI=');
         });
+
         it(`Should create override configmap with paused flag`, async function() {
           await k8sApply(overrideConfig);
         });
+
         it(`Tries to change the otlp endpoint`, async function() {
-          const labels = {foo: 'bar'};
-          await createTracePipelineInline(pipelineName, labels);
+          await createTracePipelineInline(pipelineName, 'http://another-foo');
         });
+
         it(`Should not change the OTLP endpoint in paused state`, async () => {
           await sleep(5*1000);
           const secret = await getSecret('telemetry-trace-collector', 'kyma-system');
           assert.equal(secret.data.OTLP_ENDPOINT, 'aHR0cDovL2Zvby1iYXI=');
         });
+
         it(`Deletes the override configmap`, async function() {
           k8sDelete(overrideConfig);
         });
+
         it(`Tries to change the otlp endpoint again`, async function() {
-          const labels = {foo: 'bar2'};
-          await createTracePipelineInline(pipelineName, labels);
+          await createTracePipelineInline(pipelineName, 'http://another-foo-bar');
           await waitForTracePipeline(pipelineName);
         });
+
         it(`Should now change the OTLP endpoint in paused state`, async function() {
           await sleep(5*1000);
           const secret = await getSecret('telemetry-trace-collector', 'kyma-system');
-          assert.equal(secret.data.OTLP_ENDPOINT, 'aHR0cDovL2Fub3RoZXItZm9v');
+          assert.equal(secret.data.OTLP_ENDPOINT, 'aHR0cDovL2Fub3RoZXItZm9vLWJhcg==');
         });
       });
     });
