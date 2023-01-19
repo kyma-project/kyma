@@ -143,7 +143,7 @@ This tutorial shows how to set up a custom domain and prepare a certificate requ
      * To check the certificate status, run: 
      
         ```bash
-        `kubectl get certificate httpbin-cert -n istio-system`
+        kubectl get certificate httpbin-cert -n istio-system
         ```
        
 6. Follow [this tutorial](./apix-03-set-up-tls-gateway.md) to set up a TLS Gateway.
