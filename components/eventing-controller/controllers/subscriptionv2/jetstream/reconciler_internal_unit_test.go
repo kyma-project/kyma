@@ -620,7 +620,7 @@ func Test_updateSubscription(t *testing.T) {
 				subscriptionName).Error(),
 		},
 		{
-			name:       "updateSubscription() should be idempotent",
+			name:       "updateSubscriptionStatus() should be idempotent",
 			actualSub:  sub,
 			desiredSub: sub,
 			wantChange: false,
@@ -643,7 +643,7 @@ func Test_updateSubscription(t *testing.T) {
 			resourceVersionBefore := sub.ResourceVersion
 
 			// when
-			err := r.updateSubscription(ctx, tC.desiredSub, r.namedLogger())
+			err := r.updateSubscriptionStatus(ctx, tC.desiredSub, r.namedLogger())
 
 			// then
 			// in case the subscription doesn't exist

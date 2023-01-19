@@ -208,7 +208,7 @@ func (r *Reconciler) handleSubscriptionDeletion(ctx context.Context,
 
 		// update the subscription's finalizers in k8s
 		if err := r.Update(ctx, subscription); err != nil {
-			return ctrl.Result{}, pkgerrors.MakeError(errFailedToUpdatedFinalizers, err)
+			return ctrl.Result{}, pkgerrors.MakeError(errFailedToUpdateFinalizers, err)
 		}
 		return ctrl.Result{}, nil
 	}
@@ -225,11 +225,11 @@ func (r *Reconciler) syncSubscriptionStatus(ctx context.Context,
 	desiredSubscription.Status.Conditions = eventingv1alpha2.GetSubscriptionActiveCondition(desiredSubscription, err)
 
 	// Update the subscription
-	return r.updateSubscription(ctx, desiredSubscription, log)
+	return r.updateSubscriptionStatus(ctx, desiredSubscription, log)
 }
 
-// updateSubscription updates the subscription changes to k8s.
-func (r *Reconciler) updateSubscription(ctx context.Context,
+// updateSubscriptionStatus updates the subscription's status changes to k8s.
+func (r *Reconciler) updateSubscriptionStatus(ctx context.Context,
 	sub *eventingv1alpha2.Subscription, logger *zap.SugaredLogger) error {
 	namespacedName := &k8stypes.NamespacedName{
 		Name:      sub.Name,
@@ -245,7 +245,6 @@ func (r *Reconciler) updateSubscription(ctx context.Context,
 	// copy new changes to the latest object
 	desiredSubscription := actualSubscription.DeepCopy()
 	desiredSubscription.Status = sub.Status
-	desiredSubscription.ObjectMeta.Finalizers = sub.ObjectMeta.Finalizers
 
 	// sync subscription status with k8s
 	if err := r.updateStatus(ctx, actualSubscription, desiredSubscription, logger); err != nil {
@@ -284,7 +283,7 @@ func (r *Reconciler) addFinalizer(ctx context.Context, sub *eventingv1alpha2.Sub
 
 	// update the subscription's finalizers in k8s
 	if err := r.Update(ctx, sub); err != nil {
-		return ctrl.Result{}, pkgerrors.MakeError(errFailedToUpdatedFinalizers, err)
+		return ctrl.Result{}, pkgerrors.MakeError(errFailedToUpdateFinalizers, err)
 	}
 
 	return ctrl.Result{}, nil
