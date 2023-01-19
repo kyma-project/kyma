@@ -1,4 +1,4 @@
-package test
+package jetstream_test
 
 import (
 	"fmt"
@@ -517,9 +517,10 @@ func Test_ChangeSubscription(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			g := gomega.NewGomegaWithT(t)
 
 			// given
+			g := gomega.NewGomegaWithT(t)
+
 			t.Log("creating the k8s subscription")
 			sub := CreateSubscription(t, jsTestEnsemble.Ensemble, tc.givenSubscriptionOpts...)
 
@@ -587,7 +588,8 @@ func Test_EmptyEventTypePrefix(t *testing.T) {
 	expectedNatsSubscription := []gomegatypes.GomegaMatcher{
 		BeExistingSubscription(),
 		BeValidSubscription(),
-		BeJetStreamSubscriptionWithSubject(testingv2.EventSource,
+		BeJetStreamSubscriptionWithSubject(
+			testingv2.EventSource,
 			testingv2.OrderCreatedEventTypePrefixEmpty,
 			eventingv1alpha2.TypeMatchingExact,
 			jsTestEnsemble.jetStreamBackend.Config,

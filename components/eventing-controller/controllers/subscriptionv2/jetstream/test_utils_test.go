@@ -1,4 +1,4 @@
-package test
+package jetstream_test
 
 import (
 	"context"
@@ -10,9 +10,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/controllers/subscriptionv2/jetstream"
+
 	"github.com/avast/retry-go/v3"
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
-	"github.com/kyma-project/kyma/components/eventing-controller/controllers/subscriptionv2/jetstream"
 	natsserver "github.com/nats-io/nats-server/v2/server"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
@@ -110,14 +111,14 @@ func setupSuite() error {
 		NatsServer: natsServer,
 		TestEnv: &envtest.Environment{
 			CRDDirectoryPaths: []string{
-				filepath.Join("../../../../", "config", "crd", "bases", "eventing.kyma-project.io_eventingbackends.yaml"),
-				filepath.Join("../../../../", "config", "crd", "basesv1alpha2"),
-				filepath.Join("../../../../", "config", "crd", "external"),
+				filepath.Join("../../../", "config", "crd", "bases", "eventing.kyma-project.io_eventingbackends.yaml"),
+				filepath.Join("../../../", "config", "crd", "basesv1alpha2"),
+				filepath.Join("../../../", "config", "crd", "external"),
 			},
 			AttachControlPlaneOutput: attachControlPlaneOutput,
 			UseExistingCluster:       &useExistingCluster,
 			WebhookInstallOptions: envtest.WebhookInstallOptions{
-				Paths: []string{filepath.Join("../../../../", "config", "webhook")},
+				Paths: []string{filepath.Join("../../../", "config", "webhook")},
 			},
 		},
 	}

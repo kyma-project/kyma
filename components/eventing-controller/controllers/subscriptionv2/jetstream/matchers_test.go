@@ -1,4 +1,4 @@
-package test
+package jetstream_test
 
 import (
 	"fmt"
