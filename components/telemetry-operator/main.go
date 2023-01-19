@@ -19,6 +19,7 @@ package main
 import (
 	"errors"
 	"flag"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configurelogger"
 	"os"
 	"strings"
 	"time"
@@ -37,7 +38,6 @@ import (
 	logparsercontroller "github.com/kyma-project/kyma/components/telemetry-operator/controller/logparser"
 	logpipelinecontroller "github.com/kyma-project/kyma/components/telemetry-operator/controller/logpipeline"
 	tracepipelinereconciler "github.com/kyma-project/kyma/components/telemetry-operator/controller/tracepipeline"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configureLogger"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/logger"
 	"github.com/kyma-project/kyma/components/telemetry-operator/webhook/dryrun"
@@ -83,7 +83,7 @@ var (
 	syncPeriod             time.Duration
 	telemetryNamespace     string
 	dynamicLoglevel        = zap.NewAtomicLevel()
-	configureLogLevelOnFly *configureLogger.LogLevel
+	configureLogLevelOnFly *configurelogger.LogLevel
 
 	traceCollectorCreateServiceMonitor bool
 	traceCollectorBaseName             string
@@ -203,7 +203,7 @@ func main() {
 		os.Exit(1)
 	}
 	dynamicLoglevel.SetLevel(parsedLevel)
-	configureLogLevelOnFly = configureLogger.New(dynamicLoglevel)
+	configureLogLevelOnFly = configurelogger.New(dynamicLoglevel)
 
 	ctrLogger, err := logger.New(logFormat, logLevel, dynamicLoglevel)
 

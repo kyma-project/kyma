@@ -67,17 +67,12 @@ type DeploymentProber interface {
 	IsReady(ctx context.Context, name types.NamespacedName) (bool, error)
 }
 
-type GlobalConfigHandler interface {
-	CheckGlobalConfig(config overrides.GlobalConfig) error
-	UpdateOverrideConfig(ctx context.Context, overrideConfigMap types.NamespacedName) (overrides.Config, error)
-}
-
 type Reconciler struct {
 	client.Client
 	config           Config
 	Scheme           *runtime.Scheme
 	prober           DeploymentProber
-	overridesHandler GlobalConfigHandler
+	overridesHandler overrides.GlobalConfigHandler
 }
 
 func NewReconciler(client client.Client, config Config, prober DeploymentProber, scheme *runtime.Scheme, handler *overrides.Handler) *Reconciler {

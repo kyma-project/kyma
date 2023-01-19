@@ -1,4 +1,4 @@
-package configureLogger
+package configurelogger
 
 import (
 	"go.uber.org/zap"

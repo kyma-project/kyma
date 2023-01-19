@@ -16,18 +16,18 @@ type ConfigmapProber struct {
 
 const overrideConfigFileName = "override-config"
 
-func (cmp *ConfigmapProber) ReadConfigMapIfPresent(ctx context.Context, name types.NamespacedName) (string, error) {
+func (cmp *ConfigmapProber) ReadConfigMapOrEmpty(ctx context.Context, name types.NamespacedName) (string, error) {
 	log := logf.FromContext(ctx)
 	var cm corev1.ConfigMap
 	if err := cmp.Get(ctx, name, &cm); err != nil {
-		log.V(1).Info(fmt.Sprintf("Could not get  %s/%s Configmap, looks like its not present", name.Namespace, name.Name))
 		if apierrors.IsNotFound(err) {
+			log.V(1).Info(fmt.Sprintf("Could not get  %s/%s Configmap, looks like its not present", name.Namespace, name.Name))
 			return "", nil
 		}
 		return "", fmt.Errorf("failed to get %s/%s Configmap: %v", name.Namespace, name.Name, err)
 	}
-	if _, ok := cm.Data[overrideConfigFileName]; ok {
-		return cm.Data[overrideConfigFileName], nil
+	if data, ok := cm.Data[overrideConfigFileName]; ok {
+		return data, nil
 	}
 	return "", nil
 }

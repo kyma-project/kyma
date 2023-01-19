@@ -3,7 +3,7 @@ package overrides
 import (
 	"context"
 	"fmt"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configureLogger"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configurelogger"
 	"gopkg.in/yaml.v3"
 	"k8s.io/apimachinery/pkg/types"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -14,9 +14,14 @@ type LogLevelChanger interface {
 	SetDefaultLogLevel() error
 }
 
+type GlobalConfigHandler interface {
+	CheckGlobalConfig(config GlobalConfig) error
+	UpdateOverrideConfig(ctx context.Context, overrideConfigMap types.NamespacedName) (Config, error)
+}
+
 //go:generate mockery --name ConfigMapProber --filename configmap_prober.go
 type ConfigMapProber interface {
-	ReadConfigMapIfPresent(ctx context.Context, name types.NamespacedName) (string, error)
+	ReadConfigMapOrEmpty(ctx context.Context, name types.NamespacedName) (string, error)
 }
 
 type Config struct {
@@ -42,7 +47,7 @@ type Handler struct {
 	cmProber        ConfigMapProber
 }
 
-func New(loglevelChanger *configureLogger.LogLevel, cmProber ConfigMapProber) *Handler {
+func New(loglevelChanger *configurelogger.LogLevel, cmProber ConfigMapProber) *Handler {
 	var m Handler
 	m.logLevelChanger = loglevelChanger
 	m.cmProber = cmProber
@@ -53,7 +58,7 @@ func (m *Handler) UpdateOverrideConfig(ctx context.Context, overrideConfigMap ty
 	log := logf.FromContext(ctx)
 	var overrideConfig Config
 
-	config, err := m.cmProber.ReadConfigMapIfPresent(ctx, overrideConfigMap)
+	config, err := m.cmProber.ReadConfigMapOrEmpty(ctx, overrideConfigMap)
 	if err != nil {
 		return overrideConfig, err
 	}
@@ -67,7 +72,7 @@ func (m *Handler) UpdateOverrideConfig(ctx context.Context, overrideConfigMap ty
 		return overrideConfig, err
 	}
 
-	log.V(1).Info(fmt.Sprintf("Override Config is: %+v", overrideConfig))
+	log.V(1).Info(fmt.Sprintf("Using override Config is: %+v", overrideConfig))
 
 	return overrideConfig, nil
 }
