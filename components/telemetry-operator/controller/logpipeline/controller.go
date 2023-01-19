@@ -21,10 +21,9 @@ import (
 	"fmt"
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configchecksum"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configureLogger"
 	configbuilder "github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/globalconfig"
 	utils "github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/overrides"
 	resources "github.com/kyma-project/kyma/components/telemetry-operator/internal/resources/logpipeline"
 	"github.com/prometheus/client_golang/prometheus"
 	corev1 "k8s.io/api/core/v1"
@@ -45,15 +44,7 @@ type Config struct {
 	OverrideConfigMap types.NamespacedName
 	PipelineDefaults  configbuilder.PipelineDefaults
 	ManageFluentBit   bool
-}
-
-type OverrideConfig struct {
-	Logging LoggingConfig
-	Global  globalconfig.OverrideConfig
-}
-
-type LoggingConfig struct {
-	Paused bool `yaml:"paused,omitempty"`
+	Overrides         overrides.Config
 }
 
 //go:generate mockery --name DaemonSetProber --filename daemon_set_prober.go
@@ -66,39 +57,33 @@ type DaemonSetAnnotator interface {
 	SetAnnotation(ctx context.Context, name types.NamespacedName, key, value string) error
 }
 
-//go:generate mockery --name ConfigMapProber --filename configmap_prober.go
-type ConfigMapProber interface {
-	IsPresent(ctx context.Context, name types.NamespacedName) (string, error)
-}
-
-type ManagerGlobalConfig interface {
-	CheckGlobalConfig(config globalconfig.OverrideConfig) error
+type GlobalConfigHandler interface {
+	CheckGlobalConfig(config overrides.GlobalConfig) error
+	UpdateOverrideConfig(ctx context.Context, overrideConfigMap types.NamespacedName) (overrides.Config, error)
 }
 
 type Reconciler struct {
 	client.Client
 	config                  Config
 	prober                  DaemonSetProber
-	cmProber                ConfigMapProber
 	annotator               DaemonSetAnnotator
 	allLogPipelines         prometheus.Gauge
 	unsupportedLogPipelines prometheus.Gauge
 	syncer                  syncer
-	globalConfig            ManagerGlobalConfig
+	globalConfig            GlobalConfigHandler
 }
 
-func NewReconciler(client client.Client, config Config, prober DaemonSetProber, annotator DaemonSetAnnotator, cmProber ConfigMapProber, dynamicLoglevel *configureLogger.LogLevel) *Reconciler {
+func NewReconciler(client client.Client, config Config, prober DaemonSetProber, annotator DaemonSetAnnotator, handler *overrides.Handler) *Reconciler {
 	var r Reconciler
 	r.Client = client
 	r.config = config
 	r.prober = prober
-	r.cmProber = cmProber
 	r.annotator = annotator
 	r.allLogPipelines = prometheus.NewGauge(prometheus.GaugeOpts{Name: "telemetry_all_logpipelines", Help: "Number of log pipelines."})
 	r.unsupportedLogPipelines = prometheus.NewGauge(prometheus.GaugeOpts{Name: "telemetry_unsupported_logpipelines", Help: "Number of log pipelines with custom filters or outputs."})
 	metrics.Registry.MustRegister(r.allLogPipelines, r.unsupportedLogPipelines)
 	r.syncer = syncer{client, config}
-	r.globalConfig = globalconfig.New(dynamicLoglevel)
+	r.globalConfig = handler
 
 	return &r
 }
@@ -107,7 +92,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	log := logf.FromContext(ctx)
 	log.V(1).Info("Reconciliation triggered")
 
-	overrideConfig, err := r.UpdateOverrideConfig(ctx)
+	overrideConfig, err := r.globalConfig.UpdateOverrideConfig(ctx, r.config.OverrideConfigMap)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
@@ -116,7 +101,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, err
 	}
 
-	if r.pauseReconciliation(overrideConfig.Logging) {
+	if overrideConfig.Logging.Paused {
 		log.V(1).Info("Skipping reconciliation of logpipeline as reconciliation is paused.")
 		return ctrl.Result{}, nil
 	}

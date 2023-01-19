@@ -17,6 +17,7 @@ import (
 	"context"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configureLogger"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/overrides"
 	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/types"
 	"path/filepath"
@@ -107,8 +108,9 @@ var _ = BeforeSuite(func() {
 		LeaderElectionID:       "ddd7ef0b.kyma-project.io",
 	})
 	Expect(err).ToNot(HaveOccurred())
+	overrides := overrides.New(configureLogLevelOnFly, &kubernetes.ConfigmapProber{Client: k8sClient})
 
-	reconciler := NewReconciler(mgr.GetClient(), testConfig, &kubernetes.DeploymentProber{Client: k8sClient}, &kubernetes.ConfigmapProber{Client: k8sClient}, scheme.Scheme, configureLogLevelOnFly)
+	reconciler := NewReconciler(mgr.GetClient(), testConfig, &kubernetes.DeploymentProber{Client: k8sClient}, scheme.Scheme, overrides)
 	err = reconciler.SetupWithManager(mgr)
 	Expect(err).ToNot(HaveOccurred())
 

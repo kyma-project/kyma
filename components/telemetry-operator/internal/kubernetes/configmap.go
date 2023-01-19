@@ -16,7 +16,7 @@ type ConfigmapProber struct {
 
 const overrideConfigFileName = "override-config"
 
-func (cmp *ConfigmapProber) IsPresent(ctx context.Context, name types.NamespacedName) (string, error) {
+func (cmp *ConfigmapProber) ReadConfigMapIfPresent(ctx context.Context, name types.NamespacedName) (string, error) {
 	log := logf.FromContext(ctx)
 	var cm corev1.ConfigMap
 	if err := cmp.Get(ctx, name, &cm); err != nil {

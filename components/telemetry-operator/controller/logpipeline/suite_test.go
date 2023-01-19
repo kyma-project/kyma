@@ -19,6 +19,7 @@ package logpipeline
 import (
 	"context"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configureLogger"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/overrides"
 	"path/filepath"
 	"testing"
 
@@ -110,7 +111,9 @@ var _ = BeforeSuite(func() {
 	Expect(err).ToNot(HaveOccurred())
 
 	client := mgr.GetClient()
-	reconciler := NewReconciler(client, testConfig, &kubernetes.DaemonSetProber{Client: client}, &kubernetes.DaemonSetAnnotator{Client: client}, &kubernetes.ConfigmapProber{Client: client}, configureLogLevelOnFly)
+	overrides := overrides.New(configureLogLevelOnFly, &kubernetes.ConfigmapProber{Client: client})
+
+	reconciler := NewReconciler(client, testConfig, &kubernetes.DaemonSetProber{Client: client}, &kubernetes.DaemonSetAnnotator{Client: client}, overrides)
 	err = reconciler.SetupWithManager(mgr)
 	Expect(err).ToNot(HaveOccurred())
 

@@ -22,9 +22,8 @@ import (
 	"fmt"
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configchecksum"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configureLogger"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/globalconfig"
 	utils "github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/overrides"
 	corev1 "k8s.io/api/core/v1"
 	"strings"
 
@@ -47,6 +46,7 @@ type Config struct {
 
 	Deployment DeploymentConfig
 	Service    ServiceConfig
+	Overrides  overrides.Config
 }
 
 type DeploymentConfig struct {
@@ -62,46 +62,31 @@ type ServiceConfig struct {
 	OTLPServiceName string
 }
 
-type OverrideConfig struct {
-	Tracing TracingConfig
-	Global  globalconfig.OverrideConfig
-}
-
-type TracingConfig struct {
-	Paused bool `yaml:"paused,omitempty"`
-}
-
 //go:generate mockery --name DeploymentProber --filename deployment_prober.go
 type DeploymentProber interface {
 	IsReady(ctx context.Context, name types.NamespacedName) (bool, error)
 }
 
-//go:generate mockery --name ConfigMapProber --filename configmap_prober.go
-type ConfigMapProber interface {
-	IsPresent(ctx context.Context, name types.NamespacedName) (string, error)
-}
-
-type ManagerGlobalConfig interface {
-	CheckGlobalConfig(config globalconfig.OverrideConfig) error
+type GlobalConfigHandler interface {
+	CheckGlobalConfig(config overrides.GlobalConfig) error
+	UpdateOverrideConfig(ctx context.Context, overrideConfigMap types.NamespacedName) (overrides.Config, error)
 }
 
 type Reconciler struct {
 	client.Client
-	config       Config
-	Scheme       *runtime.Scheme
-	prober       DeploymentProber
-	cmProber     ConfigMapProber
-	globalConfig ManagerGlobalConfig
+	config           Config
+	Scheme           *runtime.Scheme
+	prober           DeploymentProber
+	overridesHandler GlobalConfigHandler
 }
 
-func NewReconciler(client client.Client, config Config, prober DeploymentProber, cmProber ConfigMapProber, scheme *runtime.Scheme, dynamicLoglevel *configureLogger.LogLevel) *Reconciler {
+func NewReconciler(client client.Client, config Config, prober DeploymentProber, scheme *runtime.Scheme, handler *overrides.Handler) *Reconciler {
 	var r Reconciler
 	r.Client = client
 	r.config = config
 	r.Scheme = scheme
 	r.prober = prober
-	r.cmProber = cmProber
-	r.globalConfig = globalconfig.New(dynamicLoglevel)
+	r.overridesHandler = handler
 	return &r
 }
 
@@ -110,15 +95,15 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (reconcile
 
 	log.V(1).Info("Reconciliation triggered")
 
-	overrideConfig, err := r.UpdateOverrideConfig(ctx)
+	overrideConfig, err := r.overridesHandler.UpdateOverrideConfig(ctx, r.config.OverrideConfigMap)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
 
-	if err := r.globalConfig.CheckGlobalConfig(overrideConfig.Global); err != nil {
+	if err := r.overridesHandler.CheckGlobalConfig(overrideConfig.Global); err != nil {
 		return ctrl.Result{}, err
 	}
-	if r.pauseReconciliation(overrideConfig.Tracing) {
+	if overrideConfig.Tracing.Paused {
 		log.V(1).Info("Skipping reconciliation of tracepipeline as reconciliation is paused")
 		return ctrl.Result{}, nil
 	}

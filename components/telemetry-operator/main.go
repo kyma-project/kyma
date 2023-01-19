@@ -19,6 +19,7 @@ package main
 import (
 	"errors"
 	"flag"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/overrides"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"os"
@@ -316,7 +317,9 @@ func createLogPipelineReconciler(client client.Client) *logpipelinecontroller.Re
 		PipelineDefaults:  createPipelineDefaults(),
 		ManageFluentBit:   enableManagedFluentBit,
 	}
-	return logpipelinecontroller.NewReconciler(client, config, &kubernetes.DaemonSetProber{Client: client}, &kubernetes.DaemonSetAnnotator{Client: client}, &kubernetes.ConfigmapProber{Client: client}, configureLogLevelOnFly)
+	overrides := overrides.New(configureLogLevelOnFly, &kubernetes.ConfigmapProber{Client: client})
+
+	return logpipelinecontroller.NewReconciler(client, config, &kubernetes.DaemonSetProber{Client: client}, &kubernetes.DaemonSetAnnotator{Client: client}, overrides)
 }
 
 func createLogParserReconciler(client client.Client) *logparsercontroller.Reconciler {
@@ -324,7 +327,9 @@ func createLogParserReconciler(client client.Client) *logparsercontroller.Reconc
 		ParsersConfigMap: types.NamespacedName{Name: fluentBitParsersConfigMap, Namespace: telemetryNamespace},
 		DaemonSet:        types.NamespacedName{Namespace: telemetryNamespace, Name: fluentBitDaemonSet},
 	}
-	return logparsercontroller.NewReconciler(client, config, &kubernetes.DaemonSetProber{Client: client}, &kubernetes.DaemonSetAnnotator{Client: client})
+	overrides := overrides.New(configureLogLevelOnFly, &kubernetes.ConfigmapProber{Client: client})
+
+	return logparsercontroller.NewReconciler(client, config, &kubernetes.DaemonSetProber{Client: client}, &kubernetes.DaemonSetAnnotator{Client: client}, overrides)
 }
 
 func createLogPipelineValidator(client client.Client) *logpipelinewebhook.ValidatingWebhookHandler {
@@ -364,8 +369,9 @@ func createTracePipelineReconciler(client client.Client) *tracepipelinereconcile
 		},
 		OverrideConfigMap: types.NamespacedName{Name: overrideConfigMapName, Namespace: telemetryNamespace},
 	}
+	overrides := overrides.New(configureLogLevelOnFly, &kubernetes.ConfigmapProber{Client: client})
 
-	return tracepipelinereconciler.NewReconciler(client, config, &kubernetes.DeploymentProber{Client: client}, &kubernetes.ConfigmapProber{Client: client}, scheme, configureLogLevelOnFly)
+	return tracepipelinereconciler.NewReconciler(client, config, &kubernetes.DeploymentProber{Client: client}, scheme, overrides)
 }
 
 func createDryRunConfig() dryrun.Config {
