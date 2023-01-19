@@ -3,7 +3,7 @@ package overrides
 import (
 	"context"
 	"fmt"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configurelogger"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/logger"
 	"gopkg.in/yaml.v3"
 	"k8s.io/apimachinery/pkg/types"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -47,7 +47,7 @@ type Handler struct {
 	cmProber        ConfigMapProber
 }
 
-func New(loglevelChanger *configurelogger.LogLevel, cmProber ConfigMapProber) *Handler {
+func New(loglevelChanger *logger.LogLevel, cmProber ConfigMapProber) *Handler {
 	var m Handler
 	m.logLevelChanger = loglevelChanger
 	m.cmProber = cmProber

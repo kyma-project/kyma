@@ -18,7 +18,7 @@ package logpipeline
 
 import (
 	"context"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configurelogger"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/logger"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/overrides"
 	"path/filepath"
 	"testing"
@@ -77,7 +77,7 @@ func TestAPIs(t *testing.T) {
 var _ = BeforeSuite(func() {
 	logf.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
 	dynamicLoglevel := zapLog.NewAtomicLevel()
-	configureLogLevelOnFly := configurelogger.New(dynamicLoglevel)
+	configureLogLevelOnFly := logger.NewLogReconfigurer(dynamicLoglevel)
 
 	ctx, cancel = context.WithCancel(context.TODO())
 

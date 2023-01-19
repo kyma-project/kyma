@@ -49,18 +49,13 @@ type DaemonSetAnnotator interface {
 	SetAnnotation(ctx context.Context, name types.NamespacedName, key, value string) error
 }
 
-type GlobalConfigHandler interface {
-	CheckGlobalConfig(config overrides.GlobalConfig) error
-	UpdateOverrideConfig(ctx context.Context, overrideConfigMap types.NamespacedName) (overrides.Config, error)
-}
-
 type Reconciler struct {
 	client.Client
 	config       Config
 	prober       DaemonSetProber
 	annotator    DaemonSetAnnotator
 	syncer       syncer
-	globalConfig GlobalConfigHandler
+	globalConfig *overrides.Handler
 }
 
 func NewReconciler(client client.Client, config Config, prober DaemonSetProber, annotator DaemonSetAnnotator, handler *overrides.Handler) *Reconciler {
