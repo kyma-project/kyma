@@ -10,7 +10,7 @@ require (
 	github.com/kyma-project/kyma/components/application-operator v0.0.0-20221118103320-ffe096ff3455
 	github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20221221134059-d9a237e9ad4f
 	github.com/nats-io/nats-server/v2 v2.9.11
-	github.com/nats-io/nats.go v1.22.1
+	github.com/nats-io/nats.go v1.23.0
 	github.com/onsi/gomega v1.24.2
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.14.0
