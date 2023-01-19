@@ -559,7 +559,7 @@ func StartAndWaitForWebhookServer(k8sManager manager.Manager, webhookInstallOpts
 	dialer := &net.Dialer{Timeout: time.Second}
 	addrPort := fmt.Sprintf("%s:%d", webhookInstallOpts.LocalServingHost, webhookInstallOpts.LocalServingPort)
 	err := retry.Do(func() error {
-		//nolint:gosec //the test certificate used will report as bad certificate and hence not perform the test
+		//nolint:nolintlint //the test certificate used will report as bad certificate and hence not perform the test
 		conn, connErr := tls.DialWithDialer(dialer, "tcp", addrPort, &tls.Config{InsecureSkipVerify: true})
 		if connErr != nil {
 			return connErr
