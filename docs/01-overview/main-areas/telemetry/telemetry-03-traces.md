@@ -280,10 +280,10 @@ Only one TracePipeline resource at a time is supported at the moment.
 
 ### System span filtering
 System related spans reported by Istio will be filtered out without option to opt-out, especially the following:
-- `/healtz` endpoint of any component deployed on `kyma-system` namespace
-- `/metrics` endpoint of any component deployed on `kyma-system` namespace
+- `/healtz` endpoint of a component deployed in the `kyma-system` Namespace
+- `/metrics` endpoint of a component deployed in the `kyma-system` Namespace
 - All outgoing spans reported by Grafana and Jaeger
-- All spans in reference to `fluent-bit` and `loki` communication
+- All spans related to Fluent Bit and Loki communication
 
 ## Frequently Asked Questions
 
