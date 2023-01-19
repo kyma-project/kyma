@@ -19,12 +19,13 @@ package main
 import (
 	"errors"
 	"flag"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/overrides"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/overrides"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -44,6 +45,9 @@ import (
 	logparservalidation "github.com/kyma-project/kyma/components/telemetry-operator/webhook/logparser/validation"
 	logpipelinewebhook "github.com/kyma-project/kyma/components/telemetry-operator/webhook/logpipeline"
 	logpipelinevalidation "github.com/kyma-project/kyma/components/telemetry-operator/webhook/logpipeline/validation"
+
+	//nolint:gosec
+	_ "net/http/pprof"
 
 	"github.com/go-logr/zapr"
 
@@ -67,11 +71,13 @@ var (
 	enableLeaderElection   bool
 	enableLogging          bool
 	enableTracing          bool
+	enablePprof            bool
 	enableManagedFluentBit bool
 	logFormat              string
 	logLevel               string
 	metricsAddr            string
 	probeAddr              string
+	pprofAddr              string
 	scheme                 = runtime.NewScheme()
 	setupLog               = ctrl.Log.WithName("setup")
 	syncPeriod             time.Duration
@@ -147,7 +153,9 @@ func getEnvOrDefault(envVar string, defaultValue string) string {
 func main() {
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
+	flag.StringVar(&pprofAddr, "pprof-bind-address", ":6060", "The address the pprof endpoint binds to.")
 	flag.DurationVar(&syncPeriod, "sync-period", 1*time.Hour, "minimum frequency at which watched resources are reconciled")
+	flag.BoolVar(&enablePprof, "enable-profiling", true, "Enable pprof profiling.")
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. Enabling this will ensure there is only one active controller manager.")
 	flag.BoolVar(&enableLogging, "enable-logging", true, "Enable configurable logging.")
@@ -192,16 +200,21 @@ func main() {
 
 	parsedLevel, err := zapcore.ParseLevel(logLevel)
 	if err != nil {
-		setupLog.Error(err, "unable to parse logger level")
 		os.Exit(1)
 	}
 	dynamicLoglevel.SetLevel(parsedLevel)
 	configureLogLevelOnFly = configureLogger.New(dynamicLoglevel)
 
 	ctrLogger, err := logger.New(logFormat, logLevel, dynamicLoglevel)
+
+	if enablePprof {
+		go func() {
+			setupLog.Error(err, "Cannot start pprof server")
+		}()
+	}
+
 	ctrl.SetLogger(zapr.NewLogger(ctrLogger.WithContext().Desugar()))
 	if err != nil {
-		setupLog.Error(err, "Failed to initialize logger")
 		os.Exit(1)
 	}
 	defer func() {

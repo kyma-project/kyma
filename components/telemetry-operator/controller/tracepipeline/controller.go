@@ -234,7 +234,9 @@ func (r *Reconciler) createLock(ctx context.Context, name types.NamespacedName, 
 			Namespace: name.Namespace,
 		},
 	}
-	controllerutil.SetControllerReference(owner, &lock, r.Scheme)
+	if err := controllerutil.SetControllerReference(owner, &lock, r.Scheme); err != nil {
+		return fmt.Errorf("failed to set owner reference: %v", err)
+	}
 	if err := r.Create(ctx, &lock); err != nil {
 		return fmt.Errorf("failed to create lock: %v", err)
 	}

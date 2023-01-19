@@ -4,6 +4,8 @@ title: Tracing Architecture
 
 Kyma uses a Jaeger-based tracing component to collect and query traces.
 
+> **CAUTION:** Jaeger is [deprecated](https://kyma-project.io/blog/jaeger-deprecation) and is planned to be removed. If you want to install a custom Jaeger stack, take a look at [this tutorial](https://github.com/kyma-project/examples/tree/main/jaeger).
+
 Collection and query may occur at the same time. This way, you can inspect specific traces using the Jaeger UI, while Jaeger takes care of proper trace collection and storage in parallel.
 
 ## Architecture diagram

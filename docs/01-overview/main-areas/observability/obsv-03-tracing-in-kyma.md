@@ -2,6 +2,8 @@
 title: Tracing
 ---
 
+> **CAUTION:** Jaeger is [deprecated](https://kyma-project.io/blog/jaeger-deprecation) and is planned to be removed. If you want to install a custom Jaeger stack, take a look at [this tutorial](https://github.com/kyma-project/examples/tree/main/jaeger).
+
 ## Overview
 
 For in-cluster tracing, Kyma uses [Jaeger](https://github.com/jaegertracing). With this distributed tracing system, you can analyze the path of a request chain going through your distributed applications. This information helps you to, for example, troubleshoot your applications, or optimize the latency and performance of your solution.

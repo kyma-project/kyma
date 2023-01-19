@@ -9,6 +9,7 @@ If you're interested in learning more about the Observability area, check out th
 - Learn how to adjust Loki's [log limits](../../../04-operation-guides/operations/obsv-02-adjust-loki.md).
 
 - Install a [custom Loki stack](https://github.com/kyma-project/examples/tree/main/loki).
+- Install a [custom Jaeger stack](https://github.com/kyma-project/examples/tree/main/jaeger).
 
 - See how to [access and expose](../../../04-operation-guides/security/sec-06-access-expose-grafana.md) the services Grafana, Jaeger, and Kiali.
 
