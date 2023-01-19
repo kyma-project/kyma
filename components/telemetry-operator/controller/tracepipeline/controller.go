@@ -20,16 +20,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configchecksum"
+	utils "github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/overrides"
+	corev1 "k8s.io/api/core/v1"
 	"strings"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configchecksum"
-	utils "github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -42,9 +42,11 @@ type Config struct {
 	CreateServiceMonitor bool
 	BaseName             string
 	Namespace            string
+	OverrideConfigMap    types.NamespacedName
 
 	Deployment DeploymentConfig
 	Service    ServiceConfig
+	Overrides  overrides.Config
 }
 
 type DeploymentConfig struct {
@@ -67,24 +69,39 @@ type DeploymentProber interface {
 
 type Reconciler struct {
 	client.Client
-	config Config
-	Scheme *runtime.Scheme
-	prober DeploymentProber
+	config           Config
+	Scheme           *runtime.Scheme
+	prober           DeploymentProber
+	overridesHandler overrides.GlobalConfigHandler
 }
 
-func NewReconciler(client client.Client, config Config, prober DeploymentProber, scheme *runtime.Scheme) *Reconciler {
+func NewReconciler(client client.Client, config Config, prober DeploymentProber, scheme *runtime.Scheme, handler *overrides.Handler) *Reconciler {
 	var r Reconciler
 	r.Client = client
 	r.config = config
 	r.Scheme = scheme
 	r.prober = prober
+	r.overridesHandler = handler
 	return &r
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (reconcileResult ctrl.Result, reconcileErr error) {
-	logger := logf.FromContext(ctx)
+	log := logf.FromContext(ctx)
 
-	logger.V(1).Info("Reconciliation triggered")
+	log.V(1).Info("Reconciliation triggered")
+
+	overrideConfig, err := r.overridesHandler.UpdateOverrideConfig(ctx, r.config.OverrideConfigMap)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if err := r.overridesHandler.CheckGlobalConfig(overrideConfig.Global); err != nil {
+		return ctrl.Result{}, err
+	}
+	if overrideConfig.Tracing.Paused {
+		log.V(1).Info("Skipping reconciliation of tracepipeline as reconciliation is paused")
+		return ctrl.Result{}, nil
+	}
 
 	var tracePipeline telemetryv1alpha1.TracePipeline
 	if err := r.Get(ctx, req.NamespacedName, &tracePipeline); err != nil {
