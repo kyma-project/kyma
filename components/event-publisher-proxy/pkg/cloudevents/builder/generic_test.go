@@ -65,9 +65,9 @@ func Test_Build(t *testing.T) {
 			givenSource:            "appName1",
 			givenType:              "order.created.v1",
 			givenApplicationName:   "appName1",
-			givenApplicationLabels: map[string]string{application.TypeLabel: "t..e--s__t!!a@@p##p%%t^^y&&p**e"},
-			wantType:               "prefix.testapptype.order.created.v1",
-			wantSource:             "testapptype",
+			givenApplicationLabels: map[string]string{application.TypeLabel: "t..est-apptype"},
+			wantType:               "prefix.test-apptype.order.created.v1",
+			wantSource:             "test-apptype",
 		},
 		{
 			name:                 "should return error if empty type",
@@ -156,11 +156,11 @@ func Test_GetAppNameOrSource(t *testing.T) {
 			wantSource:             "testapptype",
 		},
 		{
-			name:                   "should return cleaned application label",
+			name:                   "should return non-clean application label",
 			givenSource:            "appName1",
 			givenApplicationName:   "appName1",
 			givenApplicationLabels: map[string]string{application.TypeLabel: "t..e--s__t!!a@@p##p%%t^^y&&p**e"},
-			wantSource:             "testapptype",
+			wantSource:             "t..e--s__t!!a@@p##p%%t^^y&&p**e",
 		},
 		{
 			name:                   "should return source name as application does not exists",
