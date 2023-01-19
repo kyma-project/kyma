@@ -114,7 +114,7 @@ type LoggingConfig struct {
 
 type TelemetryConfig struct {
 	Metrics MetricsConfig `yaml:"metrics"`
-	Logging LoggingConfig `yaml:"logging"`
+	Logs    LoggingConfig `yaml:"logs"`
 }
 
 type OTLPServiceConfig struct {
@@ -277,7 +277,7 @@ func makeServiceConfig(outputType string) OTLPServiceConfig {
 			Metrics: MetricsConfig{
 				Address: "0.0.0.0:8888",
 			},
-			Logging: LoggingConfig{
+			Logs: LoggingConfig{
 				Level: "info",
 			},
 		},
