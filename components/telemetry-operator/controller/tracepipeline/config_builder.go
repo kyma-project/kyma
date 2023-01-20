@@ -92,6 +92,15 @@ type ProcessorsConfig struct {
 	MemoryLimiter MemoryLimiterConfig          `yaml:"memory_limiter,omitempty"`
 	K8sAttributes K8sAttributesProcessorConfig `yaml:"k8sattributes,omitempty"`
 	Resource      ResourceProcessorConfig      `yaml:"resource,omitempty"`
+	Filter        FilterProcessorConfig        `yaml:"filter,omitempty"`
+}
+
+type FilterProcessorConfig struct {
+	Traces TraceConfig `yaml:"traces,omitempty"`
+}
+
+type TraceConfig struct {
+	Span []string `yaml:"span"`
 }
 
 type PipelineConfig struct {
@@ -108,8 +117,13 @@ type MetricsConfig struct {
 	Address string `yaml:"address"`
 }
 
+type LoggingConfig struct {
+	Level string `yaml:"level"`
+}
+
 type TelemetryConfig struct {
 	Metrics MetricsConfig `yaml:"metrics"`
+	Logs    LoggingConfig `yaml:"logs"`
 }
 
 type OTLPServiceConfig struct {
@@ -256,6 +270,25 @@ func makeProcessorsConfig() ProcessorsConfig {
 				},
 			},
 		},
+		Filter: FilterProcessorConfig{
+			Traces: TraceConfig{
+				Span: makeSpanFilterConfig(),
+			},
+		},
+	}
+}
+
+func makeSpanFilterConfig() []string {
+	return []string{
+		"(attributes[\"http.method\"] == \"POST\") and (attributes[\"component\"] == \"proxy\") and (attributes[\"OperationName\"] == \"Ingress\") and (resource.attributes[\"service.name\"] == \"jaeger.kyma-system\")",
+		"(attributes[\"http.method\"] == \"GET\") and (attributes[\"component\"] == \"proxy\") and (attributes[\"OperationName\"] == \"Egress\") and (resource.attributes[\"service.name\"] == \"grafana.kyma-system\")",
+		"(attributes[\"http.method\"] == \"GET\") and (attributes[\"component\"] == \"proxy\") and (attributes[\"OperationName\"] == \"Ingress\") and (IsMatch(attributes[\"http.url\"], \".+/metrics\") == true) and (resource.attributes[\"k8s.namespace.name\"] == \"kyma-system\")",
+		"(attributes[\"http.method\"] == \"GET\") and (attributes[\"component\"] == \"proxy\") and (attributes[\"OperationName\"] == \"Ingress\") and (IsMatch(attributes[\"http.url\"], \".+/healthz(/.*)?\") == true) and (resource.attributes[\"k8s.namespace.name\"] == \"kyma-system\")",
+		"(attributes[\"http.method\"] == \"GET\") and (attributes[\"component\"] == \"proxy\") and (attributes[\"OperationName\"] == \"Ingress\") and (attributes[\"user_agent\"] == \"vm_promscrape\")",
+		"(attributes[\"http.method\"] == \"POST\") and (attributes[\"component\"] == \"proxy\") and (attributes[\"OperationName\"] == \"Egress\") and (IsMatch(attributes[\"http.url\"], \"http(s)?:\\\\/\\\\/telemetry-otlp-traces\\\\.kyma-system(\\\\..*)?:(4318|4317).*\") == true)",
+		"(attributes[\"http.method\"] == \"POST\") and (attributes[\"component\"] == \"proxy\") and (attributes[\"OperationName\"] == \"Egress\") and (IsMatch(attributes[\"http.url\"], \"http(s)?:\\\\/\\\\/telemetry-trace-collector-internal\\\\.kyma-system(\\\\..*)?:(55678).*\") == true)",
+		"(attributes[\"http.method\"] == \"POST\") and (attributes[\"component\"] == \"proxy\") and (attributes[\"OperationName\"] == \"Ingress\") and (resource.attributes[\"service.name\"] == \"loki.kyma-system\")",
+		"(attributes[\"http.method\"] == \"POST\") and (attributes[\"component\"] == \"proxy\") and (attributes[\"OperationName\"] == \"Egress\") and (resource.attributes[\"service.name\"] == \"telemetry-fluent-bit.kyma-system\")",
 	}
 }
 
@@ -264,13 +297,16 @@ func makeServiceConfig(outputType string) OTLPServiceConfig {
 		Pipelines: PipelinesConfig{
 			Traces: PipelineConfig{
 				Receivers:  []string{"opencensus", "otlp"},
-				Processors: []string{"memory_limiter", "k8sattributes", "resource", "batch"},
+				Processors: []string{"memory_limiter", "k8sattributes", "filter", "resource", "batch"},
 				Exporters:  []string{outputType, "logging"},
 			},
 		},
 		Telemetry: TelemetryConfig{
 			Metrics: MetricsConfig{
 				Address: "0.0.0.0:8888",
+			},
+			Logs: LoggingConfig{
+				Level: "info",
 			},
 		},
 		Extensions: []string{"health_check"},

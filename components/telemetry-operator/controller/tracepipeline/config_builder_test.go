@@ -149,15 +149,17 @@ func TestMakeServiceConfig(t *testing.T) {
 	require.Contains(t, serviceConfig.Pipelines.Traces.Receivers, "otlp")
 	require.Contains(t, serviceConfig.Pipelines.Traces.Receivers, "opencensus")
 
-	require.Contains(t, serviceConfig.Pipelines.Traces.Processors, "memory_limiter")
-	require.Contains(t, serviceConfig.Pipelines.Traces.Processors, "k8sattributes")
-	require.Contains(t, serviceConfig.Pipelines.Traces.Processors, "resource")
-	require.Contains(t, serviceConfig.Pipelines.Traces.Processors, "batch")
+	require.Equal(t, serviceConfig.Pipelines.Traces.Processors[0], "memory_limiter")
+	require.Equal(t, serviceConfig.Pipelines.Traces.Processors[1], "k8sattributes")
+	require.Equal(t, serviceConfig.Pipelines.Traces.Processors[2], "filter")
+	require.Equal(t, serviceConfig.Pipelines.Traces.Processors[3], "resource")
+	require.Equal(t, serviceConfig.Pipelines.Traces.Processors[4], "batch")
 
 	require.Contains(t, serviceConfig.Pipelines.Traces.Exporters, "otlp")
 	require.Contains(t, serviceConfig.Pipelines.Traces.Exporters, "logging")
 
 	require.Equal(t, "0.0.0.0:8888", serviceConfig.Telemetry.Metrics.Address)
+	require.Equal(t, "info", serviceConfig.Telemetry.Logs.Level)
 	require.Contains(t, serviceConfig.Extensions, "health_check")
 }
 
@@ -212,6 +214,20 @@ func TestK8sAttributesProcessor(t *testing.T) {
 	require.Equal(t, "k8s.pod.uid", processors.K8sAttributes.PodAssociation[1].Sources[0].Name)
 
 	require.Equal(t, "connection", processors.K8sAttributes.PodAssociation[2].Sources[0].From)
+}
+
+func TestFilterProcessor(t *testing.T) {
+	processors := makeProcessorsConfig()
+	require.Equal(t, len(processors.Filter.Traces.Span), 9, "Span filter list size is wrong")
+	require.Contains(t, processors.Filter.Traces.Span, "(attributes[\"http.method\"] == \"POST\") and (attributes[\"component\"] == \"proxy\") and (attributes[\"OperationName\"] == \"Ingress\") and (resource.attributes[\"service.name\"] == \"jaeger.kyma-system\")", "Jaeger span filter missing")
+	require.Contains(t, processors.Filter.Traces.Span, "(attributes[\"http.method\"] == \"GET\") and (attributes[\"component\"] == \"proxy\") and (attributes[\"OperationName\"] == \"Egress\") and (resource.attributes[\"service.name\"] == \"grafana.kyma-system\")", "Grafana span filter missing")
+	require.Contains(t, processors.Filter.Traces.Span, "(attributes[\"http.method\"] == \"GET\") and (attributes[\"component\"] == \"proxy\") and (attributes[\"OperationName\"] == \"Ingress\") and (IsMatch(attributes[\"http.url\"], \".+/metrics\") == true) and (resource.attributes[\"k8s.namespace.name\"] == \"kyma-system\")", "/metrics endpoint span filter missing")
+	require.Contains(t, processors.Filter.Traces.Span, "(attributes[\"http.method\"] == \"GET\") and (attributes[\"component\"] == \"proxy\") and (attributes[\"OperationName\"] == \"Ingress\") and (IsMatch(attributes[\"http.url\"], \".+/healthz(/.*)?\") == true) and (resource.attributes[\"k8s.namespace.name\"] == \"kyma-system\")", "/healthz endpoint span filter missing")
+	require.Contains(t, processors.Filter.Traces.Span, "(attributes[\"http.method\"] == \"GET\") and (attributes[\"component\"] == \"proxy\") and (attributes[\"OperationName\"] == \"Ingress\") and (attributes[\"user_agent\"] == \"vm_promscrape\")", "Victoria Metrics agent span filter missing")
+	require.Contains(t, processors.Filter.Traces.Span, "(attributes[\"http.method\"] == \"POST\") and (attributes[\"component\"] == \"proxy\") and (attributes[\"OperationName\"] == \"Egress\") and (IsMatch(attributes[\"http.url\"], \"http(s)?:\\\\/\\\\/telemetry-otlp-traces\\\\.kyma-system(\\\\..*)?:(4318|4317).*\") == true)", "Telemetry OTLP service span filter missing")
+	require.Contains(t, processors.Filter.Traces.Span, "(attributes[\"http.method\"] == \"POST\") and (attributes[\"component\"] == \"proxy\") and (attributes[\"OperationName\"] == \"Egress\") and (IsMatch(attributes[\"http.url\"], \"http(s)?:\\\\/\\\\/telemetry-trace-collector-internal\\\\.kyma-system(\\\\..*)?:(55678).*\") == true)", "Telemetry Opencensus service span filter missing")
+	require.Contains(t, processors.Filter.Traces.Span, "(attributes[\"http.method\"] == \"POST\") and (attributes[\"component\"] == \"proxy\") and (attributes[\"OperationName\"] == \"Ingress\") and (resource.attributes[\"service.name\"] == \"loki.kyma-system\")", "Loki service span filter missing")
+	require.Contains(t, processors.Filter.Traces.Span, "(attributes[\"http.method\"] == \"POST\") and (attributes[\"component\"] == \"proxy\") and (attributes[\"OperationName\"] == \"Egress\") and (resource.attributes[\"service.name\"] == \"telemetry-fluent-bit.kyma-system\")", "Fluent-Bit service span filter missing")
 }
 
 func TestCollectorConfigMarshalling(t *testing.T) {
@@ -272,6 +288,39 @@ processors:
     - action: insert
       key: k8s.cluster.name
       value: ${KUBERNETES_SERVICE_HOST}
+  filter:
+    traces:
+      span:
+      - (attributes["http.method"] == "POST") and (attributes["component"] == "proxy")
+        and (attributes["OperationName"] == "Ingress") and (resource.attributes["service.name"]
+        == "jaeger.kyma-system")
+      - (attributes["http.method"] == "GET") and (attributes["component"] == "proxy")
+        and (attributes["OperationName"] == "Egress") and (resource.attributes["service.name"]
+        == "grafana.kyma-system")
+      - (attributes["http.method"] == "GET") and (attributes["component"] == "proxy")
+        and (attributes["OperationName"] == "Ingress") and (IsMatch(attributes["http.url"],
+        ".+/metrics") == true) and (resource.attributes["k8s.namespace.name"] == "kyma-system")
+      - (attributes["http.method"] == "GET") and (attributes["component"] == "proxy")
+        and (attributes["OperationName"] == "Ingress") and (IsMatch(attributes["http.url"],
+        ".+/healthz(/.*)?") == true) and (resource.attributes["k8s.namespace.name"]
+        == "kyma-system")
+      - (attributes["http.method"] == "GET") and (attributes["component"] == "proxy")
+        and (attributes["OperationName"] == "Ingress") and (attributes["user_agent"]
+        == "vm_promscrape")
+      - (attributes["http.method"] == "POST") and (attributes["component"] == "proxy")
+        and (attributes["OperationName"] == "Egress") and (IsMatch(attributes["http.url"],
+        "http(s)?:\\/\\/telemetry-otlp-traces\\.kyma-system(\\..*)?:(4318|4317).*")
+        == true)
+      - (attributes["http.method"] == "POST") and (attributes["component"] == "proxy")
+        and (attributes["OperationName"] == "Egress") and (IsMatch(attributes["http.url"],
+        "http(s)?:\\/\\/telemetry-trace-collector-internal\\.kyma-system(\\..*)?:(55678).*")
+        == true)
+      - (attributes["http.method"] == "POST") and (attributes["component"] == "proxy")
+        and (attributes["OperationName"] == "Ingress") and (resource.attributes["service.name"]
+        == "loki.kyma-system")
+      - (attributes["http.method"] == "POST") and (attributes["component"] == "proxy")
+        and (attributes["OperationName"] == "Egress") and (resource.attributes["service.name"]
+        == "telemetry-fluent-bit.kyma-system")
 extensions:
   health_check: {}
 service:
@@ -283,6 +332,7 @@ service:
       processors:
       - memory_limiter
       - k8sattributes
+      - filter
       - resource
       - batch
       exporters:
@@ -291,6 +341,8 @@ service:
   telemetry:
     metrics:
       address: 0.0.0.0:8888
+    logs:
+      level: info
   extensions:
   - health_check
 `
