@@ -98,9 +98,9 @@ kyma deploy -s main --value telemetry.operator.controllers.tracing.enabled=true
 ```
 
 
-### Enable Pausing of reconciliations
-The idea to pause the reconciliations is to be able to debug the pipelines, like trying out different pipeline configuration or different otel configuration. To achieve this we need to introduce `telemetry-override-config` in `kyma-system`
-namespace. Following example can be used:
+### Enable pausing reconciliations
+You must pause reconciliations to be able to debug the pipelines and, for example, try out a different pipeline configuration or a different OTel configuration. To pause reconciliations, create a `telemetry-override-config` in the `kyma-system`
+Namespace. Here is an example of such a ConfigMap:
 ```yaml
 apiVersion: v1
 kind: ConfigMap
@@ -116,17 +116,17 @@ data:
     logging:
       paused: true
 ```
-All the fields `global`, `tracing` and `logging` are optional.
+The `global`, `tracing`, and `logging` fields are optional.
 
 
-**Steps to debug**
-1. Introduce the override `telemetry-override-config` configmap.
-2. Perform Debug operations
-3. Remove the override configmap
-4. Trigger a reconciliation again to reset the debug actions (like to reset the otel collector config) by restarting the telemetry operator.
+#### Debugging steps
+1. Create an overriding `telemetry-override-config` ConfigMap.
+2. Perform debugging operations.
+3. Remove the created ConfigMap.
+4. To reset the debug actions, perform a restart of the telemetry operator.
    ```bash
    kubectl rollout restart deployment -n kyma-system telemetry-operator
 5. ```
 
 **Caveats**
-If you have changed the pipeline CR when the reconciliation is paused, then these changes would not be applied immediately. Rather it would be done in the periodic reconciliation cycle of 1 hour. To reconcile earlier restart the telemetry operator.
+If you change the pipeline CR when the reconciliation is paused, these changes will not be applied immediately, but in a periodic reconciliation cycle of one hour. To reconcile earlier, restart the telemetry operator.
