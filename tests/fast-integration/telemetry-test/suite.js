@@ -409,7 +409,9 @@ describe('Telemetry Operator', function() {
         it(`Should delete second TracePipeline '${secondPipelineName}'`, async function() {
           await k8sDelete(secondPipeline);
         });
+      });
 
+      context('Debuggability', function() {
         const overrideConfig = loadTestData('override-config.yaml');
         const pipeline = loadTestData('tracepipeline-output-otlp.yaml');
         const pipelineName = pipeline[0].metadata.name;
