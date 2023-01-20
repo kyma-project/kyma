@@ -131,9 +131,6 @@ func (s *Subscription) validateSubscriptionConfig() field.ErrorList {
 	if s.ifKeyExistsInConfig(WebhookAuthGrantType) && types.IsInvalidGrantType(s.Spec.Config[WebhookAuthGrantType]) {
 		allErrs = append(allErrs, MakeInvalidFieldError(ConfigPath, s.Name, InvalidGrantTypeErrDetail))
 	}
-	if len(allErrs) == 0 {
-		return nil
-	}
 	return allErrs
 }
 
@@ -171,10 +168,8 @@ func (s *Subscription) validateSubscriptionSink() *field.Error {
 }
 
 func (s *Subscription) ifKeyExistsInConfig(key string) bool {
-	if _, ok := s.Spec.Config[key]; ok {
-		return true
-	}
-	return false
+	_, ok := s.Spec.Config[key]
+	return ok
 }
 
 func isNotInt(value string) bool {
