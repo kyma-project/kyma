@@ -96,3 +96,35 @@ To activate configurable tracing, follow the previous steps to run the telemetry
 kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/main/components/telemetry-operator/config/crd/bases/telemetry.kyma-project.io_tracepipelines.yaml
 kyma deploy -s main --value telemetry.operator.controllers.tracing.enabled=true
 ```
+
+
+### Enable Pausing of reconciliations
+The idea to pause the reconciliations is to be able to debug the pipelines, like trying out different pipeline configuration or different otel configuration. To achieve this we need to introduce `telemetry-override-config` in `kyma-system`
+namespace. Following example can be used:
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: telemetry-override-config
+  namespace: kyma-system
+data:
+  override-config: |
+    global:
+      logLevel: debug
+    tracing:
+      paused: true
+    logging:
+      paused: true
+```
+All the fields `global`, `tracing` and `logging` are optional.
+
+
+**Steps to debug**
+1. Introduce the override `telemetry-override-config` configmap.
+2. Trigger a reconciliation when by changing the either `logpipeline` or `tracepipeline` CR.
+3. Perform Debug operations
+4. Remove the override configmap
+5. Trigger a reconciliation again to reset the debug actions (like to reset the otel collector config).
+
+**Caveats**
+If you have changed the pipeline CR when the reconcilation is paused. Then these changes wont be applied immediately. Rather it would be done in the periodic reconciliation cycle of 1 hour. If you want to reconcile earlier restart the telemetry operator.

@@ -442,13 +442,14 @@ describe('Telemetry Operator', function() {
         });
 
         it(`Tries to change the otlp endpoint again`, async function() {
+          await sleep(10*1000);
           await createTracePipelineInline(pipelineName, 'http://another-foo-bar');
           await waitForTracePipeline(pipelineName);
           await waitForTracePipelineStatusRunning(pipelineName);
         });
 
         it(`Should now change the OTLP endpoint in paused state`, async function() {
-          await sleep(10*1000);
+          await sleep(5*1000);
           const secret = await getSecret('telemetry-trace-collector', 'kyma-system');
           assert.equal(secret.data.OTLP_ENDPOINT, 'aHR0cDovL2Fub3RoZXItZm9vLWJhcg==');
         });

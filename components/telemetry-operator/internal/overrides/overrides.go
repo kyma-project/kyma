@@ -79,7 +79,7 @@ func (m *Handler) UpdateOverrideConfig(ctx context.Context, overrideConfigMap ty
 
 func (m *Handler) CheckGlobalConfig(config GlobalConfig) error {
 	if config.LogLevel == "" {
-		m.logLevelChanger.SetDefaultLogLevel()
+		return m.logLevelChanger.SetDefaultLogLevel()
 	}
 
 	return m.logLevelChanger.ChangeLogLevel(config.LogLevel)
