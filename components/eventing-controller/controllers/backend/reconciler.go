@@ -951,7 +951,8 @@ system_account: "$SYS"`, password))
 			Name:      natsSecretName,
 			Namespace: kymaSystemNamespace,
 			Annotations: map[string]string{
-				"eventing.kyma-project.io/managed-by-reconciler-disclaimer": "DO NOT EDIT - This resource is managed by Kyma.\n Any modifications breaks eventing.",
+				"eventing.kyma-project.io/managed-by-reconciler-disclaimer": "DO NOT EDIT - " +
+					"This resource is managed by Kyma.\n Any modifications breaks eventing.",
 			},
 		},
 		Data: secretMap,
