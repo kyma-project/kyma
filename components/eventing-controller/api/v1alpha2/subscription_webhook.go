@@ -4,6 +4,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -75,7 +77,7 @@ func (s *Subscription) ValidateSubscription() error {
 		allErrs = append(allErrs, err)
 	}
 	if err := s.validateSubscriptionConfig(); err != nil {
-		allErrs = append(allErrs, err)
+		allErrs = append(allErrs, err...)
 	}
 	if err := s.validateSubscriptionSink(); err != nil {
 		allErrs = append(allErrs, err)
@@ -115,11 +117,24 @@ func (s *Subscription) validateSubscriptionTypes() *field.Error {
 	return nil
 }
 
-func (s *Subscription) validateSubscriptionConfig() *field.Error {
+func (s *Subscription) validateSubscriptionConfig() field.ErrorList {
+	var allErrs field.ErrorList
 	if isNotInt(s.Spec.Config[MaxInFlightMessages]) {
-		return MakeInvalidFieldError(ConfigPath, s.Name, StringIntErrDetail)
+		allErrs = append(allErrs, MakeInvalidFieldError(ConfigPath, s.Name, StringIntErrDetail))
 	}
-	return nil
+	if s.ifKeyExistsInConfig(ProtocolSettingsQos) && types.IsInvalidQoS(s.Spec.Config[ProtocolSettingsQos]) {
+		allErrs = append(allErrs, MakeInvalidFieldError(ConfigPath, s.Name, InvalidQosErrDetail))
+	}
+	if s.ifKeyExistsInConfig(WebhookAuthType) && types.IsInvalidAuthType(s.Spec.Config[WebhookAuthType]) {
+		allErrs = append(allErrs, MakeInvalidFieldError(ConfigPath, s.Name, InvalidAuthTypeErrDetail))
+	}
+	if s.ifKeyExistsInConfig(WebhookAuthGrantType) && types.IsInvalidGrantType(s.Spec.Config[WebhookAuthGrantType]) {
+		allErrs = append(allErrs, MakeInvalidFieldError(ConfigPath, s.Name, InvalidGrantTypeErrDetail))
+	}
+	if len(allErrs) == 0 {
+		return nil
+	}
+	return allErrs
 }
 
 func (s *Subscription) validateSubscriptionSink() *field.Error {
@@ -153,6 +168,13 @@ func (s *Subscription) validateSubscriptionSink() *field.Error {
 	}
 
 	return nil
+}
+
+func (s *Subscription) ifKeyExistsInConfig(key string) bool {
+	if _, ok := s.Spec.Config[key]; ok {
+		return true
+	}
+	return false
 }
 
 func isNotInt(value string) bool {
