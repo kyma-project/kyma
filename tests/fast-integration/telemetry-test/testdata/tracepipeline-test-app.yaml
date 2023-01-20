@@ -1,0 +1,134 @@
+apiVersion: serverless.kyma-project.io/v1alpha2
+kind: Function
+metadata:
+  name: svc-a
+  labels:
+    app: svc-a
+spec:
+  scaleConfig:
+    maxReplicas: 1
+    minReplicas: 1
+  runtime: nodejs16
+  template:
+    labels:
+      app: svc-a
+  source:
+    inline:
+      source: |-
+        const axios = require("axios");
+        module.exports = {
+            main: async function (event, context) {
+              let traceId=event.extensions.request.headers['x-b3-traceid']
+              console.debug(`level=debug traceId=${traceId} message=Event data: ${JSON.stringify(event.data)}`);
+
+              let response = await axios.post("http://svc-b.default:80", event.data, {"Content-Type": "application/cloudevents+json"});
+              console.info(`level=info traceId=${traceId} message=Called svc-b`);
+              return response.data
+          }
+        };
+      dependencies: |-
+        {
+          "name": "svc-a",
+          "version": "1.0.0",
+          "dependencies":{
+            "axios": "^0.21.1"
+          }
+        }
+
+---
+apiVersion: serverless.kyma-project.io/v1alpha2
+kind: Function
+metadata:
+  name: svc-b
+  labels:
+    app: svc-b
+spec:
+  scaleConfig:
+    maxReplicas: 1
+    minReplicas: 1
+  runtime: nodejs16
+  template:
+    labels:
+      app: svc-b
+  source:
+    inline:
+      source: |-
+        const axios = require("axios");
+        const { v4: uuidv4 } = require('uuid');
+        module.exports = {
+            main: async function (event, context) {
+              let traceId=event.extensions.request.headers['x-b3-traceid']
+              console.debug(`level=debug traceId=${traceId} message=Event data: ${JSON.stringify(event.data)}`);
+              let response = await axios.post("http://svc-c.default:80", event.data);
+              console.info(`level=info traceId=${traceId} message=Called svc-c`);
+              return response.data
+          }
+        };
+      dependencies: |-
+        {
+          "name": "svc-b",
+          "version": "1.0.0",
+          "dependencies":{
+            "uuidv4": "6.2.12",
+            "axios": "^0.21.1"
+          }
+        }
+
+---
+
+apiVersion: serverless.kyma-project.io/v1alpha2
+kind: Function
+metadata:
+  name: svc-c
+  labels:
+    app: svc-c
+spec:
+  scaleConfig:
+    maxReplicas: 1
+    minReplicas: 1
+  runtime: nodejs16
+  template:
+    labels:
+      app: svc-c
+  source:
+    inline:
+      source: |-
+        const axios = require("axios");
+        module.exports = {
+            main: async function (event, context) {
+              let traceId=event.extensions.request.headers['x-b3-traceid']
+              console.debug(`level=debug traceId=${traceId} message=Event data: ${JSON.stringify(event.data)}`);
+              return "success"
+          }
+        };
+      dependencies: |-
+        {
+          "name": "svc-c",
+          "version": "1.0.0",
+          "dependencies":{
+            "axios": "^0.21.1"
+          }
+        }
+---
+apiVersion: gateway.kyma-project.io/v1beta1
+kind: APIRule
+metadata:
+  name: svc-a
+spec:
+  gateway: kyma-gateway.kyma-system.svc.cluster.local
+  rules:
+    - accessStrategies:
+        - config: {}
+          handler: allow
+      methods:
+        - GET
+        - POST
+        - PUT
+        - PATCH
+        - DELETE
+        - HEAD
+      path: /.*
+  host: tracing-test
+  service:
+    name: svc-a
+    port: 80

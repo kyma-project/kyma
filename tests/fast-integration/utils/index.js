@@ -643,6 +643,7 @@ async function getVirtualService(namespace, name) {
   }
 }
 
+
 async function getPersistentVolumeClaim(namespace, name) {
   const path = `/api/v1/namespaces/${namespace}/persistentvolumeclaims/${name}`;
   const response = await k8sDynamicApi.requestPromise({

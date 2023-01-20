@@ -24,8 +24,10 @@ const {
   waitForPodWithLabel,
   waitForTracePipelineStatusRunning,
   waitForTracePipelineStatusPending,
+  waitForDeploymentWithLabel,
 } = require('./helpers');
 
+const {getJaegerTracesForService, getJaegerServices, callTestApp} = require('../tracing/client');
 
 async function prepareEnvironment() {
   async function k8sApplyFile(name, namespace) {
@@ -407,6 +409,35 @@ describe('Telemetry Operator', function() {
 
         it(`Should delete second TracePipeline '${secondPipelineName}'`, async function() {
           await k8sDelete(secondPipeline);
+        });
+      });
+
+
+      context('Filter Processor', function() {
+        const testApp = loadTestData('tracepipeline-test-app.yaml');
+        it(`Should create test app`, async function() {
+          await k8sApply(testApp);
+          await waitForPodWithLabel('app', 'svc-a', 'default');
+          await waitForPodWithLabel('app', 'svc-b', 'default');
+          await waitForPodWithLabel('app', 'svc-c', 'default');
+          await waitForVirtualService('default', 'svc-a');
+        });
+
+        it(`Should call test app`, async function() {
+          for (let i=0; i < 100; i++) {
+            await callTestApp();
+          }
+        });
+
+        it(`Should get services`, async function() {
+          await getJaegerServices();
+          const svca = await waitForDeploymentWithLabel('serverless.kyma-project.io/function-name', 'svc-a', 'default');
+          const serviceTraces = await getJaegerTracesForService(svca.metadata.name, 'default');
+          assert.isTrue(serviceTraces.data.length > 0);
+        });
+
+        it(`Should delete test app `, async function() {
+          await k8sDelete(testApp);
         });
       });
     });
