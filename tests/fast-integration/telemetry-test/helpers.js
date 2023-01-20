@@ -5,7 +5,6 @@ module.exports = {
   waitForPodWithLabel,
   waitForTracePipelineStatusRunning,
   waitForTracePipelineStatusPending,
-  createTracePipelineInline,
 };
 
 const k8s = require('@kubernetes/client-node');
@@ -13,7 +12,6 @@ const fs = require('fs');
 const path = require('path');
 const {
   waitForK8sObject,
-  k8sApply,
 } = require('../utils');
 
 function loadTestData(fileName) {
@@ -111,22 +109,3 @@ function waitForPodWithLabel(
   );
 }
 
-async function createTracePipelineInline(pipelineName, endpoint) {
-  const tracePipeline = {
-    apiVersion: 'telemetry.kyma-project.io/v1alpha1',
-    kind: 'TracePipeline',
-    metadata: {
-      name: pipelineName,
-    },
-    spec: {
-      output: {
-        otlp: {
-          endpoint: {
-            value: endpoint,
-          },
-        },
-      },
-    },
-  };
-  await k8sApply([tracePipeline]);
-}

@@ -24,7 +24,6 @@ const {
   waitForPodWithLabel,
   waitForTracePipelineStatusRunning,
   waitForTracePipelineStatusPending,
-  createTracePipelineInline,
 } = require('./helpers');
 
 
@@ -411,9 +410,10 @@ describe('Telemetry Operator', function() {
         });
 
         const overrideConfig = loadTestData('override-config.yaml');
-        const pipelineName = 'test-trace';
+        const pipeline = loadTestData('tracepipeline-output-otlp.yaml');
+        const pipelineName = pipeline[0].metadata.name;
         it(`Creates a tracepipeline`, async function() {
-          await createTracePipelineInline(pipelineName, 'http://foo-bar');
+          await k8sApply(pipeline);
           await waitForTracePipeline(pipelineName);
           await waitForTracePipelineStatusRunning(pipelineName);
         });
@@ -428,7 +428,8 @@ describe('Telemetry Operator', function() {
         });
 
         it(`Tries to change the otlp endpoint`, async function() {
-          await createTracePipelineInline(pipelineName, 'http://another-foo');
+          pipeline[0].spec.output.otlp.endpoint.value = 'http://another-foo';
+          await k8sApply(pipeline);
         });
 
         it(`Should not change the OTLP endpoint in the telemetry-trace-collector secret in paused state`, async () => {
@@ -443,7 +444,8 @@ describe('Telemetry Operator', function() {
 
         it(`Tries to change the otlp endpoint again`, async function() {
           await sleep(10*1000);
-          await createTracePipelineInline(pipelineName, 'http://another-foo-bar');
+          pipeline[0].spec.output.otlp.endpoint.value = 'http://another-foo-bar';
+          await k8sApply(pipeline);
           await waitForTracePipeline(pipelineName);
           await waitForTracePipelineStatusRunning(pipelineName);
         });

@@ -6,6 +6,6 @@ metadata:
 data:
   override-config: |
     global:
-      logLevel: "debug"
+      logLevel: debug
     tracing:
       paused: true
