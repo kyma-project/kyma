@@ -431,7 +431,7 @@ describe('Telemetry Operator', function() {
           await createTracePipelineInline(pipelineName, 'http://another-foo');
         });
 
-        it(`Should not change the OTLP endpoint in paused state`, async () => {
+        it(`Should not change the OTLP endpoint in the telemetry-trace-collector secret in paused state`, async () => {
           await sleep(5*1000);
           const secret = await getSecret('telemetry-trace-collector', 'kyma-system');
           assert.equal(secret.data.OTLP_ENDPOINT, 'aHR0cDovL2Zvby1iYXI=');
@@ -448,7 +448,7 @@ describe('Telemetry Operator', function() {
           await waitForTracePipelineStatusRunning(pipelineName);
         });
 
-        it(`Should now change the OTLP endpoint in paused state`, async function() {
+        it(`Should now change the OTLP endpoint in the telemetry-trace-collector secret`, async function() {
           await sleep(5*1000);
           const secret = await getSecret('telemetry-trace-collector', 'kyma-system');
           assert.equal(secret.data.OTLP_ENDPOINT, 'aHR0cDovL2Fub3RoZXItZm9vLWJhcg==');
