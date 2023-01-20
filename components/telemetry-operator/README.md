@@ -121,10 +121,12 @@ All the fields `global`, `tracing` and `logging` are optional.
 
 **Steps to debug**
 1. Introduce the override `telemetry-override-config` configmap.
-2. Trigger a reconciliation when by changing the either `logpipeline` or `tracepipeline` CR.
-3. Perform Debug operations
-4. Remove the override configmap
-5. Trigger a reconciliation again to reset the debug actions (like to reset the otel collector config).
+2. Perform Debug operations
+3. Remove the override configmap
+4. Trigger a reconciliation again to reset the debug actions (like to reset the otel collector config) by restarting the telemetry operator.
+   ```bash
+   kubectl rollout restart deployment -n kyma-system telemetry-operator
+5. ```
 
 **Caveats**
-If you have changed the pipeline CR when the reconcilation is paused. Then these changes wont be applied immediately. Rather it would be done in the periodic reconciliation cycle of 1 hour. If you want to reconcile earlier restart the telemetry operator.
+If you have changed the pipeline CR when the reconciliation is paused, then these changes would not be applied immediately. Rather it would be done in the periodic reconciliation cycle of 1 hour. To reconcile earlier restart the telemetry operator.
