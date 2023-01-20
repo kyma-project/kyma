@@ -950,6 +950,9 @@ system_account: "$SYS"`, password))
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      natsSecretName,
 			Namespace: kymaSystemNamespace,
+			Annotations: map[string]string{
+				"eventing.kyma-project.io/managed-by-reconciler-disclaimer": "DO NOT EDIT - This resource is managed by Kyma.\n Any modifications breaks eventing.",
+			},
 		},
 		Data: secretMap,
 	}
