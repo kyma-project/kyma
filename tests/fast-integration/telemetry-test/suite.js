@@ -8,6 +8,7 @@ const {
   k8sApply,
   k8sDelete,
   sleep,
+  fromBase64,
 } = require('../utils');
 const {
   logsPresentInLoki,
@@ -420,7 +421,7 @@ describe('Telemetry Operator', function() {
 
         it('Should have created telemetry-trace-collector secret', async () => {
           const secret = await getSecret('telemetry-trace-collector', 'kyma-system');
-          assert.equal(secret.data.OTLP_ENDPOINT, 'aHR0cDovL2Zvby1iYXI=');
+          assert.equal(fromBase64(secret.data.OTLP_ENDPOINT), 'http://foo-bar');
         });
 
         it(`Should create override configmap with paused flag`, async function() {
@@ -435,7 +436,7 @@ describe('Telemetry Operator', function() {
         it(`Should not change the OTLP endpoint in the telemetry-trace-collector secret in paused state`, async () => {
           await sleep(5*1000);
           const secret = await getSecret('telemetry-trace-collector', 'kyma-system');
-          assert.equal(secret.data.OTLP_ENDPOINT, 'aHR0cDovL2Zvby1iYXI=');
+          assert.equal(fromBase64(secret.data.OTLP_ENDPOINT), 'http://foo-bar');
         });
 
         it(`Deletes the override configmap`, async function() {
@@ -453,7 +454,7 @@ describe('Telemetry Operator', function() {
         it(`Should now change the OTLP endpoint in the telemetry-trace-collector secret`, async function() {
           await sleep(5*1000);
           const secret = await getSecret('telemetry-trace-collector', 'kyma-system');
-          assert.equal(secret.data.OTLP_ENDPOINT, 'aHR0cDovL2Fub3RoZXItZm9vLWJhcg==');
+          assert.equal(fromBase64(secret.data.OTLP_ENDPOINT), 'http://another-foo-bar');
         });
       });
     });
