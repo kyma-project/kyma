@@ -126,7 +126,6 @@ The `global`, `tracing`, and `logging` fields are optional.
 4. To reset the debug actions, perform a restart of the telemetry operator.
    ```bash
    kubectl rollout restart deployment -n kyma-system telemetry-operator
-5. ```
 
 **Caveats**
-If you change the pipeline CR when the reconciliation is paused, these changes will not be applied immediately, but in a periodic reconciliation cycle of one hour. To reconcile earlier, restart the telemetry operator.
+If you change the pipeline CR when the reconciliation is paused, these changes will not be applied immediately but in a periodic reconciliation cycle of one hour. To reconcile earlier, restart the telemetry operator.
