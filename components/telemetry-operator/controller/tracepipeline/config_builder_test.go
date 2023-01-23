@@ -218,7 +218,7 @@ func TestK8sAttributesProcessor(t *testing.T) {
 
 func TestFilterProcessor(t *testing.T) {
 	processors := makeProcessorsConfig()
-	require.Equal(t, len(processors.Filter.Traces.Span), 9, "Span filter list size is wrong")
+	require.Equal(t, len(processors.Filter.Traces.Span), 11, "Span filter list size is wrong")
 	require.Contains(t, processors.Filter.Traces.Span, "(attributes[\"http.method\"] == \"POST\") and (attributes[\"component\"] == \"proxy\") and (attributes[\"OperationName\"] == \"Ingress\") and (resource.attributes[\"service.name\"] == \"jaeger.kyma-system\")", "Jaeger span filter ingress POST missing")
 	require.Contains(t, processors.Filter.Traces.Span, "(attributes[\"http.method\"] == \"GET\") and (attributes[\"component\"] == \"proxy\") and (attributes[\"OperationName\"] == \"Egress\") and (resource.attributes[\"service.name\"] == \"grafana.kyma-system\")", "Grafana span filter egress missing")
 	require.Contains(t, processors.Filter.Traces.Span, "(attributes[\"http.method\"] == \"GET\") and (attributes[\"component\"] == \"proxy\") and (attributes[\"OperationName\"] == \"Ingress\") and (resource.attributes[\"service.name\"] == \"jaeger.kyma-system\")", "Jaeger span filter ingress GET missing")
