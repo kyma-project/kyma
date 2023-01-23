@@ -35,7 +35,7 @@ type registryWatcher struct {
 
 func (r *registryWatcher) Handle(ctx context.Context, req admission.Request) admission.Response {
 	log := r.log.With("name", req.Name, "namespace", req.Namespace, "kind", req.Kind.Kind)
-	log.Debug("strting conversion")
+	log.Debug("strting admission")
 
 	var secret corev1.Secret
 	if err := r.Decoder.Decode(req, &secret); err != nil {

@@ -36,7 +36,7 @@ func NewDefaultingWebhook(configV1Alpha1 *serverlessv1alpha1.DefaultingConfig, c
 
 func (w *DefaultingWebHook) Handle(_ context.Context, req admission.Request) admission.Response {
 	log := w.log.With("name", req.Name, "namespace", req.Namespace, "kind", req.Kind.Kind)
-	log.Debug("strting conversion")
+	log.Debug("strting defaulting")
 
 	if req.Kind.Kind == "Function" {
 		res := w.handleFunctionDefaulting(req)
