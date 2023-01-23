@@ -34,7 +34,7 @@ func NewValidatingWebhook(configv1alpha1 *serverlessv1alpha1.ValidationConfig, c
 }
 func (w *ValidatingWebHook) Handle(_ context.Context, req admission.Request) admission.Response {
 	log := w.log.With("name", req.Name, "namespace", req.Namespace, "kind", req.Kind.Kind)
-	log.Debug("strting validation")
+	log.Debug("starting validation")
 
 	// We don't currently have any delete validation logic
 	if req.Operation == v1.Delete {

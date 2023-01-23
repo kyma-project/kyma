@@ -57,7 +57,7 @@ func (w *ConvertingWebhook) ServeHTTP(resp http.ResponseWriter, req *http.Reques
 	}
 
 	log = w.log.With("uid", convertReview.Request.UID)
-	log.Debug("strting conversion")
+	log.Debug("starting conversion")
 
 	conversionResponse, err := w.handleConvertRequest(convertReview.Request)
 	if err != nil {
