@@ -49,9 +49,6 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// r.URL.Path = path
-	// r.URL.RawPath = path
-
 	serviceAPI, err := p.apiExtractor.Get(apiIdentifier)
 	if err != nil {
 		handleErrors(w, err)

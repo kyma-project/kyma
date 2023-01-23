@@ -42,8 +42,11 @@ func New(
 		gwURL := *u
 		gwURL.Path = "/" + strings.Join(split[:2], "/")
 
-		// TODO: make sure
-		targetURL, _ := url.Parse(targetAPIPath) // it shouldn't be possible for this to fail?
+		targetURL, err := url.Parse(targetAPIPath)
+
+		if err != nil {
+			return model.APIIdentifier{}, nil, nil, apperrors.WrongInput("Path has to be a valid path")
+		}
 
 		return apiIdentifier, targetURL, &gwURL, nil
 	}

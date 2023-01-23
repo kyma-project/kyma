@@ -46,8 +46,19 @@ func TestProxyFactory(t *testing.T) {
 		})
 	}
 
-	createMockServiceDeffService := func(encodeURL bool) func(apiIdentifier model.APIIdentifier, targetURL string, credentials *authorization.Credentials) metadatamocks.ServiceDefinitionService {
-		return func(apiIdentifier metadatamodel.APIIdentifier, targetURL string, credentials *authorization.Credentials) metadatamocks.ServiceDefinitionService {
+	createMockServiceDeffService :=
+		func(apiIdentifier metadatamodel.APIIdentifier, targetURL string, credentials *authorization.Credentials) metadatamocks.ServiceDefinitionService {
+			serviceDefServiceMock := metadatamocks.ServiceDefinitionService{}
+			serviceDefServiceMock.On("GetAPIByServiceName", apiIdentifier.Application, apiIdentifier.Service).Return(&metadatamodel.API{
+				TargetUrl:   targetURL,
+				Credentials: credentials,
+				EncodeUrl:   true,
+			}, nil).Once()
+
+			return serviceDefServiceMock
+		}
+	createMockServiceDeffServiceWithoutEncoding :=
+		func(apiIdentifier metadatamodel.APIIdentifier, targetURL string, credentials *authorization.Credentials) metadatamocks.ServiceDefinitionService {
 			serviceDefServiceMock := metadatamocks.ServiceDefinitionService{}
 			serviceDefServiceMock.On("GetAPIByServiceName", apiIdentifier.Application, apiIdentifier.Service).Return(&metadatamodel.API{
 				TargetUrl:   targetURL,
@@ -57,7 +68,6 @@ func TestProxyFactory(t *testing.T) {
 
 			return serviceDefServiceMock
 		}
-	}
 
 	createMockServiceDeffServiceForCompass := func(apiIdentifier model.APIIdentifier, targetURL string, credentials *authorization.Credentials) metadatamocks.ServiceDefinitionService {
 		serviceDefServiceMock := metadatamocks.ServiceDefinitionService{}
@@ -86,7 +96,7 @@ func TestProxyFactory(t *testing.T) {
 			url:                             "/app/service/orders/123",
 			expectedTargetAPIURL:            "/orders/123",
 			createHandlerFunc:               New,
-			createMockServiceDefServiceFunc: createMockServiceDeffService(true),
+			createMockServiceDefServiceFunc: createMockServiceDeffService,
 			apiIdentifier:                   apiIdentifier,
 		},
 		{
@@ -94,7 +104,7 @@ func TestProxyFactory(t *testing.T) {
 			url:                             "/app/service",
 			expectedTargetAPIURL:            "/",
 			createHandlerFunc:               New,
-			createMockServiceDefServiceFunc: createMockServiceDeffService(true),
+			createMockServiceDefServiceFunc: createMockServiceDeffService,
 			apiIdentifier:                   apiIdentifier,
 		},
 		{
@@ -102,7 +112,7 @@ func TestProxyFactory(t *testing.T) {
 			url:                             "/app/service/orders/hello('%7Cworld%7C')",
 			expectedTargetAPIURL:            "/orders/hello%28%27%7Cworld%7C%27%29",
 			createHandlerFunc:               New,
-			createMockServiceDefServiceFunc: createMockServiceDeffService(true),
+			createMockServiceDefServiceFunc: createMockServiceDeffService,
 			apiIdentifier:                   apiIdentifier,
 		},
 		{
@@ -110,7 +120,7 @@ func TestProxyFactory(t *testing.T) {
 			url:                             "/app/service/orders/hello('%7Cworld%7C')",
 			expectedTargetAPIURL:            "/orders/hello('%7Cworld%7C')",
 			createHandlerFunc:               New,
-			createMockServiceDefServiceFunc: createMockServiceDeffService(false),
+			createMockServiceDefServiceFunc: createMockServiceDeffServiceWithoutEncoding,
 			apiIdentifier:                   apiIdentifier,
 		},
 		{

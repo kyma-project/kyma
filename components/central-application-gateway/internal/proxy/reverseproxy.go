@@ -40,9 +40,9 @@ func newProxy(targetURL string, requestParameters *authorization.RequestParamete
 		req.Host = target.Host
 
 		combinedPath := joinPaths(target.Path, req.URL.Path)
-		combinedPathE := joinPaths(target.Path, req.URL.RawPath)
+		combinedPathEscaped := joinPaths(target.Path, req.URL.RawPath)
 		req.URL.Path = combinedPath
-		req.URL.RawPath = combinedPathE
+		req.URL.RawPath = combinedPathEscaped
 
 		if targetQuery == "" || req.URL.RawQuery == "" {
 			req.URL.RawQuery = targetQuery + req.URL.RawQuery
