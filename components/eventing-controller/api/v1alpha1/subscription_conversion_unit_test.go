@@ -1,6 +1,7 @@
 package v1alpha1_test
 
 import (
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
@@ -200,6 +201,11 @@ func Test_Conversion(t *testing.T) {
 				if testCase.wantErrMsgV2toV1 != "" {
 					return
 				}
+
+				// initialize dummy cleaner
+				cleaner := eventtype.CleanerFunc(func(et string) (string, error) { return et, nil })
+				v1alpha1.InitializeEventTypeCleaner(cleaner)
+
 				convertedV1Alpha2 := &v1alpha2.Subscription{}
 				err := v1alpha1.V1ToV2(testCase.alpha1Sub, convertedV1Alpha2)
 				if err != nil && testCase.wantErrMsgV1toV2 != "" {
