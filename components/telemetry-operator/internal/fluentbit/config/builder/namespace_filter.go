@@ -8,7 +8,7 @@ import (
 )
 
 func systemNamespaces() []string {
-	return []string{"kyma-system", "kyma-integration", "kube-system", "istio-system", "compass-system"}
+	return []string{"kyma-system", "kube-system", "istio-system", "compass-system"}
 }
 
 func createNamespaceGrepFilter(pipeline *telemetryv1alpha1.LogPipeline) string {

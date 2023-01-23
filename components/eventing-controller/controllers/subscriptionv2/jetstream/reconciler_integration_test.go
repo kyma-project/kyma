@@ -210,7 +210,6 @@ func TestCreateSubscription(t *testing.T) {
 				testingv2.WithSourceAndType(testingv2.EventSource, testingv2.OrderCreatedEventType),
 				testingv2.WithSinkURLFromSvc(ens.SubscriberSvc),
 				testingv2.WithMaxInFlight(ens.DefaultSubscriptionConfig.MaxInFlightMessages),
-				testingv2.WithWebhookForNATS(),
 				testingv2.WithFinalizers([]string{}),
 			},
 			want: reconcilertestingv2.Want{
@@ -249,7 +248,6 @@ func TestCreateSubscription(t *testing.T) {
 			givenSubscriptionOpts: []testingv2.SubscriptionOpt{
 				testingv2.WithTypeMatchingExact(),
 				testingv2.WithSourceAndType(testingv2.EventSource, reconcilertestingv2.NewUncleanEventType("0")),
-				testingv2.WithWebhookForNATS(),
 				testingv2.WithSinkURL(
 					testingv2.ValidSinkURL(ens.SubscriberSvc.Namespace, "testapp"),
 				),
@@ -407,7 +405,6 @@ func TestChangeSubscription(t *testing.T) {
 				testingv2.WithTypeMatchingExact(),
 				testingv2.WithSourceAndType(testingv2.EventSource, reconcilertestingv2.NewCleanEventType("0")),
 				testingv2.WithSourceAndType(testingv2.EventSource, reconcilertestingv2.NewCleanEventType("1")),
-				testingv2.WithWebhookForNATS(),
 				testingv2.WithSinkURLFromSvc(ens.SubscriberSvc),
 			},
 			wantBefore: reconcilertestingv2.Want{
@@ -441,7 +438,6 @@ func TestChangeSubscription(t *testing.T) {
 				testingv2.WithTypeMatchingExact(),
 				testingv2.WithSourceAndType(testingv2.EventSource, reconcilertestingv2.NewCleanEventType("0")),
 				testingv2.WithSourceAndType(testingv2.EventSource, reconcilertestingv2.NewCleanEventType("1")),
-				testingv2.WithWebhookForNATS(),
 				testingv2.WithSinkURLFromSvc(ens.SubscriberSvc),
 			},
 			wantBefore: reconcilertestingv2.Want{
@@ -471,7 +467,6 @@ func TestChangeSubscription(t *testing.T) {
 				testingv2.WithTypeMatchingExact(),
 				testingv2.WithSourceAndType(testingv2.EventSource, testingv2.OrderCreatedEventType),
 				testingv2.WithMaxInFlight(ens.DefaultSubscriptionConfig.MaxInFlightMessages),
-				testingv2.WithWebhookForNATS(),
 				testingv2.WithSinkURLFromSvc(ens.SubscriberSvc),
 			},
 			wantBefore: reconcilertestingv2.Want{

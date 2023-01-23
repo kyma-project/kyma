@@ -8,6 +8,7 @@ const {
   k8sApply,
   k8sDelete,
   sleep,
+  fromBase64,
   getGateway,
   getVirtualService,
   retryPromise,
@@ -424,6 +425,55 @@ describe('Telemetry Operator', function() {
 
         it(`Should delete second TracePipeline '${secondPipelineName}'`, async function() {
           await k8sDelete(secondPipeline);
+        });
+      });
+
+      context('Debuggability', function() {
+        const overrideConfig = loadTestData('override-config.yaml');
+        const pipeline = loadTestData('tracepipeline-output-otlp.yaml');
+        const pipelineName = pipeline[0].metadata.name;
+        it(`Creates a tracepipeline`, async function() {
+          await k8sApply(pipeline);
+          await waitForTracePipeline(pipelineName);
+          await waitForTracePipelineStatusRunning(pipelineName);
+        });
+
+        it('Should have created telemetry-trace-collector secret', async () => {
+          const secret = await getSecret('telemetry-trace-collector', 'kyma-system');
+          assert.equal(fromBase64(secret.data.OTLP_ENDPOINT), 'http://foo-bar');
+        });
+
+        it(`Should create override configmap with paused flag`, async function() {
+          await k8sApply(overrideConfig);
+        });
+
+        it(`Tries to change the otlp endpoint`, async function() {
+          pipeline[0].spec.output.otlp.endpoint.value = 'http://another-foo';
+          await k8sApply(pipeline);
+        });
+
+        it(`Should not change the OTLP endpoint in the telemetry-trace-collector secret in paused state`, async () => {
+          await sleep(5*1000);
+          const secret = await getSecret('telemetry-trace-collector', 'kyma-system');
+          assert.equal(fromBase64(secret.data.OTLP_ENDPOINT), 'http://foo-bar');
+        });
+
+        it(`Deletes the override configmap`, async function() {
+          k8sDelete(overrideConfig);
+        });
+
+        it(`Tries to change the otlp endpoint again`, async function() {
+          await sleep(10*1000);
+          pipeline[0].spec.output.otlp.endpoint.value = 'http://another-foo-bar';
+          await k8sApply(pipeline);
+          await waitForTracePipeline(pipelineName);
+          await waitForTracePipelineStatusRunning(pipelineName);
+        });
+
+        it(`Should now change the OTLP endpoint in the telemetry-trace-collector secret`, async function() {
+          await sleep(5*1000);
+          const secret = await getSecret('telemetry-trace-collector', 'kyma-system');
+          assert.equal(fromBase64(secret.data.OTLP_ENDPOINT), 'http://another-foo-bar');
         });
       });
 
