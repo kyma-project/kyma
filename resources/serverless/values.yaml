@@ -80,7 +80,7 @@ global:
       directory: "tpi"
     function_controller:
       name: "function-controller"
-      version: "v20230117-0d3f0156"
+      version: "PR-16489"
     function_webhook:
       name: "function-webhook"
       version: "v20230117-0d3f0156"
@@ -201,7 +201,7 @@ containers:
       serviceAccountRequeueDuration:
         value: 5m
       namespaceExcludedNames:
-        value: "istio-system,kube-node-lease,kube-public,kube-system,kyma-installer,kyma-integration,kyma-system,natss,compass-system"
+        value: "istio-system,kube-node-lease,kube-public,kube-system,kyma-installer,kyma-system,natss,compass-system"
       imageRegistryExternalDockerConfigSecretName:
         value: '{{ template "fullname" . }}-registry-config'
       imageRegistryDefaultDockerConfigSecretName:
