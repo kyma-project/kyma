@@ -1,8 +1,6 @@
 const {
   debug,
   convertAxiosError,
-  retryPromise,
-  getVirtualService,
 } = require('../utils');
 const {proxyGrafanaDatasource} = require('../monitoring/client');
 
@@ -12,19 +10,6 @@ const httpsAgent = new https.Agent({
   rejectUnauthorized: false, // curl -k
 });
 axios.defaults.httpsAgent = httpsAgent;
-
-async function getTracingTestAppUrl() {
-  const vs = await getVirtualService('tracing-test', 'tracing-test-app');
-  const host = vs.spec.hosts[0];
-  return `https://${host}`;
-}
-
-async function callTracingTestApp() {
-  const testAppUrl = await getTracingTestAppUrl();
-  return retryPromise(async () => {
-    return await axios.get(testAppUrl, {timeout: 10000});
-  }, 5, 30);
-}
 
 async function getJaegerViaGrafana(path, retries = 5, interval = 30,
     timeout = 10000, debugMsg = undefined) {
@@ -76,6 +61,5 @@ async function getJaegerTracesForService(serviceName, namespace = 'default') {
 module.exports = {
   getJaegerTrace,
   getJaegerServices,
-  callTracingTestApp,
   getJaegerTracesForService,
 };

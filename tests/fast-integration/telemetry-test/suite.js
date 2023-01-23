@@ -9,6 +9,8 @@ const {
   k8sDelete,
   sleep,
   getGateway,
+  getVirtualService,
+  retryPromise,
 } = require('../utils');
 const {
   logsPresentInLoki,
@@ -26,8 +28,21 @@ const {
   waitForTracePipelineStatusRunning,
   waitForTracePipelineStatusPending,
 } = require('./helpers');
+const axios = require('axios');
+const {getJaegerTracesForService, getJaegerServices} = require('../tracing/client');
 
-const {getJaegerTracesForService, getJaegerServices, callTracingTestApp} = require('../tracing/client');
+async function getTracingTestAppUrl() {
+  const vs = await getVirtualService('tracing-test', 'tracing-test-app');
+  const host = vs.spec.hosts[0];
+  return `https://${host}`;
+}
+
+async function callTracingTestApp() {
+  const testAppUrl = await getTracingTestAppUrl();
+  return retryPromise(async () => {
+    return await axios.get(testAppUrl, {timeout: 10000});
+  }, 5, 30);
+}
 
 async function prepareEnvironment() {
   async function k8sApplyFile(name, namespace) {
