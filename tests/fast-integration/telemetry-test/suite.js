@@ -8,6 +8,7 @@ const {
   k8sApply,
   k8sDelete,
   sleep,
+  getGateway,
 } = require('../utils');
 const {
   logsPresentInLoki,
@@ -24,10 +25,9 @@ const {
   waitForPodWithLabel,
   waitForTracePipelineStatusRunning,
   waitForTracePipelineStatusPending,
-  waitForDeploymentWithLabel,
 } = require('./helpers');
 
-const {getJaegerTracesForService, getJaegerServices, callTestApp} = require('../tracing/client');
+const {getJaegerTracesForService, getJaegerServices, callTracingTestApp} = require('../tracing/client');
 
 async function prepareEnvironment() {
   async function k8sApplyFile(name, namespace) {
@@ -412,31 +412,47 @@ describe('Telemetry Operator', function() {
         });
       });
 
-
       context('Filter Processor', function() {
         const testApp = loadTestData('tracepipeline-test-app.yaml');
+        const testAppIstioPatch = loadTestData('tracepipeline-test-istio-telemetry-patch.yaml');
+        const testAppIstioCleanup = loadTestData('tracepipeline-test-istio-telemetry-cleanup.yaml');
+
         it(`Should create test app`, async function() {
+          const kymaGateway = await getGateway('kyma-system', 'kyma-gateway');
+          let kymaHostUrl = kymaGateway.spec.servers[0].hosts[0];
+          kymaHostUrl = kymaHostUrl.toString().replaceAll('*', 'tracing-test-app');
+          for (const resource of testApp ) {
+            if (resource.kind == 'VirtualService') {
+              resource.spec.hosts[0] = kymaHostUrl;
+            }
+          }
           await k8sApply(testApp);
-          await waitForPodWithLabel('app', 'svc-a', 'default');
-          await waitForPodWithLabel('app', 'svc-b', 'default');
-          await waitForPodWithLabel('app', 'svc-c', 'default');
-          await waitForVirtualService('default', 'svc-a');
+          await k8sApply(testAppIstioPatch);
+          await waitForPodWithLabel('app', 'tracing-test-app', 'tracing-test');
         });
 
         it(`Should call test app`, async function() {
-          for (let i=0; i < 100; i++) {
-            await callTestApp();
+          for (let i=0; i < 10; i++) {
+            await callTracingTestApp();
           }
         });
 
-        it(`Should get services`, async function() {
-          await getJaegerServices();
-          const svca = await waitForDeploymentWithLabel('serverless.kyma-project.io/function-name', 'svc-a', 'default');
-          const serviceTraces = await getJaegerTracesForService(svca.metadata.name, 'default');
-          assert.isTrue(serviceTraces.data.length > 0);
+        it(`Should check filter`, async function() {
+          await sleep(30000);
+          const services = await getJaegerServices();
+          console.log(services);
+          const testAppTraces = await getJaegerTracesForService('tracing-test-app', 'tracing-test');
+          assert.isTrue(testAppTraces.data.length > 0, 'No spans present for test application "tracing-test-app"');
+
+          assert.isFalse(services.data.includes('grafana.kyma-system'), 'spans are present for grafana');
+          assert.isFalse(services.data.includes('jaeger.kyma-system'), 'spans are present for jaeger');
+          assert.isFalse(services.data.includes('telemetry-fluent-bit.kyma-system'),
+              'spans are present for fluent-bit');
+          assert.isFalse(services.data.includes('loki.kyma-system'), 'spans are present for loki');
         });
 
         it(`Should delete test app `, async function() {
+          await k8sApply(testAppIstioCleanup);
           await k8sDelete(testApp);
         });
       });

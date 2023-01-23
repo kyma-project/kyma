@@ -2,7 +2,7 @@ const {
   debug,
   convertAxiosError,
   retryPromise,
-  waitForVirtualService,
+  getVirtualService,
 } = require('../utils');
 const {proxyGrafanaDatasource} = require('../monitoring/client');
 
@@ -13,15 +13,14 @@ const httpsAgent = new https.Agent({
 });
 axios.defaults.httpsAgent = httpsAgent;
 
-async function getTestAppUrl() {
-  const vs = await waitForVirtualService('default', 'svc-a');
+async function getTracingTestAppUrl() {
+  const vs = await getVirtualService('tracing-test', 'tracing-test-app');
   const host = vs.spec.hosts[0];
   return `https://${host}`;
 }
 
-async function callTestApp() {
-  const testAppUrl = await getTestAppUrl();
-
+async function callTracingTestApp() {
+  const testAppUrl = await getTracingTestAppUrl();
   return retryPromise(async () => {
     return await axios.get(testAppUrl, {timeout: 10000});
   }, 5, 30);
@@ -61,7 +60,7 @@ async function getJaegerServices() {
 }
 
 async function getJaegerTracesForService(serviceName, namespace = 'default') {
-  const path = `api/traces?limit=20&lookback=2h&maxDuration&minDuration&service=${serviceName}.${namespace}`;
+  const path = `api/traces?limit=20&lookback=1h&maxDuration&minDuration&service=${serviceName}.${namespace}`;
 
   debug(`fetching traces from jaeger`);
 
@@ -77,6 +76,6 @@ async function getJaegerTracesForService(serviceName, namespace = 'default') {
 module.exports = {
   getJaegerTrace,
   getJaegerServices,
-  callTestApp,
+  callTracingTestApp,
   getJaegerTracesForService,
 };

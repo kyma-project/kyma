@@ -643,6 +643,17 @@ async function getVirtualService(namespace, name) {
   }
 }
 
+async function getGateway(namespace, name) {
+  try {
+    const path = `/apis/networking.istio.io/v1beta1/namespaces/${namespace}/gateways/${name}`;
+    const response = await k8sDynamicApi.requestPromise({
+      url: k8sDynamicApi.basePath + path,
+    });
+    return JSON.parse(response.body);
+  } catch (err) {
+    return JSON.parse(err.response.body);
+  }
+}
 
 async function getPersistentVolumeClaim(namespace, name) {
   const path = `/api/v1/namespaces/${namespace}/persistentvolumeclaims/${name}`;
@@ -1838,6 +1849,7 @@ module.exports = {
   eventingSubscription,
   eventingSubscriptionV1Alpha2,
   getVirtualService,
+  getGateway,
   getPersistentVolumeClaim,
   waitForApplicationCr,
   patchDeployment,
