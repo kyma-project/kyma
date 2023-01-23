@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 
@@ -20,25 +21,35 @@ type ValidatingWebHook struct {
 	configv1alpha2 *serverlessv1alpha2.ValidationConfig
 	client         ctrlclient.Client
 	decoder        *admission.Decoder
+	log            *zap.SugaredLogger
 }
 
-func NewValidatingHook(configv1alpha1 *serverlessv1alpha1.ValidationConfig, configv1alpha2 *serverlessv1alpha2.ValidationConfig, client ctrlclient.Client) *ValidatingWebHook {
+func NewValidatingWebhook(configv1alpha1 *serverlessv1alpha1.ValidationConfig, configv1alpha2 *serverlessv1alpha2.ValidationConfig, client ctrlclient.Client, log *zap.SugaredLogger) *ValidatingWebHook {
 	return &ValidatingWebHook{
 		configv1alpha1: configv1alpha1,
 		configv1alpha2: configv1alpha2,
 		client:         client,
+		log:            log,
 	}
 }
 func (w *ValidatingWebHook) Handle(_ context.Context, req admission.Request) admission.Response {
+	log := w.log.With("name", req.Name, "namespace", req.Namespace, "kind", req.Kind.Kind)
+	log.Debug("strting validation")
+
 	// We don't currently have any delete validation logic
 	if req.Operation == v1.Delete {
-		return admission.Allowed("")
+		res := admission.Allowed("")
+		log.Debug("validation finished for deletion")
+		return res
 	}
 
 	if req.Kind.Kind == "Function" {
-		return w.handleFunctionValidation(req)
+		res := w.handleFunctionValidation(req)
+		log.Debug("validation finished for function")
+		return res
 	}
 
+	log.Debug("request object invalid kind")
 	return admission.Errored(http.StatusBadRequest, fmt.Errorf("invalid kind: %v", req.Kind.Kind))
 }
 

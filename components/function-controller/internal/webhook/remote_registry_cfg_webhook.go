@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/docker"
+	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
@@ -21,30 +22,42 @@ type RemoteRegistryCfgUpdater interface {
 	InjectDecoder(*admission.Decoder) error
 }
 
-func NewRegistryWatcher() RemoteRegistryCfgUpdater {
-	return &registryWatcher{}
+func NewRegistryWatcher(log *zap.SugaredLogger) RemoteRegistryCfgUpdater {
+	return &registryWatcher{
+		log: log,
+	}
 }
 
 type registryWatcher struct {
 	Decoder *admission.Decoder
+	log     *zap.SugaredLogger
 }
 
 func (r *registryWatcher) Handle(ctx context.Context, req admission.Request) admission.Response {
+	log := r.log.With("name", req.Name, "namespace", req.Namespace, "kind", req.Kind.Kind)
+	log.Debug("strting conversion")
+
 	var secret corev1.Secret
 	if err := r.Decoder.Decode(req, &secret); err != nil {
+		log.Debugf("failed to decode secret: %s", err.Error())
 		return admission.Errored(http.StatusBadRequest, err)
 	}
 
 	registryCfgMarshaler, err := docker.NewRegistryCfgMarshaler(secret.Data)
 	if err != nil {
+		log.Debugf("failed to create marshaler: %s", err.Error())
 		return admission.Errored(http.StatusInternalServerError, err)
 	}
 
 	secret.Data[keyDockerConfigJSON], err = registryCfgMarshaler.MarshalJSON()
 	if err != nil {
+		log.Debugf("failed to marshal: %s", err.Error())
 		return admission.Errored(http.StatusInternalServerError, err)
 	}
-	return patchResponseFromRaw(req.Object.Raw, &secret)
+
+	res := patchResponseFromRaw(req.Object.Raw, &secret)
+	log.Debug("admission finalized")
+	return res
 }
 
 func patchResponseFromRaw(raw []byte, secret *corev1.Secret) admission.Response {

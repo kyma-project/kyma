@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 
 	"net/http"
 
@@ -21,23 +22,34 @@ type DefaultingWebHook struct {
 	configAlphaV1 *serverlessv1alpha1.DefaultingConfig
 	client        ctrlclient.Client
 	decoder       *admission.Decoder
+	log           *zap.SugaredLogger
 }
 
-func NewDefaultingWebhook(configV1Alpha1 *serverlessv1alpha1.DefaultingConfig, configV1Alpha2 *serverlessv1alpha2.DefaultingConfig, client ctrlclient.Client) *DefaultingWebHook {
+func NewDefaultingWebhook(configV1Alpha1 *serverlessv1alpha1.DefaultingConfig, configV1Alpha2 *serverlessv1alpha2.DefaultingConfig, client ctrlclient.Client, log *zap.SugaredLogger) *DefaultingWebHook {
 	return &DefaultingWebHook{
 		configAlphaV1: configV1Alpha1,
 		configAlphaV2: configV1Alpha2,
 		client:        client,
+		log:           log,
 	}
 }
 
 func (w *DefaultingWebHook) Handle(_ context.Context, req admission.Request) admission.Response {
+	log := w.log.With("name", req.Name, "namespace", req.Namespace, "kind", req.Kind.Kind)
+	log.Debug("strting conversion")
+
 	if req.Kind.Kind == "Function" {
-		return w.handleFunctionDefaulting(req)
+		res := w.handleFunctionDefaulting(req)
+		log.Debug("defaulting finished for function")
+		return res
 	}
 	if req.Kind.Kind == "GitRepository" {
-		return w.handleGitRepoDefaulting()
+		res := w.handleGitRepoDefaulting()
+		log.Debug("defaulting finished for gitrepository")
+		return res
 	}
+
+	log.Debug("request object invalid kind")
 	return admission.Errored(http.StatusBadRequest, fmt.Errorf("invalid kind: %v", req.Kind.Kind))
 }
 
