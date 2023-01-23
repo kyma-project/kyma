@@ -102,6 +102,20 @@ func Test_ValidationWebhook(t *testing.T) {
 			wantError: testingv2.GenerateInvalidSubscriptionError(testName,
 				eventingv1alpha2.SuffixMissingErrDetail, eventingv1alpha2.SinkPath),
 		},
+		{
+			name: "should fail to create subscription with invalid protocol settings",
+			givenSubscriptionFunc: func(namespace string) *eventingv1alpha2.Subscription {
+				return reconcilertesting.NewSubscription(testName, namespace,
+					reconcilertesting.WithStandardTypeMatching(),
+					reconcilertesting.WithSource("source"),
+					reconcilertesting.WithOrderCreatedV1Event(),
+					reconcilertesting.WithInvalidWebhookAuthGrantType(),
+					reconcilertesting.WithValidSink(namespace, "svc"),
+				)
+			},
+			wantError: testingv2.GenerateInvalidSubscriptionError(testName,
+				eventingv1alpha2.InvalidGrantTypeErrDetail, eventingv1alpha2.ConfigPath),
+		},
 	}
 
 	for _, testCase := range testCases {

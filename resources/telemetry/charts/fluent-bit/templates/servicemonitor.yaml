@@ -36,25 +36,12 @@ spec:
       relabelings:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      ## scheme: HTTP scheme to use for scraping. Can be used with `tlsConfig` for example if using istio mTLS.
-      scheme: https
-      ## tlsConfig: TLS configuration to use when scraping the endpoint. For example if using istio mTLS.
-      ## Of type: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#tlsconfig
-      tlsConfig:
-        caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
-        certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
-        keyFile: /etc/prometheus/secrets/istio.default/key.pem
-        insecureSkipVerify: true  # Prometheus does not support Istio security naming, thus skip verifying target pod ceritifcate
+      scheme: http
     {{- if .Values.serviceMonitor.serviceMonitorPorts }}
     {{- range .Values.serviceMonitor.serviceMonitorPorts }}
     - port: {{ .port }}
       path: {{ .path }}
-      scheme: {{ .scheme }}
-      tlsConfig:
-        caFile: {{ .tlsConfig.caFile }}
-        certFile: {{ .tlsConfig.certFile }}
-        keyFile: {{ .tlsConfig.keyFile }}
-        insecureSkipVerify: {{ .tlsConfig.insecureSkipVerify }}
+      scheme: http
     {{- end }}
     {{- end }}
   namespaceSelector:
