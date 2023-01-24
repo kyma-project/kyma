@@ -254,3 +254,30 @@ func ConditionEquals(existing, expected Condition) bool {
 func CreateMessageForConditionReasonSubscriptionCreated(eventMeshName string) string {
 	return fmt.Sprintf("EventMesh subscription name is: %s", eventMeshName)
 }
+
+// GetSubscriptionActiveCondition updates the ConditionSubscriptionActive condition based on the given error value.
+func GetSubscriptionActiveCondition(sub *Subscription, err error) []Condition {
+	subscriptionActiveCondition := Condition{
+		Type:               ConditionSubscriptionActive,
+		LastTransitionTime: metav1.Now(),
+	}
+	if err == nil {
+		subscriptionActiveCondition.Status = corev1.ConditionTrue
+		subscriptionActiveCondition.Reason = ConditionReasonNATSSubscriptionActive
+	} else {
+		subscriptionActiveCondition.Message = err.Error()
+		subscriptionActiveCondition.Reason = ConditionReasonNATSSubscriptionNotActive
+		subscriptionActiveCondition.Status = corev1.ConditionFalse
+	}
+	for _, activeCond := range sub.Status.Conditions {
+		if activeCond.Type == ConditionSubscriptionActive {
+			if subscriptionActiveCondition.Status == activeCond.Status &&
+				subscriptionActiveCondition.Reason == activeCond.Reason &&
+				subscriptionActiveCondition.Message == activeCond.Message {
+				return []Condition{activeCond}
+			}
+		}
+	}
+
+	return []Condition{subscriptionActiveCondition}
+}
