@@ -253,17 +253,17 @@ func TestProxyRequest(t *testing.T) {
 				SkipVerify:        tc.skipTLSVerify,
 			}, nil).Once()
 
-			handler := newProxyForTest(apiExtractorMock, authStrategyFactoryMock, csrfFactoryMock, func(u *url.URL) (metadatamodel.APIIdentifier, string, *url.URL, apperrors.AppError) {
+			handler := newProxyForTest(apiExtractorMock, authStrategyFactoryMock, csrfFactoryMock, func(u *url.URL) (metadatamodel.APIIdentifier, *url.URL, *url.URL, apperrors.AppError) {
 				gwURL, err := u.Parse("/")
 				if err != nil {
-					return model.APIIdentifier{}, "", nil, apperrors.WrongInput("Couldn't parse URL")
+					return model.APIIdentifier{}, nil, nil, apperrors.WrongInput("Couldn't parse URL")
 				}
 
 				return metadatamodel.APIIdentifier{
 					Application: "app",
 					Service:     "service",
 					Entry:       "entry",
-				}, u.Path, gwURL, nil
+				}, u, gwURL, nil
 			},
 				func(url *url.URL) (*url.URL, apperrors.AppError) {
 					return url, nil
@@ -297,10 +297,10 @@ func TestProxy(t *testing.T) {
 		Entry:       "entry",
 	}
 
-	fakePathExtractor := func(u *url.URL) (metadatamodel.APIIdentifier, string, *url.URL, apperrors.AppError) {
+	fakePathExtractor := func(u *url.URL) (metadatamodel.APIIdentifier, *url.URL, *url.URL, apperrors.AppError) {
 		gwURL, err := u.Parse("/")
 		if err != nil {
-			return model.APIIdentifier{}, "", nil, apperrors.WrongInput("Couldn't parse URL")
+			return model.APIIdentifier{}, nil, nil, apperrors.WrongInput("Couldn't parse URL")
 		}
 
 		apiIdentifier := metadatamodel.APIIdentifier{
@@ -309,7 +309,7 @@ func TestProxy(t *testing.T) {
 			Entry:       "entry",
 		}
 
-		return apiIdentifier, u.Path, gwURL, nil
+		return apiIdentifier, u, gwURL, nil
 	}
 
 	fakeGwExtractor := func(url *url.URL) (*url.URL, apperrors.AppError) {
