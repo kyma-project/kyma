@@ -1,8 +1,9 @@
 package v1alpha1_test
 
 import (
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 
