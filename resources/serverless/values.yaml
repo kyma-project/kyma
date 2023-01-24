@@ -76,37 +76,37 @@ global:
   images:
     k8s_tools:
       name: "k8s-tools"
-      version: "v20230105-07fb7e0d"
+      version: "v20230110-ce11007d"
       directory: "tpi"
     function_controller:
       name: "function-controller"
-      version: "v20230105-80b16f50"
+      version: "PR-16489"
     function_webhook:
       name: "function-webhook"
-      version: "v20230105-80b16f50"
+      version: "v20230117-0d3f0156"
     function_build_init:
       name: "function-build-init"
-      version: "v20230105-80b16f50"
+      version: "v20230117-0d3f0156"
     function_runtime_nodejs14:
       name: "function-runtime-nodejs14"
-      version: "v20221221-c4e979d1"
+      version: "v20230117-0d3f0156"
     function_runtime_nodejs16:
       name: "function-runtime-nodejs16"
-      version: "v20221230-fa03f8ae"
+      version: "v20230117-0d3f0156"
     function_runtime_python39:
       name: "function-runtime-python39"
-      version: "v20221209-cea0c17a"
+      version: "v20230117-0d3f0156"
     kaniko_executor:
       name: "kaniko-executor"
-      version: "1.9.0-4ced14d5"
+      version: "1.9.1-8626c78a"
       directory: "tpi"
     registry:
       name: "registry"
-      version: "2.8.1-68053f3c"
+      version: "2.8.1-9330f913"
       directory: "tpi"
     function_registry_gc:
       name: "function-registry-gc"
-      version: "v20230105-80b16f50"
+      version: "v20230117-0d3f0156"
     google_pause:
       name: "pause-amd64"
       version: "3.2"
@@ -201,7 +201,7 @@ containers:
       serviceAccountRequeueDuration:
         value: 5m
       namespaceExcludedNames:
-        value: "istio-system,kube-node-lease,kube-public,kube-system,kyma-installer,kyma-integration,kyma-system,natss,compass-system"
+        value: "istio-system,kube-node-lease,kube-public,kube-system,kyma-installer,kyma-system,natss,compass-system"
       imageRegistryExternalDockerConfigSecretName:
         value: '{{ template "fullname" . }}-registry-config'
       imageRegistryDefaultDockerConfigSecretName:

@@ -8,5 +8,6 @@ spec:
   grantTypes:
     - client_credentials
   hydraAdmin: {}
+  metadata: null
   scope: read write beb uaa.resource
   secretName: {{ include "controller.fullname" . }}{{ .Values.bebSecret.nameSuffix }}

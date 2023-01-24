@@ -110,7 +110,7 @@ func TestUnavailableNATSServer(t *testing.T) {
 		testingv2.WithSinkURLFromSvc(ens.SubscriberSvc),
 	)
 
-	// test the subscription was reconciled properly and has the expected status
+	t.Log("test the subscription was reconciled properly and has the expected status")
 	reconcilertestingv2.TestSubscriptionOnK8s(ens.TestEnsemble, sub,
 		testingv2.HaveCondition(testingv2.DefaultReadyCondition()),
 		testingv2.HaveSubscriptionReady(),
@@ -122,13 +122,14 @@ func TestUnavailableNATSServer(t *testing.T) {
 		}),
 	)
 
-	// stopping NATS server should trigger the subscription become un-ready
+	t.Log("stopping NATS server should trigger the subscription become un-ready")
 	ens.NatsServer.Shutdown()
 	reconcilertestingv2.TestSubscriptionOnK8s(ens.TestEnsemble, sub,
 		testingv2.HaveSubscriptionNotReady(),
 	)
 
 	// should trigger the subscription become ready again
+	t.Log("startup the NATS Server and test that sub becomes ready")
 	ens.NatsServer = testingv1.StartDefaultJetStreamServer(ens.NatsPort)
 	reconcilertestingv2.TestSubscriptionOnK8s(ens.TestEnsemble, sub, testingv2.HaveSubscriptionReady())
 
@@ -210,7 +211,6 @@ func TestCreateSubscription(t *testing.T) {
 				testingv2.WithSourceAndType(testingv2.EventSource, testingv2.OrderCreatedEventType),
 				testingv2.WithSinkURLFromSvc(ens.SubscriberSvc),
 				testingv2.WithMaxInFlight(ens.DefaultSubscriptionConfig.MaxInFlightMessages),
-				testingv2.WithWebhookForNATS(),
 				testingv2.WithFinalizers([]string{}),
 			},
 			want: reconcilertestingv2.Want{
@@ -249,7 +249,6 @@ func TestCreateSubscription(t *testing.T) {
 			givenSubscriptionOpts: []testingv2.SubscriptionOpt{
 				testingv2.WithTypeMatchingExact(),
 				testingv2.WithSourceAndType(testingv2.EventSource, reconcilertestingv2.NewUncleanEventType("0")),
-				testingv2.WithWebhookForNATS(),
 				testingv2.WithSinkURL(
 					testingv2.ValidSinkURL(ens.SubscriberSvc.Namespace, "testapp"),
 				),
@@ -407,7 +406,6 @@ func TestChangeSubscription(t *testing.T) {
 				testingv2.WithTypeMatchingExact(),
 				testingv2.WithSourceAndType(testingv2.EventSource, reconcilertestingv2.NewCleanEventType("0")),
 				testingv2.WithSourceAndType(testingv2.EventSource, reconcilertestingv2.NewCleanEventType("1")),
-				testingv2.WithWebhookForNATS(),
 				testingv2.WithSinkURLFromSvc(ens.SubscriberSvc),
 			},
 			wantBefore: reconcilertestingv2.Want{
@@ -441,7 +439,6 @@ func TestChangeSubscription(t *testing.T) {
 				testingv2.WithTypeMatchingExact(),
 				testingv2.WithSourceAndType(testingv2.EventSource, reconcilertestingv2.NewCleanEventType("0")),
 				testingv2.WithSourceAndType(testingv2.EventSource, reconcilertestingv2.NewCleanEventType("1")),
-				testingv2.WithWebhookForNATS(),
 				testingv2.WithSinkURLFromSvc(ens.SubscriberSvc),
 			},
 			wantBefore: reconcilertestingv2.Want{
@@ -471,7 +468,6 @@ func TestChangeSubscription(t *testing.T) {
 				testingv2.WithTypeMatchingExact(),
 				testingv2.WithSourceAndType(testingv2.EventSource, testingv2.OrderCreatedEventType),
 				testingv2.WithMaxInFlight(ens.DefaultSubscriptionConfig.MaxInFlightMessages),
-				testingv2.WithWebhookForNATS(),
 				testingv2.WithSinkURLFromSvc(ens.SubscriberSvc),
 			},
 			wantBefore: reconcilertestingv2.Want{
