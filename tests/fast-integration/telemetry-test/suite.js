@@ -487,7 +487,8 @@ describe('Telemetry Operator', function() {
           console.log(kymaGateway);
           let kymaHostUrl = kymaGateway.spec.servers[0].hosts[0];
           console.log(kymaHostUrl);
-          kymaHostUrl = kymaHostUrl.replaceAll('*', 'tracing-test-app');
+          console.log(typeof kymaHostUrl);
+          kymaHostUrl = kymaHostUrl.replace('*', 'tracing-test-app');
           console.log(kymaHostUrl);
           for (const resource of testApp ) {
             if (resource.kind == 'VirtualService') {
