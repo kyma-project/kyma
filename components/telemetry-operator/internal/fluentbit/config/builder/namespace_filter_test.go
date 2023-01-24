@@ -54,7 +54,7 @@ func TestCreateNamespaceGrepFilterSystemNamespacesExcluded(t *testing.T) {
 	expected := `[FILTER]
     name    grep
     match   logpipeline1.*
-    exclude $kubernetes['namespace_name'] kyma-system|kyma-integration|kube-system|istio-system|compass-system
+    exclude $kubernetes['namespace_name'] kyma-system|kube-system|istio-system|compass-system
 
 `
 	actual := createNamespaceGrepFilter(logPipeline)

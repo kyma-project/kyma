@@ -19,6 +19,7 @@ package logparser
 import (
 	"context"
 	"fmt"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/overrides"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configchecksum"
@@ -32,8 +33,10 @@ import (
 const checksumAnnotationKey = "checksum/logparser-config"
 
 type Config struct {
-	ParsersConfigMap types.NamespacedName
-	DaemonSet        types.NamespacedName
+	ParsersConfigMap  types.NamespacedName
+	DaemonSet         types.NamespacedName
+	OverrideConfigMap types.NamespacedName
+	Overrides         overrides.Config
 }
 
 //go:generate mockery --name DaemonSetProber --filename daemon_set_prober.go
@@ -48,13 +51,14 @@ type DaemonSetAnnotator interface {
 
 type Reconciler struct {
 	client.Client
-	config    Config
-	prober    DaemonSetProber
-	annotator DaemonSetAnnotator
-	syncer    syncer
+	config       Config
+	prober       DaemonSetProber
+	annotator    DaemonSetAnnotator
+	syncer       syncer
+	globalConfig *overrides.Handler
 }
 
-func NewReconciler(client client.Client, config Config, prober DaemonSetProber, annotator DaemonSetAnnotator) *Reconciler {
+func NewReconciler(client client.Client, config Config, prober DaemonSetProber, annotator DaemonSetAnnotator, handler *overrides.Handler) *Reconciler {
 	var r Reconciler
 
 	r.Client = client
@@ -62,6 +66,7 @@ func NewReconciler(client client.Client, config Config, prober DaemonSetProber, 
 	r.prober = prober
 	r.annotator = annotator
 	r.syncer = syncer{client, config}
+	r.globalConfig = handler
 
 	return &r
 }
@@ -69,6 +74,20 @@ func NewReconciler(client client.Client, config Config, prober DaemonSetProber, 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := logf.FromContext(ctx)
 	log.V(1).Info("Reconciliation triggered")
+
+	overrideConfig, err := r.globalConfig.UpdateOverrideConfig(ctx, r.config.OverrideConfigMap)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if err := r.globalConfig.CheckGlobalConfig(overrideConfig.Global); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if overrideConfig.Logging.Paused {
+		log.V(1).Info("Skipping reconciliation of logparser as reconciliation is paused.")
+		return ctrl.Result{}, nil
+	}
 
 	var parser telemetryv1alpha1.LogParser
 	if err := r.Get(ctx, req.NamespacedName, &parser); err != nil {
