@@ -63,7 +63,7 @@ func TestProxyFactory(t *testing.T) {
 			serviceDefServiceMock.On("GetAPIByServiceName", apiIdentifier.Application, apiIdentifier.Service).Return(&metadatamodel.API{
 				TargetUrl:   targetURL,
 				Credentials: credentials,
-				EncodeUrl:   encodeURL,
+				EncodeUrl:   false,
 			}, nil).Once()
 
 			return serviceDefServiceMock
