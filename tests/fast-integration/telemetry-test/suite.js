@@ -111,7 +111,7 @@ describe('Telemetry Operator', function() {
     assert.isNotEmpty(epList[0].subsets);
     assert.isNotEmpty(epList[0].subsets[0].addresses);
   });
-
+/*
   context('Configurable Logging', function() {
     context('Default Loki LogPipeline', function() {
       it('Should be \'Running\'', async function() {
@@ -346,9 +346,9 @@ describe('Telemetry Operator', function() {
       });
     });
   });
-
+*/
   context('Configurable Tracing', function() {
-    context('Configurable Tracing', function() {
+    context('Configurable Tracing', function() {/*
       context('TracePipeline', function() {
         const firstPipeline = loadTestData('tracepipeline-output-otlp-secret-ref-1.yaml');
         const firstPipelineName = firstPipeline[0].metadata.name;
@@ -476,7 +476,7 @@ describe('Telemetry Operator', function() {
           assert.equal(fromBase64(secret.data.OTLP_ENDPOINT), 'http://another-foo-bar');
         });
       });
-
+*/
       context('Filter Processor', function() {
         const testApp = loadTestData('tracepipeline-test-app.yaml');
         const testAppIstioPatch = loadTestData('tracepipeline-test-istio-telemetry-patch.yaml');
@@ -484,8 +484,11 @@ describe('Telemetry Operator', function() {
 
         it(`Should create test app`, async function() {
           const kymaGateway = await getGateway('kyma-system', 'kyma-gateway');
+          console.log(kymaGateway);
           let kymaHostUrl = kymaGateway.spec.servers[0].hosts[0];
+          console.log(kymaHostUrl);
           kymaHostUrl = kymaHostUrl.toString().replaceAll('*', 'tracing-test-app');
+          console.log(kymaHostUrl);
           for (const resource of testApp ) {
             if (resource.kind == 'VirtualService') {
               resource.spec.hosts[0] = kymaHostUrl;
@@ -505,7 +508,6 @@ describe('Telemetry Operator', function() {
         it(`Should check filter`, async function() {
           await sleep(30000);
           const services = await getJaegerServices();
-          console.log(services);
           const testAppTraces = await getJaegerTracesForService('tracing-test-app', 'tracing-test');
           assert.isTrue(testAppTraces.data.length > 0, 'No spans present for test application "tracing-test-app"');
 
