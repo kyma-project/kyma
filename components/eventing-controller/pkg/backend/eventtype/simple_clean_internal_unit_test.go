@@ -49,9 +49,10 @@ func TestSimpleCleaner(t *testing.T) {
 		{
 			name:                 "success if the application name needs to be cleaned and event has more than two segments",
 			givenEventTypePrefix: "prefix",
-			givenEventType:       "prefix.te--s__t!!a@@p##p%%.Segment1.Segment2.Segment3.Segment4-Part1-Part2-Ä.Segment5-Part1-Part2-Ä.v1",
-			wantEventType:        "prefix.testapp.Segment1Segment2Segment3Segment4Part1Part2.Segment5Part1Part2.v1",
-			wantError:            false,
+			givenEventType: "prefix.te--s__t!!a@@p##p%%.Segment1.Segment2.Segment3." +
+				"Segment4-Part1-Part2-Ä.Segment5-Part1-Part2-Ä.v1",
+			wantEventType: "prefix.testapp.Segment1Segment2Segment3Segment4Part1Part2.Segment5Part1Part2.v1",
+			wantError:     false,
 		},
 		{
 			name:                 "success if the given application name is clean and event has more than two segments",
