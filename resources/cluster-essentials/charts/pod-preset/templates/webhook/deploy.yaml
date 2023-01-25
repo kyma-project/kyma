@@ -59,7 +59,7 @@ spec:
     {{- end }}
 {{- if .Values.webhook.pdb.enabled }}
 ---
-apiVersion: policy/v1beta1
+apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: {{ template "pod-preset.fullname" . }}-pdb

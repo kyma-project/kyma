@@ -74,7 +74,7 @@ func (gb *GenericBuilder) getFinalSubject(source, eventType string) string {
 func (gb *GenericBuilder) GetAppNameOrSource(source string, namedLogger *zap.SugaredLogger) string {
 	var appName = source
 	if appObj, err := gb.applicationLister.Get(source); err == nil && appObj != nil {
-		appName = application.GetCleanTypeOrName(appObj)
+		appName = application.GetTypeOrName(appObj)
 		namedLogger.With("application", source).Debug("Using application name: %s as source.", appName)
 	} else {
 		namedLogger.With("application", source).Debug("Cannot find application.")
