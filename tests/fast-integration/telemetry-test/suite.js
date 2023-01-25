@@ -506,12 +506,18 @@ describe('Telemetry Operator', function() {
           await waitForPodWithLabel('app', 'tracing-test-app', 'tracing-test');
         });
 
-
+        it(`Should call test app`, async function() {
+          await sleep(30000);
+          for (let i=0; i < 10; i++) {
+            await callTracingTestApp();
+          }
+        });
 
         it(`Should check filter`, async function() {
           await sleep(30000);
           const services = await getJaegerServices();
-
+          const testAppTraces = await getJaegerTracesForService('tracing-test-app', 'tracing-test');
+          assert.isTrue(testAppTraces.data.length > 0, 'No spans present for test application "tracing-test-app"');
 
           assert.isFalse(services.data.includes('grafana.kyma-system'), 'spans are present for grafana');
           assert.isFalse(services.data.includes('jaeger.kyma-system'), 'spans are present for jaeger');
