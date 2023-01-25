@@ -73,7 +73,7 @@ spec:
   gateways:
     - kyma-system/kyma-gateway
   hosts:
-    - kiali.hb-otel-fltr.berlin.shoot.canary.k8s-hana.ondemand.com
+    -
   http:
     - route:
         - destination:

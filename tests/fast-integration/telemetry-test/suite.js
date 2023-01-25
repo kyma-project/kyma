@@ -40,6 +40,7 @@ async function getTracingTestAppUrl() {
 
 async function callTracingTestApp() {
   const testAppUrl = await getTracingTestAppUrl();
+  console.log(testAppUrl);
   return retryPromise(async () => {
     return await axios.get(testAppUrl, {timeout: 10000});
   }, 5, 30);
