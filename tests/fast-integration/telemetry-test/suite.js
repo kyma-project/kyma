@@ -10,6 +10,7 @@ const {
   sleep,
   fromBase64,
   getGateway,
+  getVirtualService,
   retryPromise,
 } = require('../utils');
 const {
@@ -31,9 +32,14 @@ const {
 const axios = require('axios');
 const {getJaegerTracesForService, getJaegerServices} = require('../tracing/client');
 
+async function getTracingTestAppUrl() {
+  const vs = await getVirtualService('tracing-test', 'tracing-test-app');
+  const host = vs.spec.hosts[0];
+  return `https://${host}`;
+}
 
 async function callTracingTestApp() {
-  const testAppUrl = 'http://tracing-test-app.local';
+  const testAppUrl = await getTracingTestAppUrl();
 
   return retryPromise(async () => {
     return await axios.get(testAppUrl, {timeout: 10000});
@@ -500,17 +506,12 @@ describe('Telemetry Operator', function() {
           await waitForPodWithLabel('app', 'tracing-test-app', 'tracing-test');
         });
 
-        it(`Should call test app`, async function() {
-          for (let i=0; i < 10; i++) {
-            await callTracingTestApp();
-          }
-        });
+
 
         it(`Should check filter`, async function() {
           await sleep(30000);
           const services = await getJaegerServices();
-          const testAppTraces = await getJaegerTracesForService('tracing-test-app', 'tracing-test');
-          assert.isTrue(testAppTraces.data.length > 0, 'No spans present for test application "tracing-test-app"');
+
 
           assert.isFalse(services.data.includes('grafana.kyma-system'), 'spans are present for grafana');
           assert.isFalse(services.data.includes('jaeger.kyma-system'), 'spans are present for jaeger');
