@@ -111,7 +111,7 @@ describe('Telemetry Operator', function() {
     assert.isNotEmpty(epList[0].subsets);
     assert.isNotEmpty(epList[0].subsets[0].addresses);
   });
-/*
+
   context('Configurable Logging', function() {
     context('Default Loki LogPipeline', function() {
       it('Should be \'Running\'', async function() {
@@ -346,9 +346,9 @@ describe('Telemetry Operator', function() {
       });
     });
   });
-*/
+
   context('Configurable Tracing', function() {
-    context('Configurable Tracing', function() {/*
+    context('Configurable Tracing', function() {
       context('TracePipeline', function() {
         const firstPipeline = loadTestData('tracepipeline-output-otlp-secret-ref-1.yaml');
         const firstPipelineName = firstPipeline[0].metadata.name;
@@ -476,7 +476,7 @@ describe('Telemetry Operator', function() {
           assert.equal(fromBase64(secret.data.OTLP_ENDPOINT), 'http://another-foo-bar');
         });
       });
-*/
+
       context('Filter Processor', function() {
         const testApp = loadTestData('tracepipeline-test-app.yaml');
         const testAppIstioPatch = loadTestData('tracepipeline-test-istio-telemetry-patch.yaml');
