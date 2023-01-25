@@ -350,8 +350,13 @@ describe('Telemetry Operator', function() {
   context('Configurable Tracing', function() {
     context('Configurable Tracing', function() {
       context('TracePipeline', function() {
+        const jaeger = loadTestData('tracepipeline-jaeger.yaml')
         const firstPipeline = loadTestData('tracepipeline-output-otlp-secret-ref-1.yaml');
         const firstPipelineName = firstPipeline[0].metadata.name;
+
+        it(`Should clean up TracePipeline jaeger`, async function() {
+          await k8sDelete(jaeger);
+        });
 
         it(`Should create TracePipeline '${firstPipelineName}'`, async function() {
           await k8sApply(firstPipeline);
@@ -474,6 +479,10 @@ describe('Telemetry Operator', function() {
           await sleep(5*1000);
           const secret = await getSecret('telemetry-trace-collector', 'kyma-system');
           assert.equal(fromBase64(secret.data.OTLP_ENDPOINT), 'http://another-foo-bar');
+        });
+
+        it(`Should delete TracePipeline`, async function() {
+          await k8sDelete(pipeline);
         });
       });
 

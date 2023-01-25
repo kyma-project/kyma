@@ -3,6 +3,19 @@ kind: Namespace
 metadata:
   name: tracing-test
 ---
+
+apiVersion: telemetry.kyma-project.io/v1alpha1
+kind: TracePipeline
+metadata:
+  name: test-app-trace
+spec:
+  output:
+    otlp:
+      endpoint:
+        value: http://tracing-jaeger-collector.kyma-system.svc.cluster.local:4317
+
+---
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
