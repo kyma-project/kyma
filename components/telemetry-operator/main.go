@@ -159,7 +159,7 @@ func main() {
 		"Enable leader election for controller manager. Enabling this will ensure there is only one active controller manager.")
 	flag.BoolVar(&enableLogging, "enable-logging", true, "Enable configurable logging.")
 	flag.BoolVar(&enableTracing, "enable-tracing", true, "Enable configurable tracing.")
-	flag.BoolVar(&enableManagedFluentBit, "enable-managed-fluentbit", false, "Enable operator managed Fluent Bit resources.")
+	flag.BoolVar(&enableManagedFluentBit, "enable-managed-fluentbit", true, "Enable operator managed Fluent Bit resources.")
 	flag.StringVar(&logFormat, "log-format", getEnvOrDefault("APP_LOG_FORMAT", "text"), "Log format (json or text)")
 	flag.StringVar(&logLevel, "log-level", getEnvOrDefault("APP_LOG_LEVEL", "debug"), "Log level (debug, info, warn, error, fatal)")
 	flag.StringVar(&certDir, "cert-dir", ".", "Webhook TLS certificate directory")
