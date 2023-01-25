@@ -350,7 +350,7 @@ describe('Telemetry Operator', function() {
   context('Configurable Tracing', function() {
     context('Configurable Tracing', function() {
       context('TracePipeline', function() {
-        const jaeger = loadTestData('tracepipeline-jaeger.yaml')
+        const jaeger = loadTestData('tracepipeline-jaeger.yaml');
         const firstPipeline = loadTestData('tracepipeline-output-otlp-secret-ref-1.yaml');
         const firstPipelineName = firstPipeline[0].metadata.name;
 
