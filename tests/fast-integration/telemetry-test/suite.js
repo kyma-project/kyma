@@ -506,14 +506,14 @@ describe('Telemetry Operator', function() {
           await waitForPodWithLabel('app', 'tracing-test-app', 'tracing-test');
         });
 
-        it(`Should call test app`, async function() {
+        it(`Should call test app and produce spans`, async function() {
           await sleep(30000);
           for (let i=0; i < 10; i++) {
             await callTracingTestApp();
           }
         });
 
-        it(`Should check filter`, async function() {
+        it(`Should filter out noisy spans`, async function() {
           await sleep(30000);
           const services = await getJaegerServices();
           const testAppTraces = await getJaegerTracesForService('tracing-test-app', 'tracing-test');
@@ -526,7 +526,7 @@ describe('Telemetry Operator', function() {
           assert.isFalse(services.data.includes('loki.kyma-system'), 'spans are present for loki');
         });
 
-        it(`Should delete test app `, async function() {
+        it(`Should delete test setup`, async function() {
           await k8sApply(testAppIstioCleanup);
           await k8sDelete(testApp);
         });
