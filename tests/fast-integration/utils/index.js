@@ -643,6 +643,18 @@ async function getVirtualService(namespace, name) {
   }
 }
 
+async function getGateway(namespace, name) {
+  try {
+    const path = `/apis/networking.istio.io/v1beta1/namespaces/${namespace}/gateways/${name}`;
+    const response = await k8sDynamicApi.requestPromise({
+      url: k8sDynamicApi.basePath + path,
+    });
+    return JSON.parse(response.body);
+  } catch (err) {
+    return JSON.parse(err.response.body);
+  }
+}
+
 async function getPersistentVolumeClaim(namespace, name) {
   const path = `/api/v1/namespaces/${namespace}/persistentvolumeclaims/${name}`;
   const response = await k8sDynamicApi.requestPromise({
@@ -1773,6 +1785,29 @@ async function attachTraceChildSpans(parentSpan, trace) {
   }
 }
 
+function waitForDeploymentWithLabel(
+    labelKey,
+    labelValue,
+    namespace = 'default',
+    timeout = 90000,
+) {
+  const query = {
+    labelSelector: `${labelKey}=${labelValue}`,
+  };
+  return waitForK8sObject(
+      `/apis/apps/v1/namespaces/${namespace}/deployments`,
+      query,
+      (_type, _apiObj, watchObj) => {
+        return (
+
+          watchObj.object.status.readyReplicas === 1
+        );
+      },
+      timeout,
+      `Waiting for deployment with label ${labelKey}=${labelValue} timeout (${timeout} ms)`,
+  );
+}
+
 module.exports = {
   initializeK8sClient,
   getShootNameFromK8sServerUrl,
@@ -1837,6 +1872,7 @@ module.exports = {
   eventingSubscription,
   eventingSubscriptionV1Alpha2,
   getVirtualService,
+  getGateway,
   getPersistentVolumeClaim,
   waitForApplicationCr,
   patchDeployment,
@@ -1865,4 +1901,5 @@ module.exports = {
   getFunction,
   waitForEndpoint,
   waitForPodWithLabelAndCondition,
+  waitForDeploymentWithLabel,
 };
