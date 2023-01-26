@@ -25,7 +25,7 @@ func (dp *DeploymentProber) IsReady(ctx context.Context, name types.NamespacedNa
 	generation := d.Generation
 	observedGeneration := d.Status.ObservedGeneration
 	updated := d.Status.UpdatedReplicas
-	desired := d.Status.Replicas
+	desired := *d.Spec.Replicas
 	ready := d.Status.ReadyReplicas
 
 	log.V(1).Info(fmt.Sprintf("Checking Deployment: updated: %d, desired: %d, ready: %d, generation: %d, observed generation: %d",
