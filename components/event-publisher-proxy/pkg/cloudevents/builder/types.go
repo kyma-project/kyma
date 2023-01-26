@@ -7,6 +7,10 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 )
 
+const (
+	OriginalTypeHeaderName = "originaltype"
+)
+
 type CloudEventBuilder interface {
 	Build(event cev2event.Event) (*cev2event.Event, error)
 }

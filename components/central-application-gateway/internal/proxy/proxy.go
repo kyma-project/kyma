@@ -22,7 +22,6 @@ import (
 
 type proxy struct {
 	cache                        Cache
-	skipVerify                   bool
 	proxyTimeout                 int
 	authorizationStrategyFactory authorization.StrategyFactory
 	csrfTokenStrategyFactory     csrf.TokenStrategyFactory
@@ -50,12 +49,15 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	r.URL.Path = path
-
 	serviceAPI, err := p.apiExtractor.Get(apiIdentifier)
 	if err != nil {
 		handleErrors(w, err)
 		return
+	}
+
+	r.URL.Path = path.Path
+	if !serviceAPI.EncodeUrl {
+		r.URL.RawPath = path.RawPath
 	}
 
 	cacheEntry, err := p.getOrCreateCacheEntry(apiIdentifier, *serviceAPI)
@@ -77,10 +79,10 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	cacheEntry.Proxy.ServeHTTP(w, newRequest)
 }
 
-func (p *proxy) extractPath(u *url.URL) (model.APIIdentifier, string, *url.URL, apperrors.AppError) {
+func (p *proxy) extractPath(u *url.URL) (model.APIIdentifier, *url.URL, *url.URL, apperrors.AppError) {
 	apiIdentifier, path, gwURL, err := p.extractPathFunc(u)
 	if err != nil {
-		return model.APIIdentifier{}, "", nil, apperrors.WrongInput("failed to extract API Identifier from path")
+		return model.APIIdentifier{}, nil, nil, apperrors.WrongInput("failed to extract API Identifier from path")
 	}
 
 	return apiIdentifier, path, gwURL, nil

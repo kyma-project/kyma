@@ -4,7 +4,6 @@ import (
 	"crypto/sha1" //nolint:gosec
 	"fmt"
 	"strconv"
-	"strings"
 
 	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
@@ -70,24 +69,8 @@ func getDefaultSubscriptionV1Alpha2(protocolSettings *ProtocolSettings) (*types.
 	emsSubscription := &types.Subscription{}
 	emsSubscription.ContentMode = *protocolSettings.ContentMode
 	emsSubscription.ExemptHandshake = *protocolSettings.ExemptHandshake
-	qos, err := getQos(*protocolSettings.Qos)
-	if err != nil {
-		return nil, err
-	}
-	emsSubscription.Qos = qos
+	emsSubscription.Qos = types.GetQos(*protocolSettings.Qos)
 	return emsSubscription, nil
-}
-
-func getQos(qosStr string) (types.Qos, error) {
-	qosStr = strings.ReplaceAll(qosStr, "-", "_")
-	switch qosStr {
-	case string(types.QosAtLeastOnce):
-		return types.QosAtLeastOnce, nil
-	case string(types.QosAtMostOnce):
-		return types.QosAtMostOnce, nil
-	default:
-		return "", fmt.Errorf("invalid Qos: %s", qosStr)
-	}
 }
 
 func getEventMeshEvents(typeInfos []EventTypeInfo, typeMatching eventingv1alpha2.TypeMatching,
@@ -154,12 +137,8 @@ func ConvertKymaSubToEventMeshSub(subscription *eventingv1alpha2.Subscription, t
 func setEventMeshProtocolSettings(subscription *eventingv1alpha2.Subscription, eventMeshSub *types.Subscription) error {
 	// Applying protocol settings if provided in subscription CR
 	// qos
-	if qosStr, ok := subscription.Spec.Config[eventingv1alpha2.ProtocolSettingsQos]; ok && qosStr != "" {
-		qos, err := getQos(qosStr)
-		if err != nil {
-			return err
-		}
-		eventMeshSub.Qos = qos
+	if qosStr, ok := subscription.Spec.Config[eventingv1alpha2.ProtocolSettingsQos]; ok {
+		eventMeshSub.Qos = types.GetQos(qosStr)
 	}
 	// content mode
 	if contentMode, ok := subscription.Spec.Config[eventingv1alpha2.ProtocolSettingsContentMode]; ok && contentMode != "" {
@@ -182,24 +161,14 @@ func getEventMeshWebhookAuth(subscription *eventingv1alpha2.Subscription,
 	auth := &types.WebhookAuth{}
 	// extract auth info from subscription CR if any
 	if authType, ok := subscription.Spec.Config[eventingv1alpha2.WebhookAuthType]; ok {
-		if authType != string(types.AuthTypeClientCredentials) {
-			return nil, fmt.Errorf("invalid Type: %v, required: %v", authType,
-				string(types.AuthTypeClientCredentials))
-		}
-		auth.Type = types.AuthTypeClientCredentials
-	}
-
-	// if auth type was not provided then use default webhook auth
-	if auth.Type == "" {
+		auth.Type = types.GetAuthType(authType)
+	} else {
+		// if auth type was not provided then use default webhook auth
 		return defaultWebhookAuth, nil
 	}
 
 	if grantType, ok := subscription.Spec.Config[eventingv1alpha2.WebhookAuthGrantType]; ok {
-		if grantType != string(types.GrantTypeClientCredentials) {
-			return nil, fmt.Errorf("invalid GrantType: %v, required: %v", grantType,
-				string(types.GrantTypeClientCredentials))
-		}
-		auth.GrantType = types.GrantTypeClientCredentials
+		auth.GrantType = types.GetGrantType(grantType)
 	}
 
 	if tokenURL, ok := subscription.Spec.Config[eventingv1alpha2.WebhookAuthTokenURL]; ok {

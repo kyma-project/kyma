@@ -69,6 +69,7 @@ const (
 	domain                   = "domain.com"
 	namespacePrefixLength    = 5
 	syncPeriodSeconds        = 2
+	eventMeshMockKeyPrefix   = "/messaging/events/subscriptions"
 )
 
 //nolint:gochecknoglobals // only used in tests
@@ -302,6 +303,7 @@ func ensureK8sSubscriptionUpdated(ctx context.Context, t *testing.T, subscriptio
 		require.NoError(t, emTestEnsemble.k8sClient.Get(ctx, lookupKey, latestSubscription))
 		require.NotEmpty(t, latestSubscription.Name)
 		latestSubscription.Spec = subscription.Spec
+		latestSubscription.Labels = subscription.Labels
 		require.NoError(t, emTestEnsemble.k8sClient.Update(ctx, latestSubscription))
 		return true
 	}, bigTimeOut, bigPollingInterval)
@@ -400,9 +402,17 @@ func countEventMeshRequests(subscriptionName, eventType string) (int, int, int) 
 }
 
 func getEventMeshSubFromMock(subscriptionName, subscriptionNamespace string) *eventMeshtypes.Subscription {
-	nm1 := emTestEnsemble.nameMapper.MapSubscriptionName(subscriptionName, subscriptionNamespace)
-	key := fmt.Sprintf("%s/%s", "/messaging/events/subscriptions", nm1)
+	key := getEventMeshSubKeyForMock(subscriptionName, subscriptionNamespace)
 	return emTestEnsemble.eventMeshMock.Subscriptions.GetSubscription(key)
+}
+
+func getEventMeshSubKeyForMock(subscriptionName, subscriptionNamespace string) string {
+	nm1 := emTestEnsemble.nameMapper.MapSubscriptionName(subscriptionName, subscriptionNamespace)
+	return fmt.Sprintf("%s/%s", eventMeshMockKeyPrefix, nm1)
+}
+
+func getEventMeshKeyForMock(name string) string {
+	return fmt.Sprintf("%s/%s", eventMeshMockKeyPrefix, name)
 }
 
 // ensureK8sEventReceived checks if a certain event have triggered for the given namespace.
