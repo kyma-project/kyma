@@ -1,0 +1,10 @@
+apiVersion: telemetry.istio.io/v1alpha1
+kind: Telemetry
+metadata:
+  name: kyma-traces
+  namespace: istio-system
+spec:
+  tracing:
+    - providers:
+        - name: kyma-traces
+      randomSamplingPercentage: 100
