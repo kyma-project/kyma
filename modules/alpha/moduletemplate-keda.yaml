@@ -41,7 +41,7 @@ spec:
   descriptor:
     component:
       componentReferences: []
-      name: kyma.project.io/module/keda
+      name: kyma-project.io/module/keda
       provider: internal
       repositoryContexts:
       - baseUrl: europe-docker.pkg.dev/kyma-project/prod/unsigned
