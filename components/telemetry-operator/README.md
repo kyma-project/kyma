@@ -91,7 +91,7 @@ kubectl -n kyma-system set image deployment telemetry-operator manager=<my conta
 ## Troubleshooting
 
 ### Enable pausing reconciliations
-You must pause reconciliations to be able to debug the pipelines and, for example, try out a different pipeline configuration or a different OTel configuration. To pause reconciliations, create a `telemetry-override-config` in the `kyma-system`
+You must pause reconciliations to be able to debug the pipelines and, for example, try out a different pipeline configuration or a different OTel configuration. To pause reconciliations, create a `telemetry-override-config` in the `kyma-system` Namespace.
 Namespace. Here is an example of such a ConfigMap:
 ```yaml
 apiVersion: v1
