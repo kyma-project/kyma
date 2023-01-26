@@ -93,7 +93,7 @@ app.all("*", (req, res) => {
         };
 
         const callback = (status, body, headers) => {
-            if (!status) return;
+            if (res.writableEnded || !status) return;
             if (headers) {
                 for (let name of Object.keys(headers)) {
                     res.set(name, headers[name]);
@@ -107,24 +107,28 @@ app.all("*", (req, res) => {
         try {
             // Execute the user function
             const out = userFunction(event, context, callback);
-            if (out) {
-                if (helper.isPromise(out)) {
-                    out.then(result => {
-                        if (result) {
-                            callback(200, result);
-                        }
-                    })
-                    .catch((err) => {
-                        helper.handleError(500, err, span, callback)
-                    })
-                    .finally(()=>{
-                        span.end();
-                    })
+            if(!res.writableEnded){
+                if (out) {
+                    if (helper.isPromise(out)) {
+                        out.then(result => {
+                            if (result) {
+                                callback(200, result);
+                            } else {
+                                res.sendStatus(204)
+                            }
+                        })
+                        .catch((err) => {
+                            helper.handleError(500, err, span, callback)
+                        })
+                        .finally(()=>{
+                            span.end();
+                        })
+                    } else {
+                        callback(200, out)
+                    }
                 } else {
-                    callback(200, out)
+                    res.sendStatus(204)
                 }
-            } else {
-                res.sendStatus(204)
             }
         } catch (err) {
             helper.handleError(err.status || 500, err, span, callback)
