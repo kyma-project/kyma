@@ -5,7 +5,6 @@ module.exports = {
   waitForPodWithLabel,
   waitForTracePipelineStatusRunning,
   waitForTracePipelineStatusPending,
-  waitForDeploymentWithLabel,
 };
 
 const k8s = require('@kubernetes/client-node');
@@ -110,26 +109,4 @@ function waitForPodWithLabel(
   );
 }
 
-function waitForDeploymentWithLabel(
-    labelKey,
-    labelValue,
-    namespace = 'default',
-    timeout = 90000,
-) {
-  const query = {
-    labelSelector: `${labelKey}=${labelValue}`,
-  };
-  return waitForK8sObject(
-      `/apis/apps/v1/namespaces/${namespace}/deployments`,
-      query,
-      (_type, _apiObj, watchObj) => {
-        return (
-
-          watchObj.object.status.readyReplicas === 1
-        );
-      },
-      timeout,
-      `Waiting for deployment with label ${labelKey}=${labelValue} timeout (${timeout} ms)`,
-  );
-}
 

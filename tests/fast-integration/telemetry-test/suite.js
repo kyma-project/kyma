@@ -490,7 +490,6 @@ describe('Telemetry Operator', function() {
       context('Filter Processor', function() {
         const testApp = loadTestData('tracepipeline-test-app.yaml');
         const testAppIstioPatch = loadTestData('tracepipeline-test-istio-telemetry-patch.yaml');
-        const testAppIstioCleanup = loadTestData('tracepipeline-test-istio-telemetry-cleanup.yaml');
 
         it(`Should create test app`, async function() {
           const kymaGateway = await getGateway('kyma-system', 'kyma-gateway');
@@ -527,7 +526,8 @@ describe('Telemetry Operator', function() {
         });
 
         it(`Should delete test setup`, async function() {
-          await k8sApply(testAppIstioCleanup);
+          testAppIstioPatch[0].spec.tracing[0].randomSamplingPercentage = 1;
+          await k8sApply(testAppIstioPatch);
           await k8sDelete(testApp);
         });
       });
