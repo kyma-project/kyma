@@ -7,9 +7,14 @@ import (
 	"strings"
 	"time"
 
+	cloudevents "github.com/cloudevents/sdk-go/v2"
+	"github.com/cloudevents/sdk-go/v2/event"
+
 	pkgerrors "github.com/kyma-project/kyma/components/eventing-controller/pkg/errors"
 	"github.com/pkg/errors"
 )
+
+const randStringlength = 10
 
 var ErrParseSink = errors.Errorf("failed to parse subscription sink URL")
 
@@ -94,4 +99,11 @@ func GetSinkData(sink string) (string, []string, error) {
 	trimmedHost := strings.Split(sURL.Host, ":")[0]
 	subDomains := strings.Split(trimmedHost, ".")
 	return trimmedHost, subDomains, nil
+}
+
+func GetCloudEvent() event.Event {
+	newEvent := cloudevents.NewEvent()
+	newEvent.SetType(GetRandString(randStringlength))
+	newEvent.SetID(GetRandString(randStringlength))
+	return newEvent
 }

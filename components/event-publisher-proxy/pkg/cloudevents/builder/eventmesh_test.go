@@ -97,15 +97,13 @@ func Test_EventMesh_Build(t *testing.T) {
 
 			// given
 			// build cloud event
-			builder := testingutils.NewCloudEventBuilder(
-				testingutils.WithCloudEventSource(tc.givenSource),
-				testingutils.WithCloudEventType(tc.givenType),
-			)
+			builder := testingutils.NewCloudEventBuilder()
 			payload, _ := builder.BuildStructured()
 			newEvent := cloudevents.NewEvent()
-			newEvent.SetType(testingutils.CloudEventTypeWithPrefix)
-			err := json.Unmarshal([]byte(payload), &newEvent)
+			err = json.Unmarshal([]byte(payload), &newEvent)
 			require.NoError(t, err)
+			newEvent.SetType(tc.givenType)
+			newEvent.SetSource(tc.givenSource)
 
 			appLister := fake.NewApplicationListerOrDie(
 				context.Background(),
@@ -120,13 +118,13 @@ func Test_EventMesh_Build(t *testing.T) {
 			)
 
 			// when
-			buildEvent, err := eventMeshBuilder.Build(newEvent)
+			buildEvent, buildErr := eventMeshBuilder.Build(newEvent)
 
 			// then
 			if tc.wantError {
-				require.Error(t, err)
+				require.Error(t, buildErr)
 			} else {
-				require.NoError(t, err)
+				require.NoError(t, buildErr)
 				require.Equal(t, tc.wantSource, buildEvent.Source())
 				require.Equal(t, tc.wantType, buildEvent.Type())
 

@@ -93,6 +93,9 @@ func (s *Subscription) validateSubscriptionSource() *field.Error {
 	if s.Spec.Source == "" && s.Spec.TypeMatching != TypeMatchingExact {
 		return MakeInvalidFieldError(SourcePath, s.Name, EmptyErrDetail)
 	}
+	if IsInvalidCESource(s.Spec.Source) {
+		return MakeInvalidFieldError(SourcePath, s.Name, InvalidURIErrDetail)
+	}
 	return nil
 }
 
@@ -177,4 +180,14 @@ func isNotInt(value string) bool {
 		return true
 	}
 	return false
+}
+
+func IsInvalidCESource(source string) bool {
+	if source == "" {
+		return false
+	}
+	newEvent := utils.GetCloudEvent()
+	newEvent.SetSource(source)
+	err := newEvent.Validate()
+	return err != nil
 }
