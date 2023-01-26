@@ -26,15 +26,15 @@ spec:
       resources:
         operator:
           limits:
-            cpu: "1"
+            cpu: "800m"
             memory: "200Mi"
           requests:
-            cpu: "0.5"
+            cpu: "300m"
             memory: "150Mi"
         metricServer:
           limits:
-            cpu: "1"
-            memory: "1000Mi"
+            cpu: "800m"
+            memory: "500Mi"
           requests:
             cpu: "300m"
             memory: "500Mi"
