@@ -1,9 +1,9 @@
 #Kyma resource
 
-{{- if .Capabilities.APIVersions.Has "autoscaling/v2beta2" }}
+{{- if .Capabilities.APIVersions.Has "autoscaling/v2" }}
 {{- if .Values.deployment.autoscaling.enabled }}
 ---
-apiVersion: autoscaling/v2beta2
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{ include "oathkeeper.fullname" . }}
