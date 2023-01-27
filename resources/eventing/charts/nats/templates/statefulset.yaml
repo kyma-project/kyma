@@ -21,7 +21,7 @@ spec:
   {{- end }}
   serviceName: {{ include "nats.fullname" . }}
 
-  podManagementPolicy: {{ .Values.global.podManagementPolicy }}
+  podManagementPolicy: {{ .Values.global.jetstream.podManagementPolicy }}
 
   template:
     metadata:
