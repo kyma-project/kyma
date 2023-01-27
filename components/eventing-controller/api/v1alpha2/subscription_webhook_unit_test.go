@@ -429,6 +429,7 @@ func Test_IsInvalidCESource(t *testing.T) {
 	type TestCase struct {
 		name          string
 		givenSource   string
+		givenType     string
 		wantIsInvalid bool
 	}
 
@@ -436,17 +437,26 @@ func Test_IsInvalidCESource(t *testing.T) {
 		{
 			name:          "invalid URI Path source should be invalid",
 			givenSource:   "app%%type",
+			givenType:     "order.created.v1",
 			wantIsInvalid: true,
 		},
 		{
 			name:          "valid URI Path source should not be invalid",
 			givenSource:   "t..e--s__t!!a@@**p##p&&",
+			givenType:     "",
 			wantIsInvalid: false,
 		},
 		{
 			name:          "should ignore check if the source is empty",
 			givenSource:   "",
+			givenType:     "",
 			wantIsInvalid: false,
+		},
+		{
+			name:          "invalid type should be invalid",
+			givenSource:   "source",
+			givenType:     " ",
+			wantIsInvalid: true,
 		},
 	}
 
@@ -454,7 +464,7 @@ func Test_IsInvalidCESource(t *testing.T) {
 		tc := testCase
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			gotIsInvalid := v1alpha2.IsInvalidCESource(tc.givenSource)
+			gotIsInvalid := v1alpha2.IsInvalidCE(tc.givenSource, tc.givenType)
 			require.Equal(t, tc.wantIsInvalid, gotIsInvalid)
 		})
 	}

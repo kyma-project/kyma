@@ -93,7 +93,7 @@ func (s *Subscription) validateSubscriptionSource() *field.Error {
 	if s.Spec.Source == "" && s.Spec.TypeMatching != TypeMatchingExact {
 		return MakeInvalidFieldError(SourcePath, s.Name, EmptyErrDetail)
 	}
-	if IsInvalidCESource(s.Spec.Source) {
+	if IsInvalidCE(s.Spec.Source, "") {
 		return MakeInvalidFieldError(SourcePath, s.Name, InvalidURIErrDetail)
 	}
 	return nil
@@ -115,6 +115,9 @@ func (s *Subscription) validateSubscriptionTypes() *field.Error {
 		}
 		if s.Spec.TypeMatching != TypeMatchingExact && strings.HasPrefix(etype, InvalidPrefix) {
 			return MakeInvalidFieldError(TypesPath, s.Name, InvalidPrefixErrDetail)
+		}
+		if IsInvalidCE(s.Spec.Source, etype) {
+			return MakeInvalidFieldError(TypesPath, s.Name, InvalidURIErrDetail)
 		}
 	}
 	return nil
@@ -182,11 +185,11 @@ func isNotInt(value string) bool {
 	return false
 }
 
-func IsInvalidCESource(source string) bool {
+func IsInvalidCE(source, eventType string) bool {
 	if source == "" {
 		return false
 	}
-	newEvent := utils.GetCloudEvent()
+	newEvent := utils.GetCloudEvent(eventType)
 	newEvent.SetSource(source)
 	err := newEvent.Validate()
 	return err != nil

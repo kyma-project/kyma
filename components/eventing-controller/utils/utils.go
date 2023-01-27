@@ -101,9 +101,12 @@ func GetSinkData(sink string) (string, []string, error) {
 	return trimmedHost, subDomains, nil
 }
 
-func GetCloudEvent() event.Event {
+func GetCloudEvent(eventType string) event.Event {
+	if eventType == "" {
+		eventType = GetRandString(randStringlength)
+	}
 	newEvent := cloudevents.NewEvent()
-	newEvent.SetType(GetRandString(randStringlength))
+	newEvent.SetType(eventType)
 	newEvent.SetID(GetRandString(randStringlength))
 	return newEvent
 }
