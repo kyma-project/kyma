@@ -158,6 +158,18 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 
 func (r *Reconciler) reconcileFluentBit(ctx context.Context, name types.NamespacedName, pipeline *telemetryv1alpha1.LogPipeline) error {
 	if isNotMarkedForDeletion(pipeline) {
+		svcAcc := resources.MakeServiceAccount()
+		if err := utils.CreateOrUpdateServiceAccount(ctx, r, svcAcc); err != nil {
+			return fmt.Errorf("failed to create fluent bit service account: %w", err)
+		}
+		clusterRole := resources.MakeClusterRole()
+		if err := utils.CreateOrUpdateClusterRole(ctx, r, clusterRole); err != nil {
+			return fmt.Errorf("failed to create fluent bit cluster role: %w", err)
+		}
+		clusterRoleBinding := resources.MakeClusterRoleBinding()
+		if err := utils.CreateOrUpdateClusterRoleBinding(ctx, r, clusterRoleBinding); err != nil {
+			return fmt.Errorf("failed to create fluent bit cluster role Binding: %w", err)
+		}
 		ds := resources.MakeDaemonSet(name)
 		if err := utils.CreateOrUpdateDaemonSet(ctx, r, ds); err != nil {
 			return fmt.Errorf("failed to reconcile fluent bit daemonset: %w", err)

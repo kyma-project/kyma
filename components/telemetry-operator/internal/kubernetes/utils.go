@@ -3,6 +3,7 @@ package kubernetes
 import (
 	"context"
 	"fmt"
+	v1 "k8s.io/api/rbac/v1"
 	"strings"
 
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
@@ -16,6 +17,57 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
+
+func CreateOrUpdateClusterRoleBinding(ctx context.Context, c client.Client, desired *v1.ClusterRoleBinding) error {
+	var existing v1.ClusterRoleBinding
+	err := c.Get(ctx, types.NamespacedName{Name: desired.Name, Namespace: desired.Namespace}, &existing)
+	if err != nil {
+		if !apierrors.IsNotFound(err) {
+			return err
+		}
+		return c.Create(ctx, desired)
+	}
+	mutated := existing.DeepCopy()
+	mergeMetadata(&desired.ObjectMeta, mutated.ObjectMeta)
+	if apiequality.Semantic.DeepEqual(mutated, desired) {
+		return nil
+	}
+	return c.Update(ctx, desired)
+}
+
+func CreateOrUpdateClusterRole(ctx context.Context, c client.Client, desired *v1.ClusterRole) error {
+	var existing v1.ClusterRole
+	err := c.Get(ctx, types.NamespacedName{Name: desired.Name, Namespace: desired.Namespace}, &existing)
+	if err != nil {
+		if !apierrors.IsNotFound(err) {
+			return err
+		}
+		return c.Create(ctx, desired)
+	}
+	mutated := existing.DeepCopy()
+	mergeMetadata(&desired.ObjectMeta, mutated.ObjectMeta)
+	if apiequality.Semantic.DeepEqual(mutated, desired) {
+		return nil
+	}
+	return c.Update(ctx, desired)
+}
+
+func CreateOrUpdateServiceAccount(ctx context.Context, c client.Client, desired *corev1.ServiceAccount) error {
+	var existing corev1.ServiceAccount
+	err := c.Get(ctx, types.NamespacedName{Name: desired.Name, Namespace: desired.Namespace}, &existing)
+	if err != nil {
+		if !apierrors.IsNotFound(err) {
+			return err
+		}
+		return c.Create(ctx, desired)
+	}
+	mutated := existing.DeepCopy()
+	mergeMetadata(&desired.ObjectMeta, mutated.ObjectMeta)
+	if apiequality.Semantic.DeepEqual(mutated, desired) {
+		return nil
+	}
+	return c.Update(ctx, desired)
+}
 
 func CreateOrUpdateConfigMap(ctx context.Context, c client.Client, desired *corev1.ConfigMap) error {
 	var existing corev1.ConfigMap

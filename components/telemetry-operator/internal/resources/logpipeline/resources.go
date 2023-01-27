@@ -2,6 +2,7 @@ package logpipeline
 
 import (
 	"fmt"
+	v1 "k8s.io/api/rbac/v1"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -11,6 +12,39 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/pointer"
 )
+
+func MakeServiceAccount() *corev1.ServiceAccount {
+	resServiceAcc := corev1.ServiceAccount{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "telemetry-fluent-bit",
+			Namespace: "kyma-system",
+		},
+	}
+	return &resServiceAcc
+}
+
+func MakeClusterRoleBinding() *v1.ClusterRoleBinding {
+	resClusterRoleBinding := v1.ClusterRoleBinding{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "",
+			Namespace: "",
+		},
+		Subjects: []v1.Subject{{Name: "telemetry-fluent-bit", Namespace: "kyma-system", Kind: "ServiceAccount"}},
+		RoleRef: v1.RoleRef{
+			APIGroup: "rbac.authorization.k8s.io",
+			Kind:     "ClusterRole",
+			Name:     "fluent-bit",
+		},
+	}
+	return &resClusterRoleBinding
+}
+
+func MakeClusterRole() *v1.ClusterRole {
+	clusterRole := v1.ClusterRole{
+		ObjectMeta: metav1.ObjectMeta{Name: "telemetry-fluent-bit", Namespace: "kyma-system"},
+	}
+	return &clusterRole
+}
 
 func MakeDaemonSet(name types.NamespacedName) *appsv1.DaemonSet {
 	resourcesFluentBit := corev1.ResourceRequirements{
