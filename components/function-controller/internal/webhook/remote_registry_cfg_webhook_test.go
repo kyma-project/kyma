@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"go.uber.org/zap"
 	v1 "k8s.io/api/admission/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
@@ -134,6 +135,7 @@ func Test_registryWatcher_Handle(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			r := &registryWatcher{
 				Decoder: tt.fields.Decoder,
+				log:     zap.NewNop().Sugar(),
 			}
 			got := r.Handle(tt.args.ctx, tt.args.req)
 

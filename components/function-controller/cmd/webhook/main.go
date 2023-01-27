@@ -120,14 +120,26 @@ func main() {
 			logWithCtx.Named("converting-webhook")),
 	)
 	whs.Register(resources.FunctionDefaultingWebhookPath, &ctrlwebhook.Admission{
-		Handler: webhook.NewDefaultingWebhook(defaultingConfigv1alpha1, defaultingConfigv1alpha2, mgr.GetClient()),
+		Handler: webhook.NewDefaultingWebhook(
+			defaultingConfigv1alpha1,
+			defaultingConfigv1alpha2,
+			mgr.GetClient(),
+			logWithCtx.Named("defaulting-webhook")),
 	})
 
 	whs.Register(resources.FunctionValidationWebhookPath, &ctrlwebhook.Admission{
-		Handler: webhook.NewValidatingHook(validationConfigv1alpha1, validationConfigv1alpha2, mgr.GetClient()),
+		Handler: webhook.NewValidatingWebhook(
+			validationConfigv1alpha1,
+			validationConfigv1alpha2,
+			mgr.GetClient(),
+			logWithCtx.Named("validating-webhook")),
 	})
 
-	whs.Register(resources.RegistryConfigDefaultingWebhookPath, &ctrlwebhook.Admission{Handler: webhook.NewRegistryWatcher()})
+	whs.Register(
+		resources.RegistryConfigDefaultingWebhookPath,
+		&ctrlwebhook.Admission{Handler: webhook.NewRegistryWatcher(
+			logWithCtx.Named("registry-watcher"),
+		)})
 
 	logWithCtx.Info("setting up webhook resources controller")
 	// apply and monitor configuration
