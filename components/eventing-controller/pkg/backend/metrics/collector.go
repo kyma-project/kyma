@@ -10,13 +10,13 @@ import (
 
 const (
 	// latencyMetricKey name of the dispatch_duration metric
-	latencyMetricKey = "eventing_ec_subscriber_dispatch_duration_milliseconds"
+	latencyMetricKey = "eventing_ec_nats_subscriber_dispatch_duration_seconds"
 	// latencyMetricHelp help text for the dispatch_duration metric
 	latencyMetricHelp = "The duration of sending an incoming nats message to the subscriber (not including processing the message in the dispatcher)"
 	// deliveryMetricKey name of the delivery per subscription metric.
-	deliveryMetricKey = "nats_ec_delivery_per_subscription_total"
+	deliveryMetricKey = "eventing_ec_nats_delivery_per_subscription_total"
 	// eventTypeSubscribedMetricKey name of the eventType subscribed metric.
-	eventTypeSubscribedMetricKey = "nats_ec_event_type_subscribed_total"
+	eventTypeSubscribedMetricKey = "eventing_ec_event_type_subscribed_total"
 	// deliveryMetricHelp help text for the delivery per subscription metric.
 	deliveryMetricHelp = "The total number of dispatched events per subscription"
 	// eventTypeSubscribedMetricHelp help text for the eventType subscribed metric.
@@ -44,7 +44,7 @@ func NewCollector() *Collector {
 			// nolint:promlinter //disabling linter as we want to use milliseconds as the unit. This follow the same pattern as metrics exposed by istio
 			prometheus.HistogramOpts{
 				Help:    latencyMetricHelp,
-				Buckets: prometheus.ExponentialBuckets(2, 2, 10),
+				Buckets: prometheus.ExponentialBuckets(0.002, 2, 10),
 			},
 			[]string{"subscription_name", "event_type", "sink", "response_code"},
 		),
@@ -79,17 +79,17 @@ func (c *Collector) RegisterMetrics() {
 	metrics.Registry.MustRegister(c.latencyPerSubscriber)
 }
 
-// RecordDeliveryPerSubscription records a nats_ec_delivery_per_subscription_total metric.
+// RecordDeliveryPerSubscription records a eventing_ec_nats_delivery_per_subscription_total metric.
 func (c *Collector) RecordDeliveryPerSubscription(subscriptionName, eventType, sink string, statusCode int) {
 	c.deliveryPerSubscription.WithLabelValues(subscriptionName, eventType, fmt.Sprintf("%v", sink), fmt.Sprintf("%v", statusCode)).Inc()
 }
 
-// RecordLatencyPerSubscription records a eventing_ec_subscriber_dispatch_duration_milliseconds
+// RecordLatencyPerSubscription records a eventing_ec_nats_subscriber_dispatch_duration_seconds
 func (c *Collector) RecordLatencyPerSubscription(duration time.Duration, subscriptionName, eventType, sink string, statusCode int) {
-	c.latencyPerSubscriber.WithLabelValues(subscriptionName, eventType, fmt.Sprintf("%v", sink), fmt.Sprintf("%v", statusCode)).Observe(float64(duration.Milliseconds()))
+	c.latencyPerSubscriber.WithLabelValues(subscriptionName, eventType, fmt.Sprintf("%v", sink), fmt.Sprintf("%v", statusCode)).Observe(duration.Seconds())
 }
 
-// RecordEventTypes records a nats_ec_event_type_subscribed_total metric.
+// RecordEventTypes records a eventing_ec_event_type_subscribed_total metric.
 func (c *Collector) RecordEventTypes(subscriptionName, subscriptionNamespace, eventType, consumer string) {
 	c.eventTypes.WithLabelValues(subscriptionName, subscriptionNamespace, eventType, consumer).Inc()
 }

@@ -20,8 +20,8 @@ The metrics follow the [Prometheus naming convention](https://prometheus.io/docs
 
 | Metric                                      | Description                                                                    |
 |---------------------------------------------|:-------------------------------------------------------------------------------|
-| **nats_ec_event_type_subscribed_total**     | Total number of all the eventTypes subscribed using the Subscription CRD.      |
-| **nats_ec_delivery_per_subscription_total** | Total number of dispatched events per subscription, with status code and sink. |
+| **eventing_ec_event_type_subscribed_total**     | Total number of all the eventTypes subscribed using the Subscription CRD.      |
+| **eventing_ec_nats_delivery_per_subscription_total** | Total number of dispatched events per subscription, with status code and sink. |
 
 ### Metrics Emitted by NATS Exporter:
 
