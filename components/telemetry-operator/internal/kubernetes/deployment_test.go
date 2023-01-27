@@ -12,37 +12,62 @@ import (
 
 func TestDeploymentProber_IsReady(t *testing.T) {
 	tests := []struct {
-		summary            string
-		updatedReplicas    int32
-		desiredScheduled   int32
-		numberReady        int32
-		observedGeneration int64
-		desiredGeneration  int64
-		expected           bool
+		summary          string
+		desiredScheduled int32
+		numberReady      int32
+		expected         bool
 	}{
-		{summary: "all scheduled all ready", desiredScheduled: 1, numberReady: 1, updatedReplicas: 1, expected: true},
-		{summary: "all scheduled one ready", desiredScheduled: 2, numberReady: 1, updatedReplicas: 2, expected: false},
-		{summary: "all scheduled zero ready", desiredScheduled: 1, numberReady: 0, updatedReplicas: 1, expected: false},
-		{summary: "scheduled mismatch", desiredScheduled: 1, numberReady: 2, updatedReplicas: 2, expected: false},
-		{summary: "desired scheduled mismatch", desiredScheduled: 2, numberReady: 2, updatedReplicas: 1, expected: false},
-		{summary: "generation mismatch", observedGeneration: 1, desiredGeneration: 2, expected: false},
+		{summary: "all scheduled all ready", desiredScheduled: 1, numberReady: 1, expected: true},
+		{summary: "all scheduled one ready", desiredScheduled: 2, numberReady: 1, expected: false},
+		{summary: "all scheduled zero ready", desiredScheduled: 1, numberReady: 0, expected: false},
 	}
 
 	for _, test := range tests {
 		tc := test
 		t.Run(tc.summary, func(t *testing.T) {
+
 			t.Parallel()
 
+			matchLabels := make(map[string]string)
+			matchLabels["test.deployment.name"] = "test-deployment"
+
 			deployment := &appsv1.Deployment{
-				ObjectMeta: metav1.ObjectMeta{Name: "foo", Namespace: "kyma-system", Generation: tc.desiredGeneration},
-				Spec:       appsv1.DeploymentSpec{Replicas: &tc.desiredScheduled},
+				ObjectMeta: metav1.ObjectMeta{Name: "foo", Namespace: "kyma-system"},
+				Spec: appsv1.DeploymentSpec{
+					Replicas: &tc.desiredScheduled,
+					Selector: &metav1.LabelSelector{MatchLabels: matchLabels},
+				},
 				Status: appsv1.DeploymentStatus{
-					ReadyReplicas:      tc.numberReady,
-					UpdatedReplicas:    tc.updatedReplicas,
-					ObservedGeneration: tc.observedGeneration,
+					ReadyReplicas: tc.numberReady,
 				},
 			}
-			fakeClient := fake.NewClientBuilder().WithObjects(deployment).Build()
+
+			rs := &appsv1.ReplicaSet{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:            "foo",
+					Namespace:       "kyma-system",
+					Labels:          deployment.Spec.Selector.MatchLabels,
+					OwnerReferences: []metav1.OwnerReference{*metav1.NewControllerRef(deployment, deployment.GroupVersionKind())},
+				},
+				Spec: appsv1.ReplicaSetSpec{
+					Selector: deployment.Spec.Selector,
+					Replicas: &tc.desiredScheduled,
+					Template: deployment.Spec.Template,
+				},
+				Status: appsv1.ReplicaSetStatus{
+					ReadyReplicas: tc.numberReady,
+					Replicas:      tc.numberReady,
+				},
+			}
+
+			itemList := make([]appsv1.ReplicaSet, 1)
+
+			itemList = append(itemList, *rs)
+			rsList := &appsv1.ReplicaSetList{
+				Items: itemList,
+			}
+
+			fakeClient := fake.NewClientBuilder().WithObjects(deployment).WithLists(rsList).Build()
 
 			sut := DeploymentProber{fakeClient}
 			ready, err := sut.IsReady(context.Background(), types.NamespacedName{Name: "foo", Namespace: "kyma-system"})
