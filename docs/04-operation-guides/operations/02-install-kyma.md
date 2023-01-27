@@ -41,7 +41,7 @@ Use the `deploy` command to install Kyma.
   kyma deploy
   ```
 
-With Kyma installed on a local k3d cluster, access Kyma Dashboard using `kyma dashboard`. The command opens a browser and takes you to localhost with the web-based administrative UI for Kyma. With Kyma installed on a remote cluster, run the `kyma dashboard` command to open the Dashboard.
+With Kyma installed on a local k3d cluster, access Kyma Dashboard using `kyma dashboard`. The command opens a browser and takes you to localhost with the web-based administrative UI for Kyma. Use the same command to access Kyma installed on a remote cluster.
 
 ## Choose resource consumption
 
