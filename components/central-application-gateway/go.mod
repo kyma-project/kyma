@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/gorilla/mux v1.8.0
-	github.com/kyma-project/kyma/components/application-operator v0.0.0-20221102092727-d965167334ef
+	github.com/kyma-project/kyma/components/application-operator v0.0.0-20230125135111-33391903afdb
 	github.com/oklog/run v1.1.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/sirupsen/logrus v1.9.0
@@ -59,7 +59,6 @@ replace (
 	github.com/containerd/containerd => github.com/containerd/containerd v1.4.11
 	github.com/docker/distribution => github.com/docker/distribution v0.0.0-20191216044856-a8371794149d
 	github.com/docker/docker => github.com/docker/docker v20.10.8+incompatible
-	github.com/kyma-project/kyma/components/application-operator => github.com/VOID404/kyma/components/application-operator v0.0.0-20230117072504-f655d560919d
 	github.com/opencontainers/runc => github.com/opencontainers/runc v1.0.0-rc92
 	golang.org/x/crypto => golang.org/x/crypto v0.1.0
 	golang.org/x/net => golang.org/x/net v0.5.0
