@@ -455,7 +455,7 @@ func Test_IsInvalidCESource(t *testing.T) {
 		{
 			name:          "invalid type should be invalid",
 			givenSource:   "source",
-			givenType:     " ",
+			givenType:     " ", // space is an invalid type for cloud event
 			wantIsInvalid: true,
 		},
 	}

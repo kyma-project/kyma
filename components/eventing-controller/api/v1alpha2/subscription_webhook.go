@@ -94,6 +94,7 @@ func (s *Subscription) validateSubscriptionSource() *field.Error {
 	if s.Spec.Source == "" && s.Spec.TypeMatching != TypeMatchingExact {
 		return MakeInvalidFieldError(SourcePath, s.Name, EmptyErrDetail)
 	}
+	// check only if the source is valid for the cloud event, with a valid event type
 	if IsInvalidCE(s.Spec.Source, "") {
 		return MakeInvalidFieldError(SourcePath, s.Name, InvalidURIErrDetail)
 	}
@@ -117,6 +118,7 @@ func (s *Subscription) validateSubscriptionTypes() *field.Error {
 		if s.Spec.TypeMatching != TypeMatchingExact && strings.HasPrefix(etype, InvalidPrefix) {
 			return MakeInvalidFieldError(TypesPath, s.Name, InvalidPrefixErrDetail)
 		}
+		// check only is the event type is valid for the cloud event, with a valid source
 		if IsInvalidCE(ValidSource, etype) {
 			return MakeInvalidFieldError(TypesPath, s.Name, InvalidURIErrDetail)
 		}
