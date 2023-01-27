@@ -21,6 +21,7 @@ const (
 	subdomainSegments          = 5
 	InvalidPrefix              = "sap.kyma.custom"
 	ClusterLocalURLSuffix      = "svc.cluster.local"
+	ValidSource                = "source"
 )
 
 func (s *Subscription) SetupWebhookWithManager(mgr ctrl.Manager) error {
@@ -116,7 +117,7 @@ func (s *Subscription) validateSubscriptionTypes() *field.Error {
 		if s.Spec.TypeMatching != TypeMatchingExact && strings.HasPrefix(etype, InvalidPrefix) {
 			return MakeInvalidFieldError(TypesPath, s.Name, InvalidPrefixErrDetail)
 		}
-		if IsInvalidCE(s.Spec.Source, etype) {
+		if IsInvalidCE(ValidSource, etype) {
 			return MakeInvalidFieldError(TypesPath, s.Name, InvalidURIErrDetail)
 		}
 	}
