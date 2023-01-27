@@ -267,11 +267,6 @@ k8sClusterDomain: cluster.local
 # Add labels to all the deployed resources
 commonLabels: {}
 
-
-# podManagementPolicy controls how pods are created during initial scale up,
-# when replacing pods on nodes, or when scaling down.
-podManagementPolicy: Parallel
-
 # Prometheus NATS Exporter configuration.
 exporter:
   enabled: true

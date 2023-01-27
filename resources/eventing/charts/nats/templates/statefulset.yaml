@@ -21,7 +21,7 @@ spec:
   {{- end }}
   serviceName: {{ include "nats.fullname" . }}
 
-  podManagementPolicy: {{ .Values.podManagementPolicy }}
+  podManagementPolicy: {{ .Values.global.podManagementPolicy }}
 
   template:
     metadata:
