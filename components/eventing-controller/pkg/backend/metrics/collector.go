@@ -9,9 +9,10 @@ import (
 )
 
 const (
-	// latencyMetricKey name of the dispatch_duration metric
+	// latencyMetricKey name of the dispatch_duration metric.
 	latencyMetricKey = "eventing_ec_nats_subscriber_dispatch_duration_seconds"
-	// latencyMetricHelp help text for the dispatch_duration metric
+	//nolint:lll // help text for metrics
+	// latencyMetricHelp help text for the dispatch_duration metric.
 	latencyMetricHelp = "The duration of sending an incoming nats message to the subscriber (not including processing the message in the dispatcher)"
 	// deliveryMetricKey name of the delivery per subscription metric.
 	deliveryMetricKey = "eventing_ec_nats_delivery_per_subscription_total"
@@ -81,12 +82,23 @@ func (c *Collector) RegisterMetrics() {
 
 // RecordDeliveryPerSubscription records a eventing_ec_nats_delivery_per_subscription_total metric.
 func (c *Collector) RecordDeliveryPerSubscription(subscriptionName, eventType, sink string, statusCode int) {
-	c.deliveryPerSubscription.WithLabelValues(subscriptionName, eventType, fmt.Sprintf("%v", sink), fmt.Sprintf("%v", statusCode)).Inc()
+	c.deliveryPerSubscription.WithLabelValues(
+		subscriptionName,
+		eventType,
+		fmt.Sprintf("%v", sink),
+		fmt.Sprintf("%v", statusCode)).Inc()
 }
 
-// RecordLatencyPerSubscription records a eventing_ec_nats_subscriber_dispatch_duration_seconds
-func (c *Collector) RecordLatencyPerSubscription(duration time.Duration, subscriptionName, eventType, sink string, statusCode int) {
-	c.latencyPerSubscriber.WithLabelValues(subscriptionName, eventType, fmt.Sprintf("%v", sink), fmt.Sprintf("%v", statusCode)).Observe(duration.Seconds())
+// RecordLatencyPerSubscription records a eventing_ec_nats_subscriber_dispatch_duration_seconds.
+func (c *Collector) RecordLatencyPerSubscription(
+	duration time.Duration,
+	subscriptionName, eventType, sink string,
+	statusCode int) {
+	c.latencyPerSubscriber.WithLabelValues(
+		subscriptionName,
+		eventType,
+		fmt.Sprintf("%v", sink),
+		fmt.Sprintf("%v", statusCode)).Observe(duration.Seconds())
 }
 
 // RecordEventTypes records a eventing_ec_event_type_subscribed_total metric.
