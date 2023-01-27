@@ -8,13 +8,14 @@ import (
 	"net/url"
 	"strings"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/clientcert"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/httpconsts"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/httptools"
-	log "github.com/sirupsen/logrus"
 )
 
 func makeProxy(targetURL string, requestParameters *authorization.RequestParameters, serviceName string, skipTLSVerify bool, authorizationStrategy authorization.Strategy, csrfTokenStrategy csrf.TokenStrategy, clientCertificate clientcert.ClientCertificate, timeout int) (*httputil.ReverseProxy, apperrors.AppError) {
@@ -39,8 +40,9 @@ func newProxy(targetURL string, requestParameters *authorization.RequestParamete
 		req.Host = target.Host
 
 		combinedPath := joinPaths(target.Path, req.URL.Path)
-		req.URL.RawPath = combinedPath
+		combinedPathEscaped := joinPaths(target.Path, req.URL.RawPath)
 		req.URL.Path = combinedPath
+		req.URL.RawPath = combinedPathEscaped
 
 		if targetQuery == "" || req.URL.RawQuery == "" {
 			req.URL.RawQuery = targetQuery + req.URL.RawQuery

@@ -65,7 +65,7 @@ spec:
   output:
     otlp:
       endpoint:
-        value: http://tracing-jaeger-collector.kyma-system.svc.cluster.local:4317
+        value: http://jaeger-collector.jaeger.svc.cluster.local:4317
 ```
 
 This configures the underlying OTel Collector with a pipeline for traces. The receiver of the pipeline will be of the OTLP type and be accessible using the `telemetry-otlp-traces` service. As an exporter, an `otlp` or an `otlphttp` exporter is used, dependent on the configured protocol.
@@ -113,7 +113,7 @@ spec:
     otlp:
       protocol: http
       endpoint:
-        value: http://tracing-jaeger-collector.kyma-system.svc.cluster.local:4318
+        value: http://jaeger-collector.jaeger.svc.cluster.local:4318
 ```
 
 ### Step 4: Add authentication details
@@ -129,7 +129,7 @@ spec:
   output:
     otlp:
       endpoint:
-        value: http://tracing-jaeger-collector.kyma-system.svc.cluster.local:4317
+        value: http://jaeger-collector.jaeger.svc.cluster.local:4317
       authentication:
         basic:
           user:
@@ -277,6 +277,13 @@ The used buffers are volatile, and the data can be lost on the otel-collector in
 ### Single TracePipeline support
 
 Only one TracePipeline resource at a time is supported at the moment.
+
+### System span filtering
+System-related spans reported by Istio are filtered out without the opt-out option. Here are a few examples of such spans:
+- `/healtz` endpoint of a component deployed in the `kyma-system` Namespace
+- `/metrics` endpoint of a component deployed in the `kyma-system` Namespace
+- All outgoing spans reported by Grafana and Jaeger
+- All spans related to Fluent Bit and Loki communication
 
 ## Frequently Asked Questions
 

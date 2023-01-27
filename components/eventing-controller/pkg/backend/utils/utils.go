@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
 	"github.com/nats-io/nats.go"
@@ -37,6 +38,18 @@ type EventTypeInfo struct {
 // could map to a different name.
 type NameMapper interface {
 	MapSubscriptionName(subscriptionName, subscriptionNamespace string) string
+}
+
+func getQos(qosStr string) (types.Qos, error) {
+	qosStr = strings.ReplaceAll(qosStr, "-", "_")
+	switch qosStr {
+	case string(types.QosAtLeastOnce):
+		return types.QosAtLeastOnce, nil
+	case string(types.QosAtMostOnce):
+		return types.QosAtMostOnce, nil
+	default:
+		return "", fmt.Errorf("invalid Qos: %s", qosStr)
+	}
 }
 
 func getDefaultSubscription(protocolSettings *eventingv1alpha1.ProtocolSettings) (*types.Subscription, error) {
