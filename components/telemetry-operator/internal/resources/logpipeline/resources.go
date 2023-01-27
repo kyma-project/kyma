@@ -92,7 +92,7 @@ func MakeDaemonSet(name types.NamespacedName) *appsv1.DaemonSet {
 								Privileged:             pointer.Bool(false),
 								ReadOnlyRootFilesystem: pointer.Bool(true),
 							},
-							Image:           "eu.gcr.io/kyma-project/tpi/fluent-bit:1.9.9-cf0a130c",
+							Image:           "eu.gcr.io/kyma-project/tpi/fluent-bit:2.0.8-01ff7389",
 							ImagePullPolicy: "IfNotPresent",
 							EnvFrom: []corev1.EnvFromSource{
 								{
