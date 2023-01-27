@@ -1,9 +1,8 @@
 package v1alpha1
 
 import (
-	"k8s.io/apimachinery/pkg/runtime/schema"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 // +genclient
@@ -60,6 +59,7 @@ type ApplicationSpec struct {
 	LongDescription     string   `json:"longDescription"`
 
 	SkipVerify bool `json:"skipVerify"`
+	EncodeURL  bool `json:"encodeUrl"`
 
 	// Deprecated
 	AccessLabel string `json:"accessLabel,omitempty"`
