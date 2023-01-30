@@ -293,18 +293,6 @@ func WithStatusJSBackendTypes(types []eventingv1alpha2.JetStreamTypes) Subscript
 	}
 }
 
-func WithWebhookForNATS() SubscriptionOpt {
-	return func(sub *eventingv1alpha2.Subscription) {
-		if sub.Spec.Config == nil {
-			sub.Spec.Config = map[string]string{}
-		}
-		sub.Spec.Config[eventingv1alpha2.Protocol] = "NATS"
-		sub.Spec.Config[eventingv1alpha2.ProtocolSettingsContentMode] = "BINARY"
-		sub.Spec.Config[eventingv1alpha2.ProtocolSettingsExemptHandshake] = "true"
-		sub.Spec.Config[eventingv1alpha2.ProtocolSettingsQos] = "true"
-	}
-}
-
 func CustomReadyCondition(msg string) eventingv1alpha2.Condition {
 	return eventingv1alpha2.MakeCondition(
 		eventingv1alpha2.ConditionSubscriptionActive,
@@ -350,17 +338,28 @@ func WithWebhookAuthForBEB() SubscriptionOpt {
 
 func WithInvalidProtocolSettingsQos() SubscriptionOpt {
 	return func(s *eventingv1alpha2.Subscription) {
-		s.Spec.Config = map[string]string{
-			eventingv1alpha2.ProtocolSettingsQos: "AT_INVALID_ONCE",
+		if s.Spec.Config == nil {
+			s.Spec.Config = map[string]string{}
 		}
+		s.Spec.Config[eventingv1alpha2.ProtocolSettingsQos] = "AT_INVALID_ONCE"
 	}
 }
 
 func WithInvalidWebhookAuthType() SubscriptionOpt {
 	return func(s *eventingv1alpha2.Subscription) {
-		s.Spec.Config = map[string]string{
-			eventingv1alpha2.WebhookAuthType: "abcd",
+		if s.Spec.Config == nil {
+			s.Spec.Config = map[string]string{}
 		}
+		s.Spec.Config[eventingv1alpha2.WebhookAuthType] = "abcd"
+	}
+}
+
+func WithInvalidWebhookAuthGrantType() SubscriptionOpt {
+	return func(s *eventingv1alpha2.Subscription) {
+		if s.Spec.Config == nil {
+			s.Spec.Config = map[string]string{}
+		}
+		s.Spec.Config[eventingv1alpha2.WebhookAuthGrantType] = "invalid"
 	}
 }
 
@@ -751,8 +750,9 @@ func WithMaxInFlight(maxInFlight int) SubscriptionOpt {
 // WithMaxInFlightMessages is a SubscriptionOpt that sets the status with the maxInFlightMessages string value
 func WithMaxInFlightMessages(maxInFlight string) SubscriptionOpt {
 	return func(sub *eventingv1alpha2.Subscription) {
-		sub.Spec.Config = map[string]string{
-			eventingv1alpha2.MaxInFlightMessages: maxInFlight,
+		if sub.Spec.Config == nil {
+			sub.Spec.Config = map[string]string{}
 		}
+		sub.Spec.Config[eventingv1alpha2.MaxInFlightMessages] = maxInFlight
 	}
 }

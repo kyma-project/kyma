@@ -6,12 +6,13 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
-	"github.com/kyma-project/kyma/components/application-operator/pkg/normalization"
-	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/normalization"
 	log "github.com/sirupsen/logrus"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
 )
 
 const (
@@ -44,6 +45,7 @@ type ServiceAPI struct {
 	Credentials                 *Credentials
 	RequestParametersSecretName string
 	SkipVerify                  bool
+	EncodeURL                   bool
 }
 
 type predicateFunc func(service v1alpha1.Service, entry v1alpha1.Entry) bool
@@ -109,7 +111,7 @@ func (r *repository) get(appName string, predicate func(service v1alpha1.Service
 	for _, service := range app.Spec.Services {
 		for _, entry := range service.Entries {
 			if predicate(service, entry) {
-				services = append(services, convert(service, entry, app.Spec.SkipVerify))
+				services = append(services, convert(service, entry, app.Spec.SkipVerify, app.Spec.EncodeURL))
 				infos = append(infos, fmt.Sprintf("service.ID: '%s', service.DisplayName: '%s', entry.Name: '%s'", service.ID, service.DisplayName, entry.Name))
 			}
 		}
@@ -141,12 +143,13 @@ func (r *repository) getApplication(appName string) (*v1alpha1.Application, appe
 	return app, nil
 }
 
-func convert(service v1alpha1.Service, entry v1alpha1.Entry, skipVerify bool) Service {
+func convert(service v1alpha1.Service, entry v1alpha1.Entry, skipVerify, encodeURL bool) Service {
 	api := &ServiceAPI{
 		TargetURL:                   entry.TargetUrl,
 		Credentials:                 convertCredentialsFromK8sType(entry.Credentials),
 		RequestParametersSecretName: entry.RequestParametersSecretName,
 		SkipVerify:                  skipVerify,
+		EncodeURL:                   encodeURL,
 	}
 
 	return Service{

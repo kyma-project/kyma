@@ -33,6 +33,22 @@ func GetCleanTypeOrName(application *applicationv1alpha1.Application) string {
 	return GetCleanName(applicationName)
 }
 
+// GetTypeOrName returns the application name.
+// if the application type label exists, it will be returned instead of the application name.
+func GetTypeOrName(application *applicationv1alpha1.Application) string {
+	if application == nil {
+		return ""
+	}
+	applicationName := application.Name
+	for k, v := range application.Labels {
+		if strings.ToLower(k) == TypeLabel {
+			applicationName = v
+			break
+		}
+	}
+	return applicationName
+}
+
 // GetCleanName cleans the name form none-alphanumeric characters and returns the clean name.
 func GetCleanName(name string) string {
 	return invalidApplicationNameSegment.ReplaceAllString(name, "")

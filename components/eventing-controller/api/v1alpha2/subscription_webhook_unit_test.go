@@ -92,6 +92,7 @@ func Test_validateSubscription(t *testing.T) {
 			givenSub: testingv2.NewSubscription(subName, subNamespace,
 				testingv2.WithSource(testingv2.EventSourceClean),
 				testingv2.WithEventType(testingv2.OrderCreatedV1Event),
+				testingv2.WithWebhookAuthForBEB(),
 				testingv2.WithMaxInFlightMessages(v1alpha2.DefaultMaxInFlightMessages),
 				testingv2.WithSink(sink),
 			),
@@ -130,6 +131,20 @@ func Test_validateSubscription(t *testing.T) {
 				testingv2.WithSink(sink),
 			),
 			wantErr: nil,
+		},
+		{
+			name: "invalid URI reference as source should return error",
+			givenSub: testingv2.NewSubscription(subName, subNamespace,
+				testingv2.WithTypeMatchingStandard(),
+				testingv2.WithSource("s%ourc%e"),
+				testingv2.WithEventType(testingv2.OrderCreatedV1Event),
+				testingv2.WithMaxInFlightMessages(v1alpha2.DefaultMaxInFlightMessages),
+				testingv2.WithSink(sink),
+			),
+			wantErr: apierrors.NewInvalid(
+				v1alpha2.GroupKind, subName,
+				field.ErrorList{v1alpha2.MakeInvalidFieldError(v1alpha2.SourcePath,
+					subName, v1alpha2.InvalidURIErrDetail)}),
 		},
 		{
 			name: "nil types field should return error",
@@ -238,6 +253,51 @@ func Test_validateSubscription(t *testing.T) {
 				v1alpha2.GroupKind, subName,
 				field.ErrorList{v1alpha2.MakeInvalidFieldError(v1alpha2.ConfigPath,
 					subName, v1alpha2.StringIntErrDetail)}),
+		},
+		{
+			name: "invalid QoS value should return error",
+			givenSub: testingv2.NewSubscription(subName, subNamespace,
+				testingv2.WithTypeMatchingStandard(),
+				testingv2.WithSource(testingv2.EventSourceClean),
+				testingv2.WithEventType(testingv2.OrderCreatedV1Event),
+				testingv2.WithMaxInFlightMessages(v1alpha2.DefaultMaxInFlightMessages),
+				testingv2.WithInvalidProtocolSettingsQos(),
+				testingv2.WithSink(sink),
+			),
+			wantErr: apierrors.NewInvalid(
+				v1alpha2.GroupKind, subName,
+				field.ErrorList{v1alpha2.MakeInvalidFieldError(v1alpha2.ConfigPath,
+					subName, v1alpha2.InvalidQosErrDetail)}),
+		},
+		{
+			name: "invalid webhook auth type value should return error",
+			givenSub: testingv2.NewSubscription(subName, subNamespace,
+				testingv2.WithTypeMatchingStandard(),
+				testingv2.WithSource(testingv2.EventSourceClean),
+				testingv2.WithEventType(testingv2.OrderCreatedV1Event),
+				testingv2.WithMaxInFlightMessages(v1alpha2.DefaultMaxInFlightMessages),
+				testingv2.WithInvalidWebhookAuthType(),
+				testingv2.WithSink(sink),
+			),
+			wantErr: apierrors.NewInvalid(
+				v1alpha2.GroupKind, subName,
+				field.ErrorList{v1alpha2.MakeInvalidFieldError(v1alpha2.ConfigPath,
+					subName, v1alpha2.InvalidAuthTypeErrDetail)}),
+		},
+		{
+			name: "invalid webhook grant type value should return error",
+			givenSub: testingv2.NewSubscription(subName, subNamespace,
+				testingv2.WithTypeMatchingStandard(),
+				testingv2.WithSource(testingv2.EventSourceClean),
+				testingv2.WithEventType(testingv2.OrderCreatedV1Event),
+				testingv2.WithMaxInFlightMessages(v1alpha2.DefaultMaxInFlightMessages),
+				testingv2.WithInvalidWebhookAuthGrantType(),
+				testingv2.WithSink(sink),
+			),
+			wantErr: apierrors.NewInvalid(
+				v1alpha2.GroupKind, subName,
+				field.ErrorList{v1alpha2.MakeInvalidFieldError(v1alpha2.ConfigPath,
+					subName, v1alpha2.InvalidGrantTypeErrDetail)}),
 		},
 		{
 			name: "missing sink should return error",
@@ -360,6 +420,52 @@ func Test_validateSubscription(t *testing.T) {
 			t.Parallel()
 			err := tc.givenSub.ValidateSubscription()
 			require.Equal(t, err, tc.wantErr)
+		})
+	}
+}
+
+func Test_IsInvalidCESource(t *testing.T) {
+	t.Parallel()
+	type TestCase struct {
+		name          string
+		givenSource   string
+		givenType     string
+		wantIsInvalid bool
+	}
+
+	testCases := []TestCase{
+		{
+			name:          "invalid URI Path source should be invalid",
+			givenSource:   "app%%type",
+			givenType:     "order.created.v1",
+			wantIsInvalid: true,
+		},
+		{
+			name:          "valid URI Path source should not be invalid",
+			givenSource:   "t..e--s__t!!a@@**p##p&&",
+			givenType:     "",
+			wantIsInvalid: false,
+		},
+		{
+			name:          "should ignore check if the source is empty",
+			givenSource:   "",
+			givenType:     "",
+			wantIsInvalid: false,
+		},
+		{
+			name:          "invalid type should be invalid",
+			givenSource:   "source",
+			givenType:     " ", // space is an invalid type for cloud event
+			wantIsInvalid: true,
+		},
+	}
+
+	for _, testCase := range testCases {
+		tc := testCase
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			gotIsInvalid := v1alpha2.IsInvalidCE(tc.givenSource, tc.givenType)
+			require.Equal(t, tc.wantIsInvalid, gotIsInvalid)
 		})
 	}
 }

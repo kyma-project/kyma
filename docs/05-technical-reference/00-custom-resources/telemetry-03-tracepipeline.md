@@ -21,7 +21,7 @@ spec:
   output:
     otlp:
       endpoint:
-        value: http://tracing-jaeger-collector.kyma-system.svc.cluster.local:4317
+        value: http://jaeger-collector.jaeger.svc.cluster.local:4317
 status:
   conditions:
   - lastTransitionTime: "2022-12-13T14:33:27Z"

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
+
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
@@ -16,11 +18,17 @@ var (
 	NSPath     = field.NewPath("metadata").Child("namespace")
 
 	EmptyErrDetail          = "must not be empty"
+	InvalidURIErrDetail     = "must be valid as per RFC 3986"
 	DuplicateTypesErrDetail = "must not have duplicate types"
 	LengthErrDetail         = "must not be of length zero"
 	MinSegmentErrDetail     = fmt.Sprintf("must have minimum %s segments", strconv.Itoa(minEventTypeSegments))
 	InvalidPrefixErrDetail  = fmt.Sprintf("must not have %s as type prefix", InvalidPrefix)
 	StringIntErrDetail      = fmt.Sprintf("%s must be a stringified int value", MaxInFlightMessages)
+
+	InvalidQosErrDetail = fmt.Sprintf("must be a valid QoS value %s or %s",
+		types.QosAtLeastOnce, types.QosAtMostOnce)
+	InvalidAuthTypeErrDetail  = fmt.Sprintf("must be a valid Auth Type value %s", types.AuthTypeClientCredentials)
+	InvalidGrantTypeErrDetail = fmt.Sprintf("must be a valid Grant Type value %s", types.GrantTypeClientCredentials)
 
 	MissingSchemeErrDetail = "must have URL scheme 'http' or 'https'"
 	SuffixMissingErrDetail = fmt.Sprintf("must have valid sink URL suffix %s", ClusterLocalURLSuffix)

@@ -11,7 +11,6 @@ components:
   - name: "logging"
   - name: "telemetry"
   - name: "tracing"
-  - name: "kiali"
   - name: "monitoring"
   - name: "eventing"
   - name: "ory"
