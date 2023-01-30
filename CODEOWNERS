@@ -52,7 +52,6 @@
 /resources/application-connector  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 /resources/certificates @dariusztutaj @cnvergence @strekm @werdes72 @barchw
 /resources/cluster-essentials @a-thaler @strekm @dariusztutaj @cnvergence @barchw @werdes72 @PK85 @videlov @triffer
-/resources/cluster-essentials/charts/pod-preset @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @tillknuesting
 /resources/cluster-users @cnvergence @strekm @werdes72 @dariusztutaj @barchw @videlov @triffer
 /resources/compass-runtime-agent  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 /resources/eventing @kyma-project/eventing

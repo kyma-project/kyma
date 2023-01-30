@@ -21,6 +21,7 @@ const (
 	subdomainSegments          = 5
 	InvalidPrefix              = "sap.kyma.custom"
 	ClusterLocalURLSuffix      = "svc.cluster.local"
+	ValidSource                = "source"
 )
 
 func (s *Subscription) SetupWebhookWithManager(mgr ctrl.Manager) error {
@@ -93,6 +94,10 @@ func (s *Subscription) validateSubscriptionSource() *field.Error {
 	if s.Spec.Source == "" && s.Spec.TypeMatching != TypeMatchingExact {
 		return MakeInvalidFieldError(SourcePath, s.Name, EmptyErrDetail)
 	}
+	// check only if the source is valid for the cloud event, with a valid event type
+	if IsInvalidCE(s.Spec.Source, "") {
+		return MakeInvalidFieldError(SourcePath, s.Name, InvalidURIErrDetail)
+	}
 	return nil
 }
 
@@ -112,6 +117,10 @@ func (s *Subscription) validateSubscriptionTypes() *field.Error {
 		}
 		if s.Spec.TypeMatching != TypeMatchingExact && strings.HasPrefix(etype, InvalidPrefix) {
 			return MakeInvalidFieldError(TypesPath, s.Name, InvalidPrefixErrDetail)
+		}
+		// check only is the event type is valid for the cloud event, with a valid source
+		if IsInvalidCE(ValidSource, etype) {
+			return MakeInvalidFieldError(TypesPath, s.Name, InvalidURIErrDetail)
 		}
 	}
 	return nil
@@ -177,4 +186,14 @@ func isNotInt(value string) bool {
 		return true
 	}
 	return false
+}
+
+func IsInvalidCE(source, eventType string) bool {
+	if source == "" {
+		return false
+	}
+	newEvent := utils.GetCloudEvent(eventType)
+	newEvent.SetSource(source)
+	err := newEvent.Validate()
+	return err != nil
 }

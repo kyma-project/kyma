@@ -47,17 +47,21 @@ func NewConvertingWebhook(client ctrlclient.Client, scheme *runtime.Scheme, log 
 }
 
 func (w *ConvertingWebhook) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
+	log := w.log
 	convertReview := &apix.ConversionReview{}
 	err := json.NewDecoder(req.Body).Decode(convertReview)
 	if err != nil {
-		w.log.Error(err, "failed to read conversion request")
+		log.Error(err, "failed to read conversion request")
 		resp.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
+	log = w.log.With("uid", convertReview.Request.UID)
+	log.Debug("starting conversion")
+
 	conversionResponse, err := w.handleConvertRequest(convertReview.Request)
 	if err != nil {
-		w.log.Error(err, "failed to convert", "request", convertReview.Request.UID)
+		log.Error(err, "failed to convert", "request", convertReview.Request.UID)
 		convertReview.Response = errored(err)
 	} else {
 		convertReview.Response = conversionResponse
@@ -67,9 +71,11 @@ func (w *ConvertingWebhook) ServeHTTP(resp http.ResponseWriter, req *http.Reques
 
 	err = json.NewEncoder(resp).Encode(convertReview)
 	if err != nil {
-		w.log.Error(err, "failed to write response")
+		log.Error(err, "failed to write response")
 		return
 	}
+
+	log.Debug("conversion finalized")
 }
 
 func (w *ConvertingWebhook) handleConvertRequest(req *apix.ConversionRequest) (*apix.ConversionResponse, error) {
