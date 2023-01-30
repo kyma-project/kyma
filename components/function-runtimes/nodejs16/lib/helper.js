@@ -63,12 +63,12 @@ const isPromise = (promise) => {
 }
 
 
-function handleError(status, err, span, callback) {
+function handleError(err, span, sendResponse) {
     const errTxt = resolveErrorMsg(err);
     console.error(errTxt);
     span.setStatus({ code: SpanStatusCode.ERROR, message: errTxt });
     span.setAttribute("error", errTxt);
-    callback(status, errTxt);
+    sendResponse(errTxt, 500);
 }
 
 function resolveErrorMsg(err) {
