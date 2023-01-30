@@ -110,7 +110,7 @@ var (
 )
 
 const (
-	otelImage             = "eu.gcr.io/kyma-project/tpi/otel-collector:0.66.0-8bb1c644"
+	otelImage             = "eu.gcr.io/kyma-project/tpi/otel-collector:0.70.0-723b551a"
 	overrideConfigMapName = "telemetry-override-config"
 )
 
@@ -144,6 +144,7 @@ func getEnvOrDefault(envVar string, defaultValue string) string {
 
 //+kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=apps,resources=daemonsets,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=apps,resources=replicasets,verbs=get;list;watch
 
 //+kubebuilder:rbac:groups=monitoring.coreos.com,resources=servicemonitors,verbs=get;list;watch;create;update;patch;delete
 
