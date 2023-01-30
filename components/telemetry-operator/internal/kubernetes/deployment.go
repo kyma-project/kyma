@@ -31,9 +31,9 @@ func (dp *DeploymentProber) IsReady(ctx context.Context, name types.NamespacedNa
 	  Namespace:     d.Namespace,
 	}
 	if err := dp.List(ctx, &allReplicaSets, listOps); err != nil {
-	    return false, fmt.Errof("failed to list ReplicaSets: %v", err)
+	    return false, fmt.Errorf("failed to list ReplicaSets: %v", err)
 	}
-	)
+
 
 	if err := dp.Get(ctx, name, &d); err != nil {
 		return false, fmt.Errorf("failed to get %s/%s ReplicaSet for deployment: %v", name.Namespace, name.Name, err)
@@ -41,7 +41,7 @@ func (dp *DeploymentProber) IsReady(ctx context.Context, name types.NamespacedNa
 
 	replicaSet, err := getLatestReplicaSet(&d, &allReplicaSets)
 	if err != nil || replicaSet == nil {
-		return false, fmt.Errof("failed to get latest ReplicaSet: %v", err)
+		return false, fmt.Errorf("failed to get latest ReplicaSet: %v", err)
 	}
 
 	isReady := replicaSet.Status.ReadyReplicas >= desiredReplicas
