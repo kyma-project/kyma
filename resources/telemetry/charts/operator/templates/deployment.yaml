@@ -94,7 +94,7 @@ spec:
             name: metrics
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: rakeshgarimella944/tele-01
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.telemetry_operator) }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           livenessProbe:
             {{- toYaml .Values.livenessProbe | nindent 12 }}
