@@ -26,14 +26,13 @@ func (dp *DeploymentProber) IsReady(ctx context.Context, name types.NamespacedNa
 	desiredReplicas := *d.Spec.Replicas
 	var allReplicaSets v1.ReplicaSetList
 
-        listOps := &client.ListOptions{
-	  LabelSelector: k8slabels.SelectorFromSet(d.Spec.Selector.MatchLabels),
-	  Namespace:     d.Namespace,
+	listOps := &client.ListOptions{
+		LabelSelector: k8slabels.SelectorFromSet(d.Spec.Selector.MatchLabels),
+		Namespace:     d.Namespace,
 	}
 	if err := dp.List(ctx, &allReplicaSets, listOps); err != nil {
-	    return false, fmt.Errorf("failed to list ReplicaSets: %v", err)
+		return false, fmt.Errorf("failed to list ReplicaSets: %v", err)
 	}
-
 
 	if err := dp.Get(ctx, name, &d); err != nil {
 		return false, fmt.Errorf("failed to get %s/%s ReplicaSet for deployment: %v", name.Namespace, name.Name, err)
