@@ -26,7 +26,7 @@ For eventing in NATS mode, Eventing Controller also acts as a dispatcher. It con
 
 1. Make sure the environment variables are set.
    The make target `set-up-local-env` uses default values. Change them as needed.
-   If you want to push your images to Docker Hub, set the env variable `KO_DOCKER_REPO` to `index.docker.io/<docker_id>`
+   If you want to push your images to Docker Hub, set the env variable `KO_DOCKER_REPO` to `index.docker.io/<docker_id>`.
 
 1. To verify all the manifests after the processing by Kustomize without applying them to the cluster, use the make target `deploy-dry-run`:
 
@@ -159,7 +159,7 @@ If you want to know more about scaffolding code with Kubebuilder, read [Simplifi
    make manifests
    ```
 
-1. Update fields in the `spec` of an existing CRD by modifying the Go file for the type, that is, `api/version/<crd>_types.go`. For example, to adjust the Subscriptions CRD, modify `api/v1alpha1/subscriptions_types.go`.
+1. Update fields in the **spec** of an existing CRD by modifying the Go file for the type, that is, `api/version/<crd>_types.go`. For example, to adjust the Subscriptions CRD, modify `api/v1alpha1/subscriptions_types.go`.
    After that, run the following command to generate boilerplate code:
 
    ```sh
