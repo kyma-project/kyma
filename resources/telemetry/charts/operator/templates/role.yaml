@@ -2,8 +2,8 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ include "operator.fullname" . }}-manager-role
-  namespace: {{ .Release.Namespace }}
+  creationTimestamp: null
+  name: manager-role
 rules:
 - apiGroups:
   - ""
@@ -64,6 +64,18 @@ rules:
   - apps
   resources:
   - deployments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - replicasets
   verbs:
   - create
   - delete
