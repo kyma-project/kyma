@@ -17,7 +17,7 @@ type Application struct {
 }
 
 func (app Application) ShouldSkipInstallation() bool {
-	return app.Spec.SkipInstallation == true
+	return app.Spec.SkipInstallation
 }
 
 func (app Application) GetApplicationID() string {
