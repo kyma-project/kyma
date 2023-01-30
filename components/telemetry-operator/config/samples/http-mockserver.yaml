@@ -35,7 +35,7 @@ spec:
             - -i http
             - -o stdout
             - -q
-          image: eu.gcr.io/kyma-project/tpi/fluent-bit:2.0.8-01ff7389
+          image: eu.gcr.io/kyma-project/tpi/fluent-bit:2.0.8-723b551a
           livenessProbe:
             tcpSocket:
               port: serviceport
