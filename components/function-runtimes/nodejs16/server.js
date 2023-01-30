@@ -92,42 +92,45 @@ app.all("*", (req, res) => {
             'namespace': serviceNamespace
         };
 
-        const callback = (status, body, headers) => {
-            if (!status) return;
+        const sendResponse = (body, status, headers) => {
+            if (res.writableEnded) return;
             if (headers) {
                 for (let name of Object.keys(headers)) {
                     res.set(name, headers[name]);
                 }
             }
-            res.status(status).send(body);
+            if(body){
+                if(status){
+                    res.status(status);
+                } 
+                res.send(body);
+            } else if(status){
+                res.sendStatus(status);
+            } else {
+                res.send();
+            }
         };
 
         const span = startNewSpan('userFunction', tracer);
 
         try {
             // Execute the user function
-            const out = userFunction(event, context, callback);
-            if (out) {
-                if (helper.isPromise(out)) {
-                    out.then(result => {
-                        if (result) {
-                            callback(200, result);
-                        }
-                    })
-                    .catch((err) => {
-                        helper.handleError(500, err, span, callback)
-                    })
-                    .finally(()=>{
-                        span.end();
-                    })
-                } else {
-                    callback(200, out)
-                }
+            const out = userFunction(event, context, sendResponse);
+            if (out && helper.isPromise(out)) {
+                out.then(result => {
+                    sendResponse(result)
+                })
+                .catch((err) => {
+                    helper.handleError(err, span, sendResponse)
+                })
+                .finally(()=>{
+                    span.end();
+                })
             } else {
-                res.sendStatus(204)
+                sendResponse(out);
             }
         } catch (err) {
-            helper.handleError(err.status || 500, err, span, callback)
+            helper.handleError(err, span, sendResponse)
         } finally {
             span.end();
         }
