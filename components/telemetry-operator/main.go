@@ -110,7 +110,7 @@ var (
 )
 
 const (
-	otelImage             = "eu.gcr.io/kyma-project/tpi/otel-collector:0.66.0-8bb1c644"
+	otelImage             = "eu.gcr.io/kyma-project/tpi/otel-collector:0.70.0-723b551a"
 	overrideConfigMapName = "telemetry-override-config"
 )
 

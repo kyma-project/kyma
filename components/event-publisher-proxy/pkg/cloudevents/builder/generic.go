@@ -60,7 +60,10 @@ func (gb *GenericBuilder) Build(event cev2event.Event) (*cev2event.Event, error)
 	ceEvent.SetExtension(OriginalTypeHeaderName, event.Type())
 	// set prefixed type
 	ceEvent.SetType(finalEventType)
-	ceEvent.SetSource(cleanSource)
+	// validate the final cloud event
+	if err = ceEvent.Validate(); err != nil {
+		return nil, err
+	}
 
 	return &ceEvent, nil
 }
