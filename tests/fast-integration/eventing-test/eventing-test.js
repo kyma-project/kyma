@@ -88,9 +88,11 @@ describe('Eventing tests', function() {
 
   before('Expose Grafana', async function() {
     await exposeGrafana();
+    this.retries(3);
     await waitForPodWithLabelAndCondition( telemetryOperatorLabel.key, telemetryOperatorLabel.value, kymaSystem,
         conditionReady.condition, conditionReady.status, 60_000);
   });
+
 
   before('Get stream config for JetStream', async function() {
     const success = await getStreamConfigForJetStream();
@@ -351,5 +353,6 @@ describe('Eventing tests', function() {
 
   after('Unexpose Grafana', async function() {
     await unexposeGrafana(isSKR);
+    this.retries(3);
   });
 });
