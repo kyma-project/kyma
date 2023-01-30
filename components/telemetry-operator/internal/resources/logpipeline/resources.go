@@ -309,7 +309,7 @@ func MakeConfigMap(name types.NamespacedName) *corev1.ConfigMap {
     Refresh_Interval 10
     DB /data/flb_kube.db
     storage.type  filesystem
-	Read_from_Head True
+    Read_from_Head True
 
 [FILTER]
     Name kubernetes
