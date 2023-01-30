@@ -26,12 +26,13 @@ func (dp *DeploymentProber) IsReady(ctx context.Context, name types.NamespacedNa
 	desiredReplicas := *d.Spec.Replicas
 	var allReplicaSets v1.ReplicaSetList
 
-	err := dp.List(
-		ctx,
-		&allReplicaSets,
-		&client.ListOptions{
-			LabelSelector: k8slabels.SelectorFromSet(d.Spec.Selector.MatchLabels),
-			Namespace:     d.Namespace},
+        listOps := &client.ListOptions{
+	  LabelSelector: k8slabels.SelectorFromSet(d.Spec.Selector.MatchLabels),
+	  Namespace:     d.Namespace,
+	}
+	if err := dp.List(ctx, &allReplicaSets, listOps); err != nil {
+	    return false, fmt.Errof("failed to list ReplicaSets: %v", err)
+	}
 	)
 
 	if err := dp.Get(ctx, name, &d); err != nil {
@@ -40,7 +41,7 @@ func (dp *DeploymentProber) IsReady(ctx context.Context, name types.NamespacedNa
 
 	replicaSet, err := getLatestReplicaSet(&d, &allReplicaSets)
 	if err != nil || replicaSet == nil {
-		return false, err
+		return false, fmt.Errof("failed to get latest ReplicaSet: %v", err)
 	}
 
 	isReady := replicaSet.Status.ReadyReplicas >= desiredReplicas
