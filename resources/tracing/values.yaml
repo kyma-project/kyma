@@ -179,7 +179,7 @@ global:
       directory: "external"
     oauth2_proxy:
       name: "oauth2-proxy"
-      version: "7.4.0-f193d3f9"
+      version: "7.4.0-723b551a"
       directory: "tpi"
 virtualservice:
   enabled: true
