@@ -54,6 +54,8 @@ rbac:
   create: true
 podSecurityPolicy:
   create: true
+serviceMonitor:
+  enabled: true
 
 resources:
   limits:
