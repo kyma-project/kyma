@@ -18,6 +18,7 @@ var (
 	NSPath     = field.NewPath("metadata").Child("namespace")
 
 	EmptyErrDetail          = "must not be empty"
+	InvalidURIErrDetail     = "must be valid as per RFC 3986"
 	DuplicateTypesErrDetail = "must not have duplicate types"
 	LengthErrDetail         = "must not be of length zero"
 	MinSegmentErrDetail     = fmt.Sprintf("must have minimum %s segments", strconv.Itoa(minEventTypeSegments))
