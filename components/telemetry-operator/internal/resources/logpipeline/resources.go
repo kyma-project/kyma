@@ -2,6 +2,7 @@ package logpipeline
 
 import (
 	"fmt"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -91,7 +92,7 @@ func MakeDaemonSet(name types.NamespacedName) *appsv1.DaemonSet {
 								Privileged:             pointer.Bool(false),
 								ReadOnlyRootFilesystem: pointer.Bool(true),
 							},
-							Image:           "eu.gcr.io/kyma-project/tpi/fluent-bit:1.9.9-cf0a130c",
+							Image:           "eu.gcr.io/kyma-project/tpi/fluent-bit:2.0.8-723b551a",
 							ImagePullPolicy: "IfNotPresent",
 							EnvFrom: []corev1.EnvFromSource{
 								{
@@ -309,12 +310,6 @@ func MakeConfigMap(name types.NamespacedName) *corev1.ConfigMap {
     DB /data/flb_kube.db
     storage.type  filesystem
 
-[INPUT]
-    Name tail
-    Path /null.log
-    Tag null.*
-    Alias null-tail
-
 [FILTER]
     Name kubernetes
     Match tele.*
@@ -322,11 +317,6 @@ func MakeConfigMap(name types.NamespacedName) *corev1.ConfigMap {
     K8S-Logging.Parser On
     K8S-Logging.Exclude On
     Buffer_Size 1MB
-
-[OUTPUT]
-    Name null
-    Match null.*
-    Alias null-null
 
 @INCLUDE dynamic/*.conf
 `

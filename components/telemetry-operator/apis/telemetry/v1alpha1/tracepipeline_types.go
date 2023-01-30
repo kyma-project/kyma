@@ -23,19 +23,24 @@ import (
 // TracePipelineSpec defines the desired state of TracePipeline
 type TracePipelineSpec struct {
 	// Configures the trace receiver of a TracePipeline.
-	Output TracePipelineOutput `json:"output,omitempty"`
+	Output TracePipelineOutput `json:"output"`
 }
 
+// TracePipelineOutput defines the output configuration section.
 type TracePipelineOutput struct {
 	// Defines an output using the OpenTelmetry protocol.
-	Otlp *OtlpOutput `json:"otlp,omitempty"`
+	Otlp *OtlpOutput `json:"otlp"`
 }
 
 type OtlpOutput struct {
 	// Defines the OTLP protocol (http or grpc).
+	// +kubebuilder:validation:MinLength=1
+	// +kubebuilder:default:=grpc
+	// +kubebuilder:validation:Enum=grpc;http
 	Protocol string `json:"protocol,omitempty"`
 	// Defines the host and port (<host>:<port>) of an OTLP endpoint.
-	Endpoint ValueType `json:"endpoint,omitempty"`
+	// +kubebuilder:validation:Required
+	Endpoint ValueType `json:"endpoint"`
 	// Defines authentication options for the OTLP output
 	Authentication *AuthenticationOptions `json:"authentication,omitempty"`
 }
@@ -47,9 +52,11 @@ type AuthenticationOptions struct {
 
 type BasicAuthOptions struct {
 	// Contains the basic auth username or a secret reference
-	User ValueType `json:"user,omitempty"`
+	// +kubebuilder:validation:Required
+	User ValueType `json:"user"`
 	// Contains the basic auth password or a secret reference
-	Password ValueType `json:"password,omitempty"`
+	// +kubebuilder:validation:Required
+	Password ValueType `json:"password"`
 }
 
 func (b *BasicAuthOptions) IsDefined() bool {
@@ -58,20 +65,20 @@ func (b *BasicAuthOptions) IsDefined() bool {
 
 type TracePipelineConditionType string
 
-// These are the valid statuses of LogPipeline.
+// These are the valid statuses of TracePipeline.
 const (
 	TracePipelinePending TracePipelineConditionType = "Pending"
 	TracePipelineRunning TracePipelineConditionType = "Running"
 )
 
-// LogPipelineCondition contains details for the current condition of this LogPipeline
+// Contains details for the current condition of this TracePipeline
 type TracePipelineCondition struct {
 	LastTransitionTime metav1.Time                `json:"lastTransitionTime,omitempty"`
 	Reason             string                     `json:"reason,omitempty"`
 	Type               TracePipelineConditionType `json:"type,omitempty"`
 }
 
-// TracePipelineStatus defines the observed state of TracePipeline
+// Defines the observed state of TracePipeline
 type TracePipelineStatus struct {
 	Conditions []TracePipelineCondition `json:"conditions,omitempty"`
 }
@@ -130,7 +137,9 @@ type TracePipeline struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   TracePipelineSpec   `json:"spec,omitempty"`
+	// Defines the desired state of TracePipeline
+	Spec TracePipelineSpec `json:"spec,omitempty"`
+	// Shows the observed state of the TracePipeline
 	Status TracePipelineStatus `json:"status,omitempty"`
 }
 

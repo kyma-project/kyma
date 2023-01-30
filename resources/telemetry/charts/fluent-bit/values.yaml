@@ -90,12 +90,6 @@ serviceMonitor:
   serviceMonitorPorts:
     - port: http-metrics
       path: /metrics
-      scheme: https
-      tlsConfig:
-        caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
-        certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
-        keyFile: /etc/prometheus/secrets/istio.default/key.pem
-        insecureSkipVerify: true
 
 #   namespace: monitoring
 #   interval: 10s
@@ -183,33 +177,6 @@ ingress:
   #  - secretName: fluent-bit-example-tld
   #    hosts:
   #      - fluent-bit.example.tld
-
-## only available if kind is Deployment
-autoscaling:
-  enabled: false
-  minReplicas: 1
-  maxReplicas: 3
-  targetCPUUtilizationPercentage: 75
-#  targetMemoryUtilizationPercentage: 75
-   ## see https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/#autoscaling-on-multiple-metrics-and-custom-metrics
-  customRules: []
-#     - type: Pods
-#       pods:
-#         metric:
-#           name: packets-per-second
-#         target:
-#           type: AverageValue
-#           averageValue: 1k
-    ## see https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#support-for-configurable-scaling-behavior
-  behavior: {}
-#      scaleDown:
-#        policies:
-#          - type: Pods
-#            value: 4
-#            periodSeconds: 60
-#          - type: Percent
-#            value: 10
-#            periodSeconds: 60
 
 ## only available if kind is Deployment
 podDisruptionBudget:

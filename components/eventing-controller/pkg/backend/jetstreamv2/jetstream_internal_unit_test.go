@@ -1,3 +1,5 @@
+//go:build unit
+
 package jetstreamv2
 
 import (
@@ -10,20 +12,22 @@ import (
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
 	cev2protocol "github.com/cloudevents/sdk-go/v2/protocol"
 	"github.com/cloudevents/sdk-go/v2/protocol/http"
-	jetstreamv2mocks "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2/mocks"
-	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
 	"github.com/nats-io/nats.go"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest"
 
+	jetstreamv2mocks "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2/mocks"
+	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
+
 	"github.com/stretchr/testify/assert"
+
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
 	subtesting "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
-	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/require"
 )
 
 // //////////////////////////////////////////////////////////////////////
@@ -1046,9 +1050,67 @@ func Test_IsConsumerUsedByKymaSub(t *testing.T) {
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
+// Test_revertEventTypeToOriginal test the behaviour of the revertEventTypeToOriginal function.
+func Test_revertEventTypeToOriginal(t *testing.T) {
+	// pre-requisites
+	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
+	require.NoError(t, err)
+
+	jsBackend := &JetStream{
+		Config: backendnats.Config{
+			JSSubjectPrefix: "kyma",
+		},
+		logger: defaultLogger,
+	}
+
+	// test cases
+	testCases := []struct {
+		name              string
+		givenType         string
+		givenSource       string
+		givenOriginalType string
+		wantType          string
+	}{
+		{
+			name:              "Should revert the type to original form using original type header",
+			givenType:         "kyma.noapp.order.created.v1",
+			givenSource:       "noapp",
+			givenOriginalType: "order.created.v1",
+			wantType:          "order.created.v1",
+		},
+		{
+			name:        "Should revert the type to original form by removing prefixes (without originalType header)",
+			givenType:   "kyma.noapp.order.created.v1",
+			givenSource: "noapp",
+			wantType:    "order.created.v1",
+		},
+	}
+
+	for _, testCase := range testCases {
+		tc := testCase
+		t.Run(tc.name, func(t *testing.T) {
+			// given
+			ce := cev2.New(cev2.CloudEventsVersionV1)
+			ce.SetType(tc.givenType)
+			ce.SetSource(tc.givenSource)
+			if tc.givenOriginalType != "" {
+				ce.SetExtension(originalTypeHeaderName, tc.givenOriginalType)
+			}
+
+			ceLogger := jsBackend.namedLogger().With("id", ce.ID(), "source", ce.Source(), "type", ce.Type())
+
+			// when
+			jsBackend.revertEventTypeToOriginal(&ce, ceLogger)
+
+			// then
+			require.Equal(t, tc.wantType, ce.Type())
+		})
+	}
+}
+
+// //////////////////////////////////////////////////////////////////////
 // test helpers
-///////////////////////////////////////////////////////////////////////
+// /////////////////////////////////////////////////////////////////////
 
 func NewSubscriptionWithEmptyTypes() *v1alpha2.Subscription {
 	return subtesting.NewSubscription("test", "test",
@@ -1141,9 +1203,9 @@ func NewConsumers(subs []v1alpha2.Subscription, jsBackend *JetStream) []*nats.Co
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////
 // test fixtures
-///////////////////////////////////////////////////////////////////////
+// /////////////////////////////////////////////////////////////////////
 
 func fixtureNatsConfig() backendnats.Config {
 	return backendnats.Config{
@@ -1160,9 +1222,9 @@ func fixtureNatsConfigAsStreamInfo() *nats.StreamInfo {
 	return &nats.StreamInfo{}
 }
 
-////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////
 // stubs
-///////////////////////////////////////////////////////////////////////
+// /////////////////////////////////////////////////////////////////////
 
 type ceClientStub struct{}
 

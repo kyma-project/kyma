@@ -33,6 +33,7 @@ ENV NODE_VERSION 14.21.2
 
 SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 
+
 # hadolint ignore=DL3003
 RUN addgroup -g 1000 node \
     && adduser -u 1000 -G node -s /bin/sh -D node \

@@ -1,9 +1,0 @@
-kiali:
-  spec:
-    resources:
-      limits:
-        cpu: 50m
-        memory: 70Mi
-      requests:
-        cpu: 10m
-        memory: 20Mi
