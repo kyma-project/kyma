@@ -3,7 +3,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: {{ include "operator.fullname" . }}-manager-role
-  namespace: {{ .Release.Namespace }
+  namespace: {{ .Release.Namespace }}
 rules:
 - apiGroups:
   - ""
