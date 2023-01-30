@@ -237,7 +237,7 @@ describe('Telemetry Operator', function() {
         const pipelineName = pipeline[0].metadata.name;
 
         it(`Should create LogPipeline '${pipelineName}'`, async function() {
-          await k8sApply(pipeline);
+          await retryOperation( (r) => k8sApply(pipeline), 1000, 5);
           await waitForLogPipelineStatusRunning(pipelineName);
         });
 
@@ -506,16 +506,16 @@ describe('Telemetry Operator', function() {
         });
 
         it(`Should call test app and produce spans`, async function() {
-          await sleep(30000);
           for (let i=0; i < 10; i++) {
-            await callTracingTestApp();
+            await retryOperation(callTracingTestApp, 1000, 10);
           }
         });
 
         it(`Should filter out noisy spans`, async function() {
-          await sleep(30000);
-          const services = await getJaegerServices();
-          const testAppTraces = await getJaegerTracesForService('tracing-test-app', 'tracing-test');
+          const services = await retryOperation(getJaegerServices, 1000, 5);
+
+          const testAppTraces = await retryOperation((r) =>
+            getJaegerTracesForService('tracing-test-app', 'tracing-test'), 1000, 5);
           assert.isTrue(testAppTraces.data.length > 0, 'No spans present for test application "tracing-test-app"');
 
           assert.isFalse(services.data.includes('grafana.kyma-system'), 'spans are present for grafana');
@@ -533,4 +533,20 @@ describe('Telemetry Operator', function() {
       });
     });
   });
+});
+
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+const retryOperation = (operation, delay, retries) => new Promise((resolve, reject) => {
+  return operation()
+      .then(resolve)
+      .catch((reason) => {
+        if (retries > 0) {
+          return wait(delay)
+              .then(retryOperation.bind(null, operation, delay, retries - 1))
+              .then(resolve)
+              .catch(reject);
+        }
+        return reject(reason);
+      });
 });
