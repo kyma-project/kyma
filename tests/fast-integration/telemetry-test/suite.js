@@ -508,6 +508,7 @@ describe('Telemetry Operator', function() {
         it(`Should call test app and produce spans`, async function() {
           for (let i=0; i < 10; i++) {
             await retryOperation(callTracingTestApp, 1000, 10);
+            await sleep(1000);
           }
         });
 
