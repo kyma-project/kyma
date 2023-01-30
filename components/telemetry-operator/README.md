@@ -88,19 +88,11 @@ make push-image DOCKER_PUSH_DIRECTORY=<my container repo> DOCKER_TAG=latest
 kubectl -n kyma-system set image deployment telemetry-operator manager=<my container repo>/telemetry-operator:latest
 ```
 
-### Enable Tracing Controller
-
-To activate configurable tracing, follow the previous steps to run the telemetry operator in your development environment. When deploying the operator with the [telemetry chart](https://github.com/kyma-project/kyma/tree/main/resources/telemetry), you must install the `TracePipeline` CRD manually and set a feature flag to enable tracing:
-
-```bash
-kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/main/components/telemetry-operator/config/crd/bases/telemetry.kyma-project.io_tracepipelines.yaml
-kyma deploy -s main --value telemetry.operator.controllers.tracing.enabled=true
-```
-
+## Troubleshooting
 
 ### Enable pausing reconciliations
-You must pause reconciliations to be able to debug the pipelines and, for example, try out a different pipeline configuration or a different OTel configuration. To pause reconciliations, create a `telemetry-override-config` in the `kyma-system`
-Namespace. Here is an example of such a ConfigMap:
+You must pause reconciliations to be able to debug the pipelines and, for example, try out a different pipeline configuration or a different OTel configuration. To pause reconciliations, create a `telemetry-override-config` in the `kyma-system` Namespace.
+Here is an example of such a ConfigMap:
 ```yaml
 apiVersion: v1
 kind: ConfigMap
@@ -127,6 +119,11 @@ The `global`, `tracing`, and `logging` fields are optional.
    ```bash
    kubectl rollout restart deployment -n kyma-system telemetry-operator
    ```
-   
+
 **Caveats**
-If you change the pipeline CR when the reconciliation is paused, these changes will not be applied immediately but in a periodic reconciliation cycle of one hour. To reconcile earlier, restart the telemetry operator.
+If you change the pipeline CR when the reconciliation is paused, these changes will not be applied immediately but in a periodic reconciliation cycle of one hour. To reconcile earlier, restart the Telemetry operator.
+
+### Profiling
+
+The Telemetry operator has pprof-based profiling activated and exposed on port 6060. Use port-forwarding to access the pprof endpoint. You can find additional information in the Go [pprof package documentation](https://pkg.go.dev/net/http/pprof).
+

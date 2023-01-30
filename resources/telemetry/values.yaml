@@ -17,7 +17,7 @@ global:
       directory: "tpi"
     fluent_bit:
       name: "fluent-bit"
-      version: "1.9.9-cf0a130c"
+      version: "2.0.8-01ff7389"
       directory: "tpi"
     busybox:
       name: "busybox"
