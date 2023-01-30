@@ -26,14 +26,14 @@ func MakeServiceAccount() *corev1.ServiceAccount {
 func MakeClusterRoleBinding() *v1.ClusterRoleBinding {
 	resClusterRoleBinding := v1.ClusterRoleBinding{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "",
-			Namespace: "",
+			Name:      "telemetry-fluent-bit",
+			Namespace: "kyma-system",
 		},
 		Subjects: []v1.Subject{{Name: "telemetry-fluent-bit", Namespace: "kyma-system", Kind: "ServiceAccount"}},
 		RoleRef: v1.RoleRef{
 			APIGroup: "rbac.authorization.k8s.io",
 			Kind:     "ClusterRole",
-			Name:     "fluent-bit",
+			Name:     "telemetry-fluent-bit",
 		},
 	}
 	return &resClusterRoleBinding

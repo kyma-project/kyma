@@ -1,6 +1,6 @@
 
 {{- if .Values.dashboards.enabled -}}
-{{- range $path, $_ :=  .Files.Glob "dashboards/*.json" }}
+{{- range $path, $_ :=  .Files.Glob "../dashboards/*.json" }}
 apiVersion: v1
 kind: ConfigMap
 metadata:

@@ -47,6 +47,14 @@ readinessProbe:
   initialDelaySeconds: 5
   periodSeconds: 10
 
+dashboards:
+  enabled: true
+  
+rbac:
+  create: true
+podSecurityPolicy:
+  create: true
+
 resources:
   limits:
     cpu: 100m
