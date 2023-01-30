@@ -88,7 +88,7 @@ func TestMergeSectionsConfig(t *testing.T) {
 [FILTER]
     name    grep
     match   foo.*
-    exclude $kubernetes['namespace_name'] kyma-system|kyma-integration|kube-system|istio-system|compass-system
+    exclude $kubernetes['namespace_name'] kyma-system|kube-system|istio-system|compass-system
 
 [FILTER]
     name   record_modifier
@@ -173,7 +173,7 @@ func TestMergeSectionsConfigCustomOutput(t *testing.T) {
 [FILTER]
     name    grep
     match   foo.*
-    exclude $kubernetes['namespace_name'] kyma-system|kyma-integration|kube-system|istio-system|compass-system
+    exclude $kubernetes['namespace_name'] kyma-system|kube-system|istio-system|compass-system
 
 [FILTER]
     name   record_modifier

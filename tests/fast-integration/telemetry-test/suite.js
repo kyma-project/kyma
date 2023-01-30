@@ -8,6 +8,10 @@ const {
   k8sApply,
   k8sDelete,
   sleep,
+  fromBase64,
+  getGateway,
+  getVirtualService,
+  retryPromise,
 } = require('../utils');
 const {
   logsPresentInLoki,
@@ -25,7 +29,22 @@ const {
   waitForTracePipelineStatusRunning,
   waitForTracePipelineStatusPending,
 } = require('./helpers');
+const axios = require('axios');
+const {getJaegerTracesForService, getJaegerServices} = require('../tracing/client');
 
+async function getTracingTestAppUrl() {
+  const vs = await getVirtualService('tracing-test', 'tracing-test-app');
+  const host = vs.spec.hosts[0];
+  return `https://${host}`;
+}
+
+async function callTracingTestApp() {
+  const testAppUrl = await getTracingTestAppUrl();
+
+  return retryPromise(async () => {
+    return await axios.get(testAppUrl, {timeout: 10000});
+  }, 5, 30);
+}
 
 async function prepareEnvironment() {
   async function k8sApplyFile(name, namespace) {
@@ -332,8 +351,13 @@ describe('Telemetry Operator', function() {
   context('Configurable Tracing', function() {
     context('Configurable Tracing', function() {
       context('TracePipeline', function() {
+        const jaeger = loadTestData('tracepipeline-jaeger.yaml');
         const firstPipeline = loadTestData('tracepipeline-output-otlp-secret-ref-1.yaml');
         const firstPipelineName = firstPipeline[0].metadata.name;
+
+        it(`Should clean up TracePipeline jaeger`, async function() {
+          await k8sDelete(jaeger);
+        });
 
         it(`Should create TracePipeline '${firstPipelineName}'`, async function() {
           await k8sApply(firstPipeline);
@@ -407,6 +431,104 @@ describe('Telemetry Operator', function() {
 
         it(`Should delete second TracePipeline '${secondPipelineName}'`, async function() {
           await k8sDelete(secondPipeline);
+        });
+      });
+
+      context('Debuggability', function() {
+        const overrideConfig = loadTestData('override-config.yaml');
+        const pipeline = loadTestData('tracepipeline-output-otlp.yaml');
+        const pipelineName = pipeline[0].metadata.name;
+        it(`Creates a tracepipeline`, async function() {
+          await k8sApply(pipeline);
+          await waitForTracePipeline(pipelineName);
+          await waitForTracePipelineStatusRunning(pipelineName);
+        });
+
+        it('Should have created telemetry-trace-collector secret', async () => {
+          const secret = await getSecret('telemetry-trace-collector', 'kyma-system');
+          assert.equal(fromBase64(secret.data.OTLP_ENDPOINT), 'http://foo-bar');
+        });
+
+        it(`Should create override configmap with paused flag`, async function() {
+          await k8sApply(overrideConfig);
+        });
+
+        it(`Tries to change the otlp endpoint`, async function() {
+          pipeline[0].spec.output.otlp.endpoint.value = 'http://another-foo';
+          await k8sApply(pipeline);
+        });
+
+        it(`Should not change the OTLP endpoint in the telemetry-trace-collector secret in paused state`, async () => {
+          await sleep(5*1000);
+          const secret = await getSecret('telemetry-trace-collector', 'kyma-system');
+          assert.equal(fromBase64(secret.data.OTLP_ENDPOINT), 'http://foo-bar');
+        });
+
+        it(`Deletes the override configmap`, async function() {
+          k8sDelete(overrideConfig);
+        });
+
+        it(`Tries to change the otlp endpoint again`, async function() {
+          await sleep(10*1000);
+          pipeline[0].spec.output.otlp.endpoint.value = 'http://another-foo-bar';
+          await k8sApply(pipeline);
+          await waitForTracePipeline(pipelineName);
+          await waitForTracePipelineStatusRunning(pipelineName);
+        });
+
+        it(`Should now change the OTLP endpoint in the telemetry-trace-collector secret`, async function() {
+          await sleep(5*1000);
+          const secret = await getSecret('telemetry-trace-collector', 'kyma-system');
+          assert.equal(fromBase64(secret.data.OTLP_ENDPOINT), 'http://another-foo-bar');
+        });
+
+        it(`Should delete TracePipeline`, async function() {
+          await k8sDelete(pipeline);
+        });
+      });
+
+      context('Filter Processor', function() {
+        const testApp = loadTestData('tracepipeline-test-app.yaml');
+        const testAppIstioPatch = loadTestData('tracepipeline-test-istio-telemetry-patch.yaml');
+
+        it(`Should create test app`, async function() {
+          const kymaGateway = await getGateway('kyma-system', 'kyma-gateway');
+          let kymaHostUrl = kymaGateway.spec.servers[0].hosts[0];
+          kymaHostUrl = kymaHostUrl.replace('*', 'tracing-test-app');
+          for (const resource of testApp ) {
+            if (resource.kind == 'VirtualService') {
+              resource.spec.hosts[0] = kymaHostUrl;
+            }
+          }
+          await k8sApply(testApp);
+          await k8sApply(testAppIstioPatch);
+          await waitForPodWithLabel('app', 'tracing-test-app', 'tracing-test');
+        });
+
+        it(`Should call test app and produce spans`, async function() {
+          await sleep(30000);
+          for (let i=0; i < 10; i++) {
+            await callTracingTestApp();
+          }
+        });
+
+        it(`Should filter out noisy spans`, async function() {
+          await sleep(30000);
+          const services = await getJaegerServices();
+          const testAppTraces = await getJaegerTracesForService('tracing-test-app', 'tracing-test');
+          assert.isTrue(testAppTraces.data.length > 0, 'No spans present for test application "tracing-test-app"');
+
+          assert.isFalse(services.data.includes('grafana.kyma-system'), 'spans are present for grafana');
+          assert.isFalse(services.data.includes('jaeger.kyma-system'), 'spans are present for jaeger');
+          assert.isFalse(services.data.includes('telemetry-fluent-bit.kyma-system'),
+              'spans are present for fluent-bit');
+          assert.isFalse(services.data.includes('loki.kyma-system'), 'spans are present for loki');
+        });
+
+        it(`Should delete test setup`, async function() {
+          testAppIstioPatch[0].spec.tracing[0].randomSamplingPercentage = 1;
+          await k8sApply(testAppIstioPatch);
+          await k8sDelete(testApp);
         });
       });
     });

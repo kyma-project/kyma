@@ -6,13 +6,14 @@ import (
 	"os"
 	"testing"
 
-	testingv1 "github.com/kyma-project/kyma/components/eventing-controller/testing"
-	testingv2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
 	"github.com/onsi/gomega"
 	gomegatypes "github.com/onsi/gomega/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
+
+	testingv1 "github.com/kyma-project/kyma/components/eventing-controller/testing"
+	testingv2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
 
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 )
@@ -217,7 +218,6 @@ func Test_CreateSubscription(t *testing.T) {
 				testingv2.WithSourceAndType(testingv2.EventSource, testingv2.OrderCreatedEventType),
 				testingv2.WithSinkURLFromSvc(jsTestEnsemble.SubscriberSvc),
 				testingv2.WithMaxInFlight(jsTestEnsemble.DefaultSubscriptionConfig.MaxInFlightMessages),
-				testingv2.WithWebhookForNATS(),
 				testingv2.WithFinalizers([]string{}),
 			},
 			want: Want{
@@ -256,7 +256,6 @@ func Test_CreateSubscription(t *testing.T) {
 			givenSubscriptionOpts: []testingv2.SubscriptionOpt{
 				testingv2.WithTypeMatchingExact(),
 				testingv2.WithSourceAndType(testingv2.EventSource, NewUncleanEventType("0")),
-				testingv2.WithWebhookForNATS(),
 				testingv2.WithSinkURL(
 					testingv2.ValidSinkURL(jsTestEnsemble.SubscriberSvc.Namespace, "testapp"),
 				),
@@ -409,7 +408,6 @@ func Test_ChangeSubscription(t *testing.T) {
 				testingv2.WithTypeMatchingExact(),
 				testingv2.WithSourceAndType(testingv2.EventSource, NewCleanEventType("0")),
 				testingv2.WithSourceAndType(testingv2.EventSource, NewCleanEventType("1")),
-				testingv2.WithWebhookForNATS(),
 				testingv2.WithSinkURLFromSvc(jsTestEnsemble.SubscriberSvc),
 			},
 			wantBefore: Want{
@@ -443,7 +441,6 @@ func Test_ChangeSubscription(t *testing.T) {
 				testingv2.WithTypeMatchingExact(),
 				testingv2.WithSourceAndType(testingv2.EventSource, NewCleanEventType("0")),
 				testingv2.WithSourceAndType(testingv2.EventSource, NewCleanEventType("1")),
-				testingv2.WithWebhookForNATS(),
 				testingv2.WithSinkURLFromSvc(jsTestEnsemble.SubscriberSvc),
 			},
 			wantBefore: Want{
@@ -473,7 +470,6 @@ func Test_ChangeSubscription(t *testing.T) {
 				testingv2.WithTypeMatchingExact(),
 				testingv2.WithSourceAndType(testingv2.EventSource, testingv2.OrderCreatedEventType),
 				testingv2.WithMaxInFlight(jsTestEnsemble.DefaultSubscriptionConfig.MaxInFlightMessages),
-				testingv2.WithWebhookForNATS(),
 				testingv2.WithSinkURLFromSvc(jsTestEnsemble.SubscriberSvc),
 			},
 			wantBefore: Want{

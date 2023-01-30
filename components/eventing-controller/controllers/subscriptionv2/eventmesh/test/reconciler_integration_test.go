@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
+	"testing"
 	"time"
 
 	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
@@ -12,18 +14,17 @@ import (
 
 	eventMeshtypes "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
 	reconcilertestingv1 "github.com/kyma-project/kyma/components/eventing-controller/testing"
-	"github.com/stretchr/testify/assert"
+
+	"github.com/onsi/gomega"
+	gomegatypes "github.com/onsi/gomega/types"
 
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
 	eventmeshsubmatchers "github.com/kyma-project/kyma/components/eventing-controller/testing/v2/matchers/eventmeshsub"
-	"github.com/onsi/gomega"
-	gomegatypes "github.com/onsi/gomega/types"
-
-	"os"
-	"testing"
 
 	corev1 "k8s.io/api/core/v1"
 )
@@ -100,6 +101,20 @@ func Test_ValidationWebhook(t *testing.T) {
 			},
 			wantError: GenerateInvalidSubscriptionError(testName,
 				eventingv1alpha2.SuffixMissingErrDetail, eventingv1alpha2.SinkPath),
+		},
+		{
+			name: "should fail to create subscription with invalid protocol settings",
+			givenSubscriptionFunc: func(namespace string) *eventingv1alpha2.Subscription {
+				return reconcilertesting.NewSubscription(testName, namespace,
+					reconcilertesting.WithStandardTypeMatching(),
+					reconcilertesting.WithSource("source"),
+					reconcilertesting.WithOrderCreatedV1Event(),
+					reconcilertesting.WithInvalidWebhookAuthGrantType(),
+					reconcilertesting.WithValidSink(namespace, "svc"),
+				)
+			},
+			wantError: GenerateInvalidSubscriptionError(testName,
+				eventingv1alpha2.InvalidGrantTypeErrDetail, eventingv1alpha2.ConfigPath),
 		},
 	}
 

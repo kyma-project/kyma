@@ -2,30 +2,29 @@
 title: Create a workload
 ---
 
-The tutorial comes with a sample HttpBin service deployment and a sample Function.
+This tutorial explains how to create a sample HttpBin service deployment and a sample Function.
 
 ## Steps
 
-Follow these steps to deploy an instance of the HttpBin service or a sample Function.
-
-1. Create a Namespace and export its value as an environment variable. Skip the step if you already have a Namespace. Run:
+1. Create a Namespace and export its value as an environment variable. Run:
 
    ```bash
    export NAMESPACE={NAMESPACE_NAME}
    kubectl create ns $NAMESPACE
    kubectl label namespace $NAMESPACE istio-injection=enabled --overwrite
    ```
-
-<div tabs>
+2. Deploy an instance of the HttpBin service or a sample Function.
+   
+<div tabs name="create">
 
   <details>
   <summary>
   HttpBin
   </summary>
 
-2. Deploy an instance of the HttpBin service in your Namespace:
+  To deploy an instance of the HttpBin service in your Namespace using the [sample code](https://raw.githubusercontent.com/istio/istio/master/samples/httpbin/httpbin.yaml), run:
 
-   ```bash
+   ```shell
    kubectl -n $NAMESPACE create -f https://raw.githubusercontent.com/istio/istio/master/samples/httpbin/httpbin.yaml
    ```
 
@@ -33,10 +32,10 @@ Follow these steps to deploy an instance of the HttpBin service or a sample Func
 
   <details>
   <summary>
- Function
+  Function
   </summary>
 
-2. Create a Function in your Namespace using the [supplied code](./assets/function.yaml):
+  To create a Function in your Namespace using the [sample code](./assets/function.yaml), run:
 
    ```shell
    kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/kyma-project/kyma/main/docs/03-tutorials/assets/function.yaml
@@ -45,14 +44,45 @@ Follow these steps to deploy an instance of the HttpBin service or a sample Func
   </details>
 </div>
 
+3. Verify if an instance of the HttpBin service or a sample Function is successfully created.
+   
+<div tabs name="verify">
 
-## Next steps
+<details>
+  <summary>
+  HttpBin
+  </summary>
 
-Once you have your workload deployed, you can continue by choosing one of the following tutorials:
+  * To verify if an instance of the HttpBin service is created, run:
 
-- [Set up a custom domain for a workload](./apix-02-setup-custom-domain-for-workload.md)
-- [Expose a workload](./apix-03-expose-workload-apigateway.md)
-- [Expose multiple workloads on the same host](./apix-04-expose-multiple-workloads.md)
-- [Expose and secure a workload with OAuth2](./apix-05-expose-and-secure-workload-oauth2.md)
-- [Expose and secure a workload with Istio](./apix-07-expose-and-secure-workload-istio.md)
-- [Expose and secure a workload with JWT](./apix-08-expose-and-secure-workload-jwt.md)
+    ```shell
+      kubectl get pods -l app=httpbin -n $NAMESPACE
+    ```
+  * You should get a result similar to this one:
+  
+    ```shell
+      NAME             READY    STATUS     RESTARTS    AGE
+      httpbin-test     2/2      Running    0           96s
+    ```
+
+  </details>
+
+  <details>
+  <summary>
+  Function
+  </summary>
+
+  * To verify if a Function is created, run:
+
+    ```shell
+      kubectl get functions $NAME -n $NAMESPACE
+    ```
+
+  * You should get a result similar to this one:
+  
+    ```shell
+      NAME            CONFIGURED   BUILT     RUNNING   RUNTIME    VERSION   AGE
+      test-function   True         True      True      nodejs14   1         96s
+    ```
+  </details>
+</div>
