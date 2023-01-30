@@ -514,7 +514,7 @@ describe('Telemetry Operator', function() {
 
         it(`Should filter out noisy spans`, async function() {
           const services = await retryOperation(getJaegerServices, 1000, 5);
-
+          await sleep(5000);
           const testAppTraces = await retryOperation((r) =>
             getJaegerTracesForService('tracing-test-app', 'tracing-test'), 1000, 5);
           assert.isTrue(testAppTraces.data.length > 0, 'No spans present for test application "tracing-test-app"');
