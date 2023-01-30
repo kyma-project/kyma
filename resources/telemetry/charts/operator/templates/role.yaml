@@ -77,12 +77,8 @@ rules:
   resources:
   - replicasets
   verbs:
-  - create
-  - delete
   - get
   - list
-  - patch
-  - update
   - watch
 - apiGroups:
   - monitoring.coreos.com
