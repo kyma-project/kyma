@@ -528,7 +528,7 @@ describe('Telemetry Operator', function() {
               return testAppTraces;
             }
 
-            throw 'no test spans found...';
+            throw testAppTraces;
 
           }, 1000, 20);
           assert.isTrue(testAppTraces.data.length > 0, 'No spans present for test application "tracing-test-app"');
