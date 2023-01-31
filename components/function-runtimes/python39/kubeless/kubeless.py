@@ -105,6 +105,8 @@ def handler():
                 res = que.get(block=True, timeout=timeout)
                 if hasattr(res, 'headers') and 'content-type' in res.headers:
                     bottle.response.content_type = res.headers["content-type"]
+                if hasattr(res, 'status_code') :
+                    bottle.response.status_code = res.status_code
             except queue.Empty:
                 return bottle.HTTPError(408, "Timeout while processing the function")
             else:
