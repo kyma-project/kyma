@@ -138,7 +138,7 @@ func TestMakeExporterConfigWithCustomHeaders(t *testing.T) {
 	headers := []v1alpha1.Header{
 		{
 			Name: "Authorization",
-			Value: v1alpha1.ValueType{
+			ValueType: v1alpha1.ValueType{
 				Value: "Bearer xyz",
 			},
 		},

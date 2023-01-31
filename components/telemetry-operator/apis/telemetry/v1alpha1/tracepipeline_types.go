@@ -34,9 +34,9 @@ type TracePipelineOutput struct {
 
 type Header struct {
 	// Defines the header name
-	Name string `json:"name,omitempty"`
+	Name string `json:"name"`
 	// Defines the header value
-	ValueType `json:",inline,omitempty"`
+	ValueType `json:",inline"`
 }
 
 type OtlpOutput struct {
