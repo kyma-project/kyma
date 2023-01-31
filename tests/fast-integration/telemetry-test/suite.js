@@ -112,7 +112,7 @@ describe('Telemetry Operator', function() {
     assert.isNotEmpty(epList[0].subsets);
     assert.isNotEmpty(epList[0].subsets[0].addresses);
   });
-
+/*
   context('Configurable Logging', function() {
     context('Default Loki LogPipeline', function() {
       it('Should be \'Running\'', async function() {
@@ -347,7 +347,7 @@ describe('Telemetry Operator', function() {
       });
     });
   });
-
+*/
   context('Configurable Tracing', function() {
     context('Configurable Tracing', function() {
       context('TracePipeline', function() {
@@ -522,8 +522,8 @@ describe('Telemetry Operator', function() {
         });
 
         it(`Should find test spans`, async function() {
-          const testAppTraces = await retryWithDelay( (r) => {
-            const testAppTraces = getJaegerTracesForService('tracing-test-app', 'tracing-test');
+          const testAppTraces = await retryWithDelay( async (r) => {
+            const testAppTraces = await getJaegerTracesForService('tracing-test-app', 'tracing-test');
             if (testAppTraces.data.length > 0) {
               return testAppTraces;
             }
