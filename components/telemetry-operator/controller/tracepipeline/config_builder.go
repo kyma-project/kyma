@@ -170,7 +170,7 @@ func makeHeaders(output v1alpha1.TracePipelineOutput) map[string]string {
 	}
 	for _, header := range output.Otlp.Headers {
 		// TODO: Add support for secret references
-		headers[header.Name] = header.Value.Value
+		headers[header.Name] = header.Value
 	}
 	return headers
 }

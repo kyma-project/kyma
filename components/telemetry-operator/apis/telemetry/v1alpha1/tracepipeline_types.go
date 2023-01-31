@@ -36,7 +36,7 @@ type Header struct {
 	// Defines the header name
 	Name string `json:"name,omitempty"`
 	// Defines the header value
-	Value ValueType `json:",inline"`
+	ValueType `json:",inline,omitempty"`
 }
 
 type OtlpOutput struct {
