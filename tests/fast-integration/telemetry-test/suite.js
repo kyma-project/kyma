@@ -518,7 +518,7 @@ describe('Telemetry Operator', function() {
           const testAppTraces = await retryOperation((r) =>
             getJaegerTracesForService('tracing-test-app', 'tracing-test'), 1000, 5);
           assert.isTrue(testAppTraces.data.length > 0, 'No spans present for test application "tracing-test-app"');
-          !expect(testAppTraces).that.is.not.empty;
+
           assert.isFalse(services.data.includes('grafana.kyma-system'), 'spans are present for grafana');
           assert.isFalse(services.data.includes('jaeger.kyma-system'), 'spans are present for jaeger');
           assert.isFalse(services.data.includes('telemetry-fluent-bit.kyma-system'),
