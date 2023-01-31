@@ -42,6 +42,7 @@ func MakeClusterRoleBinding() *v1.ClusterRoleBinding {
 func MakeClusterRole() *v1.ClusterRole {
 	clusterRole := v1.ClusterRole{
 		ObjectMeta: metav1.ObjectMeta{Name: "telemetry-fluent-bit", Namespace: "kyma-system"},
+		Rules:      []v1.PolicyRule{{Verbs: []string{"get", "list", "watch"}, APIGroups: []string{""}, Resources: []string{"namespaces", "pods"}}},
 	}
 	return &clusterRole
 }

@@ -47,15 +47,23 @@ readinessProbe:
   initialDelaySeconds: 5
   periodSeconds: 10
 
-dashboards:
-  enabled: true
-  
-rbac:
-  create: true
-podSecurityPolicy:
-  create: true
-serviceMonitor:
-  enabled: true
+managedfluentbit:
+  networkPolicy:
+    enabled: true
+  dashboards:
+    enabled: true
+    labelKey: grafana_dashboard
+    annotations: {}
+    namespace: ""
+  rbac:
+    create: true
+  podSecurityPolicy:
+    create: true
+  serviceMonitor:
+    enabled: true
+    serviceMonitorPorts:
+      - port: http-metrics
+        path: /metrics
 
 resources:
   limits:
