@@ -1,12 +1,17 @@
+//nolint:gosec //this is just a test, and security issues found here will not result in code used in a prod environment
 package test
 
 import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"log"
 	"net"
+	"net/http"
+	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
@@ -14,14 +19,16 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"
 	k8slabels "k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"
 
 	"github.com/avast/retry-go/v3"
 	"github.com/go-logr/zapr"
 	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
+
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	eventmeshreconciler "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscriptionv2/eventmesh"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
@@ -35,12 +42,6 @@ import (
 	reconcilertestingv1 "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
 
-	"log"
-	"net/http"
-	"path/filepath"
-	"time"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -50,6 +51,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
 
 type eventMeshTestEnsemble struct {
@@ -190,7 +193,6 @@ func StartAndWaitForWebhookServer(k8sManager manager.Manager, webhookInstallOpts
 	addrPort := fmt.Sprintf("%s:%d", webhookInstallOpts.LocalServingHost, webhookInstallOpts.LocalServingPort)
 	// wait for the webhook server to get ready
 	err := retry.Do(func() error {
-		//nolint:gosec
 		conn, connErr := tls.DialWithDialer(dialer, "tcp", addrPort, &tls.Config{InsecureSkipVerify: true})
 		if connErr != nil {
 			return connErr

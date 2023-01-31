@@ -614,7 +614,7 @@ func (js *JetStream) createConsumer(subscription *eventingv1alpha1.Subscription,
 	return nil
 }
 
-// checkNATSSubscriptionsCount checks whether NATS Subscription(s) were created for all the Kyma Subscription filters
+// checkNATSSubscriptionsCount checks whether NATS Subscription(s) were created for all the Kyma Subscription filters.
 func (js *JetStream) checkNATSSubscriptionsCount(subscription *eventingv1alpha1.Subscription) error {
 	for _, subject := range subscription.Status.CleanEventTypes {
 		jsSubject := js.GetJetStreamSubject(subject)

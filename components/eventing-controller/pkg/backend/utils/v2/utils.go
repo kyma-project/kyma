@@ -1,4 +1,3 @@
-//nolint:gosec
 package v2
 
 import (
