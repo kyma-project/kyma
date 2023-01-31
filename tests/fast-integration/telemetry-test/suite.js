@@ -513,17 +513,20 @@ describe('Telemetry Operator', function() {
         });
 
         it(`Should filter out noisy spans`, async function() {
-          await sleep(20 * 1000);
           const services = await retryWithDelay(getJaegerServices, 1000, 5);
-          const testAppTraces = await retryWithDelay((r) =>
-            getJaegerTracesForService('tracing-test-app', 'tracing-test'), 1000, 5);
-          assert.isTrue(testAppTraces.data.length > 0, 'No spans present for test application "tracing-test-app"');
-
           assert.isFalse(services.data.includes('grafana.kyma-system'), 'spans are present for grafana');
           assert.isFalse(services.data.includes('jaeger.kyma-system'), 'spans are present for jaeger');
           assert.isFalse(services.data.includes('telemetry-fluent-bit.kyma-system'),
               'spans are present for fluent-bit');
           assert.isFalse(services.data.includes('loki.kyma-system'), 'spans are present for loki');
+        });
+
+        it(`Should find test spans`, async function() {
+          this.retries(5);
+          const testAppTraces = await retryWithDelay((r) =>
+              getJaegerTracesForService('tracing-test-app', 'tracing-test'), 1000, 5);
+
+          assert.isTrue(testAppTraces.data.length > 0, 'No spans present for test application "tracing-test-app"');
         });
 
         it(`Should delete test setup`, async function() {
