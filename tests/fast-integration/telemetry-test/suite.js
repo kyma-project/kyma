@@ -112,7 +112,7 @@ describe('Telemetry Operator', function() {
     assert.isNotEmpty(epList[0].subsets);
     assert.isNotEmpty(epList[0].subsets[0].addresses);
   });
-/*
+
   context('Configurable Logging', function() {
     context('Default Loki LogPipeline', function() {
       it('Should be \'Running\'', async function() {
@@ -347,7 +347,7 @@ describe('Telemetry Operator', function() {
       });
     });
   });
-*/
+
   context('Configurable Tracing', function() {
     context('Configurable Tracing', function() {
       context('TracePipeline', function() {
@@ -529,7 +529,6 @@ describe('Telemetry Operator', function() {
             }
 
             throw testAppTraces;
-
           }, 1000, 20);
           assert.isTrue(testAppTraces.data.length > 0, 'No spans present for test application "tracing-test-app"');
         });
