@@ -163,7 +163,7 @@ describe('Telemetry Operator', function() {
       const parserName = parser[0].metadata.name;
 
       it(`Should create LogParser '${parserName}'`, async function() {
-        await k8sApply(parser);
+        await retryOperation( (r)=> k8sApply(parser), 1000, 5);
       });
 
       it('Should parse the logs using regex', async function() {
@@ -513,12 +513,12 @@ describe('Telemetry Operator', function() {
         });
 
         it(`Should filter out noisy spans`, async function() {
+          await sleep(20 * 1000);
           const services = await retryOperation(getJaegerServices, 1000, 5);
-          await sleep(5000);
           const testAppTraces = await retryOperation((r) =>
             getJaegerTracesForService('tracing-test-app', 'tracing-test'), 1000, 5);
           assert.isTrue(testAppTraces.data.length > 0, 'No spans present for test application "tracing-test-app"');
-
+          !expect(testAppTraces).that.is.not.empty;
           assert.isFalse(services.data.includes('grafana.kyma-system'), 'spans are present for grafana');
           assert.isFalse(services.data.includes('jaeger.kyma-system'), 'spans are present for jaeger');
           assert.isFalse(services.data.includes('telemetry-fluent-bit.kyma-system'),
