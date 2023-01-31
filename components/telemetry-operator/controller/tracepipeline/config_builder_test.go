@@ -134,6 +134,29 @@ func TestMakeCollectorConfigWithBasicAuth(t *testing.T) {
 	require.Equal(t, "${BASIC_AUTH_HEADER}", authHeader)
 }
 
+func TestMakeExporterConfigWithCustomHeaders(t *testing.T) {
+	headers := []v1alpha1.Header{
+		{
+			Name: "Authorization",
+			Value: v1alpha1.ValueType{
+				Value: "Bearer xyz",
+			},
+		},
+	}
+	output := v1alpha1.TracePipelineOutput{
+		Otlp: &v1alpha1.OtlpOutput{
+			Endpoint: v1alpha1.ValueType{Value: "otlp-endpoint"},
+			Headers:  headers,
+		},
+	}
+
+	exporterConfig := makeExporterConfig(output, false)
+	require.NotNil(t, exporterConfig)
+
+	require.Equal(t, 1, len(exporterConfig.OTLP.Headers))
+	require.Equal(t, "Bearer xyz", exporterConfig.OTLP.Headers["Authorization"])
+}
+
 func TestMakeReceiverConfig(t *testing.T) {
 	receiverConfig := makeReceiverConfig()
 	protocols, existing := receiverConfig.OTLP["protocols"]

@@ -24,7 +24,7 @@ type RetryOnFailureConfig struct {
 
 type OTLPExporterConfig struct {
 	Endpoint       string               `yaml:"endpoint,omitempty"`
-	Headers        map[string]any       `yaml:"headers,omitempty"`
+	Headers        map[string]string    `yaml:"headers,omitempty"`
 	TLS            TLSConfig            `yaml:"tls,omitempty"`
 	SendingQueue   SendingQueueConfig   `yaml:"sending_queue,omitempty"`
 	RetryOnFailure RetryOnFailureConfig `yaml:"retry_on_failure,omitempty"`
@@ -163,14 +163,21 @@ func getOutputType(output v1alpha1.TracePipelineOutput) string {
 	return "otlp"
 }
 
+func makeHeaders(output v1alpha1.TracePipelineOutput) map[string]string {
+	headers := make(map[string]string)
+	if output.Otlp.Authentication != nil && output.Otlp.Authentication.Basic.IsDefined() {
+		headers["Authorization"] = fmt.Sprintf("${%s}", basicAuthHeaderVariable)
+	}
+	for _, header := range output.Otlp.Headers {
+		// TODO: Add support for secret references
+		headers[header.Name] = header.Value.Value
+	}
+	return headers
+}
+
 func makeExporterConfig(output v1alpha1.TracePipelineOutput, insecureOutput bool) ExporterConfig {
 	outputType := getOutputType(output)
-	var headers map[string]any
-	if output.Otlp.Authentication != nil && output.Otlp.Authentication.Basic.IsDefined() {
-		headers = map[string]any{
-			"Authorization": fmt.Sprintf("${%s}", basicAuthHeaderVariable),
-		}
-	}
+	headers := makeHeaders(output)
 	otlpExporterConfig := OTLPExporterConfig{
 		Endpoint: fmt.Sprintf("${%s}", otlpEndpointVariable),
 		Headers:  headers,
