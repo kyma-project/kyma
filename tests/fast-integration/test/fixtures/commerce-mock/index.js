@@ -752,7 +752,6 @@ async function waitForSubscriptions(subscriptions) {
   for (let i = 0; i < subscriptions.length; i++) {
     const subscription = subscriptions[i];
     await waitForSubscription(subscription.metadata.name, subscription.metadata.namespace);
-    this.retries(3)
   }
 }
 

@@ -70,6 +70,7 @@ const {
   exposeGrafana,
   unexposeGrafana,
 } = require('../monitoring');
+const mocha = require('mocha');
 
 describe('Eventing tests', function() {
   this.timeout(timeoutTime);
@@ -353,6 +354,6 @@ describe('Eventing tests', function() {
 
   after('Unexpose Grafana', async function() {
     await unexposeGrafana(isSKR);
-    this.retries(3);
+    mocha.retries(3);
   });
 });
