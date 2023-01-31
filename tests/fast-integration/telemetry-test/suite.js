@@ -522,10 +522,12 @@ describe('Telemetry Operator', function() {
         });
 
         it(`Should find test spans`, async function() {
-          this.retries(5);
-          const testAppTraces = await retryWithDelay((r) =>
-              getJaegerTracesForService('tracing-test-app', 'tracing-test'), 1000, 5);
-
+          const testAppTraces = await retryWithDelay( (r) => {
+            const testAppTraces = getJaegerTracesForService('tracing-test-app', 'tracing-test');
+            if (testAppTraces.data.length > 0) {
+              return testAppTraces;
+            }
+          }, 1000, 20);
           assert.isTrue(testAppTraces.data.length > 0, 'No spans present for test application "tracing-test-app"');
         });
 
