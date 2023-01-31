@@ -10,9 +10,9 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
-	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/fake"
-	applicationconnectorv1alpha1 "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/client/clientset/versioned/fake"
+	applicationconnectorv1alpha1 "github.com/kyma-project/kyma/components/central-application-gateway/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 
 	"testing"
 )
