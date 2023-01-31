@@ -131,7 +131,7 @@ describe('Telemetry Operator', function() {
         const pipeline = loadTestData('logpipeline-custom-filter-unknown.yaml');
 
         try {
-          await k8sApply(pipeline);
+          await retryWithDelayForErrorCode((r) => k8sApply(pipeline), 1000, 5, 403);
           await k8sDelete(pipeline);
           assert.fail('Should not be able to apply a LogPipeline with an unknown custom filter');
         } catch (e) {
@@ -146,7 +146,7 @@ describe('Telemetry Operator', function() {
         const pipeline = loadTestData('logpipeline-custom-filter-denied.yaml');
 
         try {
-          await k8sApply(pipeline);
+          await retryWithDelayForErrorCode((r) => k8sApply(pipeline), 1000, 5, 403);
           await k8sDelete(pipeline);
           assert.fail('Should not be able to apply a LogPipeline with a denied custom filter');
         } catch (e) {
@@ -163,7 +163,7 @@ describe('Telemetry Operator', function() {
       const parserName = parser[0].metadata.name;
 
       it(`Should create LogParser '${parserName}'`, async function() {
-        await retryOperation( (r)=> k8sApply(parser), 1000, 5);
+        await retryWithDelay( (r)=> k8sApply(parser), 1000, 5);
       });
 
       it('Should parse the logs using regex', async function() {
@@ -237,7 +237,7 @@ describe('Telemetry Operator', function() {
         const pipelineName = pipeline[0].metadata.name;
 
         it(`Should create LogPipeline '${pipelineName}'`, async function() {
-          await retryOperation( (r) => k8sApply(pipeline), 1000, 5);
+          await retryWithDelay( (r) => k8sApply(pipeline), 1000, 5);
           await waitForLogPipelineStatusRunning(pipelineName);
         });
 
@@ -465,7 +465,7 @@ describe('Telemetry Operator', function() {
         });
 
         it(`Deletes the override configmap`, async function() {
-          k8sDelete(overrideConfig);
+          await k8sDelete(overrideConfig);
         });
 
         it(`Tries to change the otlp endpoint again`, async function() {
@@ -507,15 +507,15 @@ describe('Telemetry Operator', function() {
 
         it(`Should call test app and produce spans`, async function() {
           for (let i=0; i < 10; i++) {
-            await retryOperation(callTracingTestApp, 1000, 10);
-            await sleep(1000);
+            await retryWithDelay(callTracingTestApp, 1000, 10);
+            await sleep(500);
           }
         });
 
         it(`Should filter out noisy spans`, async function() {
           await sleep(20 * 1000);
-          const services = await retryOperation(getJaegerServices, 1000, 5);
-          const testAppTraces = await retryOperation((r) =>
+          const services = await retryWithDelay(getJaegerServices, 1000, 5);
+          const testAppTraces = await retryWithDelay((r) =>
             getJaegerTracesForService('tracing-test-app', 'tracing-test'), 1000, 5);
           assert.isTrue(testAppTraces.data.length > 0, 'No spans present for test application "tracing-test-app"');
 
@@ -536,15 +536,34 @@ describe('Telemetry Operator', function() {
   });
 });
 
-const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const wait = (ms) => new Promise((resolve) => {
+  setTimeout(() => resolve(), ms);
+});
 
-const retryOperation = (operation, delay, retries) => new Promise((resolve, reject) => {
+const retryWithDelay = (operation, delay, retries) => new Promise((resolve, reject) => {
   return operation()
       .then(resolve)
       .catch((reason) => {
         if (retries > 0) {
           return wait(delay)
-              .then(retryOperation.bind(null, operation, delay, retries - 1))
+              .then(retryWithDelay.bind(null, operation, delay, retries - 1))
+              .then(resolve)
+              .catch(reject);
+        }
+        return reject(reason);
+      });
+});
+
+const retryWithDelayForErrorCode = (operation, delay, retries, errorCode) => new Promise((resolve, reject) => {
+  return operation()
+      .then(resolve)
+      .catch((reason) => {
+        if (reason.statusCode !== undefined && reason.statusCode === errorCode) {
+          return reject(reason);
+        }
+        if (retries > 0) {
+          return wait(delay)
+              .then(retryWithDelay.bind(null, operation, delay, retries - 1, errorCode))
               .then(resolve)
               .catch(reject);
         }
