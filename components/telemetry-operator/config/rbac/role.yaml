@@ -77,6 +77,14 @@ rules:
   - list
   - watch
 - apiGroups:
+  - apps
+  resources:
+  - replicasets
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
   - monitoring.coreos.com
   resources:
   - servicemonitors
@@ -260,12 +268,4 @@ rules:
   - list
   - patch
   - update
-  - watch
-- apiGroups:
-  - apps
-  resources:
-  - replicasets
-  verbs:
-  - get
-  - list
   - watch
