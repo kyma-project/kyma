@@ -145,7 +145,7 @@ func NewFakeClient() *fakeClient {
 
 func (c fakeClient) Get(ctx context.Context, key client.ObjectKey, obj client.Object, opts ...client.GetOption) error {
 	target := obj.(*v1alpha1.Application)
-	app, err := c.intf.Get(ctx, key.Name, v1.GetOptions{}) // FIXME: This can't be legal, right? 😱
+	app, err := c.intf.Get(ctx, key.Name, v1.GetOptions{})
 	if err != nil {
 		return err
 	}
