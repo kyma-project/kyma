@@ -71,7 +71,7 @@ func (m Migrator) DoMoveCredentialSecret(source, target types.NamespacedName) er
 		return err
 	}
 
-	return nil
+	return m.deleteSecret(source)
 }
 
 func (m Migrator) Do(source, target types.NamespacedName) error {
