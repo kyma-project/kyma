@@ -44,6 +44,7 @@ metadata:
   annotations:
     prometheus.io/port: "2021"
     prometheus.io/scrape: "true"
+    prometheus.io/scheme: "http"
   {{- with .Values.service.annotations }}
     {{- toYaml . | nindent 4 }}
   {{- end }}
