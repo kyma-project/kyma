@@ -342,7 +342,7 @@ func createLogPipelineReconciler(client client.Client) *logpipelinecontroller.Re
 	}
 	overrides := overrides.New(configureLogLevelOnFly, &kubernetes.ConfigmapProber{Client: client})
 
-	return logpipelinecontroller.NewReconciler(client, config, &kubernetes.DaemonSetProber{Client: client}, &kubernetes.DaemonSetAnnotator{Client: client}, overrides)
+	return logpipelinecontroller.NewReconciler(client, config, &kubernetes.DaemonSetProber{Client: client}, overrides)
 }
 
 func createLogParserReconciler(client client.Client) *logparsercontroller.Reconciler {

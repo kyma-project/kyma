@@ -2,7 +2,9 @@ package logpipeline
 
 import (
 	"github.com/stretchr/testify/require"
+	v1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/types"
+
 	"testing"
 )
 
@@ -66,9 +68,11 @@ func TestMakeServiceAccount(t *testing.T) {
 func TestMakeClusterRole(t *testing.T) {
 	name := types.NamespacedName{Name: "telemetry-fluent-bit", Namespace: "kyma-system"}
 	clusterRole := MakeClusterRole(name)
+	expectedRules := []v1.PolicyRule{{Verbs: []string{"get", "list", "watch"}, APIGroups: []string{""}, Resources: []string{"namespaces", "pods"}}}
 
 	require.NotNil(t, clusterRole)
 	require.Equal(t, clusterRole.Name, name.Name)
+	require.Equal(t, clusterRole.Rules, expectedRules)
 }
 
 func TestMakeClusterRoleBinding(t *testing.T) {
@@ -83,4 +87,5 @@ func TestMakeClusterRoleBinding(t *testing.T) {
 	require.Equal(t, clusterRoleBinding.RoleRef.Kind, "ClusterRole")
 	require.Equal(t, clusterRoleBinding.Subjects[0].Name, svcAcc.Name)
 	require.Equal(t, clusterRoleBinding.Subjects[0].Kind, "ServiceAccount")
+
 }

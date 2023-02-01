@@ -107,7 +107,7 @@ var _ = Describe("LogPipeline controller", func() {
 				},
 			}
 			Expect(k8sClient.Create(ctx, secret)).Should(Succeed())
-			
+
 			file := telemetryv1alpha1.FileMount{
 				Name:    "myFile",
 				Content: "file-content",
@@ -252,7 +252,7 @@ var _ = Describe("LogPipeline controller", func() {
 
 			Expect(k8sClient.Delete(ctx, logPipeline)).Should(Succeed())
 
-			// Fluent Bit daemon set should rollout-restarted (generation is 1)
+			// Fluent Bit daemon set should be created and generation should be 1
 			Eventually(func() int {
 				var fluentBitDaemonSet appsv1.DaemonSet
 				err := k8sClient.Get(ctx, types.NamespacedName{

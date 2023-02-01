@@ -21,7 +21,7 @@ func (dsp *DaemonSetProber) IsReady(ctx context.Context, name types.NamespacedNa
 	var ds appsv1.DaemonSet
 	if err := dsp.Get(ctx, name, &ds); err != nil {
 		if apierrors.IsNotFound(err) {
-			// The status change of loki happens before the creation of daemonset
+			// The status of pipeline is changed before the creation of daemonset
 			log.V(1).Info("DaemonSet is not yet created")
 			return false, nil
 		}

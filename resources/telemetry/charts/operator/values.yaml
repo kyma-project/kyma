@@ -47,7 +47,7 @@ readinessProbe:
   initialDelaySeconds: 5
   periodSeconds: 10
 
-managedfluentbit:
+fluentbit:
   fullnameOverride: telemetry-fluent-bit
   networkPolicy:
     enabled: false

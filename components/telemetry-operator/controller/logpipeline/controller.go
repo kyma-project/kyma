@@ -58,19 +58,17 @@ type Reconciler struct {
 	client.Client
 	config                  Config
 	prober                  DaemonSetProber
-	annotator               DaemonSetAnnotator
 	allLogPipelines         prometheus.Gauge
 	unsupportedLogPipelines prometheus.Gauge
 	syncer                  syncer
 	globalConfig            overrides.GlobalConfigHandler
 }
 
-func NewReconciler(client client.Client, config Config, prober DaemonSetProber, annotator DaemonSetAnnotator, handler *overrides.Handler) *Reconciler {
+func NewReconciler(client client.Client, config Config, prober DaemonSetProber, handler *overrides.Handler) *Reconciler {
 	var r Reconciler
 	r.Client = client
 	r.config = config
 	r.prober = prober
-	r.annotator = annotator
 	r.allLogPipelines = prometheus.NewGauge(prometheus.GaugeOpts{Name: "telemetry_all_logpipelines", Help: "Number of log pipelines."})
 	r.unsupportedLogPipelines = prometheus.NewGauge(prometheus.GaugeOpts{Name: "telemetry_unsupported_logpipelines", Help: "Number of log pipelines with custom filters or outputs."})
 	metrics.Registry.MustRegister(r.allLogPipelines, r.unsupportedLogPipelines)
@@ -149,8 +147,8 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 
 func (r *Reconciler) reconcileFluentBit(ctx context.Context, name types.NamespacedName, pipeline *telemetryv1alpha1.LogPipeline, checksum string) error {
 	if isNotMarkedForDeletion(pipeline) {
-		svcAcc := resources.MakeServiceAccount(name)
-		if err := utils.CreateOrUpdateServiceAccount(ctx, r, svcAcc); err != nil {
+		serviceAccount := resources.MakeServiceAccount(name)
+		if err := utils.CreateOrUpdateServiceAccount(ctx, r, serviceAccount); err != nil {
 			return fmt.Errorf("failed to create fluent bit service account: %w", err)
 		}
 		clusterRole := resources.MakeClusterRole(name)
@@ -161,8 +159,8 @@ func (r *Reconciler) reconcileFluentBit(ctx context.Context, name types.Namespac
 		if err := utils.CreateOrUpdateClusterRoleBinding(ctx, r, clusterRoleBinding); err != nil {
 			return fmt.Errorf("failed to create fluent bit cluster role Binding: %w", err)
 		}
-		ds := resources.MakeDaemonSet(name, checksum)
-		if err := utils.CreateOrUpdateDaemonSet(ctx, r, ds); err != nil {
+		daemonSet := resources.MakeDaemonSet(name, checksum)
+		if err := utils.CreateOrUpdateDaemonSet(ctx, r, daemonSet); err != nil {
 			return fmt.Errorf("failed to reconcile fluent bit daemonset: %w", err)
 		}
 		service := resources.MakeService(name)

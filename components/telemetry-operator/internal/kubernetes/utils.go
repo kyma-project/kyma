@@ -164,76 +164,39 @@ func CreateOrUpdateService(ctx context.Context, c client.Client, desired *corev1
 
 func DeleteFluentBit(ctx context.Context, c client.Client, name types.NamespacedName) error {
 	var ds appsv1.DaemonSet
-	err := c.Get(ctx, name, &ds)
-	if err == nil {
-		if err = c.Delete(ctx, &ds); err != nil && !errors.IsNotFound(err) {
-			return err
-		}
-	} else if !errors.IsNotFound(err) {
-		return err
-	}
+	err := deleteResource(c, ctx, name, &ds)
 
 	var service corev1.Service
-	err = c.Get(ctx, name, &service)
-	if err == nil {
-		if err = c.Delete(ctx, &service); err != nil && !errors.IsNotFound(err) {
-			return err
-		}
-	} else if !errors.IsNotFound(err) {
-		return err
-	}
+	err = deleteResource(c, ctx, name, &service)
 
 	var cm corev1.ConfigMap
-	err = c.Get(ctx, name, &cm)
-	if err == nil {
-		if err = c.Delete(ctx, &cm); err != nil && !errors.IsNotFound(err) {
-			return err
-		}
-	} else if !errors.IsNotFound(err) {
-		return err
-	}
+	err = deleteResource(c, ctx, name, &cm)
 
 	var serviceAccount corev1.ServiceAccount
-	err = c.Get(ctx, name, &serviceAccount)
-	if err == nil {
-		if err = c.Delete(ctx, &serviceAccount); err != nil && !errors.IsNotFound(err) {
-			return err
-		}
-	} else if !errors.IsNotFound(err) {
-		return err
-	}
+	err = deleteResource(c, ctx, name, &serviceAccount)
 
 	var clusterRoleBinding v1.ClusterRoleBinding
-	err = c.Get(ctx, name, &clusterRoleBinding)
-	if err == nil {
-		if err = c.Delete(ctx, &clusterRoleBinding); err != nil && !errors.IsNotFound(err) {
-			return err
-		}
-	} else if !errors.IsNotFound(err) {
-		return err
-	}
+	err = deleteResource(c, ctx, name, &clusterRoleBinding)
 
 	var clusterRole v1.ClusterRole
-	err = c.Get(ctx, name, &clusterRole)
-	if err == nil {
-		if err = c.Delete(ctx, &clusterRole); err != nil && !errors.IsNotFound(err) {
-			return err
-		}
-	} else if !errors.IsNotFound(err) {
-		return err
-	}
+	err = deleteResource(c, ctx, name, &clusterRole)
 
 	var luaCm corev1.ConfigMap
 	name.Name = fmt.Sprintf("%s-luascripts", name.Name)
-	err = c.Get(ctx, name, &luaCm)
+	err = deleteResource(c, ctx, name, &luaCm)
+
+	return err
+}
+
+func deleteResource(c client.Client, ctx context.Context, name client.ObjectKey, obj client.Object) error {
+	err := c.Get(ctx, name, obj)
 	if err == nil {
-		if err = c.Delete(ctx, &luaCm); err != nil && !errors.IsNotFound(err) {
+		if err = c.Delete(ctx, obj); err != nil && !errors.IsNotFound(err) {
 			return err
 		}
 	} else if !errors.IsNotFound(err) {
 		return err
 	}
-
 	return nil
 }
 

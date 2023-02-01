@@ -16,17 +16,17 @@ import (
 const checksumAnnotationKey = "checksum/logpipeline-config"
 
 func MakeServiceAccount(name types.NamespacedName) *corev1.ServiceAccount {
-	resServiceAcc := corev1.ServiceAccount{
+	serviceAccount := corev1.ServiceAccount{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name.Name,
 			Namespace: name.Namespace,
 		},
 	}
-	return &resServiceAcc
+	return &serviceAccount
 }
 
 func MakeClusterRoleBinding(name types.NamespacedName) *v1.ClusterRoleBinding {
-	resClusterRoleBinding := v1.ClusterRoleBinding{
+	clusterRoleBinding := v1.ClusterRoleBinding{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name.Name,
 			Namespace: name.Namespace,
@@ -35,10 +35,10 @@ func MakeClusterRoleBinding(name types.NamespacedName) *v1.ClusterRoleBinding {
 		RoleRef: v1.RoleRef{
 			APIGroup: "rbac.authorization.k8s.io",
 			Kind:     "ClusterRole",
-			Name:     "telemetry-fluent-bit",
+			Name:     name.Name,
 		},
 	}
-	return &resClusterRoleBinding
+	return &clusterRoleBinding
 }
 
 func MakeClusterRole(name types.NamespacedName) *v1.ClusterRole {

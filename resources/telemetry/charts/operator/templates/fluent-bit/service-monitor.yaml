@@ -1,30 +1,30 @@
-{{- if .Values.managedfluentbit.serviceMonitor.enabled }}
+{{- if .Values.fluentbit.serviceMonitor.enabled }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: {{ template "fluent-bit.fullname" . }}
-  {{- with .Values.managedfluentbit.serviceMonitor.namespace }}
+  {{- with .Values.fluentbit.serviceMonitor.namespace }}
   namespace: {{ . }}
   {{- end }}
   labels:
     {{- include "fluent-bit.labels" . | nindent 4 }}
-    {{- with .Values.managedfluentbit.serviceMonitor.selector }}
+    {{- with .Values.fluentbit.serviceMonitor.selector }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  {{- if .Values.managedfluentbit.serviceMonitor.jobLabel }}
-  jobLabel: {{ .Values.managedfluentbit.serviceMonitor.jobLabel }}
+  {{- if .Values.fluentbit.serviceMonitor.jobLabel }}
+  jobLabel: {{ .Values.fluentbit.serviceMonitor.jobLabel }}
   {{- end }}
   endpoints:
     - port: http
       path: /api/v1/metrics/prometheus
-      {{- with .Values.managedfluentbit.serviceMonitor.interval }}
+      {{- with .Values.fluentbit.serviceMonitor.interval }}
       interval: {{ . }}
       {{- end }}
-      {{- with .Values.managedfluentbit.serviceMonitor.scrapeTimeout }}
+      {{- with .Values.fluentbit.serviceMonitor.scrapeTimeout }}
       scrapeTimeout: {{ . }}
       {{- end }}
-      {{- with .Values.managedfluentbit.serviceMonitor.metricRelabelings }}
+      {{- with .Values.fluentbit.serviceMonitor.metricRelabelings }}
       metricRelabelings:
       {{- if kindIs "string" . }}
         {{- tpl . $ | nindent 8 }}
@@ -32,13 +32,13 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       {{- end }}
-      {{- with .Values.managedfluentbit.serviceMonitor.relabelings }}
+      {{- with .Values.fluentbit.serviceMonitor.relabelings }}
       relabelings:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       scheme: http
-    {{- if .Values.managedfluentbit.serviceMonitor.serviceMonitorPorts }}
-    {{- range .Values.managedfluentbit.serviceMonitor.serviceMonitorPorts }}
+    {{- if .Values.fluentbit.serviceMonitor.serviceMonitorPorts }}
+    {{- range .Values.fluentbit.serviceMonitor.serviceMonitorPorts }}
     - port: {{ .port }}
       path: {{ .path }}
       scheme: http

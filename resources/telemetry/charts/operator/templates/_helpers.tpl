@@ -71,8 +71,8 @@ Create the name of the service account to use
 Create fluentbit full name
 */}}
 {{- define "fluent-bit.fullname" -}}
-{{- if .Values.managedfluentbit.fullnameOverride -}}
-{{- .Values.managedfluentbit.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- if .Values.fluentbit.fullnameOverride -}}
+{{- .Values.fluentbit.fullnameOverride | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
 {{- $name := default .Chart.Name .Values.nameOverride -}}
 {{- if contains $name .Release.Name -}}
