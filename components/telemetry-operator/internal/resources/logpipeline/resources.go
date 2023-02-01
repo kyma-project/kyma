@@ -282,6 +282,7 @@ func MakeExporterMetricsService(name types.NamespacedName) *corev1.Service {
 			Annotations: map[string]string{
 				"prometheus.io/scrape": "true",
 				"prometheus.io/port":   "2021",
+				"prometheus.io/scheme": "http",
 			},
 		},
 		Spec: corev1.ServiceSpec{

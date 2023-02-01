@@ -12,6 +12,7 @@ metadata:
     prometheus.io/path: "/api/v1/metrics/prometheus"
     prometheus.io/port: "2020"
     prometheus.io/scrape: "true"
+    prometheus.io/scheme: "http"
   {{- with .Values.service.annotations }}
     {{- toYaml . | nindent 4 }}
   {{- end }}
