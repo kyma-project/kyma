@@ -52,12 +52,31 @@ func main() {
 		return k8sResourceClientSets.core.CoreV1().Secrets(namespace)
 	}
 
-	clusterCertSecret := parseNamespacedName(options.ClusterCertificatesSecret)
 	caCertSecret := parseNamespacedName(options.CaCertificatesSecret)
 	caCertSecretToMigrate := parseNamespacedName(options.CaCertSecretToMigrate)
+
 	secretsRepository := secrets.NewRepository(secretsManagerConstructor)
 
 	err = migrateSecret(secretsRepository, caCertSecretToMigrate, caCertSecret, options.CaCertSecretKeysToMigrate)
+	exitOnError(err, "Failed to migrate ")
+
+	clusterCertSecret := parseNamespacedName(options.ClusterCertificatesSecret)
+	agentConfigSecret := parseNamespacedName(options.AgentConfigurationSecret)
+
+	oldClusterCertSecret := types.NamespacedName{
+		Namespace: "compass-system",
+		Name:      clusterCertSecret.Name,
+	}
+
+	oldAgentConfigSecret := types.NamespacedName{
+		Namespace: "compass-system",
+		Name:      agentConfigSecret.Name,
+	}
+
+	err = migrateSecretWhenMissing(secretsRepository, oldClusterCertSecret, clusterCertSecret)
+	exitOnError(err, "Failed to migrate ")
+
+	err = migrateSecretWhenMissing(secretsRepository, oldAgentConfigSecret, agentConfigSecret)
 	exitOnError(err, "Failed to migrate ")
 
 	log.Info("Setting up manager")
@@ -76,11 +95,9 @@ func main() {
 	syncService, err := createSynchronisationService(k8sResourceClientSets, options)
 	exitOnError(err, "Failed to create synchronization service")
 
-	agentConfigSecretNamespacedName := parseNamespacedName(options.AgentConfigurationSecret)
-
 	connectionDataCache := cache.NewConnectionDataCache()
 
-	configProvider := confProvider.NewConfigProvider(agentConfigSecretNamespacedName, secretsRepository)
+	configProvider := confProvider.NewConfigProvider(agentConfigSecret, secretsRepository)
 	clientsProvider := compass.NewClientsProvider(graphql.New, options.SkipCompassTLSVerify, options.QueryLogging)
 	connectionDataCache.AddSubscriber(clientsProvider.UpdateConnectionData)
 
@@ -130,6 +147,18 @@ func main() {
 	exitOnError(err, "Failed to run the manager")
 }
 
+func migrateSecretWhenMissing(secretRepo secrets.Repository, sourceSecret, targetSecret types.NamespacedName) error {
+
+	getIncludeSourceKeyFunc := func() certificates.IncludeKeyFunc {
+		return func(string) bool {
+			return true
+		}
+	}
+
+	migrator := certificates.NewMigrator(secretRepo, getIncludeSourceKeyFunc(), true)
+	return migrator.DoMoveCredentialSecret(sourceSecret, targetSecret)
+}
+
 func migrateSecret(secretRepo secrets.Repository, sourceSecret, targetSecret types.NamespacedName, keysToInclude string) error {
 	unmarshallKeysList := func(keys string) (keysArray []string, err error) {
 		err = json.Unmarshal([]byte(keys), &keysArray)
@@ -167,7 +196,7 @@ func getMigrator(secretRepo secrets.Repository, keysToInclude []string) certific
 		}
 	}
 
-	return certificates.NewMigrator(secretRepo, getIncludeSourceKeyFunc())
+	return certificates.NewMigrator(secretRepo, getIncludeSourceKeyFunc(), false)
 }
 
 func createSynchronisationService(k8sResourceClients *k8sResourceClientSets, options Config) (kyma.Service, error) {
