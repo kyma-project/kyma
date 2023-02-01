@@ -13,21 +13,21 @@ import (
 	"k8s.io/utils/pointer"
 )
 
-func MakeServiceAccount() *corev1.ServiceAccount {
+func MakeServiceAccount(name types.NamespacedName) *corev1.ServiceAccount {
 	resServiceAcc := corev1.ServiceAccount{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "telemetry-fluent-bit",
-			Namespace: "kyma-system",
+			Name:      name.Name,
+			Namespace: name.Namespace,
 		},
 	}
 	return &resServiceAcc
 }
 
-func MakeClusterRoleBinding() *v1.ClusterRoleBinding {
+func MakeClusterRoleBinding(name types.NamespacedName) *v1.ClusterRoleBinding {
 	resClusterRoleBinding := v1.ClusterRoleBinding{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "telemetry-fluent-bit",
-			Namespace: "kyma-system",
+			Name:      name.Name,
+			Namespace: name.Namespace,
 		},
 		Subjects: []v1.Subject{{Name: "telemetry-fluent-bit", Namespace: "kyma-system", Kind: "ServiceAccount"}},
 		RoleRef: v1.RoleRef{
@@ -39,10 +39,13 @@ func MakeClusterRoleBinding() *v1.ClusterRoleBinding {
 	return &resClusterRoleBinding
 }
 
-func MakeClusterRole() *v1.ClusterRole {
+func MakeClusterRole(name types.NamespacedName) *v1.ClusterRole {
 	clusterRole := v1.ClusterRole{
-		ObjectMeta: metav1.ObjectMeta{Name: "telemetry-fluent-bit", Namespace: "kyma-system"},
-		Rules:      []v1.PolicyRule{{Verbs: []string{"get", "list", "watch"}, APIGroups: []string{""}, Resources: []string{"namespaces", "pods"}}},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name.Name,
+			Namespace: name.Namespace,
+		},
+		Rules: []v1.PolicyRule{{Verbs: []string{"get", "list", "watch"}, APIGroups: []string{""}, Resources: []string{"namespaces", "pods"}}},
 	}
 	return &clusterRole
 }

@@ -204,6 +204,36 @@ func DeleteFluentBit(ctx context.Context, c client.Client, name types.Namespaced
 		return err
 	}
 
+	var serviceAccount corev1.ServiceAccount
+	err = c.Get(ctx, name, &serviceAccount)
+	if err == nil {
+		if err = c.Delete(ctx, &serviceAccount); err != nil && !errors.IsNotFound(err) {
+			return err
+		}
+	} else if !errors.IsNotFound(err) {
+		return err
+	}
+	
+	var clusterRoleBinding v1.ClusterRoleBinding
+	err = c.Get(ctx, name, &clusterRoleBinding)
+	if err == nil {
+		if err = c.Delete(ctx, &clusterRoleBinding); err != nil && !errors.IsNotFound(err) {
+			return err
+		}
+	} else if !errors.IsNotFound(err) {
+		return err
+	}
+
+	var clusterRole v1.ClusterRole
+	err = c.Get(ctx, name, &clusterRole)
+	if err == nil {
+		if err = c.Delete(ctx, &clusterRole); err != nil && !errors.IsNotFound(err) {
+			return err
+		}
+	} else if !errors.IsNotFound(err) {
+		return err
+	}
+
 	return nil
 }
 
