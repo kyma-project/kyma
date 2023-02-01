@@ -9,8 +9,8 @@ Follows these steps:
 
 <div tabs name="steps" group="debug-function">
   <details>
-  <summary label="vsc">
-  Visual Studio Code
+  <summary label="vsc_node">
+  Visual Studio Code (Node.js)
   </summary>
 
 1. In VSC, navigate to the location of the file with the Function definition.
@@ -33,6 +33,42 @@ Follows these steps:
          "timeout": 1000
        }
      ]
+   }
+    ```
+4. Run the Function with the `--debug` flag.
+    ```bash
+    kyma run function --debug
+    ```
+
+</details>
+<details>
+<summary label="vsc_python">
+Visual Studio Code (Python)
+</summary>
+
+1. In VSC, navigate to the location of the file with the Function definition.
+2. Create the `.vscode` directory.
+3. In the `.vscode` directory, create the `launch.json` file with this content:
+   ```json
+   {
+      "version": "0.2.0",
+      "configurations": [
+          {
+              "name": "Python: Kyma function",
+              "type": "python",
+              "request": "attach",
+              "pathMappings": [
+                  {
+                      "localRoot": "${workspaceFolder}",
+                      "remoteRoot": "/kubeless"
+                  }
+              ],
+              "connect": {
+                  "host": "localhost",
+                  "port": 5678
+              }
+          }
+      ]
    }
     ```
 4. Run the Function with the `--debug` flag.
