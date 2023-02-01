@@ -93,7 +93,6 @@ describe('Eventing tests', function() {
         conditionReady.condition, conditionReady.status, 60_000);
   });
 
-
   before('Get stream config for JetStream', async function() {
     const success = await getStreamConfigForJetStream();
     assert.isTrue(success);
