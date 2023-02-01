@@ -10,7 +10,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf"
 	csrfClient "github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf/client"
 	csrfStrategy "github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf/strategy"

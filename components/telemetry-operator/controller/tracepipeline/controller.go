@@ -21,14 +21,18 @@ import (
 	"errors"
 	"fmt"
 
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"strings"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configchecksum"
 	utils "github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/overrides"
 	corev1 "k8s.io/api/core/v1"
+
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -38,11 +42,13 @@ import (
 )
 
 type Config struct {
-	BaseName  string
-	Namespace string
+	BaseName          string
+	Namespace         string
+	OverrideConfigMap types.NamespacedName
 
 	Deployment DeploymentConfig
 	Service    ServiceConfig
+	Overrides  overrides.Config
 }
 
 type DeploymentConfig struct {
@@ -65,24 +71,39 @@ type DeploymentProber interface {
 
 type Reconciler struct {
 	client.Client
-	config Config
-	Scheme *runtime.Scheme
-	prober DeploymentProber
+	config           Config
+	Scheme           *runtime.Scheme
+	prober           DeploymentProber
+	overridesHandler overrides.GlobalConfigHandler
 }
 
-func NewReconciler(client client.Client, config Config, prober DeploymentProber, scheme *runtime.Scheme) *Reconciler {
+func NewReconciler(client client.Client, config Config, prober DeploymentProber, scheme *runtime.Scheme, handler *overrides.Handler) *Reconciler {
 	var r Reconciler
 	r.Client = client
 	r.config = config
 	r.Scheme = scheme
 	r.prober = prober
+	r.overridesHandler = handler
 	return &r
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (reconcileResult ctrl.Result, reconcileErr error) {
-	logger := logf.FromContext(ctx)
+	log := logf.FromContext(ctx)
 
-	logger.V(1).Info("Reconciliation triggered")
+	log.V(1).Info("Reconciliation triggered")
+
+	overrideConfig, err := r.overridesHandler.UpdateOverrideConfig(ctx, r.config.OverrideConfigMap)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if err := r.overridesHandler.CheckGlobalConfig(overrideConfig.Global); err != nil {
+		return ctrl.Result{}, err
+	}
+	if overrideConfig.Tracing.Paused {
+		log.V(1).Info("Skipping reconciliation of tracepipeline as reconciliation is paused")
+		return ctrl.Result{}, nil
+	}
 
 	var tracePipeline telemetryv1alpha1.TracePipeline
 	if err := r.Get(ctx, req.NamespacedName, &tracePipeline); err != nil {
@@ -122,8 +143,11 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 	if err = utils.CreateOrUpdateSecret(ctx, r.Client, secret); err != nil {
 		return err
 	}
+	endpoint := string(secretData[otlpEndpointVariable])
+	isInsecure := isInsecureOutput(endpoint)
 
-	configMap := makeConfigMap(r.config, pipeline.Spec.Output)
+	collectorConfig := makeOtelCollectorConfig(pipeline.Spec.Output, isInsecure)
+	configMap := makeConfigMap(r.config, collectorConfig)
 	if err = controllerutil.SetControllerReference(pipeline, configMap, r.Scheme); err != nil {
 		return err
 	}
@@ -167,6 +191,10 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 	return nil
 }
 
+func isInsecureOutput(endpoint string) bool {
+	return len(strings.TrimSpace(endpoint)) > 0 && strings.HasPrefix(endpoint, "http://")
+}
+
 func (r *Reconciler) tryAcquireLock(ctx context.Context, pipeline *telemetryv1alpha1.TracePipeline) error {
 	lockName := types.NamespacedName{Name: "telemetry-tracepipeline-lock", Namespace: r.config.Namespace}
 	var lock corev1.ConfigMap
@@ -193,7 +221,9 @@ func (r *Reconciler) createLock(ctx context.Context, name types.NamespacedName, 
 			Namespace: name.Namespace,
 		},
 	}
-	controllerutil.SetControllerReference(owner, &lock, r.Scheme)
+	if err := controllerutil.SetControllerReference(owner, &lock, r.Scheme); err != nil {
+		return fmt.Errorf("failed to set owner reference: %v", err)
+	}
 	if err := r.Create(ctx, &lock); err != nil {
 		return fmt.Errorf("failed to create lock: %v", err)
 	}

@@ -122,6 +122,9 @@ controllers:
   tracing:
     enabled: true
 
+networkPolicy:
+  enabled: true
+
 syncPeriod: 1h
 maxLogPipelines: 3
 

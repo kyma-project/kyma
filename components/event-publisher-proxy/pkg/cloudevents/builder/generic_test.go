@@ -65,14 +65,29 @@ func Test_Build(t *testing.T) {
 			givenSource:            "appName1",
 			givenType:              "order.created.v1",
 			givenApplicationName:   "appName1",
-			givenApplicationLabels: map[string]string{application.TypeLabel: "t..e--s__t!!a@@p##p%%t^^y&&p**e"},
-			wantType:               "prefix.testapptype.order.created.v1",
-			wantSource:             "testapptype",
+			givenApplicationLabels: map[string]string{application.TypeLabel: "t..est-apptype"},
+			wantType:               "prefix.test-apptype.order.created.v1",
+			wantSource:             "appName1",
+		},
+		{
+			name:                   "should return error for providing invalid uri reference as source",
+			givenSource:            "a@@p##p%%",
+			givenType:              "order.created.v1",
+			givenApplicationName:   "appName1",
+			givenApplicationLabels: map[string]string{application.TypeLabel: "a@@p##p%%"},
+			wantError:              true,
 		},
 		{
 			name:                 "should return error if empty type",
 			givenSource:          "source1",
 			givenType:            "",
+			givenApplicationName: "appName1",
+			wantError:            true,
+		},
+		{
+			name:                 "should return error if empty source",
+			givenSource:          "",
+			givenType:            "order.created.v1",
 			givenApplicationName: "appName1",
 			wantError:            true,
 		},
@@ -85,15 +100,13 @@ func Test_Build(t *testing.T) {
 
 			// given
 			// build cloud event
-			builder := testingutils.NewCloudEventBuilder(
-				testingutils.WithCloudEventSource(tc.givenSource),
-				testingutils.WithCloudEventType(tc.givenType),
-			)
+			builder := testingutils.NewCloudEventBuilder()
 			payload, _ := builder.BuildStructured()
 			newEvent := cloudevents.NewEvent()
-			newEvent.SetType(testingutils.CloudEventTypeWithPrefix)
-			err := json.Unmarshal([]byte(payload), &newEvent)
+			err = json.Unmarshal([]byte(payload), &newEvent)
 			require.NoError(t, err)
+			newEvent.SetType(tc.givenType)
+			newEvent.SetSource(tc.givenSource)
 
 			appLister := fake.NewApplicationListerOrDie(
 				context.Background(),
@@ -107,13 +120,13 @@ func Test_Build(t *testing.T) {
 			}
 
 			// when
-			buildEvent, err := genericBuilder.Build(newEvent)
+			buildEvent, buildErr := genericBuilder.Build(newEvent)
 
 			// then
 			if tc.wantError {
-				require.Error(t, err)
+				require.Error(t, buildErr)
 			} else {
-				require.NoError(t, err)
+				require.NoError(t, buildErr)
 				require.Equal(t, tc.wantSource, buildEvent.Source())
 				require.Equal(t, tc.wantType, buildEvent.Type())
 
@@ -156,11 +169,11 @@ func Test_GetAppNameOrSource(t *testing.T) {
 			wantSource:             "testapptype",
 		},
 		{
-			name:                   "should return cleaned application label",
+			name:                   "should return non-clean application label",
 			givenSource:            "appName1",
 			givenApplicationName:   "appName1",
 			givenApplicationLabels: map[string]string{application.TypeLabel: "t..e--s__t!!a@@p##p%%t^^y&&p**e"},
-			wantSource:             "testapptype",
+			wantSource:             "t..e--s__t!!a@@p##p%%t^^y&&p**e",
 		},
 		{
 			name:                   "should return source name as application does not exists",

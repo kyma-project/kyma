@@ -141,16 +141,16 @@ global:
       directory: "external/prom"
     node_exporter:
       name: "node-exporter"
-      version: "1.5.0-941a04c4"
+      version: "1.5.0-723b551a"
       directory: "tpi"
     kube_state_metrics:
       name: "kube-state-metrics"
-      version: "2.6.0-cf0a130c"
+      version: "2.6.0-723b551a"
       directory: "tpi"
       sha: ""
     grafana:
       name: "grafana"
-      version: "7.5.17-cf0a130c"
+      version: "7.5.17-723b551a"
       directory: "tpi"
       sha: ""
     busybox:
@@ -165,7 +165,7 @@ global:
       sha: ""
     oauth2_proxy:
       name: "oauth2-proxy"
-      version: "7.4.0-f193d3f9"
+      version: "7.4.0-723b551a"
       directory: "tpi"
       sha: ""
 

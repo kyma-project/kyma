@@ -46,9 +46,8 @@ spec:
 {{- if or .Values.priorityClassName .Values.global.priorityClassName }}
       priorityClassName: {{ coalesce .Values.priorityClassName .Values.global.priorityClassName }}
 {{- end }}
-{{- with .Values.securityContext }}
-      securityContext:
-{{ toYaml . | indent 8 }}
+{{- if .Values.global.podSecurityContext }}
+      securityContext: {{ toYaml .Values.global.podSecurityContext | nindent 8 }}
 {{- end }}
 {{- with .Values.affinity }}
       affinity:
@@ -96,6 +95,9 @@ spec:
       - name: config-reloader
         image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.nats_config_reloader) }}"
         imagePullPolicy: {{ .Values.nats.pullPolicy }}
+        {{- if .Values.global.containerSecurityContext }}
+        securityContext: {{- toYaml .Values.global.containerSecurityContext | nindent 10 }}
+        {{- end }}
         command:
           - "nats-server-config-reloader"
           - "-pid"
@@ -121,9 +123,8 @@ spec:
       - name: metrics
         image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.prometheus_nats_exporter) }}"
         imagePullPolicy: {{ .Values.exporter.pullPolicy }}
-        {{- if .Values.exporter.securityContext }}
-        securityContext:
-          {{- toYaml .Values.exporter.securityContext | nindent 10 }}
+        {{- if .Values.global.containerSecurityContext }}
+        securityContext: {{- toYaml .Values.global.containerSecurityContext | nindent 10 }}
         {{- end }}
         resources:
           {{- toYaml .Values.exporter.resources | nindent 10 }}
@@ -143,9 +144,8 @@ spec:
       - name: nats
         image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.nats) }}"
         imagePullPolicy: {{ .Values.nats.pullPolicy }}
-        {{- if .Values.nats.securityContext }}
-        securityContext:
-        {{- .Values.nats.securityContext | toYaml | nindent 10 }}
+        {{- if .Values.global.containerSecurityContext }}
+        securityContext: {{- toYaml .Values.global.containerSecurityContext | nindent 10 }}
         {{- end }}
         resources:
           {{- toYaml .Values.nats.resources | nindent 10 }}

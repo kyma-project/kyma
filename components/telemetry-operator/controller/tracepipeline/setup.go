@@ -3,6 +3,7 @@ package tracepipeline
 import (
 	"context"
 	"fmt"
+
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/setup"
 	appsv1 "k8s.io/api/apps/v1"

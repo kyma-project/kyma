@@ -7,9 +7,16 @@ import (
 	"strings"
 	"time"
 
+	v1 "k8s.io/api/core/v1"
+
+	cloudevents "github.com/cloudevents/sdk-go/v2"
+	"github.com/cloudevents/sdk-go/v2/event"
+
 	pkgerrors "github.com/kyma-project/kyma/components/eventing-controller/pkg/errors"
 	"github.com/pkg/errors"
 )
+
+const randStringlength = 10
 
 var ErrParseSink = errors.Errorf("failed to parse subscription sink URL")
 
@@ -63,8 +70,15 @@ func Int32Ptr(i int32) *int32 {
 	return &i
 }
 
+func Int64Ptr(i int64) *int64 {
+	return &i
+}
+
 func StringPtr(s string) *string {
 	return &s
+}
+func ProcMountTypePtr(p v1.ProcMountType) *v1.ProcMountType {
+	return &p
 }
 
 // for Random string generation.
@@ -94,4 +108,14 @@ func GetSinkData(sink string) (string, []string, error) {
 	trimmedHost := strings.Split(sURL.Host, ":")[0]
 	subDomains := strings.Split(trimmedHost, ".")
 	return trimmedHost, subDomains, nil
+}
+
+func GetCloudEvent(eventType string) event.Event {
+	if eventType == "" {
+		eventType = GetRandString(randStringlength)
+	}
+	newEvent := cloudevents.NewEvent()
+	newEvent.SetType(eventType)
+	newEvent.SetID(GetRandString(randStringlength))
+	return newEvent
 }

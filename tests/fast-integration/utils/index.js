@@ -236,15 +236,6 @@ async function getSecrets(namespace) {
   return body.items;
 }
 
-async function getPodPresets(namespace) {
-  const path = `/apis/settings.svcat.k8s.io/v1alpha1/namespaces/${namespace}/podpresets/`;
-  const response = await k8sDynamicApi.requestPromise({
-    url: k8sDynamicApi.basePath + path,
-  });
-  const body = JSON.parse(response.body);
-  return body.items;
-}
-
 async function getSecret(name, namespace) {
   const path = `/api/v1/namespaces/${namespace}/secrets/${name}`;
   const response = await k8sDynamicApi.requestPromise({
@@ -634,6 +625,18 @@ function waitForVirtualService(namespace, apiRuleName, timeout = 30_000) {
 async function getVirtualService(namespace, name) {
   try {
     const path = `/apis/networking.istio.io/v1beta1/namespaces/${namespace}/virtualservices/${name}`;
+    const response = await k8sDynamicApi.requestPromise({
+      url: k8sDynamicApi.basePath + path,
+    });
+    return JSON.parse(response.body);
+  } catch (err) {
+    return JSON.parse(err.response.body);
+  }
+}
+
+async function getGateway(namespace, name) {
+  try {
+    const path = `/apis/networking.istio.io/v1beta1/namespaces/${namespace}/gateways/${name}`;
     const response = await k8sDynamicApi.requestPromise({
       url: k8sDynamicApi.basePath + path,
     });
@@ -1773,6 +1776,29 @@ async function attachTraceChildSpans(parentSpan, trace) {
   }
 }
 
+function waitForDeploymentWithLabel(
+    labelKey,
+    labelValue,
+    namespace = 'default',
+    timeout = 90000,
+) {
+  const query = {
+    labelSelector: `${labelKey}=${labelValue}`,
+  };
+  return waitForK8sObject(
+      `/apis/apps/v1/namespaces/${namespace}/deployments`,
+      query,
+      (_type, _apiObj, watchObj) => {
+        return (
+
+          watchObj.object.status.readyReplicas === 1
+        );
+      },
+      timeout,
+      `Waiting for deployment with label ${labelKey}=${labelValue} timeout (${timeout} ms)`,
+  );
+}
+
 module.exports = {
   initializeK8sClient,
   getShootNameFromK8sServerUrl,
@@ -1814,7 +1840,6 @@ module.exports = {
   getEventingBackend,
   getSecrets,
   getConfigMap,
-  getPodPresets,
   getSecretData,
   listResources,
   listResourceNames,
@@ -1837,6 +1862,7 @@ module.exports = {
   eventingSubscription,
   eventingSubscriptionV1Alpha2,
   getVirtualService,
+  getGateway,
   getPersistentVolumeClaim,
   waitForApplicationCr,
   patchDeployment,
@@ -1865,4 +1891,5 @@ module.exports = {
   getFunction,
   waitForEndpoint,
   waitForPodWithLabelAndCondition,
+  waitForDeploymentWithLabel,
 };

@@ -8,6 +8,7 @@ import (
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap"
 
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	"github.com/stretchr/testify/require"
@@ -270,6 +271,7 @@ func TestDefaultingWebHook_Handle(t *testing.T) {
 				configAlphaV1: tt.fields.configv1alpha1,
 				client:        tt.fields.client,
 				decoder:       tt.fields.decoder,
+				log:           zap.NewNop().Sugar(),
 			}
 			got := w.Handle(tt.args.ctx, tt.args.req)
 

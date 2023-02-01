@@ -24,6 +24,7 @@ import (
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configchecksum"
 	configbuilder "github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
 	utils "github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/overrides"
 	resources "github.com/kyma-project/kyma/components/telemetry-operator/internal/resources/logpipeline"
 	"github.com/prometheus/client_golang/prometheus"
 	corev1 "k8s.io/api/core/v1"
@@ -41,8 +42,10 @@ type Config struct {
 	SectionsConfigMap types.NamespacedName
 	FilesConfigMap    types.NamespacedName
 	EnvSecret         types.NamespacedName
+	OverrideConfigMap types.NamespacedName
 	PipelineDefaults  configbuilder.PipelineDefaults
 	ManageFluentBit   bool
+	Overrides         overrides.Config
 }
 
 //go:generate mockery --name DaemonSetProber --filename daemon_set_prober.go
@@ -63,9 +66,10 @@ type Reconciler struct {
 	allLogPipelines         prometheus.Gauge
 	unsupportedLogPipelines prometheus.Gauge
 	syncer                  syncer
+	globalConfig            overrides.GlobalConfigHandler
 }
 
-func NewReconciler(client client.Client, config Config, prober DaemonSetProber, annotator DaemonSetAnnotator) *Reconciler {
+func NewReconciler(client client.Client, config Config, prober DaemonSetProber, annotator DaemonSetAnnotator, handler *overrides.Handler) *Reconciler {
 	var r Reconciler
 	r.Client = client
 	r.config = config
@@ -75,6 +79,7 @@ func NewReconciler(client client.Client, config Config, prober DaemonSetProber, 
 	r.unsupportedLogPipelines = prometheus.NewGauge(prometheus.GaugeOpts{Name: "telemetry_unsupported_logpipelines", Help: "Number of log pipelines with custom filters or outputs."})
 	metrics.Registry.MustRegister(r.allLogPipelines, r.unsupportedLogPipelines)
 	r.syncer = syncer{client, config}
+	r.globalConfig = handler
 
 	return &r
 }
@@ -82,6 +87,20 @@ func NewReconciler(client client.Client, config Config, prober DaemonSetProber, 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := logf.FromContext(ctx)
 	log.V(1).Info("Reconciliation triggered")
+
+	overrideConfig, err := r.globalConfig.UpdateOverrideConfig(ctx, r.config.OverrideConfigMap)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if err := r.globalConfig.CheckGlobalConfig(overrideConfig.Global); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if overrideConfig.Logging.Paused {
+		log.V(1).Info("Skipping reconciliation of logpipeline as reconciliation is paused.")
+		return ctrl.Result{}, nil
+	}
 
 	if err := r.updateMetrics(ctx); err != nil {
 		log.Error(err, "Failed to get all LogPipelines while updating metrics")

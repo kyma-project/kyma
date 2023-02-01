@@ -114,7 +114,7 @@ In the following steps, you can see how to set up a typical LogPipeline. For an 
 ### Step 2: Create an input
 
 If you need selection mechanisms for application logs on the Namespace or container level, you can use an input spec to restrict or specify from which resources logs are included.
-If you don't define any input, it's collected from all Namespaces, except the system Namespaces `kube-system`, `istio-system`, `kyma-system`, and `kyma-integration`, which are excluded by default. For example, you can define the Namespaces to include in the input collection, exclude Namespaces from the input collection, or choose that only system Namespaces are included. Learn more about the available [parameters and attributes](./../../../05-technical-reference/00-custom-resources/telemetry-01-logpipeline.md).
+If you don't define any input, it's collected from all Namespaces, except the system Namespaces `kube-system`, `istio-system`, `kyma-system`, which are excluded by default. For example, you can define the Namespaces to include in the input collection, exclude Namespaces from the input collection, or choose that only system Namespaces are included. Learn more about the available [parameters and attributes](./../../../05-technical-reference/00-custom-resources/telemetry-01-logpipeline.md).
 
 The following example collects input from all Namespaces excluding `kyma-system` and only from the `istio-proxy` containers:
 ```yaml
@@ -167,7 +167,7 @@ spec:
         Regex   $kubernetes['labels']['app'] my-deployment
     - custom: |
         Name    grep
-        Exclude $kubernetes['namespace_name'] kyma-system|kube-system|kyma-integration|istio-system
+        Exclude $kubernetes['namespace_name'] kyma-system|kube-system|istio-system
     - custom: |
         Name    record_modifier
         Record  cluster_identifier ${KUBERNETES_SERVICE_HOST}

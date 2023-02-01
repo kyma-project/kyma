@@ -73,6 +73,14 @@ rules:
   - update
   - watch
 - apiGroups:
+  - apps
+  resources:
+  - replicasets
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
   - telemetry.kyma-project.io
   resources:
   - logparsers

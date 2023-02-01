@@ -13,11 +13,11 @@ global:
       version: "PR-16573"
     telemetry_otel_collector:
       name: "otel-collector"
-      version: "0.66.0-a80d981f"
+      version: "0.70.0-723b551a"
       directory: "tpi"
     fluent_bit:
       name: "fluent-bit"
-      version: "1.9.9-cf0a130c"
+      version: "2.0.8-723b551a"
       directory: "tpi"
     busybox:
       name: "busybox"

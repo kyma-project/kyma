@@ -124,6 +124,11 @@ func (r *Reconciler) Reconcile(ctx context.Context, _ ctrl.Request) (ctrl.Result
 		}
 	}
 
+	// Create NATS Secret for the eventing-nats statefulset
+	if createErr := r.createNATSSecret(ctx); createErr != nil {
+		return ctrl.Result{}, createErr
+	}
+
 	var secretList v1.SecretList
 	// the default status has all conditions and eventingReady set to true.
 	// if something breaks during reconciliation, the condition and eventingReady is updated to false.
@@ -175,16 +180,6 @@ func (r *Reconciler) reconcileNATSBackend(ctx context.Context, backendStatus *ev
 			return ctrl.Result{}, errors.Wrapf(err, "failed to update status while stopping BEB controller")
 		}
 		return ctrl.Result{}, err
-	}
-
-	// Create NATS Secret for the eventing-nats statefulset
-	if createErr := r.createNATSSecret(ctx); createErr != nil {
-		backendStatus.SetSubscriptionControllerReadyCondition(false,
-			eventingv1alpha1.ConditionReasonNATSSecretError, createErr.Error())
-		if updateErr := r.syncBackendStatus(ctx, backendStatus, nil); updateErr != nil {
-			return ctrl.Result{}, errors.Wrapf(err, "failed to update status while creating NATS secret")
-		}
-		return ctrl.Result{}, createErr
 	}
 
 	// Start the NATS subscription controller
@@ -246,16 +241,6 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 			return ctrl.Result{}, errors.Wrapf(err, "failed to update status while stopping NATS controller")
 		}
 		return ctrl.Result{}, err
-	}
-
-	// Delete NATS Secret
-	if err = r.deleteNATSSecret(ctx); err != nil {
-		backendStatus.SetSubscriptionControllerReadyCondition(false,
-			eventingv1alpha1.ConditionReasonNATSSecretError, err.Error())
-		if updateErr := r.syncBackendStatus(ctx, backendStatus, nil); updateErr != nil {
-			return ctrl.Result{}, errors.Wrapf(err, "failed to update status while deleting NATS secret")
-		}
-		return ctrl.Result{}, errors.Wrapf(err, "delete eventing NATS secret failed")
 	}
 
 	// gets oauth2ClientID and secret and stops the BEB controller if changed
@@ -965,6 +950,10 @@ system_account: "$SYS"`, password))
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      natsSecretName,
 			Namespace: kymaSystemNamespace,
+			Annotations: map[string]string{
+				"eventing.kyma-project.io/managed-by-reconciler-disclaimer": "DO NOT EDIT - " +
+					"This resource is managed by Kyma.\n Any modifications breaks eventing.",
+			},
 		},
 		Data: secretMap,
 	}

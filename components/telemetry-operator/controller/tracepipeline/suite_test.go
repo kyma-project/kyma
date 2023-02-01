@@ -15,15 +15,20 @@ package tracepipeline
 
 import (
 	"context"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
-	"k8s.io/apimachinery/pkg/api/resource"
 	"path/filepath"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/logger"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/overrides"
+	"k8s.io/apimachinery/pkg/api/resource"
+	"k8s.io/apimachinery/pkg/types"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	ctrl "sigs.k8s.io/controller-runtime"
 
+	zapLog "go.uber.org/zap"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -45,8 +50,9 @@ var ctx context.Context
 var cancel context.CancelFunc
 
 var testConfig = Config{
-	BaseName:  "telemetry-trace-collector",
-	Namespace: "kyma-system",
+	BaseName:          "telemetry-trace-collector",
+	Namespace:         "kyma-system",
+	OverrideConfigMap: types.NamespacedName{Name: "override-config", Namespace: "kyma-system"},
 	Deployment: DeploymentConfig{
 		Image:         "otel/opentelemetry-collector-contrib:0.60.0",
 		CPULimit:      resource.MustParse("1"),
@@ -67,6 +73,8 @@ func TestAPIs(t *testing.T) {
 
 var _ = BeforeSuite(func() {
 	logf.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
+	dynamicLoglevel := zapLog.NewAtomicLevel()
+	configureLogLevelOnFly := logger.NewLogReconfigurer(dynamicLoglevel)
 
 	ctx, cancel = context.WithCancel(context.TODO())
 
@@ -100,8 +108,9 @@ var _ = BeforeSuite(func() {
 		LeaderElectionID:       "ddd7ef0b.kyma-project.io",
 	})
 	Expect(err).ToNot(HaveOccurred())
+	overrides := overrides.New(configureLogLevelOnFly, &kubernetes.ConfigmapProber{Client: k8sClient})
 
-	reconciler := NewReconciler(mgr.GetClient(), testConfig, &kubernetes.DeploymentProber{Client: k8sClient}, scheme.Scheme)
+	reconciler := NewReconciler(mgr.GetClient(), testConfig, &kubernetes.DeploymentProber{Client: k8sClient}, scheme.Scheme, overrides)
 	err = reconciler.SetupWithManager(mgr)
 	Expect(err).ToNot(HaveOccurred())
 

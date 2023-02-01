@@ -1,13 +1,9 @@
 package tracepipeline
 
 import (
-	"fmt"
 	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/utils/pointer"
-	"strings"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	"go.opentelemetry.io/collector/confmap"
 	"gopkg.in/yaml.v3"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -37,43 +33,8 @@ func makeDefaultLabels(config Config) map[string]string {
 	}
 }
 
-func makeConfigMap(config Config, output v1alpha1.TracePipelineOutput) *corev1.ConfigMap {
-	exporterConfig := makeExporterConfig(output)
-	outputType := getOutputType(output)
-	processorsConfig := makeProcessorsConfig()
-	conf := confmap.NewFromStringMap(map[string]any{
-		"receivers": map[string]any{
-			"opencensus": map[string]any{},
-			"otlp": map[string]any{
-				"protocols": map[string]any{
-					"http": map[string]any{},
-					"grpc": map[string]any{},
-				},
-			},
-		},
-		"exporters":  exporterConfig,
-		"processors": processorsConfig,
-		"extensions": map[string]any{
-			"health_check": map[string]any{},
-		},
-		"service": map[string]any{
-			"pipelines": map[string]any{
-				"traces": map[string]any{
-					"receivers":  []any{"opencensus", "otlp"},
-					"processors": []any{"memory_limiter", "k8sattributes", "resource", "batch"},
-					"exporters":  []any{outputType},
-				},
-			},
-			"telemetry": map[string]any{
-				"metrics": map[string]any{
-					"address": "0.0.0.0:8888",
-				},
-			},
-			"extensions": []string{"health_check"},
-		},
-	})
-
-	bytes, _ := yaml.Marshal(conf.ToStringMap())
+func makeConfigMap(config Config, collectorConfig OTELCollectorConfig) *corev1.ConfigMap {
+	bytes, _ := yaml.Marshal(collectorConfig)
 	confYAML := string(bytes)
 
 	return &corev1.ConfigMap{
@@ -96,108 +57,6 @@ func makeSecret(config Config, secretData map[string][]byte) *corev1.Secret {
 			Labels:    makeDefaultLabels(config),
 		},
 		Data: secretData,
-	}
-}
-
-func getOutputType(output v1alpha1.TracePipelineOutput) string {
-	if output.Otlp.Protocol == "http" {
-		return "otlphttp"
-	}
-	return "otlp"
-}
-
-func makeExporterConfig(output v1alpha1.TracePipelineOutput) map[string]any {
-	outputType := getOutputType(output)
-	isInsecure := len(strings.TrimSpace(output.Otlp.Endpoint.Value)) > 0 && strings.HasPrefix(output.Otlp.Endpoint.Value, "http://")
-	var headers map[string]any
-	if output.Otlp.Authentication != nil && output.Otlp.Authentication.Basic.IsDefined() {
-		headers = map[string]any{
-			"Authorization": fmt.Sprintf("${%s}", basicAuthHeaderVariable),
-		}
-	}
-	return map[string]any{
-		outputType: map[string]any{
-			"endpoint": fmt.Sprintf("${%s}", otlpEndpointVariable),
-			"headers":  headers,
-			"tls": map[string]any{
-				"insecure": isInsecure,
-			},
-			"sending_queue": map[string]any{
-				"enabled":    true,
-				"queue_size": 512,
-			},
-			"retry_on_failure": map[string]any{
-				"enabled":          true,
-				"initial_interval": "5s",
-				"max_interval":     "30s",
-				"max_elapsed_time": "300s",
-			},
-		},
-	}
-}
-
-func makeProcessorsConfig() map[string]any {
-	k8sAttributes := []any{
-		"k8s.pod.name",
-		"k8s.node.name",
-		"k8s.namespace.name",
-		"k8s.deployment.name",
-		"k8s.statefulset.name",
-		"k8s.daemonset.name",
-		"k8s.cronjob.name",
-		"k8s.job.name",
-	}
-
-	podAssociations := []map[string]any{
-		{
-			"sources": []map[string]any{{
-				"from": "resource_attribute",
-				"name": "k8s.pod.ip",
-			},
-			},
-		},
-		{
-			"sources": []map[string]any{{
-				"from": "resource_attribute",
-				"name": "k8s.pod.uid",
-			},
-			},
-		},
-		{
-			"sources": []map[string]any{{
-				"from": "connection",
-			},
-			},
-		},
-	}
-	return map[string]any{
-		"batch": map[string]any{
-			"send_batch_size":     512,
-			"timeout":             "10s",
-			"send_batch_max_size": 512,
-		},
-		"memory_limiter": map[string]any{
-			"check_interval":         "1s",
-			"limit_percentage":       75,
-			"spike_limit_percentage": 10,
-		},
-		"k8sattributes": map[string]any{
-			"auth_type":   "serviceAccount",
-			"passthrough": "false",
-			"extract": map[string]any{
-				"metadata": k8sAttributes,
-			},
-			"pod_association": podAssociations,
-		},
-		"resource": map[string]any{
-			"attributes": []map[string]any{
-				{
-					"action": "insert",
-					"key":    "k8s.cluster.name",
-					"value":  "${KUBERNETES_SERVICE_HOST}",
-				},
-			},
-		},
 	}
 }
 
