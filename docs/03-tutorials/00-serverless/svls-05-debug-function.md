@@ -9,7 +9,7 @@ Follows these steps:
 
 <div tabs name="steps" group="debug-function">
   <details>
-  <summary label="vsc">
+  <summary label="vsc_node">
   Visual Studio Code (Node.js)
   </summary>
 
@@ -42,9 +42,9 @@ Follows these steps:
 
 </details>
 <details>
-  <summary label="vsc">
-  Visual Studio Code (Python)
-  </summary>
+<summary label="vsc_python">
+Visual Studio Code (Python)
+</summary>
 
 1. In VSC, navigate to the location of the file with the Function definition.
 2. Create the `.vscode` directory.
@@ -69,8 +69,8 @@ Follows these steps:
               }
           }
       ]
-  }
-  ```
+   }
+    ```
 4. Run the Function with the `--debug` flag.
     ```bash
     kyma run function --debug
