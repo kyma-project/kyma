@@ -130,10 +130,6 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 		return err
 	}
 
-	if err = cleanupFinalizersIfNeeded(ctx, r.Client, pipeline); err != nil {
-		return err
-	}
-
 	var checksum string
 	if checksum, err = r.calculateChecksum(ctx); err != nil {
 		return err
@@ -141,6 +137,10 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 
 	name := r.config.DaemonSet
 	if err = r.reconcileFluentBit(ctx, name, pipeline, checksum); err != nil {
+		return err
+	}
+
+	if err = cleanupFinalizersIfNeeded(ctx, r.Client, pipeline); err != nil {
 		return err
 	}
 

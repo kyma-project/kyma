@@ -193,17 +193,6 @@ func DeleteFluentBit(ctx context.Context, c client.Client, name types.Namespaced
 		return err
 	}
 
-	var luaCm corev1.ConfigMap
-	name.Name = fmt.Sprintf("%s-luascripts", name.Name)
-	err = c.Get(ctx, name, &luaCm)
-	if err == nil {
-		if err = c.Delete(ctx, &luaCm); err != nil && !errors.IsNotFound(err) {
-			return err
-		}
-	} else if !errors.IsNotFound(err) {
-		return err
-	}
-
 	var serviceAccount corev1.ServiceAccount
 	err = c.Get(ctx, name, &serviceAccount)
 	if err == nil {
@@ -228,6 +217,17 @@ func DeleteFluentBit(ctx context.Context, c client.Client, name types.Namespaced
 	err = c.Get(ctx, name, &clusterRole)
 	if err == nil {
 		if err = c.Delete(ctx, &clusterRole); err != nil && !errors.IsNotFound(err) {
+			return err
+		}
+	} else if !errors.IsNotFound(err) {
+		return err
+	}
+
+	var luaCm corev1.ConfigMap
+	name.Name = fmt.Sprintf("%s-luascripts", name.Name)
+	err = c.Get(ctx, name, &luaCm)
+	if err == nil {
+		if err = c.Delete(ctx, &luaCm); err != nil && !errors.IsNotFound(err) {
 			return err
 		}
 	} else if !errors.IsNotFound(err) {
