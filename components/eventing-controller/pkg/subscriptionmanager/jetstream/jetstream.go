@@ -107,6 +107,11 @@ func (sm *SubscriptionManager) Start(defaultSubsConfig env.DefaultSubscriptionCo
 	applicationLister := application.NewLister(ctx, dynamicClient)
 
 	if sm.envCfg.EnableNewCRDVersion {
+		// Initialize v1alpha1 event type cleaner for conversion webhook
+		simpleCleaner := eventtype.NewSimpleCleaner(sm.envCfg.EventTypePrefix, sm.logger)
+		eventingv1alpha1.InitializeEventTypeCleaner(simpleCleaner)
+
+		// Initialize v1alpha2 event type cleaner
 		jsCleaner := cleaner.NewJetStreamCleaner(sm.logger)
 		jetStreamHandler := backendjetstreamv2.NewJetStream(sm.envCfg,
 			sm.metricsCollector, jsCleaner, defaultSubsConfig, sm.logger)

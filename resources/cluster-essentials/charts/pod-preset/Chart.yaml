@@ -1,5 +1,0 @@
-name: pod-preset
-description: A Helm chart for PodPreset resource that's implemented via a CRD that is paired with a mutating webhook in order to modify pod specs on the fly
-version: 0.1.0
-appVersion: "0.1.0"
-apiVersion: v1
