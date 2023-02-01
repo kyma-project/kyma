@@ -3,6 +3,10 @@ package v1alpha1_test
 import (
 	"testing"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 
 	testingv1 "github.com/kyma-project/kyma/components/eventing-controller/testing"
@@ -200,6 +204,11 @@ func Test_Conversion(t *testing.T) {
 				if testCase.wantErrMsgV2toV1 != "" {
 					return
 				}
+
+				// initialize dummy cleaner
+				cleaner := eventtype.CleanerFunc(func(et string) (string, error) { return et, nil })
+				v1alpha1.InitializeEventTypeCleaner(cleaner)
+
 				convertedV1Alpha2 := &v1alpha2.Subscription{}
 				err := v1alpha1.V1ToV2(testCase.alpha1Sub, convertedV1Alpha2)
 				if err != nil && testCase.wantErrMsgV1toV2 != "" {
@@ -226,6 +235,136 @@ func Test_Conversion(t *testing.T) {
 				}
 
 			})
+		})
+	}
+}
+
+// Test_CleanupInV1ToV2Conversion test the cleaning from non-alphanumeric characters
+// and also merging of segments in event types if they exceed the limit.
+func Test_CleanupInV1ToV2Conversion(t *testing.T) {
+	type TestCase struct {
+		name           string
+		givenAlpha1Sub *v1alpha1.Subscription
+		givenPrefix    string
+		wantTypes      []string
+		wantError      bool
+	}
+
+	testCases := []TestCase{
+		{
+			name: "success if prefix is empty",
+			givenAlpha1Sub: newDefaultSubscription(
+				testingv1.WithFilter(eventSource, "testapp.Segment1-Part1-Part2-Ä.Segment2-Part1-Part2-Ä.v1"),
+			),
+			givenPrefix: "",
+			wantTypes: []string{
+				"testapp.Segment1Part1Part2.Segment2Part1Part2.v1",
+			},
+		},
+		{
+			name:        "success if the given event has more than two segments",
+			givenPrefix: "prefix",
+			givenAlpha1Sub: newDefaultSubscription(
+				testingv1.WithFilter(eventSource, "prefix.testapp.Segment1.Segment2.Segment3."+
+					"Segment4-Part1-Part2-Ä.Segment5-Part1-Part2-Ä.v1"),
+			),
+			wantTypes: []string{
+				"prefix.testapp.Segment1Segment2Segment3Segment4Part1Part2.Segment5Part1Part2.v1",
+			},
+			wantError: false,
+		},
+		{
+			name:        "success if the application name needs to be cleaned",
+			givenPrefix: "prefix",
+			givenAlpha1Sub: newDefaultSubscription(
+				testingv1.WithFilter(eventSource, "prefix.te--s__t!!a@@p##p%%.Segment1-Part1-Part2-Ä."+
+					"Segment2-Part1-Part2-Ä.v1"),
+			),
+			wantTypes: []string{
+				"prefix.testapp.Segment1Part1Part2.Segment2Part1Part2.v1",
+			},
+			wantError: false,
+		},
+		{
+			name:        "success if the application name needs to be cleaned and event has more than two segments",
+			givenPrefix: "prefix",
+			givenAlpha1Sub: newDefaultSubscription(
+				testingv1.WithFilter(eventSource, "prefix.te--s__t!!a@@p##p%%.Segment1.Segment2.Segment3."+
+					"Segment4-Part1-Part2-Ä.Segment5-Part1-Part2-Ä.v1"),
+			),
+			wantTypes: []string{
+				"prefix.testapp.Segment1Segment2Segment3Segment4Part1Part2.Segment5Part1Part2.v1",
+			},
+			wantError: false,
+		},
+		{
+			name:        "success if there are multiple filters",
+			givenPrefix: "prefix",
+			givenAlpha1Sub: newDefaultSubscription(
+				testingv1.WithFilter(eventSource, "prefix.test-app.Segme@@nt1.Segment2.Segment3."+
+					"Segment4-Part1-Part2-Ä.Segment5-Part1-Part2-Ä.v1"),
+				testingv1.WithFilter(eventSource, "prefix.testapp.Segment1.Segment2.Segment3."+
+					"Segment4-Part1-Part2-Ä.Segment5-Part1-Part2-Ä.v1"),
+			),
+			wantTypes: []string{
+				"prefix.testapp.Segment1Segment2Segment3Segment4Part1Part2.Segment5Part1Part2.v1",
+				"prefix.testapp.Segment1Segment2Segment3Segment4Part1Part2.Segment5Part1Part2.v1",
+			},
+			wantError: false,
+		},
+		// invalid even-types
+		{
+			name:        "fail if the prefix is invalid",
+			givenPrefix: "prefix",
+			givenAlpha1Sub: newDefaultSubscription(
+				testingv1.WithFilter(eventSource, "invalid.test-app.Segme@@nt1.Segment2.Segment3."+
+					"Segment4-Part1-Part2-Ä.Segment5-Part1-Part2-Ä.v1"),
+			),
+			wantError: true,
+		},
+		{
+			name:        "fail if the prefix is missing",
+			givenPrefix: "prefix",
+			givenAlpha1Sub: newDefaultSubscription(
+				testingv1.WithFilter(eventSource, "test-app.Segme@@nt1.Segment2.Segment3."+
+					"Segment4-Part1-Part2-Ä.Segment5-Part1-Part2-Ä.v1"),
+			),
+			wantError: true,
+		},
+		{
+			name:        "fail if the event-type is incomplete",
+			givenPrefix: "prefix",
+			givenAlpha1Sub: newDefaultSubscription(
+				testingv1.WithFilter(eventSource, "prefix.testapp.Segment1-Part1-Part2-Ä.v1"),
+			),
+			wantError: true,
+		},
+	}
+
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			// given
+			testLogger, err := logger.New("json", "info")
+			require.NoError(t, err)
+
+			// initialize dummy cleaner
+			cleaner := eventtype.NewSimpleCleaner(tc.givenPrefix, testLogger)
+			v1alpha1.InitializeEventTypeCleaner(cleaner)
+
+			// initialize v1alpha2 Subscription instance
+			convertedV1Alpha2 := &v1alpha2.Subscription{}
+
+			// when
+			err = v1alpha1.V1ToV2(tc.givenAlpha1Sub, convertedV1Alpha2)
+
+			// then
+			if tc.wantError {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, tc.wantTypes, convertedV1Alpha2.Spec.Types)
+			}
 		})
 	}
 }

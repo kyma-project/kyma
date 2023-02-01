@@ -5,14 +5,14 @@ global:
   images:
     eventing_controller:
       name: eventing-controller
-      version: PR-16671
+      version: PR-16681
       pullPolicy: "IfNotPresent"
     publisher_proxy:
       name: event-publisher-proxy
       version: PR-16671
     nats:
       name: nats
-      version: 2.9.6-alpine3.16
+      version: 2.9.11-alpine3.17
       directory: external
     nats_config_reloader:
       name: natsio/nats-server-config-reloader
@@ -45,9 +45,37 @@ global:
       statusPort: 15020
       portName: status
 
-  securityContext:
-    allowPrivilegeEscalation: false
+  podSecurityContext:
+    fsGroup: 10001
+    runAsUser: 10001
+    runAsGroup: 10001
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+    sysctls:
+      - name: kernel.shm_rmid_forced
+        value: ''
+      - name: net.ipv4.ip_local_port_range
+        value: ''
+      - name: net.ipv4.ip_unprivileged_port_start
+        value: ''
+      - name: net.ipv4.tcp_syncookies
+        value: ''
+      - name: net.ipv4.ping_group_range
+        value: ''
+
+  containerSecurityContext:
     privileged: false
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    capabilities:
+      drop:
+        - ALL
+      add:
+        - NET_BIND_SERVICE
+    seLinuxOptions:
+      type: container_t
+    procMount: default
 
   # eventTypePrefix is an optional prefix for the eventType
   # note that the eventType format is: eventTypePrefix.applicationName.eventName.eventVersion
