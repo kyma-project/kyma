@@ -13,6 +13,8 @@ import (
 	"k8s.io/utils/pointer"
 )
 
+const checksumAnnotationKey = "checksum/logpipeline-config"
+
 func MakeServiceAccount(name types.NamespacedName) *corev1.ServiceAccount {
 	resServiceAcc := corev1.ServiceAccount{
 		ObjectMeta: metav1.ObjectMeta{
@@ -50,7 +52,7 @@ func MakeClusterRole(name types.NamespacedName) *v1.ClusterRole {
 	return &clusterRole
 }
 
-func MakeDaemonSet(name types.NamespacedName) *appsv1.DaemonSet {
+func MakeDaemonSet(name types.NamespacedName, checksum string) *appsv1.DaemonSet {
 	resourcesFluentBit := corev1.ResourceRequirements{
 		Requests: map[corev1.ResourceName]resource.Quantity{
 			corev1.ResourceCPU:    resource.MustParse("10m"),
@@ -72,6 +74,8 @@ func MakeDaemonSet(name types.NamespacedName) *appsv1.DaemonSet {
 		},
 	}
 
+	annotations := make(map[string]string)
+	annotations[checksumAnnotationKey] = checksum
 	return &appsv1.DaemonSet{
 		TypeMeta: metav1.TypeMeta{},
 		ObjectMeta: metav1.ObjectMeta{
@@ -85,7 +89,8 @@ func MakeDaemonSet(name types.NamespacedName) *appsv1.DaemonSet {
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels: labels(),
+					Labels:      labels(),
+					Annotations: annotations,
 				},
 				Spec: corev1.PodSpec{
 					ServiceAccountName: name.Name,

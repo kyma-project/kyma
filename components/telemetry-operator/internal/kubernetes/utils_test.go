@@ -2,6 +2,7 @@ package kubernetes
 
 import (
 	"context"
+	corev1 "k8s.io/api/core/v1"
 	"testing"
 
 	v1 "k8s.io/api/apps/v1"
@@ -14,6 +15,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes/mocks"
+	rbac "k8s.io/api/rbac/v1"
 )
 
 func TestGetOrCreateConfigMapError(t *testing.T) {
@@ -161,4 +163,62 @@ func TestMergeChecksumAnnotations(t *testing.T) {
 	require.Equal(t, desired.Annotations["checksum/2"], "b")
 	require.Equal(t, desired.Annotations["checksum/3"], "3")
 	require.Equal(t, desired.Annotations["checksum/4"], "4")
+}
+
+func TestCreateOrUpdateClusterRoleBinding(t *testing.T) {
+	mockClient := &mocks.Client{}
+	notFoundErr := errors.NewNotFound(schema.GroupResource{}, "")
+	mockClient.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(notFoundErr)
+	mockClient.On("Create", mock.Anything, mock.Anything).Return(nil)
+
+	resClusterRoleBinding := rbac.ClusterRoleBinding{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "foo",
+			Namespace: "foo-namespace",
+		},
+		Subjects: []rbac.Subject{{Name: "telemetry-fluent-bit", Namespace: "kyma-system", Kind: "ServiceAccount"}},
+		RoleRef: rbac.RoleRef{
+			APIGroup: "rbac.authorization.k8s.io",
+			Kind:     "ClusterRole",
+			Name:     "telemetry-fluent-bit",
+		},
+	}
+	err := CreateOrUpdateClusterRoleBinding(context.Background(), mockClient, &resClusterRoleBinding)
+
+	require.NoError(t, err)
+}
+
+func TestCreateOrUpdateClusterRole(t *testing.T) {
+	mockClient := &mocks.Client{}
+	notFoundErr := errors.NewNotFound(schema.GroupResource{}, "")
+	mockClient.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(notFoundErr)
+	mockClient.On("Create", mock.Anything, mock.Anything).Return(nil)
+
+	clusterRole := rbac.ClusterRole{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "foo",
+			Namespace: "foo-namespace",
+		},
+		Rules: []rbac.PolicyRule{{Verbs: []string{"get", "list", "watch"}, APIGroups: []string{""}, Resources: []string{"namespaces", "pods"}}},
+	}
+	err := CreateOrUpdateClusterRole(context.Background(), mockClient, &clusterRole)
+
+	require.NoError(t, err)
+}
+
+func TestCreateOrUpdateServiceAccount(t *testing.T) {
+	mockClient := &mocks.Client{}
+	notFoundErr := errors.NewNotFound(schema.GroupResource{}, "")
+	mockClient.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(notFoundErr)
+	mockClient.On("Create", mock.Anything, mock.Anything).Return(nil)
+
+	resServiceAcc := corev1.ServiceAccount{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "foo",
+			Namespace: "foo-namespace",
+		},
+	}
+	err := CreateOrUpdateServiceAccount(context.Background(), mockClient, &resServiceAcc)
+
+	require.NoError(t, err)
 }

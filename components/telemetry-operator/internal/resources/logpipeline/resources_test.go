@@ -8,7 +8,8 @@ import (
 
 func TestMakeDaemonSet(t *testing.T) {
 	name := types.NamespacedName{Name: "telemetry-fluent-bit", Namespace: "kyma-system"}
-	daemonSet := MakeDaemonSet(name)
+	checksum := "foo"
+	daemonSet := MakeDaemonSet(name, checksum)
 
 	require.NotNil(t, daemonSet)
 	require.Equal(t, daemonSet.Name, name.Name)
@@ -51,4 +52,35 @@ func TestMakeLuaConfigMap(t *testing.T) {
 	require.Equal(t, cm.Name, name.Name+"-luascripts")
 	require.Equal(t, cm.Namespace, name.Namespace)
 	require.NotEmpty(t, cm.Data["filter-script.lua"])
+}
+
+func TestMakeServiceAccount(t *testing.T) {
+	name := types.NamespacedName{Name: "telemetry-fluent-bit", Namespace: "kyma-system"}
+	svcAcc := MakeServiceAccount(name)
+
+	require.NotNil(t, svcAcc)
+	require.Equal(t, svcAcc.Name, name.Name)
+	require.Equal(t, svcAcc.Namespace, name.Namespace)
+}
+
+func TestMakeClusterRole(t *testing.T) {
+	name := types.NamespacedName{Name: "telemetry-fluent-bit", Namespace: "kyma-system"}
+	clusterRole := MakeClusterRole(name)
+
+	require.NotNil(t, clusterRole)
+	require.Equal(t, clusterRole.Name, name.Name)
+}
+
+func TestMakeClusterRoleBinding(t *testing.T) {
+	name := types.NamespacedName{Name: "telemetry-fluent-bit", Namespace: "kyma-system"}
+	clusterRoleBinding := MakeClusterRoleBinding(name)
+	svcAcc := MakeServiceAccount(name)
+	clusterRole := MakeClusterRole(name)
+
+	require.NotNil(t, clusterRoleBinding)
+	require.Equal(t, clusterRoleBinding.Name, name.Name)
+	require.Equal(t, clusterRoleBinding.RoleRef.Name, clusterRole.Name)
+	require.Equal(t, clusterRoleBinding.RoleRef.Kind, "ClusterRole")
+	require.Equal(t, clusterRoleBinding.Subjects[0].Name, svcAcc.Name)
+	require.Equal(t, clusterRoleBinding.Subjects[0].Kind, "ServiceAccount")
 }

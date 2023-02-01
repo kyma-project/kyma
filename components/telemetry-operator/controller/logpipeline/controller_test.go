@@ -107,60 +107,7 @@ var _ = Describe("LogPipeline controller", func() {
 				},
 			}
 			Expect(k8sClient.Create(ctx, secret)).Should(Succeed())
-
-			podLabels := map[string]string{
-				"app.kubernetes.io/instance": "logging",
-				"app.kubernetes.io/name":     "fluent-bit",
-			}
-			container := corev1.Container{
-				Name:  "fluent-bit",
-				Image: "fluent-bit",
-			}
-			fluentBitDs := &appsv1.DaemonSet{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: "apps/v1",
-					Kind:       "DaemonSet",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      testConfig.DaemonSet.Name,
-					Namespace: testConfig.DaemonSet.Namespace,
-				},
-				Spec: appsv1.DaemonSetSpec{
-					Selector: &metav1.LabelSelector{
-						MatchLabels: podLabels,
-					},
-					Template: corev1.PodTemplateSpec{
-						ObjectMeta: metav1.ObjectMeta{
-							Labels: podLabels,
-						},
-						Spec: corev1.PodSpec{
-							Containers: []corev1.Container{
-								container,
-							},
-						},
-					},
-				},
-			}
-			Expect(k8sClient.Create(ctx, fluentBitDs)).Should(Succeed())
-
-			fluentBitPod := &corev1.Pod{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: "v1",
-					Kind:       "Pod",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      testConfig.DaemonSet.Name + "-123",
-					Namespace: testConfig.DaemonSet.Namespace,
-					Labels:    podLabels,
-				},
-				Spec: corev1.PodSpec{
-					Containers: []corev1.Container{
-						container,
-					},
-				},
-			}
-			Expect(k8sClient.Create(ctx, fluentBitPod)).Should(Succeed())
-
+			
 			file := telemetryv1alpha1.FileMount{
 				Name:    "myFile",
 				Content: "file-content",
@@ -305,7 +252,7 @@ var _ = Describe("LogPipeline controller", func() {
 
 			Expect(k8sClient.Delete(ctx, logPipeline)).Should(Succeed())
 
-			// Fluent Bit daemon set should rollout-restarted (generation changes from 1 to 2)
+			// Fluent Bit daemon set should rollout-restarted (generation is 1)
 			Eventually(func() int {
 				var fluentBitDaemonSet appsv1.DaemonSet
 				err := k8sClient.Get(ctx, types.NamespacedName{
@@ -316,7 +263,7 @@ var _ = Describe("LogPipeline controller", func() {
 					return 0
 				}
 				return int(fluentBitDaemonSet.Generation)
-			}, timeout, interval).Should(Equal(2))
+			}, timeout, interval).Should(Equal(1))
 
 			// Fluent Bit daemon set should have checksum annotation set
 			Eventually(func() bool {

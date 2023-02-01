@@ -34,8 +34,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
 )
 
-const checksumAnnotationKey = "checksum/logpipeline-config"
-
 type Config struct {
 	DaemonSet         types.NamespacedName
 	SectionsConfigMap types.NamespacedName
@@ -43,7 +41,6 @@ type Config struct {
 	EnvSecret         types.NamespacedName
 	OverrideConfigMap types.NamespacedName
 	PipelineDefaults  configbuilder.PipelineDefaults
-	ManageFluentBit   bool
 	Overrides         overrides.Config
 }
 
@@ -129,13 +126,6 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 		return err
 	}
 
-	if r.config.ManageFluentBit {
-		name := r.config.DaemonSet
-		if err = r.reconcileFluentBit(ctx, name, pipeline); err != nil {
-			return err
-		}
-	}
-
 	if err = r.syncer.syncFluentBitConfig(ctx, pipeline); err != nil {
 		return err
 	}
@@ -149,14 +139,15 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 		return err
 	}
 
-	if err = r.annotator.SetAnnotation(ctx, r.config.DaemonSet, checksumAnnotationKey, checksum); err != nil {
+	name := r.config.DaemonSet
+	if err = r.reconcileFluentBit(ctx, name, pipeline, checksum); err != nil {
 		return err
 	}
 
 	return err
 }
 
-func (r *Reconciler) reconcileFluentBit(ctx context.Context, name types.NamespacedName, pipeline *telemetryv1alpha1.LogPipeline) error {
+func (r *Reconciler) reconcileFluentBit(ctx context.Context, name types.NamespacedName, pipeline *telemetryv1alpha1.LogPipeline, checksum string) error {
 	if isNotMarkedForDeletion(pipeline) {
 		svcAcc := resources.MakeServiceAccount(name)
 		if err := utils.CreateOrUpdateServiceAccount(ctx, r, svcAcc); err != nil {
@@ -170,7 +161,7 @@ func (r *Reconciler) reconcileFluentBit(ctx context.Context, name types.Namespac
 		if err := utils.CreateOrUpdateClusterRoleBinding(ctx, r, clusterRoleBinding); err != nil {
 			return fmt.Errorf("failed to create fluent bit cluster role Binding: %w", err)
 		}
-		ds := resources.MakeDaemonSet(name)
+		ds := resources.MakeDaemonSet(name, checksum)
 		if err := utils.CreateOrUpdateDaemonSet(ctx, r, ds); err != nil {
 			return fmt.Errorf("failed to reconcile fluent bit daemonset: %w", err)
 		}

@@ -213,7 +213,7 @@ func DeleteFluentBit(ctx context.Context, c client.Client, name types.Namespaced
 	} else if !errors.IsNotFound(err) {
 		return err
 	}
-	
+
 	var clusterRoleBinding v1.ClusterRoleBinding
 	err = c.Get(ctx, name, &clusterRoleBinding)
 	if err == nil {

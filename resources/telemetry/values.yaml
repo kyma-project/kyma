@@ -27,4 +27,3 @@ global:
   log:
     format: "json"
     level: "info"
-  operatorManagedFluentBit: true
