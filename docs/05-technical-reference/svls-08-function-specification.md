@@ -208,13 +208,13 @@ module.exports = {
 Python
 </summary>
 
-By default, a failing Function simply throws an error to tell the Event Service to reinject the event at a later point. Such an HTTP-based Function returns the HTTP status code `500`. On the contrary, if you manage to invoke a Function successfully, the system returns the default HTTP status code `200`.
+By default, a failing Function simply throws an error to tell the Event Service to reinject the event at a later point. Such an HTTP-based Function returns the HTTP status code `500`. In case you manage to invoke a Function successfully, the system returns the default HTTP status code `200`.
 
 Apart from these two default codes, you can define custom responses in all Python runtimes using the **HTTPResponse** object available in Bottle.
 
 This object will need to be instantiated and can be customized. For more information, read [Bottle API documentation](https://bottlepy.org/docs/dev/api.html#the-response-object).
 
-This example shows how to set such a custom response in Python for the HTTP status code `400`:
+The following example shows how to set such a custom response in Python for the HTTP status code `400`:
 
 ```python
 from bottle import HTTPResponse
