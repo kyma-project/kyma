@@ -7,7 +7,7 @@ global:
       version: "PR-16573"
     telemetry_operator:
       name: "telemetry-operator"
-      version: "PR-16666"
+      version: "PR-16668"
     telemetry_webhook_cert_init:
       name: "webhook-cert-init"
       version: "PR-16573"
@@ -27,4 +27,3 @@ global:
   log:
     format: "json"
     level: "info"
-  operatorManagedFluentBit: false

@@ -113,7 +113,7 @@ var _ = BeforeSuite(func() {
 	client := mgr.GetClient()
 	overrides := overrides.New(configureLogLevelOnFly, &kubernetes.ConfigmapProber{Client: client})
 
-	reconciler := NewReconciler(client, testConfig, &kubernetes.DaemonSetProber{Client: client}, &kubernetes.DaemonSetAnnotator{Client: client}, overrides)
+	reconciler := NewReconciler(client, testConfig, &kubernetes.DaemonSetProber{Client: client}, overrides)
 	err = reconciler.SetupWithManager(mgr)
 	Expect(err).ToNot(HaveOccurred())
 
