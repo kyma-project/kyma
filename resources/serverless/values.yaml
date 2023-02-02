@@ -95,7 +95,7 @@ global:
       version: "v20230130-95ca28e0"
     function_runtime_python39:
       name: "function-runtime-python39"
-      version: "PR-16706"
+      version: "v20230202-2a7db538"
     kaniko_executor:
       name: "kaniko-executor"
       version: "1.9.1-8626c78a"
