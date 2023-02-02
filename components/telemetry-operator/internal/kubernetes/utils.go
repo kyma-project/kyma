@@ -163,29 +163,37 @@ func CreateOrUpdateService(ctx context.Context, c client.Client, desired *corev1
 }
 
 func DeleteFluentBit(ctx context.Context, c client.Client, name types.NamespacedName) error {
-	var ds appsv1.DaemonSet
-	err := deleteResource(c, ctx, name, &ds)
 
-	var service corev1.Service
-	err = deleteResource(c, ctx, name, &service)
+	if err := deleteResource(c, ctx, name, &appsv1.DaemonSet{}); err != nil {
+		return fmt.Errorf("unable to delete daemonset %s: %v", name.Name, err)
+	}
 
-	var cm corev1.ConfigMap
-	err = deleteResource(c, ctx, name, &cm)
+	if err := deleteResource(c, ctx, name, &corev1.Service{}); err != nil {
+		return fmt.Errorf("unable to delete service %s: %v", name.Name, err)
+	}
 
-	var serviceAccount corev1.ServiceAccount
-	err = deleteResource(c, ctx, name, &serviceAccount)
+	if err := deleteResource(c, ctx, name, &corev1.ConfigMap{}); err != nil {
+		return fmt.Errorf("unable to delete configmap %s: %v", name.Name, err)
+	}
 
-	var clusterRoleBinding v1.ClusterRoleBinding
-	err = deleteResource(c, ctx, name, &clusterRoleBinding)
+	if err := deleteResource(c, ctx, name, &corev1.ServiceAccount{}); err != nil {
+		return fmt.Errorf("unable to delete service account %s: %v", name.Name, err)
+	}
 
-	var clusterRole v1.ClusterRole
-	err = deleteResource(c, ctx, name, &clusterRole)
+	if err := deleteResource(c, ctx, name, &v1.ClusterRoleBinding{}); err != nil {
+		return fmt.Errorf("unable to delete cluster role binding %s: %v", name.Name, err)
+	}
 
-	var luaCm corev1.ConfigMap
+	if err := deleteResource(c, ctx, name, &v1.ClusterRole{}); err != nil {
+		return fmt.Errorf("unable to delete cluster role %s: %v", name.Name, err)
+	}
+
 	name.Name = fmt.Sprintf("%s-luascripts", name.Name)
-	err = deleteResource(c, ctx, name, &luaCm)
+	if err := deleteResource(c, ctx, name, &corev1.ConfigMap{}); err != nil {
+		return fmt.Errorf("unable to delete configmap %s: %v", name.Name, err)
+	}
 
-	return err
+	return nil
 }
 
 func deleteResource(c client.Client, ctx context.Context, name client.ObjectKey, obj client.Object) error {
