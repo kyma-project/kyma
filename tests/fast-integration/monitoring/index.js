@@ -6,6 +6,7 @@ module.exports = {
 
 const {
   getEnvOrDefault,
+  waitForDaemonSet,
 } = require('../utils');
 const prometheus = require('./prometheus');
 const grafana = require('./grafana');
@@ -31,6 +32,10 @@ function monitoringTests() {
   describe('Prometheus Tests:', function() {
     this.timeout(5 * 60 * 1000);
     this.slow(5000);
+
+    it('Telemetry Fluent Bit pods should be ready', async () => {
+      await waitForDaemonSet('telemetry-fluent-bit', 'kyma-system');
+    })
 
     it('Prometheus pods should be ready', async () => {
       await prometheus.assertPodsExist();
