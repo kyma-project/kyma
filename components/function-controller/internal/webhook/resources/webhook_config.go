@@ -36,7 +36,7 @@ const (
 	ValidationWebhookName          = "validation.webhook.serverless.kyma-project.io"
 	ConvertingWebHookName          = "converting.webhook.serverless.kyma-project.io"
 
-	WebhookTimeout = 15
+	WebhookTimeout = 10
 
 	FunctionDefaultingWebhookPath       = "/defaulting/functions"
 	RegistryConfigDefaultingWebhookPath = "/defaulting/registry-config-secrets"
@@ -46,6 +46,18 @@ const (
 
 	RemoteRegistryLabelKey = "serverless.kyma-project.io/remote-registry"
 )
+
+func createExcludeKubeSystemNamespacesSelector() *metav1.LabelSelector {
+	return &metav1.LabelSelector{
+		MatchExpressions: []metav1.LabelSelectorRequirement{
+			{
+				Key:      "gardener.cloud/purpose",
+				Operator: metav1.LabelSelectorOpNotIn,
+				Values:   []string{"kube-system"},
+			},
+		},
+	}
+}
 
 func EnsureWebhookConfigurationFor(ctx context.Context, client ctlrclient.Client, config WebhookConfig, wt WebHookType) error {
 	if wt == MutatingWebhook {
@@ -144,8 +156,9 @@ func getFunctionMutatingWebhookCfg(config WebhookConfig) admissionregistrationv1
 				},
 			},
 		},
-		SideEffects:    &sideEffects,
-		TimeoutSeconds: pointer.Int32(WebhookTimeout),
+		SideEffects:       &sideEffects,
+		TimeoutSeconds:    pointer.Int32(WebhookTimeout),
+		NamespaceSelector: createExcludeKubeSystemNamespacesSelector(),
 	}
 }
 
@@ -171,6 +184,7 @@ func getRegistryConfigSecretMutatingWebhook(config WebhookConfig) admissionregis
 		FailurePolicy:           &failurePolicy,
 		MatchPolicy:             &matchPolicy,
 		TimeoutSeconds:          pointer.Int32(WebhookTimeout),
+		NamespaceSelector:       createExcludeKubeSystemNamespacesSelector(),
 		SideEffects:             &sideEffects,
 		AdmissionReviewVersions: []string{"v1beta1", "v1"},
 		ObjectSelector: &metav1.LabelSelector{
@@ -255,8 +269,9 @@ func createValidatingWebhookConfiguration(config WebhookConfig) *admissionregist
 						},
 					},
 				},
-				SideEffects:    &sideEffects,
-				TimeoutSeconds: pointer.Int32(WebhookTimeout),
+				SideEffects:       &sideEffects,
+				TimeoutSeconds:    pointer.Int32(WebhookTimeout),
+				NamespaceSelector: createExcludeKubeSystemNamespacesSelector(),
 			},
 		},
 	}
@@ -288,6 +303,7 @@ func getFunctionConvertingWebhookCfg(config WebhookConfig) admissionregistration
 		ReinvocationPolicy: &reinvocationPolicy,
 		SideEffects:        &sideEffects,
 		TimeoutSeconds:     pointer.Int32(WebhookTimeout),
+		NamespaceSelector:  createExcludeKubeSystemNamespacesSelector(),
 	}
 }
 
