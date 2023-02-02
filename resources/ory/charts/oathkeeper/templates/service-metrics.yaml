@@ -6,7 +6,6 @@ metadata:
   annotations:
     prometheus.io/scrape: "true"
     prometheus.io/port: {{ .Values.sidecar.port.metrics | quote }}
-    prometheus.io/scheme: http
   labels:
 {{ include "oathkeeper-maester-sidecar.labels" . | indent 4 }}
     mode: {{ .Values.global.ory.oathkeeper.maester.mode }}
