@@ -91,6 +91,20 @@ func TestFetchFromCr(t *testing.T) {
 					Endpoint: telemetryv1alpha1.ValueType{
 						Value: "endpoint",
 					},
+					Headers: []telemetryv1alpha1.Header{
+						{
+							Name: "Authorization",
+							ValueType: telemetryv1alpha1.ValueType{
+								Value: "Bearer xyz",
+							},
+						},
+						{
+							Name: "Test",
+							ValueType: telemetryv1alpha1.ValueType{
+								Value: "123",
+							},
+						},
+					},
 				},
 			},
 		},
@@ -99,6 +113,8 @@ func TestFetchFromCr(t *testing.T) {
 	data, err := fetchSecretData(ctx, client, pipeline.Spec.Output.Otlp)
 	require.NoError(t, err)
 	require.Contains(t, data, otlpEndpointVariable)
+	require.Contains(t, data, "HEADER_AUTHORIZATION")
+	require.Contains(t, data, "HEADER_TEST")
 	require.NotContains(t, data, basicAuthHeaderVariable)
 }
 
@@ -107,6 +123,8 @@ func TestFetchFromSecret(t *testing.T) {
 		"user":     []byte("secret-username"),
 		"password": []byte("secret-password"),
 		"endpoint": []byte("secret-endpoint"),
+		"token":    []byte("Bearer 123"),
+		"test":     []byte("123"),
 	}
 	secret := corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
@@ -155,6 +173,32 @@ func TestFetchFromSecret(t *testing.T) {
 							},
 						},
 					},
+					Headers: []telemetryv1alpha1.Header{
+						{
+							Name: "Authorization",
+							ValueType: telemetryv1alpha1.ValueType{
+								ValueFrom: &telemetryv1alpha1.ValueFromSource{
+									SecretKeyRef: &telemetryv1alpha1.SecretKeyRef{
+										Name:      "my-secret",
+										Namespace: "default",
+										Key:       "token",
+									},
+								},
+							},
+						},
+						{
+							Name: "Test",
+							ValueType: telemetryv1alpha1.ValueType{
+								ValueFrom: &telemetryv1alpha1.ValueFromSource{
+									SecretKeyRef: &telemetryv1alpha1.SecretKeyRef{
+										Name:      "my-secret",
+										Namespace: "default",
+										Key:       "test",
+									},
+								},
+							},
+						},
+					},
 				},
 			},
 		},
@@ -165,6 +209,8 @@ func TestFetchFromSecret(t *testing.T) {
 	require.Contains(t, data, otlpEndpointVariable)
 	require.Equal(t, string(data[otlpEndpointVariable]), "secret-endpoint")
 	require.Contains(t, data, basicAuthHeaderVariable)
+	require.Contains(t, data, "HEADER_AUTHORIZATION")
+	require.Contains(t, data, "HEADER_TEST")
 	require.Equal(t, string(data[basicAuthHeaderVariable]), getBasicAuthHeader("secret-username", "secret-password"))
 }
 
