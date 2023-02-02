@@ -3,6 +3,7 @@ package kubernetes
 import (
 	"context"
 	"fmt"
+	v1 "k8s.io/api/rbac/v1"
 	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -15,6 +16,57 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
+
+func CreateOrUpdateClusterRoleBinding(ctx context.Context, c client.Client, desired *v1.ClusterRoleBinding) error {
+	var existing v1.ClusterRoleBinding
+	err := c.Get(ctx, types.NamespacedName{Name: desired.Name, Namespace: desired.Namespace}, &existing)
+	if err != nil {
+		if !apierrors.IsNotFound(err) {
+			return err
+		}
+		return c.Create(ctx, desired)
+	}
+	mutated := existing.DeepCopy()
+	mergeMetadata(&desired.ObjectMeta, mutated.ObjectMeta)
+	if apiequality.Semantic.DeepEqual(mutated, desired) {
+		return nil
+	}
+	return c.Update(ctx, desired)
+}
+
+func CreateOrUpdateClusterRole(ctx context.Context, c client.Client, desired *v1.ClusterRole) error {
+	var existing v1.ClusterRole
+	err := c.Get(ctx, types.NamespacedName{Name: desired.Name, Namespace: desired.Namespace}, &existing)
+	if err != nil {
+		if !apierrors.IsNotFound(err) {
+			return err
+		}
+		return c.Create(ctx, desired)
+	}
+	mutated := existing.DeepCopy()
+	mergeMetadata(&desired.ObjectMeta, mutated.ObjectMeta)
+	if apiequality.Semantic.DeepEqual(mutated, desired) {
+		return nil
+	}
+	return c.Update(ctx, desired)
+}
+
+func CreateOrUpdateServiceAccount(ctx context.Context, c client.Client, desired *corev1.ServiceAccount) error {
+	var existing corev1.ServiceAccount
+	err := c.Get(ctx, types.NamespacedName{Name: desired.Name, Namespace: desired.Namespace}, &existing)
+	if err != nil {
+		if !apierrors.IsNotFound(err) {
+			return err
+		}
+		return c.Create(ctx, desired)
+	}
+	mutated := existing.DeepCopy()
+	mergeMetadata(&desired.ObjectMeta, mutated.ObjectMeta)
+	if apiequality.Semantic.DeepEqual(mutated, desired) {
+		return nil
+	}
+	return c.Update(ctx, desired)
+}
 
 func CreateOrUpdateConfigMap(ctx context.Context, c client.Client, desired *corev1.ConfigMap) error {
 	var existing corev1.ConfigMap
@@ -110,47 +162,48 @@ func CreateOrUpdateService(ctx context.Context, c client.Client, desired *corev1
 }
 
 func DeleteFluentBit(ctx context.Context, c client.Client, name types.NamespacedName) error {
-	var ds appsv1.DaemonSet
-	err := c.Get(ctx, name, &ds)
-	if err == nil {
-		if err = c.Delete(ctx, &ds); err != nil && !errors.IsNotFound(err) {
-			return err
-		}
-	} else if !errors.IsNotFound(err) {
-		return err
+
+	if err := deleteResource(c, ctx, name, &appsv1.DaemonSet{}); err != nil {
+		return fmt.Errorf("unable to delete daemonset %s: %v", name.Name, err)
 	}
 
-	var service corev1.Service
-	err = c.Get(ctx, name, &service)
-	if err == nil {
-		if err = c.Delete(ctx, &service); err != nil && !errors.IsNotFound(err) {
-			return err
-		}
-	} else if !errors.IsNotFound(err) {
-		return err
+	if err := deleteResource(c, ctx, name, &corev1.Service{}); err != nil {
+		return fmt.Errorf("unable to delete service %s: %v", name.Name, err)
 	}
 
-	var cm corev1.ConfigMap
-	err = c.Get(ctx, name, &cm)
-	if err == nil {
-		if err = c.Delete(ctx, &cm); err != nil && !errors.IsNotFound(err) {
-			return err
-		}
-	} else if !errors.IsNotFound(err) {
-		return err
+	if err := deleteResource(c, ctx, name, &corev1.ConfigMap{}); err != nil {
+		return fmt.Errorf("unable to delete configmap %s: %v", name.Name, err)
 	}
 
-	var luaCm corev1.ConfigMap
+	if err := deleteResource(c, ctx, name, &corev1.ServiceAccount{}); err != nil {
+		return fmt.Errorf("unable to delete service account %s: %v", name.Name, err)
+	}
+
+	if err := deleteResource(c, ctx, name, &v1.ClusterRoleBinding{}); err != nil {
+		return fmt.Errorf("unable to delete cluster role binding %s: %v", name.Name, err)
+	}
+
+	if err := deleteResource(c, ctx, name, &v1.ClusterRole{}); err != nil {
+		return fmt.Errorf("unable to delete cluster role %s: %v", name.Name, err)
+	}
+
 	name.Name = fmt.Sprintf("%s-luascripts", name.Name)
-	err = c.Get(ctx, name, &luaCm)
+	if err := deleteResource(c, ctx, name, &corev1.ConfigMap{}); err != nil {
+		return fmt.Errorf("unable to delete configmap %s: %v", name.Name, err)
+	}
+
+	return nil
+}
+
+func deleteResource(c client.Client, ctx context.Context, name client.ObjectKey, obj client.Object) error {
+	err := c.Get(ctx, name, obj)
 	if err == nil {
-		if err = c.Delete(ctx, &luaCm); err != nil && !errors.IsNotFound(err) {
+		if err = c.Delete(ctx, obj); err != nil && !errors.IsNotFound(err) {
 			return err
 		}
 	} else if !errors.IsNotFound(err) {
 		return err
 	}
-
 	return nil
 }
 

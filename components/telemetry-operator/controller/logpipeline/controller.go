@@ -35,8 +35,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
 )
 
-const checksumAnnotationKey = "checksum/logpipeline-config"
-
 type Config struct {
 	DaemonSet         types.NamespacedName
 	SectionsConfigMap types.NamespacedName
@@ -44,7 +42,6 @@ type Config struct {
 	EnvSecret         types.NamespacedName
 	OverrideConfigMap types.NamespacedName
 	PipelineDefaults  configbuilder.PipelineDefaults
-	ManageFluentBit   bool
 	Overrides         overrides.Config
 }
 
@@ -62,19 +59,17 @@ type Reconciler struct {
 	client.Client
 	config                  Config
 	prober                  DaemonSetProber
-	annotator               DaemonSetAnnotator
 	allLogPipelines         prometheus.Gauge
 	unsupportedLogPipelines prometheus.Gauge
 	syncer                  syncer
 	globalConfig            overrides.GlobalConfigHandler
 }
 
-func NewReconciler(client client.Client, config Config, prober DaemonSetProber, annotator DaemonSetAnnotator, handler *overrides.Handler) *Reconciler {
+func NewReconciler(client client.Client, config Config, prober DaemonSetProber, handler *overrides.Handler) *Reconciler {
 	var r Reconciler
 	r.Client = client
 	r.config = config
 	r.prober = prober
-	r.annotator = annotator
 	r.allLogPipelines = prometheus.NewGauge(prometheus.GaugeOpts{Name: "telemetry_all_logpipelines", Help: "Number of log pipelines."})
 	r.unsupportedLogPipelines = prometheus.NewGauge(prometheus.GaugeOpts{Name: "telemetry_unsupported_logpipelines", Help: "Number of log pipelines with custom filters or outputs."})
 	metrics.Registry.MustRegister(r.allLogPipelines, r.unsupportedLogPipelines)
@@ -130,18 +125,7 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 		return err
 	}
 
-	if r.config.ManageFluentBit {
-		name := r.config.DaemonSet
-		if err = r.reconcileFluentBit(ctx, name, pipeline); err != nil {
-			return err
-		}
-	}
-
 	if err = r.syncer.syncFluentBitConfig(ctx, pipeline); err != nil {
-		return err
-	}
-
-	if err = cleanupFinalizersIfNeeded(ctx, r.Client, pipeline); err != nil {
 		return err
 	}
 
@@ -150,17 +134,34 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 		return err
 	}
 
-	if err = r.annotator.SetAnnotation(ctx, r.config.DaemonSet, checksumAnnotationKey, checksum); err != nil {
+	name := r.config.DaemonSet
+	if err = r.reconcileFluentBit(ctx, name, pipeline, checksum); err != nil {
+		return err
+	}
+
+	if err = cleanupFinalizersIfNeeded(ctx, r.Client, pipeline); err != nil {
 		return err
 	}
 
 	return err
 }
 
-func (r *Reconciler) reconcileFluentBit(ctx context.Context, name types.NamespacedName, pipeline *telemetryv1alpha1.LogPipeline) error {
+func (r *Reconciler) reconcileFluentBit(ctx context.Context, name types.NamespacedName, pipeline *telemetryv1alpha1.LogPipeline, checksum string) error {
 	if isNotMarkedForDeletion(pipeline) {
-		ds := resources.MakeDaemonSet(name)
-		if err := utils.CreateOrUpdateDaemonSet(ctx, r, ds); err != nil {
+		serviceAccount := resources.MakeServiceAccount(name)
+		if err := utils.CreateOrUpdateServiceAccount(ctx, r, serviceAccount); err != nil {
+			return fmt.Errorf("failed to create fluent bit service account: %w", err)
+		}
+		clusterRole := resources.MakeClusterRole(name)
+		if err := utils.CreateOrUpdateClusterRole(ctx, r, clusterRole); err != nil {
+			return fmt.Errorf("failed to create fluent bit cluster role: %w", err)
+		}
+		clusterRoleBinding := resources.MakeClusterRoleBinding(name)
+		if err := utils.CreateOrUpdateClusterRoleBinding(ctx, r, clusterRoleBinding); err != nil {
+			return fmt.Errorf("failed to create fluent bit cluster role Binding: %w", err)
+		}
+		daemonSet := resources.MakeDaemonSet(name, checksum)
+		if err := utils.CreateOrUpdateDaemonSet(ctx, r, daemonSet); err != nil {
 			return fmt.Errorf("failed to reconcile fluent bit daemonset: %w", err)
 		}
 		exporterMetricsService := resources.MakeExporterMetricsService(name)
