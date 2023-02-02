@@ -35,7 +35,7 @@ function monitoringTests() {
 
     it('Telemetry Fluent Bit pods should be ready', async () => {
       await waitForDaemonSet('telemetry-fluent-bit', 'kyma-system');
-    })
+    });
 
     it('Prometheus pods should be ready', async () => {
       await prometheus.assertPodsExist();
