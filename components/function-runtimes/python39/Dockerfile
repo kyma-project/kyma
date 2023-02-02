@@ -7,8 +7,8 @@
 # We use this code to manually use newest alpine and nodejs.
 # Use official build when it will be available.
 
-# image base on alpine:3.17.0
-FROM alpine@sha256:c0d488a800e4127c334ad20d61d7bc21b4097540327217dfab52262adc02380c
+# image base on alpine:3.17.1
+FROM alpine@sha256:93d5a28ff72d288d69b5997b8ba47396d2cbb62a72b5d87cd3351094b5d578a0
 
 SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 
