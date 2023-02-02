@@ -15,64 +15,17 @@ type Migrator struct {
 	ctx                  context.Context
 	secretRepository     secrets.Repository
 	includeSourceKeyFunc IncludeKeyFunc
-	doNotOverwrite       bool
 }
 
-func NewMigrator(secretRepository secrets.Repository, includeSourceKeyFunc IncludeKeyFunc, doNotOverwrite bool) Migrator {
+func NewMigrator(secretRepository secrets.Repository, includeSourceKeyFunc IncludeKeyFunc) Migrator {
 	return Migrator{
 		ctx:                  context.Background(),
 		secretRepository:     secretRepository,
 		includeSourceKeyFunc: includeSourceKeyFunc,
-		doNotOverwrite:       doNotOverwrite,
 	}
 }
 
 type IncludeKeyFunc func(string) bool
-
-func (m Migrator) DoMoveCredentialSecret(source, target types.NamespacedName) error {
-	logrus.Info("Checking if credentials need to be migrated.")
-
-	if source.Name == "" {
-		logrus.Infof("Skipping secret migration. Source secret name is empty.")
-		return nil
-	}
-
-	_, targetExists, err := m.getSecret(target)
-
-	if err != nil {
-		logrus.Errorf("Failed to read target secret: %v", err)
-		return err
-	}
-
-	// TODO: It is just one difference between Do and DoMoveCredentialSecret.
-	// Merge and Use doNotOverwrite
-	if targetExists {
-		logrus.Infof("Skipping secret migration. Target secret %s already exists in %s namespace.", target.Name, target.Namespace)
-		return nil
-	}
-
-	sourceData, sourceExists, err := m.getSecret(source)
-	if err != nil {
-		logrus.Errorf("Failed to read source secret: %v", err)
-		return err
-	}
-
-	if !sourceExists {
-		logrus.Infof("Skipping secret migration. Source secret %s doesn't exist in %s namespace.", source.Name, source.Namespace)
-		return nil
-	}
-
-	logrus.Infof("Moving credential secret. Source: %s , target=%s.", source.String(), target.String())
-
-	//err = m.createSecret(target, filterOut(sourceData, m.includeSourceKeyFunc))
-	err = m.createSecret(target, sourceData)
-	if err != nil {
-		logrus.Errorf("Failed to create target secret: %v", err)
-		return err
-	}
-
-	return m.deleteSecret(source)
-}
 
 func (m Migrator) Do(source, target types.NamespacedName) error {
 	logrus.Info("Checking if secret needs to be migrated.")

@@ -33,7 +33,7 @@ func TestMigrator(t *testing.T) {
 		secretsRepositoryMock.On("Delete", sourceSecret).Return(nil)
 
 		// when
-		migrator := NewMigrator(secretsRepositoryMock, includeAllSourceKeysFunc, false)
+		migrator := NewMigrator(secretsRepositoryMock, includeAllSourceKeysFunc)
 		err := migrator.Do(sourceSecret, targetSecret)
 
 		// then
@@ -62,7 +62,7 @@ func TestMigrator(t *testing.T) {
 			}
 
 			return false
-		}, false)
+		})
 		err := migrator.Do(sourceSecret, targetSecret)
 
 		// then
@@ -79,7 +79,7 @@ func TestMigrator(t *testing.T) {
 		secretsRepositoryMock := &mocks.Repository{}
 
 		// when
-		migrator := NewMigrator(secretsRepositoryMock, includeAllSourceKeysFunc, false)
+		migrator := NewMigrator(secretsRepositoryMock, includeAllSourceKeysFunc)
 		err := migrator.Do(sourceSecret, targetSecret)
 
 		// then
@@ -96,7 +96,7 @@ func TestMigrator(t *testing.T) {
 		secretsRepositoryMock.On("Get", sourceSecret).Return(map[string][]byte{}, k8serrors.NewNotFound(schema.GroupResource{}, "source"))
 
 		// when
-		migrator := NewMigrator(secretsRepositoryMock, includeAllSourceKeysFunc, false)
+		migrator := NewMigrator(secretsRepositoryMock, includeAllSourceKeysFunc)
 		err := migrator.Do(sourceSecret, targetSecret)
 
 		// then
@@ -113,7 +113,7 @@ func TestMigrator(t *testing.T) {
 		secretsRepositoryMock.On("Get", sourceSecret).Return(map[string][]byte{}, errors.New("failed to get"))
 
 		// when
-		migrator := NewMigrator(secretsRepositoryMock, includeAllSourceKeysFunc, false)
+		migrator := NewMigrator(secretsRepositoryMock, includeAllSourceKeysFunc)
 		err := migrator.Do(sourceSecret, targetSecret)
 
 		// then
@@ -133,7 +133,7 @@ func TestMigrator(t *testing.T) {
 		secretsRepositoryMock.On("Get", targetSecret).Return(map[string][]byte{}, errors.New("failed to get"))
 
 		// when
-		migrator := NewMigrator(secretsRepositoryMock, includeAllSourceKeysFunc, false)
+		migrator := NewMigrator(secretsRepositoryMock, includeAllSourceKeysFunc)
 		err := migrator.Do(sourceSecret, targetSecret)
 
 		// then
@@ -154,7 +154,7 @@ func TestMigrator(t *testing.T) {
 		secretsRepositoryMock.On("UpsertWithReplace", targetSecret, secret).Return(errors.New("failed to upsert"))
 
 		// when
-		migrator := NewMigrator(secretsRepositoryMock, includeAllSourceKeysFunc, false)
+		migrator := NewMigrator(secretsRepositoryMock, includeAllSourceKeysFunc)
 		err := migrator.Do(sourceSecret, targetSecret)
 
 		// then
@@ -176,7 +176,7 @@ func TestMigrator(t *testing.T) {
 		secretsRepositoryMock.On("Delete", sourceSecret).Return(errors.New("failed to upsert"))
 
 		// when
-		migrator := NewMigrator(secretsRepositoryMock, includeAllSourceKeysFunc, false)
+		migrator := NewMigrator(secretsRepositoryMock, includeAllSourceKeysFunc)
 		err := migrator.Do(sourceSecret, targetSecret)
 
 		// then
@@ -184,7 +184,7 @@ func TestMigrator(t *testing.T) {
 		secretsRepositoryMock.AssertExpectations(t)
 	})
 
-	t.Run("Should remove source secret when target exists", func(t *testing.T) {
+	t.Run("Should remove source secret and do not modify target secret when it already exists", func(t *testing.T) {
 		// given
 		sourceSecret := types.NamespacedName{Name: "source", Namespace: namespace}
 		targetSecret := types.NamespacedName{Name: "target", Namespace: namespace}
@@ -198,7 +198,7 @@ func TestMigrator(t *testing.T) {
 		secretsRepositoryMock.On("Delete", sourceSecret).Return(nil)
 
 		// when
-		migrator := NewMigrator(secretsRepositoryMock, includeAllSourceKeysFunc, false)
+		migrator := NewMigrator(secretsRepositoryMock, includeAllSourceKeysFunc)
 		err := migrator.Do(sourceSecret, targetSecret)
 
 		// then

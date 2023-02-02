@@ -73,10 +73,10 @@ func main() {
 		Name:      agentConfigSecret.Name,
 	}
 
-	err = migrateSecretWhenMissing(secretsRepository, oldClusterCertSecret, clusterCertSecret)
+	err = migrateSecretAllKeys(secretsRepository, oldClusterCertSecret, clusterCertSecret)
 	exitOnError(err, "Failed to migrate ")
 
-	err = migrateSecretWhenMissing(secretsRepository, oldAgentConfigSecret, agentConfigSecret)
+	err = migrateSecretAllKeys(secretsRepository, oldAgentConfigSecret, agentConfigSecret)
 	exitOnError(err, "Failed to migrate ")
 
 	log.Info("Setting up manager")
@@ -147,16 +147,14 @@ func main() {
 	exitOnError(err, "Failed to run the manager")
 }
 
-func migrateSecretWhenMissing(secretRepo secrets.Repository, sourceSecret, targetSecret types.NamespacedName) error {
+func migrateSecretAllKeys(secretRepo secrets.Repository, sourceSecret, targetSecret types.NamespacedName) error {
 
-	getIncludeSourceKeyFunc := func() certificates.IncludeKeyFunc {
-		return func(string) bool {
-			return true
-		}
+	includeAllKeysFunc := func(k string) bool {
+		return true
 	}
 
-	migrator := certificates.NewMigrator(secretRepo, getIncludeSourceKeyFunc(), true)
-	return migrator.DoMoveCredentialSecret(sourceSecret, targetSecret)
+	migrator := certificates.NewMigrator(secretRepo, includeAllKeysFunc)
+	return migrator.Do(sourceSecret, targetSecret)
 }
 
 func migrateSecret(secretRepo secrets.Repository, sourceSecret, targetSecret types.NamespacedName, keysToInclude string) error {
@@ -196,7 +194,7 @@ func getMigrator(secretRepo secrets.Repository, keysToInclude []string) certific
 		}
 	}
 
-	return certificates.NewMigrator(secretRepo, getIncludeSourceKeyFunc(), false)
+	return certificates.NewMigrator(secretRepo, getIncludeSourceKeyFunc())
 }
 
 func createSynchronisationService(k8sResourceClients *k8sResourceClientSets, options Config) (kyma.Service, error) {
