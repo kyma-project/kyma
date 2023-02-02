@@ -4,16 +4,10 @@ import (
 	"context"
 	"time"
 
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/config"
-
+	"github.com/google/uuid"
 	"github.com/kyma-incubator/compass/components/director/pkg/correlation"
 	"github.com/kyma-incubator/compass/components/director/pkg/str"
-
-	"github.com/google/uuid"
-
 	"github.com/sirupsen/logrus"
-
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/apis/compass/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
@@ -21,6 +15,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
+
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/config"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/apis/compass/v1alpha1"
 )
 
 const (
@@ -28,7 +25,7 @@ const (
 )
 
 type Client interface {
-	Get(ctx context.Context, key client.ObjectKey, obj client.Object) error
+	Get(ctx context.Context, key client.ObjectKey, obj client.Object, opts ...client.GetOption) error
 	Update(ctx context.Context, obj client.Object, opts ...client.UpdateOption) error
 	Delete(ctx context.Context, obj client.Object, opts ...client.DeleteOption) error
 }
