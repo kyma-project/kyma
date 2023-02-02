@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/utils/envvar"
 )
 
 type TLSConfig struct {
@@ -169,8 +170,7 @@ func makeHeaders(output v1alpha1.TracePipelineOutput) map[string]string {
 		headers["Authorization"] = fmt.Sprintf("${%s}", basicAuthHeaderVariable)
 	}
 	for _, header := range output.Otlp.Headers {
-		// TODO: Add support for secret references
-		headers[header.Name] = header.Value
+		headers[header.Name] = fmt.Sprintf("${HEADER_%s}", envvar.MakeEnvVarCompliant(header.Name))
 	}
 	return headers
 }

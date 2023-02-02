@@ -154,7 +154,7 @@ func TestMakeExporterConfigWithCustomHeaders(t *testing.T) {
 	require.NotNil(t, exporterConfig)
 
 	require.Equal(t, 1, len(exporterConfig.OTLP.Headers))
-	require.Equal(t, "Bearer xyz", exporterConfig.OTLP.Headers["Authorization"])
+	require.Equal(t, "${HEADER_AUTHORIZATION}", exporterConfig.OTLP.Headers["Authorization"])
 }
 
 func TestMakeReceiverConfig(t *testing.T) {
