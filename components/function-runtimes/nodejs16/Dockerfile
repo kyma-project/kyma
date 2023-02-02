@@ -1,7 +1,6 @@
 # image base on 16.19.0-alpine3.17
 FROM node@sha256:e427ffd1ba7915ca8d8aeba45806ef3f1f1e6b65ce152b363645cd7428f8d75a
 
-
 ARG NODE_ENV
 ENV NODE_ENV $NODE_ENV
 ENV npm_config_cache /tmp/
