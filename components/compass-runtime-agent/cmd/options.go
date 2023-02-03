@@ -44,9 +44,9 @@ func (o *Config) String() string {
 		"SkipCompassTLSVerify=%v, GatewayPort=%d,"+
 		"SkipAppTLSVerify=%v, "+
 		"QueryLogging=%v, MetricsLoggingTimeInterval=%s, "+
-		"RuntimeEventsURL=%s, RuntimeConsoleURL=%s"+
-		"DirectorProxyPort=%v,  DirectorProxyInsecureSkipVerify=%v, HealthPort=%s, IntegrationNamespace=%s, CaCertSecretToMigrate=%s, caCertificateSecretKeysToMigrate=%s"+
-		"ClusterCertificatesSecretToMigrate=%s, AgentConfigurationSecretToMigrate=%s"+
+		"RuntimeEventsURL=%s, RuntimeConsoleURL=%s, "+
+		"DirectorProxyPort=%v,  DirectorProxyInsecureSkipVerify=%v, HealthPort=%s, IntegrationNamespace=%s, CaCertSecretToMigrate=%s, caCertificateSecretKeysToMigrate=%s, "+
+		"ClusterCertificatesSecretToMigrate=%s, AgentConfigurationSecretToMigrate=%s, "+
 		"CentralGatewayServiceUrl=%v",
 		o.AgentConfigurationSecret,
 		o.ControllerSyncPeriod.String(), o.MinimalCompassSyncTime.String(),
