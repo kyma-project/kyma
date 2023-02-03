@@ -193,7 +193,7 @@ spec:
                  key: password
 ```
 
-And the following example for token based authentication with a custom header:
+And the following example for the token-based authentication with a custom header:
 
 ```yaml
 apiVersion: telemetry.kyma-project.io/v1alpha1
