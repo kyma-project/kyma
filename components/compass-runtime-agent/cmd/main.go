@@ -69,12 +69,16 @@ func main() {
 
 	_, err = k8sResourceClientSets.core.CoreV1().Namespaces().Get(context.Background(), oldClusterCertSecret.Namespace, metav1.GetOptions{})
 	if err == nil {
+		log.Infof("Migrating cluster credentials from namespace %s", oldClusterCertSecret.Namespace)
+
 		err = migrateSecretAllKeys(secretsRepository, oldClusterCertSecret, clusterCertSecret)
 		exitOnError(err, "Failed to migrate ")
 	}
 
 	_, err = k8sResourceClientSets.core.CoreV1().Namespaces().Get(context.Background(), oldAgentConfigSecret.Namespace, metav1.GetOptions{})
 	if err == nil {
+		log.Infof("Migrating compass-runtime-agent configuration from namespace %s", oldAgentConfigSecret.Namespace)
+
 		err = migrateSecretAllKeys(secretsRepository, oldAgentConfigSecret, agentConfigSecret)
 		exitOnError(err, "Failed to migrate ")
 	}
