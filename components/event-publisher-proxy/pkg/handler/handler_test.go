@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/builder"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -648,19 +649,42 @@ func TestHandler_sendEventAndRecordMetrics(t *testing.T) {
 		header http.Header
 	}
 	type wants struct {
-		result           sender.PublishResult
-		assertionFunc    assert.ErrorAssertionFunc
-		metricErrors     int
-		metricTotal      int
-		metricLatency    int
-		metricPublished  int
-		metricLatencyTEF string
+		result                  sender.PublishResult
+		assertionFunc           assert.ErrorAssertionFunc
+		metricErrors            int
+		metricTotal             int
+		metricLatency           int
+		metricPublished         int
+		metricLatencyTEF        string
+		metricPublishedTotalTEF string
 	}
 
 	const bucketsFunc = "Buckets"
 	latency := new(mocks.BucketsProvider)
 	latency.On(bucketsFunc).Return(nil)
 	latency.Test(t)
+	latencyMetricTEF := `
+					# HELP eventing_epp_backend_duration_milliseconds The duration of sending events to the messaging server in milliseconds
+					# TYPE eventing_epp_backend_duration_milliseconds histogram
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.005"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.01"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.025"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.05"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.1"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.25"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.5"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="1"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="2.5"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="5"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="10"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="+Inf"} 1
+					eventing_epp_backend_duration_milliseconds_sum{code="204",destination_service="foo"} 0
+					eventing_epp_backend_duration_milliseconds_count{code="204",destination_service="foo"} 1
+					`
+
+	ceEvent := CreateCloudEvent(t)
+	ceEventWithOriginalEventType := ceEvent.Clone()
+	ceEventWithOriginalEventType.SetExtension(builder.OriginalTypeHeaderName, testingutils.CloudEventNameAndVersion)
 
 	tests := []struct {
 		name   string
@@ -685,36 +709,61 @@ func TestHandler_sendEventAndRecordMetrics(t *testing.T) {
 			args: args{
 				ctx:   context.Background(),
 				host:  "foo",
-				event: &cev2event.Event{},
+				event: ceEvent,
 			},
 			wants: wants{
 				result: eventmesh.HTTPPublishResult{
 					Status: 204,
 					Body:   nil,
 				},
-				assertionFunc:   assert.NoError,
-				metricErrors:    0,
-				metricTotal:     1,
-				metricLatency:   1,
-				metricPublished: 1,
-				metricLatencyTEF: `
-					# HELP eventing_epp_backend_duration_milliseconds The duration of sending events to the messaging server in milliseconds
-					# TYPE eventing_epp_backend_duration_milliseconds histogram
-					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.005"} 1
-					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.01"} 1
-					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.025"} 1
-					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.05"} 1
-					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.1"} 1
-					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.25"} 1
-					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.5"} 1
-					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="1"} 1
-					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="2.5"} 1
-					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="5"} 1
-					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="10"} 1
-					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="+Inf"} 1
-					eventing_epp_backend_duration_milliseconds_sum{code="204",destination_service="foo"} 0
-					eventing_epp_backend_duration_milliseconds_count{code="204",destination_service="foo"} 1
-`,
+				assertionFunc:    assert.NoError,
+				metricErrors:     0,
+				metricTotal:      1,
+				metricLatency:    1,
+				metricPublished:  1,
+				metricLatencyTEF: latencyMetricTEF,
+				metricPublishedTotalTEF: `
+					# HELP eventing_epp_event_type_published_total The total number of events published for a given eventTypeLabel
+					# TYPE eventing_epp_event_type_published_total counter
+					eventing_epp_event_type_published_total{code="204",event_source="/default/sap.kyma/id",event_type="prefix.testapp1023.order.created.v1"} 1
+					`,
+			},
+		},
+		{
+			name: "No Error - set original event type top published metric",
+			fields: fields{
+				Sender: &GenericSenderStub{
+					Err:           nil,
+					SleepDuration: 0,
+					Result: eventmesh.HTTPPublishResult{
+						Status: 204,
+						Body:   nil,
+					},
+				},
+				Defaulter: nil,
+				collector: metrics.NewCollector(latency),
+			},
+			args: args{
+				ctx:   context.Background(),
+				host:  "foo",
+				event: &ceEventWithOriginalEventType,
+			},
+			wants: wants{
+				result: eventmesh.HTTPPublishResult{
+					Status: 204,
+					Body:   nil,
+				},
+				assertionFunc:    assert.NoError,
+				metricErrors:     0,
+				metricTotal:      1,
+				metricLatency:    1,
+				metricPublished:  1,
+				metricLatencyTEF: latencyMetricTEF,
+				metricPublishedTotalTEF: `
+					# HELP eventing_epp_event_type_published_total The total number of events published for a given eventTypeLabel
+					# TYPE eventing_epp_event_type_published_total counter
+					eventing_epp_event_type_published_total{code="204",event_source="/default/sap.kyma/id",event_type="order.created.v1"} 1
+					`,
 			},
 		},
 		{
@@ -745,10 +794,12 @@ func TestHandler_sendEventAndRecordMetrics(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// given
+			logger, err := eclogger.New("text", "debug")
 			h := &Handler{
 				Sender:    tt.fields.Sender,
 				Defaulter: tt.fields.Defaulter,
 				collector: tt.fields.collector,
+				Logger:    logger,
 			}
 
 			// when
@@ -764,6 +815,7 @@ func TestHandler_sendEventAndRecordMetrics(t *testing.T) {
 			metricstest.EnsureMetricLatency(t, h.collector, tt.wants.metricLatency)
 			metricstest.EnsureMetricEventTypePublished(t, h.collector, tt.wants.metricPublished)
 			metricstest.EnsureMetricMatchesTextExpositionFormat(t, h.collector, tt.wants.metricLatencyTEF, "eventing_epp_backend_duration_milliseconds")
+			metricstest.EnsureMetricMatchesTextExpositionFormat(t, h.collector, tt.wants.metricPublishedTotalTEF, "eventing_epp_event_type_published_total")
 		})
 	}
 }
@@ -780,11 +832,12 @@ func TestHandler_sendEventAndRecordMetrics_TracingAndDefaults(t *testing.T) {
 	latency := new(mocks.BucketsProvider)
 	latency.On(bucketsFunc).Return(nil)
 	latency.Test(t)
-
+	logger, err := eclogger.New("text", "debug")
 	h := &Handler{
 		Sender:    stub,
 		Defaulter: nil,
 		collector: metrics.NewCollector(latency),
+		Logger:    logger,
 	}
 	header := http.Header{}
 	headers := []string{"traceparent", "X-B3-TraceId", "X-B3-ParentSpanId", "X-B3-SpanId", "X-B3-Sampled", "X-B3-Flags"}
@@ -801,7 +854,7 @@ func TestHandler_sendEventAndRecordMetrics_TracingAndDefaults(t *testing.T) {
 		"b3flags":        "X-B3-Flags",
 	}
 	// when
-	_, err := h.sendEventAndRecordMetrics(context.Background(), CreateCloudEvent(t), "", header)
+	_, err = h.sendEventAndRecordMetrics(context.Background(), CreateCloudEvent(t), "", header)
 
 	// then
 	assert.NoError(t, err)
