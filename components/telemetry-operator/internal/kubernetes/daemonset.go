@@ -3,6 +3,7 @@ package kubernetes
 import (
 	"context"
 	"fmt"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -19,6 +20,11 @@ func (dsp *DaemonSetProber) IsReady(ctx context.Context, name types.NamespacedNa
 
 	var ds appsv1.DaemonSet
 	if err := dsp.Get(ctx, name, &ds); err != nil {
+		if apierrors.IsNotFound(err) {
+			// The status of pipeline is changed before the creation of daemonset
+			log.V(1).Info("DaemonSet is not yet created")
+			return false, nil
+		}
 		return false, fmt.Errorf("failed to get %s/%s DaemonSet: %v", name.Namespace, name.Name, err)
 	}
 
