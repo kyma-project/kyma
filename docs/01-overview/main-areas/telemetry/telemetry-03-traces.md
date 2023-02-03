@@ -153,7 +153,7 @@ spec:
       endpoint:
         value: http://jaeger-collector.jaeger.svc.cluster.local:4317
       headers:
-         - name: Authentication
+         - name: Authorization
            value: "Bearer myToken"
 ```
 
@@ -206,7 +206,7 @@ spec:
       endpoint:
         value: http://jaeger-collector.jaeger.svc.cluster.local:4317
       headers:
-         - name: Authentication
+         - name: Authorization
            valueFrom:
              secretKeyRef:
                 name: backend
