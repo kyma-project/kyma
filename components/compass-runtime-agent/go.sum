@@ -225,6 +225,8 @@ github.com/kyma-incubator/compass/components/connector v0.0.0-20220104122431-99e
 github.com/kyma-incubator/compass/components/connector v0.0.0-20220104122431-99ed924ea212/go.mod h1:NHpaOE/9XuX0XIEi7ButaDyWejakMXRo/mh4JhjDoxY=
 github.com/kyma-incubator/compass/components/director v0.0.0-20220126084901-92232f5eced0 h1:5pDxnqY8TK59Zp+9PqsC8uEG6ZeeURJKHxUo19ez+jY=
 github.com/kyma-incubator/compass/components/director v0.0.0-20220126084901-92232f5eced0/go.mod h1:62mrVWDkGdPxAqj+X97FKiA/e8jYSZ/MARgzoThk9AU=
+github.com/kyma-project/kyma/components/central-application-gateway v0.0.0-20230201152417-102edd243eab h1:Q6kUp8GI7W9sIl3xXYaa+hLvet8a5pOpqZ/BDQ9Y7js=
+github.com/kyma-project/kyma/components/central-application-gateway v0.0.0-20230201152417-102edd243eab/go.mod h1:NL5E+cv7oyD8xJtDywLrHnkublvqifMBt5HFdw94adc=
 github.com/lib/pq v1.10.4 h1:SO9z7FRPzA03QhHKJrH5BXA6HU1rS4V2nIVrrNC1iYk=
 github.com/logrusorgru/aurora v0.0.0-20200102142835-e9ef32dff381/go.mod h1:7rIyQOR62GCctdiQpZ/zOJlFyk6y+94wXzv6RNZgaR4=
 github.com/machinebox/graphql v0.2.3-0.20181106130121-3a9253180225 h1:guHWmqIKr4G+gQ4uYU5vcZjsUhhklRA2uOcGVfcfqis=
@@ -340,8 +342,6 @@ github.com/vektah/dataloaden v0.2.1-0.20190515034641-a19b9a6e7c9e/go.mod h1:/HUd
 github.com/vektah/gqlparser/v2 v2.0.1/go.mod h1:SyUiHgLATUR8BiYURfTirrTcGpcE+4XkV2se04Px1Ms=
 github.com/vektah/gqlparser/v2 v2.1.0 h1:uiKJ+T5HMGGQM2kRKQ8Pxw8+Zq9qhhZhz/lieYvCMns=
 github.com/vektah/gqlparser/v2 v2.1.0/go.mod h1:SyUiHgLATUR8BiYURfTirrTcGpcE+4XkV2se04Px1Ms=
-github.com/void404/kyma/components/central-application-gateway v0.0.0-20230127070203-421332c3e954 h1:Y2uTPNN05mF0gEbk6aol6qMiGhDD9FuTLqYvIjRadkE=
-github.com/void404/kyma/components/central-application-gateway v0.0.0-20230127070203-421332c3e954/go.mod h1:EzAw+XAt7Fzoi9FN8w0TwbJDgvKZX/SYPm9qgWzOQA0=
 github.com/vrischmann/envconfig v1.3.0 h1:4XIvQTXznxmWMnjouj0ST5lFo/WAYf5Exgl3x82crEk=
 github.com/vrischmann/envconfig v1.3.0/go.mod h1:bbvxFYJdRSpXrhS63mBFtKJzkDiNkyArOLXtY6q0kuI=
 github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f/go.mod h1:N2zxlSyiKSe5eX1tZViRH5QA0qijqEDrYZiPEAiq3wU=
