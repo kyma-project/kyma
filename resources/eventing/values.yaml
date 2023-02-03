@@ -45,6 +45,8 @@ global:
       statusPort: 15020
       portName: status
 
+  natsSecurityContextEnabled: false
+
   podSecurityContext:
     fsGroup: 10001
     runAsUser: 10001
