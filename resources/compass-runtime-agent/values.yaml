@@ -32,7 +32,8 @@ compassRuntimeAgent:
     secret:
       name: compass-agent-configuration
       namespace: kyma-system
-      migrationNamespace: compass-system
+      migration:
+        namespace: compass-system
   certificates:
     renewal:
       validityThreshold: "0.3"
@@ -40,7 +41,8 @@ compassRuntimeAgent:
       secret:
         name: cluster-client-certificates
         namespace: kyma-system
-        migrationNamespace: compass-system
+        migration:
+          namespace: compass-system
     caCertificate:
       secret:
         name: kyma-gateway-certs-cacert
