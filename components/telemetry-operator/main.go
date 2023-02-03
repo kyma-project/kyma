@@ -217,8 +217,8 @@ func main() {
 	flag.StringVar(&fluentBitCPURequest, "fluent-bit-cpu-request", "400m", "CPU request for fluent-bit")
 	flag.StringVar(&fluentBitMemoryRequest, "fluent-bit-memory-request", "256Mi", "Memory request for fluent-bit")
 	flag.StringVar(&fluentBitImageVersion, "fluent-bit-image", fluentBitImage, "Image for fluent-bit")
-	flag.StringVar(&fluentBitConfigPrepperImageVersion, "fluent-bit-image", fluentBitConfigPrepperImage, "Image for fluent-bit config preparation")
-	flag.StringVar(&fluentBitExporterVersion, "fluent-bit-image", fluentBitExporterImage, "Image for exporting fluent bit filesystem usage")
+	flag.StringVar(&fluentBitConfigPrepperImageVersion, "fluent-bit-config-prepper-image", fluentBitConfigPrepperImage, "Image for fluent-bit config preparation")
+	flag.StringVar(&fluentBitExporterVersion, "fluent-bit-exporter-image", fluentBitExporterImage, "Image for exporting fluent bit filesystem usage")
 	flag.StringVar(&fluentBitPriorityClassName, "fluent-bit-priority-class-name", "kyma-system-priority", "Name of the priority class of fluent bit ")
 
 	flag.StringVar(&deniedOutputPlugins, "fluent-bit-denied-output-plugins", "", "Comma separated list of denied output plugins even if allowUnsupportedPlugins is enabled. If empty, all output plugins are allowed.")
