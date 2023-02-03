@@ -1,6 +1,6 @@
 operator:
   maxLogPipelines: 5
-  fluent-bit:
+  fluentbit:
     resources:
       requests:
         cpu: 100m
