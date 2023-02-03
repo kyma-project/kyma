@@ -30,10 +30,10 @@ type Config struct {
 	MetricsLoggingTimeInterval         time.Duration `envconfig:"default=30m"`
 	HealthPort                         string        `envconfig:"default=8090"`
 	IntegrationNamespace               string        `envconfig:"default=kyma-system"`
-	CaCertSecretToMigrate              string        `envconfig:"default=''"`
+	CaCertSecretToMigrate              string        `envconfig:"optional"`
 	CaCertSecretKeysToMigrate          string        `envconfig:"default='cacert'"`
-	ClusterCertificatesSecretToMigrate string        `envconfig:"default=''"`
-	AgentConfigurationSecretToMigrate  string        `envconfig:"default=''"`
+	ClusterCertificatesSecretToMigrate string        `envconfig:"optional"`
+	AgentConfigurationSecretToMigrate  string        `envconfig:"optional"`
 	Runtime                            director.RuntimeURLsConfig
 }
 
