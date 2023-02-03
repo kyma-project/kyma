@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -318,10 +317,18 @@ func (h *Handler) sendEventAndRecordMetrics(ctx context.Context, event *cev2even
 		h.collector.RecordBackendError()
 		return nil, err
 	}
-	originalEventType, ok := event.Extensions()[builder.OriginalTypeHeaderName].(string)
+	originalEventType := event.Type()
+	originalTypeHeader, ok := event.Extensions()[builder.OriginalTypeHeaderName]
 	if !ok {
-		h.namedLogger().With().Errorw("failed to convert event original event type extension value to string", builder.OriginalTypeHeaderName, event.Extensions()[builder.OriginalTypeHeaderName])
-		return nil, fmt.Errorf("failed to convert event extension %s value %d to string", builder.OriginalTypeHeaderName, event.Extensions()[builder.OriginalTypeHeaderName])
+		h.namedLogger().With().Warnw("event header doesn't exist", "header",
+			builder.OriginalTypeHeaderName)
+	} else {
+		originalEventType, ok = originalTypeHeader.(string)
+		if !ok {
+			h.namedLogger().With().Warnw("failed to convert event original event type extension value to string",
+				builder.OriginalTypeHeaderName, originalTypeHeader)
+			originalEventType = event.Type()
+		}
 	}
 	h.collector.RecordEventType(originalEventType, event.Source(), result.HTTPStatus())
 	h.collector.RecordBackendLatency(duration, result.HTTPStatus(), host)
