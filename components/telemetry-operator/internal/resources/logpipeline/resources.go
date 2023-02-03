@@ -300,6 +300,7 @@ func MakeMetricsService(name types.NamespacedName) *corev1.Service {
 				"prometheus.io/scrape": "true",
 				"prometheus.io/port":   "2020",
 				"prometheus.io/scheme": "http",
+				"prometheus.io/path":   "/api/v1/metrics/prometheus",
 			},
 		},
 		Spec: corev1.ServiceSpec{
