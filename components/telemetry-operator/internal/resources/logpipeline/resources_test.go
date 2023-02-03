@@ -3,6 +3,7 @@ package logpipeline
 import (
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/rbac/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/types"
 
 	"testing"
@@ -11,7 +12,17 @@ import (
 func TestMakeDaemonSet(t *testing.T) {
 	name := types.NamespacedName{Name: "telemetry-fluent-bit", Namespace: "kyma-system"}
 	checksum := "foo"
-	daemonSet := MakeDaemonSet(name, checksum)
+	ds := DaemonSetConfig{
+		FluentBitImage:              "foo-fluenbit",
+		FluentBitConfigPrepperImage: "foo-configprepper",
+		ExporterImage:               "foo-exporter",
+		PriorityClassName:           "foo-prio-class",
+		CPULimit:                    resource.MustParse(".25"),
+		MemoryLimit:                 resource.MustParse("400Mi"),
+		CPURequest:                  resource.MustParse(".1"),
+		MemoryRequest:               resource.MustParse("100Mi"),
+	}
+	daemonSet := MakeDaemonSet(name, checksum, ds)
 
 	require.NotNil(t, daemonSet)
 	require.Equal(t, daemonSet.Name, name.Name)

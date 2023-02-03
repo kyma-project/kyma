@@ -19,6 +19,7 @@ package main
 import (
 	"errors"
 	"flag"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/resources/logpipeline"
 	"os"
 	"strings"
 	"time"
@@ -93,24 +94,35 @@ var (
 	traceCollectorCPURequest           string
 	traceCollectorMemoryRequest        string
 
-	fluentBitEnvSecret         string
-	fluentBitFilesConfigMap    string
-	fluentBitPath              string
-	fluentBitPluginDirectory   string
-	fluentBitInputTag          string
-	fluentBitMemoryBufferLimit string
-	fluentBitStorageType       string
-	fluentBitFsBufferLimit     string
-	fluentBitConfigMap         string
-	fluentBitSectionsConfigMap string
-	fluentBitParsersConfigMap  string
-	fluentBitDaemonSet         string
-	maxLogPipelines            int
+	fluentBitEnvSecret                 string
+	fluentBitFilesConfigMap            string
+	fluentBitPath                      string
+	fluentBitPluginDirectory           string
+	fluentBitInputTag                  string
+	fluentBitMemoryBufferLimit         string
+	fluentBitStorageType               string
+	fluentBitFsBufferLimit             string
+	fluentBitConfigMap                 string
+	fluentBitSectionsConfigMap         string
+	fluentBitParsersConfigMap          string
+	fluentBitDaemonSet                 string
+	fluentBitCPULimit                  string
+	fluentBitMemoryLimit               string
+	fluentBitCPURequest                string
+	fluentBitMemoryRequest             string
+	maxLogPipelines                    int
+	fluentBitImageVersion              string
+	fluentBitExporterVersion           string
+	fluentBitConfigPrepperImageVersion string
+	fluentBitPriorityClassName         string
 )
 
 const (
-	otelImage             = "eu.gcr.io/kyma-project/tpi/otel-collector:0.70.0-723b551a"
-	overrideConfigMapName = "telemetry-override-config"
+	otelImage                   = "eu.gcr.io/kyma-project/tpi/otel-collector:0.70.0-723b551a"
+	overrideConfigMapName       = "telemetry-override-config"
+	fluentBitImage              = "eu.gcr.io/kyma-project/tpi/fluent-bit:2.0.8-723b551a"
+	fluentBitConfigPrepperImage = "eu.gcr.io/kyma-project/external/busybox:1.34.1"
+	fluentBitExporterImage      = "eu.gcr.io/kyma-project/directory-size-exporter:v20221020-e314a071"
 )
 
 //nolint:gochecknoinits
@@ -200,6 +212,15 @@ func main() {
 	flag.StringVar(&fluentBitStorageType, "fluent-bit-storage-type", "filesystem", "Fluent Bit buffering mechanism (filesystem or memory)")
 	flag.StringVar(&fluentBitFsBufferLimit, "fluent-bit-filesystem-buffer-limit", "1G", "Fluent Bit filesystem buffer limit per log pipeline")
 	flag.StringVar(&deniedFilterPlugins, "fluent-bit-denied-filter-plugins", "", "Comma separated list of denied filter plugins even if allowUnsupportedPlugins is enabled. If empty, all filter plugins are allowed.")
+	flag.StringVar(&fluentBitCPULimit, "fluent-bit-cpu-limit", "1", "CPU limit for tracing fluent-bit")
+	flag.StringVar(&fluentBitMemoryLimit, "fluent-bit-memory-limit", "1Gi", "Memory limit for fluent-bit")
+	flag.StringVar(&fluentBitCPURequest, "fluent-bit-cpu-request", "400m", "CPU request for fluent-bit")
+	flag.StringVar(&fluentBitMemoryRequest, "fluent-bit-memory-request", "256Mi", "Memory request for fluent-bit")
+	flag.StringVar(&fluentBitImageVersion, "fluent-bit-image", fluentBitImage, "Image for fluent-bit")
+	flag.StringVar(&fluentBitConfigPrepperImageVersion, "fluent-bit-image", fluentBitConfigPrepperImage, "Image for fluent-bit config preparation")
+	flag.StringVar(&fluentBitExporterVersion, "fluent-bit-image", fluentBitExporterImage, "Image for exporting fluent bit filesystem usage")
+	flag.StringVar(&fluentBitPriorityClassName, "fluent-bit-priority-class-name", "kyma-system-priority", "Name of the priority class of fluent bit ")
+
 	flag.StringVar(&deniedOutputPlugins, "fluent-bit-denied-output-plugins", "", "Comma separated list of denied output plugins even if allowUnsupportedPlugins is enabled. If empty, all output plugins are allowed.")
 	flag.IntVar(&maxLogPipelines, "fluent-bit-max-pipelines", 5, "Maximum number of LogPipelines to be created. If 0, no limit is applied.")
 
@@ -339,6 +360,16 @@ func createLogPipelineReconciler(client client.Client) *logpipelinecontroller.Re
 		DaemonSet:         types.NamespacedName{Namespace: telemetryNamespace, Name: fluentBitDaemonSet},
 		OverrideConfigMap: types.NamespacedName{Name: overrideConfigMapName, Namespace: telemetryNamespace},
 		PipelineDefaults:  createPipelineDefaults(),
+		DaemonSetConfig: logpipeline.DaemonSetConfig{
+			FluentBitImage:              fluentBitImageVersion,
+			FluentBitConfigPrepperImage: fluentBitConfigPrepperImageVersion,
+			ExporterImage:               fluentBitExporterVersion,
+			PriorityClassName:           fluentBitPriorityClassName,
+			CPULimit:                    resource.MustParse(fluentBitCPULimit),
+			MemoryLimit:                 resource.MustParse(fluentBitMemoryLimit),
+			CPURequest:                  resource.MustParse(fluentBitCPURequest),
+			MemoryRequest:               resource.MustParse(fluentBitMemoryRequest),
+		},
 	}
 	overrides := overrides.New(configureLogLevelOnFly, &kubernetes.ConfigmapProber{Client: client})
 
