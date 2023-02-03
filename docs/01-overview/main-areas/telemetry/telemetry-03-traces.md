@@ -118,7 +118,9 @@ spec:
 
 ### Step 4: Add authentication details
 
-To integrate with external systems, you must configure authentication details. At the moment, only Basic Authentication is supported. A more general token-based authentication will be supported [soon](https://github.com/kyma-project/kyma/issues/16258).
+To integrate with external systems, you must configure authentication details. At the moment, Basic Authentication and custom headers are supported.
+
+The following example configures Basic Authentication for a TracePipeline:
 
 ```yaml
 apiVersion: telemetry.kyma-project.io/v1alpha1
@@ -138,11 +140,28 @@ spec:
             value: myPwd
 ```
 
+To use custom headers for authentication, use the following example that adds a bearer token for authentication:
+
+```yaml
+apiVersion: telemetry.kyma-project.io/v1alpha1
+kind: TracePipeline
+metadata:
+  name: jaeger
+spec:
+  output:
+    otlp:
+      endpoint:
+        value: http://jaeger-collector.jaeger.svc.cluster.local:4317
+      headers:
+         - name: Authorization
+           value: "Bearer myToken"
+```
+
 ### Step 5: Add authentication details from Secrets
 
 Integrations into external systems usually require authentication details dealing with sensitive data. To handle that data properly in Secrets, TracePipeline supports the reference of Secrets.
 
-Use the **valueFrom** attribute to map Secret keys as in the following example:
+Use the **valueFrom** attribute to map Secret keys as in the following example for Basic Authentication:
 
 ```yaml
 apiVersion: telemetry.kyma-project.io/v1alpha1
@@ -174,6 +193,27 @@ spec:
                  key: password
 ```
 
+And the following example for the token-based authentication with a custom header:
+
+```yaml
+apiVersion: telemetry.kyma-project.io/v1alpha1
+kind: TracePipeline
+metadata:
+  name: jaeger
+spec:
+  output:
+    otlp:
+      endpoint:
+        value: http://jaeger-collector.jaeger.svc.cluster.local:4317
+      headers:
+         - name: Authorization
+           valueFrom:
+             secretKeyRef:
+                name: backend
+                namespace: default
+                key: token 
+```
+
 The related Secret must fulfill the referenced name and Namespace, and contain the mapped key as in the following example:
 
 ```yaml
@@ -186,6 +226,7 @@ stringData:
   endpoint: https://myhost:4317
   user: myUser
   password: XXX
+  token: Bearer YYY
 ```
 
 ### Step 6: Rotate the Secret
