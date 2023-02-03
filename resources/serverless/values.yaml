@@ -83,7 +83,7 @@ global:
       version: "v20230125-28a4267b"
     function_webhook:
       name: "function-webhook"
-      version: "v20230125-28a4267b"
+      version: "v20230202-a4048d3d"
     function_build_init:
       name: "function-build-init"
       version: "v20230125-28a4267b"

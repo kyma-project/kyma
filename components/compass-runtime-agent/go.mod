@@ -8,7 +8,7 @@ require (
 	github.com/kofalt/go-memoize v0.0.0-20200917044458-9b55a8d73e1c
 	github.com/kyma-incubator/compass/components/connector v0.0.0-20220104122431-99ed924ea212
 	github.com/kyma-incubator/compass/components/director v0.0.0-20220126084901-92232f5eced0
-	github.com/kyma-project/kyma/components/central-application-gateway v0.0.0-00010101000000-000000000000
+	github.com/kyma-project/kyma/components/central-application-gateway v0.0.0-20230201152417-102edd243eab
 	github.com/machinebox/graphql v0.2.3-0.20181106130121-3a9253180225
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.0
@@ -93,7 +93,6 @@ replace (
 	github.com/containerd/containerd => github.com/containerd/containerd v1.4.11
 	github.com/docker/distribution => github.com/docker/distribution v0.0.0-20191216044856-a8371794149d
 	github.com/docker/docker => github.com/docker/docker v20.10.8+incompatible
-	github.com/kyma-project/kyma/components/central-application-gateway => github.com/void404/kyma/components/central-application-gateway v0.0.0-20230127070203-421332c3e954
 	golang.org/x/crypto => golang.org/x/crypto v0.1.0
 	golang.org/x/net => golang.org/x/net v0.5.0
 	golang.org/x/text => golang.org/x/text v0.3.8
