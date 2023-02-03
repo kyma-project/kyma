@@ -60,18 +60,11 @@ func main() {
 	err = migrateSecret(secretsRepository, caCertSecretToMigrate, caCertSecret, options.CaCertSecretKeysToMigrate)
 	exitOnError(err, "Failed to migrate ")
 
+	log.Info("Migrating credentials if needed")
 	clusterCertSecret := parseNamespacedName(options.ClusterCertificatesSecret)
 	agentConfigSecret := parseNamespacedName(options.AgentConfigurationSecret)
-
-	oldClusterCertSecret := types.NamespacedName{
-		Namespace: "compass-system",
-		Name:      clusterCertSecret.Name,
-	}
-
-	oldAgentConfigSecret := types.NamespacedName{
-		Namespace: "compass-system",
-		Name:      agentConfigSecret.Name,
-	}
+	oldClusterCertSecret := parseNamespacedName(options.ClusterCertificatesSecretToMigrate)
+	oldAgentConfigSecret := parseNamespacedName(options.AgentConfigurationSecretToMigrate)
 
 	err = migrateSecretAllKeys(secretsRepository, oldClusterCertSecret, clusterCertSecret)
 	exitOnError(err, "Failed to migrate ")
