@@ -33,10 +33,6 @@ function monitoringTests() {
     this.timeout(5 * 60 * 1000);
     this.slow(5000);
 
-    it('Telemetry Fluent Bit pods should be ready', async () => {
-      await waitForDaemonSet('telemetry-fluent-bit', 'kyma-system');
-    });
-
     it('Prometheus pods should be ready', async () => {
       await prometheus.assertPodsExist();
     });
