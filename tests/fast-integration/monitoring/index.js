@@ -6,7 +6,6 @@ module.exports = {
 
 const {
   getEnvOrDefault,
-  waitForDaemonSet,
 } = require('../utils');
 const prometheus = require('./prometheus');
 const grafana = require('./grafana');
