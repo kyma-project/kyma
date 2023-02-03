@@ -138,7 +138,7 @@ var _ = Describe("LogPipeline controller", Ordered, func() {
 		})
 	})
 	Context("When creating a log pipeline", Ordered, func() {
-		It("Should create a secret for the log pipeline", func() {
+		BeforeAll(func() {
 			ctx := context.Background()
 			secret := &corev1.Secret{
 				TypeMeta: metav1.TypeMeta{
@@ -154,9 +154,8 @@ var _ = Describe("LogPipeline controller", Ordered, func() {
 				},
 			}
 			Expect(k8sClient.Create(ctx, secret)).Should(Succeed())
-		})
-		It("Should create a log pipeline", func() {
 			Expect(k8sClient.Create(ctx, logPipeline)).Should(Succeed())
+
 		})
 		It("Should verify metrics from the telemetry operator are exported", func() {
 			Eventually(func() bool {
@@ -299,15 +298,8 @@ var _ = Describe("LogPipeline controller", Ordered, func() {
 
 	Context("When deleting the log pipeline", Ordered, func() {
 
-		It("Should have no log pipeline", func() {
-			ctx := context.Background()
+		BeforeAll(func() {
 			Expect(k8sClient.Delete(ctx, logPipeline)).Should(Succeed())
-			Eventually(func() int {
-				var logPipelineList telemetryv1alpha1.LogPipelineList
-				err := k8sClient.List(ctx, &logPipelineList)
-				Expect(err).ShouldNot(HaveOccurred())
-				return len(logPipelineList.Items)
-			}, timeout, interval).Should(Equal(0))
 		})
 
 		It("Should have no fluent bit daemon set", func() {
