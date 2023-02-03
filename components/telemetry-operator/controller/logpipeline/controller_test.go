@@ -122,7 +122,7 @@ var _ = Describe("LogPipeline controller", Ordered, func() {
 			Variables: []telemetryv1alpha1.VariableRef{variableRefs},
 		},
 	}
-	Context("On startup there is not log pipeline and no fluent-bit deaemonset", Ordered, func() {
+	Context("On startup", Ordered, func() {
 		It("Should not have any Logpipelines", func() {
 			ctx := context.Background()
 			var logPipelineList telemetryv1alpha1.LogPipelineList
@@ -137,7 +137,7 @@ var _ = Describe("LogPipeline controller", Ordered, func() {
 			Expect(len(fluentBitDaemonSetList.Items)).Should(Equal(0))
 		})
 	})
-	Context("When updating LogPipeline the fluent-bit config should sync", Ordered, func() {
+	Context("When creating a log pipeline", Ordered, func() {
 		It("Should create a secret for the log pipeline", func() {
 			ctx := context.Background()
 			secret := &corev1.Secret{
@@ -155,7 +155,7 @@ var _ = Describe("LogPipeline controller", Ordered, func() {
 			}
 			Expect(k8sClient.Create(ctx, secret)).Should(Succeed())
 		})
-		It(" Should create a log pipeline", func() {
+		It("Should create a log pipeline", func() {
 			Expect(k8sClient.Create(ctx, logPipeline)).Should(Succeed())
 		})
 		It("Should verify metrics from the telemetry operator are exported", func() {
@@ -297,9 +297,9 @@ var _ = Describe("LogPipeline controller", Ordered, func() {
 		})
 	})
 
-	Context("When deleting the pipelines there is no fluentbit daemonset present", Ordered, func() {
+	Context("When deleting the log pipeline", Ordered, func() {
 
-		It("Has no logpipeline", func() {
+		It("Should have no log pipeline", func() {
 			ctx := context.Background()
 			Expect(k8sClient.Delete(ctx, logPipeline)).Should(Succeed())
 			Eventually(func() int {
@@ -310,7 +310,7 @@ var _ = Describe("LogPipeline controller", Ordered, func() {
 			}, timeout, interval).Should(Equal(0))
 		})
 
-		It("Has no fluent bit daemon set", func() {
+		It("Should have no fluent bit daemon set", func() {
 			Eventually(func() int {
 				var fluentBitDaemonSetList appsv1.DaemonSetList
 				err := k8sClient.List(ctx, &fluentBitDaemonSetList)
@@ -319,7 +319,7 @@ var _ = Describe("LogPipeline controller", Ordered, func() {
 			}, timeout, interval).Should(Equal(0))
 		})
 
-		It(" Should reset the telemetry_all_logpipelines metric", func() {
+		It("Should reset the telemetry_all_logpipelines metric", func() {
 			Eventually(func() float64 {
 				resp, err := http.Get("http://localhost:8080/metrics")
 				if err != nil {
@@ -335,7 +335,7 @@ var _ = Describe("LogPipeline controller", Ordered, func() {
 			}, timeout, interval).Should(Equal(0.0))
 		})
 
-		It(" Should reset the telemetry_unsupported_logpipelines metric", func() {
+		It("Should reset the telemetry_unsupported_logpipelines metric", func() {
 			Eventually(func() float64 {
 				resp, err := http.Get("http://localhost:8080/metrics")
 				if err != nil {
