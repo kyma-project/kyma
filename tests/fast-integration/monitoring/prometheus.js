@@ -49,10 +49,11 @@ async function assertNoCriticalAlertsExist() {
 async function assertAllTargetsAreHealthy() {
   const unhealthyTargets = await retry(async () => {
     const activeTargets = await getPrometheusActiveTargets();
+
     return activeTargets
         .filter((t) => !shouldIgnoreTarget(t) && t.health !== 'up')
         .map((t) => `${t.labels.job}: ${t.lastError}`);
-  });
+  }, 20, 10 * 1000);
 
   assert.isEmpty(
       unhealthyTargets,
@@ -134,6 +135,12 @@ async function assertMetricsExist() {
         {'grafana_stat_totals_dashboard': [[]]},
         {'grafana_api_dataproxy_request_all_milliseconds_sum ': [['pod']]}],
     },
+
+    {
+      'telemetry-fluent-bit': [
+        {'telemetry_fsbuffer_usage_bytes': [[]]},
+        {'fluentbit_input_bytes_total ': [['pod']]}],
+    },
   ];
 
   for (let index = 0; index < metricsList.length; index++) {
@@ -172,7 +179,6 @@ function shouldIgnoreTarget(target) {
     'compass-migration',
     'compass-director-tenant-loader-default',
     'compass-agent-configuration',
-    'telemetry-fluent-bit',
   ];
 
   const namespacesToBeIgnored = ['test', 'e2e'];
