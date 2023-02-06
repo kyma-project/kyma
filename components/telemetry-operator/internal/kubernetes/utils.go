@@ -6,7 +6,6 @@ import (
 	v1 "k8s.io/api/rbac/v1"
 	"strings"
 
-	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	apiequality "k8s.io/apimachinery/pkg/api/equality"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -244,22 +243,6 @@ func mergeMapsByPrefix(new map[string]string, old map[string]string, prefix stri
 	}
 
 	return new
-}
-
-func CreateOrUpdateServiceMonitor(ctx context.Context, c client.Client, desired *monitoringv1.ServiceMonitor) error {
-	var existing monitoringv1.ServiceMonitor
-	err := c.Get(ctx, types.NamespacedName{Name: desired.Name, Namespace: desired.Namespace}, &existing)
-	if err != nil {
-		if !apierrors.IsNotFound(err) {
-			return err
-		}
-
-		return c.Create(ctx, desired)
-	}
-
-	mergeMetadata(&desired.ObjectMeta, existing.ObjectMeta)
-
-	return c.Update(ctx, desired)
 }
 
 func GetOrCreateConfigMap(ctx context.Context, c client.Client, name types.NamespacedName) (corev1.ConfigMap, error) {

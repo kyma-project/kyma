@@ -2,6 +2,7 @@ package logpipeline
 
 import (
 	"github.com/stretchr/testify/require"
+	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/types"
@@ -51,6 +52,7 @@ func TestMakeMetricsService(t *testing.T) {
 	require.NotNil(t, service)
 	require.Equal(t, service.Name, "telemetry-fluent-bit-metrics")
 	require.Equal(t, service.Namespace, name.Namespace)
+	require.Equal(t, service.Spec.Type, corev1.ServiceTypeClusterIP)
 	require.Len(t, service.Spec.Ports, 1)
 
 	require.Contains(t, service.Annotations, "prometheus.io/scrape")
@@ -70,6 +72,7 @@ func TestMakeExporterMetricsService(t *testing.T) {
 	require.NotNil(t, service)
 	require.Equal(t, service.Name, "telemetry-fluent-bit-exporter-metrics")
 	require.Equal(t, service.Namespace, name.Namespace)
+	require.Equal(t, service.Spec.Type, corev1.ServiceTypeClusterIP)
 	require.Len(t, service.Spec.Ports, 1)
 
 	require.Contains(t, service.Annotations, "prometheus.io/scrape")
