@@ -74,7 +74,7 @@ roleRef:
   name: {{ .Chart.Name }}-ca-cert-role
   apiGroup: rbac.authorization.k8s.io
 
-{{ if .Values.compassRuntimeAgent.certificates.clientCertificate.secret.migration }}
+{{ if .Values.compassRuntimeAgent.certificates.clientCertificate.secret.migration.enabled }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -114,7 +114,7 @@ roleRef:
   name: {{ .Chart.Name }}-client-cert-migration-role
   apiGroup: rbac.authorization.k8s.io
 {{ end }}
-{{ if .Values.compassRuntimeAgent.config.secret.migration }}
+{{ if .Values.compassRuntimeAgent.config.secret.migration.enabled }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
