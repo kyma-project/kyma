@@ -119,10 +119,17 @@ This tutorial shows only one possible use case. There are many more use cases on
        sourceType: inline
     subscriptions:
        - name: event-receiver
-         typeMatching: exact
-         source: ""
-         types:
-           - sap.kyma.custom.acme.payload.sanitised.v1
+         protocol: ""
+         filter:
+            filters:
+               - eventSource:
+                   property: source
+                   type: exact
+                   value: ""
+                eventType:
+                   property: type
+                   type: exact
+                   value: sap.kyma.custom.acme.payload.sanitised.v1
     ```
 3.  Apply your receiver Function:
      ```bash
