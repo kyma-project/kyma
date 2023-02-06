@@ -794,7 +794,7 @@ func TestHandler_sendEventAndRecordMetrics(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// given
-			logger, err := eclogger.New("text", "debug")
+			logger, _ := eclogger.New("text", "debug")
 			h := &Handler{
 				Sender:    tt.fields.Sender,
 				Defaulter: tt.fields.Defaulter,
@@ -832,7 +832,7 @@ func TestHandler_sendEventAndRecordMetrics_TracingAndDefaults(t *testing.T) {
 	latency := new(mocks.BucketsProvider)
 	latency.On(bucketsFunc).Return(nil)
 	latency.Test(t)
-	logger, err := eclogger.New("text", "debug")
+	logger, _ := eclogger.New("text", "debug")
 	h := &Handler{
 		Sender:    stub,
 		Defaulter: nil,
@@ -854,7 +854,7 @@ func TestHandler_sendEventAndRecordMetrics_TracingAndDefaults(t *testing.T) {
 		"b3flags":        "X-B3-Flags",
 	}
 	// when
-	_, err = h.sendEventAndRecordMetrics(context.Background(), CreateCloudEvent(t), "", header)
+	_, err := h.sendEventAndRecordMetrics(context.Background(), CreateCloudEvent(t), "", header)
 
 	// then
 	assert.NoError(t, err)
