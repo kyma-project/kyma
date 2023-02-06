@@ -46,7 +46,7 @@ spec:
 {{- if or .Values.priorityClassName .Values.global.priorityClassName }}
       priorityClassName: {{ coalesce .Values.priorityClassName .Values.global.priorityClassName }}
 {{- end }}
-{{- if .Values.global.podSecurityContext }}
+{{- if and .Values.global.natsSecurityContextEnabled .Values.global.podSecurityContext }}
       securityContext: {{ toYaml .Values.global.podSecurityContext | nindent 8 }}
 {{- end }}
 {{- with .Values.affinity }}
@@ -95,7 +95,7 @@ spec:
       - name: config-reloader
         image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.nats_config_reloader) }}"
         imagePullPolicy: {{ .Values.nats.pullPolicy }}
-        {{- if .Values.global.containerSecurityContext }}
+        {{- if and .Values.global.natsSecurityContextEnabled .Values.global.containerSecurityContext }}
         securityContext: {{- toYaml .Values.global.containerSecurityContext | nindent 10 }}
         {{- end }}
         command:
@@ -123,7 +123,7 @@ spec:
       - name: metrics
         image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.prometheus_nats_exporter) }}"
         imagePullPolicy: {{ .Values.exporter.pullPolicy }}
-        {{- if .Values.global.containerSecurityContext }}
+        {{- if and .Values.global.natsSecurityContextEnabled .Values.global.containerSecurityContext }}
         securityContext: {{- toYaml .Values.global.containerSecurityContext | nindent 10 }}
         {{- end }}
         resources:
@@ -144,7 +144,7 @@ spec:
       - name: nats
         image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.nats) }}"
         imagePullPolicy: {{ .Values.nats.pullPolicy }}
-        {{- if .Values.global.containerSecurityContext }}
+        {{- if and .Values.global.natsSecurityContextEnabled .Values.global.containerSecurityContext }}
         securityContext: {{- toYaml .Values.global.containerSecurityContext | nindent 10 }}
         {{- end }}
         resources:

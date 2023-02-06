@@ -48,6 +48,13 @@ readinessProbe:
   periodSeconds: 10
 
 fluentbit:
+  resources:
+    limits:
+      cpu: 400m
+      memory: 256Mi
+    requests:
+      cpu: 10m
+      memory: 50Mi
   fullnameOverride: telemetry-fluent-bit
   networkPolicy:
     enabled: false

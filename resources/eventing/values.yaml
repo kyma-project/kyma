@@ -5,11 +5,11 @@ global:
   images:
     eventing_controller:
       name: eventing-controller
-      version: PR-16681
+      version: v20230201-25433ee9
       pullPolicy: "IfNotPresent"
     publisher_proxy:
       name: event-publisher-proxy
-      version: PR-16671
+      version: v20230130-a1f2356f
     nats:
       name: nats
       version: 2.9.11-alpine3.17
@@ -44,6 +44,8 @@ global:
     proxy:
       statusPort: 15020
       portName: status
+
+  natsSecurityContextEnabled: false
 
   podSecurityContext:
     fsGroup: 10001

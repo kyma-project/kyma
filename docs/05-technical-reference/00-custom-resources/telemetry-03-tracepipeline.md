@@ -56,6 +56,10 @@ For details, see the [TracePipeline specification file](https://github.com/kyma-
 | output.otlp.authentication.basic.user | object | Configures the username to be used for `Basic` authentication. |
 | output.otlp.authentication.basic.user.value | string | Username as plain text provided as static value. |
 | output.otlp.authentication.basic.user.valueFrom.secretKeyRef | object | Reference to a key in a Secret. You must provide `name` and `namespace` of the Secret, as well as the name of the `key`. |
+| output.otlp.headers | []object | List of custom headers for outgoing requests. |
+| output.otlp.headers[].name | string | Custom header name. |
+| output.otlp.headers[].value | string | Custom header value. |
+| output.otlp.headers[].valueFrom.secretKeyRef | object | Reference to a key in a Secret. You must provide `name` and `namespace` of the Secret, as well as the name of the `key`. |
 
 ### status attribute
 

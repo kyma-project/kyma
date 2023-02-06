@@ -15,6 +15,17 @@ import (
 
 const checksumAnnotationKey = "checksum/logpipeline-config"
 
+type DaemonSetConfig struct {
+	FluentBitImage              string
+	FluentBitConfigPrepperImage string
+	ExporterImage               string
+	PriorityClassName           string
+	CPULimit                    resource.Quantity
+	MemoryLimit                 resource.Quantity
+	CPURequest                  resource.Quantity
+	MemoryRequest               resource.Quantity
+}
+
 func MakeServiceAccount(name types.NamespacedName) *corev1.ServiceAccount {
 	serviceAccount := corev1.ServiceAccount{
 		ObjectMeta: metav1.ObjectMeta{
@@ -52,15 +63,15 @@ func MakeClusterRole(name types.NamespacedName) *v1.ClusterRole {
 	return &clusterRole
 }
 
-func MakeDaemonSet(name types.NamespacedName, checksum string) *appsv1.DaemonSet {
+func MakeDaemonSet(name types.NamespacedName, checksum string, dsConfig DaemonSetConfig) *appsv1.DaemonSet {
 	resourcesFluentBit := corev1.ResourceRequirements{
 		Requests: map[corev1.ResourceName]resource.Quantity{
-			corev1.ResourceCPU:    resource.MustParse("10m"),
-			corev1.ResourceMemory: resource.MustParse("50Mi"),
+			corev1.ResourceCPU:    dsConfig.CPURequest,
+			corev1.ResourceMemory: dsConfig.MemoryRequest,
 		},
 		Limits: map[corev1.ResourceName]resource.Quantity{
-			corev1.ResourceCPU:    resource.MustParse("400m"),
-			corev1.ResourceMemory: resource.MustParse("256Mi"),
+			corev1.ResourceCPU:    dsConfig.CPULimit,
+			corev1.ResourceMemory: dsConfig.MemoryLimit,
 		},
 	}
 
@@ -94,7 +105,7 @@ func MakeDaemonSet(name types.NamespacedName, checksum string) *appsv1.DaemonSet
 				},
 				Spec: corev1.PodSpec{
 					ServiceAccountName: name.Name,
-					PriorityClassName:  "kyma-system-priority",
+					PriorityClassName:  dsConfig.PriorityClassName,
 					SecurityContext: &corev1.PodSecurityContext{
 						RunAsNonRoot:   pointer.Bool(false),
 						SeccompProfile: &corev1.SeccompProfile{Type: "RuntimeDefault"},
@@ -102,7 +113,7 @@ func MakeDaemonSet(name types.NamespacedName, checksum string) *appsv1.DaemonSet
 					InitContainers: []corev1.Container{
 						{
 							Name:  "prep-fluent-bit-config",
-							Image: "eu.gcr.io/kyma-project/external/busybox:1.34.1",
+							Image: dsConfig.FluentBitConfigPrepperImage,
 							Command: []string{
 								"sh", "-c",
 								"cp /main/* /fluent-bit/etc/ && mkdir -p /fluent-bit/etc/dynamic/ && cp /dynamic/* /fluent-bit/etc/dynamic && mkdir -p /fluent-bit/etc/dynamic-parsers/ && cp /dynamic-parsers/* /fluent-bit/etc/dynamic-parsers || touch /fluent-bit/etc/dynamic/empty.conf",
@@ -135,7 +146,7 @@ func MakeDaemonSet(name types.NamespacedName, checksum string) *appsv1.DaemonSet
 								Privileged:             pointer.Bool(false),
 								ReadOnlyRootFilesystem: pointer.Bool(true),
 							},
-							Image:           "eu.gcr.io/kyma-project/tpi/fluent-bit:2.0.8-723b551a",
+							Image:           dsConfig.FluentBitImage,
 							ImagePullPolicy: "IfNotPresent",
 							EnvFrom: []corev1.EnvFromSource{
 								{
@@ -149,11 +160,6 @@ func MakeDaemonSet(name types.NamespacedName, checksum string) *appsv1.DaemonSet
 								{
 									Name:          "http",
 									ContainerPort: 2020,
-									Protocol:      "TCP",
-								},
-								{
-									Name:          "http-metrics",
-									ContainerPort: 2021,
 									Protocol:      "TCP",
 								},
 							},
@@ -188,7 +194,7 @@ func MakeDaemonSet(name types.NamespacedName, checksum string) *appsv1.DaemonSet
 						},
 						{
 							Name:      "exporter",
-							Image:     "eu.gcr.io/kyma-project/directory-size-exporter:v20221020-e314a071",
+							Image:     dsConfig.ExporterImage,
 							Resources: resourcesExporter,
 							Args: []string{
 								"--storage-path=/data/flb-storage/",
@@ -439,7 +445,7 @@ function map_keys(table)
   local new_table = {}
   local changed_keys = {}
   for key, val in pairs(table) do
-    local mapped_key = string.gsub(key, \"[%/%.]\", \"_\")
+    local mapped_key = string.gsub(key, "[%/%.]", "_")
     if mapped_key ~= key then
       new_table[mapped_key] = val
       changed_keys[key] = true
