@@ -3,6 +3,7 @@ package logpipeline
 import (
 	"fmt"
 	v1 "k8s.io/api/rbac/v1"
+	"strconv"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -296,25 +297,53 @@ func MakeDaemonSet(name types.NamespacedName, checksum string, dsConfig DaemonSe
 	}
 }
 
-func MakeService(name types.NamespacedName) *corev1.Service {
+func MakeMetricsService(name types.NamespacedName) *corev1.Service {
+	metricsPort := 2020
 	return &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name.Name,
+			Name:      fmt.Sprintf("%s-metrics", name.Name),
 			Namespace: name.Namespace,
 			Labels:    labels(),
+			Annotations: map[string]string{
+				"prometheus.io/scrape": "true",
+				"prometheus.io/port":   strconv.Itoa(metricsPort),
+				"prometheus.io/scheme": "http",
+				"prometheus.io/path":   "/api/v1/metrics/prometheus",
+			},
 		},
 		Spec: corev1.ServiceSpec{
 			Ports: []corev1.ServicePort{
 				{
 					Name:       "http",
 					Protocol:   "TCP",
-					Port:       2020,
+					Port:       int32(metricsPort),
 					TargetPort: intstr.FromString("http"),
 				},
+			},
+			Selector: labels(),
+		},
+	}
+}
+
+func MakeExporterMetricsService(name types.NamespacedName) *corev1.Service {
+	metricsPort := 2021
+	return &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      fmt.Sprintf("%s-exporter-metrics", name.Name),
+			Namespace: name.Namespace,
+			Labels:    labels(),
+			Annotations: map[string]string{
+				"prometheus.io/scrape": "true",
+				"prometheus.io/port":   strconv.Itoa(metricsPort),
+				"prometheus.io/scheme": "http",
+			},
+		},
+		Spec: corev1.ServiceSpec{
+			Ports: []corev1.ServicePort{
 				{
 					Name:       "http-metrics",
 					Protocol:   "TCP",
-					Port:       2021,
+					Port:       int32(metricsPort),
 					TargetPort: intstr.FromString("http-metrics"),
 				},
 			},
