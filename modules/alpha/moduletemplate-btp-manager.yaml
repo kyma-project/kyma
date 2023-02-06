@@ -1,0 +1,39 @@
+apiVersion: operator.kyma-project.io/v1alpha1
+kind: ModuleTemplate
+metadata:
+  name: moduletemplate-btp-operator
+  namespace: kcp-system
+  labels:
+    "operator.kyma-project.io/managed-by": "lifecycle-manager"
+    "operator.kyma-project.io/controller-name": "manifest"
+    "operator.kyma-project.io/module-name": "btp-operator"
+  annotations:
+    "operator.kyma-project.io/module-version": "0.0.24"
+    "operator.kyma-project.io/module-provider": "internal"
+    "operator.kyma-project.io/descriptor-schema-version": "v2"
+spec:
+  target: remote
+  channel: alpha
+  data:
+
+  descriptor:
+    component:
+      componentReferences: []
+      name: kyma.project.io/module/btp-operator
+      provider: internal
+      repositoryContexts:
+      - baseUrl: europe-docker.pkg.dev/kyma-project/prod/unsigned
+        componentNameMapping: urlPath
+        type: ociRegistry
+      resources:
+      - access:
+          digest: sha256:7e56cc59e12cceffe17804b5c2aaede2770d6aaae82c758264ac0b8d5db70f85
+          type: localOciBlob
+        name: config
+        relation: local
+        type: helm-chart
+        version: 0.0.24
+      sources: []
+      version: 0.0.24
+    meta:
+      schemaVersion: v2
