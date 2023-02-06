@@ -321,6 +321,7 @@ func MakeMetricsService(name types.NamespacedName) *corev1.Service {
 				},
 			},
 			Selector: labels(),
+			Type:     corev1.ServiceTypeClusterIP,
 		},
 	}
 }
@@ -348,6 +349,7 @@ func MakeExporterMetricsService(name types.NamespacedName) *corev1.Service {
 				},
 			},
 			Selector: labels(),
+			Type:     corev1.ServiceTypeClusterIP,
 		},
 	}
 }
