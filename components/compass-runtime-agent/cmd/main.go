@@ -3,8 +3,6 @@ package main
 import (
 	"context"
 	"encoding/json"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	"github.com/google/uuid"
 	"github.com/kyma-incubator/compass/components/director/pkg/correlation"
 	"github.com/kyma-incubator/compass/components/director/pkg/str"
@@ -67,21 +65,11 @@ func main() {
 	oldClusterCertSecret := parseNamespacedName(options.ClusterCertificatesSecretToMigrate)
 	oldAgentConfigSecret := parseNamespacedName(options.AgentConfigurationSecretToMigrate)
 
-	_, err = k8sResourceClientSets.core.CoreV1().Namespaces().Get(context.Background(), oldClusterCertSecret.Namespace, metav1.GetOptions{})
-	if err == nil {
-		log.Infof("Migrating cluster credentials from namespace %s", oldClusterCertSecret.Namespace)
+	err = migrateSecretAllKeys(secretsRepository, oldClusterCertSecret, clusterCertSecret)
+	exitOnError(err, "Failed to migrate ")
 
-		err = migrateSecretAllKeys(secretsRepository, oldClusterCertSecret, clusterCertSecret)
-		exitOnError(err, "Failed to migrate ")
-	}
-
-	_, err = k8sResourceClientSets.core.CoreV1().Namespaces().Get(context.Background(), oldAgentConfigSecret.Namespace, metav1.GetOptions{})
-	if err == nil {
-		log.Infof("Migrating compass-runtime-agent configuration from namespace %s", oldAgentConfigSecret.Namespace)
-
-		err = migrateSecretAllKeys(secretsRepository, oldAgentConfigSecret, agentConfigSecret)
-		exitOnError(err, "Failed to migrate ")
-	}
+	err = migrateSecretAllKeys(secretsRepository, oldAgentConfigSecret, agentConfigSecret)
+	exitOnError(err, "Failed to migrate ")
 
 	log.Info("Setting up manager")
 	mgr, err := manager.New(cfg, manager.Options{SyncPeriod: &options.ControllerSyncPeriod})

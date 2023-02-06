@@ -73,3 +73,84 @@ roleRef:
   kind: Role
   name: {{ .Chart.Name }}-ca-cert-role
   apiGroup: rbac.authorization.k8s.io
+
+{{ if .Values.compassRuntimeAgent.certificates.clientCertificate.secret.migration }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Chart.Name }}-client-cert-migration-role
+  namespace: {{ .Values.compassRuntimeAgent.certificates.clientCertificate.secret.migration.namespace | default "default" }}
+  labels:
+    app: {{ .Chart.Name }}
+    release: {{ .Chart.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+rules:
+  - apiGroups: ["*"]
+    resources: ["secrets"]
+    verbs: ["create", "get", "update", "delete"]
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ .Chart.Name }}-client-cert-migration-rolebinding
+  namespace: {{ .Values.compassRuntimeAgent.certificates.clientCertificate.secret.migration.namespace | default "default" }}
+  labels:
+    app: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Chart.Name }}
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: Role
+  name: {{ .Chart.Name }}-client-cert-migration-role
+  apiGroup: rbac.authorization.k8s.io
+{{ end }}
+{{ if .Values.compassRuntimeAgent.config.secret.migration }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Chart.Name }}-config-migration-role
+  namespace: {{ .Values.compassRuntimeAgent.config.secret.migration.namespace | default "default" }}
+  labels:
+    app: {{ .Chart.Name }}
+    release: {{ .Chart.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+rules:
+  - apiGroups: ["*"]
+    resources: ["secrets"]
+    verbs: ["create", "get", "update", "delete"]
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ .Chart.Name }}--config-migration-rolebinding
+  namespace: {{ .Values.compassRuntimeAgent.config.secret.migration.namespace | default "default" }}
+  labels:
+    app: {{ .Chart.Name }}
+    release: {{ .Chart.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Chart.Name }}
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: Role
+  name: {{ .Chart.Name }}-config-migration-role
+  apiGroup: rbac.authorization.k8s.io
+{{ end }}
