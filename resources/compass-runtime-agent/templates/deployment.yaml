@@ -90,7 +90,11 @@ spec:
             - name: APP_CA_CERT_SECRET_KEYS_TO_MIGRATE
               value: '{{ .Values.compassRuntimeAgent.certificates.caCertificate.secret.migration.keys | default "[]" | toJson }}'
               {{ end }}
-              {{ if .Values.compassRuntimeAgent.config.secret.migration.enabled }}
+            {{- if (eq (.Values.compassRuntimeAgent.config.secret.migration.enabled | toString) "true") }}
+            - name: APP_AGENT_CONFIGURATION_SECRET_TO_MIGRATE
+              value: "{{ .Values.compassRuntimeAgent.config.secret.migration.namespace }}/{{ .Values.compassRuntimeAgent.config.secret.name | default "" }}"
+            {{ end }}
+            {{ if .Values.compassRuntimeAgent.config.secret.migration.enabled }}
             - name: APP_AGENT_CONFIGURATION_SECRET_TO_MIGRATE
               value: "{{ .Values.compassRuntimeAgent.config.secret.migration.namespace }}/{{ .Values.compassRuntimeAgent.config.secret.name | default "" }}"
               {{ end }}
