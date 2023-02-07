@@ -18,7 +18,7 @@ service:
   portName: metrics
   listenOnAllInterfaces: true
   annotations:
-    prometheus.io/scrape: "true"
+    prometheus.io/scrape: "false"
 
 # Additional environment variables that will be passed to the daemonset
 env: {}

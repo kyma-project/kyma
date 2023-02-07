@@ -31,7 +31,6 @@ import (
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 	"k8s.io/apimachinery/pkg/api/resource"
 
-	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
@@ -84,15 +83,14 @@ var (
 	dynamicLoglevel        = zap.NewAtomicLevel()
 	configureLogLevelOnFly *logger.LogLevel
 
-	traceCollectorCreateServiceMonitor bool
-	traceCollectorBaseName             string
-	traceCollectorOTLPServiceName      string
-	traceCollectorImage                string
-	traceCollectorPriorityClass        string
-	traceCollectorCPULimit             string
-	traceCollectorMemoryLimit          string
-	traceCollectorCPURequest           string
-	traceCollectorMemoryRequest        string
+	traceCollectorBaseName        string
+	traceCollectorOTLPServiceName string
+	traceCollectorImage           string
+	traceCollectorPriorityClass   string
+	traceCollectorCPULimit        string
+	traceCollectorMemoryLimit     string
+	traceCollectorCPURequest      string
+	traceCollectorMemoryRequest   string
 
 	fluentBitEnvSecret                 string
 	fluentBitFilesConfigMap            string
@@ -167,8 +165,6 @@ func getEnvOrDefault(envVar string, defaultValue string) string {
 //+kubebuilder:rbac:groups=apps,namespace=kyma-system,resources=daemonsets,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=apps,resources=replicasets,verbs=get;list;watch
 
-//+kubebuilder:rbac:groups=monitoring.coreos.com,resources=servicemonitors,verbs=get;list;watch;create;update;patch;delete
-
 //+kubebuilder:rbac:groups=admissionregistration.k8s.io,resources=validatingwebhookconfigurations,verbs=get;update;
 
 //+kubebuilder:rbac:groups=rbac.authorization.k8s.io,resources=clusterroles,verbs=get;list;watch;create;update;patch;delete
@@ -189,7 +185,6 @@ func main() {
 	flag.StringVar(&certDir, "cert-dir", ".", "Webhook TLS certificate directory")
 	flag.StringVar(&telemetryNamespace, "telemetry-namespace", "kyma-system", "Telemetry namespace")
 
-	flag.BoolVar(&traceCollectorCreateServiceMonitor, "trace-collector-create-service-monitor", true, "Create Prometheus ServiceMonitor for opentelemetry-collector")
 	flag.StringVar(&traceCollectorBaseName, "trace-collector-base-name", "telemetry-trace-collector", "Default name for tracing OpenTelemetry Collector Kubernetes resources")
 	flag.StringVar(&traceCollectorOTLPServiceName, "trace-collector-otlp-service-name", "telemetry-otlp-traces", "Default name for tracing OpenTelemetry Collector Kubernetes resources")
 	flag.StringVar(&traceCollectorImage, "trace-collector-image", otelImage, "Image for tracing OpenTelemetry Collector")
@@ -291,10 +286,6 @@ func main() {
 		setupLog.Info("Starting with tracing controller")
 		if err = createTracePipelineReconciler(mgr.GetClient()).SetupWithManager(mgr); err != nil {
 			setupLog.Error(err, "Failed to create controller", "controller", "TracePipeline")
-			os.Exit(1)
-		}
-		if err = monitoringv1.AddToScheme(scheme); err != nil {
-			setupLog.Error(err, "Failed to add monitoring scheme", "controller", "TracePipeline")
 			os.Exit(1)
 		}
 	}
@@ -407,9 +398,8 @@ func createLogParserValidator(client client.Client) *logparserwebhook.Validating
 
 func createTracePipelineReconciler(client client.Client) *tracepipelinereconciler.Reconciler {
 	config := tracepipelinereconciler.Config{
-		CreateServiceMonitor: traceCollectorCreateServiceMonitor,
-		Namespace:            telemetryNamespace,
-		BaseName:             traceCollectorBaseName,
+		Namespace: telemetryNamespace,
+		BaseName:  traceCollectorBaseName,
 		Deployment: tracepipelinereconciler.DeploymentConfig{
 			Image:             traceCollectorImage,
 			PriorityClassName: traceCollectorPriorityClass,
