@@ -2,16 +2,28 @@ package logpipeline
 
 import (
 	"github.com/stretchr/testify/require"
+	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/rbac/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/types"
-
+	"strconv"
 	"testing"
 )
 
 func TestMakeDaemonSet(t *testing.T) {
 	name := types.NamespacedName{Name: "telemetry-fluent-bit", Namespace: "kyma-system"}
 	checksum := "foo"
-	daemonSet := MakeDaemonSet(name, checksum)
+	ds := DaemonSetConfig{
+		FluentBitImage:              "foo-fluenbit",
+		FluentBitConfigPrepperImage: "foo-configprepper",
+		ExporterImage:               "foo-exporter",
+		PriorityClassName:           "foo-prio-class",
+		CPULimit:                    resource.MustParse(".25"),
+		MemoryLimit:                 resource.MustParse("400Mi"),
+		CPURequest:                  resource.MustParse(".1"),
+		MemoryRequest:               resource.MustParse("100Mi"),
+	}
+	daemonSet := MakeDaemonSet(name, checksum, ds)
 
 	require.NotNil(t, daemonSet)
 	require.Equal(t, daemonSet.Name, name.Name)
@@ -31,6 +43,45 @@ func TestMakeDaemonSet(t *testing.T) {
 	require.False(t, *containerSecurityContext.Privileged, "must not be privileged")
 	require.False(t, *containerSecurityContext.AllowPrivilegeEscalation, "must not escalate to privileged")
 	require.True(t, *containerSecurityContext.ReadOnlyRootFilesystem, "must use readonly fs")
+}
+
+func TestMakeMetricsService(t *testing.T) {
+	name := types.NamespacedName{Name: "telemetry-fluent-bit", Namespace: "kyma-system"}
+	service := MakeMetricsService(name)
+
+	require.NotNil(t, service)
+	require.Equal(t, service.Name, "telemetry-fluent-bit-metrics")
+	require.Equal(t, service.Namespace, name.Namespace)
+	require.Equal(t, service.Spec.Type, corev1.ServiceTypeClusterIP)
+	require.Len(t, service.Spec.Ports, 1)
+
+	require.Contains(t, service.Annotations, "prometheus.io/scrape")
+	require.Contains(t, service.Annotations, "prometheus.io/port")
+	require.Contains(t, service.Annotations, "prometheus.io/scheme")
+	require.Contains(t, service.Annotations, "prometheus.io/path")
+
+	port, err := strconv.Atoi(service.Annotations["prometheus.io/port"])
+	require.NoError(t, err)
+	require.Equal(t, int32(port), service.Spec.Ports[0].Port)
+}
+
+func TestMakeExporterMetricsService(t *testing.T) {
+	name := types.NamespacedName{Name: "telemetry-fluent-bit", Namespace: "kyma-system"}
+	service := MakeExporterMetricsService(name)
+
+	require.NotNil(t, service)
+	require.Equal(t, service.Name, "telemetry-fluent-bit-exporter-metrics")
+	require.Equal(t, service.Namespace, name.Namespace)
+	require.Equal(t, service.Spec.Type, corev1.ServiceTypeClusterIP)
+	require.Len(t, service.Spec.Ports, 1)
+
+	require.Contains(t, service.Annotations, "prometheus.io/scrape")
+	require.Contains(t, service.Annotations, "prometheus.io/port")
+	require.Contains(t, service.Annotations, "prometheus.io/scheme")
+
+	port, err := strconv.Atoi(service.Annotations["prometheus.io/port"])
+	require.NoError(t, err)
+	require.Equal(t, int32(port), service.Spec.Ports[0].Port)
 }
 
 func TestMakeConfigMap(t *testing.T) {

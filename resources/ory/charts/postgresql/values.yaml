@@ -166,7 +166,7 @@ extraEnv: []
 ## Alternatively, you can put your postgresql.conf under the files/ directory
 ## ref: https://www.postgresql.org/docs/current/static/runtime-config.html
 ##
-# postgresqlConfiguration:
+postgresqlConfiguration: {"sharedBuffers": "384MB", "sharedPreloadLibraries": "pg_stat_statements"}
 
 ## PostgreSQL extended configuration
 ## As above, but _appended_ to the main configuration
@@ -399,8 +399,8 @@ slave:
 ##
 resources:
   requests:
-    memory: 256Mi
-    cpu: 250m
+    memory: 1Gi
+    cpu: 750m
 
 networkPolicy:
   ## Enable creation of NetworkPolicy resources. Only Ingress traffic is filtered for now.
@@ -451,7 +451,7 @@ metrics:
   service:
     type: ClusterIP
     annotations:
-      prometheus.io/scrape: "true"
+      prometheus.io/scrape: "false"
       prometheus.io/port: "9187"
     loadBalancerIP:
   serviceMonitor:

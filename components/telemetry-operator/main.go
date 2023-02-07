@@ -19,6 +19,7 @@ package main
 import (
 	"errors"
 	"flag"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/resources/logpipeline"
 	"os"
 	"strings"
 	"time"
@@ -30,7 +31,6 @@ import (
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 	"k8s.io/apimachinery/pkg/api/resource"
 
-	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
@@ -83,34 +83,44 @@ var (
 	dynamicLoglevel        = zap.NewAtomicLevel()
 	configureLogLevelOnFly *logger.LogLevel
 
-	traceCollectorCreateServiceMonitor bool
-	traceCollectorBaseName             string
-	traceCollectorOTLPServiceName      string
-	traceCollectorImage                string
-	traceCollectorPriorityClass        string
-	traceCollectorCPULimit             string
-	traceCollectorMemoryLimit          string
-	traceCollectorCPURequest           string
-	traceCollectorMemoryRequest        string
+	traceCollectorBaseName        string
+	traceCollectorOTLPServiceName string
+	traceCollectorImage           string
+	traceCollectorPriorityClass   string
+	traceCollectorCPULimit        string
+	traceCollectorMemoryLimit     string
+	traceCollectorCPURequest      string
+	traceCollectorMemoryRequest   string
 
-	fluentBitEnvSecret         string
-	fluentBitFilesConfigMap    string
-	fluentBitPath              string
-	fluentBitPluginDirectory   string
-	fluentBitInputTag          string
-	fluentBitMemoryBufferLimit string
-	fluentBitStorageType       string
-	fluentBitFsBufferLimit     string
-	fluentBitConfigMap         string
-	fluentBitSectionsConfigMap string
-	fluentBitParsersConfigMap  string
-	fluentBitDaemonSet         string
-	maxLogPipelines            int
+	fluentBitEnvSecret                 string
+	fluentBitFilesConfigMap            string
+	fluentBitPath                      string
+	fluentBitPluginDirectory           string
+	fluentBitInputTag                  string
+	fluentBitMemoryBufferLimit         string
+	fluentBitStorageType               string
+	fluentBitFsBufferLimit             string
+	fluentBitConfigMap                 string
+	fluentBitSectionsConfigMap         string
+	fluentBitParsersConfigMap          string
+	fluentBitDaemonSet                 string
+	fluentBitCPULimit                  string
+	fluentBitMemoryLimit               string
+	fluentBitCPURequest                string
+	fluentBitMemoryRequest             string
+	maxLogPipelines                    int
+	fluentBitImageVersion              string
+	fluentBitExporterVersion           string
+	fluentBitConfigPrepperImageVersion string
+	fluentBitPriorityClassName         string
 )
 
 const (
-	otelImage             = "eu.gcr.io/kyma-project/tpi/otel-collector:0.70.0-723b551a"
-	overrideConfigMapName = "telemetry-override-config"
+	otelImage                   = "eu.gcr.io/kyma-project/tpi/otel-collector:0.70.0-723b551a"
+	overrideConfigMapName       = "telemetry-override-config"
+	fluentBitImage              = "eu.gcr.io/kyma-project/tpi/fluent-bit:2.0.8-723b551a"
+	fluentBitConfigPrepperImage = "eu.gcr.io/kyma-project/external/busybox:1.34.1"
+	fluentBitExporterImage      = "eu.gcr.io/kyma-project/directory-size-exporter:v20221020-e314a071"
 )
 
 //nolint:gochecknoinits
@@ -155,8 +165,6 @@ func getEnvOrDefault(envVar string, defaultValue string) string {
 //+kubebuilder:rbac:groups=apps,namespace=kyma-system,resources=daemonsets,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=apps,resources=replicasets,verbs=get;list;watch
 
-//+kubebuilder:rbac:groups=monitoring.coreos.com,resources=servicemonitors,verbs=get;list;watch;create;update;patch;delete
-
 //+kubebuilder:rbac:groups=admissionregistration.k8s.io,resources=validatingwebhookconfigurations,verbs=get;update;
 
 //+kubebuilder:rbac:groups=rbac.authorization.k8s.io,resources=clusterroles,verbs=get;list;watch;create;update;patch;delete
@@ -177,7 +185,6 @@ func main() {
 	flag.StringVar(&certDir, "cert-dir", ".", "Webhook TLS certificate directory")
 	flag.StringVar(&telemetryNamespace, "telemetry-namespace", "kyma-system", "Telemetry namespace")
 
-	flag.BoolVar(&traceCollectorCreateServiceMonitor, "trace-collector-create-service-monitor", true, "Create Prometheus ServiceMonitor for opentelemetry-collector")
 	flag.StringVar(&traceCollectorBaseName, "trace-collector-base-name", "telemetry-trace-collector", "Default name for tracing OpenTelemetry Collector Kubernetes resources")
 	flag.StringVar(&traceCollectorOTLPServiceName, "trace-collector-otlp-service-name", "telemetry-otlp-traces", "Default name for tracing OpenTelemetry Collector Kubernetes resources")
 	flag.StringVar(&traceCollectorImage, "trace-collector-image", otelImage, "Image for tracing OpenTelemetry Collector")
@@ -200,6 +207,15 @@ func main() {
 	flag.StringVar(&fluentBitStorageType, "fluent-bit-storage-type", "filesystem", "Fluent Bit buffering mechanism (filesystem or memory)")
 	flag.StringVar(&fluentBitFsBufferLimit, "fluent-bit-filesystem-buffer-limit", "1G", "Fluent Bit filesystem buffer limit per log pipeline")
 	flag.StringVar(&deniedFilterPlugins, "fluent-bit-denied-filter-plugins", "", "Comma separated list of denied filter plugins even if allowUnsupportedPlugins is enabled. If empty, all filter plugins are allowed.")
+	flag.StringVar(&fluentBitCPULimit, "fluent-bit-cpu-limit", "1", "CPU limit for tracing fluent-bit")
+	flag.StringVar(&fluentBitMemoryLimit, "fluent-bit-memory-limit", "1Gi", "Memory limit for fluent-bit")
+	flag.StringVar(&fluentBitCPURequest, "fluent-bit-cpu-request", "400m", "CPU request for fluent-bit")
+	flag.StringVar(&fluentBitMemoryRequest, "fluent-bit-memory-request", "256Mi", "Memory request for fluent-bit")
+	flag.StringVar(&fluentBitImageVersion, "fluent-bit-image", fluentBitImage, "Image for fluent-bit")
+	flag.StringVar(&fluentBitConfigPrepperImageVersion, "fluent-bit-config-prepper-image", fluentBitConfigPrepperImage, "Image for fluent-bit config preparation")
+	flag.StringVar(&fluentBitExporterVersion, "fluent-bit-exporter-image", fluentBitExporterImage, "Image for exporting fluent bit filesystem usage")
+	flag.StringVar(&fluentBitPriorityClassName, "fluent-bit-priority-class-name", "kyma-system-priority", "Name of the priority class of fluent bit ")
+
 	flag.StringVar(&deniedOutputPlugins, "fluent-bit-denied-output-plugins", "", "Comma separated list of denied output plugins even if allowUnsupportedPlugins is enabled. If empty, all output plugins are allowed.")
 	flag.IntVar(&maxLogPipelines, "fluent-bit-max-pipelines", 5, "Maximum number of LogPipelines to be created. If 0, no limit is applied.")
 
@@ -272,10 +288,6 @@ func main() {
 			setupLog.Error(err, "Failed to create controller", "controller", "TracePipeline")
 			os.Exit(1)
 		}
-		if err = monitoringv1.AddToScheme(scheme); err != nil {
-			setupLog.Error(err, "Failed to add monitoring scheme", "controller", "TracePipeline")
-			os.Exit(1)
-		}
 	}
 
 	//+kubebuilder:scaffold:builder
@@ -339,6 +351,16 @@ func createLogPipelineReconciler(client client.Client) *logpipelinecontroller.Re
 		DaemonSet:         types.NamespacedName{Namespace: telemetryNamespace, Name: fluentBitDaemonSet},
 		OverrideConfigMap: types.NamespacedName{Name: overrideConfigMapName, Namespace: telemetryNamespace},
 		PipelineDefaults:  createPipelineDefaults(),
+		DaemonSetConfig: logpipeline.DaemonSetConfig{
+			FluentBitImage:              fluentBitImageVersion,
+			FluentBitConfigPrepperImage: fluentBitConfigPrepperImageVersion,
+			ExporterImage:               fluentBitExporterVersion,
+			PriorityClassName:           fluentBitPriorityClassName,
+			CPULimit:                    resource.MustParse(fluentBitCPULimit),
+			MemoryLimit:                 resource.MustParse(fluentBitMemoryLimit),
+			CPURequest:                  resource.MustParse(fluentBitCPURequest),
+			MemoryRequest:               resource.MustParse(fluentBitMemoryRequest),
+		},
 	}
 	overrides := overrides.New(configureLogLevelOnFly, &kubernetes.ConfigmapProber{Client: client})
 
@@ -376,9 +398,8 @@ func createLogParserValidator(client client.Client) *logparserwebhook.Validating
 
 func createTracePipelineReconciler(client client.Client) *tracepipelinereconciler.Reconciler {
 	config := tracepipelinereconciler.Config{
-		CreateServiceMonitor: traceCollectorCreateServiceMonitor,
-		Namespace:            telemetryNamespace,
-		BaseName:             traceCollectorBaseName,
+		Namespace: telemetryNamespace,
+		BaseName:  traceCollectorBaseName,
 		Deployment: tracepipelinereconciler.DeploymentConfig{
 			Image:             traceCollectorImage,
 			PriorityClassName: traceCollectorPriorityClass,
