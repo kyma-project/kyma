@@ -47,6 +47,25 @@ readinessProbe:
   initialDelaySeconds: 5
   periodSeconds: 10
 
+fluentbit:
+  fullnameOverride: telemetry-fluent-bit
+  networkPolicy:
+    enabled: false
+  dashboards:
+    enabled: true
+    labelKey: grafana_dashboard
+    annotations: {}
+    namespace: ""
+  rbac:
+    create: true
+  podSecurityPolicy:
+    create: true
+  serviceMonitor:
+    enabled: true
+    serviceMonitorPorts:
+      - port: http-metrics
+        path: /metrics
+
 resources:
   limits:
     cpu: 100m
@@ -118,6 +137,9 @@ controllers:
     enabled: true
   tracing:
     enabled: true
+
+networkPolicy:
+  enabled: true
 
 syncPeriod: 1h
 maxLogPipelines: 3

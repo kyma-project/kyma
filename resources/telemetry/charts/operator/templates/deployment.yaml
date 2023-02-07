@@ -38,7 +38,6 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           name: telemetry-webhook-cert-init
           resources:
-          resources:
             {{- toYaml .Values.initContainers.webhookInit.resources | nindent 12 }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
@@ -78,9 +77,6 @@ spec:
             - --trace-collector-memory-limit={{ .Values.traceCollector.resources.limits.memory }}
             - --trace-collector-cpu-request={{ .Values.traceCollector.resources.requests.cpu }}
             - --trace-collector-memory-request={{ .Values.traceCollector.resources.requests.memory }}
-{{- end }}
-{{- if .Values.global.operatorManagedFluentBit }}
-            - --enable-managed-fluentbit={{.Values.global.operatorManagedFluentBit}}
 {{- end }}
           name: manager
           ports:

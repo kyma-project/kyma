@@ -38,6 +38,11 @@ func TestParseNamespacedName(t *testing.T) {
 			namespace: defaultNamespace,
 			name:      "",
 		},
+		{
+			value:     "",
+			namespace: defaultNamespace,
+			name:      "",
+		},
 	}
 
 	for _, test := range testCases {

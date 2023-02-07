@@ -39,22 +39,35 @@ func TestProxyFactory(t *testing.T) {
 		ProxyCacheTTL: 10,
 	}
 
-	createTestServer := func(path string) *httptest.Server {
+	createTestServer := func(t *testing.T, path string) *httptest.Server {
 		return NewTestServer(func(req *http.Request) {
-			assert.Equal(t, req.Method, http.MethodGet)
-			assert.Equal(t, req.RequestURI, path)
+			assert.Equal(t, http.MethodGet, req.Method)
+			assert.Equal(t, path, req.URL.String())
 		})
 	}
 
-	createMockServiceDeffService := func(apiIdentifier model.APIIdentifier, targetURL string, credentials *authorization.Credentials) metadatamocks.ServiceDefinitionService {
-		serviceDefServiceMock := metadatamocks.ServiceDefinitionService{}
-		serviceDefServiceMock.On("GetAPIByServiceName", apiIdentifier.Application, apiIdentifier.Service).Return(&metadatamodel.API{
-			TargetUrl:   targetURL,
-			Credentials: credentials,
-		}, nil).Once()
+	createMockServiceDeffService :=
+		func(apiIdentifier metadatamodel.APIIdentifier, targetURL string, credentials *authorization.Credentials) metadatamocks.ServiceDefinitionService {
+			serviceDefServiceMock := metadatamocks.ServiceDefinitionService{}
+			serviceDefServiceMock.On("GetAPIByServiceName", apiIdentifier.Application, apiIdentifier.Service).Return(&metadatamodel.API{
+				TargetUrl:   targetURL,
+				Credentials: credentials,
+				EncodeUrl:   true,
+			}, nil).Once()
 
-		return serviceDefServiceMock
-	}
+			return serviceDefServiceMock
+		}
+	createMockServiceDeffServiceWithoutEncoding :=
+		func(apiIdentifier metadatamodel.APIIdentifier, targetURL string, credentials *authorization.Credentials) metadatamocks.ServiceDefinitionService {
+			serviceDefServiceMock := metadatamocks.ServiceDefinitionService{}
+			serviceDefServiceMock.On("GetAPIByServiceName", apiIdentifier.Application, apiIdentifier.Service).Return(&metadatamodel.API{
+				TargetUrl:   targetURL,
+				Credentials: credentials,
+				EncodeUrl:   false,
+			}, nil).Once()
+
+			return serviceDefServiceMock
+		}
 
 	createMockServiceDeffServiceForCompass := func(apiIdentifier model.APIIdentifier, targetURL string, credentials *authorization.Credentials) metadatamocks.ServiceDefinitionService {
 		serviceDefServiceMock := metadatamocks.ServiceDefinitionService{}
@@ -95,6 +108,22 @@ func TestProxyFactory(t *testing.T) {
 			apiIdentifier:                   apiIdentifier,
 		},
 		{
+			name:                            "should reencode escape sequences",
+			url:                             "/app/service/orders/hello('%7Cworld%7C')",
+			expectedTargetAPIURL:            "/orders/hello%28%27%7Cworld%7C%27%29",
+			createHandlerFunc:               New,
+			createMockServiceDefServiceFunc: createMockServiceDeffService,
+			apiIdentifier:                   apiIdentifier,
+		},
+		{
+			name:                            "should honour escape sequences",
+			url:                             "/app/service/orders/hello('%7Cworld%7C')",
+			expectedTargetAPIURL:            "/orders/hello('%7Cworld%7C')",
+			createHandlerFunc:               New,
+			createMockServiceDefServiceFunc: createMockServiceDeffServiceWithoutEncoding,
+			apiIdentifier:                   apiIdentifier,
+		},
+		{
 			name:                            "should proxy using application, service and entry name",
 			url:                             "/app/service/entry/orders/123",
 			expectedTargetAPIURL:            "/orders/123",
@@ -113,8 +142,9 @@ func TestProxyFactory(t *testing.T) {
 	} {
 		t.Run(testCase.name, func(t *testing.T) {
 			// given
-			ts := createTestServer(testCase.expectedTargetAPIURL)
+			ts := createTestServer(t, testCase.expectedTargetAPIURL)
 			req, err := http.NewRequest(http.MethodGet, testCase.url, nil)
+			req.URL.RawPath = testCase.url
 			require.NoError(t, err)
 
 			authStrategyMock := &authMock.Strategy{}

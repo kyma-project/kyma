@@ -3,12 +3,11 @@ package serviceapi
 import (
 	"encoding/json"
 
-	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization"
-
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/applications"
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/model"
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/secrets"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization"
 )
 
 const (
@@ -48,6 +47,7 @@ func (sas defaultService) Read(applicationAPI *applications.ServiceAPI) (*model.
 	api := &model.API{
 		TargetUrl:  applicationAPI.TargetURL,
 		SkipVerify: applicationAPI.SkipVerify,
+		EncodeUrl:  applicationAPI.EncodeURL,
 	}
 
 	if applicationAPI.Credentials != nil {

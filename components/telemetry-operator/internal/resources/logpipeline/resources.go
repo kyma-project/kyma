@@ -2,6 +2,8 @@ package logpipeline
 
 import (
 	"fmt"
+	v1 "k8s.io/api/rbac/v1"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -11,7 +13,46 @@ import (
 	"k8s.io/utils/pointer"
 )
 
-func MakeDaemonSet(name types.NamespacedName) *appsv1.DaemonSet {
+const checksumAnnotationKey = "checksum/logpipeline-config"
+
+func MakeServiceAccount(name types.NamespacedName) *corev1.ServiceAccount {
+	serviceAccount := corev1.ServiceAccount{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name.Name,
+			Namespace: name.Namespace,
+		},
+	}
+	return &serviceAccount
+}
+
+func MakeClusterRoleBinding(name types.NamespacedName) *v1.ClusterRoleBinding {
+	clusterRoleBinding := v1.ClusterRoleBinding{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name.Name,
+			Namespace: name.Namespace,
+		},
+		Subjects: []v1.Subject{{Name: "telemetry-fluent-bit", Namespace: "kyma-system", Kind: "ServiceAccount"}},
+		RoleRef: v1.RoleRef{
+			APIGroup: "rbac.authorization.k8s.io",
+			Kind:     "ClusterRole",
+			Name:     name.Name,
+		},
+	}
+	return &clusterRoleBinding
+}
+
+func MakeClusterRole(name types.NamespacedName) *v1.ClusterRole {
+	clusterRole := v1.ClusterRole{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name.Name,
+			Namespace: name.Namespace,
+		},
+		Rules: []v1.PolicyRule{{Verbs: []string{"get", "list", "watch"}, APIGroups: []string{""}, Resources: []string{"namespaces", "pods"}}},
+	}
+	return &clusterRole
+}
+
+func MakeDaemonSet(name types.NamespacedName, checksum string) *appsv1.DaemonSet {
 	resourcesFluentBit := corev1.ResourceRequirements{
 		Requests: map[corev1.ResourceName]resource.Quantity{
 			corev1.ResourceCPU:    resource.MustParse("10m"),
@@ -33,6 +74,8 @@ func MakeDaemonSet(name types.NamespacedName) *appsv1.DaemonSet {
 		},
 	}
 
+	annotations := make(map[string]string)
+	annotations[checksumAnnotationKey] = checksum
 	return &appsv1.DaemonSet{
 		TypeMeta: metav1.TypeMeta{},
 		ObjectMeta: metav1.ObjectMeta{
@@ -46,7 +89,8 @@ func MakeDaemonSet(name types.NamespacedName) *appsv1.DaemonSet {
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels: labels(),
+					Labels:      labels(),
+					Annotations: annotations,
 				},
 				Spec: corev1.PodSpec{
 					ServiceAccountName: name.Name,
@@ -91,7 +135,7 @@ func MakeDaemonSet(name types.NamespacedName) *appsv1.DaemonSet {
 								Privileged:             pointer.Bool(false),
 								ReadOnlyRootFilesystem: pointer.Bool(true),
 							},
-							Image:           "eu.gcr.io/kyma-project/tpi/fluent-bit:1.9.9-cf0a130c",
+							Image:           "eu.gcr.io/kyma-project/tpi/fluent-bit:2.0.8-723b551a",
 							ImagePullPolicy: "IfNotPresent",
 							EnvFrom: []corev1.EnvFromSource{
 								{
@@ -308,12 +352,7 @@ func MakeConfigMap(name types.NamespacedName) *corev1.ConfigMap {
     Refresh_Interval 10
     DB /data/flb_kube.db
     storage.type  filesystem
-
-[INPUT]
-    Name tail
-    Path /null.log
-    Tag null.*
-    Alias null-tail
+    Read_from_Head True
 
 [FILTER]
     Name kubernetes
@@ -322,11 +361,6 @@ func MakeConfigMap(name types.NamespacedName) *corev1.ConfigMap {
     K8S-Logging.Parser On
     K8S-Logging.Exclude On
     Buffer_Size 1MB
-
-[OUTPUT]
-    Name null
-    Match null.*
-    Alias null-null
 
 @INCLUDE dynamic/*.conf
 `

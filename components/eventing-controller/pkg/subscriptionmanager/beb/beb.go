@@ -121,6 +121,11 @@ func (c *SubscriptionManager) Start(_ env.DefaultSubscriptionConfig, params subs
 	client := c.mgr.GetClient()
 	recorder := c.mgr.GetEventRecorderFor("eventing-controller-beb")
 	if c.envCfg.EnableNewCRDVersion {
+		// Initialize v1alpha1 event type cleaner for conversion webhook
+		simpleCleaner := eventtype.NewSimpleCleaner(c.envCfg.EventTypePrefix, c.logger)
+		eventingv1alpha1.InitializeEventTypeCleaner(simpleCleaner)
+
+		// Initialize v1alpha2 handler for EventMesh
 		eventMeshHandler := backendeventmesh.NewEventMesh(oauth2credential, nameMapper, c.logger)
 		eventMeshcleaner := cleaner.NewEventMeshCleaner(c.logger)
 		eventMeshReconciler := eventmesh.NewReconciler(
