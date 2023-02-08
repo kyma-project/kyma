@@ -77,7 +77,9 @@ const lastorderFunctionYaml = fs.readFileSync(
 );
 
 const eventTypeOrderCompleted = 'order.completed.v1';
+const uncleanEventType = 'order.completed.v1';
 const eventSourceInApp = 'inapp';
+const uncleanSource = 'test-app';
 const applicationObjs = k8s.loadAllYaml(applicationMockYaml);
 const lastorderObjs = k8s.loadAllYaml(lastorderFunctionYaml);
 let eventMeshSourceNamespace = '/default/sap.kyma/tunas-prow';
@@ -655,9 +657,10 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
 
   await waitForFunction('lastorder', targetNamespace);
 
+  const sink = `http://lastorder.${targetNamespace}.svc.cluster.local`;
   await k8sApply([eventingSubscription(
       `sap.kyma.custom.inapp.order.received.v1`,
-      `http://lastorder.${targetNamespace}.svc.cluster.local`,
+      sink,
       'order-received',
       targetNamespace)]);
   await waitForSubscription('order-received', targetNamespace);
@@ -668,14 +671,26 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
     const orderCompletedV1Alpha2Sub = eventingSubscriptionV1Alpha2(
         eventTypeOrderCompleted,
         eventSourceInApp,
-        `http://lastorder.${targetNamespace}.svc.cluster.local`,
+        sink,
         'order-completed',
         targetNamespace,
     );
-
     // apply to kyma cluster
     await k8sApply([orderCompletedV1Alpha2Sub]);
     await waitForSubscription('order-completed', targetNamespace, 'v1alpha2');
+
+    // create a subscription with unclean event type and source
+    const uncleanSubName = 'unclean-type-and-source';
+    const uncleanTypeAndSourceV1Alpha2Sub = eventingSubscriptionV1Alpha2(
+        uncleanEventType,
+        uncleanSource,
+        sink,
+        uncleanSubName,
+        targetNamespace,
+    );
+    // apply to kyma cluster
+    await k8sApply([uncleanTypeAndSourceV1Alpha2Sub]);
+    await waitForSubscription(uncleanSubName, targetNamespace, 'v1alpha2');
   }
 
   return mockHost;
@@ -763,6 +778,10 @@ async function waitForSubscriptionsTillReady(targetNamespace) {
 async function checkInClusterEventDelivery(targetNamespace, testSubscriptionV1Alpha2=false) {
   await checkInClusterEventDeliveryHelper(targetNamespace, 'structured', testSubscriptionV1Alpha2);
   await checkInClusterEventDeliveryHelper(targetNamespace, 'binary', testSubscriptionV1Alpha2);
+  if (testSubscriptionV1Alpha2) {
+    await checkInClusterEventDeliveryHelper(targetNamespace, 'structured', true,
+        uncleanEventType, uncleanSource);
+  }
   await checkInClusterLegacyEvent(targetNamespace, testSubscriptionV1Alpha2);
 }
 
@@ -919,10 +938,15 @@ async function getVirtualServiceHost(targetNamespace, funcName) {
   return vs.spec.hosts[0];
 }
 
-async function checkInClusterEventDeliveryHelper(targetNamespace, encoding, testSubscriptionV1Alpha2=false) {
+async function checkInClusterEventDeliveryHelper(targetNamespace, encoding, testSubscriptionV1Alpha2=false,
+    eventType='', eventSource='') {
   const eventId = getRandomEventId(encoding);
-  const eventType = testSubscriptionV1Alpha2? eventTypeOrderCompleted: '';
-  const eventSource = testSubscriptionV1Alpha2? eventSourceInApp: '';
+  if (!eventType) {
+    eventType = testSubscriptionV1Alpha2 ? eventTypeOrderCompleted : '';
+  }
+  if (!eventSource) {
+    eventSource = testSubscriptionV1Alpha2 ? eventSourceInApp : '';
+  }
   const mockHost = await getVirtualServiceHost(targetNamespace, 'lastorder');
 
   if (isDebugEnabled()) {
