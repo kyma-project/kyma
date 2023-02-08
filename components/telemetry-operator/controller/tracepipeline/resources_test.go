@@ -88,8 +88,10 @@ func TestMakeMetricsService(t *testing.T) {
 	require.Equal(t, service.Namespace, config.Namespace)
 	require.Equal(t, service.Spec.Selector, labels)
 	require.Equal(t, service.Spec.Type, corev1.ServiceTypeClusterIP)
-	require.NotEmpty(t, service.Spec.Ports)
 	require.Len(t, service.Spec.Ports, 1)
+
+	require.Contains(t, service.Annotations, "prometheus.io/scrape")
+	require.Contains(t, service.Annotations, "prometheus.io/port")
 }
 
 func TestMakeOpenCensusService(t *testing.T) {
@@ -103,15 +105,4 @@ func TestMakeOpenCensusService(t *testing.T) {
 	require.Equal(t, service.Spec.Type, corev1.ServiceTypeClusterIP)
 	require.NotEmpty(t, service.Spec.Ports)
 	require.Len(t, service.Spec.Ports, 1)
-}
-
-func TestMakeServiceMonitor(t *testing.T) {
-	serviceMonitor := makeServiceMonitor(config)
-	labels := makeDefaultLabels(config)
-
-	require.NotNil(t, serviceMonitor)
-	require.Equal(t, serviceMonitor.Name, config.BaseName)
-	require.Equal(t, serviceMonitor.Namespace, config.Namespace)
-	require.Contains(t, serviceMonitor.Spec.NamespaceSelector.MatchNames, config.Namespace)
-	require.Equal(t, serviceMonitor.Spec.Selector.MatchLabels, labels)
 }

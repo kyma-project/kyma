@@ -5,6 +5,8 @@ metadata:
   labels:
     {{- include "operator.selectorLabels" . | nindent 4 }}
     {{- toYaml .Values.extraLabels | nindent 4 }}
+  annotations:
+    {{- toYaml .Values.service.annotations | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
   ports:

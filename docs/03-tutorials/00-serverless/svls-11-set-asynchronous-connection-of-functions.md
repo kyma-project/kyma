@@ -120,7 +120,7 @@ This tutorial shows only one possible use case. There are many more use cases on
     subscriptions:
        - name: event-receiver
          protocol: ""
-         filer:
+         filter:
             filters:
                - eventSource:
                    property: source

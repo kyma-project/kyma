@@ -4,7 +4,6 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/utils/pointer"
 
-	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	"gopkg.in/yaml.v3"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -212,6 +211,10 @@ func makeMetricsService(config Config) *corev1.Service {
 			Name:      config.BaseName + "-metrics",
 			Namespace: config.Namespace,
 			Labels:    labels,
+			Annotations: map[string]string{
+				"prometheus.io/scrape": "true",
+				"prometheus.io/port":   "8888",
+			},
 		},
 		Spec: corev1.ServiceSpec{
 			Ports: []corev1.ServicePort{
@@ -247,32 +250,6 @@ func makeOpenCensusService(config Config) *corev1.Service {
 			},
 			Selector: labels,
 			Type:     corev1.ServiceTypeClusterIP,
-		},
-	}
-}
-
-func makeServiceMonitor(config Config) *monitoringv1.ServiceMonitor {
-	labels := makeDefaultLabels(config)
-	return &monitoringv1.ServiceMonitor{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      config.BaseName,
-			Namespace: config.Namespace,
-			Labels:    labels,
-		},
-		Spec: monitoringv1.ServiceMonitorSpec{
-			Endpoints: []monitoringv1.Endpoint{
-				{
-					Port: "http-metrics",
-				},
-			},
-			NamespaceSelector: monitoringv1.NamespaceSelector{
-				MatchNames: []string{
-					config.Namespace,
-				},
-			},
-			Selector: metav1.LabelSelector{
-				MatchLabels: labels,
-			},
 		},
 	}
 }
