@@ -188,6 +188,10 @@ func (r *Reconciler) reconcileFluentBit(ctx context.Context, name types.Namespac
 	if err := utils.CreateOrUpdateConfigMap(ctx, r, luaCm); err != nil {
 		return fmt.Errorf("failed to reconcile fluent bit lua configmap: %w", err)
 	}
+	parsersCm := resources.MakeDynamicParserConfigmap(name)
+	if err := utils.CreateIfNotExistsConfigMap(ctx, r, parsersCm); err != nil {
+		return fmt.Errorf("failed to reconcile fluent bit parser configmap: %w", err)
+	}
 	return nil
 }
 
