@@ -35,7 +35,7 @@ metadata:
   labels: {{- include "publisher-proxy.labels" . | nindent 4 }}
   annotations:
     prometheus.io/scrape: "true"
-    prometheus.io/port: { { .Values.metrics.config.port | quote } }
+    prometheus.io/port: {{ .Values.metrics.config.port | quote }}
     prometheus.io/scheme: "http"
 spec:
   type: ClusterIP
