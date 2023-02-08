@@ -250,7 +250,7 @@ var _ = Describe("LogPipeline controller", Ordered, func() {
 				if err != nil {
 					return err.Error()
 				}
-				return filesCm.Data["parser"]
+				return filesCm.Data["parsers.conf"]
 			}, timeout, interval).Should(Equal(""))
 		})
 

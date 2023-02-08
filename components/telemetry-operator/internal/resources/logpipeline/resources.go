@@ -439,7 +439,7 @@ func MakeDynamicParserConfigmap(name types.NamespacedName) *corev1.ConfigMap {
 			Namespace: name.Namespace,
 			Labels:    labels(),
 		},
-		Data: map[string]string{"parsers": ""},
+		Data: map[string]string{"parsers.conf": ""},
 	}
 }
 
