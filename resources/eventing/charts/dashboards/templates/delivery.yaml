@@ -4,7 +4,7 @@ metadata:
   name: {{ template "dashboards.fullname" . }}-delivery
   labels:
     grafana_dashboard: "1"
-  {{ include "dashboards.labels" . | indent 4 }}
+{{ include "dashboards.labels" . | indent 4 }}
 data:
   eventing-delivery.json: |-
     {{`{
