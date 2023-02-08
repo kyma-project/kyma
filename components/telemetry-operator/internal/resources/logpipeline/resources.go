@@ -338,7 +338,6 @@ func MakeConfigMap(name types.NamespacedName) *corev1.ConfigMap {
     Daemon Off
     Flush 1
     Log_Level warn
-    Parsers_File parsers.conf
     Parsers_File custom_parsers.conf
     Parsers_File dynamic-parsers/parsers.conf
     HTTP_Server On
@@ -399,6 +398,17 @@ func MakeConfigMap(name types.NamespacedName) *corev1.ConfigMap {
 			"fluent-bit.conf":     fluentBitConfig,
 			"loki-labelmap.json":  lokiLabelmap,
 		},
+	}
+}
+
+func MakeDynamicParserConfigmap(name types.NamespacedName) *corev1.ConfigMap {
+	return &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      fmt.Sprintf("%s-luascripts", name.Name),
+			Namespace: name.Namespace,
+			Labels:    labels(),
+		},
+		Data: map[string]string{"parsers": ""},
 	}
 }
 

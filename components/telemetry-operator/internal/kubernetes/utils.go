@@ -69,6 +69,18 @@ func CreateOrUpdateServiceAccount(ctx context.Context, c client.Client, desired 
 	return c.Update(ctx, desired)
 }
 
+func CreateIfNotExistsConfigMap(ctx context.Context, c client.Client, desired *corev1.ConfigMap) error {
+	err := c.Get(ctx, types.NamespacedName{Name: desired.Name, Namespace: desired.Namespace}, &corev1.ConfigMap{})
+	if err != nil {
+		if !apierrors.IsNotFound(err) {
+			return err
+		}
+
+		return c.Create(ctx, desired)
+	}
+	return nil
+}
+
 func CreateOrUpdateConfigMap(ctx context.Context, c client.Client, desired *corev1.ConfigMap) error {
 	var existing corev1.ConfigMap
 	err := c.Get(ctx, types.NamespacedName{Name: desired.Name, Namespace: desired.Namespace}, &existing)
