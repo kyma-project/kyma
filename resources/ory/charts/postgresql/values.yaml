@@ -451,7 +451,7 @@ metrics:
   service:
     type: ClusterIP
     annotations:
-      prometheus.io/scrape: "true"
+      prometheus.io/scrape: "false"
       prometheus.io/port: "9187"
     loadBalancerIP:
   serviceMonitor:

@@ -172,9 +172,13 @@ func (r *Reconciler) reconcileFluentBit(ctx context.Context, name types.Namespac
 	if err := utils.CreateOrUpdateDaemonSet(ctx, r, daemonSet); err != nil {
 		return fmt.Errorf("failed to reconcile fluent bit daemonset: %w", err)
 	}
-	service := resources.MakeService(name)
-	if err := utils.CreateOrUpdateService(ctx, r, service); err != nil {
-		return fmt.Errorf("failed to reconcile fluent bit service: %w", err)
+	exporterMetricsService := resources.MakeExporterMetricsService(name)
+	if err := utils.CreateOrUpdateService(ctx, r, exporterMetricsService); err != nil {
+		return fmt.Errorf("failed to reconcile exporter metrics service: %w", err)
+	}
+	metricsService := resources.MakeMetricsService(name)
+	if err := utils.CreateOrUpdateService(ctx, r, metricsService); err != nil {
+		return fmt.Errorf("failed to reconcile fluent bit metrics service: %w", err)
 	}
 	cm := resources.MakeConfigMap(name)
 	if err := utils.CreateOrUpdateConfigMap(ctx, r, cm); err != nil {
@@ -183,6 +187,10 @@ func (r *Reconciler) reconcileFluentBit(ctx context.Context, name types.Namespac
 	luaCm := resources.MakeLuaConfigMap(name)
 	if err := utils.CreateOrUpdateConfigMap(ctx, r, luaCm); err != nil {
 		return fmt.Errorf("failed to reconcile fluent bit lua configmap: %w", err)
+	}
+	parsersCm := resources.MakeDynamicParserConfigmap(name)
+	if err := utils.CreateIfNotExistsConfigMap(ctx, r, parsersCm); err != nil {
+		return fmt.Errorf("failed to reconcile fluent bit parser configmap: %w", err)
 	}
 	return nil
 }

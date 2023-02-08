@@ -103,6 +103,38 @@ data:
                       ]
                     },
                     {
+                      "name": "Headers",
+                      "widget": "Panel",
+                      "visibility": "$exists(spec.output.otlp.headers)",
+                      "children": [
+                        {
+                          "name": "Header",
+                          "widget": "Panel",
+                          "visibility": "$exists(spec.output.otlp.headers[].name)",
+                          "source": "spec.output.otlp.headers[]",
+                          "children": [
+                            {
+                              "name": "Name",
+                              "source": "name",
+                              "visibility": "$exists(name)"
+                            },
+                            {
+                              "name": "Value",
+                              "source": "value",
+                              "visibility": "$exists(value)"
+                            },
+                            {
+                              "name": "Value From Secret",
+                              "widget": "ResourceRefs",
+                              "source": "valueFrom.secretKeyRef",
+                              "kind": "Secret",
+                              "visibility": "$exists(valueFrom.secretKeyRef.name)"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
                       "widget": "Panel",
                       "name": "Other Settings",
                       "children": [
@@ -249,6 +281,43 @@ data:
                               }
                             ]
                         },
+                      ]
+                  },
+                  {
+                    "name": "Headers",
+                    "path": "headers[]",
+                    "widget": "FormGroup",
+                    "simple": true,
+                    "children":
+                      [
+                        {
+                          "name": "Name",
+                          "path": "name",
+                          "widget": "Text",
+                          "simple": true,
+                        },
+                        {
+                          "name": "Value",
+                          "path": "value",
+                          "widget": "Text",
+                          "simple": true,
+                        },
+                        {
+                          "name": "Secret Reference",
+                          "path": "valueFrom.secretKeyRef",
+                          "widget": "ResourceRef",
+                          "simple": true,
+                          "resource": {
+                             "kind": "secret",
+                             "version": "v1",
+                          },
+                          "children": [{
+                              "simple": true,
+                              "path": "key",
+                              "enum": "$keys($secret.data)",
+                          },
+                          ],
+                        }
                       ]
                   },
                   {

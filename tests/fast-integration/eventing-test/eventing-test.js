@@ -88,6 +88,7 @@ describe('Eventing tests', function() {
 
   before('Expose Grafana', async function() {
     await exposeGrafana();
+    this.test.retries(3);
     await waitForPodWithLabelAndCondition( telemetryOperatorLabel.key, telemetryOperatorLabel.value, kymaSystem,
         conditionReady.condition, conditionReady.status, 60_000);
   });
@@ -351,5 +352,6 @@ describe('Eventing tests', function() {
 
   after('Unexpose Grafana', async function() {
     await unexposeGrafana(isSKR);
+    this.test.retries(3);
   });
 });
