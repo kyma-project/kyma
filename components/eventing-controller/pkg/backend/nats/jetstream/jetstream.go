@@ -418,7 +418,17 @@ func (js *JetStream) ensureStreamExistsAndIsConfiguredCorrectly() error {
 }
 
 func streamIsConfiguredCorrectly(got nats.StreamConfig, want nats.StreamConfig) bool {
-	return reflect.DeepEqual(got, want)
+	// only comparing the fields which we define in stream config.
+	if got.Name != want.Name ||
+		got.Storage != want.Storage ||
+		got.Replicas != want.Replicas ||
+		got.Retention != want.Retention ||
+		got.MaxMsgs != want.MaxMsgs ||
+		got.MaxBytes != want.MaxBytes ||
+		got.Discard != want.Discard {
+		return false
+	}
+	return reflect.DeepEqual(got.Subjects, want.Subjects)
 }
 
 func getStreamConfig(natsConfig backendnats.Config) (*nats.StreamConfig, error) {
