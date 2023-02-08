@@ -4,6 +4,8 @@ title: Access and Expose Grafana and Jaeger
 
 > **CAUTION:** Jaeger is [deprecated](https://kyma-project.io/blog/jaeger-deprecation) and is planned to be removed. If you want to install a custom Jaeger stack, take a look at [this tutorial](https://github.com/kyma-project/examples/tree/main/jaeger).
 
+> **CAUTION:** Prometheus and Grafana are [deprecated](https://kyma-project.io/blog/2022/12/9/monitoring-deprecation) and are planned to be removed. If you want to install a custom Prometheus/Grafana stack, take a look at [this tutorial](https://github.com/kyma-project/examples/tree/main/prometheus).
+
 By default, Kyma does not expose Grafana and Jaeger. However, you can still access them using port forwarding. If you want to expose Grafana and Jaeger securely, use an identity provider of your choice.
 
 ![Access services flow](./assets/obsv-access-services.svg)

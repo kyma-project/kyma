@@ -28,6 +28,8 @@ kubectl logs {POD_NAME} --namespace {NAMESPACE_NAME} --container {CONTAINER_NAME
 
 > **NOTE:** Loki is [deprecated](https://kyma-project.io/blog/2022/11/2/loki-deprecation/) and is planned to be removed. If you want to install a custom Loki stack, take a look at [this tutorial](https://github.com/kyma-project/examples/tree/main/loki).
 
+> **NOTE:** Prometheus and Grafana are [deprecated](https://kyma-project.io/blog/2022/12/9/monitoring-deprecation) and are planned to be removed. If you want to install a custom Prometheus/Grafana stack, take a look at [this tutorial](https://github.com/kyma-project/examples/tree/main/prometheus).
+
 To see a visual representation and search for specific logs, follow these steps:
 
 1. In the **Cluster Overview** of Kyma Dashboard, go to **Observability** and open **Grafana**.

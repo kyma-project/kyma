@@ -16,6 +16,8 @@ To override the configuration, redefine the default values in your custom `value
 - [Prometheus Node Exporter `values.yaml`](https://github.com/kyma-project/kyma/blob/main/resources/monitoring/charts/prometheus-node-exporter/values.yaml)
 - [Prometheus Pushgateway `values.yaml`](https://github.com/kyma-project/kyma/blob/main/resources/monitoring/charts/prometheus-pushgateway/values.yaml)
 
+    > **NOTE:** Prometheus and Grafana are [deprecated](https://kyma-project.io/blog/2022/12/9/monitoring-deprecation) and are planned to be removed. If you want to install a custom Prometheus/Grafana stack, take a look at [this tutorial](https://github.com/kyma-project/examples/tree/main/prometheus).
+
 ### Logging
 
 [Logging `values.yaml`](https://github.com/kyma-project/kyma/blob/main/resources/logging/values.yaml) and subcharts:
