@@ -108,7 +108,7 @@ app.all("*", (req, res) => {
                         res.end(body);
                         break;
                     case 'object':
-                        res.json(body);
+                        res.json(body); // includes res.end(), null also handled
                         break;
                     case 'undefined':
                         res.end();
@@ -116,6 +116,7 @@ app.all("*", (req, res) => {
                     default:
                         res.end(JSON.stringify(result));
                 }
+                // res.send(body);
             } else if(status){
                 res.sendStatus(status);
             } else {

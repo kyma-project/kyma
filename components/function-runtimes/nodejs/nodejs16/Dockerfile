@@ -9,11 +9,11 @@ RUN mkdir -p /usr/src/app
 RUN mkdir -p /usr/src/app/lib
 WORKDIR /usr/src/app
 
-COPY package.json /usr/src/app/
+COPY ./nodejs16/package.json /usr/src/app/
 RUN npm install && npm cache clean --force
-COPY lib /usr/src/app/lib
+COPY ../lib /usr/src/app/lib
 
-COPY server.js /usr/src/app/server.js
+COPY ../server.js /usr/src/app/server.js
 
 CMD ["npm", "start"]
 
