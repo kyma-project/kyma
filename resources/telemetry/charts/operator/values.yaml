@@ -67,6 +67,11 @@ fluentbit:
     create: true
   podSecurityPolicy:
     create: true
+  serviceMonitor:
+    enabled: true
+    serviceMonitorPorts:
+      - port: http-metrics
+        path: /metrics
 
 resources:
   limits:
