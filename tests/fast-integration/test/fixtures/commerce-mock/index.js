@@ -77,7 +77,8 @@ const lastorderFunctionYaml = fs.readFileSync(
 );
 
 const eventTypeOrderCompleted = 'order.completed.v1';
-const uncleanEventType = 'order.completed.v1';
+const uncleanEventType = 'Order-äöüÄÖÜβ.Final.R-e-c-e-i-v-e-d.v1';
+const fullyQualifiedEventType = 'sap.kyma.custom.inapp.order.completed.v2';
 const eventSourceInApp = 'inapp';
 const uncleanSource = 'test-app';
 const applicationObjs = k8s.loadAllYaml(applicationMockYaml);
@@ -691,6 +692,20 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
     // apply to kyma cluster
     await k8sApply([uncleanTypeAndSourceV1Alpha2Sub]);
     await waitForSubscription(uncleanSubName, targetNamespace, 'v1alpha2');
+
+    // create a subscription with unclean event type and source
+    const exactSubName = 'type-matching-exact-sub';
+    const typeMatchingExactV1Alpha2Sub = eventingSubscriptionV1Alpha2(
+        fullyQualifiedEventType,
+        eventMeshSourceNamespace,
+        sink,
+        exactSubName,
+        targetNamespace,
+        'exact',
+    );
+    // apply to kyma cluster
+    await k8sApply([typeMatchingExactV1Alpha2Sub]);
+    await waitForSubscription(exactSubName, targetNamespace, 'v1alpha2');
   }
 
   return mockHost;
@@ -779,10 +794,15 @@ async function checkInClusterEventDelivery(targetNamespace, testSubscriptionV1Al
   await checkInClusterEventDeliveryHelper(targetNamespace, 'structured', testSubscriptionV1Alpha2);
   await checkInClusterEventDeliveryHelper(targetNamespace, 'binary', testSubscriptionV1Alpha2);
   if (testSubscriptionV1Alpha2) {
-    await checkInClusterEventDeliveryHelper(targetNamespace, 'structured', true,
-        uncleanEventType, uncleanSource);
+    await checkInClusterEventDeliveryHelper(targetNamespace, 'structured', true, uncleanEventType, uncleanSource);
+    await checkInClusterLegacyEvent(targetNamespace, true, uncleanEventType, uncleanSource);
   }
   await checkInClusterLegacyEvent(targetNamespace, testSubscriptionV1Alpha2);
+}
+
+async function checkBEBFullyQualifiedTypeWithExactSub(targetNamespace, eventType=fullyQualifiedEventType) {
+  await checkInClusterEventDeliveryHelper(targetNamespace, 'structured', true,
+      eventType, eventMeshSourceNamespace);
 }
 
 async function generateTraceParentHeader() {
@@ -917,7 +937,7 @@ async function ensureInClusterLegacyEventReceivedWithRetry(mockHost, eventId, ev
 
     if (eventType) {
       debug(`checking if received event type is: ${eventType}`);
-      expect(response.data).to.have.nested.property('event.ce-type').that.contains(eventType);
+      expect(response.data).to.have.nested.property('event.type').that.contains(eventType);
     } else {
       expect(response.data).to.have.nested.property('event.ce-type').that.contains('order.received');
     }
@@ -957,7 +977,8 @@ async function checkInClusterEventDeliveryHelper(targetNamespace, encoding, test
   return ensureInClusterEventReceivedWithRetry(mockHost, eventId, eventType);
 }
 
-async function checkInClusterLegacyEvent(targetNamespace, testSubscriptionV1Alpha2=false) {
+async function checkInClusterLegacyEvent(targetNamespace, testSubscriptionV1Alpha2=false,
+    eventType='', eventSource='') {
   const eventId = getRandomEventId('legacy');
   const mockHost = await getVirtualServiceHost(targetNamespace, 'lastorder');
 
@@ -966,8 +987,14 @@ async function checkInClusterLegacyEvent(targetNamespace, testSubscriptionV1Alph
   }
 
   const eventData = {'id': eventId, 'legacyOrder': '987'};
-  const eventType = testSubscriptionV1Alpha2? eventTypeOrderCompleted.replace('.v1', ''): '';
-  const eventSource = testSubscriptionV1Alpha2? eventSourceInApp: '';
+  if (!eventType) {
+    eventType = testSubscriptionV1Alpha2 ? eventTypeOrderCompleted.replace('.v1', '') : '';
+  } else {
+    eventType = testSubscriptionV1Alpha2 ? uncleanEventType.replace('.v1', '') : '';
+  }
+  if (!eventSource) {
+    eventSource = testSubscriptionV1Alpha2 ? eventSourceInApp : '';
+  }
 
   await sendInClusterLegacyEventWithRetry(mockHost, eventData, eventType, eventSource);
   return ensureInClusterLegacyEventReceivedWithRetry(mockHost, eventId, eventType);
@@ -987,6 +1014,7 @@ module.exports = {
   deleteService,
   checkFunctionResponse,
   checkInClusterEventDelivery,
+  checkBEBFullyQualifiedTypeWithExactSub,
   checkInClusterEventTracing,
   cleanMockTestFixture,
   deleteMockTestFixture,
