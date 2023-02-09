@@ -26,13 +26,10 @@ class PicklableBottleRequest(bottle.BaseRequest):
         env = self.environ.copy()
 
         # File-like objects are not picklable.
-        del env['wsgi.errors']
-        del env['wsgi.input']
+        del env['wsgi.errors'], env['wsgi.input']
 
         # bottle.ConfigDict is not picklable because it contains a lambda function.
-        del env['bottle.app']
-        del env['bottle.route']
-        del env['route.handle']
+        del env['bottle.app'], env['bottle.route'], env['route.handle']
 
         return env
 
