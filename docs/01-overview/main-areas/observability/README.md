@@ -14,7 +14,7 @@ Kyma collects telemetry data with the following in-cluster components:
 
 The collected telemetry data are exposed so that you can view and analyze them with observability tools.
 
-> **NOTE:** Kyma's [telemetry component](../telemetry/README.md) supports providing your own output configuration for application's logs, traces and metrics. With this, you can connect your own observability systems inside or outside the Kyma cluster with the Kyma backend.
+> **NOTE:** Kyma's [telemetry component](../telemetry/README.md) supports providing your own output configuration for your application's logs and traces. With this, you can connect your own observability systems inside or outside the Kyma cluster with the Kyma backend.
 
 ## Data analysis
 
