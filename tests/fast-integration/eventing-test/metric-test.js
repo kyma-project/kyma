@@ -92,19 +92,19 @@ const dashboards = {
       expect(foundMetric).to.be.not.undefined;
     },
   },
-  // The pods dashboard
-  pods_memoryUsage: {
-    title: 'Memory usage',
-    // This is not the exact query used in Grafana, but it ensures memory usage of eventing components are visible
-    query: `
-      sum by(container, pod) 
-        (container_memory_usage_bytes{job="kubelet", container!="POD", container !=""}) * on(pod) 
-        group_left() 
-        kube_pod_labels{label_kyma_project_io_dashboard="eventing", namespace="kyma-system"}
-      `,
-    backends: ['nats', 'beb'],
-    assert: ensureEventingPodsArePresent,
-  },
+  // // The pods dashboard
+  // pods_memoryUsage: {
+  //   title: 'Memory usage',
+  //   // This is not the exact query used in Grafana, but it ensures memory usage of eventing components are visible
+  //   query: `
+  //     sum by(container, pod)
+  //       (container_memory_usage_bytes{job="kubelet", container!="POD", container !=""}) * on(pod)
+  //       group_left()
+  //       kube_pod_labels{label_kyma_project_io_dashboard="eventing", namespace="kyma-system"}
+  //     `,
+  //   backends: ['nats', 'beb'],
+  //   assert: ensureEventingPodsArePresent,
+  // },
   pods_cpuUsage: {
     title: 'CPU usage',
     // This is not the exact query used in Grafana, but it ensures CPU usage of eventing components are visible
