@@ -143,7 +143,8 @@ spec:
           console.log("Printing event data: ", event.data);
           console.log("Printing event header: ", event.headers);
           return {event:inAppEvent[event.extensions.request.query.inappevent], podName: process.env.HOSTNAME};
-        } else if (event["ce-type"] && (event["ce-type"].includes("order.received") || event["ce-type"].includes("order.completed"))){
+        } else if (event["ce-type"] && (event["ce-type"].includes("order.received") || event["ce-type"].includes("order.completed") 
+               || event["ce-type"].includes("Final.R-e-c-e-i-v-e-d.v1") || event["ce-type"].includes("Final.Received.v1"))){
           console.log("Got in-app event:", event.data);
           inAppEvent[event.data.id] = { ...cloudEventHeaders(event), shipped:true, ...event.data, headers:event.extensions.request.headers };
         } else if (event["ce-type"] && event["ce-type"].includes("order.created")) {

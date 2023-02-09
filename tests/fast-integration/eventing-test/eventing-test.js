@@ -10,6 +10,7 @@ const {
   sendCloudEventStructuredModeAndCheckResponse,
   sendCloudEventBinaryModeAndCheckResponse,
   checkInClusterEventDelivery,
+  checkBEBFullyQualifiedTypeWithExactSub,
   waitForSubscriptionsTillReady,
   waitForSubscriptions,
   checkInClusterEventTracing,
@@ -491,6 +492,13 @@ describe('Eventing tests', function() {
 
     it('Run Eventing Monitoring tests', async function() {
       await eventingMonitoringTest(bebBackend, isSKR);
+    });
+
+    it('check subscription with full qualified event type and exact type matching', async function() {
+      if (!testSubscriptionV1Alpha2) {
+        this.skip();
+      }
+      await checkBEBFullyQualifiedTypeWithExactSub(testNamespace);
     });
   });
 
