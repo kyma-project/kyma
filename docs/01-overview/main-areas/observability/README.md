@@ -21,7 +21,7 @@ The collected telemetry data are exposed so that you can view and analyze them w
 You can use the following in-cluster components to observe your applications' telemetry data:
 
 - [Prometheus](https://prometheus.io/docs/introduction), a lightweight backend for metrics.
-> **CAUTION:** the Prometheus integration got [deprecated](https://kyma-project.io/blog/2022/12/9/monitoring-deprecation) and is planned to be removed.
+> **CAUTION:** The Prometheus integration has been [deprecated](https://kyma-project.io/blog/2022/12/9/monitoring-deprecation) and is planned to be removed.
 - [Loki](https://grafana.com/oss/loki/), a lightweight backend for metrics. 
 > **CAUTION:** the Loki integration got [deprecated](https://kyma-project.io/blog/2022/11/2/loki-deprecation/) and is planned to be removed.
 - [Jaeger](https://www.jaegertracing.io/docs/), a tracing backend serving as the query mechanism to display information about traces.
