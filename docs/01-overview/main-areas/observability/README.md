@@ -27,4 +27,4 @@ You can use the following in-cluster components to observe your applications' te
 - [Jaeger](https://www.jaegertracing.io/docs/), a tracing backend serving as the query mechanism to display information about traces.
 > **CAUTION:** the Jaeger integration got [deprecated](https://kyma-project.io/blog/jaeger-deprecation) and is planned to be removed.
 - [Grafana](https://grafana.com/docs/guides/getting_started/) to provide a dashboard and a query editor to visualize metrics and logs collected from Prometheus and Loki.
-> **CAUTION:** the Grafana integration got [deprecated](https://kyma-project.io/blog/2022/12/9/monitoring-deprecation) and is planned to be removed.
+> **CAUTION:** The Grafana integration has been [deprecated](https://kyma-project.io/blog/2022/12/9/monitoring-deprecation) and is planned to be removed.
