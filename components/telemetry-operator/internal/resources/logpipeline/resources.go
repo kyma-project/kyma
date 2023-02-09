@@ -161,7 +161,7 @@ func MakeDaemonSet(name types.NamespacedName, checksum string, dsConfig DaemonSe
 								{MountPath: "/fluent-bit/etc", Name: "shared-fluent-bit-config"},
 								{MountPath: "/fluent-bit/etc/fluent-bit.conf", Name: "config", SubPath: "fluent-bit.conf"},
 								{MountPath: "/fluent-bit/etc/dynamic/", Name: "dynamic-config"},
-								{MountPath: "/fluent-bit/etc/dynamic-parsers/parsers.conf", Name: "dynamic-parsers-config"},
+								{MountPath: "/fluent-bit/etc/dynamic-parsers/", Name: "dynamic-parsers-config"},
 								{MountPath: "/fluent-bit/etc/custom_parsers.conf", Name: "config", SubPath: "custom_parsers.conf"},
 								{MountPath: "/fluent-bit/etc/loki-labelmap.json", Name: "config", SubPath: "loki-labelmap.json"},
 								{MountPath: "/fluent-bit/scripts/filter-script.lua", Name: "luascripts", SubPath: "filter-script.lua"},
