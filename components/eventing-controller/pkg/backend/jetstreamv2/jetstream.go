@@ -490,7 +490,7 @@ func (js *JetStream) getCallback(subKeyPrefix, subscriptionName string) nats.Msg
 		}
 
 		js.metricsCollector.RecordDeliveryPerSubscription(subscriptionName, ce.Type(), sink, http.StatusOK)
-		ceLogger.Infow("CloudEvent was dispatched")
+		ceLogger.Debugw("CloudEvent was dispatched")
 	}
 }
 
