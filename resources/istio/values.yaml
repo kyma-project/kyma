@@ -29,13 +29,28 @@ helmValues:
   gateways:
     istio-ingressgateway:
       autoscaleEnabled: true
-
   sidecarInjectorWebhook:
     enableNamespacesByDefault: false
     objectSelector:
       autoInject: true
       enabled: false
     rewriteAppHTTPProbe: true
+  telemetry:
+    v2:
+      prometheus:
+        configOverride:
+          inboundSidecar:
+            metrics:
+              - name: requests_total
+                dimensions:
+                  destination_port: string(destination.port)
+                  request_host: request.host
+          outboundSidecar:
+            metrics:
+              - name: requests_total
+                dimensions:
+                  destination_port: string(destination.port)
+                  request_host: request.host
 
 meshConfig:
   accessLogFile: /dev/stdout
