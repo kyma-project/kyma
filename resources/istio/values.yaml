@@ -60,6 +60,13 @@ meshConfig:
     tracing: []
   defaultConfig:
     holdApplicationUntilProxyStarts: true
+    proxyStatsMatcher:
+      inclusionRegexps:
+        - ".*outlier_detection.*"
+        - ".*upstream_rq_retry.*"
+        - ".*upstream_cx_.*"
+      inclusionSuffixes:
+        - "upstream_rq_timeout"
   enablePrometheusMerge: false
   enableTracing: "{{ .Values.global.tracing.enabled }}"
   extensionProviders:
