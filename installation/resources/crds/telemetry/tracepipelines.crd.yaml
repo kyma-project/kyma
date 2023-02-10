@@ -116,6 +116,32 @@ spec:
                                 type: object
                             type: object
                         type: object
+                      headers:
+                        description: Custom headers to be added to outgoing HTTP or
+                          GRPC requests
+                        items:
+                          properties:
+                            name:
+                              description: Defines the header name
+                              type: string
+                            value:
+                              type: string
+                            valueFrom:
+                              properties:
+                                secretKeyRef:
+                                  properties:
+                                    key:
+                                      type: string
+                                    name:
+                                      type: string
+                                    namespace:
+                                      type: string
+                                  type: object
+                              type: object
+                          required:
+                          - name
+                          type: object
+                        type: array
                       protocol:
                         default: grpc
                         description: Defines the OTLP protocol (http or grpc).

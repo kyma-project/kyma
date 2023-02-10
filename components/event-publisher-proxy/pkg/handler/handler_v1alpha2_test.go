@@ -162,7 +162,7 @@ func TestHandler_publishCloudEventsV1Alpha2(t *testing.T) {
 			wantTEF: `
 				# HELP eventing_epp_event_type_published_total The total number of events published for a given eventTypeLabel
 				# TYPE eventing_epp_event_type_published_total counter
-				eventing_epp_event_type_published_total{code="204",event_source="testapp1023",event_type="prefix.testapp1023.order.created.v1"} 1
+				eventing_epp_event_type_published_total{code="204",event_source="testapp1023",event_type="order.created.v1"} 1
 				# HELP eventing_epp_backend_duration_milliseconds The duration of sending events to the messaging server in milliseconds
 				# TYPE eventing_epp_backend_duration_milliseconds histogram
 				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.005"} 1
@@ -204,7 +204,7 @@ func TestHandler_publishCloudEventsV1Alpha2(t *testing.T) {
 			wantTEF: `
 				# HELP eventing_epp_event_type_published_total The total number of events published for a given eventTypeLabel
 				# TYPE eventing_epp_event_type_published_total counter
-				eventing_epp_event_type_published_total{code="204",event_source="testapp1023",event_type="prefix.testapp1023.order.created.v1"} 1
+				eventing_epp_event_type_published_total{code="204",event_source="testapp1023",event_type="order.created.v1"} 1
 				# HELP eventing_epp_backend_duration_milliseconds The duration of sending events to the messaging server in milliseconds
 				# TYPE eventing_epp_backend_duration_milliseconds histogram
 				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.005"} 1
@@ -362,7 +362,7 @@ func TestHandler_publishLegacyEventsAsCEV1alpha2(t *testing.T) {
 			wantTEF: `
 					# HELP eventing_epp_event_type_published_total The total number of events published for a given eventTypeLabel
 					# TYPE eventing_epp_event_type_published_total counter
-					eventing_epp_event_type_published_total{code="204",event_source="testapp",event_type="prefix.testapp.object.created.v1"} 1
+					eventing_epp_event_type_published_total{code="204",event_source="testapp",event_type="object.created.v1"} 1
 
 					# HELP eventing_epp_backend_duration_milliseconds The duration of sending events to the messaging server in milliseconds
 					# TYPE eventing_epp_backend_duration_milliseconds histogram

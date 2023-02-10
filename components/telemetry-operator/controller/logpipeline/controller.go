@@ -34,8 +34,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
 )
 
-const checksumAnnotationKey = "checksum/logpipeline-config"
-
 type Config struct {
 	DaemonSet         types.NamespacedName
 	SectionsConfigMap types.NamespacedName
@@ -43,8 +41,8 @@ type Config struct {
 	EnvSecret         types.NamespacedName
 	OverrideConfigMap types.NamespacedName
 	PipelineDefaults  configbuilder.PipelineDefaults
-	ManageFluentBit   bool
 	Overrides         overrides.Config
+	DaemonSetConfig   resources.DaemonSetConfig
 }
 
 //go:generate mockery --name DaemonSetProber --filename daemon_set_prober.go
@@ -61,19 +59,17 @@ type Reconciler struct {
 	client.Client
 	config                  Config
 	prober                  DaemonSetProber
-	annotator               DaemonSetAnnotator
 	allLogPipelines         prometheus.Gauge
 	unsupportedLogPipelines prometheus.Gauge
 	syncer                  syncer
 	globalConfig            overrides.GlobalConfigHandler
 }
 
-func NewReconciler(client client.Client, config Config, prober DaemonSetProber, annotator DaemonSetAnnotator, handler *overrides.Handler) *Reconciler {
+func NewReconciler(client client.Client, config Config, prober DaemonSetProber, handler *overrides.Handler) *Reconciler {
 	var r Reconciler
 	r.Client = client
 	r.config = config
 	r.prober = prober
-	r.annotator = annotator
 	r.allLogPipelines = prometheus.NewGauge(prometheus.GaugeOpts{Name: "telemetry_all_logpipelines", Help: "Number of log pipelines."})
 	r.unsupportedLogPipelines = prometheus.NewGauge(prometheus.GaugeOpts{Name: "telemetry_unsupported_logpipelines", Help: "Number of log pipelines with custom filters or outputs."})
 	metrics.Registry.MustRegister(r.allLogPipelines, r.unsupportedLogPipelines)
@@ -129,18 +125,7 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 		return err
 	}
 
-	if r.config.ManageFluentBit {
-		name := r.config.DaemonSet
-		if err = r.reconcileFluentBit(ctx, name, pipeline); err != nil {
-			return err
-		}
-	}
-
 	if err = r.syncer.syncFluentBitConfig(ctx, pipeline); err != nil {
-		return err
-	}
-
-	if err = cleanupFinalizersIfNeeded(ctx, r.Client, pipeline); err != nil {
 		return err
 	}
 
@@ -149,44 +134,78 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 		return err
 	}
 
-	if err = r.annotator.SetAnnotation(ctx, r.config.DaemonSet, checksumAnnotationKey, checksum); err != nil {
+	name := r.config.DaemonSet
+	if err = r.reconcileFluentBit(ctx, name, pipeline, checksum); err != nil {
+		return err
+	}
+
+	if err = cleanupFinalizersIfNeeded(ctx, r.Client, pipeline); err != nil {
 		return err
 	}
 
 	return err
 }
 
-func (r *Reconciler) reconcileFluentBit(ctx context.Context, name types.NamespacedName, pipeline *telemetryv1alpha1.LogPipeline) error {
+func (r *Reconciler) reconcileFluentBit(ctx context.Context, name types.NamespacedName, pipeline *telemetryv1alpha1.LogPipeline, checksum string) error {
+	shouldDeleteFluentBit, err := r.isLastPipelineMarkedForDeletion(ctx, pipeline)
+	if err != nil {
+		return fmt.Errorf("failed to check if LogPipeline is last marked for deletion: %v", err)
+	}
+
+	if shouldDeleteFluentBit {
+		return utils.DeleteFluentBit(ctx, r, name)
+	}
+
+	serviceAccount := resources.MakeServiceAccount(name)
+	if err := utils.CreateOrUpdateServiceAccount(ctx, r, serviceAccount); err != nil {
+		return fmt.Errorf("failed to create fluent bit service account: %w", err)
+	}
+	clusterRole := resources.MakeClusterRole(name)
+	if err := utils.CreateOrUpdateClusterRole(ctx, r, clusterRole); err != nil {
+		return fmt.Errorf("failed to create fluent bit cluster role: %w", err)
+	}
+	clusterRoleBinding := resources.MakeClusterRoleBinding(name)
+	if err := utils.CreateOrUpdateClusterRoleBinding(ctx, r, clusterRoleBinding); err != nil {
+		return fmt.Errorf("failed to create fluent bit cluster role Binding: %w", err)
+	}
+	daemonSet := resources.MakeDaemonSet(name, checksum, r.config.DaemonSetConfig)
+	if err := utils.CreateOrUpdateDaemonSet(ctx, r, daemonSet); err != nil {
+		return fmt.Errorf("failed to reconcile fluent bit daemonset: %w", err)
+	}
+	exporterMetricsService := resources.MakeExporterMetricsService(name)
+	if err := utils.CreateOrUpdateService(ctx, r, exporterMetricsService); err != nil {
+		return fmt.Errorf("failed to reconcile exporter metrics service: %w", err)
+	}
+	metricsService := resources.MakeMetricsService(name)
+	if err := utils.CreateOrUpdateService(ctx, r, metricsService); err != nil {
+		return fmt.Errorf("failed to reconcile fluent bit metrics service: %w", err)
+	}
+	cm := resources.MakeConfigMap(name)
+	if err := utils.CreateOrUpdateConfigMap(ctx, r, cm); err != nil {
+		return fmt.Errorf("failed to reconcile fluent bit configmap: %w", err)
+	}
+	luaCm := resources.MakeLuaConfigMap(name)
+	if err := utils.CreateOrUpdateConfigMap(ctx, r, luaCm); err != nil {
+		return fmt.Errorf("failed to reconcile fluent bit lua configmap: %w", err)
+	}
+	parsersCm := resources.MakeDynamicParserConfigmap(name)
+	if err := utils.CreateIfNotExistsConfigMap(ctx, r, parsersCm); err != nil {
+		return fmt.Errorf("failed to reconcile fluent bit parser configmap: %w", err)
+	}
+	return nil
+}
+
+func (r *Reconciler) isLastPipelineMarkedForDeletion(ctx context.Context, pipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
 	if isNotMarkedForDeletion(pipeline) {
-		ds := resources.MakeDaemonSet(name)
-		if err := utils.CreateOrUpdateDaemonSet(ctx, r, ds); err != nil {
-			return fmt.Errorf("failed to reconcile fluent bit daemonset: %w", err)
-		}
-		service := resources.MakeService(name)
-		if err := utils.CreateOrUpdateService(ctx, r, service); err != nil {
-			return fmt.Errorf("failed to reconcile fluent bit service: %w", err)
-		}
-		cm := resources.MakeConfigMap(name)
-		if err := utils.CreateOrUpdateConfigMap(ctx, r, cm); err != nil {
-			return fmt.Errorf("failed to reconcile fluent bit configmap: %w", err)
-		}
-		luaCm := resources.MakeLuaConfigMap(name)
-		if err := utils.CreateOrUpdateConfigMap(ctx, r, luaCm); err != nil {
-			return fmt.Errorf("failed to reconcile fluent bit lua configmap: %w", err)
-		}
-		return nil
+		return false, nil
 	}
 
 	var allPipelines telemetryv1alpha1.LogPipelineList
 	if err := r.List(ctx, &allPipelines); err != nil {
-		return fmt.Errorf("failed to determine condition for deleting fluent bit: %w", err)
+		return false, fmt.Errorf("failed to list LogPipelines: %v", err)
 	}
 
-	if len(allPipelines.Items) == 1 && allPipelines.Items[0].Name == pipeline.Name {
-		return utils.DeleteFluentBit(ctx, r, name)
-	}
-
-	return nil
+	return len(allPipelines.Items) == 1 && allPipelines.Items[0].Name == pipeline.Name, nil
 }
 
 func (r *Reconciler) updateMetrics(ctx context.Context) error {
