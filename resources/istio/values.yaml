@@ -41,17 +41,10 @@ helmValues:
         configOverride:
           inboundSidecar:
             metrics:
-              - name: requests_total
+              - name: requests_total_per_path
                 dimensions:
-                  destination_port: string(destination.port)
-                  request_host: request.host
-          outboundSidecar:
-            metrics:
-              - name: requests_total
-                dimensions:
-                  destination_port: string(destination.port)
-                  request_host: request.host
-
+                  destination_service: destination.address
+                  request_operation: request.path
 meshConfig:
   accessLogFile: /dev/stdout
   accessLogEncoding: JSON
@@ -62,11 +55,9 @@ meshConfig:
     holdApplicationUntilProxyStarts: true
     proxyStatsMatcher:
       inclusionRegexps:
-        - ".*outlier_detection.*"
-        - ".*upstream_rq_retry.*"
+        - ".*upstream_rq_.*"
         - ".*upstream_cx_.*"
-      inclusionSuffixes:
-        - "upstream_rq_timeout"
+        - ".*downstream_cx_.*"
   enablePrometheusMerge: false
   enableTracing: "{{ .Values.global.tracing.enabled }}"
   extensionProviders:
