@@ -49,7 +49,7 @@
     "mocha-multi-reporters": "^1.5.1"
   },
   "dependencies": {
-    "@kubernetes/client-node": "0.15.1",
+    "@kubernetes/client-node": "0.18.1",
     "axios": "^0.21.0",
     "execa": "^5.0.0",
     "mocha-junit-reporter": "^2.0.0",
