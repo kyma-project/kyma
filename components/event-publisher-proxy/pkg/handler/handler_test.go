@@ -1,3 +1,4 @@
+//nolint:lll // this test uses many long lines directly from prometheus output
 package handler
 
 import (
@@ -207,6 +208,7 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 				request: CreateValidStructuredRequest(t),
 			},
 			wantStatus: 204,
+
 			wantTEF: `
 				# HELP eventing_epp_event_type_published_total The total number of events published for a given eventTypeLabel
 				# TYPE eventing_epp_event_type_published_total counter
@@ -249,6 +251,7 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 				request: CreateValidBinaryRequest(t),
 			},
 			wantStatus: 204,
+
 			wantTEF: `
 				# HELP eventing_epp_event_type_published_total The total number of events published for a given eventTypeLabel
 				# TYPE eventing_epp_event_type_published_total counter
@@ -329,6 +332,7 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 				request: CreateValidBinaryRequest(t),
 			},
 			wantStatus: 500,
+
 			wantTEF: `
 				# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
 				# TYPE eventing_epp_backend_errors_total counter
@@ -419,15 +423,19 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 					},
 					BackendURL: "FOO",
 				},
-				LegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", NewApplicationListerOrDie(context.Background(), "testapp")),
-				collector:         metrics.NewCollector(latency),
-				eventTypeCleaner:  eventtypetest.CleanerStub{},
+				LegacyTransformer: legacy.NewTransformer(
+					"namespace",
+					"im.a.prefix",
+					NewApplicationListerOrDie(context.Background(), "testapp")),
+				collector:        metrics.NewCollector(latency),
+				eventTypeCleaner: eventtypetest.CleanerStub{},
 			},
 			args: args{
 				request: legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
 			},
 			wantStatus: 200,
 			wantOk:     true,
+
 			wantTEF: `
 					# HELP eventing_epp_event_type_published_total The total number of events published for a given eventTypeLabel
 					# TYPE eventing_epp_event_type_published_total counter
@@ -462,9 +470,12 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 					Err:        fmt.Errorf("oh no, i cannot send: %w", sender.ErrBackendTargetNotFound),
 					BackendURL: "FOO",
 				},
-				LegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", NewApplicationListerOrDie(context.Background(), "testapp")),
-				collector:         metrics.NewCollector(latency),
-				eventTypeCleaner:  eventtypetest.CleanerStub{},
+				LegacyTransformer: legacy.NewTransformer(
+					"namespace",
+					"im.a.prefix",
+					NewApplicationListerOrDie(context.Background(), "testapp")),
+				collector:        metrics.NewCollector(latency),
+				eventTypeCleaner: eventtypetest.CleanerStub{},
 			},
 			args: args{
 				request: legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
@@ -484,9 +495,12 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 					Err:        fmt.Errorf("oh no, i cannot send: %w", sender.ErrInsufficientStorage),
 					BackendURL: "FOO",
 				},
-				LegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", NewApplicationListerOrDie(context.Background(), "testapp")),
-				collector:         metrics.NewCollector(latency),
-				eventTypeCleaner:  eventtypetest.CleanerStub{},
+				LegacyTransformer: legacy.NewTransformer(
+					"namespace",
+					"im.a.prefix",
+					NewApplicationListerOrDie(context.Background(), "testapp")),
+				collector:        metrics.NewCollector(latency),
+				eventTypeCleaner: eventtypetest.CleanerStub{},
 			},
 			args: args{
 				request: legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
@@ -506,9 +520,12 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 					Err:        fmt.Errorf("i cannot send"),
 					BackendURL: "FOO",
 				},
-				LegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", NewApplicationListerOrDie(context.Background(), "testapp")),
-				collector:         metrics.NewCollector(latency),
-				eventTypeCleaner:  eventtypetest.CleanerStub{},
+				LegacyTransformer: legacy.NewTransformer(
+					"namespace",
+					"im.a.prefix",
+					NewApplicationListerOrDie(context.Background(), "testapp")),
+				collector:        metrics.NewCollector(latency),
+				eventTypeCleaner: eventtypetest.CleanerStub{},
 			},
 			args: args{
 				request: legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
@@ -530,16 +547,20 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 					},
 					BackendURL: "FOO",
 				},
-				LegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", NewApplicationListerOrDie(context.Background(), "testapp")),
-				collector:         metrics.NewCollector(latency),
-				eventTypeCleaner:  eventtypetest.CleanerStub{},
+				LegacyTransformer: legacy.NewTransformer(
+					"namespace",
+					"im.a.prefix",
+					NewApplicationListerOrDie(context.Background(), "testapp")),
+				collector:        metrics.NewCollector(latency),
+				eventTypeCleaner: eventtypetest.CleanerStub{},
 			},
 			args: args{
 				request: legacytest.InvalidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
 			},
 			wantStatus: 400,
 			wantOk:     false,
-			wantTEF:    "", // this is a client error. We do record an error metric for requests that cannot even be decoded correctly.
+			// this is a client error. We do record an error metric for requests that cannot even be decoded correctly.
+			wantTEF: "",
 		},
 	}
 	for _, tt := range tests {
@@ -577,7 +598,6 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 			}
 
 			metricstest.EnsureMetricMatchesTextExpositionFormat(t, h.collector, tt.wantTEF)
-
 		})
 	}
 }
@@ -879,7 +899,14 @@ func CreateCloudEvent(t *testing.T) *cev2event.Event {
 // CreateValidStructuredRequest creates a structured cloudevent as http request.
 func CreateValidStructuredRequest(t *testing.T) *http.Request {
 	t.Helper()
-	req := httptest.NewRequest(http.MethodPost, "http://localhost/publish", strings.NewReader("{\"specversion\":\"1.0\",\"type\":\"sap.kyma.custom.testapp1023.order.created.v1\",\"source\":\"/default/sap.kyma/id\",\"id\":\"8945ec08-256b-11eb-9928-acde48001122\",\"data\":{\"foo\":\"bar\"}}"))
+	s := `{
+			"specversion":"1.0",
+			"type":"sap.kyma.custom.testapp1023.order.created.v1",
+			"source":"/default/sap.kyma/id",
+			"id":"8945ec08-256b-11eb-9928-acde48001122",
+			"data":{"foo":"bar"}
+			}`
+	req := httptest.NewRequest(http.MethodPost, "http://localhost/publish", strings.NewReader(s))
 	req.Header.Add("Content-Type", "application/cloudevents+json")
 	return req
 }
@@ -887,7 +914,8 @@ func CreateValidStructuredRequest(t *testing.T) *http.Request {
 // CreateBrokenRequest creates a structured cloudevent request that cannot be parsed.
 func CreateBrokenRequest(t *testing.T) *http.Request {
 	t.Helper()
-	req := httptest.NewRequest(http.MethodPost, "http://localhost/publish", strings.NewReader("I AM JUST A BROKEN REQUEST"))
+	reader := strings.NewReader("I AM JUST A BROKEN REQUEST")
+	req := httptest.NewRequest(http.MethodPost, "http://localhost/publish", reader)
 	req.Header.Add("Content-Type", "application/cloudevents+json")
 	return req
 }
@@ -895,7 +923,16 @@ func CreateBrokenRequest(t *testing.T) *http.Request {
 // CreateInvalidStructuredRequest creates an invalid structured cloudevent as http request. The `type` is missing.
 func CreateInvalidStructuredRequest(t *testing.T) *http.Request {
 	t.Helper()
-	req := httptest.NewRequest(http.MethodPost, "http://localhost/publish", strings.NewReader("{\"specversion\":\"1.0\",\"source\":\"/default/sap.kyma/id\",\"id\":\"8945ec08-256b-11eb-9928-acde48001122\",\"data\":{\"foo\":\"bar\"}}"))
+	s := `{
+			"specversion":"1.0",
+			"source":"/default/sap.kyma/id",
+			"id":"8945ec08-256b-11eb-9928-acde48001122",
+			"data": {
+				"foo":"bar"
+			}
+	}`
+	reader := strings.NewReader(s)
+	req := httptest.NewRequest(http.MethodPost, "http://localhost/publish", reader)
 	req.Header.Add("Content-Type", "application/cloudevents+json")
 	return req
 }
@@ -903,7 +940,8 @@ func CreateInvalidStructuredRequest(t *testing.T) *http.Request {
 // CreateValidBinaryRequest creates a valid binary cloudevent as http request.
 func CreateValidBinaryRequest(t *testing.T) *http.Request {
 	t.Helper()
-	req := httptest.NewRequest(http.MethodPost, "http://localhost/publish", strings.NewReader("{\"foo\":\"bar\"}"))
+	reader := strings.NewReader(`{"foo":"bar"}`)
+	req := httptest.NewRequest(http.MethodPost, "http://localhost/publish", reader)
 	req.Header.Add("Ce-Specversion", "1.0")
 	req.Header.Add("Ce-Type", "sap.kyma.custom.testapp1023.order.created.v1")
 	req.Header.Add("Ce-Source", "/default/sap.kyma/id")
@@ -914,7 +952,8 @@ func CreateValidBinaryRequest(t *testing.T) *http.Request {
 // CreateInvalidBinaryRequest creates an invalid binary cloudevent as http request. The `type` is missing.
 func CreateInvalidBinaryRequest(t *testing.T) *http.Request {
 	t.Helper()
-	req := httptest.NewRequest(http.MethodPost, "http://localhost/publish", strings.NewReader("{\"foo\":\"bar\"}"))
+	reader := strings.NewReader(`{"foo":"bar"}`)
+	req := httptest.NewRequest(http.MethodPost, "http://localhost/publish", reader)
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Ce-Specversion", "1.0")
 	req.Header.Add("Ce-Source", "/default/sap.kyma/id")

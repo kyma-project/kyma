@@ -28,8 +28,9 @@ const (
 )
 
 // TestTransformLegacyRequestsToCE ensures that TransformLegacyRequestsToCE transforms a http request containing
-// a legacy request to a valid cloud event by creating mock http requests
+// a legacy request to a valid cloud event by creating mock http requests.
 func TestTransformLegacyRequestsToCE(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		name string
 		// the event type has the structure
@@ -172,6 +173,7 @@ func TestConvertPublishRequestToCloudEvent(t *testing.T) {
 }
 
 func TestCombineEventTypeSegments(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		name           string
 		givenEventType string
@@ -202,6 +204,7 @@ func TestCombineEventTypeSegments(t *testing.T) {
 }
 
 func TestRemoveNonAlphanumeric(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		name           string
 		givenEventType string
@@ -240,6 +243,7 @@ func TestRemoveNonAlphanumeric(t *testing.T) {
 }
 
 func TestExtractPublishRequestData(t *testing.T) {
+	t.Parallel()
 	const givenVersion = "v1"
 	const givenPrefix = "pre1.pre2.pre3"
 	const givenApplication = "app"
@@ -335,6 +339,7 @@ func TestExtractPublishRequestData(t *testing.T) {
 }
 
 func TestTransformPublishRequestToCloudEvent(t *testing.T) {
+	t.Parallel()
 	const givenVersion = "v1"
 	const givenPrefix = "pre1.pre2.pre3"
 	const givenApplication = "app"

@@ -10,6 +10,7 @@ import (
 )
 
 func TestFilterEventTypeVersions(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		name           string
 		appName        string
@@ -115,6 +116,7 @@ func TestFilterEventTypeVersions(t *testing.T) {
 }
 
 func TestBuildEventType(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		name    string
 		appName string
@@ -151,6 +153,7 @@ func TestBuildEventType(t *testing.T) {
 }
 
 func TestFilterEventTypeVersionsV1alpha1(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		name            string
 		appName         string
@@ -230,6 +233,7 @@ func TestFilterEventTypeVersionsV1alpha1(t *testing.T) {
 }
 
 func TestConvertEventsMapToSlice(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		name         string
 		inputMap     map[Event]bool
@@ -274,6 +278,7 @@ func TestConvertEventsMapToSlice(t *testing.T) {
 }
 
 func TestAddUniqueEventsToResult(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		name                   string
 		eventsSubSet           []Event
@@ -353,7 +358,6 @@ func WithOneBEBFilter(bebFilters *eventingv1alpha1.BEBFilters) {
 	bebFilters.Filters = []*eventingv1alpha1.BEBFilter{
 		NewBEBFilter(evSource, evType),
 	}
-
 }
 
 func WithMultipleBEBFiltersFromSameSource(bebFilters *eventingv1alpha1.BEBFilters) {

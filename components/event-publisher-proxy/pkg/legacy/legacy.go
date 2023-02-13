@@ -18,8 +18,8 @@ import (
 )
 
 var (
-	isValidEventTypeVersion = regexp.MustCompile(AllowedEventTypeVersionChars).MatchString
-	isValidEventID          = regexp.MustCompile(AllowedEventIDChars).MatchString
+	validEventTypeVersion = regexp.MustCompile(AllowedEventTypeVersionChars)
+	validEventID          = regexp.MustCompile(AllowedEventIDChars)
 )
 
 const (
@@ -59,17 +59,16 @@ func (t *Transformer) checkParameters(parameters *apiv1.PublishEventParametersV1
 	if len(parameters.PublishrequestV1.EventTypeVersion) == 0 {
 		return ErrorResponseMissingFieldEventTypeVersion()
 	}
-	if !isValidEventTypeVersion(parameters.PublishrequestV1.EventTypeVersion) {
+	if !validEventTypeVersion.MatchString(parameters.PublishrequestV1.EventTypeVersion) {
 		return ErrorResponseWrongEventTypeVersion()
 	}
 	if len(parameters.PublishrequestV1.EventTime) == 0 {
-
 		return ErrorResponseMissingFieldEventTime()
 	}
 	if _, err := time.Parse(time.RFC3339, parameters.PublishrequestV1.EventTime); err != nil {
 		return ErrorResponseWrongEventTime()
 	}
-	if len(parameters.PublishrequestV1.EventID) > 0 && !isValidEventID(parameters.PublishrequestV1.EventID) {
+	if len(parameters.PublishrequestV1.EventID) > 0 && !validEventID.MatchString(parameters.PublishrequestV1.EventID) {
 		return ErrorResponseWrongEventID()
 	}
 	if parameters.PublishrequestV1.Data == nil {
@@ -240,10 +239,10 @@ func (t *Transformer) convertPublishRequestToCloudEvent(appName string, publishR
 }
 
 // combineEventNameSegments returns an eventName with exactly two segments separated by "." if the given event-type
-// has more than two segments separated by "." (e.g. "Account.Order.Created" becomes "AccountOrder.Created")
+// has two or more segments separated by "." (e.g. "Account.Order.Created" becomes "AccountOrder.Created").
 func combineEventNameSegments(eventName string) string {
 	parts := strings.Split(eventName, ".")
-	if len(parts) > 2 {
+	if len(parts) > 1 {
 		businessObject := strings.Join(parts[0:len(parts)-1], "")
 		operation := parts[len(parts)-1]
 		eventName = fmt.Sprintf("%s.%s", businessObject, operation)
@@ -251,7 +250,7 @@ func combineEventNameSegments(eventName string) string {
 	return eventName
 }
 
-// removeNonAlphanumeric returns an eventName without any non-alphanumerical character besides dot (".")
+// removeNonAlphanumeric returns an eventName without any non-alphanumerical character besides dot (".").
 func removeNonAlphanumeric(eventType string) string {
 	return regexp.MustCompile("[^a-zA-Z0-9.]+").ReplaceAllString(eventType, "")
 }
