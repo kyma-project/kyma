@@ -13,7 +13,7 @@ const (
 	latencyMetricKey = "eventing_ec_nats_subscriber_dispatch_duration_seconds"
 	//nolint:lll // help text for metrics
 	// latencyMetricHelp help text for the dispatch_duration metric.
-	latencyMetricHelp = "The duration of sending an incoming nats message to the subscriber (not including processing the message in the dispatcher)"
+	latencyMetricHelp = "The duration of sending an incoming NATS message to the subscriber (not including processing the message in the dispatcher)"
 	// deliveryMetricKey name of the delivery per subscription metric.
 	deliveryMetricKey = "eventing_ec_nats_delivery_per_subscription_total"
 	// eventTypeSubscribedMetricKey name of the eventType subscribed metric.

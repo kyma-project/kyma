@@ -21,7 +21,7 @@ The metrics follow the [Prometheus naming convention](https://prometheus.io/docs
 | Metric                                                    | Description                                                                                                                 |
 | --------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------- |
 | **eventing_ec_nats_delivery_per_subscription_total**      | The total number of dispatched events per subscription                                                                      |
-| **eventing_ec_nats_subscriber_dispatch_duration_seconds** | The duration of sending an incoming nats message to the subscriber (not including processing the message in the dispatcher) |
+| **eventing_ec_nats_subscriber_dispatch_duration_seconds** | The duration of sending an incoming NATS message to the subscriber (not including processing the message in the dispatcher) |
 | **eventing_ec_event_type_subscribed_total**               | The total number of eventTypes subscribed using the Subscription CRD                                                        |
 
 ### Metrics Emitted by NATS Exporter:
