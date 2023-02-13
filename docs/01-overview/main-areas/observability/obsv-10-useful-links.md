@@ -12,7 +12,7 @@ If you're interested in learning more about the Observability area, check out th
 - Install a [custom Jaeger stack](https://github.com/kyma-project/examples/tree/main/jaeger).
 - Install a [custom Prometheus stack](https://github.com/kyma-project/examples/tree/main/prometheus).
 
-- Learn how to [install an OTLP-based metrics collector](https://github.com/kyma-project/examples/tree/main/metrics-otlp) to collect and ship workload metrics to an OTLP endpoint.
+- To collect and ship workload metrics to an OTLP endpoint, see [Install an OTLP-based metrics collector](https://github.com/kyma-project/examples/tree/main/metrics-otlp).
 - Learn how to [access and expose](../../../04-operation-guides/security/sec-06-access-expose-grafana.md) the services Grafana, Jaeger, and Kiali.
 
 - Troubleshoot Observability-related issues:
