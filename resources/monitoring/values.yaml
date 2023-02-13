@@ -141,16 +141,16 @@ global:
       directory: "external/prom"
     node_exporter:
       name: "node-exporter"
-      version: "1.5.0-941a04c4"
+      version: "1.5.0-723b551a"
       directory: "tpi"
     kube_state_metrics:
       name: "kube-state-metrics"
-      version: "2.6.0-cf0a130c"
+      version: "2.6.0-723b551a"
       directory: "tpi"
       sha: ""
     grafana:
       name: "grafana"
-      version: "7.5.17-cf0a130c"
+      version: "7.5.17-723b551a"
       directory: "tpi"
       sha: ""
     busybox:
@@ -165,7 +165,7 @@ global:
       sha: ""
     oauth2_proxy:
       name: "oauth2-proxy"
-      version: "7.4.0-f193d3f9"
+      version: "7.4.0-723b551a"
       directory: "tpi"
       sha: ""
 
@@ -2802,48 +2802,65 @@ prometheus:
     ## The scrape configuration example below will find master nodes, provided they have the name .*mst.*, relabel the
     ## port to 2379 and allow etcd scraping provided it is running on all Kubernetes master nodes
     ##
-    additionalScrapeConfigs: []
-    # - job_name: kube-etcd
-    #   kubernetes_sd_configs:
-    #     - role: node
-    #   scheme: https
-    #   tls_config:
-    #     ca_file:   /etc/prometheus/secrets/etcd-client-cert/etcd-ca
-    #     cert_file: /etc/prometheus/secrets/etcd-client-cert/etcd-client
-    #     key_file:  /etc/prometheus/secrets/etcd-client-cert/etcd-client-key
-    #   relabel_configs:
-    #   - action: labelmap
-    #     regex: __meta_kubernetes_node_label_(.+)
-    #   - source_labels: [__address__]
-    #     action: replace
-    #     targetLabel: __address__
-    #     regex: ([^:;]+):(\d+)
-    #     replacement: ${1}:2379
-    #   - source_labels: [__meta_kubernetes_node_name]
-    #     action: keep
-    #     regex: .*mst.*
-    #   - source_labels: [__meta_kubernetes_node_name]
-    #     action: replace
-    #     targetLabel: node
-    #     regex: (.*)
-    #     replacement: ${1}
-    #   metric_relabel_configs:
-    #   - regex: (kubernetes_io_hostname|failure_domain_beta_kubernetes_io_region|beta_kubernetes_io_os|beta_kubernetes_io_arch|beta_kubernetes_io_instance_type|failure_domain_beta_kubernetes_io_zone)
-    #     action: labeldrop
-    #
-    ## If scrape config contains a repetitive section, you may want to use a template.
-    ## In the following example, you can see how to define `gce_sd_configs` for multiple zones
-    # additionalScrapeConfigs: |
-    #  - job_name: "node-exporter"
-    #    gce_sd_configs:
-    #    {{range $zone := .Values.gcp_zones}}
-    #    - project: "project1"
-    #      zone: "{{$zone}}"
-    #      port: 9100
-    #    {{end}}
-    #    relabel_configs:
-    #    ...
-
+    additionalScrapeConfigs:
+      # scrape all services having prometheus annotation
+      - job_name: "kyma-endpoints"
+        kubernetes_sd_configs:
+          - role: endpoints
+            namespaces:
+              own_namespace: false
+              names:
+              - kyma-system
+              - istio-system
+        relabel_configs:
+          - source_labels:
+              [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+            action: keep
+            regex: true
+          - source_labels: [__meta_kubernetes_pod_label_security_istio_io_tlsMode]
+            action: replace
+            target_label: __scheme__
+            replacement: https
+            regex: (istio)
+          - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+            action: replace
+            target_label: __scheme__
+            regex: (https?)
+          - source_labels:
+              [__meta_kubernetes_service_annotation_prometheus_io_path]
+            action: replace
+            target_label: __metrics_path__
+            regex: (.+)
+          - source_labels:
+              [
+                __address__,
+                __meta_kubernetes_service_annotation_prometheus_io_port,
+              ]
+            action: replace
+            target_label: __address__
+            regex: ([^:]+)(?::\d+)?;(\d+)
+            replacement: $1:$2
+          - source_labels: [__meta_kubernetes_namespace]
+            action: replace
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_service_name]
+            action: replace
+            target_label: service
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod
+            action: replace
+          - source_labels: [__meta_kubernetes_service_name]
+            target_label: job
+            action: replace
+        metric_relabel_configs:
+          - source_labels: [__name__,le]
+            regex: 'rest_client_request_latency_seconds_bucket;(0.002|0.008|0.032|0.128|0.512)' # drop buckets to reduce metric footprint
+            action: drop
+        tls_config:
+          ca_file: /etc/prometheus/secrets/istio.default/root-cert.pem
+          cert_file: /etc/prometheus/secrets/istio.default/cert-chain.pem
+          insecure_skip_verify: true
+          key_file: /etc/prometheus/secrets/istio.default/key.pem
 
     ## If additional scrape configurations are already deployed in a single secret file you can use this section.
     ## Expected values are the secret name and key

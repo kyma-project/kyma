@@ -14,9 +14,15 @@ webhooks:
     failurePolicy: Fail
     sideEffects: None
     matchPolicy: Exact
-    timeoutSeconds: 15
+    timeoutSeconds: 10
     admissionReviewVersions: ["v1beta1", "v1"]
     name: validation.webhook.serverless.kyma-project.io
+    namespaceSelector:
+      matchExpressions:
+      - key: gardener.cloud/purpose
+        operator: NotIn
+        values:
+        - kube-system
 ---
 apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
@@ -32,9 +38,15 @@ webhooks:
     failurePolicy: Fail
     sideEffects: None
     matchPolicy: Exact
-    timeoutSeconds: 15
+    timeoutSeconds: 10
     admissionReviewVersions: ["v1beta1", "v1"]
     name: defaulting.webhook.serverless.kyma-project.io
+    namespaceSelector:
+      matchExpressions:
+      - key: gardener.cloud/purpose
+        operator: NotIn
+        values:
+        - kube-system
   - clientConfig:
       service:
         name: {{ template "webhook.fullname" . }}
@@ -42,6 +54,12 @@ webhooks:
     failurePolicy: Fail
     sideEffects: None
     matchPolicy: Exact
-    timeoutSeconds: 15
+    timeoutSeconds: 10
     admissionReviewVersions: ["v1beta1", "v1"]
     name: mutating.secret.webhook.serverless.kyma-project.io
+    namespaceSelector:
+      matchExpressions:
+      - key: gardener.cloud/purpose
+        operator: NotIn
+        values:
+        - kube-system

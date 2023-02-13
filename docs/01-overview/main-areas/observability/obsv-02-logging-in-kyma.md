@@ -5,7 +5,7 @@ title: Logging
 ## Overview
 For in-cluster logging, Kyma uses [Loki](https://github.com/grafana/loki), a Prometheus-like log management system.
 
-> **NOTE:** Loki is [deprecated](https://kyma-project.io/blog/2022/11/2/loki-deprecation/) and is planned to be removed. Kyma's [telemetry component](./../telemetry/README.md) supports providing your own output configuration for Fluent Bit. With this, you can connect your own observability systems inside or outside the Kyma cluster.
+> **NOTE:** Loki is [deprecated](https://kyma-project.io/blog/2022/11/2/loki-deprecation/) and is planned to be removed. Kyma's [telemetry component](../telemetry/README.md) supports providing your own output configuration for Fluent Bit. With this, you can connect your own observability systems inside or outside the Kyma cluster.
 
 ## Limitations
 

@@ -28,19 +28,19 @@ resources:
       cpu: 500m
       memory: 500Mi
 subscriptions:
-    - name: function-practical-filip5
-      protocol: ""
-      filter:
-        dialect: ""
-        filters:
-            - eventSource:
-                property: source
-                type: exact
-                value: ""
-              eventType:
-                property: type
-                type: exact
-                value: sap.kyma.custom.demo-app.order.created.v1
+  - name: function-practical-filip5
+    protocol: ""
+    filter:
+      dialect: ""
+      filters:
+        - eventSource:
+            property: source
+            type: exact
+            value: ""
+          eventType:
+            property: type
+            type: exact
+            value: sap.kyma.custom.demo-app.order.created.v1
 apiRules:
     - name: function-practical-filip5
       gateway: kyma-system/kyma-gateway

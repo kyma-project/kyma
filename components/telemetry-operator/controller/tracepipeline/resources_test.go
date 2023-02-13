@@ -1,14 +1,11 @@
 package tracepipeline
 
 import (
-	"fmt"
-	corev1 "k8s.io/api/core/v1"
-	"strings"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
+
 	"github.com/stretchr/testify/require"
-	"gopkg.in/yaml.v2"
 )
 
 var (
@@ -19,106 +16,7 @@ var (
 			OTLPServiceName: "otlp-traces",
 		},
 	}
-	tracePipeline = v1alpha1.TracePipelineOutput{
-		Otlp: &v1alpha1.OtlpOutput{
-			Endpoint: v1alpha1.ValueType{
-				Value: "localhost",
-			},
-		},
-	}
-
-	tracePipelineHTTP = v1alpha1.TracePipelineOutput{
-		Otlp: &v1alpha1.OtlpOutput{
-			Endpoint: v1alpha1.ValueType{
-				Value: "http://localhost",
-			},
-		},
-	}
-
-	tracePipelineHTTPS = v1alpha1.TracePipelineOutput{
-		Otlp: &v1alpha1.OtlpOutput{
-			Endpoint: v1alpha1.ValueType{
-				Value: "https://localhost",
-			},
-		},
-	}
-
-	tracePipelineWithBasicAuth = v1alpha1.TracePipelineOutput{
-		Otlp: &v1alpha1.OtlpOutput{
-			Endpoint: v1alpha1.ValueType{
-				Value: "localhost",
-			},
-			Authentication: &v1alpha1.AuthenticationOptions{
-				Basic: &v1alpha1.BasicAuthOptions{
-					User: v1alpha1.ValueType{
-						Value: "user",
-					},
-					Password: v1alpha1.ValueType{
-						Value: "password",
-					},
-				},
-			},
-		},
-	}
 )
-
-func TestMakeConfigMap(t *testing.T) {
-	cm := makeConfigMap(config, tracePipeline)
-
-	require.NotNil(t, cm)
-	require.Equal(t, cm.Name, config.BaseName)
-	require.Equal(t, cm.Namespace, config.Namespace)
-	expectedEndpoint := fmt.Sprintf("endpoint: ${%s}", otlpEndpointVariable)
-	collectorConfig := cm.Data[configMapKey]
-
-	var collectorConfigYaml interface{}
-	require.NoError(t, yaml.Unmarshal([]byte(collectorConfig), &collectorConfigYaml), "Otel Collector config must be valid yaml")
-	require.True(t, strings.Contains(collectorConfig, expectedEndpoint), "Otel Collector config must contain OTLP endpoint")
-}
-
-func TestMakeConfigMapTLSInsecureNoScheme(t *testing.T) {
-	cm := makeConfigMap(config, tracePipeline)
-
-	require.NotNil(t, cm)
-	collectorConfig := cm.Data[configMapKey]
-	require.NotEmpty(t, collectorConfig)
-
-	expectedTLSConfig := "insecure: false"
-	require.True(t, strings.Contains(collectorConfig, expectedTLSConfig), "Otel Collector config must contain TLS insecure true")
-}
-
-func TestMakeConfigMapTLSInsecureHttp(t *testing.T) {
-	cm := makeConfigMap(config, tracePipelineHTTP)
-
-	require.NotNil(t, cm)
-	collectorConfig := cm.Data[configMapKey]
-	require.NotEmpty(t, collectorConfig)
-
-	expectedTLSConfig := "insecure: true"
-	require.True(t, strings.Contains(collectorConfig, expectedTLSConfig), "Otel Collector config must contain TLS insecure true")
-}
-
-func TestMakeConfigMapTLSInsecureHttps(t *testing.T) {
-	cm := makeConfigMap(config, tracePipelineHTTPS)
-
-	require.NotNil(t, cm)
-	collectorConfig := cm.Data[configMapKey]
-	require.NotEmpty(t, collectorConfig)
-
-	expectedTLSConfig := "insecure: false"
-	require.True(t, strings.Contains(collectorConfig, expectedTLSConfig), "Otel Collector config must contain TLS insecure false")
-}
-
-func TestMakeConfigMapWithBasicAuth(t *testing.T) {
-	cm := makeConfigMap(config, tracePipelineWithBasicAuth)
-
-	require.NotNil(t, cm)
-	collectorConfigString := cm.Data[configMapKey]
-	require.NotEmpty(t, collectorConfigString)
-
-	expectedAuthHeader := "Authorization: ${BASIC_AUTH_HEADER}"
-	require.True(t, strings.Contains(collectorConfigString, expectedAuthHeader))
-}
 
 func TestMakeSecret(t *testing.T) {
 	secretData := map[string][]byte{
@@ -131,7 +29,7 @@ func TestMakeSecret(t *testing.T) {
 	require.Equal(t, secret.Name, config.BaseName)
 	require.Equal(t, secret.Namespace, config.Namespace)
 
-	require.Equal(t, "otlpEndpoint", string(secret.Data[otlpEndpointVariable]), "Secret must contain OTLP endpoint")
+	require.Equal(t, "otlpEndpoint", string(secret.Data[otlpEndpointVariable]), "Secret must contain Otlp endpoint")
 	require.Equal(t, "basicAuthHeader", string(secret.Data[basicAuthHeaderVariable]), "Secret must contain basic auth header")
 }
 
@@ -190,8 +88,10 @@ func TestMakeMetricsService(t *testing.T) {
 	require.Equal(t, service.Namespace, config.Namespace)
 	require.Equal(t, service.Spec.Selector, labels)
 	require.Equal(t, service.Spec.Type, corev1.ServiceTypeClusterIP)
-	require.NotEmpty(t, service.Spec.Ports)
 	require.Len(t, service.Spec.Ports, 1)
+
+	require.Contains(t, service.Annotations, "prometheus.io/scrape")
+	require.Contains(t, service.Annotations, "prometheus.io/port")
 }
 
 func TestMakeOpenCensusService(t *testing.T) {
@@ -205,15 +105,4 @@ func TestMakeOpenCensusService(t *testing.T) {
 	require.Equal(t, service.Spec.Type, corev1.ServiceTypeClusterIP)
 	require.NotEmpty(t, service.Spec.Ports)
 	require.Len(t, service.Spec.Ports, 1)
-}
-
-func TestMakeServiceMonitor(t *testing.T) {
-	serviceMonitor := makeServiceMonitor(config)
-	labels := makeDefaultLabels(config)
-
-	require.NotNil(t, serviceMonitor)
-	require.Equal(t, serviceMonitor.Name, config.BaseName)
-	require.Equal(t, serviceMonitor.Namespace, config.Namespace)
-	require.Contains(t, serviceMonitor.Spec.NamespaceSelector.MatchNames, config.Namespace)
-	require.Equal(t, serviceMonitor.Spec.Selector.MatchLabels, labels)
 }

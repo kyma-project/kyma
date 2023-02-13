@@ -319,7 +319,20 @@ func (h *Handler) sendEventAndRecordMetrics(ctx context.Context, event *cev2even
 		h.collector.RecordBackendError()
 		return nil, err
 	}
-	h.collector.RecordEventType(event.Type(), event.Source(), result.HTTPStatus())
+	originalEventType := event.Type()
+	originalTypeHeader, ok := event.Extensions()[builder.OriginalTypeHeaderName]
+	if !ok {
+		h.namedLogger().With().Warnw("event header doesn't exist", "header",
+			builder.OriginalTypeHeaderName)
+	} else {
+		originalEventType, ok = originalTypeHeader.(string)
+		if !ok {
+			h.namedLogger().With().Warnw("failed to convert event original event type extension value to string",
+				builder.OriginalTypeHeaderName, originalTypeHeader)
+			originalEventType = event.Type()
+		}
+	}
+	h.collector.RecordEventType(originalEventType, event.Source(), result.HTTPStatus())
 	h.collector.RecordBackendLatency(duration, result.HTTPStatus(), host)
 	h.collector.RecordBackendRequests(result.HTTPStatus(), host)
 	return result, nil

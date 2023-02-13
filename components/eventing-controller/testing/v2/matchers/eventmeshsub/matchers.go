@@ -32,7 +32,25 @@ func HaveWebhookURL(webhookURL string) gomegatypes.GomegaMatcher {
 		gomega.Equal(webhookURL))
 }
 
+func HaveStatusPaused() gomegatypes.GomegaMatcher {
+	return gomega.WithTransform(func(s *eventMeshtypes.Subscription) eventMeshtypes.SubscriptionStatus {
+		return s.SubscriptionStatus
+	}, gomega.Equal(eventMeshtypes.SubscriptionStatusPaused))
+}
+
+func HaveStatusActive() gomegatypes.GomegaMatcher {
+	return gomega.WithTransform(func(s *eventMeshtypes.Subscription) eventMeshtypes.SubscriptionStatus {
+		return s.SubscriptionStatus
+	}, gomega.Equal(eventMeshtypes.SubscriptionStatusActive))
+}
+
 func HaveContentMode(contentMode string) gomegatypes.GomegaMatcher {
 	return gomega.WithTransform(func(s *eventMeshtypes.Subscription) string { return s.ContentMode },
 		gomega.Equal(contentMode))
+}
+
+func HaveNonEmptyLastFailedDeliveryReason() gomegatypes.GomegaMatcher {
+	return gomega.WithTransform(func(s *eventMeshtypes.Subscription) string {
+		return s.LastFailedDeliveryReason
+	}, gomega.Not(gomega.BeEmpty()))
 }

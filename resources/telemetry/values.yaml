@@ -4,20 +4,20 @@ global:
   images:
     directory_size_exporter:
       name: "directory-size-exporter"
-      version: "v20230102-4a803570"
+      version: "v20230117-64505a69"
     telemetry_operator:
       name: "telemetry-operator"
-      version: "PR-16517"
+      version: "PR-16781"
     telemetry_webhook_cert_init:
       name: "webhook-cert-init"
-      version: "v20221122-200937b4"
+      version: "v20230117-64505a69"
     telemetry_otel_collector:
       name: "otel-collector"
-      version: "0.66.0-a80d981f"
+      version: "0.70.0-723b551a"
       directory: "tpi"
     fluent_bit:
       name: "fluent-bit"
-      version: "1.9.9-cf0a130c"
+      version: "2.0.8-723b551a"
       directory: "tpi"
     busybox:
       name: "busybox"
@@ -27,4 +27,3 @@ global:
   log:
     format: "json"
     level: "info"
-  operatorManagedFluentBit: false

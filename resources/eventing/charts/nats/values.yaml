@@ -82,11 +82,6 @@ nats:
   # This will cause the StatefulSet to roll when the ConfigMap is updated
   configChecksumAnnotation: false
 
-  # securityContext for the nats container
-  securityContext:
-    allowPrivilegeEscalation: false
-    privileged: false
-
   # Toggle to disable client advertisements (connect_urls),
   # in case of running behind a load balancer
   # it might be required to disable advertisements.
@@ -206,14 +201,6 @@ auth:
 
 nameOverride: ""
 
-# Toggle whether to use setup a Pod Security Context
-# ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
-securityContext: {}
-# securityContext:
-#   fsGroup: 1000
-#   runAsUser: 1000
-#   runAsNonRoot: true
-
 # Affinity for pod assignment
 # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
 affinity:
@@ -272,7 +259,6 @@ podManagementPolicy: OrderedReady
 exporter:
   enabled: true
   pullPolicy: IfNotPresent
-  securityContext: {}
   resources: {}
   # Prometheus operator ServiceMonitor support. Exporter has to be enabled
   serviceMonitor:
