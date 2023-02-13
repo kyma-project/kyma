@@ -69,11 +69,3 @@ components:
           requests:
             cpu: 10m
             memory: 128Mi
-
-monitoring:
-  enabled: false
-  dashboards:
-    enabled: false
-  istioServiceMonitor:
-    enabled: false
-    scrapeInterval: ""

@@ -141,14 +141,6 @@ components:
         runAsNonRoot: true
         runAsGroup: 65534
 
-monitoring:
-  enabled: true
-  dashboards:
-    enabled: true
-  istioServiceMonitor:
-    enabled: true
-    scrapeInterval: ""
-
 global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
