@@ -5,7 +5,7 @@ kind: Service
 metadata:
   annotations:
     prometheus.io/scrape: "true"
-    prometheus.io/port: {{ .Values.port.metrics | quote }}
+    prometheus.io/port: {{ .Values.sidecar.port.metrics | quote }}
   labels:
 {{ include "oathkeeper-maester-sidecar.labels" . | indent 4 }}
     mode: {{ .Values.global.ory.oathkeeper.maester.mode }}
