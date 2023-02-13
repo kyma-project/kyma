@@ -13,7 +13,7 @@
 
 
 # Owners of the .kyma-project-io folder
-/.kyma-project-io/ @valentinvieriu @akucharska @qbalukom @Wawrzyn321 @Sawthis @mrCherry97 @Lyczeq
+/.kyma-project-io/ @valentinvieriu @akucharska @qbalukom @Sawthis @mrCherry97 @Lyczeq
 
 /common @Tomasz-Smelcerz-SAP @akgalwas @piotrmiskiewicz @VOID404 @koala7659 @franpog859 @mvshao
 # Logging library
@@ -27,9 +27,9 @@
 /components/eventing-controller @kyma-project/eventing
 /components/function-controller @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
 /components/function-runtimes @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
-/components/telemetry-operator @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
-/components/directory-size-exporter @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
-/components/webhook-cert-init @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @hisarbalik
+/components/telemetry-operator @kyma-project/observability
+/components/directory-size-exporter @kyma-project/observability
+/components/webhook-cert-init @kyma-project/observability
 
 # All files and subdirectories in /docs
 /docs @mmitoraj @NHingerl @grego952 @IwonaLanger @nataliasitko
@@ -42,33 +42,32 @@
 /installation/resources/crds/compass-runtime-agent  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 /installation/resources/crds/eventing @kyma-project/eventing
 /installation/resources/crds/istio @strekm @werdes72 @dariusztutaj @cnvergence @barchw @videlov @triffer
-/installation/resources/crds/monitoring @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
+/installation/resources/crds/monitoring @kyma-project/observability
 /installation/resources/crds/ory @strekm @werdes72 @dariusztutaj @cnvergence @barchw @videlov @triffer
 /installation/resources/crds/serverless @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
-/installation/resources/crds/telemetry @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @NHingerl @hisarbalik
-/installation/resources/crds/tracing @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
+/installation/resources/crds/telemetry @kyma-project/observability
+/installation/resources/crds/tracing @kyma-project/observability
 
 /resources/api-gateway @strekm @werdes72 @dariusztutaj @cnvergence @barchw @videlov @triffer
 /resources/application-connector  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 /resources/certificates @dariusztutaj @cnvergence @strekm @werdes72 @barchw
-/resources/cluster-essentials @a-thaler @strekm @dariusztutaj @cnvergence @barchw @werdes72 @PK85 @videlov @triffer
-/resources/cluster-essentials/charts/pod-preset @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @tillknuesting
+/resources/cluster-essentials @strekm @dariusztutaj @cnvergence @barchw @werdes72 @PK85 @videlov @triffer
 /resources/cluster-users @cnvergence @strekm @werdes72 @dariusztutaj @barchw @videlov @triffer
 /resources/compass-runtime-agent  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 /resources/eventing @kyma-project/eventing
 /resources/istio @strekm @werdes72 @dariusztutaj @cnvergence @barchw @videlov @triffer
 /resources/istio-resources @strekm @werdes72 @dariusztutaj @cnvergence @barchw @videlov @triffer
-/resources/istio-resources/files/dashboards @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
-/resources/logging @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
-/resources/monitoring @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
+/resources/istio-resources/files/dashboards @kyma-project/observability
+/resources/logging @kyma-project/observability
+/resources/monitoring @kyma-project/observability
 /resources/ory @strekm @werdes72 @dariusztutaj @cnvergence @barchw @videlov @triffer
 /resources/serverless @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
-/resources/telemetry @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
-/resources/tracing @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
+/resources/telemetry @kyma-project/observability
+/resources/tracing @kyma-project/observability
 
 /tests/application-gateway-legacy-tests  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 /tests/application-gateway-tests  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
-/tests/telemetry-operator-perf-tests @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @hisarbalik
+/tests/telemetry-operator-perf-tests @kyma-project/observability
 
 
 # Fast Integration Tests
@@ -82,10 +81,10 @@
 /tests/fast-integration/skr-svcat-migration-test @wozniakjan @tillknuesting @ralikio @PK85 @piotrmiskiewicz @szwedm
 /tests/fast-integration/skr-test @szwedm @wozniakjan @tillknuesting @ralikio @PK85 @piotrmiskiewicz @jaroslaw-pieszka
 /tests/fast-integration/smctl @szwedm @wozniakjan @tillknuesting @ralikio @PK85 @piotrmiskiewicz @jaroslaw-pieszka
-/tests/fast-integration/logging @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @hisarbalik
-/tests/fast-integration/monitoring @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @hisarbalik
-/tests/fast-integration/telemetry-test @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @hisarbalik
-/tests/fast-integration/tracing @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @hisarbalik
+/tests/fast-integration/logging @kyma-project/observability
+/tests/fast-integration/monitoring @kyma-project/observability
+/tests/fast-integration/telemetry-test @kyma-project/observability
+/tests/fast-integration/tracing @kyma-project/observability
 
 
 /tests/function-controller @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
@@ -95,7 +94,7 @@
 /tests/components/reconciler @khlifi411 @jeremyharisch @ruanxin @tobiscr @Tomasz-Smelcerz-SAP @jakobmoellersap @adityabhatia
 
 # performance tests
-/tests/perf @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
+/tests/perf @kyma-project/observability
 /tests/serverless-bench @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
 
 # The tools/event-subscriber directory

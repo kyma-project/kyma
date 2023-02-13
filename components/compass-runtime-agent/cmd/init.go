@@ -8,7 +8,7 @@ import (
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/secrets/strategy"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/secrets"
 
-	appclient "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
+	appclient "github.com/kyma-project/kyma/components/central-application-gateway/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications"

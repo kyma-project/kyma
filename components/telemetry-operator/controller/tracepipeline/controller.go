@@ -39,10 +39,9 @@ import (
 )
 
 type Config struct {
-	CreateServiceMonitor bool
-	BaseName             string
-	Namespace            string
-	OverrideConfigMap    types.NamespacedName
+	BaseName          string
+	Namespace         string
+	OverrideConfigMap types.NamespacedName
 
 	Deployment DeploymentConfig
 	Service    ServiceConfig
@@ -178,23 +177,12 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 		return fmt.Errorf("failed to create otel collector open census service: %w", err)
 	}
 
-	if r.config.CreateServiceMonitor {
-		serviceMonitor := makeServiceMonitor(r.config)
-		if err = controllerutil.SetControllerReference(pipeline, serviceMonitor, r.Scheme); err != nil {
-			return err
-		}
-
-		if err = utils.CreateOrUpdateServiceMonitor(ctx, r.Client, serviceMonitor); err != nil {
-			return fmt.Errorf("failed to create otel collector prometheus service monitor: %w", err)
-		}
-
-		metricsService := makeMetricsService(r.config)
-		if err = controllerutil.SetControllerReference(pipeline, metricsService, r.Scheme); err != nil {
-			return err
-		}
-		if err = utils.CreateOrUpdateService(ctx, r.Client, metricsService); err != nil {
-			return fmt.Errorf("failed to create otel collector metrics service: %w", err)
-		}
+	metricsService := makeMetricsService(r.config)
+	if err = controllerutil.SetControllerReference(pipeline, metricsService, r.Scheme); err != nil {
+		return err
+	}
+	if err = utils.CreateOrUpdateService(ctx, r.Client, metricsService); err != nil {
+		return fmt.Errorf("failed to create otel collector metrics service: %w", err)
 	}
 
 	return nil

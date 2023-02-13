@@ -40,6 +40,15 @@ func fetchSecretData(ctx context.Context, c client.Reader, output *telemetryv1al
 	}
 	secretData[otlpEndpointVariable] = endpoint
 
+	for _, header := range output.Headers {
+		key := fmt.Sprintf("HEADER_%s", envvar.MakeEnvVarCompliant(header.Name))
+		value, err := fetchSecretValue(ctx, c, header.ValueType)
+		if err != nil {
+			return nil, err
+		}
+		secretData[key] = value
+	}
+
 	return secretData, nil
 }
 
@@ -87,6 +96,11 @@ func lookupSecretRefFields(pipeline *telemetryv1alpha1.TracePipeline) []fieldDes
 		result = appendOutputFieldIfHasSecretRef(result, pipeline.Name, otlpOut.Authentication.Basic.User)
 		result = appendOutputFieldIfHasSecretRef(result, pipeline.Name, otlpOut.Authentication.Basic.Password)
 	}
+
+	for _, header := range otlpOut.Headers {
+		result = appendOutputFieldIfHasSecretRef(result, pipeline.Name, header.ValueType)
+	}
+
 	return result
 }
 
