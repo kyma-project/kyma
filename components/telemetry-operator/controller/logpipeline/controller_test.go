@@ -241,16 +241,16 @@ var _ = Describe("LogPipeline controller", Ordered, func() {
 		It("Should have created flunent-bit parsers configmap", func() {
 			Eventually(func() string {
 				parserCmName := fmt.Sprintf("%s-parsers", testConfig.DaemonSet.Name)
-				filesConfigMapLookupKey := types.NamespacedName{
+				parserConfigMapLookupKey := types.NamespacedName{
 					Name:      parserCmName,
 					Namespace: testConfig.FilesConfigMap.Namespace,
 				}
-				var filesCm corev1.ConfigMap
-				err := k8sClient.Get(ctx, filesConfigMapLookupKey, &filesCm)
+				var parserCm corev1.ConfigMap
+				err := k8sClient.Get(ctx, parserConfigMapLookupKey, &parserCm)
 				if err != nil {
 					return err.Error()
 				}
-				return filesCm.Data["parsers.conf"]
+				return parserCm.Data["parsers.conf"]
 			}, timeout, interval).Should(Equal(""))
 		})
 
