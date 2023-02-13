@@ -2,19 +2,17 @@ package controller
 
 import (
 	"context"
+	"testing"
 	"time"
 
 	"github.com/kyma-project/kyma/common/logging/logger"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/client/clientset/versioned/fake"
+	applicationconnectorv1alpha1 "github.com/kyma-project/kyma/components/central-application-gateway/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	"github.com/patrickmn/go-cache"
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
-	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/fake"
-	applicationconnectorv1alpha1 "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
-
-	"testing"
 )
 
 func TestCacheSync(t *testing.T) {
@@ -145,7 +143,7 @@ func NewFakeClient() *fakeClient {
 	}
 }
 
-func (c fakeClient) Get(ctx context.Context, key client.ObjectKey, obj client.Object) error {
+func (c fakeClient) Get(ctx context.Context, key client.ObjectKey, obj client.Object, opts ...client.GetOption) error {
 	target := obj.(*v1alpha1.Application)
 	app, err := c.intf.Get(ctx, key.Name, v1.GetOptions{})
 	if err != nil {
