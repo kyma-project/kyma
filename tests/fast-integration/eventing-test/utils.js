@@ -48,7 +48,7 @@ const testNamespace = `test-${suffix}`;
 const mockNamespace = process.env.MOCK_NAMESPACE || 'mocks';
 const backendK8sSecretName = process.env.BACKEND_SECRET_NAME || 'eventing-backend';
 const backendK8sSecretNamespace = process.env.BACKEND_SECRET_NAMESPACE || 'default';
-const streamDataConfigMapName = 'eventing-stream-info';
+const testDataConfigMapName = 'eventing-test-data';
 const eventingNatsSvcName = 'eventing-nats';
 const eventingNatsApiRuleAName = `${eventingNatsSvcName}-apirule`;
 const timeoutTime = 10 * 60 * 1000;
@@ -120,7 +120,7 @@ async function cleanupTestingResources() {
   }
 
   debug('Removing JetStream data configmap');
-  await deleteK8sConfigMap(streamDataConfigMapName);
+  await deleteK8sConfigMap(testDataConfigMapName);
 
   debug(`Removing ${testNamespace} and ${mockNamespace} namespaces`);
   await cleanMockTestFixture(mockNamespace, testNamespace, true);
@@ -187,6 +187,19 @@ async function getJetStreamStreamData(host) {
   };
 }
 
+async function getJetStreamConsumerData(consumerName, host) {
+  const responseJson = await retryPromise(async () => await axios.get(`https://${host}/jsz?consumers=true`), 5, 1000);
+  const consumers = responseJson.data.account_details[0].stream_detail[0].consumer_detail;
+  for (const con of consumers) {
+    if (con.name === consumerName) {
+      return {
+        consumerName: con.name,
+        consumerCreationTime: con.created,
+      };
+    }
+  }
+}
+
 function skipAtLeastOnceDeliveryTest() {
   return !(streamConfig['retention_policy'] === 'limits' &&
       streamConfig['consumer_deliver_policy'] === 'all');
@@ -194,6 +207,10 @@ function skipAtLeastOnceDeliveryTest() {
 
 function isStreamCreationTimeMissing(streamData) {
   return streamData.streamCreationTime === undefined;
+}
+
+function isConsumerCreationTimeMissing(streamData) {
+  return streamData.consumerCreationTime === undefined;
 }
 
 async function getClusterHost(apiRuleName, namespace) {
@@ -548,7 +565,7 @@ module.exports = {
   subCRDVersion,
   backendK8sSecretName,
   backendK8sSecretNamespace,
-  streamDataConfigMapName,
+  testDataConfigMapName,
   eventingNatsSvcName,
   eventingNatsApiRuleAName,
   timeoutTime,
@@ -563,7 +580,9 @@ module.exports = {
   getStreamConfigForJetStream,
   skipAtLeastOnceDeliveryTest,
   getJetStreamStreamData,
+  getJetStreamConsumerData,
   isStreamCreationTimeMissing,
+  isConsumerCreationTimeMissing,
   eppInClusterUrl,
   subscriptionNames,
   eventingSinkName,

@@ -79,6 +79,9 @@ const lastorderFunctionYaml = fs.readFileSync(
 const eventTypeOrderCompleted = 'order.completed.v1';
 const uncleanEventType = 'Order-äöüÄÖÜβ.Final.R-e-c-e-i-v-e-d.v1';
 const fullyQualifiedEventType = 'sap.kyma.custom.inapp.order.completed.v2';
+const eventTypeOrderReceived = 'sap.kyma.custom.inapp.order.received.v1';
+// the following is the consumer name of 'sap.kyma.custom.inapp.order.received.v1'
+const eventTypeOrderReceivedHash = 'f8a4e1486659bb2647b07bb167c9ee95';
 const eventSourceInApp = 'inapp';
 const uncleanSource = 'test-app';
 const applicationObjs = k8s.loadAllYaml(applicationMockYaml);
@@ -610,7 +613,7 @@ async function ensureCommerceMockWithCompassTestFixture(
   await waitForApplicationCr(`mp-${appName}`);
 
   await k8sApply([eventingSubscription(
-      `sap.kyma.custom.inapp.order.received.v1`,
+      eventTypeOrderReceived,
       `http://lastorder.${targetNamespace}.svc.cluster.local`,
       'order-received',
       targetNamespace)]);
@@ -1028,6 +1031,7 @@ module.exports = {
   sendInClusterEventWithRetry,
   ensureInClusterEventReceivedWithRetry,
   prepareFunction,
+  eventTypeOrderReceivedHash,
   generateTraceParentHeader,
   checkTrace,
 };

@@ -17,7 +17,7 @@ const {
   skrInstanceId,
   backendK8sSecretName,
   backendK8sSecretNamespace,
-  streamDataConfigMapName,
+  testDataConfigMapName,
   eventingNatsSvcName,
   eventingNatsApiRuleAName,
   getJetStreamStreamData,
@@ -26,6 +26,7 @@ const {
   gardener,
   director,
   shootName,
+  getJetStreamConsumerData,
   cleanupTestingResources,
   eventingSinkName,
   getClusterHost,
@@ -43,6 +44,7 @@ const {
   ensureCommerceMockLocalTestFixture,
   setEventMeshSourceNamespace,
   ensureCommerceMockWithCompassTestFixture,
+  eventTypeOrderReceivedHash,
 } = require('../test/fixtures/commerce-mock');
 const {
   info,
@@ -51,7 +53,7 @@ const {
   createEventingBackendK8sSecret,
   createK8sConfigMap,
   createApiRuleForService,
-  deleteApiRule,
+  deleteApiRule, getConfigMap,
 } = require('../utils');
 const {
   addScenarioInCompass,
@@ -62,8 +64,19 @@ const {
 const {expect} = require('chai');
 
 describe('Eventing tests preparation', function() {
+  let natsApiRuleVSHost;
+
   this.timeout(timeoutTime);
   this.slow(slowTime);
+
+  before(async () => {
+    debug('expose the eventing-nats service with an apirule');
+    const vs = await createApiRuleForService(eventingNatsApiRuleAName,
+        kymaSystem,
+        eventingNatsSvcName,
+        8222);
+    natsApiRuleVSHost = vs.spec.hosts[0];
+  });
 
   it('Print test initial configs', async function() {
     debug(`Mock namespace: ${mockNamespace}`);
@@ -118,21 +131,12 @@ describe('Eventing tests preparation', function() {
   it('Prepare JetStream data configmap', async function() {
     // Create a configmap that contains stream data for jetstream so that during the test,
     // we can verify that the stream was not affected/recreated
-    debug('expose the eventing-nats service with an apirule');
-    const vs = await createApiRuleForService(eventingNatsApiRuleAName,
-        kymaSystem,
-        eventingNatsSvcName,
-        8222);
-    const vsHost = vs.spec.hosts[0];
-
-    debug('Creating configmap with JetStream stream info');
-    const streamInfo = await getJetStreamStreamData(vsHost);
+    debug('Creating eventing test data configmap with JetStream stream info');
+    const streamInfo = await getJetStreamStreamData(natsApiRuleVSHost);
     await createK8sConfigMap(
         streamInfo,
-        streamDataConfigMapName,
+        testDataConfigMapName,
     );
-
-    await deleteApiRule(eventingNatsApiRuleAName, kymaSystem);
   });
 
   it('Prepare assets without Compass flow', async function() {
@@ -143,6 +147,8 @@ describe('Eventing tests preparation', function() {
 
     // Deploy Commerce mock application, function and subscriptions for tests
     await prepareAssetsWithoutCompassFlow();
+
+    await addConsumerToConfigMap(eventTypeOrderReceivedHash);
   });
 
   it('Prepare assets with Compass flow', async function() {
@@ -153,6 +159,10 @@ describe('Eventing tests preparation', function() {
 
     // Deploy Commerce mock application, function and subscriptions for tests (includes compass flow)
     await prepareAssetsWithCompassFlow();
+
+    debug('Adding JetStream consumer info to eventing test data configmap');
+
+    await addConsumerToConfigMap(eventTypeOrderReceivedHash);
   });
 
   it('Prepare eventing-sink function', async function() {
@@ -186,6 +196,10 @@ describe('Eventing tests preparation', function() {
     if (this.currentTest.state === 'failed') {
       await cleanupTestingResources();
     }
+  });
+
+  after(async () => {
+    await deleteApiRule(eventingNatsApiRuleAName, kymaSystem);
   });
 
   // // **** Helper functions ****
@@ -236,6 +250,19 @@ describe('Eventing tests preparation', function() {
         mockNamespace,
         testNamespace,
         compassScenarioAlreadyExist,
+    );
+  }
+
+  async function addConsumerToConfigMap(consumerName) {
+    debug('Adding JetStream consumer info to eventing test data configmap');
+    const consumerInfo = await getJetStreamConsumerData(consumerName, natsApiRuleVSHost);
+    const testDataConfigMap = await getConfigMap(testDataConfigMapName);
+    await createK8sConfigMap(
+        {
+          ...testDataConfigMap.data,
+          ...consumerInfo,
+        },
+        testDataConfigMapName,
     );
   }
 });
