@@ -114,7 +114,7 @@ var _ = BeforeSuite(func() {
 	mgr, err := ctrl.NewManager(cfg, ctrl.Options{
 		Scheme:                 scheme.Scheme,
 		MetricsBindAddress:     ":9080",
-		Port:                   9443,
+		Port:                   19443,
 		HealthProbeBindAddress: ":9081",
 		LeaderElection:         false,
 		LeaderElectionID:       "cdd7ef0a.kyma-project.io",
