@@ -19,10 +19,11 @@ package main
 import (
 	"errors"
 	"flag"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/resources/logpipeline"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/resources/logpipeline"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/overrides"
 	"go.uber.org/zap"
@@ -212,7 +213,6 @@ func main() {
 	flag.StringVar(&fluentBitCPURequest, "fluent-bit-cpu-request", "400m", "CPU request for fluent-bit")
 	flag.StringVar(&fluentBitMemoryRequest, "fluent-bit-memory-request", "256Mi", "Memory request for fluent-bit")
 	flag.StringVar(&fluentBitImageVersion, "fluent-bit-image", fluentBitImage, "Image for fluent-bit")
-	flag.StringVar(&fluentBitConfigPrepperImageVersion, "fluent-bit-config-prepper-image", fluentBitConfigPrepperImage, "Image for fluent-bit config preparation")
 	flag.StringVar(&fluentBitExporterVersion, "fluent-bit-exporter-image", fluentBitExporterImage, "Image for exporting fluent bit filesystem usage")
 	flag.StringVar(&fluentBitPriorityClassName, "fluent-bit-priority-class-name", "kyma-system-priority", "Name of the priority class of fluent bit ")
 

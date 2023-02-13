@@ -111,30 +111,6 @@ func MakeDaemonSet(name types.NamespacedName, checksum string, dsConfig DaemonSe
 						RunAsNonRoot:   pointer.Bool(false),
 						SeccompProfile: &corev1.SeccompProfile{Type: "RuntimeDefault"},
 					},
-					InitContainers: []corev1.Container{
-						{
-							Name:  "prep-fluent-bit-config",
-							Image: dsConfig.FluentBitConfigPrepperImage,
-							Command: []string{
-								"sh", "-c",
-								"cp /main/* /fluent-bit/etc/ && mkdir -p /fluent-bit/etc/dynamic/ && cp /dynamic/* /fluent-bit/etc/dynamic && mkdir -p /fluent-bit/etc/dynamic-parsers/ && cp /dynamic-parsers/* /fluent-bit/etc/dynamic-parsers || touch /fluent-bit/etc/dynamic/empty.conf",
-							},
-							SecurityContext: &corev1.SecurityContext{
-								AllowPrivilegeEscalation: pointer.Bool(false),
-								Privileged:               pointer.Bool(false),
-								ReadOnlyRootFilesystem:   pointer.Bool(true),
-								Capabilities: &corev1.Capabilities{
-									Drop: []corev1.Capability{"ALL"},
-								},
-							},
-							VolumeMounts: []corev1.VolumeMount{
-								{Name: "shared-fluent-bit-config", MountPath: "/fluent-bit/etc/"},
-								{Name: "config", MountPath: "/main/fluent-bit.conf", SubPath: "fluent-bit.conf"},
-								{Name: "dynamic-config", MountPath: "/dynamic"},
-								{Name: "dynamic-parsers-config", MountPath: "/dynamic-parsers"},
-							},
-						},
-					},
 					Containers: []corev1.Container{
 						{
 							Name: "fluent-bit",
@@ -184,6 +160,8 @@ func MakeDaemonSet(name types.NamespacedName, checksum string, dsConfig DaemonSe
 							VolumeMounts: []corev1.VolumeMount{
 								{MountPath: "/fluent-bit/etc", Name: "shared-fluent-bit-config"},
 								{MountPath: "/fluent-bit/etc/fluent-bit.conf", Name: "config", SubPath: "fluent-bit.conf"},
+								{MountPath: "/fluent-bit/etc/dynamic/", Name: "dynamic-config"},
+								{MountPath: "/fluent-bit/etc/dynamic-parsers/", Name: "dynamic-parsers-config"},
 								{MountPath: "/fluent-bit/etc/custom_parsers.conf", Name: "config", SubPath: "custom_parsers.conf"},
 								{MountPath: "/fluent-bit/etc/loki-labelmap.json", Name: "config", SubPath: "loki-labelmap.json"},
 								{MountPath: "/fluent-bit/scripts/filter-script.lua", Name: "luascripts", SubPath: "filter-script.lua"},
@@ -369,7 +347,6 @@ func MakeConfigMap(name types.NamespacedName) *corev1.ConfigMap {
     Daemon Off
     Flush 1
     Log_Level warn
-    Parsers_File parsers.conf
     Parsers_File custom_parsers.conf
     Parsers_File dynamic-parsers/parsers.conf
     HTTP_Server On
@@ -430,6 +407,17 @@ func MakeConfigMap(name types.NamespacedName) *corev1.ConfigMap {
 			"fluent-bit.conf":     fluentBitConfig,
 			"loki-labelmap.json":  lokiLabelmap,
 		},
+	}
+}
+
+func MakeDynamicParserConfigmap(name types.NamespacedName) *corev1.ConfigMap {
+	return &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      fmt.Sprintf("%s-parsers", name.Name),
+			Namespace: name.Namespace,
+			Labels:    labels(),
+		},
+		Data: map[string]string{"parsers.conf": ""},
 	}
 }
 

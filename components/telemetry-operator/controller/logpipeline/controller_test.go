@@ -19,6 +19,7 @@ package logpipeline
 import (
 	"bufio"
 	"context"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -235,6 +236,22 @@ var _ = Describe("LogPipeline controller", Ordered, func() {
 				}
 				return filesCm.Data["myFile"]
 			}, timeout, interval).Should(Equal("file-content"))
+		})
+
+		It("Should have created flunent-bit parsers configmap", func() {
+			Eventually(func() string {
+				parserCmName := fmt.Sprintf("%s-parsers", testConfig.DaemonSet.Name)
+				filesConfigMapLookupKey := types.NamespacedName{
+					Name:      parserCmName,
+					Namespace: testConfig.FilesConfigMap.Namespace,
+				}
+				var filesCm corev1.ConfigMap
+				err := k8sClient.Get(ctx, filesConfigMapLookupKey, &filesCm)
+				if err != nil {
+					return err.Error()
+				}
+				return filesCm.Data["parsers.conf"]
+			}, timeout, interval).Should(Equal(""))
 		})
 
 		It("Should verify secret reference is copied into environment secret", func() {
