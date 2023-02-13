@@ -18,6 +18,7 @@ const {
   getVirtualServiceHost,
   sendInClusterEventWithRetry,
   ensureInClusterEventReceivedWithRetry,
+  eventTypeOrderReceivedHash,
 } = require('../test/fixtures/commerce-mock');
 const {
   getEventingBackend,
@@ -53,11 +54,12 @@ const {
   getStreamConfigForJetStream,
   skipAtLeastOnceDeliveryTest,
   isStreamCreationTimeMissing,
+  isConsumerCreationTimeMissing,
   getJetStreamStreamData,
-  streamDataConfigMapName,
+  testDataConfigMapName,
   eventingNatsSvcName,
   eventingNatsApiRuleAName,
-  subscriptionNames,
+  subscriptionNames, getJetStreamConsumerData,
 } = require('./utils');
 const {
   bebBackend,
@@ -123,7 +125,7 @@ describe('Eventing tests', function() {
     }
 
     if (backend === natsBackend) {
-      testStreamNotReCreated();
+      testStreamAndConsumerNotReCreated();
       testJetStreamAtLeastOnceDelivery();
     }
   }
@@ -143,22 +145,26 @@ describe('Eventing tests', function() {
     });
   }
 
-  // testStreamNotReCreated - compares the stream creation timestamp before and after upgrade
-  // and if the timestamp is the same, we conclude that the stream is not re created.
-  function testStreamNotReCreated() {
-    context('stream check with JetStream backend', function() {
-      let wantStreamData = null;
+  // testStreamAndConsumerNotReCreated - compares the stream and consumer creation timestamp before and after upgrade
+  // and if the timestamp is the same, we conclude that the stream is not re-created.
+  function testStreamAndConsumerNotReCreated() {
+    context('stream and consumer check with JetStream backend', function() {
+      let wantStreamName = null;
+      let wantStreamCreationTime = null;
+      let wantConsumerName = null;
+      let wantConsumerCreationTime = null;
       let gotStreamData = null;
-      before('check if stream creation timestamp is available', async function() {
+      let gotConsumerData = null;
+      let cm;
+      before('check if stream and consumer creation timestamp is available', async function() {
         try {
-          const cm = await getConfigMap(streamDataConfigMapName);
-          wantStreamData = cm.data;
+          cm = await getConfigMap(testDataConfigMapName);
+          wantStreamName = cm.data.streamName;
+          wantStreamCreationTime = cm.data.streamCreationTime;
+          wantConsumerName = cm.data.consumerName;
+          wantConsumerCreationTime = cm.data.consumerCreationTime;
         } catch (err) {
           console.log('Skipping the stream recreation check due to missing configmap!');
-          this.skip();
-        }
-        if (isStreamCreationTimeMissing(wantStreamData)) {
-          console.log('Skipping the stream recreation check as the stream creation timestamp is missing!');
           this.skip();
         }
       });
@@ -170,13 +176,26 @@ describe('Eventing tests', function() {
             8222);
         const vsHost = vs.spec.hosts[0];
         gotStreamData = await getJetStreamStreamData(vsHost);
+        gotConsumerData = await getJetStreamConsumerData(eventTypeOrderReceivedHash, vsHost);
       });
 
       it('Compare the stream creation timestamp', async function() {
-        assert.equal(gotStreamData.streamName, wantStreamData.streamName);
-        assert.equal(gotStreamData.streamCreationTime, wantStreamData.streamCreationTime);
+        if (isStreamCreationTimeMissing(cm.data)) {
+          console.log('Skipping the stream recreation check as the stream creation timestamp is missing!');
+          this.skip();
+        }
+        assert.equal(gotStreamData.streamName, wantStreamName);
+        assert.equal(gotStreamData.streamCreationTime, wantStreamCreationTime);
       });
 
+      it('Compare the consumer creation timestamp', async function() {
+        if (isConsumerCreationTimeMissing(cm.data)) {
+          console.log('Skipping the consumer recreation check as the stream creation timestamp is missing!');
+          this.skip();
+        }
+        assert.equal(gotConsumerData.consumerName, wantConsumerName);
+        assert.equal(gotConsumerData.consumerCreationTime, wantConsumerCreationTime);
+      });
 
       it('Delete the created APIRule', async function() {
         await deleteApiRule(eventingNatsApiRuleAName, kymaSystem);
