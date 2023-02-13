@@ -70,7 +70,7 @@ components:
             cpu: 10m
             memory: 128Mi
 
-  monitoring:
+monitoring:
+  enabled: false
+  dashboards:
     enabled: false
-    dashboards:
-      enabled: false
