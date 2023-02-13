@@ -16,14 +16,10 @@ package logparser
 import (
 	"context"
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/controller/logpipeline"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/logger"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/overrides"
-	logPipelineInternal "github.com/kyma-project/kyma/components/telemetry-operator/internal/resources/logpipeline"
 	zapLog "go.uber.org/zap"
-	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/types"
 	"path/filepath"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -55,28 +51,6 @@ var (
 		DaemonSet:         types.NamespacedName{Name: "test-telemetry-fluent-bit", Namespace: "default"},
 		OverrideConfigMap: types.NamespacedName{Name: "override-config", Namespace: "default"},
 	}
-
-	testLogPipelineConfig = logpipeline.Config{DaemonSet: types.NamespacedName{Name: "test-telemetry-fluent-bit", Namespace: "default"},
-		SectionsConfigMap: types.NamespacedName{Name: "test-telemetry-fluent-bit-sections", Namespace: "default"},
-		FilesConfigMap:    types.NamespacedName{Name: "test-telemetry-fluent-bit-files", Namespace: "default"},
-		EnvSecret:         types.NamespacedName{Name: "test-telemetry-fluent-bit-env", Namespace: "default"},
-		OverrideConfigMap: types.NamespacedName{Name: "override-config", Namespace: "default"},
-		DaemonSetConfig: logPipelineInternal.DaemonSetConfig{
-			FluentBitImage:              "my-fluent-bit-image",
-			FluentBitConfigPrepperImage: "my-fluent-bit-config-image",
-			ExporterImage:               "my-exporter-image",
-			PriorityClassName:           "my-priority-class",
-			CPULimit:                    resource.MustParse("1"),
-			MemoryLimit:                 resource.MustParse("500Mi"),
-			CPURequest:                  resource.MustParse(".1"),
-			MemoryRequest:               resource.MustParse("100Mi"),
-		},
-		PipelineDefaults: builder.PipelineDefaults{
-			InputTag:          "kube",
-			MemoryBufferLimit: "10M",
-			StorageType:       "filesystem",
-			FsBufferLimit:     "1G",
-		}}
 )
 
 func TestAPIs(t *testing.T) {
