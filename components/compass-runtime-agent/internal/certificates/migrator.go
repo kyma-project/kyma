@@ -38,6 +38,10 @@ func (m Migrator) Do(source, target types.NamespacedName) error {
 
 	sourceData, sourceExists, err := m.getSecret(source)
 	if err != nil {
+		if k8serrors.IsForbidden(err) {
+			logrus.Warnf("failed to get source secret, skipping migration: %v", err)
+			return nil
+		}
 		logrus.Errorf("Failed to read source secret: %v", err)
 		return err
 	}
