@@ -55,8 +55,11 @@ meshConfig:
     holdApplicationUntilProxyStarts: true
     proxyStatsMatcher:
       inclusionRegexps:
+        - ".*request.*"
+        - ".*response.*"
         - ".*upstream_rq_.*"
         - ".*upstream_cx_.*"
+        - ".*downstream_rq_.*"
         - ".*downstream_cx_.*"
   enablePrometheusMerge: false
   enableTracing: "{{ .Values.global.tracing.enabled }}"
