@@ -140,7 +140,7 @@ This tutorial shows how to set up a custom domain and prepare a certificate requ
             namespace: $NAMESPACE
         EOF
         ```
-        >**NOTE:** While using default configuration, certificates with the `ACME` issuer are automatically renewed 30 days before their validity expires. Use the **--issuer.renewal-window** command line parameter to adjust the window of time between the renewal and the expiration of a certificate. For more information on Gardener Certificate Management, read the [Gardener documentation](https://github.com/gardener/cert-management#renewal-of-certificates).
+        >**NOTE:** While using default configuration, certificates with the ACME issuer are automatically renewed 30 days before their validity expires. Use the `--issuer.renewal-window `command line parameter to adjust the window of time between the renewal and the expiration of a certificate. For more information on Gardener Certificate Management, read the [Gardener documentation](https://github.com/gardener/cert-management#renewal-of-certificates).
 
      * To check the certificate status, run: 
      
