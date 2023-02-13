@@ -45,7 +45,8 @@ func TestNewHttpMessageSender(t *testing.T) {
 func TestNewRequestWithTarget(t *testing.T) {
 	t.Parallel()
 
-	client := oauth.NewClient(context.Background(), &env.EventMeshConfig{MaxIdleConns: maxIdleConns, MaxIdleConnsPerHost: maxIdleConnsPerHost})
+	cfg := &env.EventMeshConfig{MaxIdleConns: maxIdleConns, MaxIdleConnsPerHost: maxIdleConnsPerHost}
+	client := oauth.NewClient(context.Background(), cfg)
 	defer client.CloseIdleConnections()
 
 	msgSender := NewSender(eventsEndpoint, client)

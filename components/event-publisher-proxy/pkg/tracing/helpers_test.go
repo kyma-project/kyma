@@ -10,6 +10,7 @@ import (
 )
 
 func TestAddTracingContextToCEExtensions(t *testing.T) {
+	t.Parallel()
 	g := NewGomegaWithT(t)
 	testCases := []struct {
 		name               string

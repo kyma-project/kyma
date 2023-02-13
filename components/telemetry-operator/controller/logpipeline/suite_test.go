@@ -20,6 +20,8 @@ import (
 	"context"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/logger"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/overrides"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/resources/logpipeline"
+	"k8s.io/apimachinery/pkg/api/resource"
 	"path/filepath"
 	"testing"
 
@@ -59,6 +61,16 @@ var (
 		FilesConfigMap:    types.NamespacedName{Name: "test-telemetry-fluent-bit-files", Namespace: "default"},
 		EnvSecret:         types.NamespacedName{Name: "test-telemetry-fluent-bit-env", Namespace: "default"},
 		OverrideConfigMap: types.NamespacedName{Name: "override-config", Namespace: "default"},
+		DaemonSetConfig: logpipeline.DaemonSetConfig{
+			FluentBitImage:              "my-fluent-bit-image",
+			FluentBitConfigPrepperImage: "my-fluent-bit-config-image",
+			ExporterImage:               "my-exporter-image",
+			PriorityClassName:           "my-priority-class",
+			CPULimit:                    resource.MustParse("1"),
+			MemoryLimit:                 resource.MustParse("500Mi"),
+			CPURequest:                  resource.MustParse(".1"),
+			MemoryRequest:               resource.MustParse("100Mi"),
+		},
 		PipelineDefaults: builder.PipelineDefaults{
 			InputTag:          "kube",
 			MemoryBufferLimit: "10M",
@@ -113,7 +125,7 @@ var _ = BeforeSuite(func() {
 	client := mgr.GetClient()
 	overrides := overrides.New(configureLogLevelOnFly, &kubernetes.ConfigmapProber{Client: client})
 
-	reconciler := NewReconciler(client, testConfig, &kubernetes.DaemonSetProber{Client: client}, &kubernetes.DaemonSetAnnotator{Client: client}, overrides)
+	reconciler := NewReconciler(client, testConfig, &kubernetes.DaemonSetProber{Client: client}, overrides)
 	err = reconciler.SetupWithManager(mgr)
 	Expect(err).ToNot(HaveOccurred())
 

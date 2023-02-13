@@ -59,9 +59,18 @@ spec:
             - --fluent-bit-env-secret={{ .Release.Name }}-{{ .Values.logProcessor }}-env
             - --fluent-bit-files-cm={{ .Release.Name }}-{{ .Values.logProcessor }}-files
             - --fluent-bit-filesystem-buffer-limit={{ .Values.filesystemBufferLimit }}
+            - --fluent-bit-cpu-limit={{ .Values.fluentbit.resources.limits.cpu }}
+            - --fluent-bit-memory-limit={{ .Values.fluentbit.resources.limits.memory }}
+            - --fluent-bit-cpu-request={{ .Values.fluentbit.resources.requests.cpu }}
+            - --fluent-bit-memory-request={{ .Values.fluentbit.resources.requests.memory }}
             - --fluent-bit-denied-filter-plugins={{ join "," .Values.deniedPlugins.filter}}
             - --fluent-bit-denied-output-plugins={{ join "," .Values.deniedPlugins.output}}
             - --fluent-bit-max-pipelines={{.Values.maxLogPipelines}}
+            - --fluent-bit-image={{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.fluent_bit) }}
+            - --fluent-bit-exporter-image={{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.directory_size_exporter) }}
+{{- if or .Values.priorityClassName .Values.global.highPriorityClassName }}
+            - --fluent-bit-priority-class-name={{ coalesce .Values.priorityClassName .Values.global.highPriorityClassName }}
+{{- end }}
 {{- if not .Values.controllers.logging.enabled }}
             - --enable-logging=false
 {{- end }}
@@ -77,9 +86,6 @@ spec:
             - --trace-collector-memory-limit={{ .Values.traceCollector.resources.limits.memory }}
             - --trace-collector-cpu-request={{ .Values.traceCollector.resources.requests.cpu }}
             - --trace-collector-memory-request={{ .Values.traceCollector.resources.requests.memory }}
-{{- end }}
-{{- if .Values.global.operatorManagedFluentBit }}
-            - --enable-managed-fluentbit={{.Values.global.operatorManagedFluentBit}}
 {{- end }}
           name: manager
           ports:

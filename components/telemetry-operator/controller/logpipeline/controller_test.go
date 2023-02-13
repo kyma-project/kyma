@@ -19,6 +19,7 @@ package logpipeline
 import (
 	"bufio"
 	"context"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -34,7 +35,7 @@ import (
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 )
 
-var _ = Describe("LogPipeline controller", func() {
+var _ = Describe("LogPipeline controller", Ordered, func() {
 	const (
 		LogPipelineName       = "log-pipeline"
 		FluentBitFilterConfig = "Name   grep\nRegex   $kubernetes['labels']['app'] my-deployment"
@@ -88,11 +89,58 @@ var _ = Describe("LogPipeline controller", func() {
 
 	var expectedSecret = make(map[string][]byte)
 	expectedSecret["myKey"] = []byte("value")
-	Context("When updating LogPipeline", func() {
-		It("Should sync with the Fluent Bit configuration", func() {
-			By("By creating a new LogPipeline")
+	file := telemetryv1alpha1.FileMount{
+		Name:    "myFile",
+		Content: "file-content",
+	}
+	secretKeyRef := telemetryv1alpha1.SecretKeyRef{
+		Name:      "my-secret",
+		Namespace: testConfig.DaemonSet.Namespace,
+		Key:       "key",
+	}
+	variableRefs := telemetryv1alpha1.VariableRef{
+		Name:      "myKey",
+		ValueFrom: telemetryv1alpha1.ValueFromSource{SecretKeyRef: &secretKeyRef},
+	}
+	filter := telemetryv1alpha1.Filter{
+		Custom: FluentBitFilterConfig,
+	}
+	var logPipeline = &telemetryv1alpha1.LogPipeline{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: "telemetry.kyma-project.io/v1alpha1",
+			Kind:       "LogPipeline",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: LogPipelineName,
+		},
+		Spec: telemetryv1alpha1.LogPipelineSpec{
+			Input: telemetryv1alpha1.Input{Application: telemetryv1alpha1.ApplicationInput{
+				Namespaces: telemetryv1alpha1.InputNamespaces{
+					System: true}}},
+			Filters:   []telemetryv1alpha1.Filter{filter},
+			Output:    telemetryv1alpha1.Output{Custom: FluentBitOutputConfig},
+			Files:     []telemetryv1alpha1.FileMount{file},
+			Variables: []telemetryv1alpha1.VariableRef{variableRefs},
+		},
+	}
+	Context("On startup", Ordered, func() {
+		It("Should not have any Logpipelines", func() {
 			ctx := context.Background()
-
+			var logPipelineList telemetryv1alpha1.LogPipelineList
+			err := k8sClient.List(ctx, &logPipelineList)
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(len(logPipelineList.Items)).Should(Equal(0))
+		})
+		It("Should not have any fluent-bit daemon set", func() {
+			var fluentBitDaemonSetList appsv1.DaemonSetList
+			err := k8sClient.List(ctx, &fluentBitDaemonSetList)
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(len(fluentBitDaemonSetList.Items)).Should(Equal(0))
+		})
+	})
+	Context("When creating a log pipeline", Ordered, func() {
+		BeforeAll(func() {
+			ctx := context.Background()
 			secret := &corev1.Secret{
 				TypeMeta: metav1.TypeMeta{
 					APIVersion: "v1",
@@ -107,98 +155,10 @@ var _ = Describe("LogPipeline controller", func() {
 				},
 			}
 			Expect(k8sClient.Create(ctx, secret)).Should(Succeed())
-
-			podLabels := map[string]string{
-				"app.kubernetes.io/instance": "logging",
-				"app.kubernetes.io/name":     "fluent-bit",
-			}
-			container := corev1.Container{
-				Name:  "fluent-bit",
-				Image: "fluent-bit",
-			}
-			fluentBitDs := &appsv1.DaemonSet{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: "apps/v1",
-					Kind:       "DaemonSet",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      testConfig.DaemonSet.Name,
-					Namespace: testConfig.DaemonSet.Namespace,
-				},
-				Spec: appsv1.DaemonSetSpec{
-					Selector: &metav1.LabelSelector{
-						MatchLabels: podLabels,
-					},
-					Template: corev1.PodTemplateSpec{
-						ObjectMeta: metav1.ObjectMeta{
-							Labels: podLabels,
-						},
-						Spec: corev1.PodSpec{
-							Containers: []corev1.Container{
-								container,
-							},
-						},
-					},
-				},
-			}
-			Expect(k8sClient.Create(ctx, fluentBitDs)).Should(Succeed())
-
-			fluentBitPod := &corev1.Pod{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: "v1",
-					Kind:       "Pod",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      testConfig.DaemonSet.Name + "-123",
-					Namespace: testConfig.DaemonSet.Namespace,
-					Labels:    podLabels,
-				},
-				Spec: corev1.PodSpec{
-					Containers: []corev1.Container{
-						container,
-					},
-				},
-			}
-			Expect(k8sClient.Create(ctx, fluentBitPod)).Should(Succeed())
-
-			file := telemetryv1alpha1.FileMount{
-				Name:    "myFile",
-				Content: "file-content",
-			}
-			secretKeyRef := telemetryv1alpha1.SecretKeyRef{
-				Name:      "my-secret",
-				Namespace: testConfig.DaemonSet.Namespace,
-				Key:       "key",
-			}
-			variableRefs := telemetryv1alpha1.VariableRef{
-				Name:      "myKey",
-				ValueFrom: telemetryv1alpha1.ValueFromSource{SecretKeyRef: &secretKeyRef},
-			}
-			filter := telemetryv1alpha1.Filter{
-				Custom: FluentBitFilterConfig,
-			}
-
-			logPipeline := &telemetryv1alpha1.LogPipeline{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: "telemetry.kyma-project.io/v1alpha1",
-					Kind:       "LogPipeline",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name: LogPipelineName,
-				},
-				Spec: telemetryv1alpha1.LogPipelineSpec{
-					Input: telemetryv1alpha1.Input{Application: telemetryv1alpha1.ApplicationInput{
-						Namespaces: telemetryv1alpha1.InputNamespaces{
-							System: true}}},
-					Filters:   []telemetryv1alpha1.Filter{filter},
-					Output:    telemetryv1alpha1.Output{Custom: FluentBitOutputConfig},
-					Files:     []telemetryv1alpha1.FileMount{file},
-					Variables: []telemetryv1alpha1.VariableRef{variableRefs},
-				},
-			}
 			Expect(k8sClient.Create(ctx, logPipeline)).Should(Succeed())
 
-			// Custom metrics should be exported
+		})
+		It("Should verify metrics from the telemetry operator are exported", func() {
 			Eventually(func() bool {
 				resp, err := http.Get("http://localhost:8080/metrics")
 				if err != nil {
@@ -214,7 +174,8 @@ var _ = Describe("LogPipeline controller", func() {
 				}
 				return false
 			}, timeout, interval).Should(Equal(true))
-
+		})
+		It("Should have the telemetry_all_logpipelines metric set to 1", func() {
 			// All log pipeline gauge should be updated
 			Eventually(func() float64 {
 				resp, err := http.Get("http://localhost:8080/metrics")
@@ -229,8 +190,8 @@ var _ = Describe("LogPipeline controller", func() {
 
 				return *mf["telemetry_all_logpipelines"].Metric[0].Gauge.Value
 			}, timeout, interval).Should(Equal(1.0))
-
-			// Unsupported log pipeline gauge should be updated
+		})
+		It("Should have the telemetry_unsupported_logpipelines metric set to 1", func() {
 			Eventually(func() float64 {
 				resp, err := http.Get("http://localhost:8080/metrics")
 				if err != nil {
@@ -244,7 +205,8 @@ var _ = Describe("LogPipeline controller", func() {
 
 				return *mf["telemetry_unsupported_logpipelines"].Metric[0].Gauge.Value
 			}, timeout, interval).Should(Equal(1.0))
-
+		})
+		It("Should have fluent bit config section copied to the Fluent Bit configmap", func() {
 			// Fluent Bit config section should be copied to ConfigMap
 			Eventually(func() string {
 				cmFileName := LogPipelineName + ".conf"
@@ -260,8 +222,8 @@ var _ = Describe("LogPipeline controller", func() {
 				actualFluentBitConfig := strings.TrimRight(fluentBitCm.Data[cmFileName], "\n")
 				return actualFluentBitConfig
 			}, timeout, interval).Should(Equal(expectedFluentBitConfig))
-
-			// File content should be copied to ConfigMap
+		})
+		It("Should verify files have been copied into -files configmap", func() {
 			Eventually(func() string {
 				filesConfigMapLookupKey := types.NamespacedName{
 					Name:      testConfig.FilesConfigMap.Name,
@@ -274,8 +236,25 @@ var _ = Describe("LogPipeline controller", func() {
 				}
 				return filesCm.Data["myFile"]
 			}, timeout, interval).Should(Equal("file-content"))
+		})
 
-			// Secret reference should be copied to environment Secret
+		It("Should have created flunent-bit parsers configmap", func() {
+			Eventually(func() string {
+				parserCmName := fmt.Sprintf("%s-parsers", testConfig.DaemonSet.Name)
+				parserConfigMapLookupKey := types.NamespacedName{
+					Name:      parserCmName,
+					Namespace: testConfig.FilesConfigMap.Namespace,
+				}
+				var parserCm corev1.ConfigMap
+				err := k8sClient.Get(ctx, parserConfigMapLookupKey, &parserCm)
+				if err != nil {
+					return err.Error()
+				}
+				return parserCm.Data["parsers.conf"]
+			}, timeout, interval).Should(Equal(""))
+		})
+
+		It("Should verify secret reference is copied into environment secret", func() {
 			Eventually(func() string {
 				envSecretLookupKey := types.NamespacedName{
 					Name:      testConfig.EnvSecret.Name,
@@ -288,8 +267,8 @@ var _ = Describe("LogPipeline controller", func() {
 				}
 				return string(envSecret.Data["myKey"])
 			}, timeout, interval).Should(Equal("value"))
-
-			// Finalizers should be added
+		})
+		It("Should have added the finalizers", func() {
 			Eventually(func() []string {
 				loggingConfigLookupKey := types.NamespacedName{
 					Name:      LogPipelineName,
@@ -302,10 +281,8 @@ var _ = Describe("LogPipeline controller", func() {
 				}
 				return updatedLogPipeline.Finalizers
 			}, timeout, interval).Should(ContainElement("FLUENT_BIT_SECTIONS_CONFIG_MAP"))
-
-			Expect(k8sClient.Delete(ctx, logPipeline)).Should(Succeed())
-
-			// Fluent Bit daemon set should rollout-restarted (generation changes from 1 to 2)
+		})
+		It("Should have created a fluent-bit daemon set", func() {
 			Eventually(func() int {
 				var fluentBitDaemonSet appsv1.DaemonSet
 				err := k8sClient.Get(ctx, types.NamespacedName{
@@ -316,8 +293,9 @@ var _ = Describe("LogPipeline controller", func() {
 					return 0
 				}
 				return int(fluentBitDaemonSet.Generation)
-			}, timeout, interval).Should(Equal(2))
-
+			}, timeout, interval).Should(Equal(1))
+		})
+		It("Should have the checksum annotation set to the fluent-bit daemonset", func() {
 			// Fluent Bit daemon set should have checksum annotation set
 			Eventually(func() bool {
 				var fluentBitDaemonSet appsv1.DaemonSet
@@ -332,8 +310,25 @@ var _ = Describe("LogPipeline controller", func() {
 				_, found := fluentBitDaemonSet.Spec.Template.Annotations["checksum/logpipeline-config"]
 				return found
 			}, timeout, interval).Should(BeTrue())
+		})
+	})
 
-			// All log pipeline gauge should be updated after deletion
+	Context("When deleting the log pipeline", Ordered, func() {
+
+		BeforeAll(func() {
+			Expect(k8sClient.Delete(ctx, logPipeline)).Should(Succeed())
+		})
+
+		It("Should have no fluent bit daemon set", func() {
+			Eventually(func() int {
+				var fluentBitDaemonSetList appsv1.DaemonSetList
+				err := k8sClient.List(ctx, &fluentBitDaemonSetList)
+				Expect(err).ShouldNot(HaveOccurred())
+				return len(fluentBitDaemonSetList.Items)
+			}, timeout, interval).Should(Equal(0))
+		})
+
+		It("Should reset the telemetry_all_logpipelines metric", func() {
 			Eventually(func() float64 {
 				resp, err := http.Get("http://localhost:8080/metrics")
 				if err != nil {
@@ -347,8 +342,9 @@ var _ = Describe("LogPipeline controller", func() {
 
 				return *mf["telemetry_all_logpipelines"].Metric[0].Gauge.Value
 			}, timeout, interval).Should(Equal(0.0))
+		})
 
-			// Unsupported log pipeline gauge should be updated after deletion
+		It("Should reset the telemetry_unsupported_logpipelines metric", func() {
 			Eventually(func() float64 {
 				resp, err := http.Get("http://localhost:8080/metrics")
 				if err != nil {

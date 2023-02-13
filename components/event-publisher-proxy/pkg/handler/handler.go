@@ -68,11 +68,11 @@ type Handler struct {
 }
 
 // NewHandler returns a new HTTP Handler instance.
-func NewHandler(receiver *receiver.HTTPMessageReceiver, sender sender.GenericSender, healthChecker health.Checker, requestTimeout time.Duration,
-	legacyTransformer legacy.RequestToCETransformer, opts *options.Options, subscribedProcessor *subscribed.Processor,
-	logger *logger.Logger, collector metrics.PublishingMetricsCollector, eventTypeCleaner eventtype.Cleaner,
-	ceBuilder builder.CloudEventBuilder, oldEventTypePrefix string, activeBackend env.ActiveBackend) *Handler {
-
+func NewHandler(receiver *receiver.HTTPMessageReceiver, sender sender.GenericSender, healthChecker health.Checker,
+	requestTimeout time.Duration, legacyTransformer legacy.RequestToCETransformer, opts *options.Options,
+	subscribedProcessor *subscribed.Processor, logger *logger.Logger, collector metrics.PublishingMetricsCollector,
+	eventTypeCleaner eventtype.Cleaner, ceBuilder builder.CloudEventBuilder, oldEventTypePrefix string,
+	activeBackend env.ActiveBackend) *Handler {
 	return &Handler{
 		Receiver:            receiver,
 		Sender:              sender,
@@ -116,7 +116,8 @@ func (h *Handler) Start(ctx context.Context) error {
 	return h.Receiver.StartListen(ctx, h.router, h.Logger)
 }
 
-// maxBytes installs a MaxBytesReader onto the request, so that incoming request larger than a given size will cause an error.
+// maxBytes installs a MaxBytesReader onto the request, so that incoming request that is larger than a given size
+// will cause an error.
 func (h *Handler) maxBytes(f http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		r.Body = http.MaxBytesReader(w, r.Body, h.Options.MaxRequestSize)
@@ -127,7 +128,8 @@ func (h *Handler) maxBytes(f http.HandlerFunc) http.HandlerFunc {
 // handleSendEventAndRecordMetricsLegacy handles the publishing of metrics.
 // It writes to the user request if any error occurs.
 // Otherwise, returns the result.
-func (h *Handler) handleSendEventAndRecordMetricsLegacy(writer http.ResponseWriter, request *http.Request, event *cev2event.Event) (sender.PublishResult, error) {
+func (h *Handler) handleSendEventAndRecordMetricsLegacy(
+	writer http.ResponseWriter, request *http.Request, event *cev2event.Event) (sender.PublishResult, error) {
 	result, err := h.sendEventAndRecordMetrics(request.Context(), event, h.Sender.URL(), request.Header)
 	if err != nil {
 		h.namedLogger().Error(err)
@@ -317,7 +319,20 @@ func (h *Handler) sendEventAndRecordMetrics(ctx context.Context, event *cev2even
 		h.collector.RecordBackendError()
 		return nil, err
 	}
-	h.collector.RecordEventType(event.Type(), event.Source(), result.HTTPStatus())
+	originalEventType := event.Type()
+	originalTypeHeader, ok := event.Extensions()[builder.OriginalTypeHeaderName]
+	if !ok {
+		h.namedLogger().With().Warnw("event header doesn't exist", "header",
+			builder.OriginalTypeHeaderName)
+	} else {
+		originalEventType, ok = originalTypeHeader.(string)
+		if !ok {
+			h.namedLogger().With().Warnw("failed to convert event original event type extension value to string",
+				builder.OriginalTypeHeaderName, originalTypeHeader)
+			originalEventType = event.Type()
+		}
+	}
+	h.collector.RecordEventType(originalEventType, event.Source(), result.HTTPStatus())
 	h.collector.RecordBackendLatency(duration, result.HTTPStatus(), host)
 	h.collector.RecordBackendRequests(result.HTTPStatus(), host)
 	return result, nil

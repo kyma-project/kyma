@@ -31,7 +31,7 @@ const (
 	noSpaceLeftErrMessage = "no space left on device"
 )
 
-// compile time check
+// compile time check.
 var _ sender.GenericSender = &Sender{}
 var _ health.Checker = &Sender{}
 
