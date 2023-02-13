@@ -2,9 +2,7 @@
 title: Access and Expose Grafana and Jaeger
 ---
 
-> **CAUTION:** Jaeger is [deprecated](https://kyma-project.io/blog/jaeger-deprecation) and is planned to be removed. If you want to install a custom Jaeger stack, take a look at [this tutorial](https://github.com/kyma-project/examples/tree/main/jaeger).
-
-> **CAUTION:** Kyma has deprecated the following components and plans to remove them. You can replace them with a custom stack:
+> **NOTE:** Kyma has deprecated the following components and plans to remove them. You can replace them with a custom stack:
   - To replace [deprecated](https://kyma-project.io/blog/jaeger-deprecation) Jaeger, take a look at [Install custom Jaeger in Kyma](https://github.com/kyma-project/examples/tree/main/jaeger).
   - To replace [deprecated](https://kyma-project.io/blog/2022/12/9/monitoring-deprecation) Prometheus and Grafana, take a look at [Install a custom kube-prometheus-stack in Kyma](https://github.com/kyma-project/examples/tree/main/prometheus).
 
