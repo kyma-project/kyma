@@ -24,7 +24,7 @@ To do that, we'll use the Grafana dashboard that comes with Kyma.
 
 1. In the Grafana dashboard, use the left menu to navigate to **Explore** and choose **Loki** from the dropdown list.
 
-    > **NOTE:** Loki is [deprecated](https://kyma-project.io/blog/2022/11/2/loki-deprecation/) and is planned to be removed. If you want to install a custom Loki stack, take a look at [this tutorial](https://github.com/kyma-project/examples/tree/main/loki).
+    > **NOTE:** Loki is [deprecated](https://kyma-project.io/blog/2022/11/2/loki-deprecation/) and is planned to be removed. If you want to install a custom Loki stack, take a look at [Installing a custom Loki stack in Kyma](https://github.com/kyma-project/examples/tree/main/loki).
 
 2. Click on **Log browser** and select the following values:
    - **1. Select labels to search in**: `container`, `function`
