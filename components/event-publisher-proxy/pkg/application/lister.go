@@ -39,17 +39,17 @@ func (l Lister) Get(name string) (*applicationv1alpha1.Application, error) {
 		return nil, err
 	}
 
-	applicationUnstructured, ok := object.(*unstructured.Unstructured)
+	u, ok := object.(*unstructured.Unstructured)
 	if !ok {
 		return nil, errors.New("failed to convert runtime object to unstructured")
 	}
 
-	application := &applicationv1alpha1.Application{}
-	if err := runtime.DefaultUnstructuredConverter.FromUnstructured(applicationUnstructured.Object, application); err != nil {
+	a := &applicationv1alpha1.Application{}
+	if err := runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, a); err != nil {
 		return nil, err
 	}
 
-	return application, nil
+	return a, nil
 }
 
 func GroupVersionResource() schema.GroupVersionResource {
