@@ -303,7 +303,7 @@ describe('Eventing tests', function() {
   });
 
   context('with BEB backend', function() {
-    // skip publishing cloud events for beb backend when event mesh credentials file is missing
+    // skip publishing cloud events for beb backend when event mesh credentials file is missing..
     if (getEventMeshNamespace() === undefined) {
       debug('Skipping E2E eventing tests for BEB backend due to missing EVENTMESH_SECRET_FILE');
       return;
