@@ -32,6 +32,8 @@ type API struct {
 	RequestParameters *authorization.RequestParameters
 	// skipVerify is flag set on Application CRD
 	SkipVerify bool
+	// encodeUrl is flag set on Application CRD
+	EncodeUrl bool
 }
 
 // Events contains specification for events.

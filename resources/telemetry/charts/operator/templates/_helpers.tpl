@@ -65,3 +65,58 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+
+{{/*
+Create fluentbit full name
+*/}}
+{{- define "fluent-bit.fullname" -}}
+{{- if .Values.fluentbit.fullnameOverride -}}
+{{- .Values.fluentbit.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- $name := default .Chart.Name .Values.nameOverride -}}
+{{- if contains $name .Release.Name -}}
+{{- .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Fluent-bit labels
+*/}}
+{{- define "fluent-bit.labels" -}}
+helm.sh/chart: {{ include "fluent-bit.chart" . }}
+{{ include "fluent-bit.selectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end -}}
+
+{{/*
+Fluent-bit service account name
+*/}}
+{{- define "fluent-bit.serviceAccountName" -}}
+{{- if .Values.serviceAccount.create -}}
+    {{ default (include "fluent-bit.fullname" .) .Values.serviceAccount.name }}
+{{- else -}}
+    {{ default "default" .Values.serviceAccount.name }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Fluent-bit selector labels
+*/}}
+{{- define "fluent-bit.selectorLabels" -}}
+app.kubernetes.io/name: {{ printf "fluent-bit"}}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end -}}
+
+{{/*
+Fluent-bit chart name
+*/}}
+{{- define "fluent-bit.chart" -}}
+{{- printf "fluent-bit-1.9.5" | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
+{{- end -}}

@@ -18,9 +18,11 @@ func TestConfigureTransport(t *testing.T) {
 	cfg.ConfigureTransport(transport)
 
 	if transport.MaxIdleConns != maxIdleConnections {
-		t.Errorf("HTTP Transport MaxIdleConns is misconfigured want: %d but got: %d", maxIdleConnections, transport.MaxIdleConns)
+		t.Errorf("HTTP Transport MaxIdleConns is misconfigured want: %d but got: %d",
+			maxIdleConnections, transport.MaxIdleConns)
 	}
 	if transport.MaxIdleConnsPerHost != maxIdleConnectionsPerHost {
-		t.Errorf("HTTP Transport MaxIdleConnsPerHost is misconfigured want: %d but got: %d", maxIdleConnectionsPerHost, transport.MaxIdleConnsPerHost)
+		t.Errorf("HTTP Transport MaxIdleConnsPerHost is misconfigured want: %d but got: %d",
+			maxIdleConnectionsPerHost, transport.MaxIdleConnsPerHost)
 	}
 }

@@ -2,6 +2,8 @@
 title: Jaeger doesn't show the traces you want to see
 ---
 
+> **NOTE:** Jaeger is [deprecated](https://kyma-project.io/blog/jaeger-deprecation) and is planned to be removed. If you want to install a custom Jaeger stack, take a look at [Install custom Jaeger in Kyma](https://github.com/kyma-project/examples/tree/main/jaeger).
+
 ## Condition
 
 Jaeger shows fewer traces than you would like to see.

@@ -13,47 +13,47 @@ import (
 )
 
 const (
-	// BackendErrorsKey name of the backendErrors metric
+	// BackendErrorsKey name of the backendErrors metric.
 	BackendErrorsKey = "eventing_epp_backend_errors_total"
-	// backendErrorsHelp help text for the backendErrors metric
+	// backendErrorsHelp help text for the backendErrors metric.
 	backendErrorsHelp = "The total number of backend errors while sending events to the messaging server"
 
-	// BackendLatencyKey name of the backendLatencyHelp metric
+	// BackendLatencyKey name of the backendLatencyHelp metric.
 	BackendLatencyKey = "eventing_epp_backend_duration_milliseconds"
-	// backendLatencyHelp help text for the backendLatencyHelp metric
+	// backendLatencyHelp help text for the backendLatencyHelp metric.
 	backendLatencyHelp = "The duration of sending events to the messaging server in milliseconds"
 
-	// BackendRequestsKey name of the eventRequests metric
+	// BackendRequestsKey name of the eventRequests metric.
 	BackendRequestsKey = "eventing_epp_backend_requests_total"
-	// backendRequestsHelp help text for event backendRequests metric
+	// backendRequestsHelp help text for event backendRequests metric.
 	backendRequestsHelp = "The total number of backend requests"
 
-	// durationKey name of the duration metric
+	// durationKey name of the duration metric.
 	durationKey = "eventing_epp_requests_duration_milliseconds"
-	// durationHelp help text for the duration metric
+	// durationHelp help text for the duration metric.
 	durationHelp = "The duration of processing an incoming request (includes sending to the backend)"
 
-	// RequestsKey name of the Requests metric
+	// RequestsKey name of the Requests metric.
 	RequestsKey = "eventing_epp_requests_total"
-	// requestsHelp help text for event requests metric
+	// requestsHelp help text for event requests metric.
 	requestsHelp = "The total number of requests"
 
-	// EventTypePublishedMetricKey name of the eventTypeLabel metric
+	// EventTypePublishedMetricKey name of the eventTypeLabel metric.
 	EventTypePublishedMetricKey = "eventing_epp_event_type_published_total"
-	// eventTypePublishedMetricHelp help text for the eventTypeLabel metric
+	// eventTypePublishedMetricHelp help text for the eventTypeLabel metric.
 	eventTypePublishedMetricHelp = "The total number of events published for a given eventTypeLabel"
-	// methodLabel label for the method used in the http request
+	// methodLabel label for the method used in the http request.
 
 	methodLabel = "method"
-	// responseCodeLabel name of the status code labels used by multiple metrics
+	// responseCodeLabel name of the status code labels used by multiple metrics.
 	responseCodeLabel = "code"
-	// pathLabel name of the path service label
+	// pathLabel name of the path service label.
 	pathLabel = "path"
-	// destSvcLabel name of the destination service label used by multiple metrics
+	// destSvcLabel name of the destination service label used by multiple metrics.
 	destSvcLabel = "destination_service"
-	// eventTypeLabel name of the event type label used by metrics
+	// eventTypeLabel name of the event type label used by metrics.
 	eventTypeLabel = "event_type"
-	// eventSourceLabel name of the event source label used by metrics
+	// eventSourceLabel name of the event source label used by metrics.
 	eventSourceLabel = "event_source"
 )
 
@@ -70,7 +70,7 @@ type PublishingMetricsCollector interface {
 
 var _ PublishingMetricsCollector = &Collector{}
 
-// Collector implements the prometheus.Collector interface
+// Collector implements the prometheus.Collector interface.
 type Collector struct {
 	backendErrors   *prometheus.CounterVec
 	backendLatency  *prometheus.HistogramVec
@@ -82,7 +82,7 @@ type Collector struct {
 	eventType *prometheus.CounterVec
 }
 
-// NewCollector a new instance of Collector
+// NewCollector creates a new instance of Collector.
 func NewCollector(latency histogram.BucketsProvider) *Collector {
 	return &Collector{
 		backendErrors: prometheus.NewCounterVec(
@@ -92,6 +92,7 @@ func NewCollector(latency histogram.BucketsProvider) *Collector {
 			},
 			[]string{},
 		),
+		//nolint:promlinter // we follow the same pattern as istio. so a millisecond unit if fine here
 		backendLatency: prometheus.NewHistogramVec(
 			prometheus.HistogramOpts{
 				Name:    BackendLatencyKey,
@@ -116,6 +117,7 @@ func NewCollector(latency histogram.BucketsProvider) *Collector {
 			[]string{eventTypeLabel, eventSourceLabel, responseCodeLabel},
 		),
 
+		//nolint:promlinter // we follow the same pattern as istio. so a millisecond unit if fine here
 		duration: prometheus.NewHistogramVec(
 			prometheus.HistogramOpts{
 				Name:    durationKey,
@@ -133,7 +135,7 @@ func NewCollector(latency histogram.BucketsProvider) *Collector {
 	}
 }
 
-// Describe implements the prometheus.Collector interface Describe method
+// Describe implements the prometheus.Collector interface Describe method.
 func (c *Collector) Describe(ch chan<- *prometheus.Desc) {
 	c.backendErrors.Describe(ch)
 	c.backendLatency.Describe(ch)
@@ -143,7 +145,7 @@ func (c *Collector) Describe(ch chan<- *prometheus.Desc) {
 	c.duration.Describe(ch)
 }
 
-// Collect implements the prometheus.Collector interface Collect method
+// Collect implements the prometheus.Collector interface Collect method.
 func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 	c.backendErrors.Collect(ch)
 	c.backendLatency.Collect(ch)
@@ -153,27 +155,28 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 	c.duration.Collect(ch)
 }
 
-// RecordError records an error metric
+// RecordBackendError records an error while sending to the eventing backend.
 func (c *Collector) RecordBackendError() {
 	c.backendErrors.WithLabelValues().Inc()
 }
 
-// RecordLatency records a backendLatencyHelp metric
+// RecordLatency records a backendLatencyHelp metric.
 func (c *Collector) RecordBackendLatency(duration time.Duration, statusCode int, destSvc string) {
 	c.backendLatency.WithLabelValues(fmt.Sprint(statusCode), destSvc).Observe(float64(duration.Milliseconds()))
 }
 
-// RecordEventType records an eventType metric
+// RecordEventType records an eventType metric.
 func (c *Collector) RecordEventType(eventType, eventSource string, statusCode int) {
 	c.eventType.WithLabelValues(eventType, eventSource, fmt.Sprint(statusCode)).Inc()
 }
 
-// RecordRequests records an eventRequests metric
+// RecordRequests records an eventRequests metric.
 func (c *Collector) RecordBackendRequests(statusCode int, destSvc string) {
 	c.backendRequests.WithLabelValues(fmt.Sprint(statusCode), destSvc).Inc()
 }
 
-// MetricsMiddleware returns a http.Handler that can be used as middleware in gorilla.mux to track latencies for all handled paths in the gorilla router
+// MetricsMiddleware returns a http.Handler that can be used as middleware in gorilla.mux to track
+// latencies for all handled paths in the gorilla router.
 func (c *Collector) MetricsMiddleware() mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -184,6 +187,5 @@ func (c *Collector) MetricsMiddleware() mux.MiddlewareFunc {
 				promhttp.InstrumentHandlerCounter(c.requests.MustCurryWith(prometheus.Labels{pathLabel: path}), next),
 			).ServeHTTP(w, r)
 		})
-
 	}
 }

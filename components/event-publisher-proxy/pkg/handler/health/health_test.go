@@ -10,6 +10,7 @@ import (
 )
 
 func TestChecker(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		name                        string
 		useCustomLivenessCheck      bool             // use the givenCustomLivenessCheck instead of the default one

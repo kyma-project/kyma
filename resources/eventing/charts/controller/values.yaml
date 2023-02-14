@@ -11,8 +11,6 @@ clusterRole:
   # name defines optionally another name than the default name for the cluster role
   name: ""
 
-podSecurityContext:
-
 bebSecret:
   nameSuffix: "-beb-oauth2"
 
@@ -42,7 +40,6 @@ metrics:
     port: 8080
     portName: metrics
     nameSuffix: "-metrics"
-    interval: 30s
 
 webhook:
   port: 443

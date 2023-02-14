@@ -1,3 +1,4 @@
+//nolint:lll // output directly from prometheus
 package handler
 
 import (
@@ -10,17 +11,19 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy/api"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy/legacytest"
-	"github.com/stretchr/testify/require"
+
+	eclogger "github.com/kyma-project/kyma/components/eventing-controller/logger"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application/applicationtest"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application/fake"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/builder"
-	eclogger "github.com/kyma-project/kyma/components/eventing-controller/logger"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
-	"github.com/stretchr/testify/assert"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype/eventtypetest"
@@ -162,7 +165,7 @@ func TestHandler_publishCloudEventsV1Alpha2(t *testing.T) {
 			wantTEF: `
 				# HELP eventing_epp_event_type_published_total The total number of events published for a given eventTypeLabel
 				# TYPE eventing_epp_event_type_published_total counter
-				eventing_epp_event_type_published_total{code="204",event_source="testapp1023",event_type="prefix.testapp1023.order.created.v1"} 1
+				eventing_epp_event_type_published_total{code="204",event_source="testapp1023",event_type="order.created.v1"} 1
 				# HELP eventing_epp_backend_duration_milliseconds The duration of sending events to the messaging server in milliseconds
 				# TYPE eventing_epp_backend_duration_milliseconds histogram
 				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.005"} 1
@@ -204,7 +207,7 @@ func TestHandler_publishCloudEventsV1Alpha2(t *testing.T) {
 			wantTEF: `
 				# HELP eventing_epp_event_type_published_total The total number of events published for a given eventTypeLabel
 				# TYPE eventing_epp_event_type_published_total counter
-				eventing_epp_event_type_published_total{code="204",event_source="testapp1023",event_type="prefix.testapp1023.order.created.v1"} 1
+				eventing_epp_event_type_published_total{code="204",event_source="testapp1023",event_type="order.created.v1"} 1
 				# HELP eventing_epp_backend_duration_milliseconds The duration of sending events to the messaging server in milliseconds
 				# TYPE eventing_epp_backend_duration_milliseconds histogram
 				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.005"} 1
@@ -344,7 +347,7 @@ func TestHandler_publishLegacyEventsAsCEV1alpha2(t *testing.T) {
 		givenLegacyTransformer legacy.RequestToCETransformer
 		givenCollector         metrics.PublishingMetricsCollector
 		givenRequest           *http.Request
-		wantHttpStatus         int
+		wantHTTPStatus         int
 		wantTEF                string
 	}{
 		{
@@ -358,11 +361,11 @@ func TestHandler_publishLegacyEventsAsCEV1alpha2(t *testing.T) {
 			givenLegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", appLister),
 			givenCollector:         metrics.NewCollector(latency),
 			givenRequest:           legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
-			wantHttpStatus:         http.StatusOK,
+			wantHTTPStatus:         http.StatusOK,
 			wantTEF: `
 					# HELP eventing_epp_event_type_published_total The total number of events published for a given eventTypeLabel
 					# TYPE eventing_epp_event_type_published_total counter
-					eventing_epp_event_type_published_total{code="204",event_source="testapp",event_type="prefix.testapp.object.created.v1"} 1
+					eventing_epp_event_type_published_total{code="204",event_source="testapp",event_type="object.created.v1"} 1
 
 					# HELP eventing_epp_backend_duration_milliseconds The duration of sending events to the messaging server in milliseconds
 					# TYPE eventing_epp_backend_duration_milliseconds histogram
@@ -395,7 +398,7 @@ func TestHandler_publishLegacyEventsAsCEV1alpha2(t *testing.T) {
 			givenLegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", appLister),
 			givenCollector:         metrics.NewCollector(latency),
 			givenRequest:           legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
-			wantHttpStatus:         http.StatusBadGateway,
+			wantHTTPStatus:         http.StatusBadGateway,
 			wantTEF: `
 					# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
 					# TYPE eventing_epp_backend_errors_total counter
@@ -411,7 +414,7 @@ func TestHandler_publishLegacyEventsAsCEV1alpha2(t *testing.T) {
 			givenLegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", appLister),
 			givenCollector:         metrics.NewCollector(latency),
 			givenRequest:           legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
-			wantHttpStatus:         507,
+			wantHTTPStatus:         507,
 			wantTEF: `
 					# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
 					# TYPE eventing_epp_backend_errors_total counter
@@ -427,7 +430,7 @@ func TestHandler_publishLegacyEventsAsCEV1alpha2(t *testing.T) {
 			givenLegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", appLister),
 			givenCollector:         metrics.NewCollector(latency),
 			givenRequest:           legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
-			wantHttpStatus:         500,
+			wantHTTPStatus:         500,
 			wantTEF: `
 					# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
 					# TYPE eventing_epp_backend_errors_total counter
@@ -445,8 +448,9 @@ func TestHandler_publishLegacyEventsAsCEV1alpha2(t *testing.T) {
 			givenLegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", appLister),
 			givenCollector:         metrics.NewCollector(latency),
 			givenRequest:           legacytest.InvalidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
-			wantHttpStatus:         400,
-			wantTEF:                "", // this is a client error. We do record an error metric for requests that cannot even be decoded correctly.
+			wantHTTPStatus:         400,
+			// this is a client error. We do record an error metric for requests that cannot even be decoded correctly.
+			wantTEF: "",
 		},
 	}
 	for _, tt := range tests {
@@ -473,11 +477,11 @@ func TestHandler_publishLegacyEventsAsCEV1alpha2(t *testing.T) {
 			h.publishLegacyEventsAsCE(writer, tt.givenRequest)
 
 			// then
-			require.Equal(t, tt.wantHttpStatus, writer.Result().StatusCode)
+			require.Equal(t, tt.wantHTTPStatus, writer.Result().StatusCode)
 			body, err := io.ReadAll(writer.Result().Body)
 			require.NoError(t, err)
 
-			if tt.wantHttpStatus == http.StatusOK {
+			if tt.wantHTTPStatus == http.StatusOK {
 				ok := &api.PublishResponse{}
 				err = json.Unmarshal(body, ok)
 				require.NoError(t, err)
@@ -495,7 +499,16 @@ func TestHandler_publishLegacyEventsAsCEV1alpha2(t *testing.T) {
 // CreateValidStructuredRequestV1Alpha2 creates a structured cloudevent as http request.
 func CreateValidStructuredRequestV1Alpha2(t *testing.T) *http.Request {
 	t.Helper()
-	req := httptest.NewRequest(http.MethodPost, "http://localhost/publish", strings.NewReader("{\"specversion\":\"1.0\",\"type\":\"order.created.v1\",\"source\":\"testapp1023\",\"id\":\"8945ec08-256b-11eb-9928-acde48001122\",\"data\":{\"foo\":\"bar\"}}"))
+	reader := strings.NewReader(`{
+		"specversion":"1.0",
+		"type":"order.created.v1",
+		"source":"testapp1023",
+		"id":"8945ec08-256b-11eb-9928-acde48001122",
+		"data":{
+			"foo":"bar"
+		}
+		}`)
+	req := httptest.NewRequest(http.MethodPost, "http://localhost/publish", reader)
 	req.Header.Add("Content-Type", "application/cloudevents+json")
 	return req
 }
@@ -503,15 +516,24 @@ func CreateValidStructuredRequestV1Alpha2(t *testing.T) *http.Request {
 // CreateBrokenRequestV1Alpha2 creates a structured cloudevent request that cannot be parsed.
 func CreateBrokenRequestV1Alpha2(t *testing.T) *http.Request {
 	t.Helper()
-	req := httptest.NewRequest(http.MethodPost, "http://localhost/publish", strings.NewReader("I AM JUST A BROKEN REQUEST"))
+	reader := strings.NewReader("I AM JUST A BROKEN REQUEST")
+	req := httptest.NewRequest(http.MethodPost, "http://localhost/publish", reader)
 	req.Header.Add("Content-Type", "application/cloudevents+json")
 	return req
 }
 
-// CreateInvalidStructuredRequestV1Alpha2 creates an invalid structured cloudevent as http request. The `type` is missing.
+// CreateInvalidStructuredRequestV1Alpha2 creates an invalid structured cloudevent as http request.
+// The `type` is missing.
 func CreateInvalidStructuredRequestV1Alpha2(t *testing.T) *http.Request {
 	t.Helper()
-	req := httptest.NewRequest(http.MethodPost, "http://localhost/publish", strings.NewReader("{\"specversion\":\"1.0\",\"source\":\"testapp1023\",\"id\":\"8945ec08-256b-11eb-9928-acde48001122\",\"data\":{\"foo\":\"bar\"}}"))
+	reader := strings.NewReader(`{
+		"specversion":"1.0",
+		"source":"testapp1023",
+		"id":"8945ec08-256b-11eb-9928-acde48001122",
+		"data":{
+			"foo":"bar"
+		}}`)
+	req := httptest.NewRequest(http.MethodPost, "http://localhost/publish", reader)
 	req.Header.Add("Content-Type", "application/cloudevents+json")
 	return req
 }
@@ -519,7 +541,7 @@ func CreateInvalidStructuredRequestV1Alpha2(t *testing.T) *http.Request {
 // CreateValidBinaryRequestV1Alpha2 creates a valid binary cloudevent as http request.
 func CreateValidBinaryRequestV1Alpha2(t *testing.T) *http.Request {
 	t.Helper()
-	req := httptest.NewRequest(http.MethodPost, "http://localhost/publish", strings.NewReader("{\"foo\":\"bar\"}"))
+	req := httptest.NewRequest(http.MethodPost, "http://localhost/publish", strings.NewReader(`{"foo":"bar"}`))
 	req.Header.Add("Ce-Specversion", "1.0")
 	req.Header.Add("Ce-Type", "order.created.v1")
 	req.Header.Add("Ce-Source", "testapp1023")
@@ -530,7 +552,7 @@ func CreateValidBinaryRequestV1Alpha2(t *testing.T) *http.Request {
 // CreateInvalidBinaryRequestV1Alpha2 creates an invalid binary cloudevent as http request. The `type` is missing.
 func CreateInvalidBinaryRequestV1Alpha2(t *testing.T) *http.Request {
 	t.Helper()
-	req := httptest.NewRequest(http.MethodPost, "http://localhost/publish", strings.NewReader("{\"foo\":\"bar\"}"))
+	req := httptest.NewRequest(http.MethodPost, "http://localhost/publish", strings.NewReader(`{"foo":"bar"}`))
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Ce-Specversion", "1.0")
 	req.Header.Add("Ce-Source", "testapp1023")

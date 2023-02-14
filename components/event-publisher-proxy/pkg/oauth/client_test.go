@@ -22,7 +22,8 @@ func TestNewClient(t *testing.T) {
 		maxIdleConnsPerHost = 200
 	)
 
-	client := NewClient(context.Background(), &env.EventMeshConfig{MaxIdleConns: maxIdleConns, MaxIdleConnsPerHost: maxIdleConnsPerHost})
+	cfg := &env.EventMeshConfig{MaxIdleConns: maxIdleConns, MaxIdleConnsPerHost: maxIdleConnsPerHost}
+	client := NewClient(context.Background(), cfg)
 	defer client.CloseIdleConnections()
 
 	ocTransport, ok := client.Transport.(*ochttp.Transport)
@@ -41,10 +42,12 @@ func TestNewClient(t *testing.T) {
 	}
 
 	if httpTransport.MaxIdleConns != maxIdleConns {
-		t.Errorf("HTTP Client Transport MaxIdleConns is misconfigured want: %d but got: %d", maxIdleConns, httpTransport.MaxIdleConns)
+		t.Errorf("HTTP Client Transport MaxIdleConns is misconfigured want: %d but got: %d",
+			maxIdleConns, httpTransport.MaxIdleConns)
 	}
 	if httpTransport.MaxIdleConnsPerHost != maxIdleConnsPerHost {
-		t.Errorf("HTTP Client Transport MaxIdleConnsPerHost is misconfigured want: %d but got: %d", maxIdleConnsPerHost, httpTransport.MaxIdleConnsPerHost)
+		t.Errorf("HTTP Client Transport MaxIdleConnsPerHost is misconfigured want: %d but got: %d",
+			maxIdleConnsPerHost, httpTransport.MaxIdleConnsPerHost)
 	}
 }
 

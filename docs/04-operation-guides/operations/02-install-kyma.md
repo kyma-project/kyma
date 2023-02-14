@@ -26,7 +26,7 @@ You can either use an out-of-the-box k3d cluster or choose any other cluster pro
   ```
 
   But you can do more. To define the name of your k3d cluster and pass arguments to the Kubernetes API server, for example, to log to stderr, run:
-  
+
   ```bash
   kyma provision k3d --name='{CUSTOM_NAME}' --k3s-arg='--alsologtostderr@server:0'
   ```
@@ -41,7 +41,7 @@ Use the `deploy` command to install Kyma.
   kyma deploy
   ```
 
-With Kyma installed on a local k3d cluster, access Kyma Dashboard using `kyma dashboard`. The command opens a browser and takes you to localhost with the web-based administrative UI for Kyma. With Kyma installed on a remote cluster, access the Dashboard at [`https://dashboard.kyma-project.io`](https://dashboard.kyma-project.io).
+With Kyma installed on a local k3d cluster, access Kyma Dashboard using `kyma dashboard`. The command opens a browser and takes you to localhost with the web-based administrative UI for Kyma. Use the same command to access Kyma installed on a remote cluster.
 
 ## Choose resource consumption
 
@@ -69,7 +69,7 @@ A profile is defined globally for the whole Kyma installation. It's not possible
 If you install Kyma on a remote cluster, you can use the out-of-the box `kyma.example.com` domain. All you need to do is get your load balancer IP address and add the following line to the `hosts` file:
 
   ```bash
-  {load_balancer_IP} kiali.kyma.example.com grafana.kyma.example.com oauth2.kyma.example.com registry.kyma.example.com jaeger.kyma.example.com connector-service.kyma.example.com gateway.kyma.example.com
+  {load_balancer_IP} grafana.kyma.example.com oauth2.kyma.example.com registry.kyma.example.com connector-service.kyma.example.com gateway.kyma.example.com
   ```
 
 To install Kyma using your own domain name, you must provide the certificate and key as files. If you don't have a certificate yet, you can create a self-signed certificate and key:
@@ -124,7 +124,6 @@ prerequisites:
 components:
   - name: "logging"
   - name: "tracing"
-  - name: "kiali"
   - name: "monitoring"
   - name: "eventing"
   ```
@@ -136,7 +135,7 @@ components:
   ```
 
   If you provide no Namespace, the default Namespace called `kyma-system` is used. For example, to install the `eventing` component in the default Namespace and the `istio` component in the `istio-system` Namespace, run:
-  
+
   ```bash
   kyma deploy --component eventing --component istio@istio-system
   ```

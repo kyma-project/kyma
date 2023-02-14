@@ -78,7 +78,7 @@ In the following steps, you can see how to set up a typical LogPipeline. For an 
 
     - **http**, which sends the data to the specified HTTP destination. The output is designed to integrate with a [Fluentd HTTP Input](https://docs.fluentd.org/input/http), which opens up a huge ecosystem of integration possibilities.
     - **grafana-loki**, which sends the data to the Kyma-internal Loki instance. 
-    > **Note:** This output is considered legacy and is only provided for backward compatibility with the [deprecated](https://kyma-project.io/blog/2022/11/2/loki-deprecation/) in-cluster Loki instance. It might not be compatible with the latest Loki versions. For integration with a custom Loki installation, use the `custom` output with the name `loki` instead. See also [this tutorial](https://github.com/kyma-project/examples/tree/main/loki).
+    > **Note:** This output is considered legacy and is only provided for backward compatibility with the [deprecated](https://kyma-project.io/blog/2022/11/2/loki-deprecation/) in-cluster Loki instance. It might not be compatible with the latest Loki versions. For integration with a custom Loki installation, use the `custom` output with the name `loki` instead. See also [Installing a custom Loki stack in Kyma](https://github.com/kyma-project/examples/tree/main/loki).
     - **custom**, which supports the configuration of any destination in the Fluent Bit configuration syntax. 
     > **Note:** If you use a `custom` output, you put the LogPipeline in the [unsupported mode](#unsupported-mode).
 
@@ -114,7 +114,7 @@ In the following steps, you can see how to set up a typical LogPipeline. For an 
 ### Step 2: Create an input
 
 If you need selection mechanisms for application logs on the Namespace or container level, you can use an input spec to restrict or specify from which resources logs are included.
-If you don't define any input, it's collected from all Namespaces, except the system Namespaces `kube-system`, `istio-system`, `kyma-system`, and `kyma-integration`, which are excluded by default. For example, you can define the Namespaces to include in the input collection, exclude Namespaces from the input collection, or choose that only system Namespaces are included. Learn more about the available [parameters and attributes](./../../../05-technical-reference/00-custom-resources/telemetry-01-logpipeline.md).
+If you don't define any input, it's collected from all Namespaces, except the system Namespaces `kube-system`, `istio-system`, `kyma-system`, which are excluded by default. For example, you can define the Namespaces to include in the input collection, exclude Namespaces from the input collection, or choose that only system Namespaces are included. Learn more about the available [parameters and attributes](./../../../05-technical-reference/00-custom-resources/telemetry-01-logpipeline.md).
 
 The following example collects input from all Namespaces excluding `kyma-system` and only from the `istio-proxy` containers:
 ```yaml
@@ -167,7 +167,7 @@ spec:
         Regex   $kubernetes['labels']['app'] my-deployment
     - custom: |
         Name    grep
-        Exclude $kubernetes['namespace_name'] kyma-system|kube-system|kyma-integration|istio-system
+        Exclude $kubernetes['namespace_name'] kyma-system|kube-system|istio-system
     - custom: |
         Name    record_modifier
         Record  cluster_identifier ${KUBERNETES_SERVICE_HOST}

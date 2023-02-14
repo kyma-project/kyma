@@ -65,7 +65,7 @@ spec:
   output:
     otlp:
       endpoint:
-        value: http://tracing-jaeger-collector.kyma-system.svc.cluster.local:4317
+        value: http://jaeger-collector.jaeger.svc.cluster.local:4317
 ```
 
 This configures the underlying OTel Collector with a pipeline for traces. The receiver of the pipeline will be of the OTLP type and be accessible using the `telemetry-otlp-traces` service. As an exporter, an `otlp` or an `otlphttp` exporter is used, dependent on the configured protocol.
@@ -113,12 +113,14 @@ spec:
     otlp:
       protocol: http
       endpoint:
-        value: http://tracing-jaeger-collector.kyma-system.svc.cluster.local:4318
+        value: http://jaeger-collector.jaeger.svc.cluster.local:4318
 ```
 
 ### Step 4: Add authentication details
 
-To integrate with external systems, you must configure authentication details. At the moment, only Basic Authentication is supported. A more general token-based authentication will be supported [soon](https://github.com/kyma-project/kyma/issues/16258).
+To integrate with external systems, you must configure authentication details. At the moment, Basic Authentication and custom headers are supported.
+
+The following example configures Basic Authentication for a TracePipeline:
 
 ```yaml
 apiVersion: telemetry.kyma-project.io/v1alpha1
@@ -129,7 +131,7 @@ spec:
   output:
     otlp:
       endpoint:
-        value: http://tracing-jaeger-collector.kyma-system.svc.cluster.local:4317
+        value: http://jaeger-collector.jaeger.svc.cluster.local:4317
       authentication:
         basic:
           user:
@@ -138,11 +140,28 @@ spec:
             value: myPwd
 ```
 
+To use custom headers for authentication, use the following example that adds a bearer token for authentication:
+
+```yaml
+apiVersion: telemetry.kyma-project.io/v1alpha1
+kind: TracePipeline
+metadata:
+  name: jaeger
+spec:
+  output:
+    otlp:
+      endpoint:
+        value: http://jaeger-collector.jaeger.svc.cluster.local:4317
+      headers:
+         - name: Authorization
+           value: "Bearer myToken"
+```
+
 ### Step 5: Add authentication details from Secrets
 
 Integrations into external systems usually require authentication details dealing with sensitive data. To handle that data properly in Secrets, TracePipeline supports the reference of Secrets.
 
-Use the **valueFrom** attribute to map Secret keys as in the following example:
+Use the **valueFrom** attribute to map Secret keys as in the following example for Basic Authentication:
 
 ```yaml
 apiVersion: telemetry.kyma-project.io/v1alpha1
@@ -174,6 +193,27 @@ spec:
                  key: password
 ```
 
+And the following example for the token-based authentication with a custom header:
+
+```yaml
+apiVersion: telemetry.kyma-project.io/v1alpha1
+kind: TracePipeline
+metadata:
+  name: jaeger
+spec:
+  output:
+    otlp:
+      endpoint:
+        value: http://jaeger-collector.jaeger.svc.cluster.local:4317
+      headers:
+         - name: Authorization
+           valueFrom:
+             secretKeyRef:
+                name: backend
+                namespace: default
+                key: token 
+```
+
 The related Secret must fulfill the referenced name and Namespace, and contain the mapped key as in the following example:
 
 ```yaml
@@ -186,6 +226,7 @@ stringData:
   endpoint: https://myhost:4317
   user: myUser
   password: XXX
+  token: Bearer YYY
 ```
 
 ### Step 6: Rotate the Secret
@@ -277,6 +318,13 @@ The used buffers are volatile, and the data can be lost on the otel-collector in
 ### Single TracePipeline support
 
 Only one TracePipeline resource at a time is supported at the moment.
+
+### System span filtering
+System-related spans reported by Istio are filtered out without the opt-out option. Here are a few examples of such spans:
+- `/healtz` endpoint of a component deployed in the `kyma-system` Namespace
+- `/metrics` endpoint of a component deployed in the `kyma-system` Namespace
+- All outgoing spans reported by Grafana and Jaeger
+- All spans related to Fluent Bit and Loki communication
 
 ## Frequently Asked Questions
 

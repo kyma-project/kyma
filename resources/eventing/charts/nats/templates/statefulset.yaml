@@ -21,16 +21,14 @@ spec:
   {{- end }}
   serviceName: {{ include "nats.fullname" . }}
 
-  podManagementPolicy: {{ .Values.podManagementPolicy }}
+  podManagementPolicy: {{ .Values.global.jetstream.podManagementPolicy }}
 
   template:
     metadata:
       {{- if or .Values.exporter.enabled .Values.nats.configChecksumAnnotation .Values.podAnnotations }}
       annotations:
       {{- if .Values.exporter.enabled }}
-        prometheus.io/path: /metrics
-        prometheus.io/port: "7777"
-        prometheus.io/scrape: "true"
+        prometheus.io/scrape: "false"
       {{- end }}
       {{- if .Values.nats.configChecksumAnnotation }}
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
@@ -48,9 +46,8 @@ spec:
 {{- if or .Values.priorityClassName .Values.global.priorityClassName }}
       priorityClassName: {{ coalesce .Values.priorityClassName .Values.global.priorityClassName }}
 {{- end }}
-{{- with .Values.securityContext }}
-      securityContext:
-{{ toYaml . | indent 8 }}
+{{- if and .Values.global.natsSecurityContextEnabled .Values.global.podSecurityContext }}
+      securityContext: {{ toYaml .Values.global.podSecurityContext | nindent 8 }}
 {{- end }}
 {{- with .Values.affinity }}
       affinity:
@@ -98,6 +95,9 @@ spec:
       - name: config-reloader
         image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.nats_config_reloader) }}"
         imagePullPolicy: {{ .Values.nats.pullPolicy }}
+        {{- if and .Values.global.natsSecurityContextEnabled .Values.global.containerSecurityContext }}
+        securityContext: {{- toYaml .Values.global.containerSecurityContext | nindent 10 }}
+        {{- end }}
         command:
           - "nats-server-config-reloader"
           - "-pid"
@@ -123,9 +123,8 @@ spec:
       - name: metrics
         image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.prometheus_nats_exporter) }}"
         imagePullPolicy: {{ .Values.exporter.pullPolicy }}
-        {{- if .Values.exporter.securityContext }}
-        securityContext:
-          {{- toYaml .Values.exporter.securityContext | nindent 10 }}
+        {{- if and .Values.global.natsSecurityContextEnabled .Values.global.containerSecurityContext }}
+        securityContext: {{- toYaml .Values.global.containerSecurityContext | nindent 10 }}
         {{- end }}
         resources:
           {{- toYaml .Values.exporter.resources | nindent 10 }}
@@ -145,9 +144,8 @@ spec:
       - name: nats
         image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.nats) }}"
         imagePullPolicy: {{ .Values.nats.pullPolicy }}
-        {{- if .Values.nats.securityContext }}
-        securityContext:
-        {{- .Values.nats.securityContext | toYaml | nindent 10 }}
+        {{- if and .Values.global.natsSecurityContextEnabled .Values.global.containerSecurityContext }}
+        securityContext: {{- toYaml .Values.global.containerSecurityContext | nindent 10 }}
         {{- end }}
         resources:
           {{- toYaml .Values.nats.resources | nindent 10 }}
@@ -229,7 +227,7 @@ spec:
         {{- if .enabled }}
         livenessProbe:
           httpGet:
-            path: /
+            path: {{ .endpoint }}
             port: 8222
           initialDelaySeconds: {{ .initialDelaySeconds }}
           timeoutSeconds: {{ .timeoutSeconds }}
@@ -246,7 +244,7 @@ spec:
         {{- if .enabled }}
         readinessProbe:
           httpGet:
-            path: /
+            path: {{ .endpoint }}
             port: 8222
           initialDelaySeconds: {{ .initialDelaySeconds }}
           timeoutSeconds: {{ .timeoutSeconds }}
@@ -256,12 +254,12 @@ spec:
         {{- end }}
         {{- end }}
 
-        {{- if .Values.nats.healthcheck.startup.enabled }}
+        {{- with .Values.nats.healthcheck.startup }}
+        {{- if .enabled }}
         startupProbe:
           httpGet:
-            path: /healthz
+            path: {{ .endpoint }}
             port: 8222
-        {{- with .Values.nats.healthcheck.startup }}
           initialDelaySeconds: {{ .initialDelaySeconds }}
           timeoutSeconds: {{ .timeoutSeconds }}
           periodSeconds: {{ .periodSeconds }}
