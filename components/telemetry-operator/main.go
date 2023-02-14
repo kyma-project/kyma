@@ -19,10 +19,11 @@ package main
 import (
 	"errors"
 	"flag"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/resources/logpipeline"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/resources/logpipeline"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/overrides"
 	"go.uber.org/zap"
@@ -118,7 +119,7 @@ var (
 const (
 	otelImage                   = "eu.gcr.io/kyma-project/tpi/otel-collector:0.70.0-723b551a"
 	overrideConfigMapName       = "telemetry-override-config"
-	fluentBitImage              = "eu.gcr.io/kyma-project/tpi/fluent-bit:2.0.8-723b551a"
+	fluentBitImage              = "eu.gcr.io/kyma-project/tpi/fluent-bit:2.0.9-f89e8b78"
 	fluentBitConfigPrepperImage = "eu.gcr.io/kyma-project/external/busybox:1.34.1"
 	fluentBitExporterImage      = "eu.gcr.io/kyma-project/directory-size-exporter:v20221020-e314a071"
 )
@@ -212,7 +213,6 @@ func main() {
 	flag.StringVar(&fluentBitCPURequest, "fluent-bit-cpu-request", "400m", "CPU request for fluent-bit")
 	flag.StringVar(&fluentBitMemoryRequest, "fluent-bit-memory-request", "256Mi", "Memory request for fluent-bit")
 	flag.StringVar(&fluentBitImageVersion, "fluent-bit-image", fluentBitImage, "Image for fluent-bit")
-	flag.StringVar(&fluentBitConfigPrepperImageVersion, "fluent-bit-config-prepper-image", fluentBitConfigPrepperImage, "Image for fluent-bit config preparation")
 	flag.StringVar(&fluentBitExporterVersion, "fluent-bit-exporter-image", fluentBitExporterImage, "Image for exporting fluent bit filesystem usage")
 	flag.StringVar(&fluentBitPriorityClassName, "fluent-bit-priority-class-name", "kyma-system-priority", "Name of the priority class of fluent bit ")
 
