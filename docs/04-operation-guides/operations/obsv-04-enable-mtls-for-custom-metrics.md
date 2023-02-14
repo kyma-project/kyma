@@ -2,6 +2,8 @@
 title: Enable mTLS for custom metrics    
 ---
 
+> **NOTE:** Prometheus and Grafana are [deprecated](https://kyma-project.io/blog/2022/12/9/monitoring-deprecation) and are planned to be removed. If you want to install a custom stack, take a look at [Install a custom kube-prometheus-stack in Kyma](https://github.com/kyma-project/examples/tree/main/prometheus).
+
 To enable Strict mTLS scraping for a component, configure the Istio TLS certificates in the corresponding ServiceMonitor:
 
 ```yaml

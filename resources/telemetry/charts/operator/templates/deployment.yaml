@@ -67,7 +67,6 @@ spec:
             - --fluent-bit-denied-output-plugins={{ join "," .Values.deniedPlugins.output}}
             - --fluent-bit-max-pipelines={{.Values.maxLogPipelines}}
             - --fluent-bit-image={{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.fluent_bit) }}
-            - --fluent-bit-config-prepper-image={{ include "imageurl" (dict "reg" $.Values.global.containerRegistry "img" $.Values.global.images.busybox) }}
             - --fluent-bit-exporter-image={{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.directory_size_exporter) }}
 {{- if or .Values.priorityClassName .Values.global.highPriorityClassName }}
             - --fluent-bit-priority-class-name={{ coalesce .Values.priorityClassName .Values.global.highPriorityClassName }}

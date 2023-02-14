@@ -3,6 +3,9 @@ kind: Service
 metadata:
   name: {{ include "controller.fullname" . }}{{ .Values.metrics.config.nameSuffix }}
   labels: {{- include "controller.labels" . | nindent 4 }}
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: {{ .Values.metrics.config.port | quote }}
 spec:
   type: ClusterIP
   selector: {{- include "controller.selectorLabels" . | nindent 4 }}

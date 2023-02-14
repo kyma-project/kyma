@@ -17,8 +17,9 @@ First, create a sample Function that prints out the received event to console:
 
 1. Go to **Namespaces** and select the default Namespace.
 2. Go to **Workloads** > **Functions** and click **Create Function +**.
-3. Name the Function `lastorder` and click **Create**.
-4. In the inline editor for the Function, replace its source with the following code:
+3. Name the Function `lastorder`.
+4. From the **Language** dropdown, choose `nodejs`.
+5. In the **Source** section, replace its source with the following code:
     ```js
     module.exports = {
       main: async function (event, context) {
@@ -27,8 +28,8 @@ First, create a sample Function that prints out the received event to console:
       } 
     }
     ```
-5. Save your changes.
-6. Wait a few seconds for the Function to have status `RUNNING`.
+6. Click **Create**.
+7. Wait a few seconds for the Function to have status `RUNNING`.
 
   </details>
   <details>
@@ -94,6 +95,7 @@ All the published events of this type are then forwarded to an HTTP endpoint cal
 1. In your Function's view, go to **Configuration** and click **Create Subscription+**.
 2. Provide the following parameters:
    - **Subscription name**: `lastorder-sub`
+   - Choose `lastorder` from the **Service** dropdown.
    - **Application name**: `myapp`
    - **Event name**: `order.received`
    - **Event version**: `v1`
@@ -199,9 +201,10 @@ To verify that the event was properly delivered, check the logs of the Function:
   </summary>
 
 1. In Kyma Dashboard, return to the view of your `lastorder` Function.
-2. Go to **Code** and find the **Replicas of the Function** section.
-3. Click on **View Logs**.
-4. You see the received event in the logs:
+2. In the **Code** view, find the **Replicas of the Function** section.
+3. Click the name of your replica.
+4. Locate the **Containers** section and click on **View Logs**.
+5. You see the received event in the logs:
    ```
    Received event: { orderCode: '3211213' }
    ```

@@ -3,17 +3,19 @@ package builder
 import (
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
 
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
+
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
 )
 
 // Perform a compile-time check.
 var _ CloudEventBuilder = &EventMeshBuilder{}
 
-func NewEventMeshBuilder(typePrefix string, eventMeshNamespace string, cleaner cleaner.Cleaner, applicationLister *application.Lister, logger *logger.Logger) CloudEventBuilder {
+func NewEventMeshBuilder(prefix string, eventMeshNamespace string, cleaner cleaner.Cleaner,
+	applicationLister *application.Lister, logger *logger.Logger) CloudEventBuilder {
 	genericBuilder := GenericBuilder{
-		typePrefix:        typePrefix,
+		typePrefix:        prefix,
 		applicationLister: applicationLister,
 		logger:            logger,
 		cleaner:           cleaner,

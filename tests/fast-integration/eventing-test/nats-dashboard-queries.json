@@ -105,7 +105,7 @@
   },
   {
     "title":"NATS Delivery: Published Event Types with a Subscription",
-    "query":"count(nats_consumer_ack_floor_consumer_seq * on(consumer_name) group_left(event_type, subscription_name, subscription_namespace) nats_ec_event_type_subscribed_total) by (event_type, subscription_name, subscription_namespace) * on(event_type) group_left() sum(eventing_epp_event_type_published_total{}) by (event_type)"
+    "query":"count(max without(container, endpoint)(nats_consumer_ack_floor_consumer_seq) * on(consumer_name) group_left(event_type, subscription_name, subscription_namespace) max without(container, endpoint)(nats_ec_event_type_subscribed_total)) by (event_type, subscription_name, subscription_namespace) * on(event_type) group_left() sum(eventing_epp_event_type_published_total{}) by (event_type)"
   },
   {
     "title":"NATS Delivery: Successful Event Publisher Requests per Event Type",
