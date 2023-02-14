@@ -211,13 +211,6 @@ func getPodSecurityContext() *v1.PodSecurityContext {
 		SeccompProfile: &v1.SeccompProfile{
 			Type: v1.SeccompProfileTypeRuntimeDefault,
 		},
-		Sysctls: []v1.Sysctl{
-			{Name: "kernel.shm_rmid_forced", Value: ""},
-			{Name: "net.ipv4.ip_local_port_range", Value: ""},
-			{Name: "net.ipv4.ip_unprivileged_port_start", Value: ""},
-			{Name: "net.ipv4.tcp_syncookies", Value: ""},
-			{Name: "net.ipv4.ping_group_range", Value: ""},
-		},
 	}
 }
 
@@ -228,10 +221,7 @@ func getContainerSecurityContext() *v1.SecurityContext {
 		RunAsNonRoot:             utils.BoolPtr(true),
 		Capabilities: &v1.Capabilities{
 			Drop: []v1.Capability{"ALL"},
-			Add:  []v1.Capability{"NET_BIND_SERVICE"},
 		},
-		SELinuxOptions: &v1.SELinuxOptions{Type: "container_t"},
-		ProcMount:      utils.ProcMountTypePtr(v1.DefaultProcMount),
 	}
 }
 
