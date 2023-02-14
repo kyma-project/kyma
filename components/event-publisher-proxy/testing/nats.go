@@ -13,7 +13,8 @@ import (
 )
 
 const (
-	StreamName = "kyma"
+	StreamName    = "kyma"
+	maxReconnects = 3
 )
 
 func StartNATSServer() *server.Server {
@@ -30,7 +31,7 @@ func StartNATSServer() *server.Server {
 func ConnectToNATSServer(url string) (*nats.Conn, error) {
 	return pkgnats.Connect(url,
 		pkgnats.WithRetryOnFailedConnect(true),
-		pkgnats.WithMaxReconnects(3),
+		pkgnats.WithMaxReconnects(maxReconnects),
 		pkgnats.WithReconnectWait(time.Second),
 	)
 }

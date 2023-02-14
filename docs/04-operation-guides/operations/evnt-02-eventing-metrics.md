@@ -5,6 +5,8 @@ title: Kyma Eventing Metrics
 Kyma Eventing provides several Grafana Dashboard with various [metrics](./evnt-02-eventing-metrics.md), so you can monitor statistics and other information in real time.
 The metrics follow the [Prometheus naming convention](https://prometheus.io/docs/practices/naming/).
 
+> **NOTE:** Prometheus and Grafana are [deprecated](https://kyma-project.io/blog/2022/12/9/monitoring-deprecation) and are planned to be removed. If you want to install a custom stack, take a look at [Install a custom kube-prometheus-stack in Kyma](https://github.com/kyma-project/examples/tree/main/prometheus).
+
 ### Metrics Emitted by Eventing Publisher Proxy:
 
 | Metric                                                          | Description                                                                                   |
