@@ -4,7 +4,7 @@ title: Cannot connect to a service exposed by an API Rule - 500 Internal Server 
 
 ## Symptom
 
-Having an apirule under one host URL with wildcard /* and specific /headers paths with different handlers.
+Having an APIRule deployed that looks like this: 
 
   ```bash
     apiVersion: gateway.kyma-project.io/v1beta1
@@ -30,8 +30,7 @@ Having an apirule under one host URL with wildcard /* and specific /headers path
               config:
                 required_scope: ["read"]
   ```
-
-
+It is configured under one host URL with wildcard /* and specific /headers paths and the same GET method with different handlers.
 When you try to reach your service, you get `500 Internal Server Error` in response.
   ```bash
   {"error":{"code":500,"status":"Internal Server Error","request":"e84400db-16b3-4818-9370-f10a6b4f3876","message":"An internal server error occurred, please contact the system administrator"}}
