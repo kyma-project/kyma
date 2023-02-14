@@ -2,6 +2,7 @@ package legacytest
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -22,7 +23,7 @@ func InvalidLegacyRequest(version, appname, eventType string) (*http.Request, er
 	}
 
 	url := fmt.Sprintf("http://localhost:8080/%s/%s/events", appname, version)
-	return http.NewRequest(http.MethodPost, url, bytes.NewBuffer(body))
+	return http.NewRequestWithContext(context.Background(), http.MethodPost, url, bytes.NewBuffer(body))
 }
 
 func ValidLegacyRequest(version, appname, eventType string) (*http.Request, error) {
@@ -37,7 +38,7 @@ func ValidLegacyRequest(version, appname, eventType string) (*http.Request, erro
 	}
 
 	url := fmt.Sprintf("http://localhost:8080/%s/%s/events", appname, version)
-	return http.NewRequest(http.MethodPost, url, bytes.NewBuffer(body))
+	return http.NewRequestWithContext(context.Background(), http.MethodPost, url, bytes.NewBuffer(body))
 }
 
 func InvalidLegacyRequestOrDie(t *testing.T, version, appname, eventType string) *http.Request {
@@ -47,6 +48,7 @@ func InvalidLegacyRequestOrDie(t *testing.T, version, appname, eventType string)
 }
 
 func ValidLegacyRequestOrDie(t *testing.T, version, appname, eventType string) *http.Request {
+	t.Helper()
 	r, err := ValidLegacyRequest(version, appname, eventType)
 	assert.NoError(t, err)
 	return r
@@ -54,5 +56,5 @@ func ValidLegacyRequestOrDie(t *testing.T, version, appname, eventType string) *
 
 func InvalidLegacyRequestWithEmptyBody(version, appname string) (*http.Request, error) {
 	url := fmt.Sprintf("http://localhost:8080/%s/%s/events", appname, version)
-	return http.NewRequest(http.MethodPost, url, nil)
+	return http.NewRequestWithContext(context.Background(), http.MethodPost, url, nil)
 }

@@ -12,7 +12,7 @@ import (
 	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 )
 
-// a mocked http.Handler
+// a mocked http.Handler.
 type testHandler struct{}
 
 func (h *testHandler) ServeHTTP(http.ResponseWriter, *http.Request) {}
@@ -27,7 +27,7 @@ func TestNewHttpMessageReceiver(t *testing.T) {
 	}
 }
 
-// Test that the receiver shutdown when receiving stop signal
+// Test that the receiver shutdown when receiving stop signal.
 func TestStartListener(t *testing.T) {
 	timeout := time.Second * 10
 	r := fixtureReceiver()

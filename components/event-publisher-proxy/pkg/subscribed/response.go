@@ -13,7 +13,7 @@ import (
 
 const responseName = "response"
 
-// RespondWithBody sends http response with json body
+// RespondWithBody sends http response with json body.
 func RespondWithBody(w http.ResponseWriter, events Events, httpCode int) {
 	respond(w, httpCode)
 	if err := json.NewEncoder(w).Encode(events); err != nil {
@@ -21,7 +21,7 @@ func RespondWithBody(w http.ResponseWriter, events Events, httpCode int) {
 	}
 }
 
-// RespondWithErrorAndLog logs error and sends http response with error json body
+// RespondWithErrorAndLog logs error and sends http response with error json body.
 func RespondWithErrorAndLog(e error, w http.ResponseWriter) {
 	namedLogger().Error(e.Error())
 	respond(w, http.StatusInternalServerError)
@@ -40,12 +40,12 @@ func respond(w http.ResponseWriter, httpCode int) {
 	namedLogger().Infof("Response code from \"subscribed\" request: HTTP %d", httpCode)
 }
 
-// Events represents collection of all events with subscriptions
+// Events represents collection of all events with subscriptions.
 type Events struct {
 	EventsInfo []Event `json:"eventsInfo"`
 }
 
-// Event represents basic information about event
+// Event represents basic information about event.
 type Event struct {
 	Name    string `json:"name"`
 	Version string `json:"version"`

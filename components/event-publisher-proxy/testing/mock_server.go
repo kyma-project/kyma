@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-// Validator is used to validate incoming requests to the mock server
+// Validator is used to validate incoming requests to the mock server.
 type Validator func(r *http.Request) error
 
 type MockServer struct {

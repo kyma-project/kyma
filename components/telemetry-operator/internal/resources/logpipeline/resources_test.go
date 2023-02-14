@@ -6,6 +6,7 @@ import (
 	v1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/types"
+	"reflect"
 	"strconv"
 	"testing"
 )
@@ -22,6 +23,20 @@ func TestMakeDaemonSet(t *testing.T) {
 		MemoryLimit:                 resource.MustParse("400Mi"),
 		CPURequest:                  resource.MustParse(".1"),
 		MemoryRequest:               resource.MustParse("100Mi"),
+	}
+
+	expectedVolMounts := []corev1.VolumeMount{
+		{MountPath: "/fluent-bit/etc", Name: "shared-fluent-bit-config"},
+		{MountPath: "/fluent-bit/etc/fluent-bit.conf", Name: "config", SubPath: "fluent-bit.conf"},
+		{MountPath: "/fluent-bit/etc/dynamic/", Name: "dynamic-config"},
+		{MountPath: "/fluent-bit/etc/dynamic-parsers/", Name: "dynamic-parsers-config"},
+		{MountPath: "/fluent-bit/etc/custom_parsers.conf", Name: "config", SubPath: "custom_parsers.conf"},
+		{MountPath: "/fluent-bit/etc/loki-labelmap.json", Name: "config", SubPath: "loki-labelmap.json"},
+		{MountPath: "/fluent-bit/scripts/filter-script.lua", Name: "luascripts", SubPath: "filter-script.lua"},
+		{MountPath: "/var/log", Name: "varlog"},
+		{MountPath: "/var/lib/docker/containers", Name: "varlibdockercontainers", ReadOnly: true},
+		{MountPath: "/data", Name: "varfluentbit"},
+		{MountPath: "/files", Name: "dynamic-files"},
 	}
 	daemonSet := MakeDaemonSet(name, checksum, ds)
 
@@ -43,6 +58,9 @@ func TestMakeDaemonSet(t *testing.T) {
 	require.False(t, *containerSecurityContext.Privileged, "must not be privileged")
 	require.False(t, *containerSecurityContext.AllowPrivilegeEscalation, "must not escalate to privileged")
 	require.True(t, *containerSecurityContext.ReadOnlyRootFilesystem, "must use readonly fs")
+
+	volMounts := daemonSet.Spec.Template.Spec.Containers[0].VolumeMounts
+	require.True(t, reflect.DeepEqual(volMounts, expectedVolMounts))
 }
 
 func TestMakeMetricsService(t *testing.T) {

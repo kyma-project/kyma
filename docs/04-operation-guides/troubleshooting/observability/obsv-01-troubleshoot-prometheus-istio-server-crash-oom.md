@@ -2,6 +2,8 @@
 title: Prometheus Istio Server restarting or in crashback loop
 ---
 
+> **NOTE:** Prometheus and Grafana are [deprecated](https://kyma-project.io/blog/2022/12/9/monitoring-deprecation) and are planned to be removed. If you want to install a custom stack, take a look at [Install a custom kube-prometheus-stack in Kyma](https://github.com/kyma-project/examples/tree/main/prometheus).
+
 ## Condition
 
 Prometheus Istio Server is restarting or in a crashback loop.
