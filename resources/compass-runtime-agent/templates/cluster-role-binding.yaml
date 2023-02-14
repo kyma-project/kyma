@@ -22,6 +22,10 @@ rules:
     - apiGroups: ["metrics.k8s.io"]
       resources: ["nodes"]
       verbs: ["get", "list"]
+    - apiGroups: [""]
+      resources: ["namespaces"]
+      resourceNames: ["compass-system"]
+      verbs: ["get"]
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
