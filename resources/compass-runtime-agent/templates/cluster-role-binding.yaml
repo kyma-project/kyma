@@ -23,8 +23,8 @@ rules:
       resources: ["nodes"]
       verbs: ["get", "list"]
     - apiGroups: [""]
-      resources: ["namespaces"]
-      resourceNames: ["compass-system"]
+      resources: ["secrets"]
+      resourceNames: ["compass-agent-configuration","cluster-client-certificates"]
       verbs: ["get"]
 ---
 kind: ClusterRoleBinding
