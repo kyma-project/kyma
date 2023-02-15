@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	cli "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
+	cli "github.com/kyma-project/kyma/components/central-application-gateway/pkg/client/clientset/versioned"
 	ccclientset "github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/client/clientset/versioned"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/suite"
