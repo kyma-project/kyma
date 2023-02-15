@@ -42,6 +42,8 @@ When you try to reach your service, you get a `500 Internal Server Error` respon
 Having multiple rules defined under the same host URL carries the risk of errors for specific paths due to the configuration overlap in Oathkeeper.
 The root cause of the problem is the lack of support for the negative lookahead in the Golang language.
 
+## Remedy
+
 To resolve the issue, follow these guidelines:
 
 - Set the different hosts for different access startegies:
