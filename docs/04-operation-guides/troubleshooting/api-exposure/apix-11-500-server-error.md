@@ -46,7 +46,7 @@ The root cause of the problem is the lack of support for the negative lookahead 
 
 To resolve the issue, follow these guidelines:
 
-- Set the different hosts for different access startegies:
+- Set different hosts for different access strategies:
 
   ```bash
     apiVersion: gateway.kyma-project.io/v1beta1
