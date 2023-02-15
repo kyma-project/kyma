@@ -5,7 +5,7 @@ metadata:
   name: {{ include "jaeger-operator.fullname" . }}-jaeger-metrics
   annotations:
     prometheus.io/scrape: "true"
-    prometheus.io/port: "8383"
+    prometheus.io/port: "14269"
   labels:
     app.kubernetes.io/name: {{ include "jaeger-operator.fullname" . }}-jaeger-metrics
 spec:
