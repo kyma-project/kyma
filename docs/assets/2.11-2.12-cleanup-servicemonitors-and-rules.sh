@@ -10,3 +10,9 @@ kubectl delete -n kyma-system --ignore-not-found=true servicemonitors.monitoring
 kubectl delete -n kyma-system --ignore-not-found=true servicemonitors.monitoring.coreos.com serverless
 kubectl delete -n kyma-system --ignore-not-found=true servicemonitors.monitoring.coreos.com telemetry-fluent-bit
 kubectl delete -n kyma-system --ignore-not-found=true servicemonitors.monitoring.coreos.com telemetry-operator-metrics
+kubectl delete -n kyma-system --ignore-not-found=true servicemonitors.monitoring.coreos.com telemetry-operator-metrics
+kubectl delete -n kyma-system --ignore-not-found=true servicemonitors.monitoring.coreos.com tracing-jaeger
+kubectl delete -n kyma-system --ignore-not-found=true servicemonitors.monitoring.coreos.com tracing-jaeger-operator
+kubectl delete -n istio-system --ignore-not-found=true servicemonitors.monitoring.coreos.com istio-component-monitor
+
+kubectl delete -n kyma-system --ignore-not-found=true prometheusrules.monitoring.coreos.com logging-loki-kyma-loki.rules
