@@ -36,7 +36,7 @@ When you try to reach your service, you get a `500 Internal Server Error` respon
   {"error":{"code":500,"status":"Internal Server Error","request":"e84400db-16b3-4818-9370-f10a6b4f3876","message":"An internal server error occurred, please contact the system administrator"}}
   ```
 
-## Remedy
+## Cause
 
 This issue was reported in the Ory Oathkeeper [project](https://github.com/ory/oathkeeper/issues/157).
 Having multiple rules for one host URL is causing errors for specific paths due to the configuration overlap in the Oathkeeper.
