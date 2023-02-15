@@ -116,7 +116,7 @@ To resolve the issue, follow these guidelines:
   ```
 
 
-Sometimes Oathkeeper can throw `503 Service Unavailable` or `502 Bad Gateway` responses. While a simple restart of the Pod could resolve this issue, you might want to verify it and check what issue is causing this. To do so, follow these steps:
+When Oathkeeper throws `503 Service Unavailable` or `502 Bad Gateway` responses, try to restart the Pod in order to resolve the issue. If you want to investigate what caused the error, follow these steps:
 
 1. Check all Oathkeeper Pods:
 
