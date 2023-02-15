@@ -147,6 +147,7 @@ pod:
   labels: {}
   annotations:
     sidecar.istio.io/inject: "false"
+    prometheus.io/scrape: "false"
   extraProperties:
     terminationGracePeriodSeconds: 10
     # the following guidelines should be followed for this https://github.com/kyma-project/community/tree/main/concepts/psp-replacement
@@ -233,7 +234,10 @@ services:
   manager:
     type: ClusterIP
     labels: {}
-    annotations: {}
+    annotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/port: "8080"
+      prometheus.io/path: "/metrics"
     https:
       port: 443
       targetPort: 8443
@@ -246,16 +250,9 @@ metrics:
       port: 8080
       targerPort: 8080
       protocol: TCP
-  serviceMonitor:
-    create: true
-    labels: {}
-    annotations: {}
   pod:
-    labels: {}
-    annotations:
-      prometheus.io/scrape: "true"
-      prometheus.io/port: "8080"
-      prometheus.io/path: "/metrics"
+    labels: { }
+    annotations: { }
 
 backendModule:
   enabled: true
