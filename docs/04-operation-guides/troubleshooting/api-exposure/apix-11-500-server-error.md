@@ -38,7 +38,7 @@ When you try to reach your service, you get a `500 Internal Server Error` respon
 
 ## Cause
 
-This issue was reported in the Ory Oathkeeper [project](https://github.com/ory/oathkeeper/issues/157).
+[This issue](https://github.com/ory/oathkeeper/issues/157) was reported in the Ory Oathkeeper project.
 Having multiple rules for one host URL is causing errors for specific paths due to the configuration overlap in the Oathkeeper.
 This is based on lack of support of negative lookahead in the Golang language.
 
