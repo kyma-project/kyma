@@ -250,6 +250,9 @@ metrics:
       port: 8080
       targerPort: 8080
       protocol: TCP
+  pod:
+    labels: { }
+    annotations: { }
 
 backendModule:
   enabled: true
