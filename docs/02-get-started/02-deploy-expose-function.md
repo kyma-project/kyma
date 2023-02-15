@@ -17,7 +17,8 @@ First, let's create the Function and apply it.
 1. In Kyma Dashboard, go to the `default` Namespace.
 2. Go to **Workloads** > **Functions**.
 3. Click on **Create Function**.
-4. Name the Function `hello-world` and click **Create**.
+4. Name the Function `hello-world`.
+5. From the **Language** dropdown, choose `nodejs` and click **Create**.
   </details>
   <details>
   <summary label="kubectl">
@@ -140,7 +141,7 @@ This opens the Function's external address as a new page.
 
 > **NOTE:** Alternatively, from the left navigation go to **API Rules**, and click on the **Host** URL there.
 
-The operation was successful if the page says `Hello World from the Kyma Function main running on nodejs14!`.
+The operation was successful if the page says `Hello World from the Kyma Function main running on nodejs16!`.
   </details>
   <details>
   <summary label="kubectl">

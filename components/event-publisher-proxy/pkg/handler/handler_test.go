@@ -1,3 +1,4 @@
+//nolint:lll // this test uses many long lines directly from prometheus output
 package handler
 
 import (
@@ -5,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/builder"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -206,6 +208,7 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 				request: CreateValidStructuredRequest(t),
 			},
 			wantStatus: 204,
+
 			wantTEF: `
 				# HELP eventing_epp_event_type_published_total The total number of events published for a given eventTypeLabel
 				# TYPE eventing_epp_event_type_published_total counter
@@ -248,6 +251,7 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 				request: CreateValidBinaryRequest(t),
 			},
 			wantStatus: 204,
+
 			wantTEF: `
 				# HELP eventing_epp_event_type_published_total The total number of events published for a given eventTypeLabel
 				# TYPE eventing_epp_event_type_published_total counter
@@ -328,6 +332,7 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 				request: CreateValidBinaryRequest(t),
 			},
 			wantStatus: 500,
+
 			wantTEF: `
 				# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
 				# TYPE eventing_epp_backend_errors_total counter
@@ -418,15 +423,19 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 					},
 					BackendURL: "FOO",
 				},
-				LegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", NewApplicationListerOrDie(context.Background(), "testapp")),
-				collector:         metrics.NewCollector(latency),
-				eventTypeCleaner:  eventtypetest.CleanerStub{},
+				LegacyTransformer: legacy.NewTransformer(
+					"namespace",
+					"im.a.prefix",
+					NewApplicationListerOrDie(context.Background(), "testapp")),
+				collector:        metrics.NewCollector(latency),
+				eventTypeCleaner: eventtypetest.CleanerStub{},
 			},
 			args: args{
 				request: legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
 			},
 			wantStatus: 200,
 			wantOk:     true,
+
 			wantTEF: `
 					# HELP eventing_epp_event_type_published_total The total number of events published for a given eventTypeLabel
 					# TYPE eventing_epp_event_type_published_total counter
@@ -461,9 +470,12 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 					Err:        fmt.Errorf("oh no, i cannot send: %w", sender.ErrBackendTargetNotFound),
 					BackendURL: "FOO",
 				},
-				LegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", NewApplicationListerOrDie(context.Background(), "testapp")),
-				collector:         metrics.NewCollector(latency),
-				eventTypeCleaner:  eventtypetest.CleanerStub{},
+				LegacyTransformer: legacy.NewTransformer(
+					"namespace",
+					"im.a.prefix",
+					NewApplicationListerOrDie(context.Background(), "testapp")),
+				collector:        metrics.NewCollector(latency),
+				eventTypeCleaner: eventtypetest.CleanerStub{},
 			},
 			args: args{
 				request: legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
@@ -483,9 +495,12 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 					Err:        fmt.Errorf("oh no, i cannot send: %w", sender.ErrInsufficientStorage),
 					BackendURL: "FOO",
 				},
-				LegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", NewApplicationListerOrDie(context.Background(), "testapp")),
-				collector:         metrics.NewCollector(latency),
-				eventTypeCleaner:  eventtypetest.CleanerStub{},
+				LegacyTransformer: legacy.NewTransformer(
+					"namespace",
+					"im.a.prefix",
+					NewApplicationListerOrDie(context.Background(), "testapp")),
+				collector:        metrics.NewCollector(latency),
+				eventTypeCleaner: eventtypetest.CleanerStub{},
 			},
 			args: args{
 				request: legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
@@ -505,9 +520,12 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 					Err:        fmt.Errorf("i cannot send"),
 					BackendURL: "FOO",
 				},
-				LegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", NewApplicationListerOrDie(context.Background(), "testapp")),
-				collector:         metrics.NewCollector(latency),
-				eventTypeCleaner:  eventtypetest.CleanerStub{},
+				LegacyTransformer: legacy.NewTransformer(
+					"namespace",
+					"im.a.prefix",
+					NewApplicationListerOrDie(context.Background(), "testapp")),
+				collector:        metrics.NewCollector(latency),
+				eventTypeCleaner: eventtypetest.CleanerStub{},
 			},
 			args: args{
 				request: legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
@@ -529,16 +547,20 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 					},
 					BackendURL: "FOO",
 				},
-				LegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", NewApplicationListerOrDie(context.Background(), "testapp")),
-				collector:         metrics.NewCollector(latency),
-				eventTypeCleaner:  eventtypetest.CleanerStub{},
+				LegacyTransformer: legacy.NewTransformer(
+					"namespace",
+					"im.a.prefix",
+					NewApplicationListerOrDie(context.Background(), "testapp")),
+				collector:        metrics.NewCollector(latency),
+				eventTypeCleaner: eventtypetest.CleanerStub{},
 			},
 			args: args{
 				request: legacytest.InvalidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
 			},
 			wantStatus: 400,
 			wantOk:     false,
-			wantTEF:    "", // this is a client error. We do record an error metric for requests that cannot even be decoded correctly.
+			// this is a client error. We do record an error metric for requests that cannot even be decoded correctly.
+			wantTEF: "",
 		},
 	}
 	for _, tt := range tests {
@@ -576,7 +598,6 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 			}
 
 			metricstest.EnsureMetricMatchesTextExpositionFormat(t, h.collector, tt.wantTEF)
-
 		})
 	}
 }
@@ -648,19 +669,42 @@ func TestHandler_sendEventAndRecordMetrics(t *testing.T) {
 		header http.Header
 	}
 	type wants struct {
-		result           sender.PublishResult
-		assertionFunc    assert.ErrorAssertionFunc
-		metricErrors     int
-		metricTotal      int
-		metricLatency    int
-		metricPublished  int
-		metricLatencyTEF string
+		result                  sender.PublishResult
+		assertionFunc           assert.ErrorAssertionFunc
+		metricErrors            int
+		metricTotal             int
+		metricLatency           int
+		metricPublished         int
+		metricLatencyTEF        string
+		metricPublishedTotalTEF string
 	}
 
 	const bucketsFunc = "Buckets"
 	latency := new(mocks.BucketsProvider)
 	latency.On(bucketsFunc).Return(nil)
 	latency.Test(t)
+	latencyMetricTEF := `
+					# HELP eventing_epp_backend_duration_milliseconds The duration of sending events to the messaging server in milliseconds
+					# TYPE eventing_epp_backend_duration_milliseconds histogram
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.005"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.01"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.025"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.05"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.1"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.25"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.5"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="1"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="2.5"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="5"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="10"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="+Inf"} 1
+					eventing_epp_backend_duration_milliseconds_sum{code="204",destination_service="foo"} 0
+					eventing_epp_backend_duration_milliseconds_count{code="204",destination_service="foo"} 1
+					`
+
+	ceEvent := CreateCloudEvent(t)
+	ceEventWithOriginalEventType := ceEvent.Clone()
+	ceEventWithOriginalEventType.SetExtension(builder.OriginalTypeHeaderName, testingutils.CloudEventNameAndVersion)
 
 	tests := []struct {
 		name   string
@@ -685,36 +729,61 @@ func TestHandler_sendEventAndRecordMetrics(t *testing.T) {
 			args: args{
 				ctx:   context.Background(),
 				host:  "foo",
-				event: &cev2event.Event{},
+				event: ceEvent,
 			},
 			wants: wants{
 				result: eventmesh.HTTPPublishResult{
 					Status: 204,
 					Body:   nil,
 				},
-				assertionFunc:   assert.NoError,
-				metricErrors:    0,
-				metricTotal:     1,
-				metricLatency:   1,
-				metricPublished: 1,
-				metricLatencyTEF: `
-					# HELP eventing_epp_backend_duration_milliseconds The duration of sending events to the messaging server in milliseconds
-					# TYPE eventing_epp_backend_duration_milliseconds histogram
-					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.005"} 1
-					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.01"} 1
-					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.025"} 1
-					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.05"} 1
-					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.1"} 1
-					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.25"} 1
-					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.5"} 1
-					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="1"} 1
-					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="2.5"} 1
-					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="5"} 1
-					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="10"} 1
-					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="+Inf"} 1
-					eventing_epp_backend_duration_milliseconds_sum{code="204",destination_service="foo"} 0
-					eventing_epp_backend_duration_milliseconds_count{code="204",destination_service="foo"} 1
-`,
+				assertionFunc:    assert.NoError,
+				metricErrors:     0,
+				metricTotal:      1,
+				metricLatency:    1,
+				metricPublished:  1,
+				metricLatencyTEF: latencyMetricTEF,
+				metricPublishedTotalTEF: `
+					# HELP eventing_epp_event_type_published_total The total number of events published for a given eventTypeLabel
+					# TYPE eventing_epp_event_type_published_total counter
+					eventing_epp_event_type_published_total{code="204",event_source="/default/sap.kyma/id",event_type="prefix.testapp1023.order.created.v1"} 1
+					`,
+			},
+		},
+		{
+			name: "No Error - set original event type top published metric",
+			fields: fields{
+				Sender: &GenericSenderStub{
+					Err:           nil,
+					SleepDuration: 0,
+					Result: eventmesh.HTTPPublishResult{
+						Status: 204,
+						Body:   nil,
+					},
+				},
+				Defaulter: nil,
+				collector: metrics.NewCollector(latency),
+			},
+			args: args{
+				ctx:   context.Background(),
+				host:  "foo",
+				event: &ceEventWithOriginalEventType,
+			},
+			wants: wants{
+				result: eventmesh.HTTPPublishResult{
+					Status: 204,
+					Body:   nil,
+				},
+				assertionFunc:    assert.NoError,
+				metricErrors:     0,
+				metricTotal:      1,
+				metricLatency:    1,
+				metricPublished:  1,
+				metricLatencyTEF: latencyMetricTEF,
+				metricPublishedTotalTEF: `
+					# HELP eventing_epp_event_type_published_total The total number of events published for a given eventTypeLabel
+					# TYPE eventing_epp_event_type_published_total counter
+					eventing_epp_event_type_published_total{code="204",event_source="/default/sap.kyma/id",event_type="order.created.v1"} 1
+					`,
 			},
 		},
 		{
@@ -745,10 +814,12 @@ func TestHandler_sendEventAndRecordMetrics(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// given
+			logger, _ := eclogger.New("text", "debug")
 			h := &Handler{
 				Sender:    tt.fields.Sender,
 				Defaulter: tt.fields.Defaulter,
 				collector: tt.fields.collector,
+				Logger:    logger,
 			}
 
 			// when
@@ -764,6 +835,7 @@ func TestHandler_sendEventAndRecordMetrics(t *testing.T) {
 			metricstest.EnsureMetricLatency(t, h.collector, tt.wants.metricLatency)
 			metricstest.EnsureMetricEventTypePublished(t, h.collector, tt.wants.metricPublished)
 			metricstest.EnsureMetricMatchesTextExpositionFormat(t, h.collector, tt.wants.metricLatencyTEF, "eventing_epp_backend_duration_milliseconds")
+			metricstest.EnsureMetricMatchesTextExpositionFormat(t, h.collector, tt.wants.metricPublishedTotalTEF, "eventing_epp_event_type_published_total")
 		})
 	}
 }
@@ -780,11 +852,12 @@ func TestHandler_sendEventAndRecordMetrics_TracingAndDefaults(t *testing.T) {
 	latency := new(mocks.BucketsProvider)
 	latency.On(bucketsFunc).Return(nil)
 	latency.Test(t)
-
+	logger, _ := eclogger.New("text", "debug")
 	h := &Handler{
 		Sender:    stub,
 		Defaulter: nil,
 		collector: metrics.NewCollector(latency),
+		Logger:    logger,
 	}
 	header := http.Header{}
 	headers := []string{"traceparent", "X-B3-TraceId", "X-B3-ParentSpanId", "X-B3-SpanId", "X-B3-Sampled", "X-B3-Flags"}
@@ -826,7 +899,14 @@ func CreateCloudEvent(t *testing.T) *cev2event.Event {
 // CreateValidStructuredRequest creates a structured cloudevent as http request.
 func CreateValidStructuredRequest(t *testing.T) *http.Request {
 	t.Helper()
-	req := httptest.NewRequest(http.MethodPost, "http://localhost/publish", strings.NewReader("{\"specversion\":\"1.0\",\"type\":\"sap.kyma.custom.testapp1023.order.created.v1\",\"source\":\"/default/sap.kyma/id\",\"id\":\"8945ec08-256b-11eb-9928-acde48001122\",\"data\":{\"foo\":\"bar\"}}"))
+	s := `{
+			"specversion":"1.0",
+			"type":"sap.kyma.custom.testapp1023.order.created.v1",
+			"source":"/default/sap.kyma/id",
+			"id":"8945ec08-256b-11eb-9928-acde48001122",
+			"data":{"foo":"bar"}
+			}`
+	req := httptest.NewRequest(http.MethodPost, "http://localhost/publish", strings.NewReader(s))
 	req.Header.Add("Content-Type", "application/cloudevents+json")
 	return req
 }
@@ -834,7 +914,8 @@ func CreateValidStructuredRequest(t *testing.T) *http.Request {
 // CreateBrokenRequest creates a structured cloudevent request that cannot be parsed.
 func CreateBrokenRequest(t *testing.T) *http.Request {
 	t.Helper()
-	req := httptest.NewRequest(http.MethodPost, "http://localhost/publish", strings.NewReader("I AM JUST A BROKEN REQUEST"))
+	reader := strings.NewReader("I AM JUST A BROKEN REQUEST")
+	req := httptest.NewRequest(http.MethodPost, "http://localhost/publish", reader)
 	req.Header.Add("Content-Type", "application/cloudevents+json")
 	return req
 }
@@ -842,7 +923,16 @@ func CreateBrokenRequest(t *testing.T) *http.Request {
 // CreateInvalidStructuredRequest creates an invalid structured cloudevent as http request. The `type` is missing.
 func CreateInvalidStructuredRequest(t *testing.T) *http.Request {
 	t.Helper()
-	req := httptest.NewRequest(http.MethodPost, "http://localhost/publish", strings.NewReader("{\"specversion\":\"1.0\",\"source\":\"/default/sap.kyma/id\",\"id\":\"8945ec08-256b-11eb-9928-acde48001122\",\"data\":{\"foo\":\"bar\"}}"))
+	s := `{
+			"specversion":"1.0",
+			"source":"/default/sap.kyma/id",
+			"id":"8945ec08-256b-11eb-9928-acde48001122",
+			"data": {
+				"foo":"bar"
+			}
+	}`
+	reader := strings.NewReader(s)
+	req := httptest.NewRequest(http.MethodPost, "http://localhost/publish", reader)
 	req.Header.Add("Content-Type", "application/cloudevents+json")
 	return req
 }
@@ -850,7 +940,8 @@ func CreateInvalidStructuredRequest(t *testing.T) *http.Request {
 // CreateValidBinaryRequest creates a valid binary cloudevent as http request.
 func CreateValidBinaryRequest(t *testing.T) *http.Request {
 	t.Helper()
-	req := httptest.NewRequest(http.MethodPost, "http://localhost/publish", strings.NewReader("{\"foo\":\"bar\"}"))
+	reader := strings.NewReader(`{"foo":"bar"}`)
+	req := httptest.NewRequest(http.MethodPost, "http://localhost/publish", reader)
 	req.Header.Add("Ce-Specversion", "1.0")
 	req.Header.Add("Ce-Type", "sap.kyma.custom.testapp1023.order.created.v1")
 	req.Header.Add("Ce-Source", "/default/sap.kyma/id")
@@ -861,7 +952,8 @@ func CreateValidBinaryRequest(t *testing.T) *http.Request {
 // CreateInvalidBinaryRequest creates an invalid binary cloudevent as http request. The `type` is missing.
 func CreateInvalidBinaryRequest(t *testing.T) *http.Request {
 	t.Helper()
-	req := httptest.NewRequest(http.MethodPost, "http://localhost/publish", strings.NewReader("{\"foo\":\"bar\"}"))
+	reader := strings.NewReader(`{"foo":"bar"}`)
+	req := httptest.NewRequest(http.MethodPost, "http://localhost/publish", reader)
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Ce-Specversion", "1.0")
 	req.Header.Add("Ce-Source", "/default/sap.kyma/id")

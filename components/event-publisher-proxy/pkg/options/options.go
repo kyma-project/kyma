@@ -8,6 +8,9 @@ import (
 )
 
 const (
+	maxRequestSize     = 65536
+	metricEndpointPort = ":9090"
+
 	// All the available arguments.
 	argMaxRequestSize = "max-request-size"
 	argMetricsAddress = "metrics-addr"
@@ -31,8 +34,8 @@ func New() *Options {
 }
 
 func (o *Options) Parse() error {
-	flag.Int64Var(&o.MaxRequestSize, argMaxRequestSize, 65536, "The maximum request size in bytes.")
-	flag.StringVar(&o.MetricsAddress, argMetricsAddress, ":9090", "The address the metric endpoint binds to.")
+	flag.Int64Var(&o.MaxRequestSize, argMaxRequestSize, maxRequestSize, "The maximum request size in bytes.")
+	flag.StringVar(&o.MetricsAddress, argMetricsAddress, metricEndpointPort, "The address the metric endpoint binds to.")
 	flag.Parse()
 
 	if err := envconfig.Process("", &o.Env); err != nil {

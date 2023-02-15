@@ -7,7 +7,7 @@ global:
       version: "v20230117-64505a69"
     telemetry_operator:
       name: "telemetry-operator"
-      version: "PR-16740"
+      version: "PR-16800"
     telemetry_webhook_cert_init:
       name: "webhook-cert-init"
       version: "v20230117-64505a69"
@@ -17,7 +17,7 @@ global:
       directory: "tpi"
     fluent_bit:
       name: "fluent-bit"
-      version: "2.0.8-723b551a"
+      version: "2.0.9-f89e8b78"
       directory: "tpi"
     busybox:
       name: "busybox"

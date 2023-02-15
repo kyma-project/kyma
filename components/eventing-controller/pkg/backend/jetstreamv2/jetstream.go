@@ -160,6 +160,8 @@ func (js *JetStream) DeleteInvalidConsumers(subscriptions []eventingv1alpha2.Sub
 			if err := js.deleteConsumerFromJetStream(con.Name); err != nil {
 				return err
 			}
+			js.namedLogger().Infow("Dangling JetStream consumer is deleted", "name", con.Name,
+				"description", con.Config.Description)
 		}
 	}
 	return nil

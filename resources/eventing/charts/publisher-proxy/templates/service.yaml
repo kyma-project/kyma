@@ -33,6 +33,10 @@ kind: Service
 metadata:
   name: {{ include "publisher-proxy.fullname" . }}{{ .Values.metrics.config.nameSuffix }}
   labels: {{- include "publisher-proxy.labels" . | nindent 4 }}
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: {{ .Values.metrics.config.port | quote }}
+    prometheus.io/scheme: "http"
 spec:
   type: ClusterIP
   selector: {{- include "publisher-proxy.selectorLabels" . | nindent 4 }}
