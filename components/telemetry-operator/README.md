@@ -1,7 +1,7 @@
 # Telemetry Operator
 
 ## Overview
-
+some text and [some broken link test](http://ssabshabhsbas.com)
 To implement [Kyma's strategy](https://github.com/kyma-project/community/blob/main/concepts/observability-strategy/strategy.md) of moving from in-cluster observability backends to a Telemetry component that integrates with external backends, the telemetry operator provides APIs for configurable logging, tracing, and monitoring.
 
 The telemetry operator has been bootstrapped with [Kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) 3.6.0. Additional APIs can also be [added by Kubebuilder](https://book.kubebuilder.io/cronjob-tutorial/new-api.html).
