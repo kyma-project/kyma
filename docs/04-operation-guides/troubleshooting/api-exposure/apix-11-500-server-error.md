@@ -124,7 +124,7 @@ When Oathkeeper throws `503 Service Unavailable` or `502 Bad Gateway` responses,
     kubectl get pods -n kyma-system -l app.kubernetes.io/name=oathkeeper
     ```
 
-2. Check if the load is heavy on those Pods:
+2. Check if the load is heavy on the listed Pods:
 
     ```bash
    kubectl top pods -n kyma-system -l app.kubernetes.io/name=oathkeeper
