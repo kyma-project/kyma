@@ -4,7 +4,7 @@ title: Cannot connect to a service exposed by an API Rule - 500 Internal Server 
 
 ## Symptom
 
-Having an APIRule deployed that looks like this: 
+You have a deployed APIRule that looks similar to the following one: 
 
   ```bash
     apiVersion: gateway.kyma-project.io/v1beta1
