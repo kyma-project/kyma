@@ -88,7 +88,7 @@ To resolve the issue, follow these guidelines:
                 required_scope: ["read"]
   ```
 
-- Set the different methods for specified paths:
+- Set different methods for the specified paths:
 
   ```bash
     apiVersion: gateway.kyma-project.io/v1beta1
