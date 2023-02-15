@@ -140,7 +140,11 @@ This tutorial shows how to set up a custom domain and prepare a certificate requ
             namespace: $NAMESPACE
         EOF
         ```
+<<<<<<< HEAD
         >**NOTE:** While using the default configuration, certificates with the Let's Encrypt issuer are valid for 90 days and automatically renewed 60 days before their validity expires. Use the `--issuer.renewal-window` command line parameter to adjust the time window between the renewal and the expiration of a certificate. For more information on Gardener Certificate Management, read the [Gardener documentation](https://github.com/gardener/cert-management#requesting-a-certificate).
+=======
+        >**NOTE:** While using the default configuration, certificates with the ACME issuer are usually valid for 90 days and automatically renewed 60 days before their validity expires. Use the `--issuer.renewal-window` command line parameter to adjust the time window between the renewal and the expiration of a certificate. For more information on Gardener Certificate Management, read the [Gardener documentation](https://github.com/gardener/cert-management#requesting-a-certificate).
+>>>>>>> 60e776b3a013678ee5204228674dfd9be97f6250
 
      * To check the certificate status, run: 
      
