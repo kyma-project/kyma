@@ -130,7 +130,7 @@ When Oathkeeper throws `503 Service Unavailable` or `502 Bad Gateway` responses,
    kubectl top pods -n kyma-system -l app.kubernetes.io/name=oathkeeper
    ```
 
-3. Access logs to check for any other errors in the Oathkeeper:
+3. Access the logs to check for other Oathkeeper errors:
 
     ```bash
     kubectl logs -n kyma-system -l app.kubernetes.io/name=oathkeeper  -c oathkeeper
