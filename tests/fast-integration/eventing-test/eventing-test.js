@@ -10,7 +10,7 @@ const {
   sendCloudEventStructuredModeAndCheckResponse,
   sendCloudEventBinaryModeAndCheckResponse,
   checkInClusterEventDelivery,
-  checkBEBFullyQualifiedTypeWithExactSub,
+  checkFullyQualifiedTypeWithExactSub,
   waitForSubscriptionsTillReady,
   waitForSubscriptions,
   checkInClusterEventTracing,
@@ -18,7 +18,7 @@ const {
   getVirtualServiceHost,
   sendInClusterEventWithRetry,
   ensureInClusterEventReceivedWithRetry,
-  eventTypeOrderReceivedHash,
+  orderReceivedSubName,
 } = require('../test/fixtures/commerce-mock');
 const {
   getEventingBackend,
@@ -34,7 +34,7 @@ const {
   k8sApply,
   deleteK8sPod,
   eventingSubscription, waitForEndpoint, waitForPodStatusWithLabel, waitForPodWithLabelAndCondition,
-  createApiRuleForService, getConfigMap, deleteApiRule,
+  createApiRuleForService, getConfigMap, deleteApiRule, getSubscriptionConsumerName,
 } = require('../utils');
 const {
   eventingMonitoringTest,
@@ -120,12 +120,19 @@ describe('Eventing tests', function() {
       await checkInClusterEventDelivery(testNamespace, true);
     });
 
+    it('check subscription with full qualified event type and exact type matching', async function() {
+      if (!testSubscriptionV1Alpha2) {
+        this.skip();
+      }
+      await checkFullyQualifiedTypeWithExactSub(testNamespace);
+    });
+
     if (isSKR && testCompassFlow) {
       eventingE2ETestSuiteWithCommerceMock(backend);
     }
 
     if (backend === natsBackend) {
-      testStreamAndConsumerNotReCreated();
+      testStreamNotReCreated();
       testJetStreamAtLeastOnceDelivery();
     }
   }
@@ -145,24 +152,19 @@ describe('Eventing tests', function() {
     });
   }
 
-  // testStreamAndConsumerNotReCreated - compares the stream and consumer creation timestamp before and after upgrade
+  // testStreamNotReCreated - compares the stream creation timestamp before and after upgrade
   // and if the timestamp is the same, we conclude that the stream is not re-created.
-  function testStreamAndConsumerNotReCreated() {
+  function testStreamNotReCreated() {
     context('stream and consumer check with JetStream backend', function() {
       let wantStreamName = null;
       let wantStreamCreationTime = null;
-      let wantConsumerName = null;
-      let wantConsumerCreationTime = null;
       let gotStreamData = null;
-      let gotConsumerData = null;
       let cm;
-      before('check if stream and consumer creation timestamp is available', async function() {
+      before('check if stream creation timestamp is available', async function() {
         try {
           cm = await getConfigMap(testDataConfigMapName);
           wantStreamName = cm.data.streamName;
           wantStreamCreationTime = cm.data.streamCreationTime;
-          wantConsumerName = cm.data.consumerName;
-          wantConsumerCreationTime = cm.data.consumerCreationTime;
         } catch (err) {
           console.log('Skipping the stream recreation check due to missing configmap!');
           this.skip();
@@ -176,7 +178,6 @@ describe('Eventing tests', function() {
             8222);
         const vsHost = vs.spec.hosts[0];
         gotStreamData = await getJetStreamStreamData(vsHost);
-        gotConsumerData = await getJetStreamConsumerData(eventTypeOrderReceivedHash, vsHost);
       });
 
       it('Compare the stream creation timestamp', async function() {
@@ -188,6 +189,41 @@ describe('Eventing tests', function() {
         assert.equal(gotStreamData.streamCreationTime, wantStreamCreationTime);
       });
 
+      after('Delete the created APIRule', async function() {
+        await deleteApiRule(eventingNatsApiRuleAName, kymaSystem);
+      });
+    });
+  }
+
+  // testConsumerNotReCreated - compares the consumer creation timestamp before and after upgrade
+  // and if the timestamp is the same, we conclude that the consumer is not re-created.
+  function testConsumerNotReCreated() {
+    context('consumer check with JetStream backend', function() {
+      let wantConsumerName = null;
+      let wantConsumerCreationTime = null;
+      let gotConsumerData = null;
+      let cm;
+      before('check if consumer creation timestamp is available', async function() {
+        try {
+          cm = await getConfigMap(testDataConfigMapName);
+          wantConsumerName = cm.data.consumerName;
+          wantConsumerCreationTime = cm.data.consumerCreationTime;
+        } catch (err) {
+          console.log('Skipping the stream recreation check due to missing configmap!');
+          this.skip();
+        }
+      });
+
+      it('Get the current consumer creation timestamp', async function() {
+        const vs = await createApiRuleForService(eventingNatsApiRuleAName,
+            kymaSystem,
+            eventingNatsSvcName,
+            8222);
+        const vsHost = vs.spec.hosts[0];
+        const consumerName = await getSubscriptionConsumerName(orderReceivedSubName, testNamespace, subCRDVersion);
+        gotConsumerData = await getJetStreamConsumerData(consumerName, vsHost);
+      });
+
       it('Compare the consumer creation timestamp', async function() {
         if (isConsumerCreationTimeMissing(cm.data)) {
           console.log('Skipping the consumer recreation check as the stream creation timestamp is missing!');
@@ -197,12 +233,11 @@ describe('Eventing tests', function() {
         assert.equal(gotConsumerData.consumerCreationTime, wantConsumerCreationTime);
       });
 
-      it('Delete the created APIRule', async function() {
+      after('Delete the created APIRule', async function() {
         await deleteApiRule(eventingNatsApiRuleAName, kymaSystem);
       });
     });
   }
-
 
   function testJetStreamAtLeastOnceDelivery() {
     context('with JetStream file storage', function() {
@@ -314,6 +349,10 @@ describe('Eventing tests', function() {
     });
     // Running Eventing end-to-end tests
     eventingTestSuite(natsBackend, isSKR, testCompassFlow);
+
+    // Checking subscription consumers are not recreated
+    testConsumerNotReCreated();
+
     // Running Eventing tracing tests
     eventingTracingTestSuite(isSKR);
 
@@ -346,13 +385,6 @@ describe('Eventing tests', function() {
 
     it('Run Eventing Monitoring tests', async function() {
       await eventingMonitoringTest(bebBackend, isSKR);
-    });
-
-    it('check subscription with full qualified event type and exact type matching', async function() {
-      if (!testSubscriptionV1Alpha2) {
-        this.skip();
-      }
-      await checkBEBFullyQualifiedTypeWithExactSub(testNamespace);
     });
   });
 

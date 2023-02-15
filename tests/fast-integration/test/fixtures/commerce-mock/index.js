@@ -77,8 +77,9 @@ const lastorderFunctionYaml = fs.readFileSync(
 );
 
 const eventTypeOrderCompleted = 'order.completed.v1';
-const uncleanEventType = 'Order-äöüÄÖÜβ.Final.R-e-c-e-i-v-e-d.v1';
+const uncleanEventType = 'Order-$.Final.R-e-c-e-i-v-e-d.v1';
 const fullyQualifiedEventType = 'sap.kyma.custom.inapp.order.completed.v2';
+const orderReceivedSubName = 'order-received';
 const eventTypeOrderReceived = 'sap.kyma.custom.inapp.order.received.v1';
 // the following is the consumer name of 'sap.kyma.custom.inapp.order.received.v1'
 const eventTypeOrderReceivedHash = 'f8a4e1486659bb2647b07bb167c9ee95';
@@ -615,9 +616,9 @@ async function ensureCommerceMockWithCompassTestFixture(
   await k8sApply([eventingSubscription(
       eventTypeOrderReceived,
       `http://lastorder.${targetNamespace}.svc.cluster.local`,
-      'order-received',
+      orderReceivedSubName,
       targetNamespace)]);
-  await waitForSubscription('order-received', targetNamespace);
+  await waitForSubscription(orderReceivedSubName, targetNamespace);
   await waitForSubscription('order-created', targetNamespace);
   return mockHost;
 }
@@ -663,11 +664,11 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
 
   const sink = `http://lastorder.${targetNamespace}.svc.cluster.local`;
   await k8sApply([eventingSubscription(
-      `sap.kyma.custom.inapp.order.received.v1`,
+      eventTypeOrderReceived,
       sink,
-      'order-received',
+      orderReceivedSubName,
       targetNamespace)]);
-  await waitForSubscription('order-received', targetNamespace);
+  await waitForSubscription(orderReceivedSubName, targetNamespace);
   await waitForSubscription('order-created', targetNamespace);
 
   if (testSubscriptionV1Alpha2) {
@@ -789,7 +790,7 @@ async function waitForSubscriptions(subscriptions) {
 }
 
 async function waitForSubscriptionsTillReady(targetNamespace) {
-  await waitForSubscription('order-received', targetNamespace);
+  await waitForSubscription(orderReceivedSubName, targetNamespace);
   await waitForSubscription('order-created', targetNamespace);
 }
 
@@ -797,13 +798,23 @@ async function checkInClusterEventDelivery(targetNamespace, testSubscriptionV1Al
   await checkInClusterEventDeliveryHelper(targetNamespace, 'structured', testSubscriptionV1Alpha2);
   await checkInClusterEventDeliveryHelper(targetNamespace, 'binary', testSubscriptionV1Alpha2);
   if (testSubscriptionV1Alpha2) {
-    await checkInClusterEventDeliveryHelper(targetNamespace, 'structured', true, uncleanEventType, uncleanSource);
-    await checkInClusterLegacyEvent(targetNamespace, true, uncleanEventType, uncleanSource);
+    await checkInClusterEventDeliveryHelper(targetNamespace, 'structured', true,
+        eventTypeOrderCompleted, eventSourceInApp);
+    await checkInClusterEventDeliveryHelper(targetNamespace, 'binary', true,
+        eventTypeOrderCompleted, eventSourceInApp);
+    // test CE with unclean event type
+    await checkInClusterEventDeliveryHelper(targetNamespace, 'structured', true,
+        uncleanEventType, uncleanSource);
+    await checkInClusterLegacyEvent(targetNamespace, true,
+        eventTypeOrderCompleted.replace('.v1', ''), eventSourceInApp);
+    // test legacy event with unclean event type
+    await checkInClusterLegacyEvent(targetNamespace, true,
+        uncleanEventType.replace('.v1', ''), uncleanSource);
   }
   await checkInClusterLegacyEvent(targetNamespace, testSubscriptionV1Alpha2);
 }
 
-async function checkBEBFullyQualifiedTypeWithExactSub(targetNamespace, eventType=fullyQualifiedEventType) {
+async function checkFullyQualifiedTypeWithExactSub(targetNamespace, eventType=fullyQualifiedEventType) {
   await checkInClusterEventDeliveryHelper(targetNamespace, 'structured', true,
       eventType, eventMeshSourceNamespace);
 }
@@ -964,12 +975,6 @@ async function getVirtualServiceHost(targetNamespace, funcName) {
 async function checkInClusterEventDeliveryHelper(targetNamespace, encoding, testSubscriptionV1Alpha2=false,
     eventType='', eventSource='') {
   const eventId = getRandomEventId(encoding);
-  if (!eventType) {
-    eventType = testSubscriptionV1Alpha2 ? eventTypeOrderCompleted : '';
-  }
-  if (!eventSource) {
-    eventSource = testSubscriptionV1Alpha2 ? eventSourceInApp : '';
-  }
   const mockHost = await getVirtualServiceHost(targetNamespace, 'lastorder');
 
   if (isDebugEnabled()) {
@@ -990,14 +995,6 @@ async function checkInClusterLegacyEvent(targetNamespace, testSubscriptionV1Alph
   }
 
   const eventData = {'id': eventId, 'legacyOrder': '987'};
-  if (!eventType) {
-    eventType = testSubscriptionV1Alpha2 ? eventTypeOrderCompleted.replace('.v1', '') : '';
-  } else {
-    eventType = testSubscriptionV1Alpha2 ? uncleanEventType.replace('.v1', '') : '';
-  }
-  if (!eventSource) {
-    eventSource = testSubscriptionV1Alpha2 ? eventSourceInApp : '';
-  }
 
   await sendInClusterLegacyEventWithRetry(mockHost, eventData, eventType, eventSource);
   return ensureInClusterLegacyEventReceivedWithRetry(mockHost, eventId, eventType);
@@ -1017,7 +1014,7 @@ module.exports = {
   deleteService,
   checkFunctionResponse,
   checkInClusterEventDelivery,
-  checkBEBFullyQualifiedTypeWithExactSub,
+  checkFullyQualifiedTypeWithExactSub,
   checkInClusterEventTracing,
   cleanMockTestFixture,
   deleteMockTestFixture,
@@ -1032,4 +1029,5 @@ module.exports = {
   ensureInClusterEventReceivedWithRetry,
   prepareFunction,
   eventTypeOrderReceivedHash,
+  orderReceivedSubName,
 };
