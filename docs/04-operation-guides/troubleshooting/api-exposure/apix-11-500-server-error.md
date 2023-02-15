@@ -30,7 +30,7 @@ You have a deployed APIRule that looks similar to the following one:
               config:
                 required_scope: ["read"]
   ```
-It is configured under one host URL with wildcard /* and specific /headers paths and the same GET method with different handlers.
+The APIRule is configured under one host URL with the `/*` wildcard, the specific `/headers` path, and the same `GET` methods, which use different handlers.
 When you try to reach your service, you get a `500 Internal Server Error` response:
   ```bash
   {"error":{"code":500,"status":"Internal Server Error","request":"e84400db-16b3-4818-9370-f10a6b4f3876","message":"An internal server error occurred, please contact the system administrator"}}
