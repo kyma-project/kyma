@@ -1,3 +1,20 @@
+####################################
+#                                  #
+#  Security Context Configuration  #
+#                                  #
+####################################
+podSecurityContext:
+  fsGroup: 10001
+  seccompProfile:
+    type: RuntimeDefault
+
+containerSecurityContext:
+  privileged: false
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+
 ###############################
 #                             #
 #  NATS Server Configuration  #
