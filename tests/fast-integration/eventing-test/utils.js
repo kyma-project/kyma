@@ -1,6 +1,6 @@
 const {
   cleanMockTestFixture,
-  cleanCompassResourcesSKR,
+  cleanCompassResourcesSKR, eventTypeOrderReceivedHash,
 } = require('../test/fixtures/commerce-mock');
 
 const {
@@ -11,6 +11,7 @@ const {
   getShootNameFromK8sServerUrl,
   listPods,
   retryPromise,
+  getSubscription,
 } = require('../utils');
 
 const {DirectorClient, DirectorConfig, getAlreadyAssignedScenarios} = require('../compass');
@@ -143,6 +144,17 @@ async function getJetStreamStreamData(host) {
   };
 }
 
+async function getSubscriptionConsumerName(subscriptionName, namespace='default', crdVersion='v1alpha1') {
+  const sub = await getSubscription(subscriptionName, namespace, crdVersion);
+  if (crdVersion === 'v1alpha1') {
+    // the logic is temporary because consumer name is missing in the v1alpha1 subscription
+    // will be deleted as we will upgrade to v1alpha2
+    return eventTypeOrderReceivedHash;
+  } else {
+    return sub.status.backend.types[0].consumerName;
+  }
+}
+
 async function getJetStreamConsumerData(consumerName, host) {
   const responseJson = await retryPromise(async () => await axios.get(`https://${host}/jsz?consumers=true`), 5, 1000);
   const consumers = responseJson.data.account_details[0].stream_detail[0].consumer_detail;
@@ -201,4 +213,5 @@ module.exports = {
   isStreamCreationTimeMissing,
   isConsumerCreationTimeMissing,
   subscriptionNames,
+  getSubscriptionConsumerName,
 };
