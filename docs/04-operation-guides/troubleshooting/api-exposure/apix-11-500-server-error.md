@@ -36,6 +36,11 @@ When you try to reach your service, you get a `500 Internal Server Error` respon
   {"error":{"code":500,"status":"Internal Server Error","request":"e84400db-16b3-4818-9370-f10a6b4f3876","message":"An internal server error occurred, please contact the system administrator"}}
   ```
 
+## Cause
+
+Having multiple rules defined under the same host URL carries the risk of errors for specific paths due to the configuration overlap in Oathkeeper.
+The root cause of the problem is the lack of support for the negative lookahead in the Golang language. For more information, see [the issue](https://github.com/ory/oathkeeper/issues/157) reported in the Ory Oathkeeper project.
+
 ## Remedy
 
 To resolve the issue, follow these guidelines:
@@ -129,9 +134,3 @@ When Oathkeeper throws `503 Service Unavailable` or `502 Bad Gateway` responses,
     ```bash
     kubectl logs -n kyma-system -l app.kubernetes.io/name=oathkeeper  -c oathkeeper
    ```
-
-## Cause
-
-[This issue](https://github.com/ory/oathkeeper/issues/157) was reported in the Ory Oathkeeper project.
-Having multiple rules defined under the same host URL carries the risk of errors for specific paths due to the configuration overlap in Oathkeeper.
-The root cause of the problem is the lack of support for the negative lookahead in the Golang language.
