@@ -4,7 +4,6 @@ const fs = require('fs');
 const {join} = require('path');
 const {expect} = require('chai');
 const execa = require('execa');
-const {eventTypeOrderReceivedHash} = require('../test/fixtures/commerce-mock');
 
 const kc = new k8s.KubeConfig();
 let k8sDynamicApi;
@@ -411,19 +410,6 @@ function waitForFunction(name, namespace = 'default', timeout = 90_000) {
       timeout,
       `Waiting for ${name} function timeout (${timeout} ms)`,
   );
-}
-
-async function getSubscriptionConsumerName(subscriptionName, namespace='default', crdVersion='v1alpha1') {
-  const sub = await getSubscription(subscriptionName, namespace, crdVersion);
-  let consumerName;
-  if (crdVersion === 'v1alpha1') {
-    // the logic is temporary because consumer name is missing in the v1alpha1 subscription
-    // will be deleted as we will upgrade to v1alpha2
-    return eventTypeOrderReceivedHash;
-  } else {
-    consumerName = sub.status.backend.types[0].consumerName;
-  }
-  return consumerName;
 }
 
 async function getSubscription(name, namespace = 'default', crdVersion='v1alpha1') {
@@ -1925,5 +1911,5 @@ module.exports = {
   waitForEndpoint,
   waitForPodWithLabelAndCondition,
   waitForDeploymentWithLabel,
-  getSubscriptionConsumerName,
+  getSubscription,
 };

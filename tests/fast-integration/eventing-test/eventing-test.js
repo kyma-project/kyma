@@ -33,6 +33,7 @@ const {
   isDebugEnabled,
   k8sApply,
   deleteK8sPod,
+  createK8sConfigMap,
   getSubscriptionConsumerName,
   waitForFunction,
   eventingSubscription,
@@ -66,6 +67,7 @@ const {
   testDataConfigMapName,
   eventingNatsSvcName,
   eventingNatsApiRuleAName,
+  getSubscriptionConsumerName,
   getJetStreamConsumerData,
   subscriptionNames,
   eventingSinkName,
@@ -101,6 +103,7 @@ let clusterHost = '';
 let isEventingSinkDeployed = false;
 
 describe('Eventing tests', function() {
+  let natsApiRuleVSHost;
   this.timeout(timeoutTime);
   this.slow(slowTime);
 
@@ -125,6 +128,14 @@ describe('Eventing tests', function() {
   before('Get stream config for JetStream', async function() {
     const success = await getStreamConfigForJetStream();
     assert.isTrue(success);
+  });
+
+  before('Create an ApiRule for NATS', async () => {
+    const vs = await createApiRuleForService(eventingNatsApiRuleAName,
+        kymaSystem,
+        eventingNatsSvcName,
+        8222);
+    natsApiRuleVSHost = vs.spec.hosts[0];
   });
 
   before('Check if eventing-sink is deployed', async function() {
@@ -327,12 +338,7 @@ describe('Eventing tests', function() {
       });
 
       it('Get the current stream creation timestamp', async function() {
-        const vs = await createApiRuleForService(eventingNatsApiRuleAName,
-            kymaSystem,
-            eventingNatsSvcName,
-            8222);
-        const vsHost = vs.spec.hosts[0];
-        gotStreamData = await getJetStreamStreamData(vsHost);
+        gotStreamData = await getJetStreamStreamData(natsApiRuleVSHost);
       });
 
       it('Compare the stream creation timestamp', async function() {
@@ -342,10 +348,6 @@ describe('Eventing tests', function() {
         }
         assert.equal(gotStreamData.streamName, wantStreamName);
         assert.equal(gotStreamData.streamCreationTime, wantStreamCreationTime);
-      });
-
-      after('Delete the created APIRule', async function() {
-        await deleteApiRule(eventingNatsApiRuleAName, kymaSystem);
       });
     });
   }
@@ -370,13 +372,8 @@ describe('Eventing tests', function() {
       });
 
       it('Get the current consumer creation timestamp', async function() {
-        const vs = await createApiRuleForService(eventingNatsApiRuleAName,
-            kymaSystem,
-            eventingNatsSvcName,
-            8222);
-        const vsHost = vs.spec.hosts[0];
         const consumerName = await getSubscriptionConsumerName(orderReceivedSubName, testNamespace, subCRDVersion);
-        gotConsumerData = await getJetStreamConsumerData(consumerName, vsHost);
+        gotConsumerData = await getJetStreamConsumerData(consumerName, natsApiRuleVSHost);
       });
 
       it('Compare the consumer creation timestamp', async function() {
@@ -386,10 +383,6 @@ describe('Eventing tests', function() {
         }
         assert.equal(gotConsumerData.consumerName, wantConsumerName);
         assert.equal(gotConsumerData.consumerCreationTime, wantConsumerCreationTime);
-      });
-
-      after('Delete the created APIRule', async function() {
-        await deleteApiRule(eventingNatsApiRuleAName, kymaSystem);
       });
     });
   }
@@ -478,6 +471,20 @@ describe('Eventing tests', function() {
     it('In-cluster event should have correct tracing spans', async function() {
       await checkInClusterEventTracing(testNamespace);
     });
+  }
+
+  async function recordOrderReceivedConsumerDataToConfigMap() {
+    const consumerName = await getSubscriptionConsumerName(orderReceivedSubName, testNamespace, subCRDVersion);
+    debug('Adding JetStream consumer info to eventing test data configmap');
+    const consumerInfo = await getJetStreamConsumerData(consumerName, natsApiRuleVSHost);
+    const testDataConfigMap = await getConfigMap(testDataConfigMapName);
+    await createK8sConfigMap(
+        {
+          ...testDataConfigMap.data,
+          ...consumerInfo,
+        },
+        testDataConfigMapName,
+    );
   }
 
   // runs after each test in every block
@@ -581,6 +588,20 @@ describe('Eventing tests', function() {
     it('Run Eventing Monitoring tests', async function() {
       await eventingMonitoringTest(natsBackend, isSKR);
     });
+  });
+
+  // this is record consumer creation time to compare after the Kyma upgrade
+  after('Record order.received.v1 consumer data to ConfigMap', async () => {
+    const currentBackend = await getEventingBackend();
+    if (currentBackend && currentBackend.toLowerCase() !== natsBackend) {
+      this.skip();
+    }
+    debug('Adding JetStream consumer info to eventing test data configmap');
+    await recordOrderReceivedConsumerDataToConfigMap();
+  });
+
+  after('Delete the created APIRule', async function() {
+    await deleteApiRule(eventingNatsApiRuleAName, kymaSystem);
   });
 
   after('Unexpose Grafana', async function() {

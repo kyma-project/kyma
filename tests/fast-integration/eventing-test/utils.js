@@ -1,5 +1,6 @@
 const {
   cleanMockTestFixture,
+  eventTypeOrderReceivedHash,
   cleanCompassResourcesSKR,
   generateTraceParentHeader,
   checkTrace,
@@ -13,6 +14,7 @@ const {
   getShootNameFromK8sServerUrl,
   listPods,
   retryPromise,
+  getSubscription,
   waitForVirtualService,
   k8sApply,
   waitForFunction,
@@ -185,6 +187,17 @@ async function getJetStreamStreamData(host) {
     streamName: streamName,
     streamCreationTime: streamCreationTime,
   };
+}
+
+async function getSubscriptionConsumerName(subscriptionName, namespace='default', crdVersion='v1alpha1') {
+  const sub = await getSubscription(subscriptionName, namespace, crdVersion);
+  if (crdVersion === 'v1alpha1') {
+    // the logic is temporary because consumer name is missing in the v1alpha1 subscription
+    // will be deleted as we will upgrade to v1alpha2
+    return eventTypeOrderReceivedHash;
+  } else {
+    return sub.status.backend.types[0].consumerName;
+  }
 }
 
 async function getJetStreamConsumerData(consumerName, host) {
@@ -585,6 +598,7 @@ module.exports = {
   isConsumerCreationTimeMissing,
   eppInClusterUrl,
   subscriptionNames,
+  getSubscriptionConsumerName,
   eventingSinkName,
   v1alpha1SubscriptionsTypes,
   subscriptionsTypes,

@@ -44,7 +44,6 @@ const {
   ensureCommerceMockLocalTestFixture,
   setEventMeshSourceNamespace,
   ensureCommerceMockWithCompassTestFixture,
-  orderReceivedSubName,
 } = require('../test/fixtures/commerce-mock');
 const {
   info,
@@ -53,8 +52,7 @@ const {
   createEventingBackendK8sSecret,
   createK8sConfigMap,
   createApiRuleForService,
-  deleteApiRule, getConfigMap,
-  getSubscriptionConsumerName,
+  deleteApiRule,
 } = require('../utils');
 const {
   addScenarioInCompass,
@@ -148,8 +146,6 @@ describe('Eventing tests preparation', function() {
 
     // Deploy Commerce mock application, function and subscriptions for tests
     await prepareAssetsWithoutCompassFlow();
-
-    await addOrderReceivedConsumerToConfigMap();
   });
 
   it('Prepare assets with Compass flow', async function() {
@@ -160,10 +156,6 @@ describe('Eventing tests preparation', function() {
 
     // Deploy Commerce mock application, function and subscriptions for tests (includes compass flow)
     await prepareAssetsWithCompassFlow();
-
-    debug('Adding JetStream consumer info to eventing test data configmap');
-
-    await addOrderReceivedConsumerToConfigMap();
   });
 
   it('Prepare eventing-sink function', async function() {
@@ -251,20 +243,6 @@ describe('Eventing tests preparation', function() {
         mockNamespace,
         testNamespace,
         compassScenarioAlreadyExist,
-    );
-  }
-
-  async function addOrderReceivedConsumerToConfigMap() {
-    const consumerName = await getSubscriptionConsumerName(orderReceivedSubName, testNamespace, subCRDVersion);
-    debug('Adding JetStream consumer info to eventing test data configmap');
-    const consumerInfo = await getJetStreamConsumerData(consumerName, natsApiRuleVSHost);
-    const testDataConfigMap = await getConfigMap(testDataConfigMapName);
-    await createK8sConfigMap(
-        {
-          ...testDataConfigMap.data,
-          ...consumerInfo,
-        },
-        testDataConfigMapName,
     );
   }
 });
