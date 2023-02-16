@@ -152,3 +152,9 @@ resolve_clean:
 
 lint-thoroughly:
 	golangci-lint run
+
+update_metrics_docs:
+	@promlinter list -ojson ../event-publisher-proxy > metrics_epp.json
+	@promlinter list -ojson ../eventing-controller/ > metrics_ec.json
+	@gomplate -d ec=metrics_ec.json -d epp=metrics_epp.json -f hack/metrics.doc.tpl  | prettier --parser markdown > ../../docs/04-operation-guides/operations/evnt-02-eventing-metrics.md
+

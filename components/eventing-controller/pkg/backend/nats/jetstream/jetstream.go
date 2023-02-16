@@ -688,8 +688,17 @@ func (js *JetStream) getCallback(subKeyPrefix, subscriptionName string) nats.Msg
 		ceLogger.Debugw("Sending the CloudEvent")
 
 		// dispatch the event to sink
+		start := time.Now()
 		result := js.client.Send(traceCtxWithCE, *ce)
+		dispatchDuration := time.Since(start)
 		if !cev2protocol.IsACK(result) {
+			js.metricsCollector.RecordLatencyPerSubscription(
+				dispatchDuration,
+				subscriptionName,
+				ce.Type(),
+				sink,
+				http.StatusInternalServerError,
+			)
 			js.metricsCollector.RecordDeliveryPerSubscription(subscriptionName, ce.Type(), sink, http.StatusInternalServerError)
 			ceLogger.Errorw("Failed to dispatch the CloudEvent", "error", result.Error())
 			// Do not NAK the msg so that the server waits for AckWait and then redeliver the msg.
@@ -702,6 +711,7 @@ func (js *JetStream) getCallback(subKeyPrefix, subscriptionName string) nats.Msg
 			ceLogger.Errorw("Failed to ACK an event on JetStream")
 		}
 
+		js.metricsCollector.RecordLatencyPerSubscription(dispatchDuration, subscriptionName, ce.Type(), sink, http.StatusOK)
 		js.metricsCollector.RecordDeliveryPerSubscription(subscriptionName, ce.Type(), sink, http.StatusOK)
 		ceLogger.Debugw("CloudEvent was dispatched")
 	}
