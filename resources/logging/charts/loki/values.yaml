@@ -151,8 +151,7 @@ podLabels: {}
 ## Pod Annotations
 podAnnotations:
   sidecar.istio.io/inject: "true"
-  prometheus.io/scrape: "true"
-  prometheus.io/port: "http-metrics"
+  prometheus.io/scrape: "false"
 
 podManagementPolicy: OrderedReady
 
@@ -199,7 +198,9 @@ service:
   type: ClusterIP
   nodePort:
   port: 3100
-  annotations: {}
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "3100"
   labels: {}
   targetPort: http-metrics
 
@@ -223,13 +224,6 @@ podDisruptionBudget: {}
 
 updateStrategy:
   type: RollingUpdate
-
-serviceMonitor:
-  enabled: true
-  interval: ""
-  additionalLabels: {}
-  annotations: {}
-  # scrapeTimeout: 10s
 
 initContainers: []
 ## Init containers to be added to the loki pod.
@@ -310,7 +304,7 @@ chunkCleaner:
     capabilities:
       drop:
         - ALL
-    
+
 grafana:
   datasource:
     derivedFields: |

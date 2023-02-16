@@ -57,7 +57,7 @@ func NewDirectorClient(gqlClient gql.Client, oauthClient oauth.Client, tenant st
 func (cc *directorClient) getToken() error {
 	token, err := cc.oauthClient.GetAuthorizationToken()
 	if err != nil {
-		return errors.New("Error while obtaining token")
+		return err
 	}
 
 	if token.EmptyOrExpired() {
