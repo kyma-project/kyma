@@ -512,6 +512,8 @@ func Test_ChangeSubscription(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
 			// given
 			g := gomega.NewGomegaWithT(t)
 
