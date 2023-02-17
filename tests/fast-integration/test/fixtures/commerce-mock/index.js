@@ -1029,5 +1029,6 @@ module.exports = {
   ensureInClusterEventReceivedWithRetry,
   prepareFunction,
   eventTypeOrderReceivedHash,
+  eventTypeOrderReceived,
   orderReceivedSubName,
 };

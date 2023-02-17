@@ -317,20 +317,6 @@ describe('Eventing tests', function() {
     });
   }
 
-  async function recordOrderReceivedConsumerDataToConfigMap() {
-    const consumerName = await getSubscriptionConsumerName(orderReceivedSubName, testNamespace, subCRDVersion);
-    debug('Adding JetStream consumer info to eventing test data configmap');
-    const consumerInfo = await getJetStreamConsumerData(consumerName, natsApiRuleVSHost);
-    const testDataConfigMap = await getConfigMap(testDataConfigMapName);
-    await createK8sConfigMap(
-        {
-          ...testDataConfigMap.data,
-          ...consumerInfo,
-        },
-        testDataConfigMapName,
-    );
-  }
-
   // runs after each test in every block
   afterEach(async function() {
     // if the test is failed, then printing some debug logs
@@ -421,8 +407,25 @@ describe('Eventing tests', function() {
     if (currentBackend && currentBackend.toLowerCase() !== natsBackend) {
       this.skip();
     }
+
+    let testDataConfigMap;
+    try {
+      testDataConfigMap = await getConfigMap(testDataConfigMapName);
+    } catch (err) {
+      console.log('Skipping the recording consumer data due to missing configmap!');
+      this.skip();
+    }
+
     debug('Adding JetStream consumer info to eventing test data configmap');
-    await recordOrderReceivedConsumerDataToConfigMap();
+    const consumerName = await getSubscriptionConsumerName(orderReceivedSubName, testNamespace, subCRDVersion);
+    const consumerInfo = await getJetStreamConsumerData(consumerName, natsApiRuleVSHost);
+    await createK8sConfigMap(
+        {
+          ...testDataConfigMap.data,
+          ...consumerInfo,
+        },
+        testDataConfigMapName,
+    );
   });
 
   after('Delete the created APIRule', async function() {
