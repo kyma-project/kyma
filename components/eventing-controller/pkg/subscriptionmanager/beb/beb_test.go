@@ -128,7 +128,7 @@ func TestCleanup(t *testing.T) {
 	//  check that the susbcription exist in bebMock
 	getSubscriptionURL := fmt.Sprintf(client.GetURLFormat, nameMapper.MapSubscriptionName(subscription.Name, subscription.Namespace))
 	getSubscriptionURL = bebMock.MessagingURL + getSubscriptionURL
-	resp, err := http.Get(getSubscriptionURL) //nolint:gosec
+	resp, err := http.Get(getSubscriptionURL)
 	g.Expect(err).To(gomega.BeNil())
 	g.Expect(resp.StatusCode).Should(gomega.Equal(http.StatusOK))
 
@@ -149,7 +149,7 @@ func TestCleanup(t *testing.T) {
 
 	// Expect
 	// the BEB subscription should be deleted from BEB Mock
-	resp, err = http.Get(getSubscriptionURL) //nolint:gosec
+	resp, err = http.Get(getSubscriptionURL)
 	g.Expect(err).To(gomega.BeNil())
 	g.Expect(resp.StatusCode).Should(gomega.Equal(http.StatusNotFound))
 
@@ -239,7 +239,7 @@ func Test_cleanupEventMesh(t *testing.T) {
 	// check that the subscription exist in bebMock
 	getSubscriptionURL := fmt.Sprintf(client.GetURLFormat, nameMapper.MapSubscriptionName(subscription.Name, subscription.Namespace))
 	getSubscriptionURL = bebMock.MessagingURL + getSubscriptionURL
-	resp, err := http.Get(getSubscriptionURL) //nolint:gosec
+	resp, err := http.Get(getSubscriptionURL)
 	require.NoError(t, err)
 	require.Equal(t, resp.StatusCode, http.StatusOK)
 
@@ -260,7 +260,7 @@ func Test_cleanupEventMesh(t *testing.T) {
 
 	// then
 	// the BEB subscription should be deleted from BEB Mock
-	resp, err = http.Get(getSubscriptionURL) //nolint:gosec
+	resp, err = http.Get(getSubscriptionURL)
 	require.NoError(t, err)
 	require.Equal(t, resp.StatusCode, http.StatusNotFound)
 

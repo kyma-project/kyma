@@ -73,7 +73,7 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 	c.latencyPerSubscriber.Collect(ch)
 }
 
-// RegisterMetrics registers the metrics
+// RegisterMetrics registers the metrics.
 func (c *Collector) RegisterMetrics() {
 	metrics.Registry.MustRegister(c.deliveryPerSubscription)
 	metrics.Registry.MustRegister(c.eventTypes)

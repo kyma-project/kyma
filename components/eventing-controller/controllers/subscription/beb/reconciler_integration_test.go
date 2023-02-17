@@ -1185,7 +1185,6 @@ func ensureAPIRuleStatusUpdatedWithStatusReady(ctx context.Context, apiRule *api
 	By(fmt.Sprintf("Ensuring the APIRule %q is updated", apiRule.Name))
 
 	return Eventually(func() error {
-
 		lookupKey := types.NamespacedName{
 			Namespace: apiRule.Namespace,
 			Name:      apiRule.Name,

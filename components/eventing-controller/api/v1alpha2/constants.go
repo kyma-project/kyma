@@ -4,16 +4,16 @@ const (
 	TypeMatchingStandard TypeMatching = "standard"
 	TypeMatchingExact    TypeMatching = "exact"
 
-	// config fields
+	// config fields.
 	MaxInFlightMessages = "maxInFlightMessages"
 
-	// protocol settings
+	// protocol settings.
 	Protocol                        = "protocol"
 	ProtocolSettingsContentMode     = "contentMode"
 	ProtocolSettingsExemptHandshake = "exemptHandshake"
 	ProtocolSettingsQos             = "qos"
 
-	// webhook auth fields
+	// webhook auth fields.
 	WebhookAuthType         = "type"
 	WebhookAuthGrantType    = "grantType"
 	WebhookAuthClientID     = "clientId"
