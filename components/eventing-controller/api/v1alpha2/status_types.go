@@ -5,7 +5,7 @@ type EventType struct {
 	CleanType    string `json:"cleanType"`
 }
 
-// Backend contains Backend-specific fields
+// Backend contains Backend-specific fields.
 type Backend struct {
 	// BEB-specific fields
 
