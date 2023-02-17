@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
+	"testing"
 	"time"
 
 	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
@@ -12,19 +14,17 @@ import (
 
 	eventMeshtypes "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 
-	testingv2 "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscriptionv2/reconcilertesting"
+	"github.com/stretchr/testify/assert"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
 	reconcilertestingv1 "github.com/kyma-project/kyma/components/eventing-controller/testing"
-	"github.com/stretchr/testify/assert"
+
+	"github.com/onsi/gomega"
+	gomegatypes "github.com/onsi/gomega/types"
 
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
 	eventmeshsubmatchers "github.com/kyma-project/kyma/components/eventing-controller/testing/v2/matchers/eventmeshsub"
-	"github.com/onsi/gomega"
-	gomegatypes "github.com/onsi/gomega/types"
-
-	"os"
-	"testing"
 
 	corev1 "k8s.io/api/core/v1"
 )
@@ -73,7 +73,7 @@ func Test_ValidationWebhook(t *testing.T) {
 					reconcilertesting.WithValidSink(namespace, "svc"),
 				)
 			},
-			wantError: testingv2.GenerateInvalidSubscriptionError(testName,
+			wantError: GenerateInvalidSubscriptionError(testName,
 				eventingv1alpha2.EmptyErrDetail, eventingv1alpha2.SourcePath),
 		},
 		{
@@ -86,7 +86,7 @@ func Test_ValidationWebhook(t *testing.T) {
 					reconcilertesting.WithValidSink(namespace, "svc"),
 				)
 			},
-			wantError: testingv2.GenerateInvalidSubscriptionError(testName,
+			wantError: GenerateInvalidSubscriptionError(testName,
 				eventingv1alpha2.EmptyErrDetail, eventingv1alpha2.TypesPath),
 		},
 		{
@@ -99,7 +99,7 @@ func Test_ValidationWebhook(t *testing.T) {
 					reconcilertesting.WithSink("https://svc2.test.local"),
 				)
 			},
-			wantError: testingv2.GenerateInvalidSubscriptionError(testName,
+			wantError: GenerateInvalidSubscriptionError(testName,
 				eventingv1alpha2.SuffixMissingErrDetail, eventingv1alpha2.SinkPath),
 		},
 		{
@@ -113,7 +113,7 @@ func Test_ValidationWebhook(t *testing.T) {
 					reconcilertesting.WithValidSink(namespace, "svc"),
 				)
 			},
-			wantError: testingv2.GenerateInvalidSubscriptionError(testName,
+			wantError: GenerateInvalidSubscriptionError(testName,
 				eventingv1alpha2.InvalidGrantTypeErrDetail, eventingv1alpha2.ConfigPath),
 		},
 	}

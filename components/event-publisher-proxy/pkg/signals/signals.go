@@ -20,14 +20,15 @@ var (
 // SetupSignalHandler registered for SIGTERM and SIGINT. A stop channel is returned
 // which is closed on one of these signals. If a second signal is caught, the program
 // is terminated with exit code 1.
-func SetupSignalHandler() (stopCh <-chan struct{}) {
+func SetupSignalHandler() <-chan struct{} {
 	close(onlyOneSignalHandler) // panics when called twice
 
 	return setupStopChannel()
 }
 
-func setupStopChannel() (stopCh <-chan struct{}) {
+func setupStopChannel() <-chan struct{} {
 	stop := make(chan struct{})
+	//nolint:gomnd // sending a signal will trigger a graceful shutdown, sending a second signal will force stop
 	osSignal := make(chan os.Signal, 2)
 	signal.Notify(osSignal, shutdownSignals...)
 	go func() {
@@ -52,6 +53,8 @@ func NewContext() context.Context {
 }
 
 // Deadline implements context.Context.
+//
+//nolint:nakedret,nonamedreturns //same implementation in the std library
 func (scc *signalContext) Deadline() (deadline time.Time, ok bool) {
 	return
 }

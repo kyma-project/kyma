@@ -36,7 +36,6 @@ func Test_IsEventTypeSegmentsOverLimit(t *testing.T) {
 			require.Equal(t, tc.wantResult, isEventTypeSegmentsOverLimit(tc.givenEventType))
 		})
 	}
-
 }
 
 func Test_GetEventMeshSubject(t *testing.T) {

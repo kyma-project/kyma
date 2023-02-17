@@ -2,6 +2,8 @@
 title: Monitoring
 ---
 
+> **NOTE:** Prometheus and Grafana are [deprecated](https://kyma-project.io/blog/2022/12/9/monitoring-deprecation) and are planned to be removed. If you want to install a custom stack, take a look at [Install a custom kube-prometheus-stack in Kyma](https://github.com/kyma-project/examples/tree/main/prometheus).
+
 ## Overview
 
 For in-cluster monitoring, Kyma uses [Prometheus](https://prometheus.io/) as the open source monitoring and alerting toolkit that collects and stores metrics data. This data is consumed by several addons, including [Grafana](https://grafana.com/) for analytics and monitoring, and [Alertmanager](https://prometheus.io/docs/alerting/alertmanager/) for handling alerts.

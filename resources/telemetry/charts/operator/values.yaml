@@ -48,6 +48,13 @@ readinessProbe:
   periodSeconds: 10
 
 fluentbit:
+  resources:
+    limits:
+      cpu: 400m
+      memory: 256Mi
+    requests:
+      cpu: 10m
+      memory: 50Mi
   fullnameOverride: telemetry-fluent-bit
   networkPolicy:
     enabled: false
@@ -60,11 +67,6 @@ fluentbit:
     create: true
   podSecurityPolicy:
     create: true
-  serviceMonitor:
-    enabled: true
-    serviceMonitorPorts:
-      - port: http-metrics
-        path: /metrics
 
 resources:
   limits:
@@ -93,6 +95,9 @@ service:
   type: ClusterIP
   port: 8080
   portName: http-metrics
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8080"
 
 webhook:
   name: validation.webhook.telemetry.kyma-project.io

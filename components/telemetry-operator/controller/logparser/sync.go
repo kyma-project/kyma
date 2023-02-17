@@ -32,7 +32,9 @@ func (s *syncer) syncFluentBitConfig(ctx context.Context) error {
 	}
 	fluentBitParsersConfig := builder.BuildFluentBitParsersConfig(&logParsers)
 	if fluentBitParsersConfig == "" {
-		cm.Data = nil
+		data := make(map[string]string)
+		data[parsersConfigMapKey] = ""
+		cm.Data = data
 		changed = true
 	} else if cm.Data == nil {
 		data := make(map[string]string)

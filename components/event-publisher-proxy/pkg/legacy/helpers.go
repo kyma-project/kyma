@@ -15,11 +15,11 @@ import (
 const (
 	// eventTypeFormat is driven by BEB specification.
 	// An EventType must have at least 4 segments separated by dots in the form of:
-	// <domainNamespace>.<businessObjectName>.<operation>.<version>
+	// `<domainNamespace>.<businessObjectName>.<operation>.<version>`.
 	eventTypeFormat = "%s.%s.%s.%s"
 
 	// eventTypeFormatWithoutPrefix must have at least 3 segments separated by dots in the form of:
-	// <businessObjectName>.<operation>.<version>
+	// `<businessObjectName>.<operation>.<version>`.
 	eventTypeFormatWithoutPrefix = "%s.%s.%s"
 
 	legacyEventsName = "legacy-events"
@@ -27,10 +27,8 @@ const (
 
 // ParseApplicationNameFromPath returns application name from the URL.
 // The format of the URL is: /:application-name/v1/...
-// returns empty string if application-name cannot be found
+// returns empty string if application-name cannot be found.
 func ParseApplicationNameFromPath(path string) string {
-	// Assumption: Clients(application validator which has a flag for the path (https://github.com/kyma-project/kyma/blob/main/components/application-connectivity-validator/cmd/applicationconnectivityvalidator/applicationconnectivityvalidator.go#L49) using this endpoint must be sending request to path /:application/v1/events
-	// Hence it should be safe to return 0th index as the application name
 	path = strings.TrimLeft(path, "/")
 	application, _, ok := strings.Cut(path, "/")
 	if ok {
@@ -39,7 +37,7 @@ func ParseApplicationNameFromPath(path string) string {
 	return ""
 }
 
-// is2XXStatusCode checks whether status code is a 2XX status code
+// is2XXStatusCode checks whether status code is a 2XX status code.
 func is2XXStatusCode(statusCode int) bool {
 	return statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices
 }

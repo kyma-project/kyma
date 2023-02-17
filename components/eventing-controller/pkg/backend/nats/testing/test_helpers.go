@@ -12,7 +12,6 @@ func StartNATSServer(serverOpts ...eventingtesting.NatsServerOpt) (*server.Serve
 	natsPort, err := eventingtesting.GetFreePort()
 	if err != nil {
 		return nil, 0, err
-
 	}
 	serverOpts = append(serverOpts, eventingtesting.WithPort(natsPort))
 	natsServer := eventingtesting.RunNatsServerOnPort(serverOpts...)

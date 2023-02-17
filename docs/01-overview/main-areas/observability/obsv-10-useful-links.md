@@ -10,8 +10,10 @@ If you're interested in learning more about the Observability area, check out th
 
 - Install a [custom Loki stack](https://github.com/kyma-project/examples/tree/main/loki).
 - Install a [custom Jaeger stack](https://github.com/kyma-project/examples/tree/main/jaeger).
+- Install a [custom Prometheus stack](https://github.com/kyma-project/examples/tree/main/prometheus).
 
-- See how to [access and expose](../../../04-operation-guides/security/sec-06-access-expose-grafana.md) the services Grafana, Jaeger, and Kiali.
+- To collect and ship workload metrics to an OTLP endpoint, see [Install an OTLP-based metrics collector](https://github.com/kyma-project/examples/tree/main/metrics-otlp).
+- Learn how to [access and expose](../../../04-operation-guides/security/sec-06-access-expose-grafana.md) the services Grafana, Jaeger, and Kiali.
 
 - Troubleshoot Observability-related issues:
   - [Prometheus Istio Server keeps crashing](../../../04-operation-guides/troubleshooting/observability/obsv-01-troubleshoot-prometheus-istio-server-crash-oom.md)

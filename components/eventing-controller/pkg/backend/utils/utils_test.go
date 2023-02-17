@@ -1,4 +1,3 @@
-//nolint:gosec
 package utils
 
 import (
@@ -185,6 +184,5 @@ func TestGetInternalView4Ev2(t *testing.T) {
 		g.Expect(err).To(BeNil())
 		g.Expect(*expectedBEBSubWithDefault).To(Equal(*gotBEBSubWithDefaultCfg))
 		g.Expect(*expectedBEBSubWithDefault.WebhookAuth).To(Equal(*gotBEBSubWithDefaultCfg.WebhookAuth))
-
 	})
 }

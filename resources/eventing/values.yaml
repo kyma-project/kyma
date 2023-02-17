@@ -5,11 +5,11 @@ global:
   images:
     eventing_controller:
       name: eventing-controller
-      version: v20230201-25433ee9
+      version: PR-16590
       pullPolicy: "IfNotPresent"
     publisher_proxy:
       name: event-publisher-proxy
-      version: v20230130-a1f2356f
+      version: PR-16757
     nats:
       name: nats
       version: 2.9.11-alpine3.17
@@ -30,6 +30,9 @@ global:
       size: 1Gi
     maxBytes: 700Mi
     discardPolicy: new
+    # podManagementPolicy controls how pods are created during initial scale up,
+    # when replacing pods on nodes, or when scaling down.
+    podManagementPolicy: Parallel
 
   # secretName defines optionally another name than the default secret name
   secretName: ""
@@ -52,17 +55,6 @@ global:
     runAsNonRoot: true
     seccompProfile:
       type: RuntimeDefault
-    sysctls:
-      - name: kernel.shm_rmid_forced
-        value: ''
-      - name: net.ipv4.ip_local_port_range
-        value: ''
-      - name: net.ipv4.ip_unprivileged_port_start
-        value: ''
-      - name: net.ipv4.tcp_syncookies
-        value: ''
-      - name: net.ipv4.ping_group_range
-        value: ''
 
   containerSecurityContext:
     privileged: false
@@ -71,11 +63,6 @@ global:
     capabilities:
       drop:
         - ALL
-      add:
-        - NET_BIND_SERVICE
-    seLinuxOptions:
-      type: container_t
-    procMount: default
 
   # eventTypePrefix is an optional prefix for the eventType
   # note that the eventType format is: eventTypePrefix.applicationName.eventName.eventVersion

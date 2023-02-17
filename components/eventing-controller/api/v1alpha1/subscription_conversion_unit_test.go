@@ -198,7 +198,7 @@ func Test_Conversion(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			//WHEN
+			// WHEN
 			t.Run("Test v1 to v2 conversion", func(t *testing.T) {
 				// skip the conversion if the backwards conversion cannot succeed
 				if testCase.wantErrMsgV2toV1 != "" {
@@ -233,7 +233,6 @@ func Test_Conversion(t *testing.T) {
 					require.NoError(t, err)
 					v2ToV1Assertions(t, testCase.alpha1Sub, convertedV1Alpha1)
 				}
-
 			})
 		})
 	}

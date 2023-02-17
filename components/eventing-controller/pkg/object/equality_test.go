@@ -5,10 +5,11 @@ import (
 	"testing"
 
 	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
-	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
@@ -365,6 +366,7 @@ func TestEventingBackendStatusEqual(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
+		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			if IsBackendStatusEqual(tc.givenBackendStatus1, tc.givenBackendStatus2) != tc.wantResult {
@@ -433,6 +435,7 @@ func Test_isSubscriptionStatusEqual(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
+		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			if gotEqualStatus := IsSubscriptionStatusEqual(tc.subscriptionStatus1, tc.subscriptionStatus2); tc.wantEqualStatus != gotEqualStatus {

@@ -184,7 +184,7 @@ func (c *SubscriptionManager) Stop(runCleanup bool) error {
 	return c.stopBebBackend(runCleanup)
 }
 
-// stopBebBackend stops and cleans all EventMesh backend (based on Subscription v1alpha1)
+// stopBebBackend stops and cleans all EventMesh backend (based on Subscription v1alpha1).
 func (c *SubscriptionManager) stopBebBackend(runCleanup bool) error {
 	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
 	if !runCleanup {
@@ -194,7 +194,7 @@ func (c *SubscriptionManager) stopBebBackend(runCleanup bool) error {
 	return cleanup(c.bebBackend, dynamicClient, c.namedLogger())
 }
 
-// stopEventMeshBackend stops and cleans all EventMesh backend (based on Subscription v1alpha2)
+// stopEventMeshBackend stops and cleans all EventMesh backend (based on Subscription v1alpha2).
 func (c *SubscriptionManager) stopEventMeshBackend(runCleanup bool) error {
 	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
 	if !runCleanup {

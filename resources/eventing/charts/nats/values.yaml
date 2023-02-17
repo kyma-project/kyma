@@ -1,3 +1,20 @@
+####################################
+#                                  #
+#  Security Context Configuration  #
+#                                  #
+####################################
+podSecurityContext:
+  fsGroup: 10001
+  seccompProfile:
+    type: RuntimeDefault
+
+containerSecurityContext:
+  privileged: false
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+
 ###############################
 #                             #
 #  NATS Server Configuration  #
@@ -28,7 +45,11 @@ nats:
     # Enable liveness checks.  If this fails, then the NATS Server will restarted.
     liveness:
       enabled: true
-
+      # `/healthz?js-enabled-only=true` will only check if NATS server is ready for accepting requests
+      # and JetStream is enabled or not.
+      # It will not check further the streams and consumers.
+      # The endpoint to "/healthz?js-enabled-only=true" is supported in NATS >= v2.9.11
+      endpoint: "/healthz?js-enabled-only=true"
       initialDelaySeconds: 10
       timeoutSeconds: 5
       # NOTE: liveness check + terminationGracePeriodSeconds can introduce unecessarily long outages
@@ -46,7 +67,7 @@ nats:
       #
       periodSeconds: 30
       successThreshold: 1
-      failureThreshold: 3
+      failureThreshold: 5
       # Only for Kubernetes +1.22 that have pod level probes enabled.
       terminationGracePeriodSeconds:
 
@@ -56,7 +77,9 @@ nats:
     # as the liveness check.
     readiness:
       enabled: true
-
+      # `/healthz?js-server-only=true` will only check if JetStream server is current or not.
+      # It will not check further the streams and consumers.
+      endpoint: "/healthz?js-server-only=true"
       initialDelaySeconds: 10
       timeoutSeconds: 5
       periodSeconds: 10
@@ -66,12 +89,10 @@ nats:
     # Enable startup checks to confirm server is ready for traffic.
     # This is recommended for JetStream deployments since in cluster mode
     # it will try to ensure that the server is ready to serve streams.
-
-    # since this check is recommended to use in cluster mode and the cluster mode ist disabled per default
-    # this check is also defaulted to false
     startup:
-      enabled: false
-
+      enabled: true
+      # `/healthz` will check if JetStream server, streams and consumers are current or not.
+      endpoint: "/healthz"
       initialDelaySeconds: 10
       timeoutSeconds: 5
       periodSeconds: 10
@@ -232,7 +253,9 @@ statefulSetPodLabels:
   nats_cluster: eventing-nats
 
 # Annotations to add to the NATS Service
-serviceAnnotations: {}
+serviceAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "7777"
 
 cluster:
   enabled: false
@@ -249,11 +272,6 @@ k8sClusterDomain: cluster.local
 
 # Add labels to all the deployed resources
 commonLabels: {}
-
-
-# podManagementPolicy controls how pods are created during initial scale up,
-# when replacing pods on nodes, or when scaling down.
-podManagementPolicy: OrderedReady
 
 # Prometheus NATS Exporter configuration.
 exporter:

@@ -74,6 +74,3 @@ monitoring:
   enabled: false
   dashboards:
     enabled: false
-  istioServiceMonitor:
-    enabled: false
-    scrapeInterval: ""

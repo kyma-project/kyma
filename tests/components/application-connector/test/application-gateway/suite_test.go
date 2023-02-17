@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"testing"
 
-	cli "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
+	cli "github.com/kyma-project/kyma/components/central-application-gateway/pkg/client/clientset/versioned"
 	"github.com/stretchr/testify/suite"
 	"k8s.io/client-go/rest"
 )

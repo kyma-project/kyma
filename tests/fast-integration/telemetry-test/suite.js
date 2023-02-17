@@ -298,7 +298,7 @@ describe('Telemetry Operator', function() {
           const pipelineName = pipeline[0].metadata.name;
 
           it(`Should create LogPipeline '${pipelineName}'`, async function() {
-            await k8sApply(pipeline);
+            await retryWithDelay( (r) => k8sApply(pipeline), defaultRetryDelayMs, defaultRetries);
             await waitForLogPipelineStatusRunning(pipelineName);
           });
 
@@ -501,8 +501,8 @@ describe('Telemetry Operator', function() {
               resource.spec.hosts[0] = kymaHostUrl;
             }
           }
-          await k8sApply(testApp);
-          await k8sApply(testAppIstioPatch);
+          await retryWithDelay( (r) => k8sApply(testApp), defaultRetryDelayMs, defaultRetries);
+          await retryWithDelay( (r) =>k8sApply(testAppIstioPatch), defaultRetryDelayMs, defaultRetries);
           await waitForPodWithLabel('app', 'tracing-test-app', 'tracing-test');
         });
 

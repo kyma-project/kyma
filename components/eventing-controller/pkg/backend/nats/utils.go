@@ -78,7 +78,7 @@ func CreateKeyPrefix(sub *eventingv1alpha1.Subscription) string {
 	return namespacedName.String()
 }
 
-func CreateEventTypeCleaner(eventTypePrefix, applicationName string, logger *logger.Logger) eventtype.Cleaner { //nolint:unparam
+func CreateEventTypeCleaner(eventTypePrefix, applicationName string, logger *logger.Logger) eventtype.Cleaner {
 	application := applicationtest.NewApplication(applicationName, nil)
 	applicationLister := fake.NewApplicationListerOrDie(context.Background(), application)
 	return eventtype.NewCleaner(eventTypePrefix, applicationLister, logger)

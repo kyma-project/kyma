@@ -245,7 +245,6 @@ func (r *Reconciler) syncFinalizer(subscription *eventingv1alpha2.Subscription, 
 
 func (r *Reconciler) handleDeleteSubscription(ctx context.Context, subscription *eventingv1alpha2.Subscription,
 	logger *zap.SugaredLogger) (ctrl.Result, error) {
-
 	// delete EventMesh subscriptions
 	logger.Debug("Deleting subscription on EventMesh")
 	if err := r.Backend.DeleteSubscription(subscription); err != nil {
@@ -445,7 +444,7 @@ func (r *Reconciler) createOrUpdateAPIRule(ctx context.Context, subscription *ev
 
 // handlePreviousAPIRule computes the OwnerReferences list for the previous subscription APIRule (if any)
 // if the OwnerReferences list is empty, then the APIRule will be deleted
-// else if the OwnerReferences list length was decreased, then the APIRule will be updated
+// else if the OwnerReferences list length was decreased, then the APIRule will be updated.
 func (r *Reconciler) handlePreviousAPIRule(ctx context.Context, subscription *eventingv1alpha2.Subscription,
 	reusableAPIRule *apigatewayv1beta1.APIRule) error {
 	// subscription does not have a previous APIRule
@@ -580,7 +579,6 @@ func (r *Reconciler) filterSubscriptionsOnPort(subList []eventingv1alpha2.Subscr
 }
 
 func (r *Reconciler) makeAPIRule(svcNs, svcName string, labels map[string]string, subs []eventingv1alpha2.Subscription, port uint32) *apigatewayv1beta1.APIRule {
-
 	randomSuffix := utils.GetRandString(suffixLength)
 	hostName := fmt.Sprintf("%s-%s.%s", externalHostPrefix, randomSuffix, r.Domain)
 	svc := object.GetService(svcName, port)

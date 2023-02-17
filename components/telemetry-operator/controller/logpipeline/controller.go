@@ -42,6 +42,7 @@ type Config struct {
 	OverrideConfigMap types.NamespacedName
 	PipelineDefaults  configbuilder.PipelineDefaults
 	Overrides         overrides.Config
+	DaemonSetConfig   resources.DaemonSetConfig
 }
 
 //go:generate mockery --name DaemonSetProber --filename daemon_set_prober.go
@@ -146,48 +147,65 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 }
 
 func (r *Reconciler) reconcileFluentBit(ctx context.Context, name types.NamespacedName, pipeline *telemetryv1alpha1.LogPipeline, checksum string) error {
+	shouldDeleteFluentBit, err := r.isLastPipelineMarkedForDeletion(ctx, pipeline)
+	if err != nil {
+		return fmt.Errorf("failed to check if LogPipeline is last marked for deletion: %v", err)
+	}
+
+	if shouldDeleteFluentBit {
+		return utils.DeleteFluentBit(ctx, r, name)
+	}
+
+	serviceAccount := resources.MakeServiceAccount(name)
+	if err := utils.CreateOrUpdateServiceAccount(ctx, r, serviceAccount); err != nil {
+		return fmt.Errorf("failed to create fluent bit service account: %w", err)
+	}
+	clusterRole := resources.MakeClusterRole(name)
+	if err := utils.CreateOrUpdateClusterRole(ctx, r, clusterRole); err != nil {
+		return fmt.Errorf("failed to create fluent bit cluster role: %w", err)
+	}
+	clusterRoleBinding := resources.MakeClusterRoleBinding(name)
+	if err := utils.CreateOrUpdateClusterRoleBinding(ctx, r, clusterRoleBinding); err != nil {
+		return fmt.Errorf("failed to create fluent bit cluster role Binding: %w", err)
+	}
+	daemonSet := resources.MakeDaemonSet(name, checksum, r.config.DaemonSetConfig)
+	if err := utils.CreateOrUpdateDaemonSet(ctx, r, daemonSet); err != nil {
+		return fmt.Errorf("failed to reconcile fluent bit daemonset: %w", err)
+	}
+	exporterMetricsService := resources.MakeExporterMetricsService(name)
+	if err := utils.CreateOrUpdateService(ctx, r, exporterMetricsService); err != nil {
+		return fmt.Errorf("failed to reconcile exporter metrics service: %w", err)
+	}
+	metricsService := resources.MakeMetricsService(name)
+	if err := utils.CreateOrUpdateService(ctx, r, metricsService); err != nil {
+		return fmt.Errorf("failed to reconcile fluent bit metrics service: %w", err)
+	}
+	cm := resources.MakeConfigMap(name)
+	if err := utils.CreateOrUpdateConfigMap(ctx, r, cm); err != nil {
+		return fmt.Errorf("failed to reconcile fluent bit configmap: %w", err)
+	}
+	luaCm := resources.MakeLuaConfigMap(name)
+	if err := utils.CreateOrUpdateConfigMap(ctx, r, luaCm); err != nil {
+		return fmt.Errorf("failed to reconcile fluent bit lua configmap: %w", err)
+	}
+	parsersCm := resources.MakeDynamicParserConfigmap(name)
+	if err := utils.CreateIfNotExistsConfigMap(ctx, r, parsersCm); err != nil {
+		return fmt.Errorf("failed to reconcile fluent bit parser configmap: %w", err)
+	}
+	return nil
+}
+
+func (r *Reconciler) isLastPipelineMarkedForDeletion(ctx context.Context, pipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
 	if isNotMarkedForDeletion(pipeline) {
-		serviceAccount := resources.MakeServiceAccount(name)
-		if err := utils.CreateOrUpdateServiceAccount(ctx, r, serviceAccount); err != nil {
-			return fmt.Errorf("failed to create fluent bit service account: %w", err)
-		}
-		clusterRole := resources.MakeClusterRole(name)
-		if err := utils.CreateOrUpdateClusterRole(ctx, r, clusterRole); err != nil {
-			return fmt.Errorf("failed to create fluent bit cluster role: %w", err)
-		}
-		clusterRoleBinding := resources.MakeClusterRoleBinding(name)
-		if err := utils.CreateOrUpdateClusterRoleBinding(ctx, r, clusterRoleBinding); err != nil {
-			return fmt.Errorf("failed to create fluent bit cluster role Binding: %w", err)
-		}
-		daemonSet := resources.MakeDaemonSet(name, checksum)
-		if err := utils.CreateOrUpdateDaemonSet(ctx, r, daemonSet); err != nil {
-			return fmt.Errorf("failed to reconcile fluent bit daemonset: %w", err)
-		}
-		service := resources.MakeService(name)
-		if err := utils.CreateOrUpdateService(ctx, r, service); err != nil {
-			return fmt.Errorf("failed to reconcile fluent bit service: %w", err)
-		}
-		cm := resources.MakeConfigMap(name)
-		if err := utils.CreateOrUpdateConfigMap(ctx, r, cm); err != nil {
-			return fmt.Errorf("failed to reconcile fluent bit configmap: %w", err)
-		}
-		luaCm := resources.MakeLuaConfigMap(name)
-		if err := utils.CreateOrUpdateConfigMap(ctx, r, luaCm); err != nil {
-			return fmt.Errorf("failed to reconcile fluent bit lua configmap: %w", err)
-		}
-		return nil
+		return false, nil
 	}
 
 	var allPipelines telemetryv1alpha1.LogPipelineList
 	if err := r.List(ctx, &allPipelines); err != nil {
-		return fmt.Errorf("failed to determine condition for deleting fluent bit: %w", err)
+		return false, fmt.Errorf("failed to list LogPipelines: %v", err)
 	}
 
-	if len(allPipelines.Items) == 1 && allPipelines.Items[0].Name == pipeline.Name {
-		return utils.DeleteFluentBit(ctx, r, name)
-	}
-
-	return nil
+	return len(allPipelines.Items) == 1 && allPipelines.Items[0].Name == pipeline.Name, nil
 }
 
 func (r *Reconciler) updateMetrics(ctx context.Context) error {

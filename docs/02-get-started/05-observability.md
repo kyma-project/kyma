@@ -6,7 +6,9 @@ We successfully got our Function [triggered](04-trigger-workload-with-event.md).
 Now we would like to check its logs and metrics. 
 To do that, we'll use the Grafana dashboard that comes with Kyma.
 
-> **NOTE:** See how to access logs from the Function's Pod [via Kyma Dashboard](../04-operation-guides/operations/obsv-01-access-logs.md#kubernetes-logs-in-kyma-dashboard) and [using kubectl](../04-operation-guides/operations/obsv-01-access-logs.md#kubernetes-logs-using-kubectl). 
+> **NOTE:** See how to access logs from the Function's Pod [via Kyma Dashboard](../04-operation-guides/operations/obsv-01-access-logs.md#kubernetes-logs-in-kyma-dashboard) and [using kubectl](../04-operation-guides/operations/obsv-01-access-logs.md#kubernetes-logs-using-kubectl).
+
+> **NOTE:** Prometheus and Grafana are [deprecated](https://kyma-project.io/blog/2022/12/9/monitoring-deprecation) and are planned to be removed. If you want to install a custom stack, take a look at [Install a custom kube-prometheus-stack in Kyma](https://github.com/kyma-project/examples/tree/main/prometheus).
 
 ## Access Grafana
 
@@ -22,7 +24,7 @@ To do that, we'll use the Grafana dashboard that comes with Kyma.
 
 1. In the Grafana dashboard, use the left menu to navigate to **Explore** and choose **Loki** from the dropdown list.
 
-    > **NOTE:** Loki is [deprecated](https://kyma-project.io/blog/2022/11/2/loki-deprecation/) and is planned to be removed. If you want to install a custom Loki stack, take a look at [this tutorial](https://github.com/kyma-project/examples/tree/main/loki).
+    > **NOTE:** Loki is [deprecated](https://kyma-project.io/blog/2022/11/2/loki-deprecation/) and is planned to be removed. If you want to install a custom Loki stack, take a look at [Installing a custom Loki stack in Kyma](https://github.com/kyma-project/examples/tree/main/loki).
 
 2. Click on **Log browser** and select the following values:
    - **1. Select labels to search in**: `container`, `function`

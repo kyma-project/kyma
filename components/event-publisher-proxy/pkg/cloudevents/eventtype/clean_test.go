@@ -13,6 +13,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application/fake"
 )
 
+//nolint:lll // we need long lines here as the event types can get very long
 func TestCleaner(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
