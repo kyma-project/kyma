@@ -12,4 +12,4 @@ If the status is `Error`, edit the APIRule and fix issues described in `.Status.
 
 - [Cannot connect to a service exposed by an API Rule - `401 Unauthorized` or `403 Forbidden`](./apix-02-401-unauthorized-403-forbidden.md)
 - [Cannot connect to a service exposed by an API Rule - `404 Not Found`](./apix-03-404-not-found.md)
-- [Cannot connect to a service exposed by an API Rule - `500 Internal Server Error`](./apix-11-500-server-error.md)
+- [Cannot connect to a service exposed by an API Rule - `500 Internal Server Error`](./apix-04-500-server-error.md)
