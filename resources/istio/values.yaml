@@ -1,6 +1,7 @@
 ---
 helmValues:
   global:
+    autoscalingv2API: true
     priorityClassName: "kyma-system-priority"
     imagePullPolicy: IfNotPresent
     proxy:
