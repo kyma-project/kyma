@@ -60,7 +60,7 @@ type Config struct {
 	EventTypePrefix string `envconfig:"EVENT_TYPE_PREFIX" required:"true"`
 
 	// EnableNewCRDVersion changes the Subscription CRD to v1alpha2
-	EnableNewCRDVersion bool `envconfig:"ENABLE_NEW_CRD_VERSION" default:"false"`
+	EnableNewCRDVersion bool `envconfig:"ENABLE_NEW_CRD_VERSION" default:"true"`
 }
 
 func GetConfig() Config {

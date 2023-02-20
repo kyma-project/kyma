@@ -38,7 +38,7 @@ type PublisherConfig struct {
 	// publisher takes the controller values
 	AppLogFormat        string `envconfig:"APP_LOG_FORMAT" default:"json"`
 	AppLogLevel         string `envconfig:"APP_LOG_LEVEL" default:"info"`
-	EnableNewCRDVersion bool   `envconfig:"ENABLE_NEW_CRD_VERSION" default:"false"`
+	EnableNewCRDVersion bool   `envconfig:"ENABLE_NEW_CRD_VERSION" default:"true"`
 }
 
 type DefaultSubscriptionConfig struct {
