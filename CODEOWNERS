@@ -8,7 +8,7 @@
 * @pbochynski @PK85 @a-thaler
 
 /.github @kyma-project/prow
-/.github/workflows @PK85 @piotrmiskiewicz @szwedm @wozniakjan @tillknuesting @ralikio @kyma-project/prow
+/.github/workflows @kyma-project/prow @kyma-project/gopher
 /.github/ISSUE_TEMPLATE @mmitoraj @NHingerl @grego952 @IwonaLanger @nataliasitko
 
 
@@ -71,16 +71,15 @@
 
 
 # Fast Integration Tests
-/tests/fast-integration @lindnerby @rakesh-garimella @jeremyharisch @khlifi411 @ruanxin @pbochynski @dennis-ge @jakobmoellersap @Tomasz-Smelcerz-SAP @PK85 @tillknuesting @chrkl
+/tests/fast-integration @lindnerby @rakesh-garimella @jeremyharisch @khlifi411 @ruanxin @pbochynski @dennis-ge @jakobmoellersap @Tomasz-Smelcerz-SAP @PK85 @chrkl
 /tests/fast-integration/eventing-test @kyma-project/eventing
 /tests/fast-integration/image @kyma-project/eventing
-/tests/fast-integration/kcp @PK85 @piotrmiskiewicz @szwedm @wozniakjan @tillknuesting @ralikio @jaroslaw-pieszka
-/tests/fast-integration/kyma-environment-broker @PK85 @piotrmiskiewicz @szwedm @wozniakjan @tillknuesting @ralikio @jaroslaw-pieszka
-/tests/fast-integration/skr-aws-upgrade-integration @tillknuesting @ralikio @PK85 @piotrmiskiewicz @szwedm @wozniakjan @jaroslaw-pieszka
-/tests/fast-integration/skr-nightly @tillknuesting @ralikio @PK85 @piotrmiskiewicz @szwedm @wozniakjan @jaroslaw-pieszka
-/tests/fast-integration/skr-svcat-migration-test @wozniakjan @tillknuesting @ralikio @PK85 @piotrmiskiewicz @szwedm
-/tests/fast-integration/skr-test @szwedm @wozniakjan @tillknuesting @ralikio @PK85 @piotrmiskiewicz @jaroslaw-pieszka
-/tests/fast-integration/smctl @szwedm @wozniakjan @tillknuesting @ralikio @PK85 @piotrmiskiewicz @jaroslaw-pieszka
+/tests/fast-integration/kcp @kyma-project/gopher
+/tests/fast-integration/kyma-environment-broker @kyma-project/gopher
+/tests/fast-integration/skr-aws-upgrade-integration @kyma-project/gopher
+/tests/fast-integration/skr-nightly @kyma-project/gopher
+/tests/fast-integration/skr-test @kyma-project/gopher
+/tests/fast-integration/smctl @kyma-project/gopher
 /tests/fast-integration/logging @kyma-project/observability
 /tests/fast-integration/monitoring @kyma-project/observability
 /tests/fast-integration/telemetry-test @kyma-project/observability
