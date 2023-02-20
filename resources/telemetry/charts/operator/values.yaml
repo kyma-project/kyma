@@ -56,8 +56,6 @@ fluentbit:
       cpu: 10m
       memory: 50Mi
   fullnameOverride: telemetry-fluent-bit
-  networkPolicy:
-    enabled: false
   dashboards:
     enabled: true
     labelKey: grafana_dashboard
