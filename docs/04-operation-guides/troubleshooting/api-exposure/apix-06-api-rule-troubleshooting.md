@@ -1,5 +1,5 @@
 ---
-title: Issues when creating an APIRule - Various reasons
+title: Issues when creating an APIRule - various reasons
 ---
 
 ## Symptom
