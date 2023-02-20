@@ -22,7 +22,7 @@ Check if the IP address provided as the value of the **spec.targets** parameter 
 kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}'`
 ```
 
-In addion, ensure that your OS resolves the target host name to the same Ingress Gateway IP address.
+In addition, ensure that your OS resolves the target host name to the same Ingress Gateway IP address.
 Run:
 
 ```bash
