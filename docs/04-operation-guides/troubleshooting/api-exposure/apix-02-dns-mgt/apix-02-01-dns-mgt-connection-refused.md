@@ -26,5 +26,6 @@ In addition, ensure that your OS resolves the target host name to the same Ingre
 Run:
 
 ```bash
-host {YOUR_SUBDOMAIN} #e.g. httpbin.kyma-goat.ga
+host {YOUR_SUBDOMAIN}
 ```
+>**NOTE** `YOUR_SUBDOMAIN` specifies the name of your subdomain, for example, `httpbin.kyma-goat.ga`.

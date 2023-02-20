@@ -20,10 +20,10 @@ To check the error message of the APIRule resource, run:
 kubectl get apirule -n <namespace> <api-rule-name> -o=jsonpath='{.status.APIRuleStatus}'
 ```
 ---
-## JWT handler's `trusted_issuers` configuration is missing
+## JWT handler's **trusted_issuers** configuration is missing
 #### Cause
 
-The following APIRule is missing the `trusted_issuers` configuration for the JWT handler:
+The following APIRule is missing the **trusted_issuers** configuration for the JWT handler:
 
 ```yaml
 spec:
@@ -35,7 +35,7 @@ spec:
         - handler: jwt
 ```
 
-If your APIRule is missing the `trusted_issuers` configuration for the JWT handler, the following `APIRuleStatus` error appears:
+If your APIRule is missing the **trusted_issuers** configuration for the JWT handler, the following `APIRuleStatus` error appears:
 
 ```
 {"code":"ERROR","desc":"Validation error: Attribute \".spec.rules[0].accessStrategies[0].config\": supplied config cannot be empty"}
@@ -43,7 +43,7 @@ If your APIRule is missing the `trusted_issuers` configuration for the JWT handl
 
 #### Remedy
 
-Add JWT configuration for the `trusted_issuers` or ``. Here's an example of a valid configuration:
+Add JWT configuration for the **trusted_issuers** or ``. Here's an example of a valid configuration:
 
 ```yaml
 spec:
@@ -57,10 +57,10 @@ spec:
             trusted_issuers: ["https://dev.kyma.local"]
 ```
 ---
-## Invalid `trusted_issuers` for the JWT handler
+## Invalid **trusted_issuers** for the JWT handler
 #### Cause
 
-Here's an example of an APIRule with the `trusted_issuers` URL configured:
+Here's an example of an APIRule with the **trusted_issuers** URL configured:
 
 ```bash
 cat <<EOF | kubectl apply -f -
@@ -80,7 +80,7 @@ spec:
 EOF
 ```
 
-If the `trusted_issuers` URL is an unsecured HTTP URL, or the `trusted_issuers` URL is not valid, you get an instant error, and the APIRule resource is not created:
+If the **trusted_issuers** URL is an unsecured HTTP URL, or the **trusted_issuers** URL is not valid, you get an instant error, and the APIRule resource is not created:
 
 ```
 The APIRule "httpbin" is invalid: spec.rules[0].accessStrategies[0].config.trusted_issuers[0]: Invalid value: "some-url": spec.rules[0].accessStrategies[0].config.trusted_issuers[0] in body should match '^(https://|file://).*$'
@@ -88,7 +88,7 @@ The APIRule "httpbin" is invalid: spec.rules[0].accessStrategies[0].config.trust
 
 #### Remedy
 
-The JWT `trusted-issuers` must be a valid HTTPS URL, for example:
+The JWT **trusted-issuers** must be a valid HTTPS URL, for example:
 
 ```yaml
 spec:
@@ -189,7 +189,7 @@ spec:
 ## Configuration of `noop` and `allow` handlers 
 #### Cause
 
-In the following APIRule, the `noop` handler has the `trusted-issuers` field configured:
+In the following APIRule, the `noop` handler has the **trusted-issuers** field configured:
 
 ```yaml
 spec:

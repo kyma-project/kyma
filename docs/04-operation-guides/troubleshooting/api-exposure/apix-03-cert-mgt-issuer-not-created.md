@@ -4,15 +4,15 @@ title: Certificate management - Issuer not created
 
 ## Symptom
 
-Whey you try to create an Issuer CR using `cert.gardener.cloud/v1alpha1`, the resource is not created. There are no logs in the `cert-management` controller.
+When you try to create an Issuer CR using `cert.gardener.cloud/v1alpha1`, the resource is not created. There are no logs in the `cert-management` controller.
 
 ## Cause
 
-The Namespece in which the Issuer CR was cretaed is incorrect. By default, the `cert-management` watches the `default` Namespace for all Issuer CRs.
+The Namespace in which the Issuer CR was created is incorrect. By default, the `cert-management` watches the `default` Namespace for all Issuer CRs.
 
 ## Remedy
 
-Make sure if you created the Issuer CR in the `default` Namespace. Run:
+Make sure that you created the Issuer CR in the `default` Namespace. Run:
 
 ```bash
 kubectl get issuers -A

@@ -4,15 +4,15 @@ title: Kyma Gateway - not reachable
 
 ## Symptom
 
-You cannot access services or Functions using the APIRules created. The Kyma Gateway refuses the connection.
+You cannot access services or Functions using the created APIRules. Kyma Gateway refuses the connection.
 
 ## Cause
 
-The issue can come up if you either rename or duplicate the default `kyma-gateway`. Once you have multiple Gateway custom resources (CRs) pointing to the same host, the first Gateway CR created takes precedence over the other ones.
+The issue comes up if you either rename or duplicate the default `kyma-gateway`. Once you have multiple Gateway custom resources (CRs) pointing to the same host, the first Gateway CR created takes precedence over the others.
 
 ## Remedy
 
-It is not recommended having two Gateway CRs pointing to the same host. To solve the issue, choose one of the proposed solutions:
+Having two Gateway CRs pointing to the same host is not recommended. To resolve the issue, choose one of the following solutions:
 
 - Make sure the default `kyma-gateway` exists and is not renamed or duplicated.
 
