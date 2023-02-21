@@ -7,7 +7,7 @@ global:
       version: "v20230117-64505a69"
     telemetry_operator:
       name: "telemetry-manager"
-      version: "PR-5"
+      version: "v20230221-16fb9090"
     telemetry_webhook_cert_init:
       name: "webhook-cert-init"
       version: "v20230117-64505a69"
