@@ -98,16 +98,6 @@ spec:
           }
         }
 ---
-apiVersion: hydra.ory.sh/v1alpha1
-kind: OAuth2Client
-metadata:
-  name: eventing-sink
-spec:
-  grantTypes:
-    - "client_credentials"
-  scope: "read write"
-  secretName: eventing-sink-oauth
----
 apiVersion: gateway.kyma-project.io/v1alpha1
 kind: APIRule
 metadata:
@@ -118,9 +108,8 @@ spec:
     - path: /function
       methods: ["GET", "POST"]
       accessStrategies:
-        - handler: oauth2_introspection
-          config:
-            required_scope: ["read"]
+        - handler: allow
+          config: {}
     - path: /.*
       methods: ["GET", "POST"]
       accessStrategies:

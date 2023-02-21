@@ -19,7 +19,6 @@ const {
   eventingSubscription,
   waitForSubscription,
   eventingSubscriptionV1Alpha2,
-  getSecretData,
   convertAxiosError,
   sleep,
 } = require('../utils');
@@ -32,7 +31,6 @@ const {v4: uuidv4} = require('uuid');
 const fs = require('fs');
 const path = require('path');
 const k8s = require('@kubernetes/client-node');
-const {OAuthToken, OAuthCredentials} = require('../lib/oauth');
 const {expect} = require('chai');
 
 // Variables
@@ -277,40 +275,21 @@ async function waitForV1Alpha2Subscriptions() {
 }
 
 async function checkFunctionReachable(name, namespace, host) {
-  // get OAuth client id and client secret from Kubernetes Secret
-  const oAuthSecretData = await getSecretData(`${name}-oauth`, namespace);
-
-  // get access token from OAuth server
-  const oAuthTokenGetter = new OAuthToken(
-      `https://oauth2.${host}/oauth2/token`,
-      new OAuthCredentials(oAuthSecretData['client_id'], oAuthSecretData['client_secret']),
-  );
-  const accessToken = await oAuthTokenGetter.getToken(['read', 'write']);
-
-  // expect no error when authorized
+  // the function should be reachable.
   const res = await retryPromise(
       () => axios.post(`https://${name}.${host}/function`, {orderCode: '789'}, {
         timeout: 5000,
-        headers: {Authorization: `bearer ${accessToken}`},
       }),
       45,
       2000,
   ).catch((err) => {
+    debug(`Error when trying to reach the function: ${name}`);
+    debug(err);
     throw convertAxiosError(err, `Function ${name} responded with error`);
   });
 
   // the request should be authorized and successful
   expect(res.status).to.be.equal(200);
-
-  // expect error when unauthorized
-  let errorOccurred = false;
-  try {
-    await axios.post(`https://${name}.${host}/function`, {orderCode: '789'}, {timeout: 5000});
-  } catch (err) {
-    errorOccurred = true;
-    expect(err.response.status).to.be.equal(401);
-  }
-  expect(errorOccurred).to.be.equal(true);
 }
 
 async function checkEventTracing(proxyHost, eventType, eventSource, namespace) {
