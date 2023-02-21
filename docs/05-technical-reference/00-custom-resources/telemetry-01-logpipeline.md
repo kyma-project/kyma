@@ -63,7 +63,7 @@ For further LogPipeline examples, see the [samples](https://github.com/kyma-proj
 
 ### spec attribute
 
-For details, see the [LogPipeline specification file](https://github.com/kyma-project/telemetry-manager/blob/main/apis/telemetry/v1alpha1/logpipeline_types_test.go).
+For details, see the [LogPipeline specification file](https://github.com/kyma-project/telemetry-manager/blob/main/apis/telemetry/v1alpha1/logpipeline_types.go).
 
 | Parameter | Type | Description |
 |---|---|---|
@@ -116,7 +116,7 @@ For details, see the [LogPipeline specification file](https://github.com/kyma-pr
 
 ### status attribute
 
-For details, see the [LogPipeline specification file](https://github.com/kyma-project/telemetry-manager/blob/main/apis/telemetry/v1alpha1/logpipeline_types_test.go).
+For details, see the [LogPipeline specification file](https://github.com/kyma-project/telemetry-manager/blob/main/apis/telemetry/v1alpha1/logpipeline_types.go).
 
 | Parameter | Type | Description |
 |---|---|---|
