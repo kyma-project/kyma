@@ -440,7 +440,8 @@ describe('Eventing tests', function() {
           testDataConfigMapName,
       );
     } else {
-      debug('Skipping adding consumer info to the eventing data CM due to missing consumer');
+      throw Error(`Couldn't add consumer info to the eventing data CM due to` +
+          `missing consumer ${consumerName} in NATS JetStream`);
     }
   });
 
