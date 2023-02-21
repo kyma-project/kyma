@@ -162,7 +162,7 @@ describe('Eventing tests', function() {
       }
     });
 
-    it('Eventing-sink function should be reachable through secured API Rule', async function() {
+    it('Eventing-sink function should be reachable through API Rule', async function() {
       if (!isEventingSinkDeployed) {
         this.skip();
       }

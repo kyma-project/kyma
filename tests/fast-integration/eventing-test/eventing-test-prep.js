@@ -161,7 +161,7 @@ describe('Eventing tests preparation', function() {
     await waitForEventingSinkFunction();
   });
 
-  it('Eventing-sink function should be reachable through secured API Rule', async function() {
+  it('Eventing-sink function should be reachable through API Rule', async function() {
     this.test.retries(5);
 
     const host = await getClusterHost(eventingSinkName, testNamespace);
