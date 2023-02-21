@@ -25,7 +25,7 @@ func InitializeEventTypeCleaner(cleaner eventtype.Cleaner) {
 }
 
 // ConvertTo converts this Subscription in version v1 to the Hub version v2.
-func (src *Subscription) ConvertTo(dstRaw conversion.Hub) error { //nolint:revive
+func (src *Subscription) ConvertTo(dstRaw conversion.Hub) error {
 	dst, ok := dstRaw.(*v1alpha2.Subscription)
 	if !ok {
 		return errors.Errorf(ErrorHubVersionMsg)
@@ -35,7 +35,6 @@ func (src *Subscription) ConvertTo(dstRaw conversion.Hub) error { //nolint:reviv
 
 // V1ToV2 copies the v1alpha1-type field values into v1alpha2-type field values.
 func V1ToV2(src *Subscription, dst *v1alpha2.Subscription) error {
-
 	// ObjectMeta
 	dst.ObjectMeta = src.ObjectMeta
 
@@ -72,7 +71,6 @@ func (dst *Subscription) ConvertFrom(srcRaw conversion.Hub) error { //nolint:rev
 
 // V2ToV1 copies the v1alpha2-type field values into v1alpha1-type field values.
 func V2ToV1(dst *Subscription, src *v1alpha2.Subscription) error {
-
 	// ObjectMeta
 	dst.ObjectMeta = src.ObjectMeta
 
@@ -248,7 +246,7 @@ func (src *Subscription) setV2SpecTypes(dst *v1alpha2.Subscription) error {
 	return nil
 }
 
-// natsSpecConfigToV2 converts the v1alpha2 Spec config to v1alpha1
+// natsSpecConfigToV2 converts the v1alpha2 Spec config to v1alpha1.
 func (src *Subscription) natsSpecConfigToV1(dst *v1alpha2.Subscription) error {
 	if maxInFlightMessages, ok := dst.Spec.Config[v1alpha2.MaxInFlightMessages]; ok {
 		intVal, err := strconv.Atoi(maxInFlightMessages)

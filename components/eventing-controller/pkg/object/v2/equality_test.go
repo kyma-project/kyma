@@ -5,8 +5,9 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	corev1 "k8s.io/api/core/v1"
+
+	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 )
 
 func Test_isSubscriptionStatusEqual(t *testing.T) {
@@ -72,6 +73,7 @@ func Test_isSubscriptionStatusEqual(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
+		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			gotEqualStatus := IsSubscriptionStatusEqual(tc.subscriptionStatus1, tc.subscriptionStatus2)

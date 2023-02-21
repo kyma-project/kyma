@@ -98,7 +98,6 @@ func ConvertKymaSubToEventMeshSub(subscription *eventingv1alpha2.Subscription, t
 	apiRule *apigatewayv1beta1.APIRule, defaultWebhookAuth *types.WebhookAuth,
 	defaultProtocolSettings *ProtocolSettings,
 	defaultNamespace string, nameMapper NameMapper) (*types.Subscription, error) { //nolint:gocognit
-
 	// get default EventMesh subscription object
 	eventMeshSubscription, err := getDefaultSubscriptionV1Alpha2(defaultProtocolSettings)
 	if err != nil {

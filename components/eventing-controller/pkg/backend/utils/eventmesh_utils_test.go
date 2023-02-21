@@ -1,4 +1,3 @@
-//nolint:gosec
 package utils
 
 import (
@@ -293,7 +292,6 @@ func Test_getEventMeshWebhookAuth(t *testing.T) {
 			require.Equal(t, tc.wantWebhook, webhookAuth)
 		})
 	}
-
 }
 
 func TestGetCleanedEventMeshSubscription(t *testing.T) {
@@ -559,7 +557,6 @@ func TestIsEventMeshSubModified(t *testing.T) {
 		// when
 		g.Expect(err).ShouldNot(HaveOccurred())
 		g.Expect(result).To(Equal(test.output))
-
 	}
 }
 

@@ -9,9 +9,10 @@ import (
 	"time"
 
 	"github.com/go-logr/zapr"
-	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
+	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -157,7 +158,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 	When("Creating a controller deployment", func() {
 		It("Should return an non empty owner to be used as a reference in publisher deployment", func() {
 			ctx := context.Background()
-			ensureNamespaceCreated(ctx, kymaSystemNamespace)
+			ensureKymaSystemNamespaceCreated(ctx)
 			ownerReferences = ensureControllerDeploymentCreated(ctx)
 			// Expect
 			// The matcher in the following Eventually assertion will match against the first returned parameter
@@ -170,7 +171,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 	When("Creating a Eventing Backend and no secret labeled for BEB is found", func() {
 		It("Should start with NATS", func() {
 			ctx := context.Background()
-			ensureNamespaceCreated(ctx, kymaSystemNamespace)
+			ensureKymaSystemNamespaceCreated(ctx)
 			ensureEventingBackendCreated(ctx, eventingBackendName, kymaSystemNamespace)
 			// Expect
 			Eventually(publisherProxyDeploymentGetter(ctx), timeout, pollingInterval).
@@ -220,7 +221,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 		It("Should switch from NATS to BEB", func() {
 			ctx := context.Background()
 			// As there is no Hydra operator that creates secrets based on OAuth2Client CRs, we create the secret.
-			ensureNamespaceCreated(ctx, kymaSystemNamespace)
+			ensureKymaSystemNamespaceCreated(ctx)
 			createOAuth2Secret(ctx, []byte("id1"), []byte("secret1"))
 			ensureBEBSecretCreated(ctx, bebSecret1name, kymaSystemNamespace)
 			// Expect
@@ -439,7 +440,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 			ctx := context.Background()
 
 			By("Making sure the Backend reconciler is started", func() {
-				ensureNamespaceCreated(ctx, kymaSystemNamespace)
+				ensureKymaSystemNamespaceCreated(ctx)
 				ensureEventingBackendCreated(ctx, eventingBackendName, kymaSystemNamespace)
 				Eventually(publisherProxyDeploymentGetter(ctx), timeout, pollingInterval).ShouldNot(BeNil())
 			})
@@ -494,9 +495,9 @@ func newMapFrom(ms ...map[string]string) map[string]string {
 	return mr
 }
 
-func ensureNamespaceCreated(ctx context.Context, namespace string) { // nolint:unparam
-	By(fmt.Sprintf("Ensuring the namespace %q is created", namespace))
-	ns := reconcilertesting.NewNamespace(namespace)
+func ensureKymaSystemNamespaceCreated(ctx context.Context) {
+	By(fmt.Sprintf("Ensuring the namespace %q is created", kymaSystemNamespace))
+	ns := reconcilertesting.NewNamespace(kymaSystemNamespace)
 	err := k8sClient.Create(ctx, ns)
 	if !k8serrors.IsAlreadyExists(err) {
 		Expect(err).ShouldNot(HaveOccurred())

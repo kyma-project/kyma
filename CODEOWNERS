@@ -8,8 +8,8 @@
 * @pbochynski @PK85 @a-thaler
 
 /.github @kyma-project/prow
-/.github/workflows @PK85 @piotrmiskiewicz @szwedm @wozniakjan @tillknuesting @ralikio @kyma-project/prow
-/.github/ISSUE_TEMPLATE @mmitoraj @NHingerl @grego952 @IwonaLanger @nataliasitko
+/.github/workflows @kyma-project/prow @kyma-project/gopher
+/.github/ISSUE_TEMPLATE @kyma-project/technical-writers
 
 
 # Owners of the .kyma-project-io folder
@@ -27,16 +27,13 @@
 /components/eventing-controller @kyma-project/eventing
 /components/function-controller @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
 /components/function-runtimes @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
-/components/telemetry-operator @kyma-project/observability
 /components/directory-size-exporter @kyma-project/observability
 /components/webhook-cert-init @kyma-project/observability
 
 # All files and subdirectories in /docs
-/docs @mmitoraj @NHingerl @grego952 @IwonaLanger @nataliasitko
+/docs @kyma-project/technical-writers
 
-/hack @clebs
-
-/installation @khlifi411 @jeremyharisch @ruanxin @tobiscr @moelsayed @Tomasz-Smelcerz-SAP @jakobmoellersap @adityabhatia
+/installation @khlifi411 @jeremyharisch @ruanxin @tobiscr @moelsayed @Tomasz-Smelcerz-SAP @jakobmoellersap
 /installation/resources/crds/api-gateway @strekm @werdes72 @dariusztutaj @cnvergence @barchw @videlov @triffer
 /installation/resources/crds/application-connector  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 /installation/resources/crds/compass-runtime-agent  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
@@ -71,16 +68,15 @@
 
 
 # Fast Integration Tests
-/tests/fast-integration @lindnerby @rakesh-garimella @jeremyharisch @khlifi411 @ruanxin @pbochynski @dennis-ge @jakobmoellersap @Tomasz-Smelcerz-SAP @PK85 @tillknuesting @chrkl
+/tests/fast-integration @lindnerby @rakesh-garimella @jeremyharisch @khlifi411 @ruanxin @pbochynski @dennis-ge @jakobmoellersap @Tomasz-Smelcerz-SAP @PK85 @chrkl
 /tests/fast-integration/eventing-test @kyma-project/eventing
 /tests/fast-integration/image @kyma-project/eventing
-/tests/fast-integration/kcp @PK85 @piotrmiskiewicz @szwedm @wozniakjan @tillknuesting @ralikio @jaroslaw-pieszka
-/tests/fast-integration/kyma-environment-broker @PK85 @piotrmiskiewicz @szwedm @wozniakjan @tillknuesting @ralikio @jaroslaw-pieszka
-/tests/fast-integration/skr-aws-upgrade-integration @tillknuesting @ralikio @PK85 @piotrmiskiewicz @szwedm @wozniakjan @jaroslaw-pieszka
-/tests/fast-integration/skr-nightly @tillknuesting @ralikio @PK85 @piotrmiskiewicz @szwedm @wozniakjan @jaroslaw-pieszka
-/tests/fast-integration/skr-svcat-migration-test @wozniakjan @tillknuesting @ralikio @PK85 @piotrmiskiewicz @szwedm
-/tests/fast-integration/skr-test @szwedm @wozniakjan @tillknuesting @ralikio @PK85 @piotrmiskiewicz @jaroslaw-pieszka
-/tests/fast-integration/smctl @szwedm @wozniakjan @tillknuesting @ralikio @PK85 @piotrmiskiewicz @jaroslaw-pieszka
+/tests/fast-integration/kcp @kyma-project/gopher
+/tests/fast-integration/kyma-environment-broker @kyma-project/gopher
+/tests/fast-integration/skr-aws-upgrade-integration @kyma-project/gopher
+/tests/fast-integration/skr-nightly @kyma-project/gopher
+/tests/fast-integration/skr-test @kyma-project/gopher
+/tests/fast-integration/smctl @kyma-project/gopher
 /tests/fast-integration/logging @kyma-project/observability
 /tests/fast-integration/monitoring @kyma-project/observability
 /tests/fast-integration/telemetry-test @kyma-project/observability
@@ -91,7 +87,7 @@
 /tests/components/api-gateway @strekm @werdes72 @dariusztutaj @cnvergence @barchw @videlov @triffer
 /tests/components/istio @strekm @dariusztutaj @cnvergence @barchw @werdes72 @videlov @triffer
 /tests/components/application-connector @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
-/tests/components/reconciler @khlifi411 @jeremyharisch @ruanxin @tobiscr @Tomasz-Smelcerz-SAP @jakobmoellersap @adityabhatia
+/tests/components/reconciler @khlifi411 @jeremyharisch @ruanxin @tobiscr @Tomasz-Smelcerz-SAP @jakobmoellersap
 
 # performance tests
 /tests/perf @kyma-project/observability
@@ -104,13 +100,13 @@
 /tools/gitserver/ @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
 
 # Config file for MILV - milv.config.yaml
-milv.config.yaml @m00g3n @pPrecel @kwiatekus @moelsayed @cortey @anoipm @mmitoraj @NHingerl @grego952 @IwonaLanger @nataliasitko
+milv.config.yaml @m00g3n @pPrecel @kwiatekus @moelsayed @cortey @anoipm @kyma-project/technical-writers
 
 # VERSION file
 VERSION @kyma-project/prow
 
 # All .md files
-*.md @mmitoraj @NHingerl @grego952 @IwonaLanger @nataliasitko
+*.md @kyma-project/technical-writers
 
 # Managed Modules
-/modules @pbochynski @janmedrek @khlifi411 @jeremyharisch @ruanxin @tobiscr @Tomasz-Smelcerz-SAP @jakobmoellersap @adityabhatia @clebs
+/modules @pbochynski @janmedrek @khlifi411 @jeremyharisch @ruanxin @tobiscr @Tomasz-Smelcerz-SAP @jakobmoellersap

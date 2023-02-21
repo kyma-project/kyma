@@ -6,8 +6,8 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 
-	. "github.com/onsi/gomega"         // nolint
-	. "github.com/onsi/gomega/gstruct" // nolint
+	. "github.com/onsi/gomega"         //nolint:revive,stylecheck // using . import for convenience
+	. "github.com/onsi/gomega/gstruct" //nolint:revive,stylecheck // using . import for convenience
 	gomegatypes "github.com/onsi/gomega/types"
 
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
