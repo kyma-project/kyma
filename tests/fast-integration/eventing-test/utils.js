@@ -19,6 +19,7 @@ const {GardenerClient, GardenerConfig} = require('../gardener');
 const {eventMeshSecretFilePath} = require('./common/common');
 const axios = require('axios');
 const kymaVersion = process.env.KYMA_VERSION || '';
+const kymaStreamName = 'sap';
 const isSKR = process.env.KYMA_TYPE === 'SKR';
 const skrInstanceId = process.env.INSTANCE_ID || '';
 const testCompassFlow = process.env.TEST_COMPASS_FLOW || false;
@@ -135,22 +136,24 @@ async function getStreamConfigForJetStream() {
 
 async function getJetStreamStreamData(host) {
   const responseJson = await retryPromise(async () => await axios.get(`https://${host}/jsz?streams=true`), 5, 1000);
-  const streamName = responseJson.data.account_details[0].stream_detail[0].name;
-  const streamCreationTime = responseJson.data.account_details[0].stream_detail[0].created;
-
-  return {
-    streamName: streamName,
-    streamCreationTime: streamCreationTime,
-  };
+  const streams = responseJson.data.account_details[0].stream_detail;
+  for (const stream of streams) {
+    if (stream.name === kymaStreamName) {
+      return {
+        streamName: kymaStreamName,
+        streamCreationTime: stream.created,
+      };
+    }
+  }
 }
 
 async function getSubscriptionConsumerName(subscriptionName, namespace='default', crdVersion='v1alpha1') {
-  const sub = await getSubscription(subscriptionName, namespace, crdVersion);
   if (crdVersion === 'v1alpha1') {
     // the logic is temporary because consumer name is missing in the v1alpha1 subscription
     // will be deleted as we will upgrade to v1alpha2
     return eventTypeOrderReceivedHash;
   } else {
+    const sub = await getSubscription(subscriptionName, namespace, crdVersion);
     return sub.status.backend.types[0].consumerName;
   }
 }

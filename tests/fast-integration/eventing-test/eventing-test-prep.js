@@ -123,10 +123,14 @@ describe('Eventing tests preparation', function() {
     // we can verify that the stream was not affected/recreated
     debug('Creating eventing test data configmap with JetStream stream info');
     const streamInfo = await getJetStreamStreamData(natsApiRuleVSHost);
-    await createK8sConfigMap(
-        streamInfo,
-        testDataConfigMapName,
-    );
+    if (streamInfo) {
+      await createK8sConfigMap(
+          streamInfo,
+          testDataConfigMapName,
+      );
+    } else {
+      debug('Skipping creating eventing test data configmap due to missing stream');
+    }
   });
 
   it('Prepare assets without Compass flow', async function() {
