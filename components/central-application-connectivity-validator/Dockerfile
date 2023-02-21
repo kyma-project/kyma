@@ -1,4 +1,4 @@
-FROM eu.gcr.io/kyma-project/external/golang:1.19.4-alpine3.17 as builder
+FROM eu.gcr.io/kyma-project/external/golang:1.20.1-alpine3.17 as builder
 
 ARG DOCK_PKG_DIR=/go/src/github.com/kyma-project/kyma/components/central-application-connectivity-validator
 WORKDIR $DOCK_PKG_DIR
