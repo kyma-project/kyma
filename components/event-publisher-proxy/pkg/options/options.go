@@ -14,6 +14,7 @@ const (
 	// All the available arguments.
 	argMaxRequestSize = "max-request-size"
 	argMetricsAddress = "metrics-addr"
+
 	// All the available environment variables.
 	envEnableNewCRDVersion = "ENABLE_NEW_CRD_VERSION"
 )
@@ -26,7 +27,7 @@ type Options struct {
 
 // Env represents the controller environment variables.
 type Env struct {
-    EnableNewCRDVersion bool `envconfig:"ENABLE_NEW_CRD_VERSION" default:"true"`
+	EnableNewCRDVersion bool `envconfig:"ENABLE_NEW_CRD_VERSION" default:"true"`
 }
 
 func New() *Options {
