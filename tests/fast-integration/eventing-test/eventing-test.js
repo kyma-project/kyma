@@ -329,11 +329,19 @@ describe('Eventing tests', function() {
       before('check if stream creation timestamp is available', async function() {
         try {
           cm = await getConfigMap(testDataConfigMapName);
+          if (isStreamCreationTimeMissing(cm.data)) {
+            debug('Skipping the stream recreation check as the stream creation timestamp is missing!');
+            this.skip();
+          }
           wantStreamName = cm.data.streamName;
           wantStreamCreationTime = cm.data.streamCreationTime;
         } catch (err) {
-          console.log('Skipping the stream recreation check due to missing configmap!');
-          this.skip();
+          if (err.statusCode === 404) {
+            debug('Skipping the stream recreation check due to missing eventing test data configmap!');
+            this.skip();
+          } else {
+            throw err;
+          }
         }
       });
 
@@ -342,10 +350,6 @@ describe('Eventing tests', function() {
       });
 
       it('Compare the stream creation timestamp', async function() {
-        if (isStreamCreationTimeMissing(cm.data)) {
-          console.log('Skipping the stream recreation check as the stream creation timestamp is missing!');
-          this.skip();
-        }
         assert.equal(gotStreamData.streamName, wantStreamName);
         assert.equal(gotStreamData.streamCreationTime, wantStreamCreationTime);
       });
@@ -363,11 +367,19 @@ describe('Eventing tests', function() {
       before('check if consumer creation timestamp is available', async function() {
         try {
           cm = await getConfigMap(testDataConfigMapName);
+          if (isConsumerCreationTimeMissing(cm.data)) {
+            debug('Skipping the consumer recreation check as the consumer creation timestamp is missing!');
+            this.skip();
+          }
           wantConsumerName = cm.data.consumerName;
           wantConsumerCreationTime = cm.data.consumerCreationTime;
         } catch (err) {
-          console.log('Skipping the stream recreation check due to missing configmap!');
-          this.skip();
+          if (err.statusCode === 404) {
+            debug('Skipping the consumer recreation check due to missing eventing test data configmap!');
+            this.skip();
+          } else {
+            throw err;
+          }
         }
       });
 
@@ -377,10 +389,6 @@ describe('Eventing tests', function() {
       });
 
       it('Compare the consumer creation timestamp', async function() {
-        if (isConsumerCreationTimeMissing(cm.data)) {
-          console.log('Skipping the consumer recreation check as the stream creation timestamp is missing!');
-          this.skip();
-        }
         assert.equal(gotConsumerData.consumerName, wantConsumerName);
         assert.equal(gotConsumerData.consumerCreationTime, wantConsumerCreationTime);
       });
@@ -594,13 +602,17 @@ describe('Eventing tests', function() {
     debug('Adding JetStream consumer info to eventing test data configmap');
     const consumerName = await getSubscriptionConsumerName(orderReceivedSubName, testNamespace, subCRDVersion);
     const consumerInfo = await getJetStreamConsumerData(consumerName, natsApiRuleVSHost);
-    await createK8sConfigMap(
-        {
-          ...testDataConfigMap.data,
-          ...consumerInfo,
-        },
-        testDataConfigMapName,
-    );
+    if (consumerInfo) {
+      await createK8sConfigMap(
+          {
+            ...testDataConfigMap.data,
+            ...consumerInfo,
+          },
+          testDataConfigMapName,
+      );
+    } else {
+      debug('Skipping adding consumer info to the eventing data CM due to missing consumer');
+    }
   });
 
   after('Delete the created APIRule', async function() {
