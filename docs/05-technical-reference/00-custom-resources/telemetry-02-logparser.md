@@ -23,13 +23,13 @@ spec:
     Regex ^(?<INT>[^ ]+) (?<FLOAT>[^ ]+) (?<BOOL>[^ ]+) (?<STRING>.+)$
 ```
 
-For further LogParser examples, see the [samples](https://github.com/kyma-project/kyma/blob/main/components/telemetry-operator/config/samples) directory.
+For further LogParser examples, see the [samples](https://github.com/kyma-project/telemetry-manager/tree/main/config/samples) directory.
 
 ## Custom resource parameters
 
 ### spec attribute
 
-For details, see the [LogParser specification file](https://github.com/kyma-project/kyma/blob/main/components/telemetry-operator/apis/telemetry/v1alpha1/logparser_types.go).
+For details, see the [LogParser specification file](https://github.com/kyma-project/telemetry-manager/blob/main/apis/telemetry/v1alpha1/logparser_types.go).
 
 | Parameter | Type | Description |
 |---|---|---|
@@ -38,7 +38,7 @@ For details, see the [LogParser specification file](https://github.com/kyma-proj
 
 ### status attribute
 
-For details, see the [LogParser specification file](https://github.com/kyma-project/kyma/blob/main/components/telemetry-operator/apis/telemetry/v1alpha1/logparser_types.go).
+For details, see the [LogParser specification file](https://github.com/kyma-project/telemetry-manager/blob/main/apis/telemetry/v1alpha1/logparser_types.go).
 
 | Parameter | Type | Description |
 |---|---|---|
