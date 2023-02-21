@@ -26,7 +26,6 @@ const {
   gardener,
   director,
   shootName,
-  getJetStreamConsumerData,
   cleanupTestingResources,
   eventingSinkName,
   getClusterHost,

@@ -34,7 +34,6 @@ const {
   k8sApply,
   deleteK8sPod,
   createK8sConfigMap,
-  getSubscriptionConsumerName,
   waitForFunction,
   eventingSubscription,
   waitForEndpoint,
@@ -615,7 +614,8 @@ describe('Eventing tests', function() {
           testDataConfigMapName,
       );
     } else {
-      debug('Skipping adding consumer info to the eventing data CM due to missing consumer');
+      throw Error(`Couldn't add consumer info to the eventing data CM due to` +
+          `missing consumer ${consumerName} in NATS JetStream`);
     }
   });
 
