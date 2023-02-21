@@ -413,15 +413,19 @@ describe('Eventing tests', function() {
   after('Record order.received.v1 consumer data to ConfigMap', async () => {
     const currentBackend = await getEventingBackend();
     if (currentBackend && currentBackend.toLowerCase() !== natsBackend) {
-      this.skip();
+      debug('Skipping the recording consumer data for non NATS backend!');
+      return;
     }
 
     let testDataConfigMap;
     try {
       testDataConfigMap = await getConfigMap(testDataConfigMapName);
     } catch (err) {
-      console.log('Skipping the recording consumer data due to missing configmap!');
-      this.skip();
+      if (err.statusCode === 404) {
+        debug('Skipping the recording consumer data due to missing configmap!');
+        return;
+      }
+      throw err;
     }
 
     debug('Adding JetStream consumer info to eventing test data configmap');
