@@ -92,7 +92,7 @@ global:
       version: "v20230202-93374cde"
     function_runtime_nodejs16:
       name: "function-runtime-nodejs16"
-      version: "v20230202-93374cde"
+      version: "PR-16869"
     function_runtime_python39:
       name: "function-runtime-python39"
       version: "v20230202-93374cde"
