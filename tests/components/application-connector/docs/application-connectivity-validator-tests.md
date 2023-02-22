@@ -59,7 +59,7 @@ Pipelines run the tests using the **test-validator** target from the `Makefile`.
 ### Run the tests
 
 ``` sh
-make test-validator
+make -f Makefile.test-application-conn-validator test-validator
 ```
 
 By default, the tests clean up after themselves, removing all the previously created resources and the `test` Namespace.
@@ -75,11 +75,11 @@ To run the tests without removing all the created resources afterwards, run them
 1. To start the tests in the debugging mode, run:
 
    ``` shell
-   make test-validator-debug
+   make -f Makefile.test-application-conn-validator test-validator-debug
    ```
 
 2. Once you've finished debugging, run:
 
    ``` shell
-   make clean-validator-test
+   make -f Makefile.test-application-conn-validator clean-validator-test
    ```

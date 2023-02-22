@@ -27,6 +27,13 @@ const {
   director,
   shootName,
   cleanupTestingResources,
+  eventingSinkName,
+  getClusterHost,
+  checkFunctionReachable,
+  deployEventingSinkFunction,
+  waitForEventingSinkFunction,
+  deployV1Alpha1Subscriptions,
+  deployV1Alpha2Subscriptions,
 } = require('./utils');
 const {
   eventMeshSecretFilePath,
@@ -52,6 +59,7 @@ const {
   scenarioExistsInCompass,
   isRuntimeAssignedToScenario,
 } = require('../compass');
+const {expect} = require('chai');
 
 describe('Eventing tests preparation', function() {
   this.timeout(timeoutTime);
@@ -145,6 +153,32 @@ describe('Eventing tests preparation', function() {
 
     // Deploy Commerce mock application, function and subscriptions for tests (includes compass flow)
     await prepareAssetsWithCompassFlow();
+  });
+
+  it('Prepare eventing-sink function', async function() {
+    debug('Preparing EventingSinkFunction');
+    await deployEventingSinkFunction();
+    await waitForEventingSinkFunction();
+  });
+
+  it('Eventing-sink function should be reachable through API Rule', async function() {
+    this.test.retries(5);
+
+    const host = await getClusterHost(eventingSinkName, testNamespace);
+    expect(host).to.not.empty;
+    debug('host fetched, now checking if eventing-sink function is reachable...');
+    await checkFunctionReachable(eventingSinkName, testNamespace, host);
+  });
+
+  it('Prepare v1alpha1 subscriptions', async function() {
+    await deployV1Alpha1Subscriptions();
+  });
+
+  it('Prepare v1alpha2 subscriptions', async function() {
+    if (!testSubscriptionV1Alpha2) {
+      this.skip();
+    }
+    await deployV1Alpha2Subscriptions();
   });
 
   afterEach(async function() {
