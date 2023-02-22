@@ -87,7 +87,7 @@ const eventSourceInApp = 'inapp';
 const uncleanSource = 'test-app';
 const applicationObjs = k8s.loadAllYaml(applicationMockYaml);
 const lastorderObjs = k8s.loadAllYaml(lastorderFunctionYaml);
-let eventMeshSourceNamespace = '/default/sap.kyma/tunas-prow';
+let eventMeshSourceNamespace = '/default/sap.kyma/tunas-develop';
 
 function setEventMeshSourceNamespace(namespace) {
   eventMeshSourceNamespace = `/${namespace.trimStart('/')}`;
@@ -1031,4 +1031,6 @@ module.exports = {
   eventTypeOrderReceivedHash,
   eventTypeOrderReceived,
   orderReceivedSubName,
+  generateTraceParentHeader,
+  checkTrace,
 };
