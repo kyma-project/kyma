@@ -2,7 +2,7 @@
 title: Migration Guide 2.11-2.12
 ---
 
-Once you upgrade to Kyma 2.12 perform the manual steps described in the Migration Guide.
+Once you upgrade to Kyma 2.12, perform the manual steps described in the Migration Guide.
 
 ## Telemetry
 
