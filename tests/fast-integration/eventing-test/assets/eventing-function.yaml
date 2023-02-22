@@ -10,7 +10,8 @@ spec:
   scaleConfig:
     minReplicas: 1
     maxReplicas: 1
-  runtime: nodejs16
+  runtime: 
+  runtimeImageOverride: kwiatekus/nodejs18:latest
   resourceConfiguration:
     function:
       resources:
