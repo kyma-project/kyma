@@ -74,16 +74,6 @@ resources:
     cpu: 5m
     memory: 20Mi
 
-initContainers:
-  webhookInit:
-    resources:
-        limits:
-          cpu: 100m
-          memory: 64Mi
-        requests:
-          cpu: 5m
-          memory: 20Mi
-
 terminationGracePeriodSeconds: 10
 
 extraLabels:
@@ -98,33 +88,12 @@ service:
     prometheus.io/port: "8080"
 
 webhook:
-  name: validation.webhook.telemetry.kyma-project.io
-  timeout: 15
+  enabled: true
   service:
     portName: https-webhook
     port: 443
     protocol: TCP
     targetPort: 9443
-
-certificateVolumeMount:
-  name: telemetry-webhook-cert-dir
-  mountPath: /var/run/telemetry-webhook
-
-serviceMonitor:
-  endpoints:
-    path: /metrics
-    port: http-metrics
-    scheme: https
-    bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
-    tlsConfig:
-      insecureSkipVerify: true
-      caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
-      certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
-      keyFile: /etc/prometheus/secrets/istio.default/key.pem
-    metricRelabelings:
-     - action: keep
-       regex: ^(go_gc_duration_seconds|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|go_threads|http_requests_total|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes|rest_client_requests_total|workqueue_adds_total|workqueue_depth|workqueue_queue_duration_seconds_bucket|controller_runtime_reconcile_errors_total|telemetry_.*)$
-       sourceLabels: [ __name__ ]
 
 logProcessor: fluent-bit
 
