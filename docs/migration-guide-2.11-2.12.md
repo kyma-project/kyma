@@ -20,4 +20,4 @@ The PodPreset component was deprecated in [Kyma 2.4](https://kyma-project.io/blo
 
 ### Removal of the `compass-system` Namespace
 
-With Kyma 2.12, Compass Runtime Agent will deploy in the `kyma-system` Namespace instead of `compass-system`. After upgrading Kyma to the 2.12 version, you must execute [this script](https://github.com/kyma-project/kyma/blob/main/docs/assets/2.11-2.12-SKR-delete-compass-system-namespace.sh) that removes the `compass-system` Namespace and patches the CompassConnection custom resource.
+With Kyma 2.12, Compass Runtime Agent will deploy in the `kyma-system` Namespace instead of `compass-system`. After upgrading Kyma to the 2.12 version, you must execute [this script](https://github.com/kyma-project/kyma/blob/main/docs/assets/2.11-2.12-delete-compass-system-namespace.sh) that removes the `compass-system` Namespace and patches the CompassConnection custom resource.
