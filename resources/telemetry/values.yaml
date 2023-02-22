@@ -6,23 +6,19 @@ global:
       name: "directory-size-exporter"
       version: "v20230117-64505a69"
     telemetry_operator:
-      name: "telemetry-operator"
-      version: "PR-16800"
+      name: "telemetry-manager"
+      version: "v20230221-16fb9090"
     telemetry_webhook_cert_init:
       name: "webhook-cert-init"
       version: "v20230117-64505a69"
     telemetry_otel_collector:
       name: "otel-collector"
-      version: "0.70.0-723b551a"
+      version: "0.71.0-372fcb3b"
       directory: "tpi"
     fluent_bit:
       name: "fluent-bit"
       version: "2.0.9-f89e8b78"
       directory: "tpi"
-    busybox:
-      name: "busybox"
-      version: "1.34.1"
-      directory: "external"
   highPriorityClassName: "kyma-system-priority"
   log:
     format: "json"

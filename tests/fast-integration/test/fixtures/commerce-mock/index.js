@@ -976,4 +976,6 @@ module.exports = {
   sendInClusterEventWithRetry,
   ensureInClusterEventReceivedWithRetry,
   prepareFunction,
+  generateTraceParentHeader,
+  checkTrace,
 };

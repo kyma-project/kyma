@@ -57,13 +57,13 @@ status:
     type: Running
 ```
 
-For further LogPipeline examples, see the [samples](https://github.com/kyma-project/kyma/blob/main/components/telemetry-operator/config/samples) directory.
+For further LogPipeline examples, see the [samples](https://github.com/kyma-project/telemetry-manager/tree/main/config/samples) directory.
 
 ## Custom resource parameters
 
 ### spec attribute
 
-For details, see the [LogPipeline specification file](https://github.com/kyma-project/kyma/blob/main/components/telemetry-operator/apis/telemetry/v1alpha1/logpipeline_types.go).
+For details, see the [LogPipeline specification file](https://github.com/kyma-project/telemetry-manager/blob/main/apis/telemetry/v1alpha1/logpipeline_types.go).
 
 | Parameter | Type | Description |
 |---|---|---|
@@ -116,7 +116,7 @@ For details, see the [LogPipeline specification file](https://github.com/kyma-pr
 
 ### status attribute
 
-For details, see the [LogPipeline specification file](https://github.com/kyma-project/kyma/blob/main/components/telemetry-operator/apis/telemetry/v1alpha1/logpipeline_types.go).
+For details, see the [LogPipeline specification file](https://github.com/kyma-project/telemetry-manager/blob/main/apis/telemetry/v1alpha1/logpipeline_types.go).
 
 | Parameter | Type | Description |
 |---|---|---|
