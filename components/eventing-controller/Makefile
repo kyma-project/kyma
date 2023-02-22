@@ -128,7 +128,7 @@ path-to-referenced-charts:
 
 copy-crds: manifests-local ## copy Eventing CRDs to installation/eventing
 	# patch the CRD only if the new CRD version is enabled
-	@if [ "$(ENABLE_NEW_CRD_VERSION)" == "false" ]; \
+	@if [ "$(ENABLE_NEW_CRD_VERSION)" = "false" ]; \
  		then cp ./config/crd/bases/eventing.kyma-project.io_subscriptions.yaml ./../../installation/resources/crds/eventing/subscriptions.eventing.kyma-project.io.crd.yaml; \
  	else \
 		rm -rf $(HELM_TEMPLATE_CRD_PATCHES_DIR); mkdir $(HELM_TEMPLATE_CRD_PATCHES_DIR); kustomize build config/crd -o $(HELM_TEMPLATE_CRD_PATCHES_DIR); \

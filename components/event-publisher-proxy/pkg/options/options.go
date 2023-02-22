@@ -27,7 +27,7 @@ type Options struct {
 
 // Env represents the controller environment variables.
 type Env struct {
-	EnableNewCRDVersion bool `envconfig:"ENABLE_NEW_CRD_VERSION" default:"true"`
+	EnableNewCRDVersion bool `envconfig:"ENABLE_NEW_CRD_VERSION" default:"false"`
 }
 
 func New() *Options {

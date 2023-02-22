@@ -45,7 +45,7 @@ type Args struct {
 type Env struct {
 	LogFormat           string `envconfig:"APP_LOG_FORMAT" default:"json"`
 	LogLevel            string `envconfig:"APP_LOG_LEVEL" default:"warn"`
-	EnableNewCRDVersion bool   `envconfig:"ENABLE_NEW_CRD_VERSION" default:"true"`
+	EnableNewCRDVersion bool   `envconfig:"ENABLE_NEW_CRD_VERSION" default:"false"`
 }
 
 // New returns a new Options instance.
