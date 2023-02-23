@@ -53,7 +53,6 @@ const eventingNatsSvcName = 'eventing-nats';
 const eventingNatsApiRuleAName = `${eventingNatsSvcName}-apirule`;
 const timeoutTime = 10 * 60 * 1000;
 const slowTime = 5000;
-const streamConfig = { };
 const eppInClusterUrl = 'eventing-event-publisher-proxy.kyma-system';
 const subscriptionNames = {
   orderCreated: 'order-created',
@@ -154,28 +153,6 @@ async function getNatsPods() {
   return await listPods(labelSelector, 'kyma-system');
 }
 
-// getStreamConfigForJetStream gets the stream retention policy and the consumer deliver policy env variables
-// from the eventing controller pod and also checks if these env variables exist on the pod.
-async function getStreamConfigForJetStream() {
-  const labelSelector = 'app.kubernetes.io/instance=eventing,app.kubernetes.io/name=controller';
-  const res = await listPods(labelSelector, 'kyma-system');
-  let envsCount = 0;
-  res.body?.items[0]?.spec.containers.find((container) =>
-    container.name === 'controller',
-  ).env.forEach((env) => {
-    if (env.name === 'JS_STREAM_RETENTION_POLICY') {
-      streamConfig['retention_policy'] = env.value;
-      envsCount++;
-    }
-    if (env.name === 'JS_CONSUMER_DELIVER_POLICY') {
-      streamConfig['consumer_deliver_policy'] = env.value;
-      envsCount++;
-    }
-  });
-  // check to make sure the environment variables exist
-  return envsCount === 2;
-}
-
 async function getJetStreamStreamData(host) {
   const responseJson = await retryPromise(async () => await axios.get(`https://${host}/jsz?streams=true`), 5, 1000);
   const streamName = responseJson.data.account_details[0].stream_detail[0].name;
@@ -185,11 +162,6 @@ async function getJetStreamStreamData(host) {
     streamName: streamName,
     streamCreationTime: streamCreationTime,
   };
-}
-
-function skipAtLeastOnceDeliveryTest() {
-  return !(streamConfig['retention_policy'] === 'limits' &&
-      streamConfig['consumer_deliver_policy'] === 'all');
 }
 
 function isStreamCreationTimeMissing(streamData) {
@@ -560,8 +532,6 @@ module.exports = {
   cleanupTestingResources,
   getRegisteredCompassScenarios,
   getNatsPods,
-  getStreamConfigForJetStream,
-  skipAtLeastOnceDeliveryTest,
   getJetStreamStreamData,
   isStreamCreationTimeMissing,
   eppInClusterUrl,
