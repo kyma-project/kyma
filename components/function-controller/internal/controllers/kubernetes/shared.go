@@ -19,7 +19,7 @@ const (
 
 type Config struct {
 	BaseNamespace                 string        `envconfig:"default=kyma-system"`
-	ExcludedNamespaces            []string      `envconfig:"default=istio-system;kube-node-lease;kube-public;kube-system;kyma-installer;kyma-system;natss;compass-system"`
+	ExcludedNamespaces            []string      `envconfig:"default=istio-system;kube-node-lease;kube-public;kube-system;kyma-installer;kyma-system;natss"`
 	ConfigMapRequeueDuration      time.Duration `envconfig:"default=1m"`
 	SecretRequeueDuration         time.Duration `envconfig:"default=1m"`
 	ServiceAccountRequeueDuration time.Duration `envconfig:"default=1m"`
