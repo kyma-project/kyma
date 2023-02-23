@@ -104,7 +104,9 @@ service:
   # Specify a specific node port when type is NodePort
   # nodePort: 32500
   # Annotations for service
-  annotations: {}
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8383"
 
 serviceAccount:
   # Specifies whether a ServiceAccount should be created
@@ -179,7 +181,7 @@ global:
       directory: "external"
     oauth2_proxy:
       name: "oauth2-proxy"
-      version: "7.4.0-f193d3f9"
+      version: "7.4.0-791da1af"
       directory: "tpi"
 virtualservice:
   enabled: true

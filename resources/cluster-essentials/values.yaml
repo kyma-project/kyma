@@ -28,7 +28,3 @@ securityContext:
   runAsNonRoot: true
   runAsUser: 65534
 
-pod-preset:
-  key: ""
-  cert: ""
-  caCert: ""

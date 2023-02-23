@@ -210,6 +210,8 @@ func (js *JetStream) DeleteInvalidConsumers(subscriptions []eventingv1alpha1.Sub
 			if err := js.deleteConsumerFromJetStream(con.Name); err != nil {
 				return err
 			}
+			js.namedLogger().Infow("Dangling JetStream consumer is deleted", "name", con.Name,
+				"description", con.Config.Description)
 		}
 	}
 	return nil
@@ -418,7 +420,17 @@ func (js *JetStream) ensureStreamExistsAndIsConfiguredCorrectly() error {
 }
 
 func streamIsConfiguredCorrectly(got nats.StreamConfig, want nats.StreamConfig) bool {
-	return reflect.DeepEqual(got, want)
+	// only comparing the fields which we define in stream config.
+	if got.Name != want.Name ||
+		got.Storage != want.Storage ||
+		got.Replicas != want.Replicas ||
+		got.Retention != want.Retention ||
+		got.MaxMsgs != want.MaxMsgs ||
+		got.MaxBytes != want.MaxBytes ||
+		got.Discard != want.Discard {
+		return false
+	}
+	return reflect.DeepEqual(got.Subjects, want.Subjects)
 }
 
 func getStreamConfig(natsConfig backendnats.Config) (*nats.StreamConfig, error) {
@@ -614,7 +626,7 @@ func (js *JetStream) createConsumer(subscription *eventingv1alpha1.Subscription,
 	return nil
 }
 
-// checkNATSSubscriptionsCount checks whether NATS Subscription(s) were created for all the Kyma Subscription filters
+// checkNATSSubscriptionsCount checks whether NATS Subscription(s) were created for all the Kyma Subscription filters.
 func (js *JetStream) checkNATSSubscriptionsCount(subscription *eventingv1alpha1.Subscription) error {
 	for _, subject := range subscription.Status.CleanEventTypes {
 		jsSubject := js.GetJetStreamSubject(subject)
@@ -676,8 +688,17 @@ func (js *JetStream) getCallback(subKeyPrefix, subscriptionName string) nats.Msg
 		ceLogger.Debugw("Sending the CloudEvent")
 
 		// dispatch the event to sink
+		start := time.Now()
 		result := js.client.Send(traceCtxWithCE, *ce)
+		dispatchDuration := time.Since(start)
 		if !cev2protocol.IsACK(result) {
+			js.metricsCollector.RecordLatencyPerSubscription(
+				dispatchDuration,
+				subscriptionName,
+				ce.Type(),
+				sink,
+				http.StatusInternalServerError,
+			)
 			js.metricsCollector.RecordDeliveryPerSubscription(subscriptionName, ce.Type(), sink, http.StatusInternalServerError)
 			ceLogger.Errorw("Failed to dispatch the CloudEvent", "error", result.Error())
 			// Do not NAK the msg so that the server waits for AckWait and then redeliver the msg.
@@ -690,8 +711,9 @@ func (js *JetStream) getCallback(subKeyPrefix, subscriptionName string) nats.Msg
 			ceLogger.Errorw("Failed to ACK an event on JetStream")
 		}
 
+		js.metricsCollector.RecordLatencyPerSubscription(dispatchDuration, subscriptionName, ce.Type(), sink, http.StatusOK)
 		js.metricsCollector.RecordDeliveryPerSubscription(subscriptionName, ce.Type(), sink, http.StatusOK)
-		ceLogger.Infow("CloudEvent was dispatched")
+		ceLogger.Debugw("CloudEvent was dispatched")
 	}
 }
 

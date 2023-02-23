@@ -1,10 +1,10 @@
-//nolint:gosec
 package utils
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
 	"github.com/nats-io/nats.go"
@@ -37,6 +37,18 @@ type EventTypeInfo struct {
 // could map to a different name.
 type NameMapper interface {
 	MapSubscriptionName(subscriptionName, subscriptionNamespace string) string
+}
+
+func getQos(qosStr string) (types.Qos, error) {
+	qosStr = strings.ReplaceAll(qosStr, "-", "_")
+	switch qosStr {
+	case string(types.QosAtLeastOnce):
+		return types.QosAtLeastOnce, nil
+	case string(types.QosAtMostOnce):
+		return types.QosAtMostOnce, nil
+	default:
+		return "", fmt.Errorf("invalid Qos: %s", qosStr)
+	}
 }
 
 func getDefaultSubscription(protocolSettings *eventingv1alpha1.ProtocolSettings) (*types.Subscription, error) {
@@ -90,6 +102,10 @@ func GetInternalView4Ev2(subscription *eventingv1alpha1.Subscription, apiRule *a
 	emsSubscription.WebhookURL = urlTobeRegistered
 
 	// Events
+	if subscription.Spec.Filter == nil {
+		return nil, errors.New("subscription filter is empty")
+	}
+
 	uniqueFilters, err := subscription.Spec.Filter.Deduplicate()
 	if err != nil {
 		return nil, errors.Wrap(err, "deduplicate subscription filters failed")

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"reflect"
+	"strings"
 	"time"
 
 	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
@@ -35,6 +36,7 @@ const (
 	idleHeartBeatDuration  = 1 * time.Minute
 	jsConsumerMaxRedeliver = 100
 	jsConsumerAcKWait      = 30 * time.Second
+	originalTypeHeaderName = "originaltype"
 )
 
 func NewJetStream(config backendnats.Config, metricsCollector *backendmetrics.Collector,
@@ -158,6 +160,8 @@ func (js *JetStream) DeleteInvalidConsumers(subscriptions []eventingv1alpha2.Sub
 			if err := js.deleteConsumerFromJetStream(con.Name); err != nil {
 				return err
 			}
+			js.namedLogger().Infow("Dangling JetStream consumer is deleted", "name", con.Name,
+				"description", con.Config.Description)
 		}
 	}
 	return nil
@@ -274,7 +278,17 @@ func (js *JetStream) ensureStreamExistsAndIsConfiguredCorrectly() error {
 }
 
 func streamIsConfiguredCorrectly(got nats.StreamConfig, want nats.StreamConfig) bool {
-	return reflect.DeepEqual(got, want)
+	// only comparing the fields which we define in stream config.
+	if got.Name != want.Name ||
+		got.Storage != want.Storage ||
+		got.Replicas != want.Replicas ||
+		got.Retention != want.Retention ||
+		got.MaxMsgs != want.MaxMsgs ||
+		got.MaxBytes != want.MaxBytes ||
+		got.Discard != want.Discard {
+		return false
+	}
+	return reflect.DeepEqual(got.Subjects, want.Subjects)
 }
 
 func (js *JetStream) initJSContext() error {
@@ -414,6 +428,20 @@ func (js *JetStream) deleteSubscriptionFromJetStream(jsSub Subscriber, jsSubKey 
 	return nil
 }
 
+func (js *JetStream) revertEventTypeToOriginal(event *cev2.Event, sugaredLogger *zap.SugaredLogger) {
+	// check if original type header exists in the cloud event.
+	if orgType, ok := event.Extensions()[originalTypeHeaderName]; ok && orgType != "" {
+		event.SetType(fmt.Sprintf("%v", orgType))
+		sugaredLogger.Debugf("type reverted to original type using %s header", originalTypeHeaderName)
+		return
+	}
+
+	// otherwise, manually trim the prefixes from event type.
+	ceType := strings.TrimPrefix(event.Type(), fmt.Sprintf("%s.%s.", js.Config.JSSubjectPrefix, event.Source()))
+	event.SetType(ceType)
+	sugaredLogger.Debugw("type reverted to original type by trimming prefixes")
+}
+
 func (js *JetStream) getCallback(subKeyPrefix, subscriptionName string) nats.MsgHandler {
 	return func(msg *nats.Msg) {
 		// fetch sink info from storage
@@ -443,6 +471,9 @@ func (js *JetStream) getCallback(subKeyPrefix, subscriptionName string) nats.Msg
 		// decorate the logger with CloudEvent context
 		ceLogger := js.namedLogger().With("id", ce.ID(), "source", ce.Source(), "type", ce.Type(), "sink", sink)
 
+		// revert the event type to original form
+		js.revertEventTypeToOriginal(ce, ceLogger)
+
 		ceLogger.Debugw("Sending the CloudEvent")
 
 		// dispatch the event to sink
@@ -461,7 +492,7 @@ func (js *JetStream) getCallback(subKeyPrefix, subscriptionName string) nats.Msg
 		}
 
 		js.metricsCollector.RecordDeliveryPerSubscription(subscriptionName, ce.Type(), sink, http.StatusOK)
-		ceLogger.Infow("CloudEvent was dispatched")
+		ceLogger.Debugw("CloudEvent was dispatched")
 	}
 }
 

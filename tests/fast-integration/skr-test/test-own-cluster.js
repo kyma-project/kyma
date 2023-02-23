@@ -1,5 +1,6 @@
 const {gatherOptions} = require('./index');
 const {getOrProvisionSKR} = require('./provision/provision-skr');
+const {deprovisionAndUnregisterSKR} = require('./provision/deprovision-skr');
 const {GardenerClient, GardenerConfig} = require('../gardener');
 
 const {getSecret} = require('../utils');
@@ -63,6 +64,7 @@ describe('SKR own_cluster test', function() {
   after('Cleanup the resources', async function() {
     console.log('Cleaning up');
     this.timeout(deprovisioningTimeout);
+    await deprovisionAndUnregisterSKR(options, deprovisioningTimeout, false, false);
     await gardener.deleteShoot(shootName);
   });
 });

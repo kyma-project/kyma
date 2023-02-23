@@ -3,6 +3,9 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "api-gateway.name" . }}-metrics
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: {{ .Values.config.ports.metrics | quote }}
   labels:
 {{ include "api-gateway.labels" . | indent 4 }}
 spec:
@@ -12,33 +15,6 @@ spec:
   selector:
     app.kubernetes.io/name: {{ include "api-gateway.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
----
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
-metadata:
-  labels:
-    prometheus: monitoring
-{{ include "api-gateway.labels" . | indent 4 }}
-  name: {{ include "api-gateway.name" . }}
-spec:
-  endpoints:
-  - port: tcp-metrics
-    metricRelabelings:
-    - sourceLabels: [ __name__ ]
-      regex: ^(go_gc_duration_seconds|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|go_threads|http_requests_total|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes|rest_client_request_latency_seconds_bucket|rest_client_requests_total|workqueue_adds_total|workqueue_depth|workqueue_queue_duration_seconds_bucket|workqueue_queue_duration_seconds_sum|workqueue_queue_duration_seconds_count|workqueue_work_duration_seconds_sum|workqueue_work_duration_seconds_count|controller_runtime_reconcile_errors_total)$
-      action: keep
-    - sourceLabels: [__name__,le]
-      regex: 'rest_client_request_latency_seconds_bucket;(0.002|0.008|0.032|0.128|0.512)' # drop buckets to reduce metric footprint
-      action: drop
-    - sourceLabels: [__name__,url]
-      regex: ^rest_client_request_latency_seconds_bucket;https://.+(/api/v1.*|/apis/(apps|gateway.kyma-project.io).+)$ # allow metrics from core, apps and api gateway API group
-      action: keep
-  namespaceSelector:
-    matchNames:
-      - "{{ .Release.Namespace }}"
-  selector:
-    matchLabels:
-{{ include "api-gateway.labels" . | indent 6 }}
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule

@@ -18,7 +18,7 @@ type TypeMatching string
 
 var Finalizer = GroupVersion.Group
 
-// SubscriptionSpec defines the desired state of Subscription
+// SubscriptionSpec defines the desired state of Subscription.
 type SubscriptionSpec struct {
 	// ID is the unique identifier of Subscription, read-only
 	// +optional
@@ -86,7 +86,7 @@ func (s Subscription) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-// GetMaxInFlightMessages tries to convert the string-type maxInFlight to the integer
+// GetMaxInFlightMessages tries to convert the string-type maxInFlight to the integer.
 func (s *Subscription) GetMaxInFlightMessages(defaults *env.DefaultSubscriptionConfig) int {
 	val, err := strconv.Atoi(s.Spec.Config[MaxInFlightMessages])
 	if err != nil {
@@ -128,7 +128,7 @@ func (s *Subscription) ToUnstructuredSub() (*unstructured.Unstructured, error) {
 
 //+kubebuilder:object:root=true
 
-// SubscriptionList contains a list of Subscription
+// SubscriptionList contains a list of Subscription.
 type SubscriptionList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`

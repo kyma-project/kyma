@@ -8,12 +8,12 @@
 * @pbochynski @PK85 @a-thaler
 
 /.github @kyma-project/prow
-/.github/workflows @PK85 @piotrmiskiewicz @szwedm @wozniakjan @tillknuesting @ralikio @kyma-project/prow
-/.github/ISSUE_TEMPLATE @mmitoraj @NHingerl @grego952 @IwonaLanger @nataliasitko
+/.github/workflows @kyma-project/prow @kyma-project/gopher
+/.github/ISSUE_TEMPLATE @kyma-project/technical-writers
 
 
 # Owners of the .kyma-project-io folder
-/.kyma-project-io/ @valentinvieriu @akucharska @qbalukom @Wawrzyn321 @Sawthis @mrCherry97 @Lyczeq
+/.kyma-project-io/ @valentinvieriu @akucharska @qbalukom @Sawthis @mrCherry97 @Lyczeq
 
 /common @Tomasz-Smelcerz-SAP @akgalwas @piotrmiskiewicz @VOID404 @koala7659 @franpog859 @mvshao
 # Logging library
@@ -27,76 +27,70 @@
 /components/eventing-controller @kyma-project/eventing
 /components/function-controller @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
 /components/function-runtimes @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
-/components/telemetry-operator @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
-/components/directory-size-exporter @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
-/components/webhook-cert-init @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @hisarbalik
+/components/directory-size-exporter @kyma-project/observability
+/components/webhook-cert-init @kyma-project/observability
 
 # All files and subdirectories in /docs
-/docs @mmitoraj @NHingerl @grego952 @IwonaLanger @nataliasitko
+/docs @kyma-project/technical-writers
 
-/hack @clebs
-
-/installation @khlifi411 @jeremyharisch @ruanxin @tobiscr @moelsayed @Tomasz-Smelcerz-SAP @jakobmoellersap @adityabhatia
-/installation/resources/crds/api-gateway @strekm @werdes72 @dariusztutaj @cnvergence @barchw @videlov @triffer
+/installation @khlifi411 @jeremyharisch @ruanxin @tobiscr @moelsayed @Tomasz-Smelcerz-SAP @jakobmoellersap
+/installation/resources/crds/api-gateway @kyma-project/goat
 /installation/resources/crds/application-connector  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 /installation/resources/crds/compass-runtime-agent  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 /installation/resources/crds/eventing @kyma-project/eventing
-/installation/resources/crds/istio @strekm @werdes72 @dariusztutaj @cnvergence @barchw @videlov @triffer
-/installation/resources/crds/monitoring @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
-/installation/resources/crds/ory @strekm @werdes72 @dariusztutaj @cnvergence @barchw @videlov @triffer
+/installation/resources/crds/istio @kyma-project/goat
+/installation/resources/crds/monitoring @kyma-project/observability
+/installation/resources/crds/ory @kyma-project/goat
 /installation/resources/crds/serverless @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
-/installation/resources/crds/telemetry @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @NHingerl @hisarbalik
-/installation/resources/crds/tracing @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
+/installation/resources/crds/telemetry @kyma-project/observability
+/installation/resources/crds/tracing @kyma-project/observability
 
-/resources/api-gateway @strekm @werdes72 @dariusztutaj @cnvergence @barchw @videlov @triffer
+/resources/api-gateway @kyma-project/goat
 /resources/application-connector  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
-/resources/certificates @dariusztutaj @cnvergence @strekm @werdes72 @barchw
-/resources/cluster-essentials @a-thaler @strekm @dariusztutaj @cnvergence @barchw @werdes72 @PK85 @videlov @triffer
-/resources/cluster-essentials/charts/pod-preset @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @tillknuesting
-/resources/cluster-users @cnvergence @strekm @werdes72 @dariusztutaj @barchw @videlov @triffer
+/resources/certificates @kyma-project/goat
+/resources/cluster-essentials @kyma-project/goat
+/resources/cluster-users @kyma-project/goat
 /resources/compass-runtime-agent  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 /resources/eventing @kyma-project/eventing
-/resources/istio @strekm @werdes72 @dariusztutaj @cnvergence @barchw @videlov @triffer
-/resources/istio-resources @strekm @werdes72 @dariusztutaj @cnvergence @barchw @videlov @triffer
-/resources/istio-resources/files/dashboards @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
-/resources/kiali @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
-/resources/logging @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
-/resources/monitoring @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
-/resources/ory @strekm @werdes72 @dariusztutaj @cnvergence @barchw @videlov @triffer
+/resources/istio @kyma-project/goat
+/resources/istio-resources @kyma-project/goat
+/resources/istio-resources/files/dashboards @kyma-project/observability
+/resources/logging @kyma-project/observability
+/resources/monitoring @kyma-project/observability
+/resources/ory @kyma-project/goat
 /resources/serverless @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
-/resources/telemetry @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
-/resources/tracing @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
+/resources/telemetry @kyma-project/observability
+/resources/tracing @kyma-project/observability
 
 /tests/application-gateway-legacy-tests  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 /tests/application-gateway-tests  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
-/tests/telemetry-operator-perf-tests @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @hisarbalik
+/tests/telemetry-operator-perf-tests @kyma-project/observability
 
 
 # Fast Integration Tests
-/tests/fast-integration @lindnerby @rakesh-garimella @jeremyharisch @khlifi411 @ruanxin @pbochynski @dennis-ge @jakobmoellersap @Tomasz-Smelcerz-SAP @PK85 @tillknuesting @chrkl
+/tests/fast-integration @lindnerby @rakesh-garimella @jeremyharisch @khlifi411 @ruanxin @pbochynski @dennis-ge @jakobmoellersap @Tomasz-Smelcerz-SAP @PK85 @chrkl
 /tests/fast-integration/eventing-test @kyma-project/eventing
 /tests/fast-integration/image @kyma-project/eventing
-/tests/fast-integration/kcp @PK85 @piotrmiskiewicz @szwedm @wozniakjan @tillknuesting @ralikio @jaroslaw-pieszka
-/tests/fast-integration/kyma-environment-broker @PK85 @piotrmiskiewicz @szwedm @wozniakjan @tillknuesting @ralikio @jaroslaw-pieszka
-/tests/fast-integration/skr-aws-upgrade-integration @tillknuesting @ralikio @PK85 @piotrmiskiewicz @szwedm @wozniakjan @jaroslaw-pieszka
-/tests/fast-integration/skr-nightly @tillknuesting @ralikio @PK85 @piotrmiskiewicz @szwedm @wozniakjan @jaroslaw-pieszka
-/tests/fast-integration/skr-svcat-migration-test @wozniakjan @tillknuesting @ralikio @PK85 @piotrmiskiewicz @szwedm
-/tests/fast-integration/skr-test @szwedm @wozniakjan @tillknuesting @ralikio @PK85 @piotrmiskiewicz @jaroslaw-pieszka
-/tests/fast-integration/smctl @szwedm @wozniakjan @tillknuesting @ralikio @PK85 @piotrmiskiewicz @jaroslaw-pieszka
-/tests/fast-integration/logging @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @hisarbalik
-/tests/fast-integration/monitoring @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @hisarbalik
-/tests/fast-integration/telemetry-test @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @hisarbalik
-/tests/fast-integration/tracing @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @hisarbalik
+/tests/fast-integration/kcp @kyma-project/gopher
+/tests/fast-integration/kyma-environment-broker @kyma-project/gopher
+/tests/fast-integration/skr-aws-upgrade-integration @kyma-project/gopher
+/tests/fast-integration/skr-nightly @kyma-project/gopher
+/tests/fast-integration/skr-test @kyma-project/gopher
+/tests/fast-integration/smctl @kyma-project/gopher
+/tests/fast-integration/logging @kyma-project/observability
+/tests/fast-integration/monitoring @kyma-project/observability
+/tests/fast-integration/telemetry-test @kyma-project/observability
+/tests/fast-integration/tracing @kyma-project/observability
 
 
 /tests/function-controller @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
 /tests/components/api-gateway @strekm @werdes72 @dariusztutaj @cnvergence @barchw @videlov @triffer
 /tests/components/istio @strekm @dariusztutaj @cnvergence @barchw @werdes72 @videlov @triffer
 /tests/components/application-connector @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
-/tests/components/reconciler @khlifi411 @jeremyharisch @ruanxin @tobiscr @Tomasz-Smelcerz-SAP @jakobmoellersap @adityabhatia
+/tests/components/reconciler @khlifi411 @jeremyharisch @ruanxin @tobiscr @Tomasz-Smelcerz-SAP @jakobmoellersap
 
 # performance tests
-/tests/perf @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
+/tests/perf @kyma-project/observability
 /tests/serverless-bench @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
 
 # The tools/event-subscriber directory
@@ -106,13 +100,13 @@
 /tools/gitserver/ @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
 
 # Config file for MILV - milv.config.yaml
-milv.config.yaml @m00g3n @pPrecel @kwiatekus @moelsayed @cortey @anoipm @mmitoraj @NHingerl @grego952 @IwonaLanger @nataliasitko
+milv.config.yaml @m00g3n @pPrecel @kwiatekus @moelsayed @cortey @anoipm @kyma-project/technical-writers
 
 # VERSION file
 VERSION @kyma-project/prow
 
 # All .md files
-*.md @mmitoraj @NHingerl @grego952 @IwonaLanger @nataliasitko
+*.md @kyma-project/technical-writers
 
 # Managed Modules
-/modules @pbochynski @janmedrek @khlifi411 @jeremyharisch @ruanxin @tobiscr @Tomasz-Smelcerz-SAP @jakobmoellersap @adityabhatia @clebs
+/modules @pbochynski @janmedrek @khlifi411 @jeremyharisch @ruanxin @tobiscr @Tomasz-Smelcerz-SAP @jakobmoellersap

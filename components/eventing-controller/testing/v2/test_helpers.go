@@ -37,6 +37,7 @@ const (
 	EventSourceUnclean       = "s>o>*u*r>c.e"
 	EventSourceClean         = "source"
 
+	EventMeshNamespaceNS        = "/default/ns"
 	EventMeshNamespace          = "/default/kyma/id"
 	EventSource                 = "/default/kyma/id"
 	EventTypePrefix             = "prefix"
@@ -292,18 +293,6 @@ func WithStatusJSBackendTypes(types []eventingv1alpha2.JetStreamTypes) Subscript
 	}
 }
 
-func WithWebhookForNATS() SubscriptionOpt {
-	return func(sub *eventingv1alpha2.Subscription) {
-		if sub.Spec.Config == nil {
-			sub.Spec.Config = map[string]string{}
-		}
-		sub.Spec.Config[eventingv1alpha2.Protocol] = "NATS"
-		sub.Spec.Config[eventingv1alpha2.ProtocolSettingsContentMode] = "BINARY"
-		sub.Spec.Config[eventingv1alpha2.ProtocolSettingsExemptHandshake] = "true"
-		sub.Spec.Config[eventingv1alpha2.ProtocolSettingsQos] = "true"
-	}
-}
-
 func CustomReadyCondition(msg string) eventingv1alpha2.Condition {
 	return eventingv1alpha2.MakeCondition(
 		eventingv1alpha2.ConditionSubscriptionActive,
@@ -349,17 +338,28 @@ func WithWebhookAuthForBEB() SubscriptionOpt {
 
 func WithInvalidProtocolSettingsQos() SubscriptionOpt {
 	return func(s *eventingv1alpha2.Subscription) {
-		s.Spec.Config = map[string]string{
-			eventingv1alpha2.ProtocolSettingsQos: "AT_INVALID_ONCE",
+		if s.Spec.Config == nil {
+			s.Spec.Config = map[string]string{}
 		}
+		s.Spec.Config[eventingv1alpha2.ProtocolSettingsQos] = "AT_INVALID_ONCE"
 	}
 }
 
 func WithInvalidWebhookAuthType() SubscriptionOpt {
 	return func(s *eventingv1alpha2.Subscription) {
-		s.Spec.Config = map[string]string{
-			eventingv1alpha2.WebhookAuthType: "abcd",
+		if s.Spec.Config == nil {
+			s.Spec.Config = map[string]string{}
 		}
+		s.Spec.Config[eventingv1alpha2.WebhookAuthType] = "abcd"
+	}
+}
+
+func WithInvalidWebhookAuthGrantType() SubscriptionOpt {
+	return func(s *eventingv1alpha2.Subscription) {
+		if s.Spec.Config == nil {
+			s.Spec.Config = map[string]string{}
+		}
+		s.Spec.Config[eventingv1alpha2.WebhookAuthGrantType] = "invalid"
 	}
 }
 
@@ -383,7 +383,7 @@ func WithEventType(eventType string) SubscriptionOpt {
 	return func(subscription *eventingv1alpha2.Subscription) { AddEventType(eventType, subscription) }
 }
 
-// WithEventSource is a SubscriptionOpt for creating a Subscription with a specific event source,
+// WithEventSource is a SubscriptionOpt for creating a Subscription with a specific event source,.
 func WithEventSource(source string) SubscriptionOpt {
 	return func(subscription *eventingv1alpha2.Subscription) { subscription.Spec.Source = source }
 }
@@ -404,7 +404,7 @@ func WithStandardTypeMatching() SubscriptionOpt {
 	return WithTypeMatching(eventingv1alpha2.TypeMatchingStandard)
 }
 
-// WithTypeMatching is a SubscriptionOpt for creating a Subscription with a specific type matching,
+// WithTypeMatching is a SubscriptionOpt for creating a Subscription with a specific type matching,.
 func WithTypeMatching(typeMatching eventingv1alpha2.TypeMatching) SubscriptionOpt {
 	return func(subscription *eventingv1alpha2.Subscription) { subscription.Spec.TypeMatching = typeMatching }
 }
@@ -487,6 +487,11 @@ func WithSinkURLFromSvc(svc *corev1.Service) SubscriptionOpt {
 // ValidSinkURL converts a namespace and service name to a valid sink url.
 func ValidSinkURL(namespace, svcName string) string {
 	return fmt.Sprintf("https://%s.%s.svc.cluster.local", svcName, namespace)
+}
+
+// ValidSinkURLWithPath converts a namespace and service name to a valid sink url with path.
+func ValidSinkURLWithPath(namespace, svcName, path string) string {
+	return fmt.Sprintf("https://%s.%s.svc.cluster.local/%s", svcName, namespace, path)
 }
 
 // WithSinkURL is a SubscriptionOpt for creating a subscription with a specific sink.
@@ -714,26 +719,27 @@ func WithCleanEventSourceAndType() SubscriptionOpt {
 	return WithSourceAndType(EventSourceClean, OrderCreatedV1Event)
 }
 
-// WithNotCleanEventSourceAndType is a SubscriptionOpt that initializes subscription with a not clean event source and type
+// WithNotCleanEventSourceAndType is a SubscriptionOpt that initializes subscription with a not clean event source
+// and type.
 func WithNotCleanEventSourceAndType() SubscriptionOpt {
 	return WithSourceAndType(EventSourceUnclean, OrderCreatedUncleanEvent)
 }
 
-// WithTypeMatchingStandard is a SubscriptionOpt that initializes the subscription with type matching to standard
+// WithTypeMatchingStandard is a SubscriptionOpt that initializes the subscription with type matching to standard.
 func WithTypeMatchingStandard() SubscriptionOpt {
 	return func(subscription *eventingv1alpha2.Subscription) {
 		subscription.Spec.TypeMatching = eventingv1alpha2.TypeMatchingStandard
 	}
 }
 
-// WithTypeMatchingExact is a SubscriptionOpt that initializes the subscription with type matching to exact
+// WithTypeMatchingExact is a SubscriptionOpt that initializes the subscription with type matching to exact.
 func WithTypeMatchingExact() SubscriptionOpt {
 	return func(subscription *eventingv1alpha2.Subscription) {
 		subscription.Spec.TypeMatching = eventingv1alpha2.TypeMatchingExact
 	}
 }
 
-// WithMaxInFlight is a SubscriptionOpt that sets the status with the maxInFlightMessages int value
+// WithMaxInFlight is a SubscriptionOpt that sets the status with the maxInFlightMessages int value.
 func WithMaxInFlight(maxInFlight int) SubscriptionOpt {
 	return func(subscription *eventingv1alpha2.Subscription) {
 		subscription.Spec.Config = map[string]string{
@@ -742,11 +748,12 @@ func WithMaxInFlight(maxInFlight int) SubscriptionOpt {
 	}
 }
 
-// WithMaxInFlightMessages is a SubscriptionOpt that sets the status with the maxInFlightMessages string value
+// WithMaxInFlightMessages is a SubscriptionOpt that sets the status with the maxInFlightMessages string value.
 func WithMaxInFlightMessages(maxInFlight string) SubscriptionOpt {
 	return func(sub *eventingv1alpha2.Subscription) {
-		sub.Spec.Config = map[string]string{
-			eventingv1alpha2.MaxInFlightMessages: maxInFlight,
+		if sub.Spec.Config == nil {
+			sub.Spec.Config = map[string]string{}
 		}
+		sub.Spec.Config[eventingv1alpha2.MaxInFlightMessages] = maxInFlight
 	}
 }

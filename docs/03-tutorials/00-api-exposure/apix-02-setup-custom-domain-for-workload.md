@@ -2,169 +2,152 @@
 title: Set up a custom domain for a workload
 ---
 
-This tutorial shows how to set up your custom domain and prepare a certificate for exposing a workload. It uses Gardener [External DNS Management](https://github.com/gardener/external-dns-management) and [Certificate Management](https://github.com/gardener/cert-management) components.
-  >**NOTE:** Skip this tutorial if you use a Kyma domain instead of your custom domain.
+This tutorial shows how to set up a custom domain and prepare a certificate required for exposing a workload. It uses Gardener [External DNS Management](https://github.com/gardener/external-dns-management) and [Certificate Management](https://github.com/gardener/cert-management) components.
+
+>**NOTE:** Skip this tutorial if you use a Kyma domain instead of your custom domain.
 
 ## Prerequisites
 
-If you use a cluster not managed by Gardener, install the [External DNS Management](https://github.com/gardener/external-dns-management) and [Certificate Management](https://github.com/gardener/cert-management) components manually in a dedicated Namespace.
-
-This tutorial is based on a sample HttpBin service deployment and a sample Function. To deploy or create those workloads, follow the [Create a workload](./apix-01-create-workload.md) tutorial.
+* Deploy [a sample HttpBin service and a sample Function](./apix-01-create-workload.md).
+* If you use a cluster not managed by Gardener, install the [External DNS Management](https://github.com/gardener/external-dns-management#quick-start) and [Certificate Management](https://github.com/gardener/cert-management) components manually in a dedicated Namespace.
 
 ## Steps
 
-Follow these steps to set up your custom domain and prepare a certificate required to expose a workload.
+1. Create a Secret containing credentials for the DNS cloud service provider account in your Namespace.
 
-1. Create a Secret containing credentials for your DNS cloud service provider account in your Namespace.
+     * Choose your DNS cloud service provider and create a secret in your Namespace. To learn how to do it, follow [the guidelines](https://github.com/gardener/external-dns-management/blob/master/README.md#external-dns-management) provided in the External DNS Management documentation. 
+     * Export the name of the created Secret as an environment variable:
 
-  See the [official External DNS Management documentation](https://github.com/gardener/external-dns-management/blob/master/README.md#external-dns-management), choose your DNS cloud service provider, and follow the relevant guidelines to create a secret in your Namespace. Then export the following value as an environment variable:
+       ```bash
+       export SECRET={SECRET_NAME}
+       ```
 
-   ```bash
-   export SECRET={SECRET_NAME}
-   ```
+2. Create a `DNSProvider` custom resource (CR).
 
-2. Create a DNSProvider and a DNSEntry custom resource (CR).
+     * Export the following values as environment variables. 
+        >**NOTE:** As the `SPEC_TYPE`, use the relevant provider type. The `DOMAIN_NAME` value specifies the name of a domain that you own, for example, `mydomain.com`. 
 
-   - Export the following values as environment variables and run the command provided.
+        ```bash
+        export SPEC_TYPE={PROVIDER_TYPE}
+        export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} 
+        ````
   
-   As the **SPEC_TYPE**, use the relevant provider type. See the [official Gardener examples](https://github.com/gardener/external-dns-management/tree/master/examples) of the DNSProvider CR.
+     * To create a `DNSProvider` CR, run: 
 
-   ```bash
-   export SPEC_TYPE={PROVIDER_TYPE}
-   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} 
-   ```
-   >**NOTE:** `DOMAIN_NAME` is the domain that you own, for example, mydomain.com
-
-   ```bash
-   cat <<EOF | kubectl apply -f -
-   apiVersion: dns.gardener.cloud/v1alpha1
-   kind: DNSProvider
-   metadata:
-     name: dns-provider
-     namespace: $NAMESPACE
-     annotations:
-       dns.gardener.cloud/class: garden
-   spec:
-     type: $SPEC_TYPE
-     secretRef:
-       name: $SECRET
-     domains:
-       include:
-         - $DOMAIN_TO_EXPOSE_WORKLOADS
-   EOF
-   ```
-
-   - Export the following values as environment variables and run the command provided:
-
-   ```bash
-   export IP=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}') # Assuming only one LoadBalancer with external IP
-   ```
-   **NOTE:** For some cluster providers you may need to replace the`ip` with the `hostname`, for example, in AWS, set `jsonpath='{.status.loadBalancer.ingress[0].hostname}'`
-
-    ```bash
-    cat <<EOF | kubectl apply -f -
-    apiVersion: dns.gardener.cloud/v1alpha1
-    kind: DNSEntry
-    metadata:
-      name: dns-entry
-      namespace: $NAMESPACE
-      annotations:
-        dns.gardener.cloud/class: garden
-    spec:
-      dnsName: "*.$DOMAIN_TO_EXPOSE_WORKLOADS"
-      ttl: 600
-      targets:
-        - $IP
-    EOF
-    ```
-
-3. Create an Issuer CR.
-
-  Export the following values as environment variables and run the command provided.
-
-   ```bash
-   export EMAIL={YOUR_EMAIL_ADDRESS}
-   ```
-
-   ```bash
-   cat <<EOF | kubectl apply -f -
-   apiVersion: cert.gardener.cloud/v1alpha1
-   kind: Issuer
-   metadata:
-     name: letsencrypt-staging
-     namespace: $NAMESPACE
-   spec:
-     acme:
-       server: https://acme-staging-v02.api.letsencrypt.org/directory
-       email: $EMAIL
-       autoRegistration: true
-       privateKeySecretRef:
-         name: letsencrypt-staging-secret
+       ```bash
+       cat <<EOF | kubectl apply -f -
+       apiVersion: dns.gardener.cloud/v1alpha1
+       kind: DNSProvider
+       metadata:
+         name: dns-provider
          namespace: $NAMESPACE
-       domains:
-         include:
-           - $DOMAIN_TO_EXPOSE_WORKLOADS
-           - "*.$DOMAIN_TO_EXPOSE_WORKLOADS"
-   EOF
-   ```
+         annotations:
+           dns.gardener.cloud/class: garden
+       spec:
+         type: $SPEC_TYPE
+         secretRef:
+           name: $SECRET
+         domains:
+           include:
+             - $DOMAIN_TO_EXPOSE_WORKLOADS
+       EOF
+       ```
+  
+3. Create a `DNSEntry` CR.
+   
+     * Export the following values as environment variables:
 
-4. Create a Certificate CR.
+       ```bash
+       export IP=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}') # Assuming only one LoadBalancer with external IP
+       ```
+        >**NOTE:** For some cluster providers you need to replace the `ip` with the `hostname`, for example, in AWS, set `jsonpath='{.status.loadBalancer.ingress[0].hostname}'`.
 
-  Export the following values as environment variables and run the command provided.
+     * To create a `DNSEntry` CR, run:
 
-   ```bash
-   export TLS_SECRET={TLS_SECRET_NAME} # The name of the TLS Secret that will be created in this step, for example, httpbin-tls-credentials
-   export ISSUER={ISSUER_NAME} # The name of the Issuer CR, for example,letsencrypt-staging
-   ```
+       ```bash
+       cat <<EOF | kubectl apply -f -
+       apiVersion: dns.gardener.cloud/v1alpha1
+       kind: DNSEntry
+       metadata:
+         name: dns-entry
+         namespace: $NAMESPACE
+         annotations:
+           dns.gardener.cloud/class: garden
+       spec:
+         dnsName: "*.$DOMAIN_TO_EXPOSE_WORKLOADS"
+         ttl: 600
+         targets:
+           - $IP
+       EOF
+       ```
 
-   ```bash
-   cat <<EOF | kubectl apply -f -
-   apiVersion: cert.gardener.cloud/v1alpha1
-   kind: Certificate
-   metadata:
-     name: httpbin-cert
-     namespace: istio-system
-   spec:  
-     secretName: $TLS_SECRET
-     commonName: $DOMAIN_TO_EXPOSE_WORKLOADS
-     issuerRef:
-       name: $ISSUER
-       namespace: $NAMESPACE
-   EOF
-   ```
-   >**NOTE:** Run the following command to check the certificate status: `kubectl get certificate httpbin-cert -n istio-system`
+4. Create an Issuer CR.
 
-5. Create a Gateway CR. Run:
+     * Export the following values as environment variables:
 
-   >**NOTE:** Skip this step if you're creating mTLS gateway. 
+       ```bash
+       export EMAIL={YOUR_EMAIL_ADDRESS}
+       ```
+     * To create an Issuer CR, run: 
 
-   ```bash
-   cat <<EOF | kubectl apply -f -
-   apiVersion: networking.istio.io/v1alpha3
-   kind: Gateway
-   metadata:
-     name: httpbin-gateway
-     namespace: $NAMESPACE
-   spec:
-     selector:
-       istio: ingressgateway # Use Istio Ingress Gateway as default
-     servers:
-       - port:
-           number: 443
-           name: https
-           protocol: HTTPS
-         tls:
-           mode: SIMPLE
-           credentialName: $TLS_SECRET
-         hosts:
-           - "*.$DOMAIN_TO_EXPOSE_WORKLOADS"
-   EOF
-   ```
+       ```bash
+       cat <<EOF | kubectl apply -f -
+       apiVersion: cert.gardener.cloud/v1alpha1
+       kind: Issuer
+       metadata:
+         name: letsencrypt-staging
+         namespace: $NAMESPACE
+       spec:
+         acme:
+           server: https://acme-staging-v02.api.letsencrypt.org/directory
+           email: $EMAIL
+           autoRegistration: true
+           privateKeySecretRef:
+             name: letsencrypt-staging-secret
+             namespace: $NAMESPACE
+           domains:
+             include:
+               - $DOMAIN_TO_EXPOSE_WORKLOADS
+               - "*.$DOMAIN_TO_EXPOSE_WORKLOADS"
+       EOF
+       ```
 
-## Next steps
+5. Create a Certificate CR.
 
-- [Expose a workload](./apix-03-expose-workload-apigateway.md)
-- [Expose multiple workloads on the same host](./apix-04-expose-multiple-workloads.md)
-- [Expose and secure a workload with OAuth2](./apix-05-expose-and-secure-workload-oauth2.md)
-- [Expose and secure a workload with Istio](./apix-07-expose-and-secure-workload-istio.md)
-- [Expose and secure a workload with JWT](./apix-08-expose-and-secure-workload-jwt.md)
+     * Export the following values as environment variables:
+
+        >**NOTE:** The `TLS_SECRET` is the name of the TLS Secret, for example `httpbin-tls-credentials`. The `ISSUER` value is the name of the Issuer CR, for example, `letsencrypt-staging`.
+
+        ```bash
+        export TLS_SECRET={TLS_SECRET_NAME}
+        export ISSUER={ISSUER_NAME}
+        ```
+
+     * To create a Certificate CR, run:
+
+        ```bash
+        cat <<EOF | kubectl apply -f -
+        apiVersion: cert.gardener.cloud/v1alpha1
+        kind: Certificate
+        metadata:
+          name: httpbin-cert
+          namespace: istio-system
+        spec:  
+          secretName: $TLS_SECRET
+          commonName: $DOMAIN_TO_EXPOSE_WORKLOADS
+          issuerRef:
+            name: $ISSUER
+            namespace: $NAMESPACE
+        EOF
+        ```
+        >**NOTE:** While using the default configuration, certificates with the Let's Encrypt issuer are valid for 90 days and automatically renewed 60 days before their validity expires. Use the `--issuer.renewal-window` command line parameter to adjust the time window between the renewal and the expiration of a certificate. For more information on Gardener Certificate Management, read the [Gardener documentation](https://github.com/gardener/cert-management#requesting-a-certificate).
+
+     * To check the certificate status, run: 
+     
+        ```bash
+        kubectl get certificate httpbin-cert -n istio-system
+        ```
+       
+6. Follow [this tutorial](./apix-03-set-up-tls-gateway.md) to set up a TLS Gateway.
+
+Visit the [Gardener external DNS management documentation](https://github.com/gardener/external-dns-management/tree/master/examples) to see more examples of custom resources for services and ingresses.

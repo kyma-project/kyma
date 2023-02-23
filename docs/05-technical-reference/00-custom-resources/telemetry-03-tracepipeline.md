@@ -21,7 +21,7 @@ spec:
   output:
     otlp:
       endpoint:
-        value: http://tracing-jaeger-collector.kyma-system.svc.cluster.local:4317
+        value: http://jaeger-collector.jaeger.svc.cluster.local:4317
 status:
   conditions:
   - lastTransitionTime: "2022-12-13T14:33:27Z"
@@ -32,13 +32,13 @@ status:
     type: Running
 ```
 
-For further TracePipeline examples, see the [samples](https://github.com/kyma-project/kyma/blob/main/components/telemetry-operator/config/samples) directory.
+For further TracePipeline examples, see the [samples](https://github.com/kyma-project/telemetry-manager/tree/main/config/samples) directory.
 
 ## Custom resource parameters
 
 ### spec attribute
 
-For details, see the [TracePipeline specification file](https://github.com/kyma-project/kyma/blob/main/components/telemetry-operator/apis/telemetry/v1alpha1/tracepipeline_types.go).
+For details, see the [TracePipeline specification file](https://github.com/kyma-project/telemetry-manager/blob/main/apis/telemetry/v1alpha1/tracepipeline_types.go).
 
 | Parameter | Type | Description |
 |---|---|---|
@@ -56,10 +56,14 @@ For details, see the [TracePipeline specification file](https://github.com/kyma-
 | output.otlp.authentication.basic.user | object | Configures the username to be used for `Basic` authentication. |
 | output.otlp.authentication.basic.user.value | string | Username as plain text provided as static value. |
 | output.otlp.authentication.basic.user.valueFrom.secretKeyRef | object | Reference to a key in a Secret. You must provide `name` and `namespace` of the Secret, as well as the name of the `key`. |
+| output.otlp.headers | []object | List of custom headers for outgoing requests. |
+| output.otlp.headers[].name | string | Custom header name. |
+| output.otlp.headers[].value | string | Custom header value. |
+| output.otlp.headers[].valueFrom.secretKeyRef | object | Reference to a key in a Secret. You must provide `name` and `namespace` of the Secret, as well as the name of the `key`. |
 
 ### status attribute
 
-For details, see the [TracePipeline specification file](https://github.com/kyma-project/kyma/blob/main/components/telemetry-operator/apis/telemetry/v1alpha1/tracepipeline_types.go).
+For details, see the [TracePipeline specification file](https://github.com/kyma-project/telemetry-manager/blob/main/apis/telemetry/v1alpha1/tracepipeline_types.go).
 
 | Parameter | Type | Description |
 |---|---|---|

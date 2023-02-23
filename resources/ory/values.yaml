@@ -30,7 +30,7 @@ global:
   images:
     k8s_tools:
       name: "k8s-tools"
-      version: "v20221213-1840f45a"
+      version: "v20230214-a820b6b6"
       directory: "tpi"
     ## Google Cloud SQL Proxy image
     ## ref: https://cloud.google.com/sql/docs/mysql/sql-proxy
@@ -69,7 +69,7 @@ global:
       directory: "external/bitnami"
     alpine:
       name: "alpine"
-      version: "3.16.0"
+      version: "3.17.2"
       directory: "external"
 
 headerRewrite:

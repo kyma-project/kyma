@@ -5,7 +5,7 @@ global:
   images:
     compass_runtime_agent:
       name: "compass-runtime-agent"
-      version: "v20221227-2dddc00f"
+      version: "PR-16525"
   istio:
     gateway:
       name: kyma-gateway
@@ -31,14 +31,20 @@ compassRuntimeAgent:
     skipAppsTLSVerification: false
     secret:
       name: compass-agent-configuration
-      namespace: compass-system
+      namespace: kyma-system
+      migration:
+        namespace: compass-system
+        enabled: true
   certificates:
     renewal:
       validityThreshold: "0.3"
     clientCertificate:
       secret:
         name: cluster-client-certificates
-        namespace: compass-system
+        namespace: kyma-system
+        migration:
+          namespace: compass-system
+          enabled: true
     caCertificate:
       secret:
         name: kyma-gateway-certs-cacert

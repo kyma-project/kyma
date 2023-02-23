@@ -59,7 +59,7 @@ persistence:
   # storageClass: '-'
 
 garbageCollection:
-  enabled: true
+  enabled: false
 
 # set the type of filesystem to use: filesystem, s3.
 # If filesystem is used, you should also add it to configData, below

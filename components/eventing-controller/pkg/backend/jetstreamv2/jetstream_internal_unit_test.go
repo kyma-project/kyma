@@ -5,6 +5,11 @@ package jetstreamv2
 import (
 	"testing"
 
+	cev2 "github.com/cloudevents/sdk-go/v2/event"
+	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
+
 	jetstreamv2mocks "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2/mocks"
 	"github.com/nats-io/nats.go"
 
@@ -30,6 +35,85 @@ func Test_SyncConsumersAndSubscriptions_ForEmptyTypes(t *testing.T) {
 
 	// then
 	assert.NoError(t, err)
+}
+
+func Test_streamIsConfiguredCorrectly(t *testing.T) {
+	streamConfig := &nats.StreamConfig{
+		Name:      "test",
+		Storage:   nats.FileStorage,
+		Replicas:  3,
+		Retention: nats.InterestPolicy,
+		MaxMsgs:   10,
+		MaxBytes:  1024,
+		Discard:   nats.DiscardNew,
+		Subjects:  []string{"kyma.>"},
+	}
+
+	testCases := []struct {
+		name            string
+		ecDefinedConfig nats.StreamConfig
+		natsConfig      nats.StreamConfig
+		wantResult      bool
+	}{
+		{
+			name:            "same configs should return true",
+			ecDefinedConfig: *streamConfig,
+			natsConfig:      *streamConfig,
+			wantResult:      true,
+		},
+		{
+			name:            "Non relevant nats config should not effect result",
+			ecDefinedConfig: *streamConfig,
+			natsConfig: nats.StreamConfig{
+				Name:              streamConfig.Name,
+				Storage:           streamConfig.Storage,
+				Replicas:          streamConfig.Replicas,
+				Retention:         streamConfig.Retention,
+				MaxMsgs:           streamConfig.MaxMsgs,
+				MaxBytes:          streamConfig.MaxBytes,
+				Discard:           streamConfig.Discard,
+				Subjects:          streamConfig.Subjects,
+				MaxMsgsPerSubject: 99,
+			},
+			wantResult: true,
+		},
+		{
+			name:            "Different nats config should return false",
+			ecDefinedConfig: *streamConfig,
+			natsConfig: nats.StreamConfig{
+				Name:      "test",
+				Storage:   nats.FileStorage,
+				Replicas:  3,
+				Retention: nats.InterestPolicy,
+				MaxMsgs:   10,
+				MaxBytes:  2048,
+				Discard:   nats.DiscardNew,
+				Subjects:  []string{"kyma.>"},
+			},
+			wantResult: false,
+		},
+		{
+			name:            "Different subject config should return false",
+			ecDefinedConfig: *streamConfig,
+			natsConfig: nats.StreamConfig{
+				Name:      "test",
+				Storage:   nats.FileStorage,
+				Replicas:  3,
+				Retention: nats.InterestPolicy,
+				MaxMsgs:   10,
+				MaxBytes:  2048,
+				Discard:   nats.DiscardNew,
+				Subjects:  []string{"xyz.>"},
+			},
+			wantResult: false,
+		},
+	}
+	for _, testCase := range testCases {
+		tc := testCase
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.wantResult, streamIsConfiguredCorrectly(tc.natsConfig, tc.ecDefinedConfig))
+		})
+	}
 }
 
 // Test_GetOrCreateConsumer tests the behaviour of the getOrCreateConsumer function.
@@ -633,6 +717,64 @@ func Test_IsConsumerUsedByKymaSub(t *testing.T) {
 			if testCase.wantError == nil {
 				assert.Equal(t, testCase.wantResult, result)
 			}
+		})
+	}
+}
+
+// Test_revertEventTypeToOriginal test the behaviour of the revertEventTypeToOriginal function.
+func Test_revertEventTypeToOriginal(t *testing.T) {
+	// pre-requisites
+	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
+	require.NoError(t, err)
+
+	jsBackend := &JetStream{
+		Config: backendnats.Config{
+			JSSubjectPrefix: "kyma",
+		},
+		logger: defaultLogger,
+	}
+
+	// test cases
+	testCases := []struct {
+		name              string
+		givenType         string
+		givenSource       string
+		givenOriginalType string
+		wantType          string
+	}{
+		{
+			name:              "Should revert the type to original form using original type header",
+			givenType:         "kyma.noapp.order.created.v1",
+			givenSource:       "noapp",
+			givenOriginalType: "order.created.v1",
+			wantType:          "order.created.v1",
+		},
+		{
+			name:        "Should revert the type to original form by removing prefixes (without originalType header)",
+			givenType:   "kyma.noapp.order.created.v1",
+			givenSource: "noapp",
+			wantType:    "order.created.v1",
+		},
+	}
+
+	for _, testCase := range testCases {
+		tc := testCase
+		t.Run(tc.name, func(t *testing.T) {
+			// given
+			ce := cev2.New(cev2.CloudEventsVersionV1)
+			ce.SetType(tc.givenType)
+			ce.SetSource(tc.givenSource)
+			if tc.givenOriginalType != "" {
+				ce.SetExtension(originalTypeHeaderName, tc.givenOriginalType)
+			}
+
+			ceLogger := jsBackend.namedLogger().With("id", ce.ID(), "source", ce.Source(), "type", ce.Type())
+
+			// when
+			jsBackend.revertEventTypeToOriginal(&ce, ceLogger)
+
+			// then
+			require.Equal(t, tc.wantType, ce.Type())
 		})
 	}
 }

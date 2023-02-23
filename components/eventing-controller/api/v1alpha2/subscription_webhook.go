@@ -4,6 +4,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -19,6 +21,7 @@ const (
 	subdomainSegments          = 5
 	InvalidPrefix              = "sap.kyma.custom"
 	ClusterLocalURLSuffix      = "svc.cluster.local"
+	ValidSource                = "source"
 )
 
 func (s *Subscription) SetupWebhookWithManager(mgr ctrl.Manager) error {
@@ -75,7 +78,7 @@ func (s *Subscription) ValidateSubscription() error {
 		allErrs = append(allErrs, err)
 	}
 	if err := s.validateSubscriptionConfig(); err != nil {
-		allErrs = append(allErrs, err)
+		allErrs = append(allErrs, err...)
 	}
 	if err := s.validateSubscriptionSink(); err != nil {
 		allErrs = append(allErrs, err)
@@ -90,6 +93,10 @@ func (s *Subscription) ValidateSubscription() error {
 func (s *Subscription) validateSubscriptionSource() *field.Error {
 	if s.Spec.Source == "" && s.Spec.TypeMatching != TypeMatchingExact {
 		return MakeInvalidFieldError(SourcePath, s.Name, EmptyErrDetail)
+	}
+	// check only if the source is valid for the cloud event, with a valid event type
+	if IsInvalidCE(s.Spec.Source, "") {
+		return MakeInvalidFieldError(SourcePath, s.Name, InvalidURIErrDetail)
 	}
 	return nil
 }
@@ -111,15 +118,29 @@ func (s *Subscription) validateSubscriptionTypes() *field.Error {
 		if s.Spec.TypeMatching != TypeMatchingExact && strings.HasPrefix(etype, InvalidPrefix) {
 			return MakeInvalidFieldError(TypesPath, s.Name, InvalidPrefixErrDetail)
 		}
+		// check only is the event type is valid for the cloud event, with a valid source
+		if IsInvalidCE(ValidSource, etype) {
+			return MakeInvalidFieldError(TypesPath, s.Name, InvalidURIErrDetail)
+		}
 	}
 	return nil
 }
 
-func (s *Subscription) validateSubscriptionConfig() *field.Error {
+func (s *Subscription) validateSubscriptionConfig() field.ErrorList {
+	var allErrs field.ErrorList
 	if isNotInt(s.Spec.Config[MaxInFlightMessages]) {
-		return MakeInvalidFieldError(ConfigPath, s.Name, StringIntErrDetail)
+		allErrs = append(allErrs, MakeInvalidFieldError(ConfigPath, s.Name, StringIntErrDetail))
 	}
-	return nil
+	if s.ifKeyExistsInConfig(ProtocolSettingsQos) && types.IsInvalidQoS(s.Spec.Config[ProtocolSettingsQos]) {
+		allErrs = append(allErrs, MakeInvalidFieldError(ConfigPath, s.Name, InvalidQosErrDetail))
+	}
+	if s.ifKeyExistsInConfig(WebhookAuthType) && types.IsInvalidAuthType(s.Spec.Config[WebhookAuthType]) {
+		allErrs = append(allErrs, MakeInvalidFieldError(ConfigPath, s.Name, InvalidAuthTypeErrDetail))
+	}
+	if s.ifKeyExistsInConfig(WebhookAuthGrantType) && types.IsInvalidGrantType(s.Spec.Config[WebhookAuthGrantType]) {
+		allErrs = append(allErrs, MakeInvalidFieldError(ConfigPath, s.Name, InvalidGrantTypeErrDetail))
+	}
+	return allErrs
 }
 
 func (s *Subscription) validateSubscriptionSink() *field.Error {
@@ -155,9 +176,24 @@ func (s *Subscription) validateSubscriptionSink() *field.Error {
 	return nil
 }
 
+func (s *Subscription) ifKeyExistsInConfig(key string) bool {
+	_, ok := s.Spec.Config[key]
+	return ok
+}
+
 func isNotInt(value string) bool {
 	if _, err := strconv.Atoi(value); err != nil {
 		return true
 	}
 	return false
+}
+
+func IsInvalidCE(source, eventType string) bool {
+	if source == "" {
+		return false
+	}
+	newEvent := utils.GetCloudEvent(eventType)
+	newEvent.SetSource(source)
+	err := newEvent.Validate()
+	return err != nil
 }

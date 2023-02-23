@@ -68,7 +68,6 @@ type Want struct {
 // This conflict can happen if another entity such as the eventing-controller changed the sub in the meantime.
 func EventuallyUpdateSubscriptionOnK8s(ctx context.Context, ens *TestEnsemble, sub *eventingv1alpha1.Subscription, updateFunc func(*eventingv1alpha1.Subscription) error) {
 	ens.G.Eventually(func() error {
-
 		// get a fresh version of the Subscription
 		lookupKey := types.NamespacedName{
 			Namespace: sub.Namespace,

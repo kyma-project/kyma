@@ -57,7 +57,7 @@ func NewDirectorClient(gqlClient gql.Client, oauthClient oauth.Client, tenant st
 func (cc *directorClient) getToken() error {
 	token, err := cc.oauthClient.GetAuthorizationToken()
 	if err != nil {
-		return errors.New("Error while obtaining token")
+		return err
 	}
 
 	if token.EmptyOrExpired() {
@@ -146,6 +146,24 @@ func (cc *directorClient) RegisterApplication(appName, displayName string) (stri
 	execFunc := getExecGraphQLFunc[graphql.Application](cc)
 	operationDescription := "register application"
 	successfulLogMessage := fmt.Sprintf("Successfully registered application %s in Director for tenant %s", appName, cc.tenant)
+
+	result, err := executeQuery(queryFunc, execFunc, operationDescription, successfulLogMessage)
+	if err != nil {
+		return "", err
+	}
+
+	id := result.Result.ID
+	_, err = cc.AddBundle(id)
+	return id, err
+}
+
+func (cc *directorClient) AddBundle(appID string) (string, error) {
+	log.Infof("Adding Bundle to Application")
+
+	queryFunc := func() string { return cc.queryProvider.addBundleMutation(appID) }
+	execFunc := getExecGraphQLFunc[graphql.Application](cc)
+	operationDescription := "add bundle"
+	successfulLogMessage := fmt.Sprintf("Successfully added bundle to application with ID %s in Director for tenant %s", appID, cc.tenant)
 
 	result, err := executeQuery(queryFunc, execFunc, operationDescription, successfulLogMessage)
 	if err != nil {

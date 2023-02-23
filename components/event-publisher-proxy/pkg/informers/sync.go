@@ -16,7 +16,7 @@ const (
 
 type waitForCacheSyncFunc func(stopCh <-chan struct{}) map[schema.GroupVersionResource]bool
 
-// WaitForCacheSyncOrDie waits for the cache to sync. If sync fails everything stops
+// WaitForCacheSyncOrDie waits for the cache to sync. If sync fails everything stops.
 func WaitForCacheSyncOrDie(ctx context.Context, dc dynamicinformer.DynamicSharedInformerFactory, logger *logger.Logger) {
 	dc.Start(ctx.Done())
 

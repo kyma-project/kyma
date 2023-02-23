@@ -22,7 +22,6 @@ import (
 )
 
 func Test_getProcessedEventTypes(t *testing.T) {
-
 	// given
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	require.NoError(t, err)
@@ -159,7 +158,6 @@ func Test_getProcessedEventTypes(t *testing.T) {
 			}
 		})
 	}
-
 }
 
 func Test_handleKymaSubModified(t *testing.T) {

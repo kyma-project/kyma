@@ -16,8 +16,10 @@ First, create a sample Function that prints out the received event to console:
   </summary>
 
 1. Go to **Namespaces** and select the default Namespace.
-2. Go to **Workloads** > **Functions** and switch to **Advanced** tab.
-3. Name the Function `lastorder` and in the inline editor for the Function, replace its source with the following code:
+2. Go to **Workloads** > **Functions** and click **Create Function +**.
+3. Name the Function `lastorder`.
+4. From the **Language** dropdown, choose `nodejs`.
+5. In the **Source** section, replace its source with the following code:
     ```js
     module.exports = {
       main: async function (event, context) {
@@ -26,8 +28,8 @@ First, create a sample Function that prints out the received event to console:
       } 
     }
     ```
-5. Click **Create**.
-6. Wait a few seconds for the Function to have status `RUNNING`.
+6. Click **Create**.
+7. Wait a few seconds for the Function to have status `RUNNING`.
 
   </details>
   <details>
@@ -191,9 +193,10 @@ To verify that the event was properly delivered, check the logs of the Function:
   </summary>
 
 1. In Kyma Dashboard, return to the view of your `lastorder` Function.
-2. Go to **Code** and find the **Replicas of the Function** section.
-3. Open the Function Pod and Click on **View Logs** in the **Containers** section.
-4. You see the received event in the logs:
+2. In the **Code** view, find the **Replicas of the Function** section.
+3. Click the name of your replica.
+4. Locate the **Containers** section and click on **View Logs**.
+5. You see the received event in the logs:
    ```
    Received event: { orderCode: '3211213' }
    ```

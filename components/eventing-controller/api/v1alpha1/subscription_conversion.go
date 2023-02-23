@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/pkg/errors"
 	"sigs.k8s.io/controller-runtime/pkg/conversion"
@@ -15,8 +17,15 @@ const (
 	ErrorMultipleSourceMsg = "subscription contains more than 1 eventSource"
 )
 
+var v1alpha1TypeCleaner eventtype.Cleaner //nolint:gochecknoglobals // using global var because there is no runtime
+// object to hold this instance.
+
+func InitializeEventTypeCleaner(cleaner eventtype.Cleaner) {
+	v1alpha1TypeCleaner = cleaner
+}
+
 // ConvertTo converts this Subscription in version v1 to the Hub version v2.
-func (src *Subscription) ConvertTo(dstRaw conversion.Hub) error { //nolint:revive
+func (src *Subscription) ConvertTo(dstRaw conversion.Hub) error {
 	dst, ok := dstRaw.(*v1alpha2.Subscription)
 	if !ok {
 		return errors.Errorf(ErrorHubVersionMsg)
@@ -26,7 +35,6 @@ func (src *Subscription) ConvertTo(dstRaw conversion.Hub) error { //nolint:reviv
 
 // V1ToV2 copies the v1alpha1-type field values into v1alpha2-type field values.
 func V1ToV2(src *Subscription, dst *v1alpha2.Subscription) error {
-
 	// ObjectMeta
 	dst.ObjectMeta = src.ObjectMeta
 
@@ -63,7 +71,6 @@ func (dst *Subscription) ConvertFrom(srcRaw conversion.Hub) error { //nolint:rev
 
 // V2ToV1 copies the v1alpha2-type field values into v1alpha1-type field values.
 func V2ToV1(dst *Subscription, src *v1alpha2.Subscription) error {
-
 	// ObjectMeta
 	dst.ObjectMeta = src.ObjectMeta
 
@@ -214,6 +221,10 @@ func (src *Subscription) setV1ProtocolFields(dst *v1alpha2.Subscription) {
 
 // setV2SpecTypes sets event types in the Subscription Spec in the v1alpha2 way.
 func (src *Subscription) setV2SpecTypes(dst *v1alpha2.Subscription) error {
+	if v1alpha1TypeCleaner == nil {
+		return errors.New("event type cleaner is not initialized")
+	}
+
 	if src.Spec.Filter != nil {
 		for _, filter := range src.Spec.Filter.Filters {
 			if dst.Spec.Source == "" {
@@ -222,13 +233,20 @@ func (src *Subscription) setV2SpecTypes(dst *v1alpha2.Subscription) error {
 			if dst.Spec.Source != "" && filter.EventSource.Value != dst.Spec.Source {
 				return errors.New(ErrorMultipleSourceMsg)
 			}
-			dst.Spec.Types = append(dst.Spec.Types, filter.EventType.Value)
+			// clean the type and merge segments if needed
+			cleanedType, err := v1alpha1TypeCleaner.Clean(filter.EventType.Value)
+			if err != nil {
+				return err
+			}
+
+			// add the type to spec
+			dst.Spec.Types = append(dst.Spec.Types, cleanedType)
 		}
 	}
 	return nil
 }
 
-// natsSpecConfigToV2 converts the v1alpha2 Spec config to v1alpha1
+// natsSpecConfigToV2 converts the v1alpha2 Spec config to v1alpha1.
 func (src *Subscription) natsSpecConfigToV1(dst *v1alpha2.Subscription) error {
 	if maxInFlightMessages, ok := dst.Spec.Config[v1alpha2.MaxInFlightMessages]; ok {
 		intVal, err := strconv.Atoi(maxInFlightMessages)

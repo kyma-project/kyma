@@ -1,4 +1,3 @@
-//nolint:gosec
 package utils
 
 import (
@@ -126,38 +125,6 @@ func TestConvertKymaSubToEventMeshSub(t *testing.T) {
 				)
 			},
 		},
-		{
-			name: "subscription with invalid protocol settings QoS",
-			givenSubscription: eventingtestingv2.NewSubscription("name", "namespace",
-				eventingtestingv2.WithDefaultSource(),
-				eventingtestingv2.WithOrderCreatedFilter(),
-				eventingtestingv2.WithValidSink("ns", svcName),
-				eventingtestingv2.WithInvalidProtocolSettingsQos(),
-			),
-			givenAPIRuleFunc: func(subscription *eventingv1alpha2.Subscription) *apigatewayv1beta1.APIRule {
-				return eventingtestingv2.NewAPIRule(subscription,
-					eventingtestingv2.WithPath(),
-					eventingtestingv2.WithService(svcName, host),
-				)
-			},
-			wantError: true,
-		},
-		{
-			name: "subscription with invalid webhook auth type",
-			givenSubscription: eventingtestingv2.NewSubscription("name", "namespace",
-				eventingtestingv2.WithDefaultSource(),
-				eventingtestingv2.WithOrderCreatedFilter(),
-				eventingtestingv2.WithValidSink("ns", svcName),
-				eventingtestingv2.WithInvalidWebhookAuthType(),
-			),
-			givenAPIRuleFunc: func(subscription *eventingv1alpha2.Subscription) *apigatewayv1beta1.APIRule {
-				return eventingtestingv2.NewAPIRule(subscription,
-					eventingtestingv2.WithPath(),
-					eventingtestingv2.WithService(svcName, host),
-				)
-			},
-			wantError: true,
-		},
 	}
 
 	// execute test cases
@@ -193,7 +160,6 @@ func Test_setEventMeshProtocolSettings(t *testing.T) {
 		givenSubscription          *eventingv1alpha2.Subscription
 		givenEventMeshSubscription *types.Subscription
 		wantEventMeshSubscription  *types.Subscription
-		wantError                  bool
 	}{
 		{
 			name:              "should use default values if protocol settings are not provided in subscription",
@@ -232,18 +198,6 @@ func Test_setEventMeshProtocolSettings(t *testing.T) {
 			},
 		},
 		{
-			name: "should return error if invalid Qos value is provided in subscription",
-			givenSubscription: &eventingv1alpha2.Subscription{
-				Spec: eventingv1alpha2.SubscriptionSpec{
-					Config: map[string]string{
-						eventingv1alpha2.ProtocolSettingsQos: "invalid",
-					},
-				},
-			},
-			givenEventMeshSubscription: &types.Subscription{},
-			wantError:                  true,
-		},
-		{
 			name: "should set ExemptHandshake to true if invalid ExemptHandshake value is provided in subscription",
 			givenSubscription: &eventingv1alpha2.Subscription{
 				Spec: eventingv1alpha2.SubscriptionSpec{
@@ -273,12 +227,8 @@ func Test_setEventMeshProtocolSettings(t *testing.T) {
 			err := setEventMeshProtocolSettings(tc.givenSubscription, eventMeshSubscription)
 
 			// then
-			if tc.wantError {
-				require.Error(t, err)
-			} else {
-				require.NoError(t, err)
-				require.Equal(t, tc.wantEventMeshSubscription, eventMeshSubscription)
-			}
+			require.NoError(t, err)
+			require.Equal(t, tc.wantEventMeshSubscription, eventMeshSubscription)
 		})
 	}
 }
@@ -298,7 +248,6 @@ func Test_getEventMeshWebhookAuth(t *testing.T) {
 		name              string
 		givenSubscription *eventingv1alpha2.Subscription
 		wantWebhook       *types.WebhookAuth
-		wantError         bool
 	}{
 		{
 			name:              "should use default values if webhook auth settings are not provided in subscription",
@@ -326,29 +275,6 @@ func Test_getEventMeshWebhookAuth(t *testing.T) {
 				TokenURL:     "https://oauth2.xxx.com/oauth2/token",
 			},
 		},
-		{
-			name: "should return error if invalid Type value is provided in subscription",
-			givenSubscription: &eventingv1alpha2.Subscription{
-				Spec: eventingv1alpha2.SubscriptionSpec{
-					Config: map[string]string{
-						eventingv1alpha2.WebhookAuthType: "invalid",
-					},
-				},
-			},
-			wantError: true,
-		},
-		{
-			name: "should return error if invalid GrantType value is provided in subscription",
-			givenSubscription: &eventingv1alpha2.Subscription{
-				Spec: eventingv1alpha2.SubscriptionSpec{
-					Config: map[string]string{
-						eventingv1alpha2.WebhookAuthType:      "oauth2",
-						eventingv1alpha2.WebhookAuthGrantType: "invalid",
-					},
-				},
-			},
-			wantError: true,
-		},
 	}
 
 	// execute test cases
@@ -362,15 +288,10 @@ func Test_getEventMeshWebhookAuth(t *testing.T) {
 			webhookAuth, err := getEventMeshWebhookAuth(tc.givenSubscription, defaultWebhookAuth)
 
 			// then
-			if tc.wantError {
-				require.Error(t, err)
-			} else {
-				require.NoError(t, err)
-				require.Equal(t, tc.wantWebhook, webhookAuth)
-			}
+			require.NoError(t, err)
+			require.Equal(t, tc.wantWebhook, webhookAuth)
 		})
 	}
-
 }
 
 func TestGetCleanedEventMeshSubscription(t *testing.T) {
@@ -636,7 +557,6 @@ func TestIsEventMeshSubModified(t *testing.T) {
 		// when
 		g.Expect(err).ShouldNot(HaveOccurred())
 		g.Expect(result).To(Equal(test.output))
-
 	}
 }
 

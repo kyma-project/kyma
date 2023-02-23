@@ -23,11 +23,11 @@ global:
   images:
     loki:
       name: loki
-      version: 2.2.1-cf0a130c
+      version: 2.2.1-791da1af
       directory: tpi
     alpine:
       name: "alpine"
-      version: "3.16.0"
+      version: "3.17.2"
       directory: "external"
   kymaRuntime:
     adminGroup: runtimeAdmin

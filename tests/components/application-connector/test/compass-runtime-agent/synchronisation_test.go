@@ -2,12 +2,11 @@ package compass_runtime_agent
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
-	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
-	k8sErr "k8s.io/apimachinery/pkg/api/errors"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apis/applicationconnector/v1alpha1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/executor"
@@ -16,7 +15,7 @@ import (
 
 const checkAppExistsPeriod = 10 * time.Second
 const appCreationTimeout = 2 * time.Minute
-const appUpdateTimeout = 3 * time.Minute
+const appUpdateTimeout = 2 * time.Minute
 
 const updatedDescription = "The app was updated"
 
@@ -27,7 +26,10 @@ type ApplicationReader interface {
 func (cs *CompassRuntimeAgentSuite) TestApplication() {
 	expectedAppName := "app1"
 	updatedAppName := "app1-updated"
+
 	compassAppName := expectedAppName + random.RandomString(10)
+
+	correctState := false
 
 	//Create Application in Director
 	applicationID, err := cs.directorClient.RegisterApplication(compassAppName, "Test Application for testing Compass Runtime Agent")
@@ -44,13 +46,21 @@ func (cs *CompassRuntimeAgentSuite) TestApplication() {
 	cs.Run("Compass Runtime Agent should create Application", func() {
 		err = cs.appComparator.Compare(cs.T(), expectedAppName, synchronizedCompassAppName)
 		cs.NoError(err)
+
+		correctState = err == nil
 	})
 
 	cs.Run("Update app", func() {
-		_ = cs.updateAndWaitForCompare(applicationInterface, synchronizedCompassAppName, applicationID, updatedAppName)
+		if !correctState {
+			cs.T().Skip("App not in correct state")
+		}
+
+		_ = cs.updateAndWait(applicationInterface, synchronizedCompassAppName, applicationID)
 
 		err = cs.appComparator.Compare(cs.T(), updatedAppName, synchronizedCompassAppName)
 		cs.NoError(err)
+
+		correctState = err == nil
 	})
 
 	// Clean up
@@ -60,7 +70,7 @@ func (cs *CompassRuntimeAgentSuite) TestApplication() {
 	})
 }
 
-func (cs *CompassRuntimeAgentSuite) updateAndWaitForCompare(appReader ApplicationReader, compassAppName, applicationID, updatedName string) error {
+func (cs *CompassRuntimeAgentSuite) updateAndWait(appReader ApplicationReader, compassAppName, applicationID string) error {
 	t := cs.T()
 	t.Helper()
 
@@ -127,12 +137,12 @@ func (cs *CompassRuntimeAgentSuite) removeApplicationAndWaitForSync(appReader Ap
 
 	verify := func() bool {
 		_, err := appReader.Get(context.Background(), compassAppName, v1.GetOptions{})
+		if errors.IsNotFound(err) {
+			t.Logf("Application was successfully removed by Compass Runtime Agent: %v", err)
+			return true
+		}
+
 		if err != nil {
-			var statusErr *k8sErr.StatusError
-			if errors.As(err, &statusErr) && statusErr.Status().Reason == v1.StatusReasonNotFound {
-				t.Logf("Application was successfully removed by Compass Runtime Agent: %v", err)
-				return true
-			}
 			t.Logf("Failed to check whether Application was removed by Compass Runtime Agent: %v", err)
 		}
 

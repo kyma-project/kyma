@@ -33,7 +33,7 @@ var (
 )
 
 // ConvertRuntimeObjToSubscriptionV1alpha1 converts a runtime.Object to a v1alpha1 version of Subscription object
-// by converting to unstructured in between
+// by converting to unstructured in between.
 func ConvertRuntimeObjToSubscriptionV1alpha1(sObj runtime.Object) (*eventingv1alpha1.Subscription, error) {
 	sub := &eventingv1alpha1.Subscription{}
 	if subUnstructured, ok := sObj.(*unstructured.Unstructured); ok {
@@ -45,7 +45,8 @@ func ConvertRuntimeObjToSubscriptionV1alpha1(sObj runtime.Object) (*eventingv1al
 	return sub, nil
 }
 
-// ConvertRuntimeObjToSubscription converts a runtime.Object to a Subscription object by converting to unstructured in between
+// ConvertRuntimeObjToSubscription converts a runtime.Object to a Subscription object
+// by converting to unstructured in between.
 func ConvertRuntimeObjToSubscription(sObj runtime.Object) (*eventingv1alpha2.Subscription, error) {
 	sub := &eventingv1alpha2.Subscription{}
 	if subUnstructured, ok := sObj.(*unstructured.Unstructured); ok {
@@ -57,7 +58,7 @@ func ConvertRuntimeObjToSubscription(sObj runtime.Object) (*eventingv1alpha2.Sub
 	return sub, nil
 }
 
-// GenerateSubscriptionInfFactory generates DynamicSharedInformerFactory for Subscription
+// GenerateSubscriptionInfFactory generates DynamicSharedInformerFactory for Subscription.
 func GenerateSubscriptionInfFactory(k8sConfig *rest.Config, enableNewCrd bool) dynamicinformer.DynamicSharedInformerFactory {
 	subDynamicClient := dynamic.NewForConfigOrDie(k8sConfig)
 	dFilteredSharedInfFactory := dynamicinformer.NewFilteredDynamicSharedInformerFactory(subDynamicClient,
@@ -73,7 +74,7 @@ func GenerateSubscriptionInfFactory(k8sConfig *rest.Config, enableNewCrd bool) d
 	return dFilteredSharedInfFactory
 }
 
-// ConvertEventsMapToSlice converts a map of Events to a slice of Events
+// ConvertEventsMapToSlice converts a map of Events to a slice of Events.
 func ConvertEventsMapToSlice(eventsMap map[Event]bool) []Event {
 	result := make([]Event, 0)
 	for k := range eventsMap {
@@ -82,7 +83,7 @@ func ConvertEventsMapToSlice(eventsMap map[Event]bool) []Event {
 	return result
 }
 
-// AddUniqueEventsToResult returns a map of unique Events which also contains the events eventsSubSet
+// AddUniqueEventsToResult returns a map of unique Events which also contains the events eventsSubSet.
 func AddUniqueEventsToResult(eventsSubSet []Event, uniqEvents map[Event]bool) map[Event]bool {
 	if len(uniqEvents) == 0 {
 		uniqEvents = make(map[Event]bool)
@@ -97,7 +98,7 @@ func AddUniqueEventsToResult(eventsSubSet []Event, uniqEvents map[Event]bool) ma
 
 // FilterEventTypeVersions returns a slice of Events:
 // if the event source matches the appName for typeMatching standard
-// if the <eventTypePrefix>.<appName> is present in the eventType for typeMatching exact
+// if the <eventTypePrefix>.<appName> is present in the eventType for typeMatching exact.
 func FilterEventTypeVersions(eventTypePrefix, appName string, subscription *eventingv1alpha2.Subscription) []Event {
 	events := make([]Event, 0)
 	prefixAndAppName := fmt.Sprintf("%s.%s.", eventTypePrefix, appName)
@@ -121,7 +122,7 @@ func FilterEventTypeVersions(eventTypePrefix, appName string, subscription *even
 	return events
 }
 
-// it receives event and type version, e.g. order.created.v1 and returns {Name: order.created, Version: v1}
+// it receives event and type version, e.g. order.created.v1 and returns `{Name: order.created, Version: v1}`.
 func buildEvent(eventTypeAndVersion string) Event {
 	lastDotIndex := strings.LastIndex(eventTypeAndVersion, ".")
 	eventName := eventTypeAndVersion[:lastDotIndex]
@@ -135,7 +136,7 @@ func buildEvent(eventTypeAndVersion string) Event {
 // FilterEventTypeVersionsV1alpha1 returns a slice of Events for v1alpha1 version of Subscription resource:
 // 1. if the eventType matches the format: <eventTypePrefix><appName>.<event-name>.<version>
 // E.g. sap.kyma.custom.varkes.order.created.v0
-// 2. if the eventSource matches BEBNamespace name
+// 2. if the eventSource matches BEBNamespace name.
 func FilterEventTypeVersionsV1alpha1(eventTypePrefix, bebNs, appName string, filters *eventingv1alpha1.BEBFilters) []Event {
 	events := make([]Event, 0)
 	if filters == nil {
@@ -146,43 +147,46 @@ func FilterEventTypeVersionsV1alpha1(eventTypePrefix, bebNs, appName string, fil
 			continue
 		}
 
-		var prefix string
-		if len(strings.TrimSpace(eventTypePrefix)) == 0 {
-			prefix = strings.ToLower(fmt.Sprintf("%s.", appName))
-		} else {
-			prefix = strings.ToLower(fmt.Sprintf("%s.%s.", eventTypePrefix, appName))
+		prefix := preparePrefix(eventTypePrefix, appName)
+
+		if filter.EventSource == nil || filter.EventType == nil {
+			continue
 		}
 
-		if filter.EventSource != nil && filter.EventType != nil {
-			// TODO revisit the filtration logic as part of https://github.com/kyma-project/kyma/issues/10761
+		// TODO revisit the filtration logic as part of https://github.com/kyma-project/kyma/issues/10761
 
-			// filter by event-source if exists
-			if len(strings.TrimSpace(filter.EventSource.Value)) > 0 && !strings.EqualFold(filter.EventSource.Value, bebNs) {
-				continue
-			}
-
-			if strings.HasPrefix(filter.EventType.Value, prefix) {
-				eventTypeVersion := strings.ReplaceAll(filter.EventType.Value, prefix, "")
-				eventTypeVersionArr := strings.Split(eventTypeVersion, ".")
-				version := eventTypeVersionArr[len(eventTypeVersionArr)-1]
-				eventType := ""
-				for i, part := range eventTypeVersionArr {
-					if i == 0 {
-						eventType = part
-						continue
-					}
-					// Adding the segments till last but 1 as the last one is the version
-					if i < (len(eventTypeVersionArr) - 1) {
-						eventType = fmt.Sprintf("%s.%s", eventType, part)
-					}
-				}
-				event := Event{
-					Name:    eventType,
-					Version: version,
-				}
-				events = append(events, event)
-			}
+		// filter by event-source if exists
+		if len(strings.TrimSpace(filter.EventSource.Value)) > 0 && !strings.EqualFold(filter.EventSource.Value, bebNs) {
+			continue
 		}
+
+		if !strings.HasPrefix(filter.EventType.Value, prefix) {
+			continue
+		}
+
+		// remove the prefix
+		eventTypeVersion := strings.TrimPrefix(filter.EventType.Value, prefix)
+
+		eventTypeVersionArr := strings.Split(eventTypeVersion, ".")
+
+		// join all segments except the last to form the eventType
+		eventType := strings.Join(eventTypeVersionArr[:len(eventTypeVersionArr)-1], ".")
+
+		// the last segment is the version
+		version := eventTypeVersionArr[len(eventTypeVersionArr)-1]
+
+		event := Event{
+			Name:    eventType,
+			Version: version,
+		}
+		events = append(events, event)
 	}
 	return events
+}
+
+func preparePrefix(eventTypePrefix string, appName string) string {
+	if len(strings.TrimSpace(eventTypePrefix)) == 0 {
+		return strings.ToLower(fmt.Sprintf("%s.", appName))
+	}
+	return strings.ToLower(fmt.Sprintf("%s.%s.", eventTypePrefix, appName))
 }
