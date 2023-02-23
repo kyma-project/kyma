@@ -103,11 +103,23 @@ app.all("*", (req, res) => {
                 if(status){
                     res.status(status);
                 } 
-                res.send(body);
+                switch (typeof body) {
+                    case 'string':
+                        res.end(body);
+                        break;
+                    case 'object':
+                        res.json(body);
+                        break;
+                    case 'undefined':
+                        res.end();
+                        break;
+                    default:
+                        res.end(JSON.stringify(result));
+                }
             } else if(status){
                 res.sendStatus(status);
             } else {
-                res.send();
+                res.end();
             }
         };
 

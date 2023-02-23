@@ -17,7 +17,7 @@ const {
   skrInstanceId,
   backendK8sSecretName,
   backendK8sSecretNamespace,
-  streamDataConfigMapName,
+  testDataConfigMapName,
   eventingNatsSvcName,
   eventingNatsApiRuleAName,
   getJetStreamStreamData,
@@ -27,6 +27,13 @@ const {
   director,
   shootName,
   cleanupTestingResources,
+  eventingSinkName,
+  getClusterHost,
+  checkFunctionReachable,
+  deployEventingSinkFunction,
+  waitForEventingSinkFunction,
+  deployV1Alpha1Subscriptions,
+  deployV1Alpha2Subscriptions,
 } = require('./utils');
 const {
   eventMeshSecretFilePath,
@@ -52,10 +59,22 @@ const {
   scenarioExistsInCompass,
   isRuntimeAssignedToScenario,
 } = require('../compass');
+const {expect} = require('chai');
 
 describe('Eventing tests preparation', function() {
+  let natsApiRuleVSHost;
+
   this.timeout(timeoutTime);
   this.slow(slowTime);
+
+  before(async () => {
+    debug('expose the eventing-nats service with an apirule');
+    const vs = await createApiRuleForService(eventingNatsApiRuleAName,
+        kymaSystem,
+        eventingNatsSvcName,
+        8222);
+    natsApiRuleVSHost = vs.spec.hosts[0];
+  });
 
   it('Print test initial configs', async function() {
     debug(`Mock namespace: ${mockNamespace}`);
@@ -110,21 +129,16 @@ describe('Eventing tests preparation', function() {
   it('Prepare JetStream data configmap', async function() {
     // Create a configmap that contains stream data for jetstream so that during the test,
     // we can verify that the stream was not affected/recreated
-    debug('expose the eventing-nats service with an apirule');
-    const vs = await createApiRuleForService(eventingNatsApiRuleAName,
-        kymaSystem,
-        eventingNatsSvcName,
-        8222);
-    const vsHost = vs.spec.hosts[0];
-
-    debug('Creating configmap with JetStream stream info');
-    const streamInfo = await getJetStreamStreamData(vsHost);
-    await createK8sConfigMap(
-        streamInfo,
-        streamDataConfigMapName,
-    );
-
-    await deleteApiRule(eventingNatsApiRuleAName, kymaSystem);
+    debug('Creating eventing test data configmap with JetStream stream info');
+    const streamInfo = await getJetStreamStreamData(natsApiRuleVSHost);
+    if (streamInfo) {
+      await createK8sConfigMap(
+          streamInfo,
+          testDataConfigMapName,
+      );
+    } else {
+      debug('Skipping creating eventing test data configmap due to missing stream');
+    }
   });
 
   it('Prepare assets without Compass flow', async function() {
@@ -147,11 +161,41 @@ describe('Eventing tests preparation', function() {
     await prepareAssetsWithCompassFlow();
   });
 
+  it('Prepare eventing-sink function', async function() {
+    debug('Preparing EventingSinkFunction');
+    await deployEventingSinkFunction();
+    await waitForEventingSinkFunction();
+  });
+
+  it('Eventing-sink function should be reachable through API Rule', async function() {
+    this.test.retries(5);
+
+    const host = await getClusterHost(eventingSinkName, testNamespace);
+    expect(host).to.not.empty;
+    debug('host fetched, now checking if eventing-sink function is reachable...');
+    await checkFunctionReachable(eventingSinkName, testNamespace, host);
+  });
+
+  it('Prepare v1alpha1 subscriptions', async function() {
+    await deployV1Alpha1Subscriptions();
+  });
+
+  it('Prepare v1alpha2 subscriptions', async function() {
+    if (!testSubscriptionV1Alpha2) {
+      this.skip();
+    }
+    await deployV1Alpha2Subscriptions();
+  });
+
   afterEach(async function() {
     // if the test preparation failed, perform the cleanup
     if (this.currentTest.state === 'failed') {
       await cleanupTestingResources();
     }
+  });
+
+  after(async () => {
+    await deleteApiRule(eventingNatsApiRuleAName, kymaSystem);
   });
 
   // // **** Helper functions ****

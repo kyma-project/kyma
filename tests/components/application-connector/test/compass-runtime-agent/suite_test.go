@@ -111,7 +111,7 @@ func (cs *CompassRuntimeAgentSuite) initCompassRuntimeAgentConfigurator() {
 		initcra.NewCertificateSecretConfigurator(cs.coreClientSet),
 		initcra.NewConfigurationSecretConfigurator(cs.coreClientSet),
 		initcra.NewCompassConnectionCRConfiguration(cs.compassConnectionClientSet.CompassV1alpha1().CompassConnections()),
-		initcra.NewDeploymentConfiguration(cs.coreClientSet, "compass-runtime-agent", cs.testConfig.CompassSystemNamespace),
+		initcra.NewDeploymentConfiguration(cs.coreClientSet, "compass-runtime-agent", cs.testConfig.CompassNamespace),
 		cs.testConfig.OAuthCredentialsNamespace)
 }
 

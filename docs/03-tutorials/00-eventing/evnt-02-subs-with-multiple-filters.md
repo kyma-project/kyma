@@ -21,17 +21,19 @@ To subscribe to multiple events, you need a [Subscription](../../05-technical-re
   Kyma Dashboard
   </summary>
 
-1. In Kyma Dashboard, go to the view of your Function `lastorder`.
-2. Go to **Configuration** > **Create Subscription+**.
-3. Switch to the **Advanced** tab, and name the Subscription `lastorder-sub`.
-4. Add a second Filter using **Filters** > **Add Filter +**.
-5. Provide the `Event type` under `Filter 1` as `sap.kyma.custom.myapp.order.received.v1`. Leave the `Event source` as empty.
-6. Provide the `Event type` under `Filter 2` as `sap.kyma.custom.myapp.order.changed.v1`. Leave the `Event source` as empty.
+1. Go to **Namespaces** and select the default Namespace.
+2. Go to **Configuration** > **Subscriptions** and click **Create Subscription+**.
+3. Provide the following parameters:
+   - **Subscription name**: `lastorder-sub`
+   - **Types**: `order.received.v1` and `order.changed.v1`
+   - **Service**: `lastorder` (The sink field will be populated automatically.)
+   - **Type matching:**: `standard`
+   - **Source**: `myapp`
 
-   > **NOTE:** You can add more filters to your subscription if you want to subscribe to more event types.
+   > **NOTE:** You can add more types to your subscription if you want to subscribe to more event types.
 
-7. Click **Create**.
-8. Wait a few seconds for the Subscription to have status `READY`.
+4. Click **Create**.
+5. Wait a few seconds for the Subscription to have status `READY`.
 
   </details>
   <details>
@@ -42,31 +44,17 @@ To subscribe to multiple events, you need a [Subscription](../../05-technical-re
 Run:
 ```bash
 cat <<EOF | kubectl apply -f -
-    apiVersion: eventing.kyma-project.io/v1alpha1
+    apiVersion: eventing.kyma-project.io/v1alpha2
     kind: Subscription
     metadata:
       name: lastorder-sub
       namespace: default
     spec:
       sink: 'http://lastorder.default.svc.cluster.local'
-      filter:
-        filters:
-          - eventSource:
-              property: source
-              type: exact
-              value: ''
-            eventType:
-              property: type
-              type: exact
-              value: sap.kyma.custom.myapp.order.received.v1
-          - eventSource:
-              property: source
-              type: exact
-              value: ''
-            eventType:
-              property: type
-              type: exact
-              value: sap.kyma.custom.myapp.order.changed.v1
+      source: myapp
+      types:
+       - order.received.v1
+       - order.changed.v1
 EOF
 ```
 
@@ -85,7 +73,7 @@ The operation was successful if the returned status says `true`.
 You created the `lastorder` Function, and subscribed to the `order.received.v1` and `order.changed.v1` events by creating a Subscription CR. Now it's time to publish the events and trigger the Function.
 In the following example, you port-forward the [Event Publisher Proxy](../../05-technical-reference/00-architecture/evnt-01-architecture.md) Service to localhost.
 
-1. Port-forward the Event Publisher Proxy](../../05-technical-reference/00-architecture/evnt-01-architecture.md) Service to localhost, using port `3000`. Run:
+1. Port-forward the [Event Publisher Proxy](../../05-technical-reference/00-architecture/evnt-01-architecture.md) Service to localhost, using port `3000`. Run:
    ```bash
    kubectl -n kyma-system port-forward service/eventing-event-publisher-proxy 3000:80
    ```
@@ -99,7 +87,7 @@ In the following example, you port-forward the [Event Publisher Proxy](../../05-
     
        ```bash
        cloudevents send http://localhost:3000/publish \
-          --type sap.kyma.custom.myapp.order.received.v1 \
+          --type order.received.v1 \
           --id cc99dcdd-6f6d-43d6-afef-d024eb276584 \
           --source myapp \
           --datacontenttype application/json \
@@ -116,7 +104,7 @@ In the following example, you port-forward the [Event Publisher Proxy](../../05-
        ```bash
        curl -v -X POST \
             -H "ce-specversion: 1.0" \
-            -H "ce-type: sap.kyma.custom.myapp.order.received.v1" \
+            -H "ce-type: order.received.v1" \
             -H "ce-source: myapp" \
             -H "ce-eventtypeversion: v1" \
             -H "ce-id: cc99dcdd-6f6d-43d6-afef-d024eb276584" \
@@ -137,7 +125,7 @@ In the following example, you port-forward the [Event Publisher Proxy](../../05-
     
        ```bash
        cloudevents send http://localhost:3000/publish \
-          --type sap.kyma.custom.myapp.order.changed.v1 \
+          --type order.changed.v1 \
           --id 94064655-7e9e-4795-97a3-81bfd497aac6 \
           --source myapp \
           --datacontenttype application/json \
@@ -154,7 +142,7 @@ In the following example, you port-forward the [Event Publisher Proxy](../../05-
        ```bash
        curl -v -X POST \
             -H "ce-specversion: 1.0" \
-            -H "ce-type: sap.kyma.custom.myapp.order.changed.v1" \
+            -H "ce-type: order.changed.v1" \
             -H "ce-source: myapp" \
             -H "ce-eventtypeversion: v1" \
             -H "ce-id: 94064655-7e9e-4795-97a3-81bfd497aac6" \

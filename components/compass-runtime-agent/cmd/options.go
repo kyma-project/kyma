@@ -15,24 +15,26 @@ const (
 )
 
 type Config struct {
-	AgentConfigurationSecret     string        `envconfig:"default=compass-system/compass-agent-configuration"`
-	ControllerSyncPeriod         time.Duration `envconfig:"default=20s"`
-	MinimalCompassSyncTime       time.Duration `envconfig:"default=10s"`
-	CertValidityRenewalThreshold float64       `envconfig:"default=0.3"`
-	ClusterCertificatesSecret    string        `envconfig:"default=compass-system/cluster-client-certificates"`
-	CaCertificatesSecret         string        `envconfig:"default=istio-system/ca-certificates"`
-	SkipCompassTLSVerify         bool          `envconfig:"default=false"`
-	GatewayPort                  int           `envconfig:"default=8080"`
-	SkipAppsTLSVerify            bool          `envconfig:"default=false"`
-	CentralGatewayServiceUrl     string        `envconfig:"default=http://central-application-gateway.kyma-system.svc.cluster.local:8082"`
-	QueryLogging                 bool          `envconfig:"default=false"`
-	DirectorProxy                director.ProxyConfig
-	MetricsLoggingTimeInterval   time.Duration `envconfig:"default=30m"`
-	HealthPort                   string        `envconfig:"default=8090"`
-	IntegrationNamespace         string        `envconfig:"default=kyma-system"`
-	CaCertSecretToMigrate        string        `envconfig:"default=''"`
-	CaCertSecretKeysToMigrate    string        `envconfig:"default='cacert'"`
-	Runtime                      director.RuntimeURLsConfig
+	AgentConfigurationSecret           string        `envconfig:"default=kyma-system/compass-agent-configuration"`
+	ControllerSyncPeriod               time.Duration `envconfig:"default=20s"`
+	MinimalCompassSyncTime             time.Duration `envconfig:"default=10s"`
+	CertValidityRenewalThreshold       float64       `envconfig:"default=0.3"`
+	ClusterCertificatesSecret          string        `envconfig:"default=kyma-system/cluster-client-certificates"`
+	CaCertificatesSecret               string        `envconfig:"default=istio-system/ca-certificates"`
+	SkipCompassTLSVerify               bool          `envconfig:"default=false"`
+	GatewayPort                        int           `envconfig:"default=8080"`
+	SkipAppsTLSVerify                  bool          `envconfig:"default=false"`
+	CentralGatewayServiceUrl           string        `envconfig:"default=http://central-application-gateway.kyma-system.svc.cluster.local:8082"`
+	QueryLogging                       bool          `envconfig:"default=false"`
+	DirectorProxy                      director.ProxyConfig
+	MetricsLoggingTimeInterval         time.Duration `envconfig:"default=30m"`
+	HealthPort                         string        `envconfig:"default=8090"`
+	IntegrationNamespace               string        `envconfig:"default=kyma-system"`
+	CaCertSecretToMigrate              string        `envconfig:"optional"`
+	CaCertSecretKeysToMigrate          string        `envconfig:"default='cacert'"`
+	ClusterCertificatesSecretToMigrate string        `envconfig:"optional"`
+	AgentConfigurationSecretToMigrate  string        `envconfig:"optional"`
+	Runtime                            director.RuntimeURLsConfig
 }
 
 func (o *Config) String() string {
@@ -42,8 +44,9 @@ func (o *Config) String() string {
 		"SkipCompassTLSVerify=%v, GatewayPort=%d,"+
 		"SkipAppTLSVerify=%v, "+
 		"QueryLogging=%v, MetricsLoggingTimeInterval=%s, "+
-		"RuntimeEventsURL=%s, RuntimeConsoleURL=%s"+
-		"DirectorProxyPort=%v,  DirectorProxyInsecureSkipVerify=%v, HealthPort=%s, IntegrationNamespace=%s, CaCertSecretToMigrate=%s, caCertificateSecretKeysToMigrate=%s"+
+		"RuntimeEventsURL=%s, RuntimeConsoleURL=%s, "+
+		"DirectorProxyPort=%v,  DirectorProxyInsecureSkipVerify=%v, HealthPort=%s, IntegrationNamespace=%s, CaCertSecretToMigrate=%s, caCertificateSecretKeysToMigrate=%s, "+
+		"ClusterCertificatesSecretToMigrate=%s, AgentConfigurationSecretToMigrate=%s, "+
 		"CentralGatewayServiceUrl=%v",
 		o.AgentConfigurationSecret,
 		o.ControllerSyncPeriod.String(), o.MinimalCompassSyncTime.String(),
@@ -53,6 +56,7 @@ func (o *Config) String() string {
 		o.QueryLogging, o.MetricsLoggingTimeInterval,
 		o.Runtime.EventsURL, o.Runtime.ConsoleURL,
 		o.DirectorProxy.Port, o.DirectorProxy.InsecureSkipVerify, o.HealthPort, o.IntegrationNamespace, o.CaCertSecretToMigrate, o.CaCertSecretKeysToMigrate,
+		o.ClusterCertificatesSecretToMigrate, o.AgentConfigurationSecretToMigrate,
 		o.CentralGatewayServiceUrl)
 }
 
