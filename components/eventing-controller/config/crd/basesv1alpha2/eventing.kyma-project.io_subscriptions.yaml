@@ -41,7 +41,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: SubscriptionSpec defines the desired state of Subscription
+            description: SubscriptionSpec defines the desired state of Subscription.
             properties:
               config:
                 additionalProperties:

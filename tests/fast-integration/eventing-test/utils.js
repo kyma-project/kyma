@@ -39,7 +39,7 @@ const isSKR = process.env.KYMA_TYPE === 'SKR';
 const skrInstanceId = process.env.INSTANCE_ID || '';
 const testCompassFlow = process.env.TEST_COMPASS_FLOW || false;
 const testSubscriptionV1Alpha2 = process.env.ENABLE_SUBSCRIPTION_V1_ALPHA2 === 'true';
-const subCRDVersion = testSubscriptionV1Alpha2? 'v1alpha2': 'v1alpha1';
+const subCRDVersion = testSubscriptionV1Alpha2 ? 'v1alpha2' : 'v1alpha1';
 const skipResourceCleanup = process.env.SKIP_CLEANUP || false;
 const suffix = getSuffix(isSKR, testCompassFlow);
 const appName = `app-${suffix}`;
