@@ -3,7 +3,7 @@ const {
   eventTypeOrderReceivedHash,
   cleanCompassResourcesSKR,
   generateTraceParentHeader,
-  checkTrace,
+  checkTrace, orderReceivedSubName,
 } = require('../test/fixtures/commerce-mock');
 
 const {
@@ -22,7 +22,7 @@ const {
   waitForSubscription,
   eventingSubscriptionV1Alpha2,
   convertAxiosError,
-  sleep,
+  sleep, getConfigMap, createK8sConfigMap,
 } = require('../utils');
 
 const {DirectorClient, DirectorConfig, getAlreadyAssignedScenarios} = require('../compass');
@@ -41,6 +41,7 @@ const kymaStreamName = 'sap';
 const isSKR = process.env.KYMA_TYPE === 'SKR';
 const skrInstanceId = process.env.INSTANCE_ID || '';
 const testCompassFlow = process.env.TEST_COMPASS_FLOW || false;
+const isEventingUpgradeTest = process.env.IS_EVENTING_UPGRADE_TEST === 'true';
 const testSubscriptionV1Alpha2 = process.env.ENABLE_SUBSCRIPTION_V1_ALPHA2 === 'true';
 const subCRDVersion = testSubscriptionV1Alpha2 ? 'v1alpha2' : 'v1alpha1';
 const skipResourceCleanup = process.env.SKIP_CLEANUP || false;
@@ -156,17 +157,15 @@ async function getNatsPods() {
   return await listPods(labelSelector, 'kyma-system');
 }
 
-async function getJetStreamStreamData(host) {
+async function getJetStreamStreamData(host, streamName) {
   const responseJson = await retryPromise(async () => await axios.get(`https://${host}/jsz?streams=true`), 5, 1000);
   const streams = responseJson.data.account_details[0].stream_detail;
   for (const stream of streams) {
-    if (stream.name === kymaStreamName) {
-      return {
-        streamName: kymaStreamName,
-        streamCreationTime: stream.created,
-      };
+    if (stream.name === streamName) {
+      return stream;
     }
   }
+  return undefined;
 }
 
 async function getSubscriptionConsumerName(subscriptionName, namespace='default', crdVersion='v1alpha1') {
@@ -183,14 +182,12 @@ async function getSubscriptionConsumerName(subscriptionName, namespace='default'
 async function getJetStreamConsumerData(consumerName, host) {
   const responseJson = await retryPromise(async () => await axios.get(`https://${host}/jsz?consumers=true`), 5, 1000);
   const consumers = responseJson.data.account_details[0].stream_detail[0].consumer_detail;
-  for (const con of consumers) {
-    if (con.name === consumerName) {
-      return {
-        consumerName: con.name,
-        consumerCreationTime: con.created,
-      };
+  for (const consumer of consumers) {
+    if (consumer.name === consumerName) {
+      return consumer;
     }
   }
+  return undefined;
 }
 
 function isStreamCreationTimeMissing(streamData) {
@@ -540,6 +537,60 @@ function createLegacyEventRequestBody(proxyHost, eventId, eventType, eventSource
   return reqBody;
 }
 
+async function getConfigMapWithRetries(name, namespace, retriesLeft = 10) {
+  return retryPromise(async () => {
+    try {
+      return await getConfigMap(testDataConfigMapName);
+    } catch (err) {
+      if (err.statusCode === 404) {
+        return undefined;
+      }
+      throw err;
+    }
+  }, retriesLeft, 1000);
+}
+
+async function saveJetStreamDataForRecreateTest(host, configMapName) {
+  debug('Fetching stream details from NATS server...')
+  const streamData = await getJetStreamStreamData(host, kymaStreamName)
+  expect(streamData).to.not.be.undefined;
+
+  const subscriptionName = 'fi-test-sub-v2-0';
+  debug(`Fetching consumer name from Kyma Subscription (name: ${subscriptionName}) CR status...`);
+  const conName = await getSubscriptionConsumerName(subscriptionName, testNamespace, subCRDVersion);
+  expect(conName).to.not.be.empty;
+
+  debug(`Fetching consumer (name: ${conName}) details from NATS server...`);
+  const consumerInfo = await getJetStreamConsumerData(conName, host);
+  expect(consumerInfo).to.not.be.undefined;
+
+  const cmData = {
+    stream: streamData,
+    consumers: [consumerInfo],
+  };
+
+  debug(`Saving fetched stream and consumers details in configMap (name: ${configMapName})...`);
+  await createK8sConfigMap(cmData, configMapName);
+}
+
+async function checkStreamNotReCreated(host, configMapData) {
+  debug('Fetching latest stream details from NATS server...')
+  const streamData = await getJetStreamStreamData(host, kymaStreamName)
+  expect(streamData).to.not.be.undefined;
+
+  const beforeUpgradeCreationTime = configMapData.created;
+  const afterUpgradeCreationTime = streamData.created;
+
+  debug(`Stream creation timestamp: Before Upgrade: ${beforeUpgradeCreationTime}, After Upgrade: ${afterUpgradeCreationTime}`);
+
+  expect(beforeUpgradeCreationTime).to.be.equal(afterUpgradeCreationTime);
+}
+
+async function checkConsumersNotReCreated(host, configMapData) {
+  // consumerName: con.name,
+  //     consumerCreationTime: con.created,
+}
+
 module.exports = {
   appName,
   scenarioName,
@@ -585,4 +636,10 @@ module.exports = {
   waitForV1Alpha1Subscriptions,
   waitForV1Alpha2Subscriptions,
   checkEventTracing,
+  isEventingUpgradeTest,
+  kymaStreamName,
+  saveJetStreamDataForRecreateTest,
+  getConfigMapWithRetries,
+  checkStreamNotReCreated,
+  checkConsumersNotReCreated,
 };

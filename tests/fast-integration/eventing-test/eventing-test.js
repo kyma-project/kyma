@@ -13,7 +13,6 @@ const {
   checkFullyQualifiedTypeWithExactSub,
   waitForSubscriptionsTillReady,
   checkInClusterEventTracing,
-  orderReceivedSubName,
 } = require('../test/fixtures/commerce-mock');
 const {
   getEventingBackend,
@@ -22,12 +21,10 @@ const {
   printAllSubscriptions,
   debug,
   isDebugEnabled,
-  createK8sConfigMap,
   waitForFunction,
   waitForEndpoint,
   waitForPodWithLabelAndCondition,
   createApiRuleForService,
-  getConfigMap,
   deleteApiRule,
 } = require('../utils');
 const {
@@ -44,14 +41,10 @@ const {
   testCompassFlow,
   testSubscriptionV1Alpha2,
   subCRDVersion,
-  isStreamCreationTimeMissing,
-  isConsumerCreationTimeMissing,
   getJetStreamStreamData,
   testDataConfigMapName,
   eventingNatsSvcName,
   eventingNatsApiRuleAName,
-  getSubscriptionConsumerName,
-  getJetStreamConsumerData,
   eventingSinkName,
   v1alpha1SubscriptionsTypes,
   subscriptionsTypes,
@@ -61,6 +54,11 @@ const {
   waitForV1Alpha1Subscriptions,
   waitForV1Alpha2Subscriptions,
   checkEventTracing,
+  isEventingUpgradeTest,
+  saveJetStreamDataForRecreateTest,
+  getConfigMapWithRetries,
+  checkStreamNotReCreated,
+  checkConsumersNotReCreated,
 } = require('./utils');
 const {
   bebBackend,
@@ -73,7 +71,6 @@ const {
   jaegerEndpoint,
 } = require('./common/common');
 const {
-  assert,
   expect,
 } = require('chai');
 const {
@@ -285,10 +282,6 @@ describe('Eventing tests', function() {
     if (isSKR && testCompassFlow) {
       eventingE2ETestSuiteWithCommerceMock(backend);
     }
-
-    if (backend === natsBackend) {
-      testStreamNotReCreated();
-    }
   }
 
   // eventingE2ETestSuiteWithCommerceMock - Runs Eventing end-to-end tests with Compass
@@ -306,79 +299,50 @@ describe('Eventing tests', function() {
     });
   }
 
-  // testStreamNotReCreated - compares the stream creation timestamp before and after upgrade
-  // and if the timestamp is the same, we conclude that the stream is not re-created.
-  function testStreamNotReCreated() {
-    context('stream and consumer check with JetStream backend', function() {
-      let wantStreamName = null;
-      let wantStreamCreationTime = null;
-      let gotStreamData = null;
-      let cm;
-      before('check if stream creation timestamp is available', async function() {
-        try {
-          cm = await getConfigMap(testDataConfigMapName);
-          if (isStreamCreationTimeMissing(cm.data)) {
-            debug('Skipping the stream recreation check as the stream creation timestamp is missing!');
-            this.skip();
-          }
-          wantStreamName = cm.data.streamName;
-          wantStreamCreationTime = cm.data.streamCreationTime;
-        } catch (err) {
-          if (err.statusCode === 404) {
-            debug('Skipping the stream recreation check due to missing eventing test data configmap!');
-            this.skip();
-          } else {
-            throw err;
-          }
+  function jsSaveStreamAndConsumersDataSuite() {
+    context('save stream and consumer data', function() {
+      it('saving JetStream data to test stream and consumers will not be re-created by kyma upgrade', async function() {
+        if (!isEventingUpgradeTest) {
+          debug('Skipping recording stream and consumer data because ENV: IS_EVENTING_UPGRADE_TEST is not set!');
+          this.skip();
+          return;
         }
-      });
 
-      it('Get the current stream creation timestamp', async function() {
-        gotStreamData = await getJetStreamStreamData(natsApiRuleVSHost);
-      });
-
-      it('Compare the stream creation timestamp', async function() {
-        assert.equal(gotStreamData.streamName, wantStreamName);
-        assert.equal(gotStreamData.streamCreationTime, wantStreamCreationTime);
+        debug(`Using NATS host: ${natsApiRuleVSHost}`);
+        await saveJetStreamDataForRecreateTest(natsApiRuleVSHost, testDataConfigMapName);
       });
     });
   }
 
-  // testConsumerNotReCreated - compares the consumer creation timestamp before and after upgrade
+  // jsStreamAndConsumersNotReCreatedTestSuite - compares the stream creation timestamp before and after upgrade
+  // and if the timestamp is the same, we conclude that the stream is not re-created.
+  // It also compares the consumers creation timestamp before and after upgrade
   // and if the timestamp is the same, we conclude that the consumer is not re-created.
-  function testConsumerNotReCreated() {
-    context('consumer check with JetStream backend', function() {
-      let wantConsumerName = null;
-      let wantConsumerCreationTime = null;
-      let gotConsumerData = null;
-      let cm;
-      before('check if consumer creation timestamp is available', async function() {
-        try {
-          cm = await getConfigMap(testDataConfigMapName);
-          if (isConsumerCreationTimeMissing(cm.data)) {
-            debug('Skipping the consumer recreation check as the consumer creation timestamp is missing!');
-            this.skip();
-          }
-          wantConsumerName = cm.data.consumerName;
-          wantConsumerCreationTime = cm.data.consumerCreationTime;
-        } catch (err) {
-          if (err.statusCode === 404) {
-            debug('Skipping the consumer recreation check due to missing eventing test data configmap!');
-            this.skip();
-          } else {
-            throw err;
-          }
+  function jsStreamAndConsumersNotReCreatedTestSuite() {
+    context('stream and consumer not re-created check with NATS backend', function() {
+      let configMapData = null;
+
+      before('fetch eventing-js-test data configMap', async function() {
+        if (!isEventingUpgradeTest) {
+          debug('Skipping stream and consumers not re-created check because ENV: IS_EVENTING_UPGRADE_TEST is not set!');
+          this.skip();
+          return;
         }
+
+        debug(`fetch configMap: ${testDataConfigMapName}...`);
+        let cm = await getConfigMapWithRetries(testDataConfigMapName, testNamespace);
+        expect(cm).to.not.be.undefined;
+        configMapData = cm.data;
       });
 
-      it('Get the current consumer creation timestamp', async function() {
-        const consumerName = await getSubscriptionConsumerName(orderReceivedSubName, testNamespace, subCRDVersion);
-        gotConsumerData = await getJetStreamConsumerData(consumerName, natsApiRuleVSHost);
+      it('upgrade should not have re-created stream', async function() {
+        debug('Verifying that the stream was not re-created by the kyma upgrade...');
+        await checkStreamNotReCreated(natsApiRuleVSHost, configMapData);
       });
 
-      it('Compare the consumer creation timestamp', async function() {
-        assert.equal(gotConsumerData.consumerName, wantConsumerName);
-        assert.equal(gotConsumerData.consumerCreationTime, wantConsumerCreationTime);
+      it('upgrade should not have re-created consumers', async function() {
+        debug('Verifying that the consumers were not re-created by the kyma upgrade...');
+        await checkConsumersNotReCreated(natsApiRuleVSHost, configMapData);
       });
     });
   }
@@ -405,6 +369,7 @@ describe('Eventing tests', function() {
       }
       await switchEventingBackend(backendK8sSecretName, backendK8sSecretNamespace, natsBackend);
     });
+
     it('Wait until subscriptions are ready', async function() {
       await waitForSubscriptionsTillReady(testNamespace);
     });
@@ -415,9 +380,6 @@ describe('Eventing tests', function() {
     // Running Eventing end-to-end tests - deprecated (will be removed)
     eventingTestSuite(natsBackend, isSKR, testCompassFlow);
 
-    // Checking subscription consumers are not recreated
-    testConsumerNotReCreated();
-
     // Running Eventing tracing tests [v2]
     eventingTracingTestSuiteV2(isSKR);
 
@@ -426,6 +388,9 @@ describe('Eventing tests', function() {
 
     // Running Eventing monitoring tests.
     eventingMonitoringTestSuite(natsBackend, isSKR);
+
+    // Running JetStream stream and consumers not re-created by upgrade tests.
+    jsStreamAndConsumersNotReCreatedTestSuite();
   });
 
   context('with BEB backend', function() {
@@ -484,42 +449,9 @@ describe('Eventing tests', function() {
 
     // Running Eventing monitoring tests.
     eventingMonitoringTestSuite(natsBackend, isSKR);
-  });
 
-  // this is record consumer creation time to compare after the Kyma upgrade
-  after('Record order.received.v1 consumer data to ConfigMap', async () => {
-    const currentBackend = await getEventingBackend();
-    if (currentBackend && currentBackend.toLowerCase() !== natsBackend) {
-      debug('Skipping the recording consumer data for non NATS backend!');
-      return;
-    }
-
-    let testDataConfigMap;
-    try {
-      testDataConfigMap = await getConfigMap(testDataConfigMapName);
-    } catch (err) {
-      if (err.statusCode === 404) {
-        debug('Skipping the recording consumer data due to missing configmap!');
-        return;
-      }
-      throw err;
-    }
-
-    debug('Adding JetStream consumer info to eventing test data configmap');
-    const consumerName = await getSubscriptionConsumerName(orderReceivedSubName, testNamespace, subCRDVersion);
-    const consumerInfo = await getJetStreamConsumerData(consumerName, natsApiRuleVSHost);
-    if (consumerInfo) {
-      await createK8sConfigMap(
-          {
-            ...testDataConfigMap.data,
-            ...consumerInfo,
-          },
-          testDataConfigMapName,
-      );
-    } else {
-      throw Error(`Couldn't add consumer info to the eventing data CM due to` +
-          `missing consumer ${consumerName} in NATS JetStream`);
-    }
+    // Record stream and consumer data for Kyma upgrade
+    jsSaveStreamAndConsumersDataSuite();
   });
 
   after('Delete the created APIRule', async function() {
