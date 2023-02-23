@@ -172,7 +172,7 @@ describe('Eventing tests', function() {
         eventSource = getEventMeshNamespace();
       }
       for (let i=0; i < v1alpha1SubscriptionsTypes.length; i++) {
-        await checkEventDelivery(clusterHost, 'binary', v1alpha1SubscriptionsTypes[i], eventSource, true);
+        await checkEventDelivery(clusterHost, 'binary', v1alpha1SubscriptionsTypes[i].type, eventSource, true);
       }
     });
 
@@ -186,7 +186,7 @@ describe('Eventing tests', function() {
         eventSource = getEventMeshNamespace();
       }
       for (let i=0; i < v1alpha1SubscriptionsTypes.length; i++) {
-        await checkEventDelivery(clusterHost, 'structured', v1alpha1SubscriptionsTypes[i], eventSource, true);
+        await checkEventDelivery(clusterHost, 'structured', v1alpha1SubscriptionsTypes[i].type, eventSource, true);
       }
     });
 
@@ -195,7 +195,7 @@ describe('Eventing tests', function() {
         this.skip();
       }
       for (let i=0; i < v1alpha1SubscriptionsTypes.length; i++) {
-        await checkEventDelivery(clusterHost, 'legacy', v1alpha1SubscriptionsTypes[i], 'test', true);
+        await checkEventDelivery(clusterHost, 'legacy', v1alpha1SubscriptionsTypes[i].type, 'test', true);
       }
     });
 

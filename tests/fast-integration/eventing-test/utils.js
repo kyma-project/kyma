@@ -65,22 +65,37 @@ const eventingSinkName = 'eventing-sink';
 
 // ****** Event types to test ***********//
 const v1alpha1SubscriptionsTypes = [
-  'sap.kyma.custom.noapp.order.tested.v1',
-  'sap.kyma.custom.connected-app.order.tested.v1',
-  'sap.kyma.custom.test-app.order-$.second.R-e-c-e-i-v-e-d.v1',
-  'sap.kyma.custom.connected-app2.or-der.crea-ted.one.two.three.v4',
+  {
+    name: 'fi-test-sub-0',
+    type: 'sap.kyma.custom.noapp.order.tested.v1',
+  },
+  {
+    name: 'fi-test-sub-1',
+    type: 'sap.kyma.custom.connected-app.order.tested.v1',
+  },
+  {
+    name: 'fi-test-sub-2',
+    type: 'sap.kyma.custom.test-app.order-$.second.R-e-c-e-i-v-e-d.v1',
+  },
+  {
+    name: 'fi-test-sub-3',
+    type: 'sap.kyma.custom.connected-app2.or-der.crea-ted.one.two.three.v4',
+  },
 ];
 
 const subscriptionsTypes = [
   {
+    name: 'fi-test-sub-v2-0',
     type: 'order.modified.v1',
     source: 'myapp',
   },
   {
+    name: 'fi-test-sub-v2-1',
     type: 'or-der.crea-ted.one.two.three.four.v4',
     source: 'test-app',
   },
   {
+    name: 'fi-test-sub-v2-2',
     type: 'Order-$.third.R-e-c-e-i-v-e-d.v1',
     source: 'test-app',
   },
@@ -233,8 +248,8 @@ async function deployV1Alpha1Subscriptions() {
 
   // creating v1alpha1 subscriptions
   for (let i=0; i < v1alpha1SubscriptionsTypes.length; i++) {
-    const subName = `fi-test-sub-${i}`;
-    const eventType = v1alpha1SubscriptionsTypes[i];
+    const subName = v1alpha1SubscriptionsTypes[i].name;
+    const eventType = v1alpha1SubscriptionsTypes[i].type;
 
     debug(`Creating subscription: ${subName} with type: ${eventType}`);
     await k8sApply([eventingSubscription(eventType, sink, subName, testNamespace)]);
@@ -249,7 +264,7 @@ async function deployV1Alpha2Subscriptions() {
 
   // creating v1alpha2 subscriptions
   for (let i=0; i < subscriptionsTypes.length; i++) {
-    const subName = `fi-test-sub-v2-${i}`;
+    const subName = subscriptionsTypes[i].name;
     const eventType = subscriptionsTypes[i].type;
     const eventSource = subscriptionsTypes[i].source;
 
@@ -264,8 +279,8 @@ async function deployV1Alpha2Subscriptions() {
 async function waitForV1Alpha1Subscriptions() {
   // waiting for v1alpha1 subscriptions
   for (let i=0; i < v1alpha1SubscriptionsTypes.length; i++) {
-    const subName = `fi-test-sub-${i}`;
-    debug(`Waiting for subscription: ${subName} with type: ${v1alpha1SubscriptionsTypes[i]}`);
+    const subName = v1alpha1SubscriptionsTypes[i].name;
+    debug(`Waiting for subscription: ${subName} with type: ${v1alpha1SubscriptionsTypes[i].type}`);
     await waitForSubscription(subName, testNamespace);
   }
 }
@@ -273,7 +288,7 @@ async function waitForV1Alpha1Subscriptions() {
 async function waitForV1Alpha2Subscriptions() {
   // waiting for v1alpha2 subscriptions
   for (let i=0; i < subscriptionsTypes.length; i++) {
-    const subName = `fi-test-sub-v2-${i}`;
+    const subName = subscriptionsTypes[i].name;
     debug(`Waiting for subscription: ${subName} with type: ${subscriptionsTypes[i].type}`);
     await waitForSubscription(subName, testNamespace);
   }
