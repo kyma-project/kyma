@@ -21,8 +21,8 @@ RUN go build -ldflags "-s -w" -a -o jobinit cmd/jobinit/main.go \
     && mkdir /app \
     && mv ./jobinit /app/jobinit
 
-# result container base on alpine:3.16.2
-FROM eu.gcr.io/kyma-project/external/alpine@sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870
+# result container base on alpine:3.17.2
+FROM eu.gcr.io/kyma-project/external/alpine@sha256:e2e16842c9b54d985bf1ef9242a313f36b856181f188de21313820e177002501
 ENV LIBGIT2_VERSION=1.1.0-r2
 
 LABEL source = git@github.com:kyma-project/kyma.git
