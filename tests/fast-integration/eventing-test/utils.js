@@ -1,5 +1,6 @@
 const {
   cleanMockTestFixture,
+  eventTypeOrderReceivedHash,
   cleanCompassResourcesSKR,
   generateTraceParentHeader,
   checkTrace,
@@ -13,6 +14,7 @@ const {
   getShootNameFromK8sServerUrl,
   listPods,
   retryPromise,
+  getSubscription,
   waitForVirtualService,
   k8sApply,
   waitForFunction,
@@ -35,6 +37,7 @@ const {expect} = require('chai');
 
 // Variables
 const kymaVersion = process.env.KYMA_VERSION || '';
+const kymaStreamName = 'sap';
 const isSKR = process.env.KYMA_TYPE === 'SKR';
 const skrInstanceId = process.env.INSTANCE_ID || '';
 const testCompassFlow = process.env.TEST_COMPASS_FLOW || false;
@@ -48,7 +51,7 @@ const testNamespace = `test-${suffix}`;
 const mockNamespace = process.env.MOCK_NAMESPACE || 'mocks';
 const backendK8sSecretName = process.env.BACKEND_SECRET_NAME || 'eventing-backend';
 const backendK8sSecretNamespace = process.env.BACKEND_SECRET_NAMESPACE || 'default';
-const streamDataConfigMapName = 'eventing-stream-info';
+const testDataConfigMapName = 'eventing-test-data';
 const eventingNatsSvcName = 'eventing-nats';
 const eventingNatsApiRuleAName = `${eventingNatsSvcName}-apirule`;
 const timeoutTime = 10 * 60 * 1000;
@@ -120,7 +123,7 @@ async function cleanupTestingResources() {
   }
 
   debug('Removing JetStream data configmap');
-  await deleteK8sConfigMap(streamDataConfigMapName);
+  await deleteK8sConfigMap(testDataConfigMapName);
 
   debug(`Removing ${testNamespace} and ${mockNamespace} namespaces`);
   await cleanMockTestFixture(mockNamespace, testNamespace, true);
@@ -178,13 +181,39 @@ async function getStreamConfigForJetStream() {
 
 async function getJetStreamStreamData(host) {
   const responseJson = await retryPromise(async () => await axios.get(`https://${host}/jsz?streams=true`), 5, 1000);
-  const streamName = responseJson.data.account_details[0].stream_detail[0].name;
-  const streamCreationTime = responseJson.data.account_details[0].stream_detail[0].created;
+  const streams = responseJson.data.account_details[0].stream_detail;
+  for (const stream of streams) {
+    if (stream.name === kymaStreamName) {
+      return {
+        streamName: kymaStreamName,
+        streamCreationTime: stream.created,
+      };
+    }
+  }
+}
 
-  return {
-    streamName: streamName,
-    streamCreationTime: streamCreationTime,
-  };
+async function getSubscriptionConsumerName(subscriptionName, namespace='default', crdVersion='v1alpha1') {
+  if (crdVersion === 'v1alpha1') {
+    // the logic is temporary because consumer name is missing in the v1alpha1 subscription
+    // will be deleted as we will upgrade to v1alpha2
+    return eventTypeOrderReceivedHash;
+  } else {
+    const sub = await getSubscription(subscriptionName, namespace, crdVersion);
+    return sub.status.backend.types[0].consumerName;
+  }
+}
+
+async function getJetStreamConsumerData(consumerName, host) {
+  const responseJson = await retryPromise(async () => await axios.get(`https://${host}/jsz?consumers=true`), 5, 1000);
+  const consumers = responseJson.data.account_details[0].stream_detail[0].consumer_detail;
+  for (const con of consumers) {
+    if (con.name === consumerName) {
+      return {
+        consumerName: con.name,
+        consumerCreationTime: con.created,
+      };
+    }
+  }
 }
 
 function skipAtLeastOnceDeliveryTest() {
@@ -194,6 +223,10 @@ function skipAtLeastOnceDeliveryTest() {
 
 function isStreamCreationTimeMissing(streamData) {
   return streamData.streamCreationTime === undefined;
+}
+
+function isConsumerCreationTimeMissing(streamData) {
+  return streamData.consumerCreationTime === undefined;
 }
 
 async function getClusterHost(apiRuleName, namespace) {
@@ -548,7 +581,7 @@ module.exports = {
   subCRDVersion,
   backendK8sSecretName,
   backendK8sSecretNamespace,
-  streamDataConfigMapName,
+  testDataConfigMapName,
   eventingNatsSvcName,
   eventingNatsApiRuleAName,
   timeoutTime,
@@ -563,9 +596,12 @@ module.exports = {
   getStreamConfigForJetStream,
   skipAtLeastOnceDeliveryTest,
   getJetStreamStreamData,
+  getJetStreamConsumerData,
   isStreamCreationTimeMissing,
+  isConsumerCreationTimeMissing,
   eppInClusterUrl,
   subscriptionNames,
+  getSubscriptionConsumerName,
   eventingSinkName,
   v1alpha1SubscriptionsTypes,
   subscriptionsTypes,
