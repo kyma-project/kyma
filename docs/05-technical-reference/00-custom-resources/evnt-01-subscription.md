@@ -9,30 +9,26 @@ The `subscriptions.eventing.kyma-project.io` CustomResourceDefinition (CRD) is a
 
 ## Sample custom resource
 
-This sample Subscription custom resource (CR) subscribes to an event called `sap.kyma.custom.commerce.order.created.v1`.
+This sample Subscription custom resource (CR) subscribes to an event called `order.created.v1`.
 
-> **WARNING:** Non-alphanumeric characters `[^a-zA-Z0-9]+` are not allowed in event names under the **spec.filter.filters.eventType.value** property. If any are detected, Eventing will remove them. Read [Event names](../evnt-01-event-names.md#event-name-cleanup) for more information.
+> **WARNING:** Prohibited characters in event names under the **spec.types** property, are not supported in some backends. If any are detected, Eventing will remove them. Read [Event names](../evnt-01-event-names.md#event-name-cleanup) for more information.
 
 > **NOTE:** Both the subscriber and the Subscription should exist in the same Namespace.
 
 ```yaml
-apiVersion: eventing.kyma-project.io/v1alpha1
+apiVersion: eventing.kyma-project.io/v1alpha2
 kind: Subscription
 metadata:
   name: test
   namespace: test
 spec:
-  filter:
-    filters:
-    - eventSource:
-        property: source
-        type: exact
-        value: ""
-      eventType:
-        property: type
-        type: exact
-        value: sap.kyma.custom.commerce.order.created.v1
+  typeMatching: standard
+  source: commerce
+  types:
+    - order.created.v1
   sink: http://test.test.svc.cluster.local
+  config:
+    maxInFlightMessages: "10"
 ```
 
 ## Custom resource parameters
@@ -43,21 +39,11 @@ This table lists all the possible parameters of a given resource together with t
 |-------------|:---------:|--------------|
 | **metadata.name** | Yes | Specifies the name of the CR. |
 | **metadata.namespace** | No | Defines the Namespace in which the CR is available. It is set to `default` unless your specify otherwise. |
-| **spec.filter** | Yes | Defines the list of filters. |
-| **spec.filter.dialect** | No | Specifies the preferred Eventing backend. Currently, the capability to switch between Eventing backends is not available. It is set to NATS by default. |
-| **spec.filter.filters** | Yes | Defines the filter element as a combination of two CloudEvent filter elements. |
-| **spec.filter.filters.eventSource** | Yes | The origin from which events are published. |
-| **spec.filter.filters.eventType** | Yes | The type of events used to trigger workloads. |
-| **spec.filter.filters.eventSource.property** | Yes | Must be set to `source`. |
-| **spec.filter.filters.eventSource.type** | No | Must be set to `exact`. |
-| **spec.filter.filters.eventSource.value** | Yes | Must be set to `""` for the NATS backend. |
-| **spec.filter.filters.eventType.property** | Yes | Must be set to `type`. |
-| **spec.filter.filters.eventType.type** | No | Must be set to `exact`. |
-| **spec.filter.filters.eventType.value** | Yes | Name of the event being subscribed to, for example: `sap.kyma.custom.commerce.order.created.v1`. The name cannot contain any non-alphanumeric characters `[^a-zA-Z0-9]+`. Read [Event names](../evnt-01-event-names.md#event-name-cleanup) for more information. |
-| **spec.protocol** | Yes | Must be set to `""`. |
-| **spec.protocolsettings** | Yes | Defines the CloudEvent protocol setting specification implementation. Must be set to `{}`. |
-| **spec.sink** | Yes | Specifies the HTTP endpoint where matching events should be sent to, for example: `test.test.svc.cluster.local`.  |
-| **spec.config.maxInFlightMessages** | No | The maximum idle "in-flight messages" sent by NATS to the sink without waiting for a response. By default, it is set to 10.  |
+| **spec.typeMatching** | No | Defines the matching type (`standard` or `exact`) for event types. When it is set to `exact`, Eventing does not do any kind of modifications to the provided `spec.types` internally. In case of `standard`, Eventing  modifies the types internally to fulfil the backend requirements. It is set to `standard` unless you specify otherwise. |
+| **spec.source** | Yes | The origin from which events are published. |
+| **spec.types** | Yes | Defines the list of event types used to trigger workloads. |
+| **spec.sink** | Yes | Specifies the HTTP endpoint where matching events should be sent to, for example: `test.test.svc.cluster.local`. |
+| **spec.config.maxInFlightMessages** | No | The maximum idle "in-flight messages" sent by NATS to the sink without waiting for a response. By default, it is set to 10. |
 
 ## Related resources and components
 
