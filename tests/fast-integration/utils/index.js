@@ -412,6 +412,25 @@ function waitForFunction(name, namespace = 'default', timeout = 90_000) {
   );
 }
 
+async function getSubscription(name, namespace = 'default', crdVersion='v1alpha1') {
+  try {
+    const path = `/apis/eventing.kyma-project.io/${crdVersion}/namespaces/${namespace}/subscriptions/${name}`;
+    const response = await k8sDynamicApi.requestPromise({
+      url: k8sDynamicApi.basePath + path,
+      qs: {limit: 500},
+    });
+    const body = JSON.parse(response.body);
+    return body;
+  } catch (e) {
+    if (e.statusCode === 404 || e.statusCode === 405) {
+      // do nothing
+    } else {
+      error(e);
+      throw e;
+    }
+  }
+}
+
 async function getAllSubscriptions(namespace = 'default', crdVersion='v1alpha1') {
   try {
     const path = `/apis/eventing.kyma-project.io/${crdVersion}/namespaces/${namespace}/subscriptions`;
@@ -1892,4 +1911,5 @@ module.exports = {
   waitForEndpoint,
   waitForPodWithLabelAndCondition,
   waitForDeploymentWithLabel,
+  getSubscription,
 };

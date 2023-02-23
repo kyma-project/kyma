@@ -90,6 +90,14 @@ spec:
             - name: APP_CA_CERT_SECRET_KEYS_TO_MIGRATE
               value: '{{ .Values.compassRuntimeAgent.certificates.caCertificate.secret.migration.keys | default "[]" | toJson }}'
               {{ end }}
+              {{ if .Values.compassRuntimeAgent.config.secret.migration.enabled }}
+            - name: APP_AGENT_CONFIGURATION_SECRET_TO_MIGRATE
+              value: "{{ .Values.compassRuntimeAgent.config.secret.migration.namespace }}/{{ .Values.compassRuntimeAgent.config.secret.name | default "" }}"
+              {{ end }}
+              {{ if .Values.compassRuntimeAgent.certificates.clientCertificate.secret.migration.enabled }}
+            - name: APP_CLUSTER_CERTIFICATES_SECRET_TO_MIGRATE
+              value: "{{ .Values.compassRuntimeAgent.certificates.clientCertificate.secret.migration.namespace }}/{{ .Values.compassRuntimeAgent.certificates.clientCertificate.secret.name | default "" }}"
+              {{ end }}
             - name: APP_CENTRAL_GATEWAY_SERVICE_URL
               value: {{ .Values.compassRuntimeAgent.resources.centralGatewayServiceUrl | quote }}
           livenessProbe:

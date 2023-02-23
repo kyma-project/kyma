@@ -184,7 +184,7 @@ func TestMigrator(t *testing.T) {
 		secretsRepositoryMock.AssertExpectations(t)
 	})
 
-	t.Run("Should remove source secret when target exists", func(t *testing.T) {
+	t.Run("Should remove source secret and do not modify target secret when it already exists", func(t *testing.T) {
 		// given
 		sourceSecret := types.NamespacedName{Name: "source", Namespace: namespace}
 		targetSecret := types.NamespacedName{Name: "target", Namespace: namespace}

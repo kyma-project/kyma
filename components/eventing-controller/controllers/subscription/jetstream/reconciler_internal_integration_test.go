@@ -720,7 +720,8 @@ func setupTestEnsemble(ctx context.Context, eventTypePrefix string,
 		NatsServer: natsServer,
 		TestEnv: &envtest.Environment{
 			CRDDirectoryPaths: []string{
-				filepath.Join("../../../", "config", "crd", "bases"),
+				filepath.Join("../../../", "config", "crd", "bases", "eventing.kyma-project.io_eventingbackends.yaml"),
+				filepath.Join("../../../", "config", "crd", "basesv1alpha1"),
 				filepath.Join("../../../", "config", "crd", "external"),
 			},
 			AttachControlPlaneOutput: attachControlPlaneOutput,

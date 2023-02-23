@@ -4,32 +4,26 @@ title: Event names
 
 Event names depend on the type of event. Eventing supports the following event types:
 - [CloudEvents](https://cloudevents.io/) - they use a specification for describing event data in a common way.
-- legacy events - they are converted to CloudEvents by [Event Publisher Proxy](./00-architecture/evnt-01-architecture.md#event-publisher-proxy), which also adds a `sap.kyma.custom` prefix.
+- legacy events - they are converted to CloudEvents by [Event Publisher Proxy](./00-architecture/evnt-01-architecture.md#event-publisher-proxy).
 
 ## Event name format
 
-For a Subscription Custom Resource, the fully qualified event name takes the sample form of `sap.kyma.custom.commerce.order.created.v1` or `sap.kyma.custom.commerce.Account.Root.Created.v1`.
+For a Subscription Custom Resource, the fully qualified event name takes the sample form of `order.created.v1` or `Account.Root.Created.v1`.
 
 The event type is composed of the following components:
-- Prefix: `sap.kyma.custom`
-- Application: `commerce`
 - Event: can have two or more segments separated by `.`; for example, `order.created` or `Account.Root.Created`
 - Version: `v1`
 
 For publishers, the event type takes this sample form:
 - `order.created` or `Account.Root.Created` for legacy events coming from the `commerce` application
-- `sap.kyma.custom.commerce.order.created.v1` or `sap.kyma.custom.commerce.Account.Root.Created.v1` for CloudEvents
+- `order.created.v1` or `Account.Root.Created.v1` for CloudEvents
 
 ## Event name cleanup
 
 To conform to Cloud Event specifications, sometimes Eventing must modify the event name before dispatching an event.
 
-### Events with more than two segments
+### Special characters
 
-If the event name contains more than two segments, Eventing combines them into two segments when creating the underlying Eventing infrastructure. For example, `Account.Root.Created` becomes `AccountRoot.Created`.
+If the event name contains any prohibited characters as per [NATS JetStream specifications](https://docs.nats.io/running-a-nats-service/nats_admin/jetstream_admin/naming), the underlying Eventing services use a clean name with allowed characters only; for example, `system>prod*` becomes `systemprod`.
 
-### Non-alphanumeric characters
-
-If the Application name contains any non-alphanumeric character `[^a-zA-Z0-9]+`, the underlying Eventing services use a clean name with alphanumeric characters only `[a-zA-Z0-9]+`; for example, `system-prod` becomes `systemprod`.
-
-This could lead to a naming collision. For example, both `system-prod` and `systemprod` become `systemprod`. While this won't result in an error, it can cause Kyma to not work as expected. Take a look into this [troubleshooting guide](../04-operation-guides/troubleshooting/eventing/evnt-03-type-collision.md) for more information.
+This can lead to a naming collision. For example, both `system>prod` and `systemprod` become `systemprod`. While this doesn't result in an error, it can cause Eventing to not work as expected. Take a look into this [troubleshooting guide](../04-operation-guides/troubleshooting/eventing/evnt-03-type-collision.md) for more information.
