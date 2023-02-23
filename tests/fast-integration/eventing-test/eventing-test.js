@@ -249,6 +249,18 @@ describe('Eventing tests', function() {
     });
   }
 
+  // eventingMonitoringTestSuite - Runs Eventing tests for monitoring
+  function eventingMonitoringTestSuite(backend, isSKR) {
+    it('Run Eventing Monitoring tests', async function() {
+      if (isEventingSinkDeployed && testSubscriptionV1Alpha2) {
+        await eventingMonitoringTest(backend, isSKR, true);
+        return;
+      }
+      // run old monitoring tests - deprecated - will be removed
+      await eventingMonitoringTest(backend, isSKR);
+    });
+  }
+
   // eventingTracingTestSuite - Runs Eventing tracing tests
   function eventingTracingTestSuiteV2(isSKR) {
     // Only run tracing tests on OSS
@@ -518,9 +530,8 @@ describe('Eventing tests', function() {
     // Running Eventing tracing tests - deprecated (will be removed)
     eventingTracingTestSuite(isSKR);
 
-    it('Run Eventing Monitoring tests', async function() {
-      await eventingMonitoringTest(natsBackend, isSKR);
-    });
+    // Running Eventing monitoring tests.
+    eventingMonitoringTestSuite(natsBackend, isSKR);
   });
 
   context('with BEB backend', function() {
@@ -549,9 +560,8 @@ describe('Eventing tests', function() {
     // Running Eventing end-to-end tests - deprecated (will be removed)
     eventingTestSuite(bebBackend, isSKR, testCompassFlow);
 
-    it('Run Eventing Monitoring tests', async function() {
-      await eventingMonitoringTest(bebBackend, isSKR);
-    });
+    // Running Eventing monitoring tests.
+    eventingMonitoringTestSuite(bebBackend, isSKR);
   });
 
   context('with Nats backend switched back from BEB', async function() {
@@ -578,9 +588,8 @@ describe('Eventing tests', function() {
     // Running Eventing tracing tests - deprecated (will be removed)
     eventingTracingTestSuite(isSKR);
 
-    it('Run Eventing Monitoring tests', async function() {
-      await eventingMonitoringTest(natsBackend, isSKR);
-    });
+    // Running Eventing monitoring tests.
+    eventingMonitoringTestSuite(natsBackend, isSKR);
   });
 
   // this is record consumer creation time to compare after the Kyma upgrade
