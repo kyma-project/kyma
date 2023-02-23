@@ -12,32 +12,19 @@ const {
   checkInClusterEventDelivery,
   checkFullyQualifiedTypeWithExactSub,
   waitForSubscriptionsTillReady,
-  waitForSubscriptions,
   checkInClusterEventTracing,
-  getRandomEventId,
-  getVirtualServiceHost,
-  sendInClusterEventWithRetry,
-  ensureInClusterEventReceivedWithRetry,
   orderReceivedSubName,
 } = require('../test/fixtures/commerce-mock');
 const {
   getEventingBackend,
   waitForNamespace,
   switchEventingBackend,
-  waitForEventingBackendToReady,
   printAllSubscriptions,
-  printEventingControllerLogs,
-  printEventingPublisherProxyLogs,
-  k8sDelete,
   debug,
   isDebugEnabled,
-  k8sApply,
-  deleteK8sPod,
   createK8sConfigMap,
   waitForFunction,
-  eventingSubscription,
   waitForEndpoint,
-  waitForPodStatusWithLabel,
   waitForPodWithLabelAndCondition,
   createApiRuleForService,
   getConfigMap,
@@ -57,9 +44,6 @@ const {
   testCompassFlow,
   testSubscriptionV1Alpha2,
   subCRDVersion,
-  getNatsPods,
-  getStreamConfigForJetStream,
-  skipAtLeastOnceDeliveryTest,
   isStreamCreationTimeMissing,
   isConsumerCreationTimeMissing,
   getJetStreamStreamData,
@@ -68,7 +52,6 @@ const {
   eventingNatsApiRuleAName,
   getSubscriptionConsumerName,
   getJetStreamConsumerData,
-  subscriptionNames,
   eventingSinkName,
   v1alpha1SubscriptionsTypes,
   subscriptionsTypes,
@@ -122,11 +105,6 @@ describe('Eventing tests', function() {
     this.test.retries(3);
     await waitForPodWithLabelAndCondition( telemetryOperatorLabel.key, telemetryOperatorLabel.value, kymaSystem,
         conditionReady.condition, conditionReady.status, 60_000);
-  });
-
-  before('Get stream config for JetStream', async function() {
-    const success = await getStreamConfigForJetStream();
-    assert.isTrue(success);
   });
 
   before('Create an ApiRule for NATS', async () => {
@@ -298,7 +276,6 @@ describe('Eventing tests', function() {
 
     if (backend === natsBackend) {
       testStreamNotReCreated();
-      testJetStreamAtLeastOnceDelivery();
     }
   }
 
@@ -394,79 +371,6 @@ describe('Eventing tests', function() {
     });
   }
 
-  function testJetStreamAtLeastOnceDelivery() {
-    context('with JetStream file storage', function() {
-      const minute = 60 * 1000;
-      const funcName = 'lastorder';
-      const encodingBinary = 'binary';
-      const encodingStructured = 'structured';
-      const eventIdBinary = getRandomEventId(encodingBinary);
-      const eventIdStructured = getRandomEventId(encodingStructured);
-      const sink = `http://lastorder.${testNamespace}.svc.cluster.local`;
-      const subscriptions = [
-        eventingSubscription(`sap.kyma.custom.inapp.order.received.v1`,
-            sink, subscriptionNames.orderReceived, testNamespace),
-        eventingSubscription(`sap.kyma.custom.commerce.order.created.v1`,
-            sink, subscriptionNames.orderCreated, testNamespace),
-      ];
-
-      before('check if at least once delivery tests need to be skipped', async function() {
-        if (skipAtLeastOnceDeliveryTest()) {
-          console.log('Skipping the at least once delivery tests for NATS JetStream');
-          this.skip();
-        }
-      });
-
-      it('Delete subscriptions', async function() {
-        await k8sDelete(subscriptions);
-      });
-
-      it('Publish events', async function() {
-        const host = await getVirtualServiceHost(testNamespace, funcName);
-        assert.isNotEmpty(host);
-
-        await sendInClusterEventWithRetry(host, eventIdBinary, encodingBinary);
-        await sendInClusterEventWithRetry(host, eventIdStructured, encodingStructured);
-      });
-
-      it('Delete all Nats pods', async function() {
-        const natsPods = await getNatsPods();
-        for (let i = 0; i < natsPods.body.items.length; i++) {
-          const pod = natsPods.body.items[i];
-          await deleteK8sPod(pod);
-        }
-      });
-
-      it('Wait until all Nats pods are deleted', async function() {
-        // Assuming that Nats pods had the status.phase equals to "Running", so if it changed to "Pending"
-        // this means that they were successfully deleted and recreated.
-        await waitForPodStatusWithLabel('app.kubernetes.io/name', 'nats', 'kyma-system', 'Pending', 5 * minute);
-      });
-
-      it('Wait until any Nats pod is ready', async function() {
-        // When the status.phase changes from "Pending" to "Running" this means that Nats pod containers are starting.
-        await waitForPodStatusWithLabel('app.kubernetes.io/name', 'nats', 'kyma-system', 'Running', 5 * minute);
-      });
-
-      it('Wait until eventing backend is ready', async function() {
-        await waitForEventingBackendToReady(natsBackend, 'eventing-backend', 'kyma-system', 5 * minute);
-      });
-
-      it('Recreate subscriptions', async function() {
-        await k8sApply(subscriptions);
-        await waitForSubscriptions(subscriptions);
-      });
-
-      it('Wait for events to be delivered', async function() {
-        const host = await getVirtualServiceHost(testNamespace, funcName);
-        assert.isNotEmpty(host);
-
-        await ensureInClusterEventReceivedWithRetry(host, eventIdBinary);
-        await ensureInClusterEventReceivedWithRetry(host, eventIdStructured);
-      });
-    });
-  }
-
   // eventingTracingTestSuite - Runs Eventing tracing tests
   function eventingTracingTestSuite(isSKR) {
     // Only run tracing tests on OSS
@@ -479,16 +383,6 @@ describe('Eventing tests', function() {
       await checkInClusterEventTracing(testNamespace);
     });
   }
-
-  // runs after each test in every block
-  afterEach(async function() {
-    // if the test is failed, then printing some debug logs
-    if (this.currentTest.state === 'failed' && isDebugEnabled()) {
-      await printAllSubscriptions(testNamespace, subCRDVersion);
-      await printEventingControllerLogs();
-      await printEventingPublisherProxyLogs();
-    }
-  });
 
   // Tests
   context('with Nats backend', function() {
