@@ -108,7 +108,7 @@ app.all("*", (req, res) => {
                         res.end(body);
                         break;
                     case 'object':
-                        res.json(body); // includes res.end(), null also handled
+                        res.json(body);
                         break;
                     case 'undefined':
                         res.end();
