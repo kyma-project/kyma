@@ -1,5 +1,5 @@
 ---
-title: Cannot connect to a service exposed by an APIRule - 404 Not Found
+title: 404 Not Found
 ---
 
 ## Symptom

@@ -1,5 +1,5 @@
 ---
-title: External DNS management - connection refused or timeout
+title: Connection refused or timeout
 ---
 
 ## Symptom

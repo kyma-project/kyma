@@ -1,5 +1,5 @@
 ---
-title: External DNS management - could not resolve host
+title: Could not resolve host
 ---
 
 ## Symptom
