@@ -89,6 +89,8 @@ service:
 
 webhook:
   enabled: true
+  name: validation.webhook.telemetry.kyma-project.io
+  timeout: 15
   service:
     portName: https-webhook
     port: 443
