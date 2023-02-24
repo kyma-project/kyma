@@ -88,11 +88,17 @@ data:
       trigger: [sink]
     - path: spec.sink
       name: spec.sink
+      widget: Resource
+      resource:
+        kind: Service
+        version: v1
+        scope: namespace
       simple: true
       inputInfo: inputInfo.sink
       placeholder: placeholder.sink
+      trigger: [sink]
       subscribe:
-        sink: '"http://" & $service & "." & $root.metadata.namespace & ".svc.cluster.local"'
+        sink: '"http://" & spec.sink & "." & $root.metadata.namespace & ".svc.cluster.local"'
     - path: spec.typeMatching
       simple: true
       enum:
