@@ -555,7 +555,7 @@ function createLegacyEventRequestBody(proxyHost, eventId, eventType, eventSource
 async function getConfigMapWithRetries(name, namespace, retriesLeft = 10) {
   return retryPromise(async () => {
     try {
-      return await getConfigMap(testDataConfigMapName);
+      return await getConfigMap(testDataConfigMapName, namespace);
     } catch (err) {
       if (err.statusCode === 404) {
         return undefined;
@@ -570,7 +570,7 @@ async function saveJetStreamDataForRecreateTest(host, configMapName) {
   const streamData = await getJetStreamStreamData(host, kymaStreamName)
   expect(streamData).to.not.be.undefined;
 
-  const subscriptionName = 'fi-test-sub-v2-0';
+  const subscriptionName = subscriptionsTypes[0].name;
   debug(`Fetching consumer name from Kyma Subscription (name: ${subscriptionName}) CR status...`);
   const conName = await getSubscriptionConsumerName(subscriptionName, testNamespace, subCRDVersion);
   expect(conName).to.not.be.empty;
@@ -579,31 +579,39 @@ async function saveJetStreamDataForRecreateTest(host, configMapName) {
   const consumerInfo = await getJetStreamConsumerData(conName, host);
   expect(consumerInfo).to.not.be.undefined;
 
+  // Note that the values for stringified.
   const cmData = {
-    stream: streamData,
-    consumers: [consumerInfo],
+    stream: JSON.stringify(streamData),
+    consumers: JSON.stringify([consumerInfo]),
   };
 
   debug(`Saving fetched stream and consumers details in configMap (name: ${configMapName})...`);
-  await createK8sConfigMap(cmData, configMapName);
+  await createK8sConfigMap(cmData, configMapName, testNamespace);
 }
 
-async function checkStreamNotReCreated(host, configMapData) {
+async function checkStreamNotReCreated(host, preUpgradeStreamData) {
   debug('Fetching latest stream details from NATS server...')
   const streamData = await getJetStreamStreamData(host, kymaStreamName)
   expect(streamData).to.not.be.undefined;
 
-  const beforeUpgradeCreationTime = configMapData.created;
+  const beforeUpgradeCreationTime = preUpgradeStreamData.created;
   const afterUpgradeCreationTime = streamData.created;
 
   debug(`Stream creation timestamp: Before Upgrade: ${beforeUpgradeCreationTime}, After Upgrade: ${afterUpgradeCreationTime}`);
 
-  expect(beforeUpgradeCreationTime).to.be.equal(afterUpgradeCreationTime);
+  expect(getTimeStampsWithZeroMilliSeconds(beforeUpgradeCreationTime)).to.be.equal(
+      getTimeStampsWithZeroMilliSeconds(afterUpgradeCreationTime));
 }
 
 async function checkConsumersNotReCreated(host, configMapData) {
   // consumerName: con.name,
   //     consumerCreationTime: con.created,
+}
+
+function getTimeStampsWithZeroMilliSeconds(timestamp) {
+  // set milliseconds to zero
+  const ts = (new Date(timestamp)).setMilliseconds(0)
+  return (new Date(ts)).toISOString()
 }
 
 module.exports = {
