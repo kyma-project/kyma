@@ -364,7 +364,7 @@ describe('Eventing tests', function() {
     });
   }
 
-  //Tests
+  // Tests
   context('with Nats backend', function() {
     it('Switch Eventing Backend to Nats', async function() {
       const currentBackend = await getEventingBackend();

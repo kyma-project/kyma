@@ -3,7 +3,7 @@ const {
   eventTypeOrderReceivedHash,
   cleanCompassResourcesSKR,
   generateTraceParentHeader,
-  checkTrace, orderReceivedSubName,
+  checkTrace,
 } = require('../test/fixtures/commerce-mock');
 
 const {
@@ -22,7 +22,9 @@ const {
   waitForSubscription,
   eventingSubscriptionV1Alpha2,
   convertAxiosError,
-  sleep, getConfigMap, createK8sConfigMap,
+  sleep,
+  getConfigMap,
+  createK8sConfigMap,
 } = require('../utils');
 
 const {DirectorClient, DirectorConfig, getAlreadyAssignedScenarios} = require('../compass');
