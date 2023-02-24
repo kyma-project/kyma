@@ -299,6 +299,19 @@ describe('Eventing tests', function() {
     });
   }
 
+  // eventingTracingTestSuite - Runs Eventing tracing tests
+  function eventingTracingTestSuite(isSKR) {
+    // Only run tracing tests on OSS
+    if (isSKR) {
+      debug('Skipping eventing tracing tests on SKR');
+      return;
+    }
+
+    it('In-cluster event should have correct tracing spans', async function() {
+      await checkInClusterEventTracing(testNamespace);
+    });
+  }
+
   function jsSaveStreamAndConsumersDataSuite() {
     context('save stream and consumer data', function() {
       it('saving JetStream data to test stream and consumers will not be re-created by kyma upgrade', async function() {
@@ -351,112 +364,99 @@ describe('Eventing tests', function() {
     });
   }
 
-  // eventingTracingTestSuite - Runs Eventing tracing tests
-  function eventingTracingTestSuite(isSKR) {
-    // Only run tracing tests on OSS
-    if (isSKR) {
-      debug('Skipping eventing tracing tests on SKR');
-      return;
-    }
-
-    it('In-cluster event should have correct tracing spans', async function() {
-      await checkInClusterEventTracing(testNamespace);
-    });
-  }
-
-  // //Tests
+  //Tests
   context('with Nats backend', function() {
-    // it('Switch Eventing Backend to Nats', async function() {
-    //   const currentBackend = await getEventingBackend();
-    //   if (currentBackend && currentBackend.toLowerCase() === natsBackend) {
-    //     this.skip();
-    //   }
-    //   await switchEventingBackend(backendK8sSecretName, backendK8sSecretNamespace, natsBackend);
-    // });
-    //
-    // it('Wait until subscriptions are ready', async function() {
-    //   await waitForSubscriptionsTillReady(testNamespace);
-    // });
-    //
-    // // Running Eventing end-to-end event delivery tests
-    // eventDeliveryTestSuite(natsBackend);
-    //
-    // // Running Eventing end-to-end tests - deprecated (will be removed)
-    // eventingTestSuite(natsBackend, isSKR, testCompassFlow);
-    //
-    // // Running Eventing tracing tests [v2]
-    // eventingTracingTestSuiteV2(isSKR);
-    //
-    // // Running Eventing tracing tests - deprecated (will be removed)
-    // eventingTracingTestSuite(isSKR);
-    //
-    // // Running Eventing monitoring tests.
-    // eventingMonitoringTestSuite(natsBackend, isSKR);
+    it('Switch Eventing Backend to Nats', async function() {
+      const currentBackend = await getEventingBackend();
+      if (currentBackend && currentBackend.toLowerCase() === natsBackend) {
+        this.skip();
+      }
+      await switchEventingBackend(backendK8sSecretName, backendK8sSecretNamespace, natsBackend);
+    });
+
+    it('Wait until subscriptions are ready', async function() {
+      await waitForSubscriptionsTillReady(testNamespace);
+    });
+
+    // Running Eventing end-to-end event delivery tests
+    eventDeliveryTestSuite(natsBackend);
+
+    // Running Eventing end-to-end tests - deprecated (will be removed)
+    eventingTestSuite(natsBackend, isSKR, testCompassFlow);
+
+    // Running Eventing tracing tests [v2]
+    eventingTracingTestSuiteV2(isSKR);
+
+    // Running Eventing tracing tests - deprecated (will be removed)
+    eventingTracingTestSuite(isSKR);
+
+    // Running Eventing monitoring tests.
+    eventingMonitoringTestSuite(natsBackend, isSKR);
 
     // Running JetStream stream and consumers not re-created by upgrade tests.
     jsStreamAndConsumersNotReCreatedTestSuite();
   });
 
-  // context('with BEB backend', function() {
-  //   // skip publishing cloud events for beb backend when event mesh credentials file is missing
-  //   if (getEventMeshNamespace() === undefined) {
-  //     debug('Skipping E2E eventing tests for BEB backend due to missing EVENTMESH_SECRET_FILE');
-  //     return;
-  //   }
-  //   it('Switch Eventing Backend to BEB', async function() {
-  //     const currentBackend = await getEventingBackend();
-  //     if (currentBackend && currentBackend.toLowerCase() === bebBackend) {
-  //       this.skip();
-  //     }
-  //     await switchEventingBackend(backendK8sSecretName, backendK8sSecretNamespace, bebBackend);
-  //   });
-  //   it('Wait until subscriptions are ready', async function() {
-  //     await waitForSubscriptionsTillReady(testNamespace); // print subscriptions status when debugLogs is enabled
-  //     if (isDebugEnabled()) {
-  //       await printAllSubscriptions(testNamespace, subCRDVersion);
-  //     }
-  //   });
-  //
-  //   // Running Eventing end-to-end event delivery tests
-  //   eventDeliveryTestSuite(bebBackend);
-  //
-  //   // Running Eventing end-to-end tests - deprecated (will be removed)
-  //   eventingTestSuite(bebBackend, isSKR, testCompassFlow);
-  //
-  //   // Running Eventing monitoring tests.
-  //   eventingMonitoringTestSuite(bebBackend, isSKR);
-  // });
+  context('with BEB backend', function() {
+    // skip publishing cloud events for beb backend when event mesh credentials file is missing
+    if (getEventMeshNamespace() === undefined) {
+      debug('Skipping E2E eventing tests for BEB backend due to missing EVENTMESH_SECRET_FILE');
+      return;
+    }
+    it('Switch Eventing Backend to BEB', async function() {
+      const currentBackend = await getEventingBackend();
+      if (currentBackend && currentBackend.toLowerCase() === bebBackend) {
+        this.skip();
+      }
+      await switchEventingBackend(backendK8sSecretName, backendK8sSecretNamespace, bebBackend);
+    });
+    it('Wait until subscriptions are ready', async function() {
+      await waitForSubscriptionsTillReady(testNamespace); // print subscriptions status when debugLogs is enabled
+      if (isDebugEnabled()) {
+        await printAllSubscriptions(testNamespace, subCRDVersion);
+      }
+    });
 
-  // context('with Nats backend switched back from BEB', async function() {
-  //   it('Switch Eventing Backend to Nats', async function() {
-  //     const currentBackend = await getEventingBackend();
-  //     if (currentBackend && currentBackend.toLowerCase() === natsBackend) {
-  //       this.skip();
-  //     }
-  //     await switchEventingBackend(backendK8sSecretName, backendK8sSecretNamespace, natsBackend);
-  //   });
-  //   // it('Wait until subscriptions are ready', async function() {
-  //   //   await waitForSubscriptionsTillReady(testNamespace);
-  //   // });
-  //
-  //   // // Running Eventing end-to-end event delivery tests
-  //   // eventDeliveryTestSuite(natsBackend);
-  //
-  //   // // Running Eventing end-to-end tests - deprecated (will be removed)
-  //   // eventingTestSuite(natsBackend, isSKR, testCompassFlow);
-  //   //
-  //   // // Running Eventing tracing tests [v2]
-  //   // eventingTracingTestSuiteV2(isSKR);
-  //   //
-  //   // // Running Eventing tracing tests - deprecated (will be removed)
-  //   // eventingTracingTestSuite(isSKR);
-  //   //
-  //   // // Running Eventing monitoring tests.
-  //   // eventingMonitoringTestSuite(natsBackend, isSKR);
-  //
-  //   // Record stream and consumer data for Kyma upgrade
-  //   jsSaveStreamAndConsumersDataSuite();
-  // });
+    // Running Eventing end-to-end event delivery tests
+    eventDeliveryTestSuite(bebBackend);
+
+    // Running Eventing end-to-end tests - deprecated (will be removed)
+    eventingTestSuite(bebBackend, isSKR, testCompassFlow);
+
+    // Running Eventing monitoring tests.
+    eventingMonitoringTestSuite(bebBackend, isSKR);
+  });
+
+  context('with Nats backend switched back from BEB', async function() {
+    it('Switch Eventing Backend to Nats', async function() {
+      const currentBackend = await getEventingBackend();
+      if (currentBackend && currentBackend.toLowerCase() === natsBackend) {
+        this.skip();
+      }
+      await switchEventingBackend(backendK8sSecretName, backendK8sSecretNamespace, natsBackend);
+    });
+    it('Wait until subscriptions are ready', async function() {
+      await waitForSubscriptionsTillReady(testNamespace);
+    });
+
+    // Running Eventing end-to-end event delivery tests
+    eventDeliveryTestSuite(natsBackend);
+
+    // Running Eventing end-to-end tests - deprecated (will be removed)
+    eventingTestSuite(natsBackend, isSKR, testCompassFlow);
+
+    // Running Eventing tracing tests [v2]
+    eventingTracingTestSuiteV2(isSKR);
+
+    // Running Eventing tracing tests - deprecated (will be removed)
+    eventingTracingTestSuite(isSKR);
+
+    // Running Eventing monitoring tests.
+    eventingMonitoringTestSuite(natsBackend, isSKR);
+
+    // Record stream and consumer data for Kyma upgrade
+    jsSaveStreamAndConsumersDataSuite();
+  });
 
   after('Delete the created APIRule', async function() {
     await deleteApiRule(eventingNatsApiRuleAName, kymaSystem);
