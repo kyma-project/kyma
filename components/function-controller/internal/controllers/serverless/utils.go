@@ -120,7 +120,7 @@ func getArg(args []string, arg string) string {
 
 func getPackageConfigVolumeMountsForRuntime(rtm serverlessv1alpha2.Runtime) []corev1.VolumeMount {
 	switch rtm {
-	case serverlessv1alpha2.NodeJs14, serverlessv1alpha2.NodeJs16:
+	case serverlessv1alpha2.NodeJs14, serverlessv1alpha2.NodeJs16, serverlessv1alpha2.NodeJs18:
 		return []corev1.VolumeMount{
 			{
 				Name:      "registry-config",

@@ -13,18 +13,19 @@ const (
 
 // Runtime enumerates runtimes that are currently supported by Function Controller
 // It is a subset of RuntimeExtended
-// +kubebuilder:validation:Enum=nodejs14;nodejs16;python39
+// +kubebuilder:validation:Enum=nodejs14;nodejs16;nodejs18;python39
 type Runtime string
 
 const (
 	Nodejs14 Runtime = "nodejs14"
 	Nodejs16 Runtime = "nodejs16"
+	Nodejs18 Runtime = "nodejs18"
 	Python39 Runtime = "python39"
 )
 
 // RuntimeExtended enumerates runtimes that are either currently supported or
 // no longer supported but there still might be "read-only" Functions using them
-// +kubebuilder:validation:Enum=nodejs12;nodejs14;nodejs16;nodejs10;python38;python39
+// +kubebuilder:validation:Enum=nodejs12;nodejs14;nodejs16;nodejs18;nodejs10;python38;python39
 type RuntimeExtended string
 
 const (
@@ -32,6 +33,7 @@ const (
 	RuntimeExtendedNodejs12 RuntimeExtended = "nodejs12"
 	RuntimeExtendedNodejs14 RuntimeExtended = "nodejs14"
 	RuntimeExtendedNodejs16 RuntimeExtended = "nodejs16"
+	RuntimeExtendedNodejs18 RuntimeExtended = "nodejs18"
 	RuntimeExtendedPython38 RuntimeExtended = "python38"
 	RuntimeExtendedPython39 RuntimeExtended = "python39"
 )

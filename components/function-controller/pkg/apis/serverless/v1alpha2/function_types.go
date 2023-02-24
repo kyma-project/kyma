@@ -28,6 +28,7 @@ const (
 	Python39 Runtime = "python39"
 	NodeJs14 Runtime = "nodejs14"
 	NodeJs16 Runtime = "nodejs16"
+	NodeJs18 Runtime = "nodejs18"
 )
 
 type FunctionType string
@@ -148,7 +149,7 @@ const (
 
 // FunctionSpec defines the desired state of Function
 type FunctionSpec struct {
-	// Runtime specifies the runtime of the Function. The available values are `nodejs14`, `nodejs16`, and `python39`.
+	// Runtime specifies the runtime of the Function. The available values are `nodejs16`, `nodejs18`, and `python39`.
 	Runtime Runtime `json:"runtime"`
 
 	// RuntimeImageOverride specifies the runtimes image which must be used instead of the default one.

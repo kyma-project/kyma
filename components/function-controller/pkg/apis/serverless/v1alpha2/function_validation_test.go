@@ -49,7 +49,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 						MinReplicas: pointer.Int32(1),
 						MaxReplicas: pointer.Int32(1),
 					},
-					Runtime: NodeJs16,
+					Runtime: NodeJs18,
 					ResourceConfiguration: &ResourceConfiguration{
 						Function: &ResourceRequirements{
 							Resources: &corev1.ResourceRequirements{Limits: corev1.ResourceList{
@@ -89,7 +89,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							Dependencies: " { test }     \t\n",
 						},
 					},
-					Runtime: NodeJs16,
+					Runtime: NodeJs18,
 					Env: []corev1.EnvVar{
 						{
 							Name:  "test",
@@ -191,7 +191,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
-					Runtime: NodeJs16,
+					Runtime: NodeJs18,
 					Source: Source{
 						Inline: &InlineSource{
 							Source:       "test-source",
@@ -215,7 +215,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
-					Runtime: NodeJs16,
+					Runtime: NodeJs18,
 					Source:  Source{},
 				},
 			},
@@ -230,7 +230,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
-					Runtime: NodeJs16,
+					Runtime: NodeJs18,
 					Source: Source{
 						Inline: &InlineSource{
 							Source:       "test-source",
@@ -250,7 +250,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
-					Runtime: NodeJs16,
+					Runtime: NodeJs18,
 					Source: Source{
 						Inline: &InlineSource{
 							Source: "test-source",
@@ -279,7 +279,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
-					Runtime: NodeJs16,
+					Runtime: NodeJs18,
 					Source: Source{
 						Inline: &InlineSource{
 							Source: "test-source",
@@ -304,7 +304,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
-					Runtime: NodeJs16,
+					Runtime: NodeJs18,
 					Source: Source{
 						Inline: &InlineSource{
 							Source: "test-source",
@@ -327,7 +327,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
-					Runtime: NodeJs16,
+					Runtime: NodeJs18,
 					Source: Source{
 						Inline: &InlineSource{
 							Source: "test-source",
@@ -350,7 +350,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
-					Runtime: NodeJs16,
+					Runtime: NodeJs18,
 					Source: Source{
 						Inline: &InlineSource{
 							Source: "test-source",
@@ -386,7 +386,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
-					Runtime: NodeJs16,
+					Runtime: NodeJs18,
 					Source: Source{
 						Inline: &InlineSource{
 							Source: "test-source",
@@ -436,7 +436,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 						MinReplicas: pointer.Int32(0),
 						MaxReplicas: pointer.Int32(0),
 					},
-					Runtime: NodeJs16,
+					Runtime: NodeJs18,
 					Source: Source{
 						Inline: &InlineSource{
 							Source: "test-source",
@@ -527,7 +527,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 						MinReplicas: pointer.Int32(1),
 						MaxReplicas: pointer.Int32(1),
 					},
-					Runtime: NodeJs16,
+					Runtime: NodeJs18,
 				},
 			},
 			expectedError: gomega.BeNil(),
@@ -571,7 +571,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 						MinReplicas: pointer.Int32(1),
 						MaxReplicas: pointer.Int32(1),
 					},
-					Runtime: NodeJs16,
+					Runtime: NodeJs18,
 				},
 			},
 			specifiedExpectedError: gomega.And(
@@ -634,7 +634,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							Dependencies: " { test }",
 						},
 					},
-					Runtime: NodeJs16,
+					Runtime: NodeJs18,
 					ResourceConfiguration: &ResourceConfiguration{
 						Function: &ResourceRequirements{
 							Profile: "function-profile",
@@ -671,7 +671,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
-					Runtime: NodeJs16,
+					Runtime: NodeJs18,
 					Source: Source{
 						Inline: &InlineSource{
 							Source: "test-source",
@@ -699,7 +699,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
-					Runtime: NodeJs16,
+					Runtime: NodeJs18,
 					Source: Source{
 						Inline: &InlineSource{
 							Source: "test-source",
@@ -731,7 +731,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
-					Runtime: NodeJs16,
+					Runtime: NodeJs18,
 					Source: Source{
 						Inline: &InlineSource{
 							Source: "test-source",

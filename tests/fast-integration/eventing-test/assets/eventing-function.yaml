@@ -10,7 +10,7 @@ spec:
   scaleConfig:
     minReplicas: 1
     maxReplicas: 1
-  runtime: nodejs16
+  runtime: nodejs18
   resourceConfiguration:
     function:
       resources:
