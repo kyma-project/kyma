@@ -555,6 +555,12 @@ function createLegacyEventRequestBody(proxyHost, eventId, eventType, eventSource
   return reqBody;
 }
 
+function getTimeStampsWithZeroMilliSeconds(timestamp) {
+  // set milliseconds to zero
+  const ts = (new Date(timestamp)).setMilliseconds(0);
+  return (new Date(ts)).toISOString();
+}
+
 module.exports = {
   appName,
   scenarioName,
@@ -600,4 +606,5 @@ module.exports = {
   waitForV1Alpha1Subscriptions,
   waitForV1Alpha2Subscriptions,
   checkEventTracing,
+  getTimeStampsWithZeroMilliSeconds,
 };
