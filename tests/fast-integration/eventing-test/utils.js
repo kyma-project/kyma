@@ -43,7 +43,6 @@ const kymaStreamName = 'sap';
 const isSKR = process.env.KYMA_TYPE === 'SKR';
 const skrInstanceId = process.env.INSTANCE_ID || '';
 const testCompassFlow = process.env.TEST_COMPASS_FLOW || false;
-const isEventingUpgradeTest = process.env.IS_EVENTING_UPGRADE_TEST === 'true';
 const testSubscriptionV1Alpha2 = process.env.ENABLE_SUBSCRIPTION_V1_ALPHA2 === 'true';
 const subCRDVersion = testSubscriptionV1Alpha2 ? 'v1alpha2' : 'v1alpha1';
 const skipResourceCleanup = process.env.SKIP_CLEANUP || false;
@@ -570,18 +569,18 @@ async function getConfigMapWithRetries(name, namespace, retriesLeft = 10) {
 }
 
 async function saveJetStreamDataForRecreateTest(host, configMapName, isSubV1Alpha2=false) {
-  debug('Fetching stream details from NATS server...')
-  const streamData = await getJetStreamStreamData(host, kymaStreamName)
+  debug('Fetching stream details from NATS server...');
+  const streamData = await getJetStreamStreamData(host, kymaStreamName);
   expect(streamData).to.not.be.undefined;
 
   const consumerData = {};
-  debug(`Fetching [v1alpha1] consumer (name: ${v1alpha1SubscriptionsTypes[0].consumerName}) details from NATS server...`);
+  debug(`Fetching [v1alpha1] consumer (${v1alpha1SubscriptionsTypes[0].consumerName}) details from NATS...`);
   const consumerInfo = await getJetStreamConsumerData(v1alpha1SubscriptionsTypes[0].consumerName, host);
   expect(consumerInfo).to.not.be.undefined;
   consumerData[v1alpha1SubscriptionsTypes[0].consumerName] = consumerInfo;
 
   if (isSubV1Alpha2) {
-    debug(`Fetching consumer (name: ${subscriptionsTypes[0].consumerName}) details from NATS server...`);
+    debug(`Fetching consumer (${subscriptionsTypes[0].consumerName}) details from NATS...`);
     const consumerInfo = await getJetStreamConsumerData(subscriptionsTypes[0].consumerName, host);
     expect(consumerInfo).to.not.be.undefined;
     consumerData[subscriptionsTypes[0].consumerName] = consumerInfo;
@@ -598,14 +597,15 @@ async function saveJetStreamDataForRecreateTest(host, configMapName, isSubV1Alph
 }
 
 async function checkStreamNotReCreated(host, preUpgradeStreamData) {
-  debug('Fetching latest stream details from NATS server...')
-  const streamData = await getJetStreamStreamData(host, kymaStreamName)
+  debug('Fetching latest stream details from NATS server...');
+  const streamData = await getJetStreamStreamData(host, kymaStreamName);
   expect(streamData).to.not.be.undefined;
 
   const beforeUpgradeCreationTime = preUpgradeStreamData.created;
   const afterUpgradeCreationTime = streamData.created;
 
-  debug(`Stream creation timestamp: Before Upgrade: ${beforeUpgradeCreationTime}, After Upgrade: ${afterUpgradeCreationTime}`);
+  debug(`Stream creation timestamp: 
+    Before Upgrade: ${beforeUpgradeCreationTime}, After Upgrade: ${afterUpgradeCreationTime}`);
   expect(getTimeStampsWithZeroMilliSeconds(beforeUpgradeCreationTime)).to.be.equal(
       getTimeStampsWithZeroMilliSeconds(afterUpgradeCreationTime));
 }
@@ -627,15 +627,16 @@ async function checkConsumerNotReCreated(host, consumerName, preUpgradeConsumers
 
   const beforeUpgradeCreationTime = preUpgradeConsumersData[consumerName].created;
   const afterUpgradeCreationTime = consumerInfo.created;
-  debug(`Consumer creation timestamp: Before Upgrade: ${beforeUpgradeCreationTime}, After Upgrade: ${afterUpgradeCreationTime}`);
+  debug(`Consumer creation timestamp: 
+    Before Upgrade: ${beforeUpgradeCreationTime}, After Upgrade: ${afterUpgradeCreationTime}`);
   expect(getTimeStampsWithZeroMilliSeconds(beforeUpgradeCreationTime)).to.be.equal(
       getTimeStampsWithZeroMilliSeconds(afterUpgradeCreationTime));
 }
 
 function getTimeStampsWithZeroMilliSeconds(timestamp) {
   // set milliseconds to zero
-  const ts = (new Date(timestamp)).setMilliseconds(0)
-  return (new Date(ts)).toISOString()
+  const ts = (new Date(timestamp)).setMilliseconds(0);
+  return (new Date(ts)).toISOString();
 }
 
 module.exports = {
@@ -683,7 +684,6 @@ module.exports = {
   waitForV1Alpha1Subscriptions,
   waitForV1Alpha2Subscriptions,
   checkEventTracing,
-  isEventingUpgradeTest,
   kymaStreamName,
   saveJetStreamDataForRecreateTest,
   getConfigMapWithRetries,

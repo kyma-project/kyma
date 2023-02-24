@@ -41,7 +41,6 @@ const {
   testCompassFlow,
   testSubscriptionV1Alpha2,
   subCRDVersion,
-  getJetStreamStreamData,
   testDataConfigMapName,
   eventingNatsSvcName,
   eventingNatsApiRuleAName,
@@ -54,7 +53,6 @@ const {
   waitForV1Alpha1Subscriptions,
   waitForV1Alpha2Subscriptions,
   checkEventTracing,
-  isEventingUpgradeTest,
   saveJetStreamDataForRecreateTest,
   getConfigMapWithRetries,
   checkStreamNotReCreated,
@@ -315,12 +313,6 @@ describe('Eventing tests', function() {
   function jsSaveStreamAndConsumersDataSuite() {
     context('save stream and consumer data', function() {
       it('saving JetStream data to test stream and consumers will not be re-created by kyma upgrade', async function() {
-        if (!isEventingUpgradeTest) {
-          debug('Skipping recording stream and consumer data because ENV: IS_EVENTING_UPGRADE_TEST is not set!');
-          this.skip();
-          return;
-        }
-
         debug(`Using NATS host: ${natsApiRuleVSHost}`);
         await saveJetStreamDataForRecreateTest(natsApiRuleVSHost, testDataConfigMapName, testSubscriptionV1Alpha2);
       });
@@ -337,17 +329,17 @@ describe('Eventing tests', function() {
       let preUpgradeConsumersData = null;
 
       before('fetch eventing-js-test data configMap', async function() {
-        if (!isEventingUpgradeTest) {
-          debug('Skipping stream and consumers not re-created check because ENV: IS_EVENTING_UPGRADE_TEST is not set!');
+        debug(`fetch configMap: ${testDataConfigMapName}...`);
+        const cm = await getConfigMapWithRetries(testDataConfigMapName, testNamespace);
+        if (!cm || !cm.data || !cm.data.consumers) {
+          debug(`Skipping stream and consumers not re-created check because ${testDataConfigMapName} was not found!`);
           this.skip();
           return;
         }
 
-        debug(`fetch configMap: ${testDataConfigMapName}...`);
-        let cm = await getConfigMapWithRetries(testDataConfigMapName, testNamespace);
-        expect(cm).to.not.be.undefined;
-        expect(cm.data).to.have.nested.property('stream')
-        expect(cm.data).to.have.nested.property('consumers')
+        // if configMap is found, then check for re-creation
+        expect(cm.data).to.have.nested.property('stream');
+        expect(cm.data).to.have.nested.property('consumers');
         preUpgradeStreamData = JSON.parse(cm.data.stream);
         preUpgradeConsumersData = JSON.parse(cm.data.consumers);
       });
