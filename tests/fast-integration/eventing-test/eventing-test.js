@@ -309,7 +309,7 @@ describe('Eventing tests', function() {
         }
 
         debug(`Using NATS host: ${natsApiRuleVSHost}`);
-        await saveJetStreamDataForRecreateTest(natsApiRuleVSHost, testDataConfigMapName);
+        await saveJetStreamDataForRecreateTest(natsApiRuleVSHost, testDataConfigMapName, testSubscriptionV1Alpha2);
       });
     });
   }
@@ -336,6 +336,7 @@ describe('Eventing tests', function() {
         expect(cm.data).to.have.nested.property('stream')
         expect(cm.data).to.have.nested.property('consumers')
         preUpgradeStreamData = JSON.parse(cm.data.stream);
+        preUpgradeConsumersData = JSON.parse(cm.data.consumers);
       });
 
       it('upgrade should not have re-created stream', async function() {
@@ -343,10 +344,10 @@ describe('Eventing tests', function() {
         await checkStreamNotReCreated(natsApiRuleVSHost, preUpgradeStreamData);
       });
 
-      // it('upgrade should not have re-created consumers', async function() {
-      //   debug('Verifying that the consumers were not re-created by the kyma upgrade...');
-      //   await checkConsumersNotReCreated(natsApiRuleVSHost, configMapData);
-      // });
+      it('upgrade should not have re-created consumers', async function() {
+        debug('Verifying that the consumers were not re-created by the kyma upgrade...');
+        await checkConsumersNotReCreated(natsApiRuleVSHost, preUpgradeConsumersData, testSubscriptionV1Alpha2);
+      });
     });
   }
 

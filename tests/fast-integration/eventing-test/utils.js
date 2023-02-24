@@ -69,6 +69,7 @@ const v1alpha1SubscriptionsTypes = [
   {
     name: 'fi-test-sub-0',
     type: 'sap.kyma.custom.noapp.order.tested.v1',
+    consumerName: '984424e04059615b51d99847bfe5b49d',
   },
   {
     name: 'fi-test-sub-1',
@@ -89,6 +90,7 @@ const subscriptionsTypes = [
     name: 'fi-test-sub-v2-0',
     type: 'order.modified.v1',
     source: 'myapp',
+    consumerName: 'e04ea2aff4332541145342207495afce',
   },
   {
     name: 'fi-test-sub-v2-1',
@@ -565,24 +567,28 @@ async function getConfigMapWithRetries(name, namespace, retriesLeft = 10) {
   }, retriesLeft, 1000);
 }
 
-async function saveJetStreamDataForRecreateTest(host, configMapName) {
+async function saveJetStreamDataForRecreateTest(host, configMapName, isSubV1Alpha2=false) {
   debug('Fetching stream details from NATS server...')
   const streamData = await getJetStreamStreamData(host, kymaStreamName)
   expect(streamData).to.not.be.undefined;
 
-  const subscriptionName = subscriptionsTypes[0].name;
-  debug(`Fetching consumer name from Kyma Subscription (name: ${subscriptionName}) CR status...`);
-  const conName = await getSubscriptionConsumerName(subscriptionName, testNamespace, subCRDVersion);
-  expect(conName).to.not.be.empty;
-
-  debug(`Fetching consumer (name: ${conName}) details from NATS server...`);
-  const consumerInfo = await getJetStreamConsumerData(conName, host);
+  const consumerData = {};
+  debug(`Fetching [v1alpha1] consumer (name: ${v1alpha1SubscriptionsTypes[0].consumerName}) details from NATS server...`);
+  const consumerInfo = await getJetStreamConsumerData(v1alpha1SubscriptionsTypes[0].consumerName, host);
   expect(consumerInfo).to.not.be.undefined;
+  consumerData[v1alpha1SubscriptionsTypes[0].consumerName] = consumerInfo;
+
+  if (isSubV1Alpha2) {
+    debug(`Fetching consumer (name: ${subscriptionsTypes[0].consumerName}) details from NATS server...`);
+    const consumerInfo = await getJetStreamConsumerData(subscriptionsTypes[0].consumerName, host);
+    expect(consumerInfo).to.not.be.undefined;
+    consumerData[subscriptionsTypes[0].consumerName] = consumerInfo;
+  }
 
   // Note that the values for stringified.
   const cmData = {
     stream: JSON.stringify(streamData),
-    consumers: JSON.stringify([consumerInfo]),
+    consumers: JSON.stringify(consumerData),
   };
 
   debug(`Saving fetched stream and consumers details in configMap (name: ${configMapName})...`);
@@ -598,14 +604,30 @@ async function checkStreamNotReCreated(host, preUpgradeStreamData) {
   const afterUpgradeCreationTime = streamData.created;
 
   debug(`Stream creation timestamp: Before Upgrade: ${beforeUpgradeCreationTime}, After Upgrade: ${afterUpgradeCreationTime}`);
-
   expect(getTimeStampsWithZeroMilliSeconds(beforeUpgradeCreationTime)).to.be.equal(
       getTimeStampsWithZeroMilliSeconds(afterUpgradeCreationTime));
 }
 
-async function checkConsumersNotReCreated(host, configMapData) {
-  // consumerName: con.name,
-  //     consumerCreationTime: con.created,
+async function checkConsumersNotReCreated(host, preUpgradeConsumersData, isSubV1Alpha2=false) {
+  await checkConsumerNotReCreated(host, v1alpha1SubscriptionsTypes[0].consumerName, preUpgradeConsumersData);
+
+  if (isSubV1Alpha2 && preUpgradeConsumersData[subscriptionsTypes[0].consumerName]) {
+    await checkConsumerNotReCreated(host, subscriptionsTypes[0].consumerName, preUpgradeConsumersData);
+  }
+}
+
+async function checkConsumerNotReCreated(host, consumerName, preUpgradeConsumersData) {
+  expect(preUpgradeConsumersData[consumerName]).to.not.be.undefined;
+
+  debug(`Fetching consumer (name: ${consumerName}) latest details from NATS server...`);
+  const consumerInfo = await getJetStreamConsumerData(consumerName, host);
+  expect(consumerInfo).to.not.be.undefined;
+
+  const beforeUpgradeCreationTime = preUpgradeConsumersData[consumerName].created;
+  const afterUpgradeCreationTime = consumerInfo.created;
+  debug(`Consumer creation timestamp: Before Upgrade: ${beforeUpgradeCreationTime}, After Upgrade: ${afterUpgradeCreationTime}`);
+  expect(getTimeStampsWithZeroMilliSeconds(beforeUpgradeCreationTime)).to.be.equal(
+      getTimeStampsWithZeroMilliSeconds(afterUpgradeCreationTime));
 }
 
 function getTimeStampsWithZeroMilliSeconds(timestamp) {
