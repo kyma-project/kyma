@@ -17,6 +17,7 @@ const {
 const {queryPrometheus} = require('../monitoring/client');
 const {
   subscriptionNames,
+  subscriptionsTypes,
   eventingSinkName,
 } = require('./utils');
 
@@ -210,7 +211,7 @@ async function eventingMonitoringTest(backend, isSkr, isEventingSinkDeployed=fal
   // // add OSS related dashboard entries for tests.
   if (isEventingSinkDeployed) {
     debug(`Using dashboards w.r.t. ${eventingSinkName} function`);
-    allDashboards = getOSSDashboards(eventingSinkName, 'fi-test-sub-v2-0');
+    allDashboards = getOSSDashboards(eventingSinkName, subscriptionsTypes[0].name);
   } else {
     debug('Using dashboards w.r.t. lastorder function');
     allDashboards = getOSSDashboards('lastorder', subscriptionNames.orderReceived);
