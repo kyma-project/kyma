@@ -1,5 +1,5 @@
 ---
-title: Cannot connect to a service exposed by an APIRule - 500 Internal Server Error
+title: 500 Internal Server Error
 ---
 
 ## Symptom
