@@ -27,3 +27,4 @@ COPY --from=builder /go/src/github.com/kyma-project/kyma/components/eventing-con
 USER nonroot:nonroot
 
 ENTRYPOINT ["/eventing-controller"]
+
