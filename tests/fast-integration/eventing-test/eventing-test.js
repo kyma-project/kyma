@@ -61,6 +61,7 @@ const {
   waitForV1Alpha1Subscriptions,
   waitForV1Alpha2Subscriptions,
   checkEventTracing,
+  getTimeStampsWithZeroMilliSeconds,
 } = require('./utils');
 const {
   bebBackend,
@@ -339,7 +340,10 @@ describe('Eventing tests', function() {
 
       it('Compare the stream creation timestamp', async function() {
         assert.equal(gotStreamData.streamName, wantStreamName);
-        assert.equal(gotStreamData.streamCreationTime, wantStreamCreationTime);
+        assert.equal(
+            getTimeStampsWithZeroMilliSeconds(gotStreamData.streamCreationTime),
+            getTimeStampsWithZeroMilliSeconds(wantStreamCreationTime),
+        );
       });
     });
   }
@@ -378,7 +382,10 @@ describe('Eventing tests', function() {
 
       it('Compare the consumer creation timestamp', async function() {
         assert.equal(gotConsumerData.consumerName, wantConsumerName);
-        assert.equal(gotConsumerData.consumerCreationTime, wantConsumerCreationTime);
+        assert.equal(
+            getTimeStampsWithZeroMilliSeconds(gotConsumerData.consumerCreationTime),
+            getTimeStampsWithZeroMilliSeconds(wantConsumerCreationTime),
+        );
       });
     });
   }
