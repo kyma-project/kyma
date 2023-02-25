@@ -326,6 +326,7 @@ async function sendCloudEventBinaryModeAndCheckTracing(targetNamespace = 'test',
 
 async function checkInClusterEventTracing(targetNamespace) {
   const res = await checkInClusterEventDeliveryHelper(targetNamespace, 'structured');
+  console.log(res);
   expect(res.data).to.have.nested.property('event.headers.traceparent');
   expect(res.data).to.have.nested.property('podName');
 
@@ -974,13 +975,17 @@ async function getVirtualServiceHost(targetNamespace, funcName) {
 
 async function checkInClusterEventDeliveryHelper(targetNamespace, encoding, testSubscriptionV1Alpha2=false,
     eventType='', eventSource='') {
+  console.log('checkInClusterEventDeliveryHelper');
   const eventId = getRandomEventId(encoding);
   const mockHost = await getVirtualServiceHost(targetNamespace, 'lastorder');
-
   if (isDebugEnabled()) {
     await printStatusOfInClusterEventingInfrastructure(targetNamespace, encoding, 'lastorder');
   }
-
+  console.log(eventId);
+  console.log(mockHost);
+  console.log(encoding);
+  console.log(eventType);
+  console.log(eventSource);
   await sendInClusterEventWithRetry(mockHost, eventId, encoding, eventType, eventSource);
   return ensureInClusterEventReceivedWithRetry(mockHost, eventId, eventType);
 }
