@@ -17,7 +17,7 @@ const {
   skrInstanceId,
   backendK8sSecretName,
   backendK8sSecretNamespace,
-  streamDataConfigMapName,
+  testDataConfigMapName,
   eventingNatsSvcName,
   eventingNatsApiRuleAName,
   getJetStreamStreamData,
@@ -62,8 +62,19 @@ const {
 const {expect} = require('chai');
 
 describe('Eventing tests preparation', function() {
+  let natsApiRuleVSHost;
+
   this.timeout(timeoutTime);
   this.slow(slowTime);
+
+  before(async () => {
+    debug('expose the eventing-nats service with an apirule');
+    const vs = await createApiRuleForService(eventingNatsApiRuleAName,
+        kymaSystem,
+        eventingNatsSvcName,
+        8222);
+    natsApiRuleVSHost = vs.spec.hosts[0];
+  });
 
   it('Print test initial configs', async function() {
     debug(`Mock namespace: ${mockNamespace}`);
@@ -118,21 +129,16 @@ describe('Eventing tests preparation', function() {
   it('Prepare JetStream data configmap', async function() {
     // Create a configmap that contains stream data for jetstream so that during the test,
     // we can verify that the stream was not affected/recreated
-    debug('expose the eventing-nats service with an apirule');
-    const vs = await createApiRuleForService(eventingNatsApiRuleAName,
-        kymaSystem,
-        eventingNatsSvcName,
-        8222);
-    const vsHost = vs.spec.hosts[0];
-
-    debug('Creating configmap with JetStream stream info');
-    const streamInfo = await getJetStreamStreamData(vsHost);
-    await createK8sConfigMap(
-        streamInfo,
-        streamDataConfigMapName,
-    );
-
-    await deleteApiRule(eventingNatsApiRuleAName, kymaSystem);
+    debug('Creating eventing test data configmap with JetStream stream info');
+    const streamInfo = await getJetStreamStreamData(natsApiRuleVSHost);
+    if (streamInfo) {
+      await createK8sConfigMap(
+          streamInfo,
+          testDataConfigMapName,
+      );
+    } else {
+      debug('Skipping creating eventing test data configmap due to missing stream');
+    }
   });
 
   it('Prepare assets without Compass flow', async function() {
@@ -186,6 +192,10 @@ describe('Eventing tests preparation', function() {
     if (this.currentTest.state === 'failed') {
       await cleanupTestingResources();
     }
+  });
+
+  after(async () => {
+    await deleteApiRule(eventingNatsApiRuleAName, kymaSystem);
   });
 
   // // **** Helper functions ****

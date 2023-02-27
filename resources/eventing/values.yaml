@@ -5,14 +5,14 @@ global:
   images:
     eventing_controller:
       name: eventing-controller
-      version: PR-16826
+      version: PR-16849
       pullPolicy: "IfNotPresent"
     publisher_proxy:
       name: event-publisher-proxy
-      version: PR-16836
+      version: PR-16849
     nats:
       name: nats
-      version: 2.9.11-alpine3.17
+      version: v20230223-2.9.14-alpine3.17
       directory: external
     nats_config_reloader:
       name: natsio/nats-server-config-reloader

@@ -92,18 +92,17 @@ All the published events of this type are then forwarded to an HTTP endpoint cal
   Kyma Dashboard
   </summary>
 
-1. In your Function's view, go to **Configuration** and click **Create Subscription+**.
-2. Provide the following parameters:
+1. Go to **Namespaces** and select the default Namespace.
+2. Go to **Configuration** > **Subscriptions** and click **Create Subscription+**.
+3. Provide the following parameters:
    - **Subscription name**: `lastorder-sub`
-   - Choose `lastorder` from the **Service** dropdown.
-   - **Application name**: `myapp`
-   - **Event name**: `order.received`
-   - **Event version**: `v1`
+   - **Types**: `order.received.v1`
+   - **Service**: `lastorder` (The sink field will be populated automatically.)
+   - **Type matching:**: `standard`
+   - **Source**: `myapp`
 
-   - **Event type** is generated automatically. For this example, it's `sap.kyma.custom.myapp.order.received.v1`.
-
-3. Click **Create**.
-4. Wait a few seconds for the Subscription to have status `READY`.
+4. Click **Create**.
+5. Wait a few seconds for the Subscription to have status `READY`.
 
   </details>
   <details>
@@ -114,22 +113,15 @@ All the published events of this type are then forwarded to an HTTP endpoint cal
 Run:
 ```bash
 cat <<EOF | kubectl apply -f -
-   apiVersion: eventing.kyma-project.io/v1alpha1
+   apiVersion: eventing.kyma-project.io/v1alpha2
    kind: Subscription
    metadata:
      name: lastorder-sub
      namespace: default
    spec:
-     filter:
-       filters:
-       - eventSource:
-           property: source
-           type: exact
-           value: ""
-         eventType:
-           property: type
-           type: exact
-           value: sap.kyma.custom.myapp.order.received.v1
+     source: myapp
+     types:
+       - order.received.v1
      sink: http://lastorder.default.svc.cluster.local
 EOF
 ```
@@ -163,8 +155,8 @@ We created the `lastorder` Function and subscribed to the `order.received.v1` ev
    ```bash
    curl -v -X POST \
         -H "ce-specversion: 1.0" \
-        -H "ce-type: sap.kyma.custom.myapp.order.received.v1" \
-        -H "ce-source: /default/io.kyma-project/custom" \
+        -H "ce-type: order.received.v1" \
+        -H "ce-source: myapp" \
         -H "ce-eventtypeversion: v1" \
         -H "ce-id: 759815c3-b142-48f2-bf18-c6502dc0998f" \
         -H "content-type: application/json" \
@@ -179,7 +171,7 @@ We created the `lastorder` Function and subscribed to the `order.received.v1` ev
 
    ```bash
    cloudevents send http://localhost:3000/publish \
-      --type sap.kyma.custom.myapp.order.received.v1 \
+      --type order.received.v1 \
       --id 759815c3-b142-48f2-bf18-c6502dc0998f \
       --source myapp \
       --datacontenttype application/json \
