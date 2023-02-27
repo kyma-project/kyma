@@ -50,6 +50,7 @@ const {
   eventingSinkName,
   v1alpha1SubscriptionsTypes,
   subscriptionsTypes,
+  subscriptionsExactTypeMatching,
   getClusterHost,
   checkFunctionReachable,
   checkEventDelivery,
@@ -213,6 +214,20 @@ describe('Eventing tests', function() {
       }
       for (let i=0; i < subscriptionsTypes.length; i++) {
         await checkEventDelivery(clusterHost, 'legacy', subscriptionsTypes[i].type, subscriptionsTypes[i].source);
+      }
+    });
+
+    it('Cloud Events with subscription (exact) should be delivered to eventing-sink ', async function() {
+      if (!isEventingSinkDeployed || !testSubscriptionV1Alpha2 || backend !== bebBackend) {
+        this.skip();
+      }
+
+      let eventSource = 'eventing-test';
+      if (backend === bebBackend) {
+        eventSource = getEventMeshNamespace();
+      }
+      for (let i=0; i < subscriptionsExactTypeMatching.length; i++) {
+        await checkEventDelivery(clusterHost, 'binary', subscriptionsExactTypeMatching[i].type, eventSource);
       }
     });
   }
