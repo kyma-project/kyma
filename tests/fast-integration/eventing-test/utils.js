@@ -29,7 +29,7 @@ const {
 
 const {DirectorClient, DirectorConfig, getAlreadyAssignedScenarios} = require('../compass');
 const {GardenerClient, GardenerConfig} = require('../gardener');
-const {eventMeshSecretFilePath} = require('./common/common');
+const {eventMeshSecretFilePath, getEventMeshNamespace} = require('./common/common');
 const axios = require('axios');
 const {v4: uuidv4} = require('uuid');
 const fs = require('fs');
@@ -102,6 +102,15 @@ const subscriptionsTypes = [
     name: 'fi-test-sub-v2-2',
     type: 'Order-$.third.R-e-c-e-i-v-e-d.v1',
     source: 'test-app',
+  },
+];
+
+const subscriptionsExactTypeMatching = [
+  {
+    name: 'fi-test-sub-v2-exact-0',
+    type: 'sap.kyma.custom.exact.order.completed.v2',
+    source: undefined,
+    typeMatching: 'exact',
   },
 ];
 
@@ -262,15 +271,29 @@ async function deployV1Alpha2Subscriptions() {
   const sink = `http://${eventingSinkName}.${testNamespace}.svc.cluster.local`;
   debug(`Using sink: ${sink}`);
 
-  // creating v1alpha2 subscriptions
+  // creating v1alpha2 subscriptions - standard type matching
   for (let i=0; i < subscriptionsTypes.length; i++) {
     const subName = subscriptionsTypes[i].name;
     const eventType = subscriptionsTypes[i].type;
     const eventSource = subscriptionsTypes[i].source;
 
     debug(`Creating subscription: ${subName} with type: ${eventType}, source: ${eventSource}`);
-    // eventingSubscriptionV1Alpha2(eventType, source, sink, name, namespace, typeMatching='standard')
     await k8sApply([eventingSubscriptionV1Alpha2(eventType, eventSource, sink, subName, testNamespace)]);
+    debug(`Waiting for subscription: ${subName} with type: ${eventType}, source: ${eventSource}`);
+    await waitForSubscription(subName, testNamespace);
+  }
+
+  // creating v1alpha2 subscriptions - exact type matching
+  for (let i=0; i < subscriptionsExactTypeMatching.length; i++) {
+    const subName = subscriptionsExactTypeMatching[i].name;
+    const eventType = subscriptionsExactTypeMatching[i].type;
+    let eventSource = subscriptionsExactTypeMatching[i].source;
+    if (!subscriptionsTypes[i].source) {
+      eventSource = getEventMeshNamespace();
+    }
+
+    debug(`Creating subscription (TypeMatching: exact): ${subName} with type: ${eventType}, source: ${eventSource}`);
+    await k8sApply([eventingSubscriptionV1Alpha2(eventType, eventSource, sink, subName, testNamespace, 'exact')]);
     debug(`Waiting for subscription: ${subName} with type: ${eventType}, source: ${eventSource}`);
     await waitForSubscription(subName, testNamespace);
   }
@@ -290,6 +313,13 @@ async function waitForV1Alpha2Subscriptions() {
   for (let i=0; i < subscriptionsTypes.length; i++) {
     const subName = subscriptionsTypes[i].name;
     debug(`Waiting for subscription: ${subName} with type: ${subscriptionsTypes[i].type}`);
+    await waitForSubscription(subName, testNamespace);
+  }
+
+  // waiting for v1alpha2 subscriptions - exact type matching
+  for (let i=0; i < subscriptionsExactTypeMatching.length; i++) {
+    const subName = subscriptionsExactTypeMatching[i].name;
+    debug(`Waiting for subscription: ${subName} with type: ${subscriptionsExactTypeMatching[i].type}`);
     await waitForSubscription(subName, testNamespace);
   }
 }
@@ -674,6 +704,7 @@ module.exports = {
   eventingSinkName,
   v1alpha1SubscriptionsTypes,
   subscriptionsTypes,
+  subscriptionsExactTypeMatching,
   getClusterHost,
   checkFunctionReachable,
   checkEventDelivery,
