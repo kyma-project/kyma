@@ -140,7 +140,7 @@ describe('Eventing tests', function() {
     debug(`host name fetched: ${clusterHost}`);
   });
 
-  // eventDeliveryTestSuite - Runs Eventing tests for event delivery
+  // eventDeliveryTestSuite - Runs Eventing tests for event delivery tests
   function eventDeliveryTestSuite(backend) {
     it('Wait for subscriptions to be ready', async function() {
       // important for upgrade tests
