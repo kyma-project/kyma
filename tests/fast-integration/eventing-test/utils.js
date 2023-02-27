@@ -170,7 +170,7 @@ async function getStreamConfigForJetStream() {
   const res = await listPods(labelSelector, 'kyma-system');
   let envsCount = 0;
   res.body?.items[0]?.spec.containers.find((container) =>
-      container.name === 'controller',
+    container.name === 'controller',
   ).env.forEach((env) => {
     if (env.name === 'JS_STREAM_RETENTION_POLICY') {
       streamConfig['retention_policy'] = env.value;
