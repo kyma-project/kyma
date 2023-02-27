@@ -74,9 +74,9 @@ generate-local: controller-gen-local ## Generate code containing DeepCopy, DeepC
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
 set-up-local-env:
-    export NATS_URL ?= eventing-nats.kyma-system.svc.cluster.local
-    export DOMAIN ?= example-domain.com
-    export WEBHOOK_TOKEN_ENDPOINT ?= "https://oauth2.${DOMAIN}/oauth2/token"
+	export NATS_URL ?= eventing-nats.kyma-system.svc.cluster.local
+	export DOMAIN ?= example-domain.com
+	export WEBHOOK_TOKEN_ENDPOINT ?= "https://oauth2.${DOMAIN}/oauth2/token"
 	export ENABLE_NEW_CRD_VERSION ?= true
 
 ENVTEST_ASSETS_DIR=$(PROJECT_DIR)/testbin/$(shell uname)
@@ -96,9 +96,9 @@ run: manifests-local generate-local fmt-local vet-local set-up-local-env## Run a
 	go run --tags=local ./cmd/eventing-controller/main.go
 
 eventing-controller: gomod-vendor-local ## Build the binary
-        @CGO_ENABLED=0 go build -o bin/$(APP_NAME) \
-        $(GOBUILD_FLAGS) \
-        $(PKG)/$(ENTRYPOINT)
+	@CGO_ENABLED=0 go build -o bin/$(APP_NAME) \
+	$(GOBUILD_FLAGS) \
+	$(PKG)/$(ENTRYPOINT)
 
 test: copy-external-crds ## It will also run overridden `test` target from generic makefile after `copy-external-crds`
 
@@ -158,4 +158,3 @@ update_metrics_docs:
 	@promlinter list -ojson ../event-publisher-proxy > metrics_epp.json
 	@promlinter list -ojson ../eventing-controller/ > metrics_ec.json
 	@gomplate -d ec=metrics_ec.json -d epp=metrics_epp.json -f hack/metrics.doc.tpl  | prettier --parser markdown > ../../docs/04-operation-guides/operations/evnt-02-eventing-metrics.md
-
