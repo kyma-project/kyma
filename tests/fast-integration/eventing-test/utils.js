@@ -1,5 +1,6 @@
 const {
   cleanMockTestFixture,
+  eventTypeOrderReceivedHash,
   cleanCompassResourcesSKR,
   generateTraceParentHeader,
   checkTrace,
@@ -13,6 +14,7 @@ const {
   getShootNameFromK8sServerUrl,
   listPods,
   retryPromise,
+  getSubscription,
   waitForVirtualService,
   k8sApply,
   waitForFunction,
@@ -25,7 +27,7 @@ const {
 
 const {DirectorClient, DirectorConfig, getAlreadyAssignedScenarios} = require('../compass');
 const {GardenerClient, GardenerConfig} = require('../gardener');
-const {eventMeshSecretFilePath} = require('./common/common');
+const {eventMeshSecretFilePath, getEventMeshNamespace} = require('./common/common');
 const axios = require('axios');
 const {v4: uuidv4} = require('uuid');
 const fs = require('fs');
@@ -35,11 +37,12 @@ const {expect} = require('chai');
 
 // Variables
 const kymaVersion = process.env.KYMA_VERSION || '';
+const kymaStreamName = 'sap';
 const isSKR = process.env.KYMA_TYPE === 'SKR';
 const skrInstanceId = process.env.INSTANCE_ID || '';
 const testCompassFlow = process.env.TEST_COMPASS_FLOW || false;
 const testSubscriptionV1Alpha2 = process.env.ENABLE_SUBSCRIPTION_V1_ALPHA2 === 'true';
-const subCRDVersion = testSubscriptionV1Alpha2? 'v1alpha2': 'v1alpha1';
+const subCRDVersion = testSubscriptionV1Alpha2 ? 'v1alpha2' : 'v1alpha1';
 const skipResourceCleanup = process.env.SKIP_CLEANUP || false;
 const suffix = getSuffix(isSKR, testCompassFlow);
 const appName = `app-${suffix}`;
@@ -48,12 +51,11 @@ const testNamespace = `test-${suffix}`;
 const mockNamespace = process.env.MOCK_NAMESPACE || 'mocks';
 const backendK8sSecretName = process.env.BACKEND_SECRET_NAME || 'eventing-backend';
 const backendK8sSecretNamespace = process.env.BACKEND_SECRET_NAMESPACE || 'default';
-const streamDataConfigMapName = 'eventing-stream-info';
+const testDataConfigMapName = 'eventing-test-data';
 const eventingNatsSvcName = 'eventing-nats';
 const eventingNatsApiRuleAName = `${eventingNatsSvcName}-apirule`;
 const timeoutTime = 10 * 60 * 1000;
 const slowTime = 5000;
-const streamConfig = { };
 const eppInClusterUrl = 'eventing-event-publisher-proxy.kyma-system';
 const subscriptionNames = {
   orderCreated: 'order-created',
@@ -63,24 +65,48 @@ const eventingSinkName = 'eventing-sink';
 
 // ****** Event types to test ***********//
 const v1alpha1SubscriptionsTypes = [
-  'sap.kyma.custom.noapp.order.tested.v1',
-  'sap.kyma.custom.connected-app.order.tested.v1',
-  'sap.kyma.custom.test-app.order-$.second.R-e-c-e-i-v-e-d.v1',
-  'sap.kyma.custom.connected-app2.or-der.crea-ted.one.two.three.v4',
+  {
+    name: 'fi-test-sub-0',
+    type: 'sap.kyma.custom.noapp.order.tested.v1',
+  },
+  {
+    name: 'fi-test-sub-1',
+    type: 'sap.kyma.custom.connected-app.order.tested.v1',
+  },
+  {
+    name: 'fi-test-sub-2',
+    type: 'sap.kyma.custom.test-app.order-$.second.R-e-c-e-i-v-e-d.v1',
+  },
+  {
+    name: 'fi-test-sub-3',
+    type: 'sap.kyma.custom.connected-app2.or-der.crea-ted.one.two.three.v4',
+  },
 ];
 
 const subscriptionsTypes = [
   {
+    name: 'fi-test-sub-v2-0',
     type: 'order.modified.v1',
     source: 'myapp',
   },
   {
+    name: 'fi-test-sub-v2-1',
     type: 'or-der.crea-ted.one.two.three.four.v4',
     source: 'test-app',
   },
   {
+    name: 'fi-test-sub-v2-2',
     type: 'Order-$.third.R-e-c-e-i-v-e-d.v1',
     source: 'test-app',
+  },
+];
+
+const subscriptionsExactTypeMatching = [
+  {
+    name: 'fi-test-sub-v2-exact-0',
+    type: 'sap.kyma.custom.exact.order.completed.v2',
+    source: undefined,
+    typeMatching: 'exact',
   },
 ];
 
@@ -120,7 +146,7 @@ async function cleanupTestingResources() {
   }
 
   debug('Removing JetStream data configmap');
-  await deleteK8sConfigMap(streamDataConfigMapName);
+  await deleteK8sConfigMap(testDataConfigMapName);
 
   debug(`Removing ${testNamespace} and ${mockNamespace} namespaces`);
   await cleanMockTestFixture(mockNamespace, testNamespace, true);
@@ -154,46 +180,49 @@ async function getNatsPods() {
   return await listPods(labelSelector, 'kyma-system');
 }
 
-// getStreamConfigForJetStream gets the stream retention policy and the consumer deliver policy env variables
-// from the eventing controller pod and also checks if these env variables exist on the pod.
-async function getStreamConfigForJetStream() {
-  const labelSelector = 'app.kubernetes.io/instance=eventing,app.kubernetes.io/name=controller';
-  const res = await listPods(labelSelector, 'kyma-system');
-  let envsCount = 0;
-  res.body?.items[0]?.spec.containers.find((container) =>
-    container.name === 'controller',
-  ).env.forEach((env) => {
-    if (env.name === 'JS_STREAM_RETENTION_POLICY') {
-      streamConfig['retention_policy'] = env.value;
-      envsCount++;
-    }
-    if (env.name === 'JS_CONSUMER_DELIVER_POLICY') {
-      streamConfig['consumer_deliver_policy'] = env.value;
-      envsCount++;
-    }
-  });
-  // check to make sure the environment variables exist
-  return envsCount === 2;
-}
-
 async function getJetStreamStreamData(host) {
   const responseJson = await retryPromise(async () => await axios.get(`https://${host}/jsz?streams=true`), 5, 1000);
-  const streamName = responseJson.data.account_details[0].stream_detail[0].name;
-  const streamCreationTime = responseJson.data.account_details[0].stream_detail[0].created;
-
-  return {
-    streamName: streamName,
-    streamCreationTime: streamCreationTime,
-  };
+  const streams = responseJson.data.account_details[0].stream_detail;
+  for (const stream of streams) {
+    if (stream.name === kymaStreamName) {
+      return {
+        streamName: kymaStreamName,
+        streamCreationTime: stream.created,
+      };
+    }
+  }
 }
 
-function skipAtLeastOnceDeliveryTest() {
-  return !(streamConfig['retention_policy'] === 'limits' &&
-      streamConfig['consumer_deliver_policy'] === 'all');
+async function getSubscriptionConsumerName(subscriptionName, namespace='default', crdVersion='v1alpha1') {
+  if (crdVersion === 'v1alpha1') {
+    // the logic is temporary because consumer name is missing in the v1alpha1 subscription
+    // will be deleted as we will upgrade to v1alpha2
+    return eventTypeOrderReceivedHash;
+  } else {
+    const sub = await getSubscription(subscriptionName, namespace, crdVersion);
+    return sub.status.backend.types[0].consumerName;
+  }
+}
+
+async function getJetStreamConsumerData(consumerName, host) {
+  const responseJson = await retryPromise(async () => await axios.get(`https://${host}/jsz?consumers=true`), 5, 1000);
+  const consumers = responseJson.data.account_details[0].stream_detail[0].consumer_detail;
+  for (const con of consumers) {
+    if (con.name === consumerName) {
+      return {
+        consumerName: con.name,
+        consumerCreationTime: con.created,
+      };
+    }
+  }
 }
 
 function isStreamCreationTimeMissing(streamData) {
   return streamData.streamCreationTime === undefined;
+}
+
+function isConsumerCreationTimeMissing(streamData) {
+  return streamData.consumerCreationTime === undefined;
 }
 
 async function getClusterHost(apiRuleName, namespace) {
@@ -228,8 +257,8 @@ async function deployV1Alpha1Subscriptions() {
 
   // creating v1alpha1 subscriptions
   for (let i=0; i < v1alpha1SubscriptionsTypes.length; i++) {
-    const subName = `fi-test-sub-${i}`;
-    const eventType = v1alpha1SubscriptionsTypes[i];
+    const subName = v1alpha1SubscriptionsTypes[i].name;
+    const eventType = v1alpha1SubscriptionsTypes[i].type;
 
     debug(`Creating subscription: ${subName} with type: ${eventType}`);
     await k8sApply([eventingSubscription(eventType, sink, subName, testNamespace)]);
@@ -242,15 +271,29 @@ async function deployV1Alpha2Subscriptions() {
   const sink = `http://${eventingSinkName}.${testNamespace}.svc.cluster.local`;
   debug(`Using sink: ${sink}`);
 
-  // creating v1alpha2 subscriptions
+  // creating v1alpha2 subscriptions - standard type matching
   for (let i=0; i < subscriptionsTypes.length; i++) {
-    const subName = `fi-test-sub-v2-${i}`;
+    const subName = subscriptionsTypes[i].name;
     const eventType = subscriptionsTypes[i].type;
     const eventSource = subscriptionsTypes[i].source;
 
     debug(`Creating subscription: ${subName} with type: ${eventType}, source: ${eventSource}`);
-    // eventingSubscriptionV1Alpha2(eventType, source, sink, name, namespace, typeMatching='standard')
     await k8sApply([eventingSubscriptionV1Alpha2(eventType, eventSource, sink, subName, testNamespace)]);
+    debug(`Waiting for subscription: ${subName} with type: ${eventType}, source: ${eventSource}`);
+    await waitForSubscription(subName, testNamespace);
+  }
+
+  // creating v1alpha2 subscriptions - exact type matching
+  for (let i=0; i < subscriptionsExactTypeMatching.length; i++) {
+    const subName = subscriptionsExactTypeMatching[i].name;
+    const eventType = subscriptionsExactTypeMatching[i].type;
+    let eventSource = subscriptionsExactTypeMatching[i].source;
+    if (!subscriptionsTypes[i].source) {
+      eventSource = getEventMeshNamespace();
+    }
+
+    debug(`Creating subscription (TypeMatching: exact): ${subName} with type: ${eventType}, source: ${eventSource}`);
+    await k8sApply([eventingSubscriptionV1Alpha2(eventType, eventSource, sink, subName, testNamespace, 'exact')]);
     debug(`Waiting for subscription: ${subName} with type: ${eventType}, source: ${eventSource}`);
     await waitForSubscription(subName, testNamespace);
   }
@@ -259,8 +302,8 @@ async function deployV1Alpha2Subscriptions() {
 async function waitForV1Alpha1Subscriptions() {
   // waiting for v1alpha1 subscriptions
   for (let i=0; i < v1alpha1SubscriptionsTypes.length; i++) {
-    const subName = `fi-test-sub-${i}`;
-    debug(`Waiting for subscription: ${subName} with type: ${v1alpha1SubscriptionsTypes[i]}`);
+    const subName = v1alpha1SubscriptionsTypes[i].name;
+    debug(`Waiting for subscription: ${subName} with type: ${v1alpha1SubscriptionsTypes[i].type}`);
     await waitForSubscription(subName, testNamespace);
   }
 }
@@ -268,8 +311,15 @@ async function waitForV1Alpha1Subscriptions() {
 async function waitForV1Alpha2Subscriptions() {
   // waiting for v1alpha2 subscriptions
   for (let i=0; i < subscriptionsTypes.length; i++) {
-    const subName = `fi-test-sub-v2-${i}`;
+    const subName = subscriptionsTypes[i].name;
     debug(`Waiting for subscription: ${subName} with type: ${subscriptionsTypes[i].type}`);
+    await waitForSubscription(subName, testNamespace);
+  }
+
+  // waiting for v1alpha2 subscriptions - exact type matching
+  for (let i=0; i < subscriptionsExactTypeMatching.length; i++) {
+    const subName = subscriptionsExactTypeMatching[i].name;
+    debug(`Waiting for subscription: ${subName} with type: ${subscriptionsExactTypeMatching[i].type}`);
     await waitForSubscription(subName, testNamespace);
   }
 }
@@ -535,6 +585,12 @@ function createLegacyEventRequestBody(proxyHost, eventId, eventType, eventSource
   return reqBody;
 }
 
+function getTimeStampsWithZeroMilliSeconds(timestamp) {
+  // set milliseconds to zero
+  const ts = (new Date(timestamp)).setMilliseconds(0);
+  return (new Date(ts)).toISOString();
+}
+
 module.exports = {
   appName,
   scenarioName,
@@ -548,7 +604,7 @@ module.exports = {
   subCRDVersion,
   backendK8sSecretName,
   backendK8sSecretNamespace,
-  streamDataConfigMapName,
+  testDataConfigMapName,
   eventingNatsSvcName,
   eventingNatsApiRuleAName,
   timeoutTime,
@@ -560,15 +616,17 @@ module.exports = {
   cleanupTestingResources,
   getRegisteredCompassScenarios,
   getNatsPods,
-  getStreamConfigForJetStream,
-  skipAtLeastOnceDeliveryTest,
   getJetStreamStreamData,
+  getJetStreamConsumerData,
   isStreamCreationTimeMissing,
+  isConsumerCreationTimeMissing,
   eppInClusterUrl,
   subscriptionNames,
+  getSubscriptionConsumerName,
   eventingSinkName,
   v1alpha1SubscriptionsTypes,
   subscriptionsTypes,
+  subscriptionsExactTypeMatching,
   getClusterHost,
   checkFunctionReachable,
   checkEventDelivery,
@@ -579,4 +637,5 @@ module.exports = {
   waitForV1Alpha1Subscriptions,
   waitForV1Alpha2Subscriptions,
   checkEventTracing,
+  getTimeStampsWithZeroMilliSeconds,
 };

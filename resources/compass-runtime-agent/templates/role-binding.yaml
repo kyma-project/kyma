@@ -73,3 +73,4 @@ roleRef:
   kind: Role
   name: {{ .Chart.Name }}-ca-cert-role
   apiGroup: rbac.authorization.k8s.io
+

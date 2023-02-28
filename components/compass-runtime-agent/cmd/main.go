@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/json"
-
 	"github.com/google/uuid"
 	"github.com/kyma-incubator/compass/components/director/pkg/correlation"
 	"github.com/kyma-incubator/compass/components/director/pkg/str"
@@ -52,12 +51,24 @@ func main() {
 		return k8sResourceClientSets.core.CoreV1().Secrets(namespace)
 	}
 
-	clusterCertSecret := parseNamespacedName(options.ClusterCertificatesSecret)
 	caCertSecret := parseNamespacedName(options.CaCertificatesSecret)
 	caCertSecretToMigrate := parseNamespacedName(options.CaCertSecretToMigrate)
+
 	secretsRepository := secrets.NewRepository(secretsManagerConstructor)
 
 	err = migrateSecret(secretsRepository, caCertSecretToMigrate, caCertSecret, options.CaCertSecretKeysToMigrate)
+	exitOnError(err, "Failed to migrate ")
+
+	log.Info("Migrating credentials if needed")
+	clusterCertSecret := parseNamespacedName(options.ClusterCertificatesSecret)
+	agentConfigSecret := parseNamespacedName(options.AgentConfigurationSecret)
+	oldClusterCertSecret := parseNamespacedName(options.ClusterCertificatesSecretToMigrate)
+	oldAgentConfigSecret := parseNamespacedName(options.AgentConfigurationSecretToMigrate)
+
+	err = migrateSecretAllKeys(secretsRepository, oldClusterCertSecret, clusterCertSecret)
+	exitOnError(err, "Failed to migrate ")
+
+	err = migrateSecretAllKeys(secretsRepository, oldAgentConfigSecret, agentConfigSecret)
 	exitOnError(err, "Failed to migrate ")
 
 	log.Info("Setting up manager")
@@ -76,11 +87,9 @@ func main() {
 	syncService, err := createSynchronisationService(k8sResourceClientSets, options)
 	exitOnError(err, "Failed to create synchronization service")
 
-	agentConfigSecretNamespacedName := parseNamespacedName(options.AgentConfigurationSecret)
-
 	connectionDataCache := cache.NewConnectionDataCache()
 
-	configProvider := confProvider.NewConfigProvider(agentConfigSecretNamespacedName, secretsRepository)
+	configProvider := confProvider.NewConfigProvider(agentConfigSecret, secretsRepository)
 	clientsProvider := compass.NewClientsProvider(graphql.New, options.SkipCompassTLSVerify, options.QueryLogging)
 	connectionDataCache.AddSubscriber(clientsProvider.UpdateConnectionData)
 
@@ -128,6 +137,16 @@ func main() {
 	log.Info("Starting the Cmd.")
 	err = mgr.Start(signals.SetupSignalHandler())
 	exitOnError(err, "Failed to run the manager")
+}
+
+func migrateSecretAllKeys(secretRepo secrets.Repository, sourceSecret, targetSecret types.NamespacedName) error {
+
+	includeAllKeysFunc := func(k string) bool {
+		return true
+	}
+
+	migrator := certificates.NewMigrator(secretRepo, includeAllKeysFunc)
+	return migrator.Do(sourceSecret, targetSecret)
 }
 
 func migrateSecret(secretRepo secrets.Repository, sourceSecret, targetSecret types.NamespacedName, keysToInclude string) error {

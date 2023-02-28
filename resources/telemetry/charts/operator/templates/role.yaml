@@ -1,4 +1,3 @@
-
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -59,6 +58,7 @@ rules:
   resources:
   - validatingwebhookconfigurations
   verbs:
+  - create
   - get
   - update
 - apiGroups:
@@ -181,7 +181,6 @@ rules:
   - get
   - patch
   - update
-
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role

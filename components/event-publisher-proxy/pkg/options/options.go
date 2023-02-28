@@ -14,6 +14,7 @@ const (
 	// All the available arguments.
 	argMaxRequestSize = "max-request-size"
 	argMetricsAddress = "metrics-addr"
+
 	// All the available environment variables.
 	envEnableNewCRDVersion = "ENABLE_NEW_CRD_VERSION"
 )
