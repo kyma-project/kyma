@@ -97,10 +97,7 @@ This tutorial shows only one possible use case. There are many more use cases on
 
       ```bash
       export KYMA_DOMAIN={KYMA_DOMAIN_VARIABLE}
-      
-      curl -X POST https://incoming.${KYMA_DOMAIN}
-      -H 'Content-Type: application/json'
-      -d '{"foo":"bar"}'
+      curl -X POST https://incoming.${KYMA_DOMAIN} -H 'Content-Type: application/json' -d '{"foo":"bar"}'
       ```
 ### Create the receiver Function
 
