@@ -11,7 +11,7 @@ The [Subscription](../../05-technical-reference/00-custom-resources/evnt-01-subs
 1. Follow the [Prerequisites steps](./) for the Eventing tutorials.
 2. [Create a Function](../../02-get-started/04-trigger-workload-with-event.md#create-a-function).
 
-## Create a Subscription with Multiple event types
+## Create a Subscription with multiple event types
 
 To subscribe to multiple events, you need a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) custom resource. In the following example, you learn how to subscribe to events of two types: `order.received.v1` and `order.changed.v1`.
 
