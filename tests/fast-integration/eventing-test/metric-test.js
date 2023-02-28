@@ -15,24 +15,28 @@ const {
 } = require('../utils');
 
 const {queryPrometheus} = require('../monitoring/client');
-const {subscriptionNames} = require('./utils');
+const {
+  subscriptionNames,
+  eventingSinkName,
+} = require('./utils');
 
-const dashboards = {
-  // The delivery dashboard
-  delivery_publisherProxy: {
-    title: 'Requests to publisher proxy',
-    query: 'sum by (destination_service) (rate(istio_requests_total{destination_service=~"event.*-publisher-proxy.kyma-system.svc.cluster.local", response_code=~"2.*"}[5m]))',
-    backends: ['nats', 'beb'],
-    // The assert function receives the `data.result` section of the query result:
-    // https://prometheus.io/docs/prometheus/latest/querying/api/#instant-queries
-    assert: function(result) {
-      const foundMetric = result.find((res) => res.metric.destination_service.startsWith('eventing-event-publisher-proxy'));
-      expect(foundMetric).to.be.not.undefined;
+function getOSSDashboards(functionName, subscriptionName) {
+  return {
+    // The delivery dashboard
+    delivery_publisherProxy: {
+      title: 'Requests to publisher proxy',
+      query: 'sum by (destination_service) (rate(istio_requests_total{destination_service=~"event.*-publisher-proxy.kyma-system.svc.cluster.local", response_code=~"2.*"}[5m]))',
+      backends: ['nats', 'beb'],
+      // The assert function receives the `data.result` section of the query result:
+      // https://prometheus.io/docs/prometheus/latest/querying/api/#instant-queries
+      assert: function(result) {
+        const foundMetric = result.find((res) => res.metric.destination_service.startsWith('eventing-event-publisher-proxy'));
+        expect(foundMetric).to.be.not.undefined;
+      },
     },
-  },
-  delivery_subscribers: {
-    title: 'Requests to subscribers',
-    query: `
+    delivery_subscribers: {
+      title: 'Requests to subscribers',
+      query: `
           sum (rate(
             istio_requests_total{
               source_workload=~"eventing.*controller",
@@ -40,41 +44,41 @@ const dashboards = {
               response_code=~"2.*"
             }[5m])
           ) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload,response_code)`,
-    backends: ['nats'],
-    assert: function(result) {
-      const foundMetric = result.find((res) => res.metric.destination_workload.startsWith('lastorder'));
-      expect(foundMetric).to.be.not.undefined;
+      backends: ['nats'],
+      assert: function(result) {
+        const foundMetric = result.find((res) => res.metric.destination_workload.startsWith(functionName));
+        expect(foundMetric).to.be.not.undefined;
+      },
     },
-  },
-  delivery_per_subscription: {
-    title: 'Delivery per Subscription',
-    query: `
+    delivery_per_subscription: {
+      title: 'Delivery per Subscription',
+      query: `
          sum (nats_ec_delivery_per_subscription_total{response_code=~"[245].*"}) 
           by (namespace, subscription_name,event_type,sink,response_code)`,
-    backends: ['nats'],
-    assert: function(result) {
-      const foundMetric = result.find((res) =>
-        res.metric.subscription_name &&
-          res.metric.subscription_name === subscriptionNames.orderReceived &&
-          res.metric.response_code === '200',
-      );
-      expect(foundMetric).to.be.not.undefined;
+      backends: ['nats'],
+      assert: function(result) {
+        const foundMetric = result.find((res) =>
+          res.metric.subscription_name &&
+            res.metric.subscription_name === subscriptionName &&
+            res.metric.response_code === '200',
+        );
+        expect(foundMetric).to.be.not.undefined;
+      },
     },
-  },
-  latency_eventPublisherToMessagingServer: {
-    title: 'Latency of Event Publisher -> Messaging Server',
-    query: 'histogram_quantile(0.99999, sum(rate(eventing_epp_backend_duration_milliseconds_bucket{namespace="kyma-system"}[5m])) by (le,pod,namespace,service))',
-    backends: ['nats', 'beb'],
-    assert: function(result) {
-      const foundMetric = result.find((res) =>
-        res.metric.namespace.toLowerCase() === 'kyma-system' &&
-        res.metric.pod.toLowerCase().startsWith('eventing-publisher-proxy'));
-      expect(foundMetric).to.be.not.undefined;
+    latency_eventPublisherToMessagingServer: {
+      title: 'Latency of Event Publisher -> Messaging Server',
+      query: 'histogram_quantile(0.99999, sum(rate(eventing_epp_backend_duration_milliseconds_bucket{namespace="kyma-system"}[5m])) by (le,pod,namespace,service))',
+      backends: ['nats', 'beb'],
+      assert: function(result) {
+        const foundMetric = result.find((res) =>
+          res.metric.namespace.toLowerCase() === 'kyma-system' &&
+            res.metric.pod.toLowerCase().startsWith('eventing-publisher-proxy'));
+        expect(foundMetric).to.be.not.undefined;
+      },
     },
-  },
-  latency_eventDispatcherToSubscribers: {
-    title: 'Latency of Event Dispatcher -> Subscribers',
-    query: `
+    latency_eventDispatcherToSubscribers: {
+      title: 'Latency of Event Dispatcher -> Subscribers',
+      query: `
           histogram_quantile(
           0.99999, 
           sum(rate(
@@ -84,60 +88,61 @@ const dashboards = {
             }[5m])
           ) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))
         `,
-    backends: ['nats'],
-    assert: function(result) {
-      const foundMetric = result.find((res) =>
-        res.metric.source_workload === 'eventing-controller' &&
-        res.metric.destination_workload.toLowerCase().startsWith('lastorder'));
-      expect(foundMetric).to.be.not.undefined;
+      backends: ['nats'],
+      assert: function(result) {
+        const foundMetric = result.find((res) =>
+          res.metric.source_workload === 'eventing-controller' &&
+            res.metric.destination_workload.toLowerCase().startsWith(functionName));
+        expect(foundMetric).to.be.not.undefined;
+      },
     },
-  },
-  // The pods dashboard
-  pods_memoryUsage: {
-    title: 'Memory usage',
-    // This is not the exact query used in Grafana, but it ensures memory usage of eventing components are visible
-    query: `
+    // The pods dashboard
+    pods_memoryUsage: {
+      title: 'Memory usage',
+      // This is not the exact query used in Grafana, but it ensures memory usage of eventing components are visible
+      query: `
       sum by(container, pod) 
         (container_memory_usage_bytes{job="kubelet", container!="POD", container !=""}) * on(pod) 
         group_left() 
         kube_pod_labels{label_kyma_project_io_dashboard="eventing", namespace="kyma-system"}
       `,
-    backends: ['nats', 'beb'],
-    assert: ensureEventingPodsArePresent,
-  },
-  pods_cpuUsage: {
-    title: 'CPU usage',
-    // This is not the exact query used in Grafana, but it ensures CPU usage of eventing components are visible
-    query: `
+      backends: ['nats', 'beb'],
+      assert: ensureEventingPodsArePresent,
+    },
+    pods_cpuUsage: {
+      title: 'CPU usage',
+      // This is not the exact query used in Grafana, but it ensures CPU usage of eventing components are visible
+      query: `
       sum by (container, pod) 
         (irate(container_cpu_usage_seconds_total{job="kubelet", image!="", container!="POD"}[4m])) * on(pod) 
         group_left() 
         kube_pod_labels{label_kyma_project_io_dashboard="eventing", namespace="kyma-system"}
       `,
-    backends: ['nats', 'beb'],
-    assert: ensureEventingPodsArePresent,
-  },
-  pods_networkReceive: {
-    title: 'Network receive',
-    query: `
+      backends: ['nats', 'beb'],
+      assert: ensureEventingPodsArePresent,
+    },
+    pods_networkReceive: {
+      title: 'Network receive',
+      query: `
       sum by (pod) 
         (irate(container_network_receive_bytes_total{job="kubelet"}[4m])) * on(pod) 
         kube_pod_labels{label_kyma_project_io_dashboard="eventing", namespace="kyma-system"}
       `,
-    backends: ['nats', 'beb'],
-    assert: ensureEventingPodsArePresent,
-  },
-  pods_networkTransmit: {
-    title: 'Network transmit',
-    query: `
+      backends: ['nats', 'beb'],
+      assert: ensureEventingPodsArePresent,
+    },
+    pods_networkTransmit: {
+      title: 'Network transmit',
+      query: `
       sum by (pod) 
         (irate(container_network_transmit_bytes_total{job="kubelet"}[4m])) * on(pod) 
         kube_pod_labels{label_kyma_project_io_dashboard="eventing", namespace="kyma-system"}
       `,
-    backends: ['nats', 'beb'],
-    assert: ensureEventingPodsArePresent,
-  },
-};
+      backends: ['nats', 'beb'],
+      assert: ensureEventingPodsArePresent,
+    },
+  };
+}
 
 const skrDashboards = {
   // The delivery dashboard
@@ -192,25 +197,45 @@ function ensureEventingPodsArePresent(result) {
 function runDashboardTestCase(dashboardName, test) {
   return retryPromise(async () => {
     await queryPrometheus(test.query).then((result) => {
-      debug(dashboardName + ' result: ' + JSON.stringify(result, null, 2));
       test.assert(result);
-    }).catch((reason) => {
-      throw new Error(reason);
+    }).catch((err) => {
+      throw new Error(err);
     });
   }, 120, 5000);
 }
 
-async function eventingMonitoringTest(backend, isSkr) {
-  let allDashboards = dashboards;
+async function eventingMonitoringTest(backend, isSkr, isEventingSinkDeployed=false) {
+  let allDashboards = {};
+
+  // // add OSS related dashboard entries for tests.
+  if (isEventingSinkDeployed) {
+    debug(`Using dashboards w.r.t. ${eventingSinkName} function`);
+    allDashboards = getOSSDashboards(eventingSinkName, 'fi-test-sub-v2-0');
+  } else {
+    debug('Using dashboards w.r.t. lastorder function');
+    allDashboards = getOSSDashboards('lastorder', subscriptionNames.orderReceived);
+  }
+
+  // add JetStream dashboard entries for tests.
   allDashboards = Object.assign(allDashboards, getJetStreamDashboardTests());
+
+  // add SKR related dashboard entries for tests.
   if (isSkr && testCompassFlow) {
     allDashboards = Object.assign(allDashboards, skrDashboards);
   }
 
+  // Run all the assigned dashboard tests.
   for (const [dashboardName, test] of Object.entries(allDashboards)) {
     if (test.backends.includes(backend)) {
-      console.log('Testing dashboard: ' + test.title);
-      await runDashboardTestCase(dashboardName, test);
+      try {
+        debug('Testing dashboard: ' + test.title);
+        await runDashboardTestCase(dashboardName, test);
+      } catch (err) {
+        debug('Failed during testing dashboard: ' + test.title);
+        debug('The dashboard query failed: ' + test.query);
+        debug('Error:', err);
+        throw err;
+      }
     }
   }
 }

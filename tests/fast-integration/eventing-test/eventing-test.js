@@ -11,28 +11,21 @@ const {
   sendCloudEventBinaryModeAndCheckResponse,
   checkInClusterEventDelivery,
   waitForSubscriptionsTillReady,
-  waitForSubscriptions,
   checkInClusterEventTracing,
-  getRandomEventId,
-  getVirtualServiceHost,
-  sendInClusterEventWithRetry,
-  ensureInClusterEventReceivedWithRetry,
 } = require('../test/fixtures/commerce-mock');
 const {
   getEventingBackend,
   waitForNamespace,
   switchEventingBackend,
-  waitForEventingBackendToReady,
   printAllSubscriptions,
-  printEventingControllerLogs,
-  printEventingPublisherProxyLogs,
-  k8sDelete,
   debug,
   isDebugEnabled,
-  k8sApply,
-  deleteK8sPod,
-  eventingSubscription, waitForEndpoint, waitForPodStatusWithLabel, waitForPodWithLabelAndCondition,
-  createApiRuleForService, getConfigMap, deleteApiRule,
+  waitForFunction,
+  waitForEndpoint,
+  waitForPodWithLabelAndCondition,
+  createApiRuleForService,
+  getConfigMap,
+  deleteApiRule,
 } = require('../utils');
 const {
   eventingMonitoringTest,
@@ -48,28 +41,44 @@ const {
   testCompassFlow,
   testSubscriptionV1Alpha2,
   subCRDVersion,
-  getNatsPods,
   getStreamConfigForJetStream,
-  skipAtLeastOnceDeliveryTest,
   isStreamCreationTimeMissing,
   getJetStreamStreamData,
   streamDataConfigMapName,
   eventingNatsSvcName,
   eventingNatsApiRuleAName,
-  subscriptionNames,
+  eventingSinkName,
+  v1alpha1SubscriptionsTypes,
+  subscriptionsTypes,
+  subscriptionsExactTypeMatching,
+  getClusterHost,
+  checkFunctionReachable,
+  checkEventDelivery,
+  waitForV1Alpha1Subscriptions,
+  waitForV1Alpha2Subscriptions,
+  checkEventTracing,
 } = require('./utils');
 const {
   bebBackend,
-  natsBackend, getEventMeshNamespace,
-  kymaSystem, telemetryOperatorLabel, conditionReady, jaegerLabel, jaegerEndpoint,
+  natsBackend,
+  getEventMeshNamespace,
+  kymaSystem,
+  telemetryOperatorLabel,
+  conditionReady,
+  jaegerLabel,
+  jaegerEndpoint,
 } = require('./common/common');
 const {
   assert,
+  expect,
 } = require('chai');
 const {
   exposeGrafana,
   unexposeGrafana,
 } = require('../monitoring');
+
+let clusterHost = '';
+let isEventingSinkDeployed = false;
 
 describe('Eventing tests', function() {
   this.timeout(timeoutTime);
@@ -97,6 +106,161 @@ describe('Eventing tests', function() {
     assert.isTrue(success);
   });
 
+  before('Check if eventing-sink is deployed', async function() {
+    try {
+      await waitForFunction(eventingSinkName, testNamespace, 30*1000);
+      isEventingSinkDeployed = true;
+    } catch (e) {
+      debug('Eventing Sink is not deployed');
+      debug(e);
+      isEventingSinkDeployed = false;
+    }
+  });
+
+  before('Get cluster host name from Virtual Services', async function() {
+    if (!isEventingSinkDeployed) {
+      return;
+    }
+
+    this.test.retries(5);
+
+    clusterHost = await getClusterHost(eventingSinkName, testNamespace);
+    expect(clusterHost).to.not.empty;
+    debug(`host name fetched: ${clusterHost}`);
+  });
+
+  // eventDeliveryTestSuite - Runs Eventing tests for event delivery
+  function eventDeliveryTestSuite(backend) {
+    it('Wait for subscriptions to be ready', async function() {
+      // important for upgrade tests
+      if (!isEventingSinkDeployed) {
+        return;
+      }
+
+      // waiting for v1alpha1 subscriptions
+      await waitForV1Alpha1Subscriptions();
+
+      if (testSubscriptionV1Alpha2) {
+        // waiting for v1alpha2 subscriptions
+        await waitForV1Alpha2Subscriptions();
+      }
+    });
+
+    it('Eventing-sink function should be reachable through API Rule', async function() {
+      if (!isEventingSinkDeployed) {
+        this.skip();
+      }
+      await checkFunctionReachable(eventingSinkName, testNamespace, clusterHost);
+    });
+
+    it('Cloud Events [binary] with v1alpha1 subscription should be delivered to eventing-sink ', async function() {
+      if (!isEventingSinkDeployed) {
+        this.skip();
+      }
+
+      let eventSource = 'eventing-test';
+      if (backend === bebBackend) {
+        eventSource = getEventMeshNamespace();
+      }
+      for (let i=0; i < v1alpha1SubscriptionsTypes.length; i++) {
+        await checkEventDelivery(clusterHost, 'binary', v1alpha1SubscriptionsTypes[i], eventSource, true);
+      }
+    });
+
+    it('Cloud Events [structured] with v1alpha1 subscription should be delivered to eventing-sink ', async function() {
+      if (!isEventingSinkDeployed) {
+        this.skip();
+      }
+
+      let eventSource = 'eventing-test';
+      if (backend === bebBackend) {
+        eventSource = getEventMeshNamespace();
+      }
+      for (let i=0; i < v1alpha1SubscriptionsTypes.length; i++) {
+        await checkEventDelivery(clusterHost, 'structured', v1alpha1SubscriptionsTypes[i], eventSource, true);
+      }
+    });
+
+    it('Legacy Events with v1alpha1 subscription should be delivered to eventing-sink ', async function() {
+      if (!isEventingSinkDeployed) {
+        this.skip();
+      }
+      for (let i=0; i < v1alpha1SubscriptionsTypes.length; i++) {
+        await checkEventDelivery(clusterHost, 'legacy', v1alpha1SubscriptionsTypes[i], 'test', true);
+      }
+    });
+
+    it('Cloud Events [binary] with v1alpha2 subscription should be delivered to eventing-sink ', async function() {
+      if (!isEventingSinkDeployed || !testSubscriptionV1Alpha2) {
+        this.skip();
+      }
+      for (let i=0; i < subscriptionsTypes.length; i++) {
+        await checkEventDelivery(clusterHost, 'binary', subscriptionsTypes[i].type, subscriptionsTypes[i].source);
+      }
+    });
+
+    it('Cloud Events [structured] with v1alpha2 subscription should be delivered to eventing-sink ', async function() {
+      if (!isEventingSinkDeployed || !testSubscriptionV1Alpha2) {
+        this.skip();
+      }
+      for (let i=0; i < subscriptionsTypes.length; i++) {
+        await checkEventDelivery(clusterHost, 'structured', subscriptionsTypes[i].type, subscriptionsTypes[i].source);
+      }
+    });
+
+    it('Legacy Events with v1alpha2 subscription should be delivered to eventing-sink ', async function() {
+      if (!isEventingSinkDeployed || !testSubscriptionV1Alpha2) {
+        this.skip();
+      }
+      for (let i=0; i < subscriptionsTypes.length; i++) {
+        await checkEventDelivery(clusterHost, 'legacy', subscriptionsTypes[i].type, subscriptionsTypes[i].source);
+      }
+    });
+
+    it('Cloud Events with subscription (exact) should be delivered to eventing-sink ', async function() {
+      if (!isEventingSinkDeployed || !testSubscriptionV1Alpha2 || backend !== bebBackend) {
+        this.skip();
+      }
+
+      let eventSource = 'eventing-test';
+      if (backend === bebBackend) {
+        eventSource = getEventMeshNamespace();
+      }
+      for (let i=0; i < subscriptionsExactTypeMatching.length; i++) {
+        await checkEventDelivery(clusterHost, 'binary', subscriptionsExactTypeMatching[i].type, eventSource);
+      }
+    });
+  }
+
+  // eventingMonitoringTestSuite - Runs Eventing tests for monitoring
+  function eventingMonitoringTestSuite(backend, isSKR) {
+    it('Run Eventing Monitoring tests', async function() {
+      if (isEventingSinkDeployed && testSubscriptionV1Alpha2) {
+        await eventingMonitoringTest(backend, isSKR, true);
+        return;
+      }
+      // run old monitoring tests - deprecated - will be removed
+      await eventingMonitoringTest(backend, isSKR);
+    });
+  }
+
+  // eventingTracingTestSuite - Runs Eventing tracing tests
+  function eventingTracingTestSuiteV2(isSKR) {
+    // Only run tracing tests on OSS
+    if (isSKR) {
+      debug('Skipping eventing tracing tests on SKR');
+      return;
+    }
+
+    it('In-cluster event should have correct tracing spans [v2]', async function() {
+      if (!isEventingSinkDeployed || !testSubscriptionV1Alpha2) {
+        this.skip();
+      }
+
+      await checkEventTracing(clusterHost, subscriptionsTypes[0].type, subscriptionsTypes[0].source, testNamespace);
+    });
+  }
+
   // eventingTestSuite - Runs Eventing tests
   function eventingTestSuite(backend, isSKR, testCompassFlow=false) {
     it('lastorder function should be reachable through secured API Rule', async function() {
@@ -122,7 +286,6 @@ describe('Eventing tests', function() {
 
     if (backend === natsBackend) {
       testStreamNotReCreated();
-      testJetStreamAtLeastOnceDelivery();
     }
   }
 
@@ -183,79 +346,6 @@ describe('Eventing tests', function() {
   }
 
 
-  function testJetStreamAtLeastOnceDelivery() {
-    context('with JetStream file storage', function() {
-      const minute = 60 * 1000;
-      const funcName = 'lastorder';
-      const encodingBinary = 'binary';
-      const encodingStructured = 'structured';
-      const eventIdBinary = getRandomEventId(encodingBinary);
-      const eventIdStructured = getRandomEventId(encodingStructured);
-      const sink = `http://lastorder.${testNamespace}.svc.cluster.local`;
-      const subscriptions = [
-        eventingSubscription(`sap.kyma.custom.inapp.order.received.v1`,
-            sink, subscriptionNames.orderReceived, testNamespace),
-        eventingSubscription(`sap.kyma.custom.commerce.order.created.v1`,
-            sink, subscriptionNames.orderCreated, testNamespace),
-      ];
-
-      before('check if at least once delivery tests need to be skipped', async function() {
-        if (skipAtLeastOnceDeliveryTest()) {
-          console.log('Skipping the at least once delivery tests for NATS JetStream');
-          this.skip();
-        }
-      });
-
-      it('Delete subscriptions', async function() {
-        await k8sDelete(subscriptions);
-      });
-
-      it('Publish events', async function() {
-        const host = await getVirtualServiceHost(testNamespace, funcName);
-        assert.isNotEmpty(host);
-
-        await sendInClusterEventWithRetry(host, eventIdBinary, encodingBinary);
-        await sendInClusterEventWithRetry(host, eventIdStructured, encodingStructured);
-      });
-
-      it('Delete all Nats pods', async function() {
-        const natsPods = await getNatsPods();
-        for (let i = 0; i < natsPods.body.items.length; i++) {
-          const pod = natsPods.body.items[i];
-          await deleteK8sPod(pod);
-        }
-      });
-
-      it('Wait until all Nats pods are deleted', async function() {
-        // Assuming that Nats pods had the status.phase equals to "Running", so if it changed to "Pending"
-        // this means that they were successfully deleted and recreated.
-        await waitForPodStatusWithLabel('app.kubernetes.io/name', 'nats', 'kyma-system', 'Pending', 5 * minute);
-      });
-
-      it('Wait until any Nats pod is ready', async function() {
-        // When the status.phase changes from "Pending" to "Running" this means that Nats pod containers are starting.
-        await waitForPodStatusWithLabel('app.kubernetes.io/name', 'nats', 'kyma-system', 'Running', 5 * minute);
-      });
-
-      it('Wait until eventing backend is ready', async function() {
-        await waitForEventingBackendToReady(natsBackend, 'eventing-backend', 'kyma-system', 5 * minute);
-      });
-
-      it('Recreate subscriptions', async function() {
-        await k8sApply(subscriptions);
-        await waitForSubscriptions(subscriptions);
-      });
-
-      it('Wait for events to be delivered', async function() {
-        const host = await getVirtualServiceHost(testNamespace, funcName);
-        assert.isNotEmpty(host);
-
-        await ensureInClusterEventReceivedWithRetry(host, eventIdBinary);
-        await ensureInClusterEventReceivedWithRetry(host, eventIdStructured);
-      });
-    });
-  }
-
   // eventingTracingTestSuite - Runs Eventing tracing tests
   function eventingTracingTestSuite(isSKR) {
     // Only run tracing tests on OSS
@@ -269,16 +359,6 @@ describe('Eventing tests', function() {
     });
   }
 
-  // runs after each test in every block
-  afterEach(async function() {
-    // if the test is failed, then printing some debug logs
-    if (this.currentTest.state === 'failed' && isDebugEnabled()) {
-      await printAllSubscriptions(testNamespace, subCRDVersion);
-      await printEventingControllerLogs();
-      await printEventingPublisherProxyLogs();
-    }
-  });
-
   // Tests
   context('with Nats backend', function() {
     it('Switch Eventing Backend to Nats', async function() {
@@ -291,14 +371,21 @@ describe('Eventing tests', function() {
     it('Wait until subscriptions are ready', async function() {
       await waitForSubscriptionsTillReady(testNamespace);
     });
-    // Running Eventing end-to-end tests
+
+    // Running Eventing end-to-end event delivery tests
+    eventDeliveryTestSuite(natsBackend);
+
+    // Running Eventing end-to-end tests - deprecated (will be removed)
     eventingTestSuite(natsBackend, isSKR, testCompassFlow);
-    // Running Eventing tracing tests
+
+    // Running Eventing tracing tests [v2]
+    eventingTracingTestSuiteV2(isSKR);
+
+    // Running Eventing tracing tests - deprecated (will be removed)
     eventingTracingTestSuite(isSKR);
 
-    it('Run Eventing Monitoring tests', async function() {
-      await eventingMonitoringTest(natsBackend, isSKR);
-    });
+    // Running Eventing monitoring tests.
+    eventingMonitoringTestSuite(natsBackend, isSKR);
   });
 
   context('with BEB backend', function() {
@@ -320,12 +407,15 @@ describe('Eventing tests', function() {
         await printAllSubscriptions(testNamespace, subCRDVersion);
       }
     });
-    // Running Eventing end-to-end tests
+
+    // Running Eventing end-to-end event delivery tests
+    eventDeliveryTestSuite(bebBackend);
+
+    // Running Eventing end-to-end tests - deprecated (will be removed)
     eventingTestSuite(bebBackend, isSKR, testCompassFlow);
 
-    it('Run Eventing Monitoring tests', async function() {
-      await eventingMonitoringTest(bebBackend, isSKR);
-    });
+    // Running Eventing monitoring tests.
+    eventingMonitoringTestSuite(bebBackend, isSKR);
   });
 
   context('with Nats backend switched back from BEB', async function() {
@@ -339,14 +429,21 @@ describe('Eventing tests', function() {
     it('Wait until subscriptions are ready', async function() {
       await waitForSubscriptionsTillReady(testNamespace);
     });
-    // Running Eventing end-to-end tests
+
+    // Running Eventing end-to-end event delivery tests
+    eventDeliveryTestSuite(natsBackend);
+
+    // Running Eventing end-to-end tests - deprecated (will be removed)
     eventingTestSuite(natsBackend, isSKR, testCompassFlow);
-    // Running Eventing tracing tests
+
+    // Running Eventing tracing tests [v2]
+    eventingTracingTestSuiteV2(isSKR);
+
+    // Running Eventing tracing tests - deprecated (will be removed)
     eventingTracingTestSuite(isSKR);
 
-    it('Run Eventing Monitoring tests', async function() {
-      await eventingMonitoringTest(natsBackend, isSKR);
-    });
+    // Running Eventing monitoring tests.
+    eventingMonitoringTestSuite(natsBackend, isSKR);
   });
 
   after('Unexpose Grafana', async function() {
