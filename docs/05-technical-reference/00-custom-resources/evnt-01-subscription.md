@@ -39,7 +39,7 @@ This table lists all the possible parameters of a given resource together with t
 |-------------|:---------:|--------------|
 | **metadata.name** | Yes | Specifies the name of the CR. |
 | **metadata.namespace** | No | Defines the Namespace in which the CR is available. It is set to `default` unless your specify otherwise. |
-| **spec.typeMatching** | No | Defines the matching type (`standard` or `exact`) for event types. When it is set to `exact`, Eventing does not do any kind of modifications to the provided `spec.types` internally. In case of `standard`, Eventing  modifies the types internally to fulfil the backend requirements. It is set to `standard` unless you specify otherwise. **NOTE:** The `exact` type matching with NATS JetStream is only supported to upgrade a Subscription CR from version `v1alpha1` to `v1alpha2`, and it will be deprecated in future. |
+| **spec.typeMatching** | No | Defines the matching type (`standard` or `exact`) for event types. When it is set to `exact`, Eventing does not do any kind of modifications to the provided `spec.types` internally. In case of `standard`, Eventing  modifies the types internally to fulfil the backend requirements. It is set to `standard` unless you specify otherwise.<br /> **NOTE:** The `exact` type matching with NATS JetStream is only supported to upgrade a Subscription CR from version `v1alpha1` to `v1alpha2`, and it will be deprecated in future. |
 | **spec.source** | Yes | The origin from which events are published. |
 | **spec.types** | Yes | Defines the list of event types used to trigger workloads. |
 | **spec.sink** | Yes | Specifies the HTTP endpoint where matching events should be sent to, for example: `test.test.svc.cluster.local`. |
