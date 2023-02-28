@@ -84,6 +84,8 @@ This configures the underlying OTel Collector with a pipeline for traces. The re
 
 ### Step 2. Enable Istio tracing
 
+>**CAUTION:** The provided Istio feature uses an API in alpha state, which may change in future releases.
+
 By default, the tracing feature of the Istio module is disabled to avoid increased network utilization in the case of the TracePipeline absence.
 To activate the [Istio tracing](#istio) feature with a sampling rate of 100% (not recommended on production), use a resource similar to the following:
 
@@ -240,6 +242,8 @@ Kyma bundles several modules which are potentially involved in user flows. Appli
 ### Istio
 
 The Istio module is a crucial enabler in distributed tracing as it provides [ingress gateway](https://istio.io/latest/docs/tasks/traffic-management/ingress/ingress-control/) where usually external requests enter the cluster scope and are enriched with trace context if it hasn't happened yet. Furthermore, every component being part of the Istio Service Mesh is running an Istio proxy, which propagates the context properly but also creates span data. Having Istio tracing activated and doing trace propagation in your application already ensures that you will get a complete picture of a trace, as every component will automatically contribute span data.
+
+>**CAUTION:** The provided Istio feature uses an API in alpha state, which may change in future releases.
 
 The Istio module is configured with an [extension provider](https://istio.io/latest/docs/tasks/observability/telemetry/) called `kyma-traces`. The provider can be activated on the global mesh label using the Istio [Telemetry API](https://istio.io/latest/docs/reference/config/telemetry/#Tracing) by placing a resource to the istio-system namespace like that:
 
