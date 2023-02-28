@@ -76,16 +76,6 @@ data:
       defaultExpanded: true
       children:
         - path: '[]'
-    - simple: true
-      type: string
-      var: service
-      name: Service
-      widget: Resource
-      resource:
-        kind: Service
-        version: v1
-        scope: namespace
-      trigger: [sink]
     - path: spec.sink
       name: spec.sink
       widget: Resource
