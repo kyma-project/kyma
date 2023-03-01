@@ -10,6 +10,7 @@ spec:
   profile: default
   components:
     cni:
+      namespace: {{ .Release.Namespace }}
       enabled: {{ .Values.components.cni.enabled }}
       k8s:
 {{- toYaml .Values.components.cni.config | nindent 8}}  
