@@ -249,6 +249,7 @@ spec:
                 enum:
                 - nodejs14
                 - nodejs16
+                - nodejs18
                 - python39
                 type: string
               runtimeImageOverride:
@@ -297,6 +298,7 @@ spec:
                 - nodejs12
                 - nodejs14
                 - nodejs16
+                - nodejs18
                 - nodejs10
                 - python38
                 - python39
@@ -555,7 +557,7 @@ spec:
                 type: object
               runtime:
                 description: Runtime specifies the runtime of the Function. The available
-                  values are `nodejs14`, `nodejs16`, and `python39`.
+                  values are `nodejs16`, `nodejs18`, and `python39`.
                 type: string
               runtimeImageOverride:
                 description: RuntimeImageOverride specifies the runtimes image which
