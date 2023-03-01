@@ -2,16 +2,17 @@
 
 ## Overview
 
-This eventing sink function is used to test the end-to-end flow for Eventing. It is responsible for three tasks:
+Use the `eventing-sink` Function to test the end-to-end flow for Eventing. 
+It performs three tasks:
 1. Forward requests to publish events to event-publisher-proxy.
 2. Save all received events in memory.
 3. Return saved events to users.
 
 ## Usage
 
-### Forward requests to publish events to event-publisher-proxy.
+### Forward requests to publish events to `event-publisher-proxy`
 
-To publish an event to event-publisher-proxy, send a Http request with params `send=true` and body:
+To publish an event to `event-publisher-proxy`, send an HTTP request with parameter `send=true` and the following body:
 
 ```
 {
@@ -23,9 +24,9 @@ To publish an event to event-publisher-proxy, send a Http request with params `s
 }
 ```
 
-### Fetch an event received by eventing-sink from a backend.
+### Fetch an event received by `eventing-sink` from a backend
 
-To fetch an event received by eventing-sink, send a Http request with params `eventid=<id>`. The response contains:
+To fetch an event received by `eventing-sink`, send an HTTP request with parameter `eventid=<id>`. The response contains:
 
 ```
 {
