@@ -12,7 +12,7 @@ In preparation for the upcoming modularization and having a reduced set of depen
 
 ### Remove Init Container from telemetry-operator deployment
 
-Creating the ValidatingWebhookConfiguration and the related CA bundle was moved from an init container to the operator itself. Run the [cleanup script](./assets/2.11-2.12-cleanup-init-container.sh) to remove the old init container.
+Creating the ValidatingWebhookConfiguration and the related CA bundle was moved from an init container to the operator itself. Run the [cleanup script](https://github.com/kyma-project/kyma/blob/main/docs/assets/2.11-2.12-cleanup-init-container.sh) to remove the old init container.
 
 ## Application Connectivity
 
