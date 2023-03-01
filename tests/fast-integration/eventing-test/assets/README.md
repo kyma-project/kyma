@@ -4,9 +4,9 @@
 
 Use the `eventing-sink` Function to test the end-to-end flow for Eventing. 
 It performs three tasks:
-1. Forward requests to publish events to event-publisher-proxy.
-2. Save all received events in memory.
-3. Return saved events to users.
+- Forward requests to publish events to event-publisher-proxy. 
+- Save all received events in memory.
+- Return saved events to users.
 
 ## Usage
 
