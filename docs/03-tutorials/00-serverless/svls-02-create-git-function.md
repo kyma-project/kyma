@@ -98,7 +98,7 @@ Follow these steps:
       namespace: $NAMESPACE
     spec:
       type: git
-      runtime: nodejs14
+      runtime: nodejs16
       source: $GIT_FUNCTION
       reference: main
       baseDir: orders-service/function
@@ -117,7 +117,7 @@ Follow these steps:
 
     ```bash
     NAME            CONFIGURED   BUILT     RUNNING   RUNTIME    VERSION   AGE
-    test-function   True         True      True      nodejs14   1         96s
+    test-function   True         True      True      nodejs16   1         96s
     ```
 
     </details>

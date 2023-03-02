@@ -11,8 +11,8 @@ See the sample `config.yaml` for an inline Function for which code and dependenc
 ```yaml
 name: function-practical-filip5
 namespace: testme
-runtime: nodejs14
-runtimeImageOverride: eu.gcr.io/kyma-project/function-runtime-nodejs14:9e934c09
+runtime: nodejs16
+runtimeImageOverride: eu.gcr.io/kyma-project/function-runtime-nodejs16:9e934c09
 labels:
     app: serverless-test
 source:
@@ -104,7 +104,7 @@ See the sample `config.yaml` for a [Git Function](./svls-04-git-source-type.md) 
 ```yaml
 name: function-practical-marcin
 namespace: iteration-review
-runtime: nodejs14
+runtime: nodejs16
 source:
     sourceType: git
     url: https://github.com/username/public-gitops.git
@@ -125,7 +125,7 @@ See all parameter descriptions.
 | ---------------------------------------- | :------------: | ---------| ---------| ------- |
 | **name**              | Yes | Function | | Specifies the name of your Function.         |
 | **namespace**             | No | Function | `default` | Defines the Namespace in which the Function is created.        |
-| **runtime**             | Yes | Function | | Specifies the execution environment for your Function. The available values are `nodejs14`, `nodejs16`, and `python39`.      |
+| **runtime**             | Yes | Function | | Specifies the execution environment for your Function. The available values are `nodejs16`, `nodejs16`, and `python39`.      |
 | **runtimeImageOverride** | No | Function | | Specifies the runtimes image which must be used instead of default one. |
 | **labels**             | No | Function | | Specifies the Function's Pod labels. |
 | **source**            | Yes | Function | | Provides details on the type and location of your Function's source code and dependencies.         |

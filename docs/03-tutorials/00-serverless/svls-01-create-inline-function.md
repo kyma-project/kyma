@@ -70,7 +70,7 @@ Follow these steps:
 
     ```bash
     NAME            CONFIGURED   BUILT     RUNNING   RUNTIME    VERSION   AGE
-    test-function   True         True      True      nodejs14   1         96s
+    test-function   True         True      True      nodejs16   1         96s
     ```
 
   </details>
@@ -96,7 +96,7 @@ Follow these steps:
       name: $NAME
       namespace: $NAMESPACE
     spec:
-      runtime: nodejs14
+      runtime: nodejs16
       source: |
         module.exports = {
           main: function(event, context) {
@@ -116,7 +116,7 @@ Follow these steps:
 
     ```bash
     NAME            CONFIGURED   BUILT     RUNNING   RUNTIME    VERSION   AGE
-    test-function   True         True      True      nodejs14   1         96s
+    test-function   True         True      True      nodejs16   1         96s
     ```
 
     </details>
