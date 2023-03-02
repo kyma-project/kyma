@@ -43,6 +43,7 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 	python39Logger := logf.WithField(scenarioKey, "python39")
 	nodejs14Logger := logf.WithField(scenarioKey, "nodejs14")
 	nodejs16Logger := logf.WithField(scenarioKey, "nodejs16")
+	nodejs18Logger := logf.WithField(scenarioKey, "nodejs18")
 
 	genericContainer := shared.Container{
 		DynamicCli:  dynamicCli,
@@ -57,6 +58,8 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 	nodeJS14Fn := function.NewFunction("nodejs14", cfg.KubectlProxyEnabled, genericContainer.WithLogger(nodejs14Logger))
 
 	nodejs16Fn := function.NewFunction("nodejs16", cfg.KubectlProxyEnabled, genericContainer.WithLogger(nodejs16Logger))
+
+	nodejs18Fn := function.NewFunction("nodejs18", cfg.KubectlProxyEnabled, genericContainer.WithLogger(nodejs18Logger))
 
 	cm := configmap.NewConfigMap("test-serverless-configmap", genericContainer.WithLogger(nodejs14Logger))
 	cmEnvKey := "CM_ENV_KEY"
@@ -107,6 +110,12 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 				teststep.NewHTTPCheck(nodejs16Logger, "NodeJS16 pre update simple check through service", nodejs16Fn.FunctionURL, poll, "Hello from nodejs16"),
 				teststep.UpdateFunction(nodejs16Logger, nodejs16Fn, "Update NodeJS16 Function", runtimes.BasicNodeJSFunctionWithCustomDependency("Hello from updated nodejs16", serverlessv1alpha2.NodeJs16)),
 				teststep.NewHTTPCheck(nodejs16Logger, "NodeJS16 post update simple check through service", nodejs16Fn.FunctionURL, poll, "Hello from updated nodejs16"),
+			),
+			step.NewSerialTestRunner(nodejs18Logger, "NodeJS18 test",
+				teststep.CreateFunction(nodejs18Logger, nodejs18Fn, "Create NodeJS18 Function", runtimes.BasicNodeJSFunction("Hello from nodejs18", serverlessv1alpha2.NodeJs18)),
+				teststep.NewHTTPCheck(nodejs18Logger, "NodeJS18 pre update simple check through service", nodejs18Fn.FunctionURL, poll, "Hello from nodejs18"),
+				teststep.UpdateFunction(nodejs18Logger, nodejs18Fn, "Update NodeJS18 Function", runtimes.BasicNodeJSFunctionWithCustomDependency("Hello from updated nodejs18", serverlessv1alpha2.NodeJs18)),
+				teststep.NewHTTPCheck(nodejs18Logger, "NodeJS18 post update simple check through service", nodejs18Fn.FunctionURL, poll, "Hello from updated nodejs18"),
 			),
 		),
 	), nil

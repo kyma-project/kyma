@@ -2,18 +2,18 @@ apiVersion: serverless.kyma-project.io/v1alpha2
 kind: Function
 metadata:
   labels:
-    serverless.kyma-project.io/function-resources-preset: M
-  name: nodejs14-m
+    serverless.kyma-project.io/function-resources-preset: S
+  name: nodejs18-s
 spec:
   scaleConfig:
     maxReplicas: 1
     minReplicas: 1
-  runtime: nodejs14
+  runtime: nodejs18
   source:
     inline:
       dependencies: |-
         {
-          "name": "nodejs14-m",
+          "name": "nodejs18-s",
           "version": "0.0.1",
           "dependencies": {}
         }

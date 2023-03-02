@@ -3,17 +3,17 @@ kind: Function
 metadata:
   labels:
     serverless.kyma-project.io/function-resources-preset: XS
-  name: nodejs14-xs
+  name: nodejs18-xs
 spec:
   scaleConfig:
     maxReplicas: 1
     minReplicas: 1
-  runtime: nodejs14
+  runtime: nodejs18
   source:
     inline:
       dependencies: |-
         {
-          "name": "nodejs14-xs",
+          "name": "nodejs18-xs",
           "version": "0.0.1",
           "dependencies": {}
         }
