@@ -8,7 +8,7 @@ require (
 	github.com/go-git/go-git/v5 v5.2.0
 	github.com/hashicorp/errwrap v1.0.0
 	github.com/hashicorp/go-multierror v1.1.0
-	github.com/kyma-project/kyma/components/function-controller v0.0.0-20221012075513-f3e30e39496e
+	github.com/kyma-project/kyma/components/function-controller v0.0.0-20230302105705-8afb2e732edb
 	github.com/onsi/gomega v1.20.2
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.8.1
@@ -28,7 +28,6 @@ require (
 replace (
 	github.com/googleapis/gnostic => github.com/googleapis/gnostic v0.3.1
 	github.com/kyma-incubator/api-gateway => github.com/kyma-project/api-gateway v0.0.0-20220819093753-296e6704d413
-	github.com/kyma-project/kyma/components/function-controller => github.com/kwiatekus/kyma/components/function-controller v0.0.0-20230224144226-1fa97267bca2
 	go.etcd.io/etcd => go.etcd.io/etcd v3.3.25+incompatible
 	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
 	golang.org/x/text => golang.org/x/text v0.3.3
