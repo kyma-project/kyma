@@ -7,7 +7,7 @@ global:
       version: "v20230117-64505a69"
     telemetry_operator:
       name: "telemetry-manager"
-      version: "v20230228-5c25a280"
+      version: "PR-46"
     telemetry_otel_collector:
       name: "otel-collector"
       version: "0.72.0-734399a6"
