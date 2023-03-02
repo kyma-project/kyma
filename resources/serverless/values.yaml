@@ -95,7 +95,7 @@ global:
       version: "PR-16768"
     function_runtime_nodejs18:
       name: "function-runtime-nodejs18"
-      version: "PR-16768"
+      version: "PR-16979"
     function_runtime_python39:
       name: "function-runtime-python39"
       version: "PR-16894"
