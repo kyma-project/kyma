@@ -80,19 +80,22 @@ global:
       directory: "tpi"
     function_controller:
       name: "function-controller"
-      version: "PR-16894"
+      version: "PR-16918"
     function_webhook:
       name: "function-webhook"
-      version: "PR-16894"
+      version: "PR-16918"
     function_build_init:
       name: "function-build-init"
-      version: "PR-16894"
+      version: "PR-16918"
     function_runtime_nodejs14:
       name: "function-runtime-nodejs14"
       version: "PR-16894"
     function_runtime_nodejs16:
       name: "function-runtime-nodejs16"
-      version: "PR-16894"
+      version: "PR-16768"
+    function_runtime_nodejs18:
+      name: "function-runtime-nodejs18"
+      version: "PR-16768"
     function_runtime_python39:
       name: "function-runtime-python39"
       version: "PR-16894"
@@ -114,7 +117,7 @@ global:
   testImages:
     function_controller_test:
       name: "function-controller-test"
-      version: "PR-16925"
+      version: "PR-16920"
     git_server:
       name: "gitserver"
       version: "708f6a87"
