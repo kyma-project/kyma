@@ -124,6 +124,10 @@ async function getShootName(keb, instanceID) {
   return resp.data[0].shootName;
 }
 
+async function getCatalog(keb) {
+  return keb.getCatalog();
+}
+
 async function ensureValidOIDCConfigInCustomerFacingKubeconfig(keb, instanceID, oidcConfig) {
   let kubeconfigContent;
   try {
@@ -156,4 +160,5 @@ module.exports = {
   getShootName,
   ensureValidShootOIDCConfig,
   ensureValidOIDCConfigInCustomerFacingKubeconfig,
+  getCatalog,
 };

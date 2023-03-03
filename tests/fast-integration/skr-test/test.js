@@ -52,11 +52,7 @@ describe('SKR test', function() {
 
   // Run the OIDC and machine type tests
   oidcE2ETest(getShootOptionsFunc, getShootInfoFunc);
-  if (process.env.MACHINE_TYPE_UPDATE) {
-    machineTypeE2ETest(getShootOptionsFunc, getShootInfoFunc);
-  } else {
-    console.log('no machine type update defined');
-  }
+  machineTypeE2ETest(getShootOptionsFunc, getShootInfoFunc);
 
   after('Cleanup the resources', async function() {
     this.timeout(deprovisioningTimeout);
