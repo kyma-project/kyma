@@ -23,6 +23,8 @@ const {
   eventingSubscriptionV1Alpha2,
   convertAxiosError,
   sleep,
+  getConfigMap,
+  createK8sConfigMap,
 } = require('../utils');
 
 const {DirectorClient, DirectorConfig, getAlreadyAssignedScenarios} = require('../compass');
@@ -52,6 +54,7 @@ const mockNamespace = process.env.MOCK_NAMESPACE || 'mocks';
 const backendK8sSecretName = process.env.BACKEND_SECRET_NAME || 'eventing-backend';
 const backendK8sSecretNamespace = process.env.BACKEND_SECRET_NAMESPACE || 'default';
 const testDataConfigMapName = 'eventing-test-data';
+const jetStreamTestConfigMapName = 'jetstream-test-data';
 const eventingNatsSvcName = 'eventing-nats';
 const eventingNatsApiRuleAName = `${eventingNatsSvcName}-apirule`;
 const timeoutTime = 10 * 60 * 1000;
@@ -88,6 +91,7 @@ const subscriptionsTypes = [
     name: 'fi-test-sub-v2-0',
     type: 'order.modified.v1',
     source: 'myapp',
+    consumerName: 'e04ea2aff4332541145342207495afce',
   },
   {
     name: 'fi-test-sub-v2-1',
@@ -147,6 +151,7 @@ async function cleanupTestingResources() {
 
   debug('Removing JetStream data configmap');
   await deleteK8sConfigMap(testDataConfigMapName);
+  await deleteK8sConfigMap(jetStreamTestConfigMapName);
 
   debug(`Removing ${testNamespace} and ${mockNamespace} namespaces`);
   await cleanMockTestFixture(mockNamespace, testNamespace, true);
@@ -585,6 +590,93 @@ function createLegacyEventRequestBody(proxyHost, eventId, eventType, eventSource
   return reqBody;
 }
 
+async function getConfigMapWithRetries(name, namespace, retriesLeft = 10) {
+  return retryPromise(async () => {
+    try {
+      return await getConfigMap(name, namespace);
+    } catch (err) {
+      if (err.statusCode === 404) {
+        return undefined;
+      }
+      throw err;
+    }
+  }, retriesLeft, 1000);
+}
+
+async function getJetStreamStreamDataV2(host, streamName) {
+  const responseJson = await retryPromise(async () => await axios.get(`https://${host}/jsz?streams=true`), 5, 1000);
+  const streams = responseJson.data.account_details[0].stream_detail;
+  for (const stream of streams) {
+    if (stream.name === streamName) {
+      return stream;
+    }
+  }
+  return undefined;
+}
+
+async function getJetStreamConsumerDataV2(consumerName, host) {
+  const responseJson = await retryPromise(async () => await axios.get(`https://${host}/jsz?consumers=true`), 5, 1000);
+  const consumers = responseJson.data.account_details[0].stream_detail[0].consumer_detail;
+  for (const consumer of consumers) {
+    if (consumer.name === consumerName) {
+      return consumer;
+    }
+  }
+  return undefined;
+}
+
+async function saveJetStreamDataForRecreateTest(host, configMapName) {
+  debug('Fetching stream details from NATS server...');
+  const streamData = await getJetStreamStreamDataV2(host, kymaStreamName);
+  expect(streamData).to.not.be.undefined;
+
+  const consumerData = {};
+  debug(`Fetching consumer (${subscriptionsTypes[0].consumerName}) details from NATS...`);
+  const consumerInfo = await getJetStreamConsumerDataV2(subscriptionsTypes[0].consumerName, host);
+  expect(consumerInfo).to.not.be.undefined;
+  // save by consumer name as key
+  consumerData[subscriptionsTypes[0].consumerName] = consumerInfo;
+
+  // Note that the values for stringified.
+  const cmData = {
+    stream: JSON.stringify(streamData),
+    consumers: JSON.stringify(consumerData),
+  };
+
+  debug(`Saving fetched stream and consumers details in configMap (name: ${configMapName})...`);
+  await createK8sConfigMap(cmData, configMapName, testNamespace);
+}
+
+async function checkStreamNotReCreated(host, preUpgradeStreamData) {
+  debug('Fetching latest stream details from NATS server...');
+  const streamData = await getJetStreamStreamDataV2(host, kymaStreamName);
+  expect(streamData).to.not.be.undefined;
+
+  const beforeUpgradeCreationTime = preUpgradeStreamData.created;
+  const afterUpgradeCreationTime = streamData.created;
+
+  debug(`Stream creation timestamp: 
+    Before Upgrade: ${beforeUpgradeCreationTime}, After Upgrade: ${afterUpgradeCreationTime}`);
+  expect(getTimeStampsWithZeroMilliSeconds(beforeUpgradeCreationTime)).to.be.equal(
+      getTimeStampsWithZeroMilliSeconds(afterUpgradeCreationTime));
+}
+
+async function checkConsumerNotReCreated(host, preUpgradeConsumersData) {
+  const consumerName = subscriptionsTypes[0].consumerName;
+  expect(preUpgradeConsumersData[consumerName]).to.not.be.undefined;
+
+  debug(`Fetching consumer (name: ${consumerName}) latest details from NATS server...`);
+  const consumerInfo = await getJetStreamConsumerDataV2(consumerName, host);
+  expect(consumerInfo).to.not.be.undefined;
+
+  const beforeUpgradeCreationTime = preUpgradeConsumersData[consumerName].created;
+  const afterUpgradeCreationTime = consumerInfo.created;
+  debug(`Consumer creation timestamp: 
+    Before Upgrade: ${beforeUpgradeCreationTime}, After Upgrade: ${afterUpgradeCreationTime}`);
+  expect(getTimeStampsWithZeroMilliSeconds(beforeUpgradeCreationTime)).to.be.equal(
+      getTimeStampsWithZeroMilliSeconds(afterUpgradeCreationTime));
+}
+
 function getTimeStampsWithZeroMilliSeconds(timestamp) {
   // set milliseconds to zero
   const ts = (new Date(timestamp)).setMilliseconds(0);
@@ -605,6 +697,7 @@ module.exports = {
   backendK8sSecretName,
   backendK8sSecretNamespace,
   testDataConfigMapName,
+  jetStreamTestConfigMapName,
   eventingNatsSvcName,
   eventingNatsApiRuleAName,
   timeoutTime,
@@ -638,4 +731,9 @@ module.exports = {
   waitForV1Alpha2Subscriptions,
   checkEventTracing,
   getTimeStampsWithZeroMilliSeconds,
+  kymaStreamName,
+  saveJetStreamDataForRecreateTest,
+  getConfigMapWithRetries,
+  checkStreamNotReCreated,
+  checkConsumerNotReCreated,
 };
