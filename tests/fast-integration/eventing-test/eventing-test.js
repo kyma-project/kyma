@@ -519,7 +519,7 @@ describe('Eventing tests', function() {
       it('Check for events sent before upgrade', async function() {
         if (eventID !== undefined) {
           await ensureEventReceivedWithRetry(eventingUpgradeSinkName, clusterHost,
-              'binary', eventID, 'order.created.v1', 'upgrade');
+              encoding, eventID, eventType, eventSource);
         }
       });
 
@@ -531,12 +531,12 @@ describe('Eventing tests', function() {
       });
 
       it('Publish events', async function() {
-        await publishBinaryCEToEventingSink(clusterHost, eventIdBinary, 'order.created.v1', 'upgrade');
+        await publishBinaryCEToEventingSink(clusterHost, eventIdBinary, eventType, eventSource);
       });
 
       it('Wait for events to be delivered', async function() {
         await ensureEventReceivedWithRetry(eventingUpgradeSinkName, clusterHost,
-            'binary', eventIdBinary, 'order.created.v1', 'upgrade');
+            encoding, eventIdBinary, eventType, eventSource);
       });
 
       it('Delete the upgrade sink', async function() {
@@ -553,7 +553,7 @@ describe('Eventing tests', function() {
             },
             testDataConfigMapName,
         );
-        await publishBinaryCEToEventingSink(clusterHost, eventIdBinary, 'order.created.v1', 'upgrade');
+        await publishBinaryCEToEventingSink(clusterHost, eventIdBinary, eventType, eventSource);
       });
     });
   }
