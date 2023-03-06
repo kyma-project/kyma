@@ -13,7 +13,7 @@ const {
   checkFullyQualifiedTypeWithExactSub,
   waitForSubscriptionsTillReady,
   checkInClusterEventTracing,
-  orderReceivedSubName,
+  orderReceivedSubName, getRandomEventId,
 } = require('../test/fixtures/commerce-mock');
 const {
   getEventingBackend,
@@ -28,7 +28,7 @@ const {
   waitForPodWithLabelAndCondition,
   createApiRuleForService,
   getConfigMap,
-  deleteApiRule,
+  deleteApiRule, k8sApply, waitForSubscription, eventingSubscriptionV1Alpha2,
 } = require('../utils');
 const {
   eventingMonitoringTest,
@@ -41,6 +41,7 @@ const {
   slowTime,
   mockNamespace,
   isSKR,
+  isUpgradeJob,
   testCompassFlow,
   testSubscriptionV1Alpha2,
   subCRDVersion,
@@ -68,6 +69,14 @@ const {
   getConfigMapWithRetries,
   checkStreamNotReCreated,
   checkConsumerNotReCreated,
+  subscriptionNames,
+  deployEventingSinkFunction,
+  eventingUpgradeSinkName,
+  waitForEventingSinkFunction,
+  publishBinaryCEToEventingSink,
+  ensureEventReceivedWithRetry,
+  undeployEventingFunction,
+  checkFunctionUnreachable,
 } = require('./utils');
 const {
   bebBackend,
@@ -473,6 +482,82 @@ describe('Eventing tests', function() {
     });
   }
 
+  function jsTestAtLeastOnceDelivery() {
+    context('test jetStream at-least once delivery during upgrade', function() {
+      const [encoding, eventType, eventSource] = ['binary', 'order.created.v1', 'upgrade'];
+      const sink = `http://${eventingUpgradeSinkName}.${testNamespace}.svc.cluster.local`;
+      const subscriptions = [
+        eventingSubscriptionV1Alpha2(eventType, eventSource,
+            sink, subscriptionNames.orderCreatedUpgrade, testNamespace),
+      ];
+      let eventIdBinary = getRandomEventId(encoding);
+      let host; let eventID; let cm;
+
+      before('Check if this an upgrade job and get the eventID if kyma is already upgraded', async function() {
+        cm = await getConfigMapWithRetries(testDataConfigMapName, 'default');
+        if (!cm || !isUpgradeJob || !isEventingSinkDeployed) {
+          debug(`Skipping jetStream at-least once delivery test`);
+          this.skip();
+        }
+        eventID = cm.data.upgradeEventID;
+      });
+
+      it('Create upgrade sink', async function() {
+        await deployEventingSinkFunction(eventingUpgradeSinkName);
+        await waitForEventingSinkFunction(eventingUpgradeSinkName);
+      });
+
+      it('ensure upgrade sink is reachable through the api rule', async function() {
+        this.test.retries(5);
+
+        host = await getClusterHost(eventingUpgradeSinkName, testNamespace);
+        expect(host).to.not.empty;
+        debug('host fetched, now checking if eventing-upgrade-sink function is reachable...');
+        await checkFunctionReachable(eventingUpgradeSinkName, testNamespace, host);
+      });
+
+      it('Check for events sent before upgrade', async function() {
+        if (eventID !== undefined) {
+          await ensureEventReceivedWithRetry(eventingUpgradeSinkName, clusterHost,
+              'binary', eventID, 'order.created.v1', 'upgrade');
+        }
+      });
+
+      it('Create subscriptions during pre-upgrade phase', async function() {
+        if (eventID === undefined) {
+          await k8sApply(subscriptions);
+          await waitForSubscription(subscriptionNames.orderCreatedUpgrade, testNamespace, 'v1alpha2');
+        }
+      });
+
+      it('Publish events', async function() {
+        await publishBinaryCEToEventingSink(clusterHost, eventIdBinary, 'order.created.v1', 'upgrade');
+      });
+
+      it('Wait for events to be delivered', async function() {
+        await ensureEventReceivedWithRetry(eventingUpgradeSinkName, clusterHost,
+            'binary', eventIdBinary, 'order.created.v1', 'upgrade');
+      });
+
+      it('Delete the upgrade sink', async function() {
+        await undeployEventingFunction(eventingUpgradeSinkName);
+        await checkFunctionUnreachable(eventingUpgradeSinkName, testNamespace, host);
+      });
+
+      it('Generate new eventId, save the id and publish events', async function() {
+        eventIdBinary = getRandomEventId(encoding);
+        await createK8sConfigMap(
+            {
+              ...cm.data,
+              upgradeEventID: eventIdBinary,
+            },
+            testDataConfigMapName,
+        );
+        await publishBinaryCEToEventingSink(clusterHost, eventIdBinary, 'order.created.v1', 'upgrade');
+      });
+    });
+  }
+
   // Tests
   context('with Nats backend', function() {
     it('Switch Eventing Backend to Nats', async function() {
@@ -567,6 +652,9 @@ describe('Eventing tests', function() {
 
     // Record stream and consumer data for Kyma upgrade
     jsSaveStreamAndConsumersDataSuite();
+
+    // Running JetStream At-least Once delivery Test during Upgrade
+    jsTestAtLeastOnceDelivery();
   });
 
   // this is record consumer creation time to compare after the Kyma upgrade
