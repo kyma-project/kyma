@@ -94,7 +94,7 @@ func (s *Subscription) validateSubscriptionSource() *field.Error {
 	if s.Spec.Source == "" && s.Spec.TypeMatching != TypeMatchingExact {
 		return MakeInvalidFieldError(SourcePath, s.Name, EmptyErrDetail)
 	}
-	// check only if the source is valid for the cloud event, with a valid event type
+	// Check only if the source is valid for the cloud event, with a valid event type.
 	if IsInvalidCE(s.Spec.Source, "") {
 		return MakeInvalidFieldError(SourcePath, s.Name, InvalidURIErrDetail)
 	}
@@ -118,7 +118,7 @@ func (s *Subscription) validateSubscriptionTypes() *field.Error {
 		if s.Spec.TypeMatching != TypeMatchingExact && strings.HasPrefix(etype, InvalidPrefix) {
 			return MakeInvalidFieldError(TypesPath, s.Name, InvalidPrefixErrDetail)
 		}
-		// check only is the event type is valid for the cloud event, with a valid source
+		// Check only is the event type is valid for the cloud event, with a valid source.
 		if IsInvalidCE(ValidSource, etype) {
 			return MakeInvalidFieldError(TypesPath, s.Name, InvalidURIErrDetail)
 		}
@@ -157,17 +157,17 @@ func (s *Subscription) validateSubscriptionSink() *field.Error {
 		return MakeInvalidFieldError(SinkPath, s.Name, err.Error())
 	}
 
-	// Validate sink URL is a cluster local URL
+	// Validate sink URL is a cluster local URL.
 	if !strings.HasSuffix(trimmedHost, ClusterLocalURLSuffix) {
 		return MakeInvalidFieldError(SinkPath, s.Name, SuffixMissingErrDetail)
 	}
 
-	// we expected a sink in the format "service.namespace.svc.cluster.local"
+	// We expected a sink in the format "service.namespace.svc.cluster.local".
 	if len(subDomains) != subdomainSegments {
 		return MakeInvalidFieldError(SinkPath, s.Name, SubDomainsErrDetail+trimmedHost)
 	}
 
-	// Assumption: Subscription CR and Subscriber should be deployed in the same namespace
+	// Assumption: Subscription CR and Subscriber should be deployed in the same namespace.
 	svcNs := subDomains[1]
 	if s.Namespace != svcNs {
 		return MakeInvalidFieldError(NSPath, s.Name, NSMismatchErrDetail+svcNs)
