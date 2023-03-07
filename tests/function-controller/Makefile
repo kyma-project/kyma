@@ -20,3 +20,10 @@ resolve-local:
 
 compile:
 	CGO_ENABLED=0 go build -o main.test ./cmd/main.go
+
+.PHONY: serverless-integration
+serverless-integration:
+	./run-local.sh serverless-integration
+
+git-auth-integration:
+	./run-local.sh git-auth-integration
