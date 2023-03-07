@@ -63,7 +63,7 @@ spec:
   runtime: nodejs16
   source:
     inline:
-    dependencies: '{ "dependencies": {}}'
+      dependencies: '{ "dependencies": {}}'
       source: |-
         module.exports = {
           main: async function (event, context) {
