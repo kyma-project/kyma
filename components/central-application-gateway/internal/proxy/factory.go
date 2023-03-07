@@ -91,7 +91,10 @@ func NewForCompass(
 		gwURL := *u
 		gwURL.Path = "/" + strings.Join(split[:3], "/")
 
-		targetURL, _ := url.Parse(targetAPIPath)
+		targetURL, err := url.Parse(targetAPIPath)
+		if err != nil {
+			return model.APIIdentifier{}, nil, nil, apperrors.WrongInput("invalid target path")
+		}
 
 		return apiIdentifier, targetURL, &gwURL, nil
 	}
