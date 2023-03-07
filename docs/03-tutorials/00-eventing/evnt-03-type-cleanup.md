@@ -70,7 +70,6 @@ You learn how Eventing behaves when you create a [Subscription](../../05-technic
    EOF
    ```
 
-   
      </details>
    </div>
 
