@@ -29,7 +29,7 @@
 # image base on alpine:3.17.2
 FROM alpine@sha256:e2e16842c9b54d985bf1ef9242a313f36b856181f188de21313820e177002501
 
-ENV NODE_VERSION 14.21.2
+ENV NODE_VERSION 14.21.3
 
 SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 
@@ -46,7 +46,7 @@ RUN addgroup -g 1000 node \
       && case "${alpineArch}" in \
         x86_64) \
           ARCH='x64' \
-          CHECKSUM="069d9b0f9c01fa269dfe71e0b65f04a151c233c81bd998b59894c5f717f79877" \
+          CHECKSUM="39c334bd7ef3a6e5a5a396e08b3edbe335d86161bbfba222c75aa4a3518af942" \
           ;; \
         *) ;; \
       esac \

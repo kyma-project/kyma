@@ -8,6 +8,7 @@ replace (
 	github.com/prometheus/common => github.com/prometheus/common v0.26.0
 	go.etcd.io/etcd => go.etcd.io/etcd v3.3.25+incompatible
 	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20220213190939-1e6e3497d506
+	golang.org/x/net v0.4.0 => golang.org/x/net v0.7.0
 	gopkg.in/yaml.v2 => gopkg.in/yaml.v2 v2.3.0
 	k8s.io/api => k8s.io/api v0.22.7
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.22.7
@@ -83,9 +84,9 @@ require (
 	go.uber.org/multierr v1.6.0 // indirect
 	golang.org/x/net v0.4.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8 // indirect
-	golang.org/x/sys v0.3.0 // indirect
-	golang.org/x/term v0.3.0 // indirect
-	golang.org/x/text v0.5.0 // indirect
+	golang.org/x/sys v0.5.0 // indirect
+	golang.org/x/term v0.5.0 // indirect
+	golang.org/x/text v0.7.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.2.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
