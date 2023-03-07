@@ -64,7 +64,7 @@ spec:
   source:
     inline:
       dependencies: '{ "dependencies": {}}'
-      source: |-
+      source: |
         module.exports = {
           main: async function (event, context) {
             console.log("Received event:", event.data);
