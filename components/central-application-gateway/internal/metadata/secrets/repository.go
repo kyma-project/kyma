@@ -4,12 +4,11 @@ package secrets
 import (
 	"context"
 
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
 	log "github.com/sirupsen/logrus"
 	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
 )
 
 // Repository contains operations for managing client credentials
@@ -21,6 +20,7 @@ type Repository interface {
 
 type repository struct {
 	secretsManager Manager
+	application    string
 }
 
 // Manager contains operations for managing k8s secrets
