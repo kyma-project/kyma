@@ -45,8 +45,6 @@ apiVersion: serverless.kyma-project.io/v1alpha2
 kind: Function
 metadata:
   labels:
-    serverless.kyma-project.io/build-resources-preset: local-dev
-    serverless.kyma-project.io/function-resources-preset: S
     serverless.kyma-project.io/replicas-preset: S
   name: lastorder
   namespace: default
@@ -54,17 +52,18 @@ spec:
   replicas: 1
   resourceConfiguration:
     function:
-      profile: XS
+      profile: S
       resources:
         limits:
+          cpu: 200m
+          memory: 256Mi
+        requests:
           cpu: 100m
           memory: 128Mi
-        requests:
-          cpu: 50m
-          memory: 64Mi
   runtime: nodejs16
   source:
     inline:
+    dependencies: '{ "dependencies": {}}'
       source: |-
         module.exports = {
           main: async function (event, context) {
