@@ -62,7 +62,7 @@ Follow these steps:
 
 ## Kyma users
 
-[Read](https://kyma-project.io/#used-by) how these companies use Kyma:
+The following companies use Kyma:
 
 <p align="center">
   <img src="https://github.com/kyma-project/website/blob/main/content/adopters/logos/sap.svg" alt="SAP" width="120" height="70" />
