@@ -50,25 +50,23 @@ type BasicAuth struct {
 	Password string
 }
 
-type RepoConfig struct {
-	URL       string
-	BaseDir   string
-	Reference string
-}
-
 type GithubRepo struct {
-	RepoConfig
+	Reference string `envconfig:"default=main"`
+	URL       string `envconfig:"default=git@github.com:kyma-project/private-fn-for-e2e-serverless-tests.git"`
+	BaseDir   string `envconfig:"default=/code"`
 	SSHAuth
 }
 
 type AzureRepo struct {
-	RepoConfig
+	Reference string `envconfig:"default=main"`
+	URL       string `envconfig:"default=https://kyma-wookiee@dev.azure.com/kyma-wookiee/kyma-function/_git/kyma-function"`
+	BaseDir   string `envconfig:"default=/"`
 	BasicAuth
 }
 
 func GitAuthTestSteps(restConfig *rest.Config, cfg testsuite.Config, logf *logrus.Entry) (step.Step, error) {
 	testCfg := &config{}
-	if err := envconfig.InitWithPrefix(testCfg, "APP"); err != nil {
+	if err := envconfig.InitWithPrefix(testCfg, "APP_TEST"); err != nil {
 		return nil, errors.Wrap(err, "while loading git auth test config")
 	}
 
