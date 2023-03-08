@@ -96,27 +96,10 @@ Follow these steps:
     ```
    
     >**NOTE:** To avoid performance degradation caused by large Git repositories and large monorepos, Function Controller implements a configurable backoff period for the source checkout based on `APP_FUNCTION_REQUEUE_DURATION`. This behavior can be disabled, allowing the controller to perform the source checkout with every reconciliation loop by marking the Function CR with the annotation `serverless.kyma-project.io/continuousGitCheckout: true`
-4. Create a Function CR that specifies the Function's logic and points to the directory with code and dependencies in the given repository.
-
-    ```yaml
-    cat <<EOF | kubectl apply -f -
-    apiVersion: serverless.kyma-project.io/v1alpha1
-    kind: Function
-    metadata:
-      name: $GIT_FUNCTION
-      namespace: $NAMESPACE
-    spec:
-      type: git
-      runtime: nodejs16
-      source: $GIT_FUNCTION
-      reference: main
-      baseDir: orders-service/function
-    EOF
-    ```
 
     >**NOTE:** See this [Function's code and dependencies](https://github.com/kyma-project/examples/tree/main/orders-service/function).
 
-5. Check if your Function was created and all conditions are set to `True`:
+4. Check if your Function was created and all conditions are set to `True`:
 
     ```bash
     kubectl get functions $GIT_FUNCTION -n $NAMESPACE
