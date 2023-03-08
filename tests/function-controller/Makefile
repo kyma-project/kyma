@@ -25,5 +25,6 @@ compile:
 serverless-integration:
 	./run-local.sh serverless-integration
 
+.PHONY: git-auth-integration
 git-auth-integration:
 	./run-local.sh git-auth-integration
