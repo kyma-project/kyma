@@ -29,7 +29,11 @@ const {
   waitForPodWithLabelAndCondition,
   createApiRuleForService,
   getConfigMap,
-  deleteApiRule, k8sApply, waitForSubscription, eventingSubscriptionV1Alpha2,
+  deleteApiRule,
+  k8sApply,
+  waitForSubscription,
+  eventingSubscriptionV1Alpha2,
+  deleteK8sConfigMap,
 } = require('../utils');
 const {
   eventingMonitoringTest,
@@ -597,6 +601,10 @@ describe('Eventing tests', function() {
         it('Wait for the pending event to be delivered', async function() {
           await ensureEventReceivedWithRetry(eventingSinkName, clusterHost,
               encoding, eventID, subscriptionsTypes[0].type, subscriptionsTypes[0].source);
+        });
+
+        it(`Delete configMap: ${testDataConfigMapName}`, async function() {
+          await deleteK8sConfigMap(testDataConfigMapName);
         });
       });
     });
