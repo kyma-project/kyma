@@ -71,8 +71,8 @@ Follow these steps:
    apiVersion: serverless.kyma-project.io/v1alpha2
    kind: Function
    metadata:
-     name: image-test
-     namespace: default
+     name: $NAME
+     namespace: $NAMESPACE
    spec:
      replicas: 1
      resourceConfiguration:
@@ -85,7 +85,7 @@ Follow these steps:
              cpu: 50m
              memory: 64Mi
      runtime: python39
-     runtimeImageOverride: 'wookieeteam/test-gk:0.1'
+     runtimeImageOverride: $RUNTIME_IMAGE
      source:
        inline:
          source: |

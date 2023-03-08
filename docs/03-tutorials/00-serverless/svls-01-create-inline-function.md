@@ -93,8 +93,8 @@ Follow these steps:
    apiVersion: serverless.kyma-project.io/v1alpha2
    kind: Function
    metadata:
-     name: test-function
-     namespace: default
+     name: $NAME
+     namespace: $NAMESPACE
    spec:
      replicas: 1
      resourceConfiguration:
