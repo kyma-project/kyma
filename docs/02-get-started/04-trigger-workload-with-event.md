@@ -44,10 +44,6 @@ cat <<EOF | kubectl apply -f -
 apiVersion: serverless.kyma-project.io/v1alpha2
 kind: Function
 metadata:
-  labels:
-    serverless.kyma-project.io/build-resources-preset: local-dev
-    serverless.kyma-project.io/function-resources-preset: S
-    serverless.kyma-project.io/replicas-preset: S
   name: lastorder
   namespace: default
 spec:
@@ -55,13 +51,8 @@ spec:
   resourceConfiguration:
     function:
       profile: XS
-      resources:
-        limits:
-          cpu: 100m
-          memory: 128Mi
-        requests:
-          cpu: 50m
-          memory: 64Mi
+      build:
+        profile: local-dev
   runtime: nodejs16
   source:
     inline:
