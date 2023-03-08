@@ -202,8 +202,8 @@ See all parameter descriptions.
 ```yaml
 name: function-practical-filip5
 namespace: testme
-runtime: nodejs14
-runtimeImageOverride: eu.gcr.io/kyma-project/function-runtime-nodejs14:9e934c09
+runtime: nodejs16
+runtimeImageOverride: eu.gcr.io/kyma-project/function-runtime-nodejs16:9e934c09
 labels:
     app: serverless-test
 source:
@@ -288,7 +288,7 @@ See the sample `config.yaml` for a [Git Function](./svls-04-git-source-type.md) 
 ```yaml
 name: function-practical-marcin
 namespace: iteration-review
-runtime: nodejs14
+runtime: nodejs16
 source:
     sourceType: git
     url: https://github.com/username/public-gitops.git
