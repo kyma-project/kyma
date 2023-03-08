@@ -97,10 +97,8 @@ This tutorial shows only one possible use case. There are many more use cases on
 
       ```bash
       export KYMA_DOMAIN={KYMA_DOMAIN_VARIABLE}
-      
-      curl -X POST https://incoming.${KYMA_DOMAIN}
-      -H 'Content-Type: application/json'
-      -d '{"foo":"bar"}'
+   
+      curl -X POST https://incoming.${KYMA_DOMAIN} -H 'Content-Type: application/json' -d '{"foo":"bar"}'
       ```
 ### Create the receiver Function
 
@@ -111,7 +109,14 @@ This tutorial shows only one possible use case. There are many more use cases on
    The `init` command creates the same files as in the `emitter` folder.
 
 2. In the `config.yaml` file, configure event types your Function will subscribe to:
-    ```yaml
+
+<div tabs name="function" group="set-asynchronous-connection-of-functions">
+  <details>
+  <summary label="v1alpha1">
+  v1alpha1
+  </summary>
+   
+   ```yaml
     name: event-receiver
     namespace: default
     runtime: nodejs16
@@ -130,7 +135,33 @@ This tutorial shows only one possible use case. There are many more use cases on
                    property: type
                    type: exact
                    value: sap.kyma.custom.acme.payload.sanitised.v1
-    ```
+    schemaVersion: v0
+   ```
+
+</details>
+<details>
+  <summary label="v1alpha2">
+  v1alpha2
+  </summary>   
+
+```yaml
+    name: event-receiver
+    namespace: default
+    runtime: nodejs16
+    source:
+       sourceType: inline
+    subscriptions:
+       - name: event-receiver
+         typeMatching: exact
+         source: ""
+         types:
+           - sap.kyma.custom.acme.payload.sanitised.v1
+    schemaVersion: v1
+   ```
+
+</details>
+</div>
+
 3.  Apply your receiver Function:
      ```bash
      kyma apply function
