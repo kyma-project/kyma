@@ -97,11 +97,15 @@ components:
         metrics:
           - resource:
               name: cpu
-              targetAverageUtilization: 80
+              target:
+                type: Utilization
+                averageUtilization: 80
             type: Resource
           - resource:
               name: memory
-              targetAverageUtilization: 80
+              target:
+                type: Utilization
+                averageUtilization: 80
             type: Resource
       securityContext:
         seccompProfile:
