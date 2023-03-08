@@ -66,24 +66,36 @@ Follow these steps:
 
 3. Create a Function CR that specifies the Function's logic:
 
-    ```yaml
-    cat <<EOF | kubectl apply -f -
-    apiVersion: serverless.kyma-project.io/v1alpha1
-    kind: Function
-    metadata:
-      name: $NAME
-      namespace: $NAMESPACE
-    spec:
-      runtime: python39
-      runtimeImageOverride: $RUNTIME_IMAGE
-      source: |
-        module.exports = {
-          main: function(event, context) {
-            return 'Hello World!'
-          }
-        }
-    EOF
-    ```
+   ```yaml
+   cat <<EOF | kubectl apply -f -
+   apiVersion: serverless.kyma-project.io/v1alpha2
+   kind: Function
+   metadata:
+     name: image-test
+     namespace: default
+   spec:
+     replicas: 1
+     resourceConfiguration:
+       function:
+         resources:
+           limits:
+             cpu: 100m
+             memory: 128Mi
+           requests:
+             cpu: 50m
+             memory: 64Mi
+     runtime: python39
+     runtimeImageOverride: 'wookieeteam/test-gk:0.1'
+     source:
+       inline:
+         source: |
+           module.exports = {
+             main: function(event, context) {
+               return 'Hello World!'
+             }
+           }
+   EOF
+   ```
 
 4. Verify whether your Function is running:
 
