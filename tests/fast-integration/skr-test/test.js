@@ -1,6 +1,7 @@
 const {
   gatherOptions,
   oidcE2ETest,
+  machineTypeE2ETest,
 } = require('./index');
 const {getOrProvisionSKR} = require('./provision/provision-skr');
 const {deprovisionAndUnregisterSKR} = require('./provision/deprovision-skr');
@@ -49,8 +50,9 @@ describe('SKR test', function() {
   });
 
 
-  // Run the OIDC tests
+  // Run the OIDC and machine type tests
   oidcE2ETest(getShootOptionsFunc, getShootInfoFunc);
+  machineTypeE2ETest(getShootOptionsFunc, getShootInfoFunc);
 
   after('Cleanup the resources', async function() {
     this.timeout(deprovisioningTimeout);
