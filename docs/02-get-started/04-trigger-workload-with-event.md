@@ -50,7 +50,7 @@ spec:
   replicas: 1
   resourceConfiguration:
     function:
-      profile: XS
+      profile: S
     build:
         profile: local-dev
   runtime: nodejs16
