@@ -65,7 +65,6 @@ const eppInClusterUrl = 'eventing-event-publisher-proxy.kyma-system';
 const subscriptionNames = {
   orderCreated: 'order-created',
   orderReceived: 'order-received',
-  orderCreatedUpgrade: 'order-created-upgrade',
 };
 const eventingSinkName = 'eventing-sink';
 const eventingUpgradeSinkName = 'eventing-upgrade-sink';
@@ -366,7 +365,7 @@ async function checkFunctionUnreachable(name, namespace, host) {
         });
         expect(response.status).to.not.equal(200);
         return response;
-      }, 5, 2 * 1000)
+      }, 45, 2 * 1000)
       .catch((err) => {
         debug(err);
       });
@@ -401,30 +400,21 @@ async function checkEventTracing(proxyHost, eventType, eventSource, namespace) {
 
 // checks if the event publish and receive is working.
 // Possible values for encoding are [binary, structured, legacy].
-async function checkEventDelivery(proxyHost, encoding, eventType, eventSource, isSubV1Alpha1 = false) {
+async function checkEventDelivery(proxyHost, encoding, eventType, eventSource,
+    isSubV1Alpha1 = false, sinkName=eventingSinkName) {
   const eventId = createNewEventId();
 
   debug(`Publishing event with id:${eventId}, type: ${eventType}, source: ${eventSource}...`);
   const result = await publishEventWithRetry(proxyHost, encoding, eventId, eventType, eventSource, isSubV1Alpha1);
 
   debug(`Verifying if event with id:${eventId}, type: ${eventType}, source: ${eventSource} was received by sink...`);
-  const result2 = await ensureEventReceivedWithRetry(eventingSinkName, proxyHost,
+  const result2 = await ensureEventReceivedWithRetry(sinkName, proxyHost,
       encoding, eventId, eventType, eventSource);
   return {
     eventId,
     traceParentId: result.traceParentId,
     response: result2.response,
   };
-}
-
-async function publishBinaryCEToEventingSink(proxyHost, eventID, eventType, eventSource) {
-  // send request
-  const reqBody = createBinaryCloudEventRequestBody(proxyHost, eventID, eventType, eventSource);
-  await axios.post(`https://${eventingSinkName}.${proxyHost}`, reqBody, {
-    params: {
-      send: true,
-    },
-  });
 }
 
 // send event using function query parameter send=true
@@ -752,7 +742,6 @@ module.exports = {
   isStreamCreationTimeMissing,
   isConsumerCreationTimeMissing,
   eppInClusterUrl,
-  publishBinaryCEToEventingSink,
   ensureEventReceivedWithRetry,
   subscriptionNames,
   getSubscriptionConsumerName,
@@ -779,4 +768,5 @@ module.exports = {
   getConfigMapWithRetries,
   checkStreamNotReCreated,
   checkConsumerNotReCreated,
+  publishEventWithRetry,
 };
