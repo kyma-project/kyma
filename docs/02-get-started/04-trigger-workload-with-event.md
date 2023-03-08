@@ -51,7 +51,7 @@ spec:
   resourceConfiguration:
     function:
       profile: XS
-      build:
+    build:
         profile: local-dev
   runtime: nodejs16
   source:
