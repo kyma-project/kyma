@@ -62,19 +62,28 @@ Follow these steps:
 
     >**NOTE:** Read more about the [supported authentication methods](../../05-technical-reference/svls-04-git-source-type.md).
 
-3. Create a [GitRepository CR](../../05-technical-reference/00-custom-resources/svls-02-gitrepository.md) that specifies the Git repository metadata:
+3. Create a a Function CR that specifies the Function's logic and points to the directory with code and dependencies in the given repository. It also specifies the Git repository metadata:
 
-    ```yaml
-    cat <<EOF | kubectl apply -f -
-    apiVersion: serverless.kyma-project.io/v1alpha1
-    kind: GitRepository
-    metadata:
-      name: $GIT_FUNCTION
-      namespace: $NAMESPACE
-    spec:
-      url: "https://github.com/kyma-project/examples.git"
-    EOF
-    ```
+   ```yaml
+   cat <<EOF | kubectl apply -f -
+   apiVersion: serverless.kyma-project.io/v1alpha2
+   kind: Function
+   metadata:
+     name: $GIT_FUNCTION
+     namespace: $NAMESPACE
+   spec:
+     replicas: 1
+     resourceConfiguration:
+       function:
+         profile: XS
+     runtime: nodejs16
+     source:
+       gitRepository:
+         baseDir: orders-service/function
+         reference: main
+         url: https://github.com/kyma-project/examples.git
+   EOF
+   ```
 
     >**NOTE:** If you use a secured repository, add the **auth** object with the adequate **type** and **secretName** fields to the spec:
 
