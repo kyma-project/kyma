@@ -65,7 +65,7 @@ func (f *Function) Create(spec serverlessv1alpha1.FunctionSpec) error {
 	f.function.Spec = spec
 	_, err := f.resCli.Create(f.function)
 	if err != nil {
-		return errors.Wrapf(err, "while creating %s", f.toString)
+		return errors.Wrapf(err, "while creating %s", f.toString())
 	}
 	return err
 }
@@ -93,7 +93,7 @@ func (f *Function) WaitForStatusRunning() error {
 func (f *Function) Delete() error {
 	err := f.resCli.Delete(f.function.Name)
 	if err != nil {
-		return errors.Wrapf(err, "while deleting %s", f.toString)
+		return errors.Wrapf(err, "while deleting %s", f.toString())
 	}
 
 	return nil
@@ -117,14 +117,14 @@ func (f *Function) Update(spec serverlessv1alpha1.FunctionSpec) error {
 		// https://github.com/kubernetes/client-go/blob/9927afa2880713c4332723b7f0865adee5e63a7b/util/retry/util.go#L89-L93
 		return err
 	}, f.log)
-	return errors.Wrapf(err, "while updating %s", f.toString)
+	return errors.Wrapf(err, "while updating %s", f.toString())
 
 }
 
 func (f *Function) Get() (*serverlessv1alpha1.Function, error) {
 	u, err := f.resCli.Get(f.function.Name)
 	if err != nil {
-		return nil, errors.Wrapf(err, "while getting %s", f.toString)
+		return nil, errors.Wrapf(err, "while getting %s", f.toString())
 	}
 
 	function, err := convertFromUnstructuredToFunction(u)
