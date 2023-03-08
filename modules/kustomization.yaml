@@ -5,3 +5,14 @@ components:
   - alpha
   - fast
   - regular
+
+patches:
+- target:
+    kind: ModuleTemplate
+  patch: |-
+    apiVersion: operator.kyma-project.io/v1alpha1
+    kind: ModuleTemplate
+    metadata:
+      name: "*"
+    spec:
+      target: control-plane
