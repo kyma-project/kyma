@@ -103,46 +103,66 @@ kubectl create secret generic  my-secret  --from-literal secret-env="I come from
 
 3. Create a Function CR that specifies the Function's logic:
 
-    ```yaml
-    cat <<EOF | kubectl apply -f -
-    apiVersion: serverless.kyma-project.io/v1alpha1
-    kind: Function
-    metadata:
-        name: my-function
-    spec:
-        env:
-            - name: env1
-              value: I come from function definition
-            - name: env2
-              valueFrom:
-                configMapKeyRef:
-                    key: config-env
-                    name: my-config
-            - name: env3
-              valueFrom:
-                secretKeyRef:
-                    key: secret-env
-                    name: my-secret
-        runtime: nodejs16
-        source: |-
-            module.exports = {
-                main: function (event, context) {
-                    envs = ["env1", "env2", "env3"]
-                    envs.forEach(function(key){
-                        console.log(`${key}:${readEnv(key)}`)
-                    });
-                    return 'Hello Serverless'
-                }
+   ```yaml
+   cat <<EOF | kubectl apply -f -
+   apiVersion: serverless.kyma-project.io/v1alpha2
+   kind: Function
+   metadata:
+     name: my-function
+     namespace: default
+   spec:
+     env:
+       - name: env1
+         value: I come from function definition
+       - name: env2
+         valueFrom:
+           configMapKeyRef:
+             key: config-env
+             name: my-config
+       - name: env3
+         valueFrom:
+           secretKeyRef:
+             key: secret-env
+             name: my-secret
+     replicas: 1
+     resourceConfiguration:
+       function:
+         resources:
+           limits:
+             cpu: 100m
+             memory: 128Mi
+           requests:
+             cpu: 50m
+             memory: 64Mi
+     runtime: nodejs16
+     source:
+       inline:
+         dependencies: |-
+           {
+            "name": "example-1",
+            "version": "0.0.1",
+            "dependencies": {
+              "request": "^2.85.0"
             }
-
-            readEnv=(envKey) => {
-                if(envKey){
-                    return process.env[envKey];
-                }
-                return
-            }
-    EOF
-    ```
+           }
+         source: |-
+           module.exports = {
+               main: function (event, context) {
+                   envs = ["env1", "env2", "env3"]
+                   envs.forEach(function(key){
+                       console.log()
+                   });
+                   return 'Hello Serverless'
+               }
+           }
+           readEnv=(envKey) => {
+               if(envKey){
+                   return process.env[envKey];
+               }
+               return
+           }
+   EOF
+   ```
 
 4. Verify whether your Function is running:
 
