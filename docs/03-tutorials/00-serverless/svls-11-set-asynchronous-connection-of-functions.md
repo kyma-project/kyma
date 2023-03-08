@@ -135,7 +135,7 @@ This tutorial shows only one possible use case. There are many more use cases on
                    property: type
                    type: exact
                    value: sap.kyma.custom.acme.payload.sanitised.v1
-   schemaVersion: v0
+    schemaVersion: v0
    ```
 
 </details>
@@ -156,7 +156,7 @@ This tutorial shows only one possible use case. There are many more use cases on
          source: ""
          types:
            - sap.kyma.custom.acme.payload.sanitised.v1
-   schemaVersion: v1
+    schemaVersion: v1
    ```
 
 </details>
