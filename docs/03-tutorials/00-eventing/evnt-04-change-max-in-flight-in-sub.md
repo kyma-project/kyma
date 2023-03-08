@@ -42,24 +42,15 @@ The "in-flight messages" config defines the number of events that Kyma Eventing 
    apiVersion: serverless.kyma-project.io/v1alpha2
    kind: Function
    metadata:
-     labels:
-       serverless.kyma-project.io/build-resources-preset: local-dev
-       serverless.kyma-project.io/function-resources-preset: S
-       serverless.kyma-project.io/replicas-preset: S
      name: lastorder
      namespace: default
    spec:
      replicas: 1
      resourceConfiguration:
        function:
-         profile: XS
-         resources:
-           limits:
-             cpu: 100m
-             memory: 128Mi
-           requests:
-             cpu: 50m
-             memory: 64Mi
+         profile: S
+       build:
+         profile: local-dev
      runtime: nodejs16
      source:
        inline:
@@ -67,9 +58,9 @@ The "in-flight messages" config defines the number of events that Kyma Eventing 
            module.exports = {
              main: async function (event, context) {
                console.log("Processing event:", event.data);
-             // sleep/wait for 5 seconds
-             await new Promise(r => setTimeout(r, 5 * 1000));
-             console.log("Completely processed event:", event.data);
+               // sleep/wait for 5 seconds
+               await new Promise(r => setTimeout(r, 5 * 1000));
+               console.log("Completely processed event:", event.data);
                return;
              }
            }
