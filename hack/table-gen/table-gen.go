@@ -15,14 +15,6 @@ type FunctionSpecGenerator struct {
 	elementsToSkip map[string]bool
 }
 
-// how to deal with comment tag? +
-// what to do with required label? // there is a required label, detect it and extract info // if existing tool does not work, keep minimal, no need for required
-// which kind of elements should we include by default? +
-// how to start this script automatically? move to hack, do the prow job
-// add auto crd name comment insertion
-
-// try to remove keep-this tag if it is easy +
-
 const (
 	FunctionSpecIdentifier      = `FUNCTION-SPEC`
 	REFunctionSpecPattern       = `(?s)<!--\s*` + FunctionSpecIdentifier + `-START\s* -->.*<!--\s*` + FunctionSpecIdentifier + `-END\s*-->`
@@ -40,9 +32,8 @@ var (
 )
 
 func main() {
-	//remove default value
-	flag.StringVar(&CRDFilename, "crd-filename", "/Users/I572465/telemetry-manager/config/crd/bases/telemetry.kyma-project.io_logpipelines.yaml", "Full or relative path to the .yaml file containing crd")
-	flag.StringVar(&MDFilename, "md-filename", "/Users/I572465/Go/src/github.com/kyma-project/kyma/docs/01-overview/main-areas/telemetry/telemetry-02-logs.md", "Full or relative path to the .md file containing the file where we should insert table rows")
+	flag.StringVar(&CRDFilename, "crd-filename", "", "Full or relative path to the .yaml file containing crd")
+	flag.StringVar(&MDFilename, "md-filename", "", "Full or relative path to the .md file containing the file where we should insert table rows")
 	flag.StringVar(&APIVersion, "api-version", "v1alpha1", "API version your operattor uses")
 	flag.StringVar(&CRDTitle, "crd-title", "", "The name of the CRD which was passed in crd-filename")
 	flag.Parse()
