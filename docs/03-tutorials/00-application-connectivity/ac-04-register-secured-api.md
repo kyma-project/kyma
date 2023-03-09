@@ -41,7 +41,7 @@ The **credentials** object must contain the following fields:
 | Field                 | Description                                                                 |
 | --------------------- |-----------------------------------------------------------------------------|
 | **secretName**        | Name of a Secret storing credentials                                        |
-| **type**              | Authentication method type. Supported values: `Basic`, `OAuth`, `OAuthWithCert `, `CertGen`.  |
+| **type**              | Authentication method type. Supported values: `Basic`, `OAuth`, `OAuthWithCert `, `CertificateGen`.  |
 | **authenticationUrl** | Optional OAuth token URL, valid only for the `OAuth` and `OAuthWithCert` types. |
 
 ## Register a Basic Authentication-secured API
