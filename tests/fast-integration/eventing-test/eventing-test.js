@@ -599,7 +599,7 @@ describe('Eventing tests', function() {
         });
 
         it('Wait for the pending event to be delivered', async function() {
-          await ensureEventReceivedWithRetry(eventingSinkName, clusterHost,
+          await ensureEventReceivedWithRetry(eventingUpgradeSinkName, clusterHost,
               encoding, eventID, subscriptionsTypes[0].type, subscriptionsTypes[0].source);
         });
 
