@@ -460,15 +460,3 @@ Each Fluent Bit Pod can process up to 10 MB/s of logs for a single LogPipeline. 
 
 In the production profile, no more than 5 LogPipelines.
 In the evaluation profile, no more than 3 LogPipelines.
-
-<!-- Part of the table bellow is generated automatically don't touch them. When you want to change description, do it in components/function-controller/pkg/apis/serverless/v1alpha2/function_types.go -->
-<!-- Some special tags (html comments) are at the end of lines due to markdown requirements. -->
-<!-- The content between "FUNCTION-SPEC-START" and "FUNCTION-SPEC-END" will be replaced but rows with "KEEP-THIS" at the end will be preserved-->
-
-<!-- SKIP-ELEMENT spec -->
-<!-- SKIP-ELEMENT status -->
-<!-- SKIP-WITH-ANCESTORS spec.template -->
-
-<!-- FUNCTION-SPEC-START -->
-
-<!-- FUNCTION-SPEC-END -->

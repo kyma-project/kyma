@@ -11,13 +11,8 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-type FunctionSpecGenerator struct {
-	elementsToSkip map[string]bool
-}
-
 const (
-	FunctionSpecIdentifier      = `FUNCTION-SPEC`
-	REFunctionSpecPattern       = `(?s)<!--\s*` + FunctionSpecIdentifier + `-START\s* -->.*<!--\s*` + FunctionSpecIdentifier + `-END\s*-->`
+	REPattern                   = `(?s)<!--\s*TABLE-START\s* -->.*<!--\s*TABLE-END\s*-->`
 	SkipIdentifier              = `SKIP-ELEMENT`
 	RESkipPattern               = `<!--\s*` + SkipIdentifier + `\s*([^\s]+)\s*-->`
 	SkipWithAncestorsIdentifier = `SKIP-WITH-ANCESTORS`
@@ -28,19 +23,18 @@ var (
 	CRDFilename string
 	MDFilename  string
 	APIVersion  string
-	CRDTitle    string
+	CRDKind     string
 )
 
 func main() {
 	flag.StringVar(&CRDFilename, "crd-filename", "", "Full or relative path to the .yaml file containing crd")
 	flag.StringVar(&MDFilename, "md-filename", "", "Full or relative path to the .md file containing the file where we should insert table rows")
 	flag.StringVar(&APIVersion, "api-version", "v1alpha1", "API version your operattor uses")
-	flag.StringVar(&CRDTitle, "crd-title", "", "The name of the CRD which was passed in crd-filename")
+	flag.StringVar(&CRDKind, "crd-title", "", "The name of the CRD which was passed in crd-filename")
 	flag.Parse()
 
-	toSkip := getElementsToSkip()
-	generator := CreateFunctionSpecGenerator(toSkip)
-	doc := generator.generateDocFromCRD()
+	elementsToSkip := getElementsToSkip()
+	doc := generateDocFromCRD(elementsToSkip)
 	replaceDocInMD(doc)
 	print(doc)
 }
@@ -53,14 +47,14 @@ func getElementsToSkip() map[string]bool {
 
 	doc := string(inDoc)
 	reSkip := regexp.MustCompile(RESkipPattern)
-	toSkip := map[string]bool{}
+	elementsToSkip := map[string]bool{}
 
-	pairsToParamsToSkip(toSkip, reSkip.FindAllStringSubmatch(doc, -1), false)
+	pairsToParamsToSkip(elementsToSkip, reSkip.FindAllStringSubmatch(doc, -1), false)
 
 	reSkipWithAncestors := regexp.MustCompile(RESkipWithAncestorsPattern)
-	pairsToParamsToSkip(toSkip, reSkipWithAncestors.FindAllStringSubmatch(doc, -1), true)
+	pairsToParamsToSkip(elementsToSkip, reSkipWithAncestors.FindAllStringSubmatch(doc, -1), true)
 
-	return toSkip
+	return elementsToSkip
 }
 
 func replaceDocInMD(doc string) {
@@ -70,10 +64,10 @@ func replaceDocInMD(doc string) {
 	}
 
 	newContent := strings.Join([]string{
-		"<!-- " + FunctionSpecIdentifier + "-START -->",
-		doc + "<!-- " + FunctionSpecIdentifier + "-END -->",
+		"<!-- TABLE-START -->",
+		doc + "<!-- TABLE-END -->",
 	}, "\n")
-	re := regexp.MustCompile(REFunctionSpecPattern)
+	re := regexp.MustCompile(REPattern)
 	outDoc := re.ReplaceAll(inDoc, []byte(newContent))
 
 	outFile, err := os.OpenFile(MDFilename, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
@@ -84,13 +78,7 @@ func replaceDocInMD(doc string) {
 	outFile.Write(outDoc)
 }
 
-func CreateFunctionSpecGenerator(toSkip map[string]bool) FunctionSpecGenerator {
-	return FunctionSpecGenerator{
-		elementsToSkip: toSkip,
-	}
-}
-
-func (generator *FunctionSpecGenerator) generateDocFromCRD() string {
+func generateDocFromCRD(elementsToSkip map[string]bool) string {
 	input, err := os.ReadFile(CRDFilename)
 	if err != nil {
 		panic(err)
@@ -110,11 +98,11 @@ func (generator *FunctionSpecGenerator) generateDocFromCRD() string {
 			continue
 		}
 
-		functionSpec := getElement(version, "schema", "openAPIV3Schema", "properties", "spec")
-		mergeMaps(docElements, generator.generateElementDoc(functionSpec, "spec", ""))
+		spec := getElement(version, "schema", "openAPIV3Schema", "properties", "spec")
+		mergeMaps(docElements, generateElementDoc(elementsToSkip, spec, "spec", ""))
 
-		functionStatus := getElement(version, "schema", "openAPIV3Schema", "properties", "status")
-		mergeMaps(docElements, generator.generateElementDoc(functionStatus, "status", ""))
+		status := getElement(version, "schema", "openAPIV3Schema", "properties", "status")
+		mergeMaps(docElements, generateElementDoc(elementsToSkip, status, "status", ""))
 	}
 
 	var doc []string
@@ -123,7 +111,7 @@ func (generator *FunctionSpecGenerator) generateDocFromCRD() string {
 	}
 
 	doc = append([]string{
-		"<!-- " + CRDTitle + " -->",
+		"<!-- " + CRDKind + " -->",
 		"| Parameter         | Description                                   |",
 		"| ---------------------------------------- | ---------|",
 	}, doc...)
@@ -131,7 +119,7 @@ func (generator *FunctionSpecGenerator) generateDocFromCRD() string {
 	return strings.Join(doc, "\n")
 }
 
-func (generator *FunctionSpecGenerator) generateElementDoc(obj interface{}, name string, parentPath string) map[string]string {
+func generateElementDoc(elementsToSkip map[string]bool, obj interface{}, name string, parentPath string) map[string]string {
 	result := map[string]string{}
 	element := obj.(map[string]interface{})
 	elementType := element["type"].(string)
@@ -141,7 +129,7 @@ func (generator *FunctionSpecGenerator) generateElementDoc(obj interface{}, name
 	}
 
 	fullName := fmt.Sprintf("%s%s", parentPath, name)
-	skipWithAncestors, shouldBeSkipped := generator.elementsToSkip[fullName]
+	skipWithAncestors, shouldBeSkipped := elementsToSkip[fullName]
 	if shouldBeSkipped && skipWithAncestors {
 		return result
 	}
@@ -151,12 +139,12 @@ func (generator *FunctionSpecGenerator) generateElementDoc(obj interface{}, name
 	}
 
 	if elementType == "object" {
-		mergeMaps(result, generator.generateObjectDoc(element, name, parentPath))
+		mergeMaps(result, generateObjectDoc(elementsToSkip, element, name, parentPath))
 	}
 	return result
 }
 
-func (generator *FunctionSpecGenerator) generateObjectDoc(element map[string]interface{}, name string, parentPath string) map[string]string {
+func generateObjectDoc(elementsToSkip map[string]bool, element map[string]interface{}, name string, parentPath string) map[string]string {
 	result := map[string]string{}
 	properties := getElement(element, "properties")
 	if properties == nil {
@@ -165,7 +153,7 @@ func (generator *FunctionSpecGenerator) generateObjectDoc(element map[string]int
 
 	propMap := properties.(map[string]interface{})
 	for _, propName := range sortKeys(propMap) {
-		mergeMaps(result, generator.generateElementDoc(propMap[propName], propName, parentPath+name+"."))
+		mergeMaps(result, generateElementDoc(elementsToSkip, propMap[propName], propName, parentPath+name+"."))
 	}
 	return result
 }

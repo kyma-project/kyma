@@ -27,22 +27,17 @@ For further LogParser examples, see the [samples](https://github.com/kyma-projec
 
 ## Custom resource parameters
 
-### spec attribute
+<!-- The table below was generated automatically -->
+<!-- Some special tags (html comments) are at the end of lines due to markdown requirements. -->
+<!-- The content between "TABLE-START" and "TABLE-END" will be replaced -->
 
-For details, see the [LogParser specification file](https://github.com/kyma-project/telemetry-manager/blob/main/apis/telemetry/v1alpha1/logparser_types.go).
+<!-- SKIP-ELEMENT spec -->
+<!-- SKIP-ELEMENT status -->
+<!-- SKIP-WITH-ANCESTORS spec.template -->
 
-| Parameter | Type | Description |
-|---|---|---|
-| parser | object | [Fluent Bit Parsers](https://docs.fluentbit.io/manual/pipeline/parsers). The parser specified here has no effect until it is referenced by a [Pod annotation](https://docs.fluentbit.io/manual/pipeline/filters/kubernetes#kubernetes-annotations) on your workload or by a [Parser Filter](https://docs.fluentbit.io/manual/pipeline/filters/parser) defined in a pipelines filters section. |
-| parser.content | string | The actual parser definition in the syntax of Fluent Bit. |
-
-### status attribute
-
-For details, see the [LogParser specification file](https://github.com/kyma-project/telemetry-manager/blob/main/apis/telemetry/v1alpha1/logparser_types.go).
-
-| Parameter | Type | Description |
-|---|---|---|
-| conditions | []object | An array of conditions describing the status of the parser.
-| conditions[].lastTransitionTime | []object | An array of conditions describing the status of the parser.
-| conditions[].reason | []object | An array of conditions describing the status of the parser.
-| conditions[].type | enum | The possible transition types are:<br>- `Running`: The parser is ready and usable.<br>- `Pending`: The parser is being activated. |
+<!-- TABLE-START -->
+<!-- LogParser -->
+| Parameter         | Description                                   |
+| ---------------------------------------- | ---------|
+| **spec.parser** | Configures a user defined Fluent Bit parser to be applied to the logs. |
+| **status.conditions** |  |<!-- TABLE-END -->
