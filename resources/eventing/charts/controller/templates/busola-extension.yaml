@@ -76,7 +76,7 @@ data:
       defaultExpanded: true
       children:
         - path: '[]'
-        simple: true
+          simple: true
     - simple: true
       type: string
       var: service
