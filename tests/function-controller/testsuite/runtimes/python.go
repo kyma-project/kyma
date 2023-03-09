@@ -26,6 +26,9 @@ arrow==0.15.8`
 			Function: &serverlessv1alpha2.ResourceRequirements{
 				Profile: "M",
 			},
+			Build: &serverlessv1alpha2.ResourceRequirements{
+				Profile: "normal",
+			},
 		},
 	}
 }
@@ -51,6 +54,9 @@ kyma-pypi-test==1.0.0`
 		ResourceConfiguration: &serverlessv1alpha2.ResourceConfiguration{
 			Function: &serverlessv1alpha2.ResourceRequirements{
 				Profile: "M",
+			},
+			Build: &serverlessv1alpha2.ResourceRequirements{
+				Profile: "normal",
 			},
 		},
 	}

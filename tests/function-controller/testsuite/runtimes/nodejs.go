@@ -20,6 +20,9 @@ func BasicNodeJSFunction(msg string, rtm serverlessv1alpha2.Runtime) serverlessv
 			Function: &serverlessv1alpha2.ResourceRequirements{
 				Profile: "M",
 			},
+			Build: &serverlessv1alpha2.ResourceRequirements{
+				Profile: "normal",
+			},
 		},
 	}
 }
@@ -36,6 +39,9 @@ func BasicNodeJSFunctionWithCustomDependency(msg string, rtm serverlessv1alpha2.
 		ResourceConfiguration: &serverlessv1alpha2.ResourceConfiguration{
 			Function: &serverlessv1alpha2.ResourceRequirements{
 				Profile: "M",
+			},
+			Build: &serverlessv1alpha2.ResourceRequirements{
+				Profile: "normal",
 			},
 		},
 	}
@@ -83,6 +89,9 @@ func NodeJSFunctionWithEnvFromConfigMapAndSecret(configMapName, cmEnvKey, secret
 		ResourceConfiguration: &serverlessv1alpha2.ResourceConfiguration{
 			Function: &serverlessv1alpha2.ResourceRequirements{
 				Profile: "M",
+			},
+			Build: &serverlessv1alpha2.ResourceRequirements{
+				Profile: "normal",
 			},
 		},
 	}
