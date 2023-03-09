@@ -76,6 +76,7 @@ data:
       defaultExpanded: true
       children:
         - path: '[]'
+          simple: true
     - path: spec.sink
       name: spec.sink
       widget: Resource
