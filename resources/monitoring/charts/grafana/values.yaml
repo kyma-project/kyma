@@ -36,11 +36,15 @@ autoscaling:
 #   - type: Resource
 #     resource:
 #       name: cpu
-#       targetAverageUtilization: 60
+#       target:
+#          type: Utilization
+#          averageUtilization: 60
 #   - type: Resource
 #     resource:
 #       name: memory
-#       targetAverageUtilization: 60
+#       target:
+#          type: Utilization
+#          averageUtilization: 60
 
 ## See `kubectl explain poddisruptionbudget.spec` for more
 ## ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
