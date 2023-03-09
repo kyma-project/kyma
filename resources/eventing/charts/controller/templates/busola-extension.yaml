@@ -89,7 +89,7 @@ data:
       placeholder: placeholder.sink
       trigger: [sink]
       subscribe:
-        sink: '"http://" & spec.sink & "." & $root.metadata.namespace & ".svc.cluster.local"'
+        sink: '"http://" & $sink & "." & $root.metadata.namespace & ".svc.cluster.loca"'
     - path: spec.typeMatching
       simple: true
       enum:
