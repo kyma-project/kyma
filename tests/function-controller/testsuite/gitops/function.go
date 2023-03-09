@@ -39,6 +39,9 @@ func GitopsFunction(repoURL, baseDir, reference string, rtm serverlessv1alpha2.R
 			Function: &serverlessv1alpha2.ResourceRequirements{
 				Profile: "M",
 			},
+			Build: &serverlessv1alpha2.ResourceRequirements{
+				Profile: "normal",
+			},
 		},
 	}
 }
