@@ -42,7 +42,7 @@ function machineTypeE2ETest(getShootOptionsFunc, getShootInfoFunc) {
           }
           const si = p.schemas.service_instance;
           console.log(`catalog plan update ${si.update !== undefined}`);
-          if (si.update === undefined) {
+          if (si.update === undefined || si.update.parameters.properties.machineType === undefined) {
             continue;
           }
           const mt = si.update.parameters.properties.machineType.enum;
