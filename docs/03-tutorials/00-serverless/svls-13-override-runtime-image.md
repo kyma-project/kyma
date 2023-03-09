@@ -74,16 +74,6 @@ Follow these steps:
      name: $NAME
      namespace: $NAMESPACE
    spec:
-     replicas: 1
-     resourceConfiguration:
-       function:
-         resources:
-           limits:
-             cpu: 100m
-             memory: 128Mi
-           requests:
-             cpu: 50m
-             memory: 64Mi
      runtime: python39
      runtimeImageOverride: $RUNTIME_IMAGE
      source:

@@ -72,10 +72,6 @@ Follow these steps:
      name: $GIT_FUNCTION
      namespace: $NAMESPACE
    spec:
-     replicas: 1
-     resourceConfiguration:
-       function:
-         profile: XS
      runtime: nodejs16
      source:
        gitRepository:

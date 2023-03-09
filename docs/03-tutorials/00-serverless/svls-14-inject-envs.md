@@ -109,7 +109,6 @@ kubectl create secret generic  my-secret  --from-literal secret-env="I come from
    kind: Function
    metadata:
      name: my-function
-     namespace: default
    spec:
      env:
        - name: env1
@@ -124,33 +123,15 @@ kubectl create secret generic  my-secret  --from-literal secret-env="I come from
            secretKeyRef:
              key: secret-env
              name: my-secret
-     replicas: 1
-     resourceConfiguration:
-       function:
-         resources:
-           limits:
-             cpu: 100m
-             memory: 128Mi
-           requests:
-             cpu: 50m
-             memory: 64Mi
      runtime: nodejs16
      source:
        inline:
-         dependencies: |-
-           {
-            "name": "example-1",
-            "version": "0.0.1",
-            "dependencies": {
-              "request": "^2.85.0"
-            }
-           }
          source: |-
            module.exports = {
                main: function (event, context) {
                    envs = ["env1", "env2", "env3"]
                    envs.forEach(function(key){
-                       console.log()
+                       console.log(`${key}:${readEnv(key)}`)
                    });
                    return 'Hello Serverless'
                }
