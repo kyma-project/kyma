@@ -67,7 +67,7 @@
 
 
 # Fast Integration Tests
-/tests/fast-integration @lindnerby @rakesh-garimella @jeremyharisch @khlifi411 @ruanxin @pbochynski @dennis-ge @jakobmoellersap @Tomasz-Smelcerz-SAP @PK85 @chrkl
+/tests/fast-integration @lindnerby @rakesh-garimella @jeremyharisch @khlifi411 @ruanxin @dennis-ge @jakobmoellersap @Tomasz-Smelcerz-SAP @PK85 @chrkl
 /tests/fast-integration/eventing-test @kyma-project/eventing
 /tests/fast-integration/image @kyma-project/eventing
 /tests/fast-integration/kcp @kyma-project/gopher
