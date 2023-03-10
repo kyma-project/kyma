@@ -62,7 +62,7 @@ Follow these steps:
 
     >**NOTE:** Read more about the [supported authentication methods](../../05-technical-reference/svls-04-git-source-type.md).
 
-3. Create a a Function CR that specifies the Function's logic and points to the directory with code and dependencies in the given repository. It also specifies the Git repository metadata:
+3. Create a Function CR that specifies the Function's logic and points to the directory with code and dependencies in the given repository. It also specifies the Git repository metadata:
 
    ```yaml
    cat <<EOF | kubectl apply -f -
