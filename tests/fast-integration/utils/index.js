@@ -1167,12 +1167,22 @@ function log(prefix, ...args) {
   if (args.length === 0) {
     return;
   }
-
-  args = [...args];
+  args = filterSensitiveLog(args);
   const fmt = `[${prefix}] ` + args[0];
   args = args.slice(1);
   console.log.apply(console, [fmt, ...args]);
 }
+
+function filterSensitiveLog(args) {
+  args.forEach((o, i, a) => {
+    if (typeof o === 'object') {
+      a[i] = JSON.stringify(o);
+    }
+    a[i] = a[i].replace(/"Authorization".*",/, '');
+  });
+  return args;
+}
+
 
 function isDebugEnabled() {
   return DEBUG;
