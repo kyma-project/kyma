@@ -26,6 +26,8 @@ func (r *Runner) Execute(step Step) error {
 		if err == nil {
 			return step.Cleanup()
 		}
+	default:
+		err = errors.Errorf("couldn't find cleanup mode: %s", r.cleanup)
 	}
 	return err
 }
