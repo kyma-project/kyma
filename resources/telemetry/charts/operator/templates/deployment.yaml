@@ -30,16 +30,7 @@ spec:
         - command:
             - /manager
           args:
-            - --leader-elect
-            - --sync-period={{.Values.syncPeriod}}
             - --cert-dir=/tmp
-            - --telemetry-namespace={{ .Release.Namespace }}
-            - --fluent-bit-cm-name={{ .Release.Name }}-{{ .Values.logProcessor }}
-            - --fluent-bit-sections-cm-name={{ .Release.Name }}-{{ .Values.logProcessor }}-sections
-            - --fluent-bit-parser-cm-name={{ .Release.Name }}-{{ .Values.logProcessor }}-parsers
-            - --fluent-bit-ds-name={{ .Release.Name }}-{{ .Values.logProcessor }}
-            - --fluent-bit-env-secret={{ .Release.Name }}-{{ .Values.logProcessor }}-env
-            - --fluent-bit-files-cm={{ .Release.Name }}-{{ .Values.logProcessor }}-files
             - --fluent-bit-filesystem-buffer-limit={{ .Values.filesystemBufferLimit }}
             - --fluent-bit-cpu-limit={{ .Values.fluentbit.resources.limits.cpu }}
             - --fluent-bit-memory-limit={{ .Values.fluentbit.resources.limits.memory }}
@@ -92,7 +83,5 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
-            - name: APP_LOG_FORMAT
-              value: {{ .Values.global.log.format | quote }}
             - name: APP_LOG_LEVEL
               value: {{ .Values.global.log.level | quote }}
