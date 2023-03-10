@@ -1183,7 +1183,6 @@ function filterSensitiveLog(args) {
   return args;
 }
 
-
 function isDebugEnabled() {
   return DEBUG;
 }
