@@ -89,7 +89,7 @@ See [`kubeless.js`](https://github.com/kubeless/runtimes/blob/master/stable/node
 See the example of a Function with these environment variables set:
 
 ```yaml
-apiVersion: serverless.kyma-project.io/v1alpha1
+apiVersion: serverless.kyma-project.io/v1alpha2
 kind: Function
 metadata:
   name: sample-fn-with-envs
@@ -97,15 +97,18 @@ metadata:
 spec:
   env:
     - name: FUNC_TIMEOUT
-      value: "2"
+      value: '2'
     - name: REQ_MB_LIMIT
-      value: "10"
-  source: |
-    module.exports = {
-      main: function (event, context) {
-        return "Hello World!";
-      }
-    }
+      value: '10'
+  runtime: nodejs16
+  source:
+    inline:
+      source: |
+        module.exports = {
+          main: function (event, context) {
+            return "Hello World!";
+          }
+        }
 ```
 
 ### Python runtime-specific environment variables
@@ -121,7 +124,7 @@ To configure a Function with the Python runtime, override the default values of 
 See [`kubeless.py`](https://github.com/kubeless/runtimes/blob/master/stable/python/_kubeless.py) to get a deeper understanding of how the Bottle server, that acts as a runtime, uses these values internally to run Python Functions.
 
 ```yaml
-apiVersion: serverless.kyma-project.io/v1alpha1
+apiVersion: serverless.kyma-project.io/v1alpha2
 kind: Function
 metadata:
   name: sample-fn-with-envs
@@ -129,8 +132,12 @@ metadata:
 spec:
   env:
     - name: FUNC_MEMFILE_MAX
-      value: "1048576" # 1MiB
-  source: |
-    def main(event. context):
-      return "Hello World!"
+      value: '1048576' #1MiB
+  runtime: nodejs16
+  source:
+    inline:
+      source: |
+        def main(event. context):
+          return "Hello World!"
+
 ```
