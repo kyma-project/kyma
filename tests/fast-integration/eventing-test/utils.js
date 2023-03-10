@@ -25,6 +25,7 @@ const {
   sleep,
   getConfigMap,
   createK8sConfigMap,
+  namespaceObj,
 } = require('../utils');
 
 const {DirectorClient, DirectorConfig, getAlreadyAssignedScenarios} = require('../compass');
@@ -683,6 +684,10 @@ function getTimeStampsWithZeroMilliSeconds(timestamp) {
   return (new Date(ts)).toISOString();
 }
 
+async function createK8sNamespace(name) {
+  await k8sApply([namespaceObj(name)]);
+}
+
 module.exports = {
   appName,
   scenarioName,
@@ -736,4 +741,5 @@ module.exports = {
   getConfigMapWithRetries,
   checkStreamNotReCreated,
   checkConsumerNotReCreated,
+  createK8sNamespace,
 };
