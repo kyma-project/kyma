@@ -43,6 +43,7 @@ const {
   getConfigMapWithRetries,
   checkStreamNotReCreated,
   checkConsumerNotReCreated,
+  isUpgradeJob,
 } = require('./utils');
 const {
   bebBackend,
@@ -196,7 +197,7 @@ describe('Eventing tests', function() {
   function jsSaveStreamAndConsumersDataSuite() {
     context('save stream and consumer data', function() {
       it('saving JetStream data to test stream and consumers will not be re-created by kyma upgrade', async function() {
-        if (!isEventingSinkDeployed || !testSubscriptionV1Alpha2) {
+        if (!isUpgradeJob) {
           debug(`Skipping saving JetStream test data into a configMap: ${jetStreamTestConfigMapName}`);
           this.skip();
         }
@@ -218,7 +219,7 @@ describe('Eventing tests', function() {
       before('fetch eventing-js-test data configMap', async function() {
         debug(`fetch configMap: ${jetStreamTestConfigMapName}...`);
         const cm = await getConfigMapWithRetries(jetStreamTestConfigMapName, testNamespace);
-        if (!cm || !isEventingSinkDeployed || !testSubscriptionV1Alpha2) {
+        if (!cm || !isUpgradeJob) {
           debug(`Skipping stream and consumers not re-created check`);
           this.skip();
           return;
