@@ -10,6 +10,9 @@ global:
     publisher_proxy:
       name: event-publisher-proxy
       version: v20230306-92b6a97e
+    certHandler:
+      name: api-gateway-webhook-certificates
+      version: "1.4.0"
     nats:
       name: nats
       version: v20230223-2.9.14-alpine3.17
