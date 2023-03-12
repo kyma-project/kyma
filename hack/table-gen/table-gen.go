@@ -36,7 +36,6 @@ func main() {
 	elementsToSkip := getElementsToSkip()
 	doc := generateDocFromCRD(elementsToSkip)
 	replaceDocInMD(doc)
-	print(doc)
 }
 
 func getElementsToSkip() map[string]bool {
