@@ -25,7 +25,6 @@ const {
   timeoutTime,
   slowTime,
   isSKR,
-  testSubscriptionV1Alpha2,
   eventingNatsSvcName,
   eventingNatsApiRuleAName,
   eventingSinkName,
@@ -44,6 +43,10 @@ const {
   checkStreamNotReCreated,
   checkConsumerNotReCreated,
   isUpgradeJob,
+  deployEventingSinkFunction,
+  waitForEventingSinkFunction,
+  deployV1Alpha1Subscriptions,
+  deployV1Alpha2Subscriptions,
 } = require('./utils');
 const {
   bebBackend,
@@ -96,7 +99,22 @@ describe('Eventing tests', function() {
   });
 
   before('Ensure eventing-sink function is ready', async function() {
-    await waitForFunction(eventingSinkName, testNamespace, 30*1000);
+    try {
+      await waitForFunction(eventingSinkName, testNamespace, 30*1000);
+    } catch (e) {
+      if (!isUpgradeJob) {
+        throw e;
+      }
+
+      // Deploying eventing sink with subscriptions if its upgrade tests
+      // Only temporarily - will be removed
+      debug('Eventing Sink is not deployed');
+      debug(e);
+      await deployEventingSinkFunction();
+      await waitForEventingSinkFunction();
+      await deployV1Alpha1Subscriptions();
+      await deployV1Alpha2Subscriptions();
+    }
   });
 
   before('Get cluster host name from Virtual Services', async function() {
