@@ -100,7 +100,7 @@ describe('Eventing tests', function() {
   });
 
   before('Ensure eventing-sink function is ready', async function() {
-    await waitForFunction(eventingSinkName, testNamespace, 30*1000);
+    await waitForEventingSinkFunction();
   });
 
   before('Ensure subscriptions exists', async function() {
@@ -110,14 +110,10 @@ describe('Eventing tests', function() {
       return;
     }
 
-
-    // Deploying eventing sink with subscriptions if its upgrade tests
+    // Creating v1alpha2 subscriptions if its upgrade tests
     // Only temporarily - will be removed
-    debug('Subscription v1alpha2 is not deployed');
-    debug('Creating v1alpha2 subscriptions');
-    await deployEventingSinkFunction();
-    await waitForEventingSinkFunction();
-    await deployV1Alpha1Subscriptions();
+    debug('Subscription v1alpha2 do not exists');
+    debug('Creating v1alpha2 subscriptions...');
     await deployV1Alpha2Subscriptions();
   });
 
