@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-readonly CURRENT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+readonly CURRENT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )/hack" && pwd )
 readonly ROOT_PATH="$( cd "${CURRENT_DIR}/../" && pwd )"
 
 TMP_DIR=$(mktemp -d)
