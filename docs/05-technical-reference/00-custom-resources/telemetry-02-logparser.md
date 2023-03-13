@@ -40,4 +40,7 @@ For further LogParser examples, see the [samples](https://github.com/kyma-projec
 | Parameter         | Description                                   |
 | ---------------------------------------- | ---------|
 | **spec.parser** | Configures a user defined Fluent Bit parser to be applied to the logs. |
-| **status.conditions** |  |<!-- TABLE-END -->
+| **status.conditions** | LogParserCondition contains details for the current condition of this LogParser |
+| **status.conditions.lastTransitionTime** |  |
+| **status.conditions.reason** |  |
+| **status.conditions.type** |  |<!-- TABLE-END -->

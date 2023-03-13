@@ -73,8 +73,11 @@ For further LogPipeline examples, see the [samples](https://github.com/kyma-proj
 <!-- LogPipeline -->
 | Parameter         | Description                                   |
 | ---------------------------------------- | ---------|
-| **spec.files** |  |
-| **spec.filters** |  |
+| **spec.files** | Provides file content to be consumed by a LogPipeline configuration |
+| **spec.files.content** |  |
+| **spec.files.name** |  |
+| **spec.filters** | Describes a filtering option on the logs of the pipeline. |
+| **spec.filters.custom** | Filter definition in the Fluent Bit syntax. Note: If you use a `custom` filter, you put the LogPipeline in unsupported mode. |
 | **spec.input** | Describes a log input for a LogPipeline. |
 | **spec.input.application** | Configures in more detail from which containers application logs are enabled as input. |
 | **spec.input.application.containers** | Describes whether application logs from specific containers are selected. The options are mutually exclusive. |
@@ -128,6 +131,15 @@ For further LogPipeline examples, see the [samples](https://github.com/kyma-proj
 | **spec.output.http.user.valueFrom.secretKeyRef.key** |  |
 | **spec.output.http.user.valueFrom.secretKeyRef.name** |  |
 | **spec.output.http.user.valueFrom.secretKeyRef.namespace** |  |
-| **spec.variables** |  |
-| **status.conditions** |  |
+| **spec.variables** | References a Kubernetes secret that should be provided as environment variable to Fluent Bit |
+| **spec.variables.name** |  |
+| **spec.variables.valueFrom** |  |
+| **spec.variables.valueFrom.secretKeyRef** |  |
+| **spec.variables.valueFrom.secretKeyRef.key** |  |
+| **spec.variables.valueFrom.secretKeyRef.name** |  |
+| **spec.variables.valueFrom.secretKeyRef.namespace** |  |
+| **status.conditions** | LogPipelineCondition contains details for the current condition of this LogPipeline |
+| **status.conditions.lastTransitionTime** |  |
+| **status.conditions.reason** |  |
+| **status.conditions.type** |  |
 | **status.unsupportedMode** |  |<!-- TABLE-END -->

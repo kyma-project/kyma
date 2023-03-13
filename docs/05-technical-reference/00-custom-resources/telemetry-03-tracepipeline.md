@@ -74,5 +74,15 @@ For further TracePipeline examples, see the [samples](https://github.com/kyma-pr
 | **spec.output.otlp.endpoint.valueFrom.secretKeyRef.name** |  |
 | **spec.output.otlp.endpoint.valueFrom.secretKeyRef.namespace** |  |
 | **spec.output.otlp.headers** | Custom headers to be added to outgoing HTTP or GRPC requests |
+| **spec.output.otlp.headers.name** | Defines the header name |
+| **spec.output.otlp.headers.value** |  |
+| **spec.output.otlp.headers.valueFrom** |  |
+| **spec.output.otlp.headers.valueFrom.secretKeyRef** |  |
+| **spec.output.otlp.headers.valueFrom.secretKeyRef.key** |  |
+| **spec.output.otlp.headers.valueFrom.secretKeyRef.name** |  |
+| **spec.output.otlp.headers.valueFrom.secretKeyRef.namespace** |  |
 | **spec.output.otlp.protocol** | Defines the OTLP protocol (http or grpc). |
-| **status.conditions** |  |<!-- TABLE-END -->
+| **status.conditions** | Contains details for the current condition of this TracePipeline |
+| **status.conditions.lastTransitionTime** |  |
+| **status.conditions.reason** |  |
+| **status.conditions.type** |  |<!-- TABLE-END -->

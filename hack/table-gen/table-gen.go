@@ -140,6 +140,11 @@ func generateElementDoc(elementsToSkip map[string]bool, obj interface{}, name st
 	if elementType == "object" {
 		mergeMaps(result, generateObjectDoc(elementsToSkip, element, name, parentPath))
 	}
+
+	if elementType == "array" {
+		mergeMaps(result, generateArrayDoc(elementsToSkip, element, name, parentPath))
+	}
+
 	return result
 }
 
@@ -154,6 +159,32 @@ func generateObjectDoc(elementsToSkip map[string]bool, element map[string]interf
 	for _, propName := range sortKeys(propMap) {
 		mergeMaps(result, generateElementDoc(elementsToSkip, propMap[propName], propName, parentPath+name+"."))
 	}
+	return result
+}
+
+func generateArrayDoc(elementsToSkip map[string]bool, element map[string]interface{}, name string, parentPath string) map[string]string {
+	result := map[string]string{}
+	properties := getElement(element, "items")
+	if properties == nil {
+		return result
+	}
+
+	description := ""
+
+	if element["description"] != nil {
+		description = element["description"].(string)
+	}
+
+	propMap := properties.(map[string]interface{})
+
+	if description == "" && propMap["description"] != nil {
+		description = propMap["description"].(string)
+	}
+
+	result = generateObjectDoc(elementsToSkip, propMap, name, parentPath)
+
+	result[parentPath+name] = generateTableRow(parentPath+name, description, name)
+
 	return result
 }
 
