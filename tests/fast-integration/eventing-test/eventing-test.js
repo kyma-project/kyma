@@ -9,7 +9,6 @@ const {
   waitForNamespace,
   switchEventingBackend,
   debug,
-  waitForFunction,
   waitForEndpoint,
   waitForPodWithLabelAndCondition,
   createApiRuleForService,
@@ -44,10 +43,9 @@ const {
   checkStreamNotReCreated,
   checkConsumerNotReCreated,
   isUpgradeJob,
-  deployEventingSinkFunction,
   waitForEventingSinkFunction,
-  deployV1Alpha1Subscriptions,
-  deployV1Alpha2Subscriptions, subscriptionNames, subCRDVersion,
+  deployV1Alpha2Subscriptions,
+  subCRDVersion,
 } = require('./utils');
 const {
   bebBackend,
@@ -104,14 +102,18 @@ describe('Eventing tests', function() {
   });
 
   before('Ensure subscriptions exists', async function() {
-    const sub1 = await getSubscription(subscriptionNames[0].name, testNamespace, subCRDVersion);
+    if (!isUpgradeJob) {
+      return
+    }
+
+    // Creating v1alpha2 subscriptions if they do not exists in upgrade tests
+    // Only temporarily - will be removed
+    const sub1 = await getSubscription(subscriptionsTypes[0].name, testNamespace, subCRDVersion);
     if (sub1) {
       debug('Subscription v1alpha2 exists');
       return;
     }
-
-    // Creating v1alpha2 subscriptions if its upgrade tests
-    // Only temporarily - will be removed
+    
     debug('Subscription v1alpha2 do not exists');
     debug('Creating v1alpha2 subscriptions...');
     await deployV1Alpha2Subscriptions();

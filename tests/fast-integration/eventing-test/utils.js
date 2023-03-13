@@ -1,7 +1,5 @@
 const {
   cleanMockTestFixture,
-  eventTypeOrderReceivedHash,
-  cleanCompassResourcesSKR,
   generateTraceParentHeader,
   checkTrace,
 } = require('../test/fixtures/commerce-mock');
@@ -14,7 +12,6 @@ const {
   getShootNameFromK8sServerUrl,
   listPods,
   retryPromise,
-  getSubscription,
   waitForVirtualService,
   k8sApply,
   waitForFunction,
@@ -49,9 +46,7 @@ const subCRDVersion = 'v1alpha2';
 const skipResourceCleanup = process.env.SKIP_CLEANUP || false;
 const suffix = getSuffix(isSKR, testCompassFlow);
 const appName = `app-${suffix}`;
-const scenarioName = `test-${suffix}`;
 const testNamespace = `test-${suffix}`;
-const mockNamespace = process.env.MOCK_NAMESPACE || 'mocks';
 const backendK8sSecretName = process.env.BACKEND_SECRET_NAME || 'eventing-backend';
 const backendK8sSecretNamespace = process.env.BACKEND_SECRET_NAMESPACE || 'default';
 const testDataConfigMapName = 'eventing-test-data';
@@ -61,10 +56,6 @@ const eventingNatsApiRuleAName = `${eventingNatsSvcName}-apirule`;
 const timeoutTime = 10 * 60 * 1000;
 const slowTime = 5000;
 const eppInClusterUrl = 'eventing-event-publisher-proxy.kyma-system';
-const subscriptionNames = {
-  orderCreated: 'order-created',
-  orderReceived: 'order-received',
-};
 const eventingSinkName = 'eventing-sink';
 
 // ****** Event types to test ***********//
@@ -132,13 +123,6 @@ if (isSKR) {
 
 // cleans up all the test resources including the compass scenario
 async function cleanupTestingResources() {
-  if (isSKR && testCompassFlow) {
-    debug('Cleaning compass resources');
-    // Get shoot info from gardener to get compassID for this shoot
-    const skrInfo = await gardener.getShoot(shootName);
-    await cleanCompassResourcesSKR(director, appName, scenarioName, skrInfo.compassID);
-  }
-
   // skip the cluster resources cleanup if the SKIP_CLEANUP env flag is set
   if (skipResourceCleanup === 'true') {
     return;
@@ -154,8 +138,8 @@ async function cleanupTestingResources() {
   await deleteK8sConfigMap(testDataConfigMapName);
   await deleteK8sConfigMap(jetStreamTestConfigMapName);
 
-  debug(`Removing ${testNamespace} and ${mockNamespace} namespaces`);
-  await cleanMockTestFixture(mockNamespace, testNamespace, true);
+  debug(`Removing ${testNamespace} and mocks namespaces`);
+  await cleanMockTestFixture('mocks', testNamespace, true);
 }
 
 // gets the suffix depending on kyma type
@@ -196,17 +180,6 @@ async function getJetStreamStreamData(host) {
         streamCreationTime: stream.created,
       };
     }
-  }
-}
-
-async function getSubscriptionConsumerName(subscriptionName, namespace='default', crdVersion='v1alpha1') {
-  if (crdVersion === 'v1alpha1') {
-    // the logic is temporary because consumer name is missing in the v1alpha1 subscription
-    // will be deleted as we will upgrade to v1alpha2
-    return eventTypeOrderReceivedHash;
-  } else {
-    const sub = await getSubscription(subscriptionName, namespace, crdVersion);
-    return sub.status.backend.types[0].consumerName;
   }
 }
 
@@ -690,9 +663,7 @@ async function createK8sNamespace(name) {
 
 module.exports = {
   appName,
-  scenarioName,
   testNamespace,
-  mockNamespace,
   kymaVersion,
   isSKR,
   skrInstanceId,
@@ -718,8 +689,6 @@ module.exports = {
   isStreamCreationTimeMissing,
   isConsumerCreationTimeMissing,
   eppInClusterUrl,
-  subscriptionNames,
-  getSubscriptionConsumerName,
   eventingSinkName,
   v1alpha1SubscriptionsTypes,
   subscriptionsTypes,
