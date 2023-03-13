@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+echo "${BASH_SOURCE[0]}"
+
 readonly CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/hack"
 readonly ROOT_PATH="$( cd "${CURRENT_DIR}/../" && pwd )"
 
