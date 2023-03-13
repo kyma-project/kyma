@@ -14,6 +14,7 @@ const {
   waitForPodWithLabelAndCondition,
   createApiRuleForService,
   deleteApiRule,
+  getSubscription,
 } = require('../utils');
 const {
   eventingMonitoringTest,
@@ -46,7 +47,7 @@ const {
   deployEventingSinkFunction,
   waitForEventingSinkFunction,
   deployV1Alpha1Subscriptions,
-  deployV1Alpha2Subscriptions,
+  deployV1Alpha2Subscriptions, subscriptionNames, subCRDVersion,
 } = require('./utils');
 const {
   bebBackend,
@@ -99,22 +100,25 @@ describe('Eventing tests', function() {
   });
 
   before('Ensure eventing-sink function is ready', async function() {
-    try {
-      await waitForFunction(eventingSinkName, testNamespace, 30*1000);
-    } catch (e) {
-      if (!isUpgradeJob) {
-        throw e;
-      }
+    await waitForFunction(eventingSinkName, testNamespace, 30*1000);
+  });
 
-      // Deploying eventing sink with subscriptions if its upgrade tests
-      // Only temporarily - will be removed
-      debug('Eventing Sink is not deployed');
-      debug(e);
-      await deployEventingSinkFunction();
-      await waitForEventingSinkFunction();
-      await deployV1Alpha1Subscriptions();
-      await deployV1Alpha2Subscriptions();
+  before('Ensure subscriptions exists', async function() {
+    const sub1 = await getSubscription(subscriptionNames[0].name, testNamespace, subCRDVersion);
+    if (sub1) {
+      debug('Subscription v1alpha2 exists');
+      return;
     }
+
+
+    // Deploying eventing sink with subscriptions if its upgrade tests
+    // Only temporarily - will be removed
+    debug('Subscription v1alpha2 is not deployed');
+    debug('Creating v1alpha2 subscriptions');
+    await deployEventingSinkFunction();
+    await waitForEventingSinkFunction();
+    await deployV1Alpha1Subscriptions();
+    await deployV1Alpha2Subscriptions();
   });
 
   before('Get cluster host name from Virtual Services', async function() {
