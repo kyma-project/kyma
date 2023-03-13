@@ -145,12 +145,12 @@ global:
       directory: "tpi"
     kube_state_metrics:
       name: "kube-state-metrics"
-      version: "2.6.0-723b551a"
+      version: "2.8.1-a3475b24"
       directory: "tpi"
       sha: ""
     grafana:
       name: "grafana"
-      version: "7.5.17-791da1af"
+      version: "7.5.17-a3475b24"
       directory: "tpi"
       sha: ""
     busybox:
@@ -165,7 +165,7 @@ global:
       sha: ""
     oauth2_proxy:
       name: "oauth2-proxy"
-      version: "7.4.0-791da1af"
+      version: "7.4.0-a3475b24"
       directory: "tpi"
       sha: ""
 
