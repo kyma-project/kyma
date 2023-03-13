@@ -697,7 +697,6 @@ module.exports = {
   isSKR,
   skrInstanceId,
   testCompassFlow,
-  testSubscriptionV1Alpha2,
   subCRDVersion,
   backendK8sSecretName,
   backendK8sSecretNamespace,
