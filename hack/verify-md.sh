@@ -5,11 +5,6 @@ readonly ROOT_PATH="$( cd "${CURRENT_DIR}/../" && pwd )"
 
 TMP_DIR=$(mktemp -d)
 
-echo $ROOT_PATH
-echo $CURRENT_DIR
-
-ls ${ROOT_PATH}/hack
-
 source "${ROOT_PATH}/hack/utilities.sh" || { echo 'Cannot load CI utilities.'; exit 1; }
 
 cleanup() {
