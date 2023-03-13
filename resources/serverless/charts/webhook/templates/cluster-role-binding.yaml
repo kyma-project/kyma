@@ -12,3 +12,19 @@ roleRef:
   kind: ClusterRole
   name: {{ template "webhook.fullname" . }}
   apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ template "webhook.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "tplValue" ( dict "value" .Values.commonLabels "context" . ) | nindent 4 }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ template "webhook.fullname" . }}
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: bla
+  apiGroup: rbac.authorization.k8s.io
