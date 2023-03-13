@@ -3,7 +3,7 @@
 version: 2
 updates:
   - package-ecosystem: "docker"
-    directory: "/components/event-publisher-proxy/cmd/event-publisher-proxy"
+    directory: "/components/event-publisher-proxy"
     labels:
       - "docker"
       - "area/dependency"
