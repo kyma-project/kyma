@@ -5,7 +5,7 @@ readonly ROOT_PATH="$( cd "${CURRENT_DIR}/../" && pwd )"
 
 TMP_DIR=$(mktemp -d)
 
-source "${ROOT_PATH}/hack/utilities.sh" || { echo 'Cannot load CI utilities.'; exit 1; }
+# source "${ROOT_PATH}/hack/utilities.sh" || { echo 'Cannot load CI utilities.'; exit 1; }
 
 cleanup() {
     rm -rf "${TMP_DIR}" || true
@@ -25,7 +25,8 @@ go run $CURRENT_DIR/table-gen/table-gen.go --crd-filename ../../installation/res
 
 DIFF=$(diff -q $TMP_DIR ${ROOT_PATH}/docs/05-technical-reference/00-custom-resources)
 if [ -n "${DIFF}" ]; then 
-    echo -e "${RED}x there is a difference between operator CRD and documentation${NC}"
+    # echo -e "${RED}x there is a difference between operator CRD and documentation${NC}"
+    echo -e "x there is a difference between operator CRD and documentation"
     echo -e "Please, go to the hack/table-gen, and run 'make run'"
     exit 1
 fi
