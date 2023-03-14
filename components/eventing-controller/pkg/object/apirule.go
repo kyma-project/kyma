@@ -11,6 +11,7 @@ import (
 
 // OAuthHandlerName OAuth handler name supported in Kyma.
 const OAuthHandlerName = "oauth2_introspection"
+const OAuthJWTHandlerName = "jwt"
 
 // NewAPIRule creates a APIRule object.
 func NewAPIRule(ns, namePrefix string, opts ...Option) *apigatewayv1beta1.APIRule {

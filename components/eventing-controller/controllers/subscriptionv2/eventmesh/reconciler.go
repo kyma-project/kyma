@@ -587,7 +587,8 @@ func (r *Reconciler) makeAPIRule(svcNs, svcName string, labels map[string]string
 		objectv2.WithOwnerReference(subs),
 		object.WithService(hostName, svcName, port),
 		object.WithGateway(constants.ClusterLocalAPIGateway),
-		objectv2.WithRules(subs, svc, http.MethodPost, http.MethodOptions))
+		objectv2.WithRules(subs, svc, http.MethodPost, http.MethodOptions),
+		objectv2.WithJWTHandlerForXSUAA(r.oauth2credentials))
 	return apiRule
 }
 

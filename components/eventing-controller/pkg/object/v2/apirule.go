@@ -1,7 +1,11 @@
 package v2
 
 import (
+	"fmt"
 	"net/url"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/beb"
+	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
 
@@ -72,5 +76,34 @@ func WithRules(subs []eventingv1alpha2.Subscription, svc apigatewayv1beta1.Servi
 			rules = append(rules, rule)
 		}
 		d.Spec.Rules = rules
+	}
+}
+
+func WithJWTHandlerForXSUAA(oauth2credentials *beb.OAuth2ClientCredentials) object.Option {
+	return func(o metav1.Object) {
+		d := o.(*apigatewayv1beta1.APIRule) //nolint:errcheck // for testing phase
+
+		if oauth2credentials.ProviderName == "" {
+			return
+		}
+
+		handler := apigatewayv1beta1.Handler{
+			Name: object.OAuthJWTHandlerName,
+			Config: &runtime.RawExtension{
+				Raw: []byte(fmt.Sprintf(`{"jwks_urls":"%s"}`, oauth2credentials.APIRuleTokenURL)),
+			},
+		}
+		authenticator := &apigatewayv1beta1.Authenticator{
+			Handler: &handler,
+		}
+		accessStrategies := []*apigatewayv1beta1.Authenticator{
+			authenticator,
+		}
+
+		d.Spec.Rules[0].AccessStrategies = accessStrategies
+
+		for i := range d.Spec.Rules {
+			d.Spec.Rules[i].AccessStrategies = accessStrategies
+		}
 	}
 }

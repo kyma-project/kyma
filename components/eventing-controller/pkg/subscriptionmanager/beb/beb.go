@@ -110,7 +110,7 @@ func (c *SubscriptionManager) Start(_ env.DefaultSubscriptionConfig, params subs
 
 	var oauth2credential *backendbeb.OAuth2ClientCredentials
 	var err error
-	if params["client_id"] == true {
+	if params["xsuaa"] == true {
 		ctrl.Log.WithName("EventMesh-subscription-manager").Info("using XSUAA oauth2 configs")
 		oauth2credential, err = getXSUAAOAuth2ClientCredentials(params)
 	} else {
