@@ -103,7 +103,7 @@ describe('Eventing tests', function() {
 
   before('Ensure subscriptions exists', async function() {
     if (!isUpgradeJob) {
-      return
+      return;
     }
 
     // Creating v1alpha2 subscriptions if they do not exists in upgrade tests
@@ -113,7 +113,7 @@ describe('Eventing tests', function() {
       debug('Subscription v1alpha2 exists');
       return;
     }
-    
+
     debug('Subscription v1alpha2 do not exists');
     debug('Creating v1alpha2 subscriptions...');
     await deployV1Alpha2Subscriptions();
