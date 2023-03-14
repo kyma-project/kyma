@@ -45,7 +45,7 @@ For details, see the [TracePipeline specification file](https://github.com/kyma-
 <!-- SKIP-WITH-ANCESTORS spec.template -->
 
 <!-- TABLE-START -->
-<!-- TracePipeline -->
+<!-- TracePipeline v1alpha1 -->
 | Parameter         | Description                                   |
 | ---------------------------------------- | ---------|
 | **spec.output** | Configures the trace receiver of a TracePipeline. |

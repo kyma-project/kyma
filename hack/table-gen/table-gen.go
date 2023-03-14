@@ -111,7 +111,7 @@ func generateDocFromCRD(elementsToSkip map[string]bool) string {
 	}
 
 	doc = append([]string{
-		"<!-- " + CRDKind + " -->",
+		"<!-- " + CRDKind + " " + APIVersion + " -->",
 		"| Parameter         | Description                                   |",
 		"| ---------------------------------------- | ---------|",
 	}, doc...)

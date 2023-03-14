@@ -36,7 +36,7 @@ For details, see the [LogParser specification file](https://github.com/kyma-proj
 <!-- SKIP-WITH-ANCESTORS spec.template -->
 
 <!-- TABLE-START -->
-<!-- LogParser -->
+<!-- LogParser v1alpha1 -->
 | Parameter         | Description                                   |
 | ---------------------------------------- | ---------|
 | **spec.parser** | Configures a user defined Fluent Bit parser to be applied to the logs. |

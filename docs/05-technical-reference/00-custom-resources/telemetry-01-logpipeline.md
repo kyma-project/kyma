@@ -70,7 +70,7 @@ For details, see the [LogPipeline specification file](https://github.com/kyma-pr
 <!-- SKIP-WITH-ANCESTORS spec.template -->
 
 <!-- TABLE-START -->
-<!-- LogPipeline -->
+<!-- LogPipeline v1alpha1 -->
 | Parameter         | Description                                   |
 | ---------------------------------------- | ---------|
 | **spec.files** | Provides file content to be consumed by a LogPipeline configuration |
