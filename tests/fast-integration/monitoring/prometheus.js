@@ -221,14 +221,6 @@ async function getServiceMonitors() {
   return resources.filter((r) => !shouldIgnoreServiceMonitor(r.metadata.name));
 }
 
-async function getPodMonitors() {
-  const path = '/apis/monitoring.coreos.com/v1/podmonitors';
-
-  const resources = await listResources(path);
-
-  return resources.filter((r) => !shouldIgnorePodMonitor(r.metadata.name));
-}
-
 function shouldIgnoreServiceMonitor(serviceMonitorName) {
   const serviceMonitorsToBeIgnored = [
     // tracing-metrics is created automatically by jaeger operator and can't be disabled
