@@ -6,6 +6,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"reflect"
+
+	backendbebv1 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/beb"
+	emstypes "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 
 	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
 	pkgerrors "github.com/kyma-project/kyma/components/eventing-controller/pkg/errors"
@@ -62,6 +66,8 @@ const (
 	natsSecretName           = "eventing-nats-secret"
 	natsSecretKey            = "resolver.conf"
 	natsSecretPasswordLength = 60
+
+	XSUAASecretName = "eventing-xsuaa-config"
 )
 
 var (
@@ -89,8 +95,9 @@ type Reconciler struct {
 	// backendType is the type of the backend which the reconciler detects at runtime
 	backendType eventingv1alpha1.BackendType
 	// The OAuth2 credentials that are passed to the BEB subscription reconciler
-	oauth2ClientID     []byte
-	oauth2ClientSecret []byte
+	oauth2ClientID         []byte
+	oauth2ClientSecret     []byte
+	xsuaaOAuth2credentials *backendbebv1.OAuth2ClientCredentials
 }
 
 func NewReconciler(ctx context.Context, natsSubMgr subscriptionmanager.Manager, natsConfig backendnats.Config,
@@ -244,11 +251,22 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 	}
 
 	// gets oauth2ClientID and secret and stops the BEB controller if changed
-	err = r.syncOauth2ClientIDAndSecret(ctx, backendStatus)
+	xsuaaSecretExists, getErr := r.doesXSUAASecretExists(ctx, XSUAASecretName, deployment.ControllerNamespace)
+	if getErr != nil {
+		return ctrl.Result{}, getErr
+	}
+
+	if xsuaaSecretExists {
+		err = r.syncXSUAAOauth2ClientIDAndSecret(ctx, backendStatus)
+	} else {
+		r.xsuaaOAuth2credentials = nil
+		err = r.syncOauth2ClientIDAndSecret(ctx, backendStatus)
+	}
 	if err != nil {
 		backendStatus.SetPublisherReadyCondition(false, eventingv1alpha1.ConditionReasonOauth2ClientSyncFailed, err.Error())
 		if updateErr := r.syncBackendStatus(ctx, backendStatus, nil); updateErr != nil {
-			return ctrl.Result{}, errors.Wrapf(err, "failed to update status while syncing oauth2Client")
+			return ctrl.Result{}, errors.Wrapf(err, "failed to update status while syncing oauth2Client. "+
+				"(xsuaaSecretExists: %t)", xsuaaSecretExists)
 		}
 		return ctrl.Result{}, err
 	}
@@ -303,6 +321,43 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 	}
 
 	return ctrl.Result{}, nil
+}
+
+func (r *Reconciler) syncXSUAAOauth2ClientIDAndSecret(ctx context.Context,
+	backendStatus *eventingv1alpha1.EventingBackendStatus) error {
+	// Following could return an error when the OAuth2Client CR is created for the first time, until the secret is
+	// created by the Hydra operator. However, eventually it should get resolved in the next few reconciliation loops.
+	credentials, err := r.getXSUAAOAuth2ClientCredentials(ctx, XSUAASecretName, deployment.ControllerNamespace)
+	if err != nil && !k8serrors.IsNotFound(err) {
+		return err
+	}
+	oauth2CredentialsNotFound := k8serrors.IsNotFound(err)
+	oauth2CredentialsChanged := false
+	if err == nil {
+		oauth2CredentialsChanged = !reflect.DeepEqual(r.xsuaaOAuth2credentials, credentials)
+	}
+	if oauth2CredentialsNotFound || oauth2CredentialsChanged {
+		// Stop the controller and mark all subs as not ready
+		message := "Stopping the EventMesh subscription manager due to change in XSUAA OAuth2 credentials"
+		r.namedLogger().Info(message)
+		if err = r.bebSubMgr.Stop(false); err != nil {
+			return err
+		}
+		r.bebSubMgrStarted = false
+		// update eventing backend status to reflect that the controller is not ready
+		backendStatus.SetSubscriptionControllerReadyCondition(false,
+			eventingv1alpha1.ConditionReasonSubscriptionControllerNotReady, message)
+		if updateErr := r.syncBackendStatus(ctx, backendStatus, nil); updateErr != nil {
+			return errors.Wrapf(err, "update status after stopping BEB controller failed")
+		}
+	}
+	if oauth2CredentialsNotFound {
+		return err
+	}
+	if oauth2CredentialsChanged {
+		r.xsuaaOAuth2credentials = credentials
+	}
+	return nil
 }
 
 func (r *Reconciler) syncOauth2ClientIDAndSecret(ctx context.Context, backendStatus *eventingv1alpha1.EventingBackendStatus) error {
@@ -725,6 +780,60 @@ func (r *Reconciler) getOAuth2ClientCredentials(ctx context.Context, name, names
 	return
 }
 
+func (r *Reconciler) getXSUAAOAuth2ClientCredentials(ctx context.Context, name,
+	namespace string) (*backendbebv1.OAuth2ClientCredentials, error) {
+	oauth2Secret := new(v1.Secret)
+	oauth2SecretNamespacedName := types.NamespacedName{Namespace: namespace, Name: name}
+	if getErr := r.Get(ctx, oauth2SecretNamespacedName, oauth2Secret); getErr != nil {
+		return nil, errors.Wrapf(getErr, "get secret failed namespace:%s name:%s", namespace, name)
+	}
+
+	// check if all keys exists in the secret
+	var exists bool
+	if _, exists = oauth2Secret.Data["client_id"]; !exists {
+		return nil, errors.New("key 'client_id' not found in secret " + oauth2SecretNamespacedName.String())
+	}
+	if _, exists = oauth2Secret.Data["client_secret"]; !exists {
+		return nil, errors.New("key 'client_secret' not found in secret " + oauth2SecretNamespacedName.String())
+	}
+	if _, exists = oauth2Secret.Data["auth_type"]; !exists {
+		return nil, errors.New("key 'auth_type' not found in secret " + oauth2SecretNamespacedName.String())
+	}
+	if _, exists = oauth2Secret.Data["grant_type"]; !exists {
+		return nil, errors.New("key 'grant_type' not found in secret " + oauth2SecretNamespacedName.String())
+	}
+	if _, exists = oauth2Secret.Data["token_url"]; !exists {
+		return nil, errors.New("key 'token_url' not found in secret " + oauth2SecretNamespacedName.String())
+	}
+	if _, exists = oauth2Secret.Data["api_rule_token_url"]; !exists {
+		return nil, errors.New("key 'api_rule_token_url' not found in secret " + oauth2SecretNamespacedName.String())
+	}
+
+	// read all values
+	credentials := &backendbebv1.OAuth2ClientCredentials{
+		ProviderName:    name,
+		ClientID:        string(oauth2Secret.Data["client_id"]),
+		ClientSecret:    string(oauth2Secret.Data["client_secret"]),
+		AuthType:        emstypes.AuthType(oauth2Secret.Data["auth_type"]),
+		GrantType:       emstypes.GrantType(oauth2Secret.Data["grant_type"]),
+		TokenURL:        string(oauth2Secret.Data["token_url"]),
+		APIRuleTokenURL: string(oauth2Secret.Data["api_rule_token_url"]),
+	}
+	return credentials, nil
+}
+
+func (r *Reconciler) doesXSUAASecretExists(ctx context.Context, name, namespace string) (bool, error) {
+	xsuaaSecret := new(v1.Secret)
+	xsuaaSecretNamespacedName := types.NamespacedName{Namespace: namespace, Name: name}
+	if getErr := r.Get(ctx, xsuaaSecretNamespacedName, xsuaaSecret); getErr != nil {
+		if k8serrors.IsNotFound(getErr) {
+			return false, nil
+		}
+		return false, errors.Wrapf(getErr, "get secret failed namespace:%s name:%s", namespace, name)
+	}
+	return true, nil
+}
+
 func getDeploymentMapper() handler.EventHandler {
 	var mapper handler.MapFunc = func(obj client.Object) []reconcile.Request {
 		var reqs []reconcile.Request
@@ -798,7 +907,22 @@ func (r *Reconciler) stopNATSController() error {
 
 func (r *Reconciler) startBEBController(clientID, clientSecret []byte) error {
 	if !r.bebSubMgrStarted {
-		bebSubMgrParams := subscriptionmanager.Params{"client_id": clientID, "client_secret": clientSecret}
+		var bebSubMgrParams subscriptionmanager.Params
+		if r.xsuaaOAuth2credentials != nil {
+			bebSubMgrParams = subscriptionmanager.Params{
+				"xsuaa":              true,
+				"provider_name":      r.xsuaaOAuth2credentials.ProviderName,
+				"client_id":          r.xsuaaOAuth2credentials.ClientID,
+				"client_secret":      r.xsuaaOAuth2credentials.ClientSecret,
+				"auth_type":          string(r.xsuaaOAuth2credentials.AuthType),
+				"grant_type":         string(r.xsuaaOAuth2credentials.GrantType),
+				"token_url":          r.xsuaaOAuth2credentials.TokenURL,
+				"api_rule_token_url": r.xsuaaOAuth2credentials.APIRuleTokenURL,
+			}
+			r.namedLogger().Info("EventMesh starting with XSUAA params...", bebSubMgrParams)
+		} else {
+			bebSubMgrParams = subscriptionmanager.Params{"client_id": clientID, "client_secret": clientSecret}
+		}
 		if err := r.bebSubMgr.Start(r.cfg.DefaultSubscriptionConfig, bebSubMgrParams); err != nil {
 			return xerrors.Errorf("failed to start BEB subscription manager: %v", err)
 		}

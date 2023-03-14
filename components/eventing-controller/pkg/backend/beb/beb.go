@@ -59,8 +59,13 @@ type Backend interface {
 }
 
 type OAuth2ClientCredentials struct {
-	ClientID     string
-	ClientSecret string
+	ProviderName    string
+	ClientID        string
+	ClientSecret    string
+	AuthType        types.AuthType
+	GrantType       types.GrantType
+	TokenURL        string
+	APIRuleTokenURL string
 }
 
 func NewBEB(credentials *OAuth2ClientCredentials, mapper backendutils.NameMapper, logger *logger.Logger) *BEB {
