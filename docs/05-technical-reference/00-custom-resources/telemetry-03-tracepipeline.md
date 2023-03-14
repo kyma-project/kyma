@@ -36,6 +36,8 @@ For further TracePipeline examples, see the [samples](https://github.com/kyma-pr
 
 ## Custom resource parameters
 
+For details, see the [TracePipeline specification file](https://github.com/kyma-project/telemetry-manager/blob/main/apis/telemetry/v1alpha1/tracepipeline_types.go).
+
 <!-- The table below was generated automatically -->
 <!-- Some special tags (html comments) are at the end of lines due to markdown requirements. -->
 <!-- The content between "TABLE-START" and "TABLE-END" will be replaced -->
