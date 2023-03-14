@@ -401,7 +401,9 @@ env:
   # https://grafana.com/docs/grafana/v7.5/administration/configuration/#dashboards
   GF_DASHBOARDS_MIN_REFRESH_INTERVAL: "10s"
   # https://grafana.com/docs/grafana/v7.5/administration/configuration/#snapshots
-  GF_SNAPSHOTS_EXTERNAL_ENABLED: "false"
+# https://grafana.com/docs/grafana/v7.5/administration/configuration/#snapshots
+GF_SNAPSHOTS_ENABLED: "false"
+GF_SNAPSHOTS_EXTERNAL_ENABLED: "false"
 
 ## "valueFrom" environment variable references that will be added to deployment pods
 ## ref: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.17/#envvarsource-v1-core
