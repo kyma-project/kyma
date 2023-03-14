@@ -234,7 +234,7 @@ function shouldIgnoreServiceMonitor(serviceMonitorName) {
     // tracing-metrics is created automatically by jaeger operator and can't be disabled
     'tracing-metrics',
   ];
-  return serviceMonitorsToBeIgnored.includes(serviceMonitorName);
+  return serviceMonitorsToBeIgnored.includes(serviceMonitorName) || !serviceMonitorName.startsWith('monitoring');
 }
 
 function shouldIgnorePodMonitor(podMonitorName) {
@@ -246,19 +246,11 @@ function shouldIgnorePodMonitor(podMonitorName) {
 
 async function buildScrapePoolSet() {
   const serviceMonitors = await getServiceMonitors();
-  const podMonitors = await getPodMonitors();
 
   const scrapePools = new Set();
 
   for (const monitor of serviceMonitors) {
     const endpoints = monitor.spec.endpoints;
-    for (let i = 0; i < endpoints.length; i++) {
-      const scrapePool = `${monitor.metadata.namespace}/${monitor.metadata.name}/${i}`;
-      scrapePools.add(scrapePool);
-    }
-  }
-  for (const monitor of podMonitors) {
-    const endpoints = monitor.spec.podmetricsendpoints;
     for (let i = 0; i < endpoints.length; i++) {
       const scrapePool = `${monitor.metadata.namespace}/${monitor.metadata.name}/${i}`;
       scrapePools.add(scrapePool);
