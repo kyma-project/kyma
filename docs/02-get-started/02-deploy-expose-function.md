@@ -86,7 +86,7 @@ First, let's create an [APIRule](../05-technical-reference/00-custom-resources/a
 3. Provide the **Name** (`hello-world`).
 4. From the **Service Name** dropdown, select `hello-world`.
 5. Provide your Service **Port** (`80`).
-6. Choose your host from the **Host** dropdown and replace the asterix (*) with the name of your subdomain (`hello-world`).
+6. Choose your host from the **Host** dropdown and replace the asterisk (*) with the name of your subdomain (`hello-world`).
 
   </details>
   <details>
