@@ -7,5 +7,8 @@ logpipeline:
 logparser:
 	go run table-gen.go --crd-filename ../../installation/resources/crds/telemetry/logparsers.crd.yaml --md-filename ../../docs/05-technical-reference/00-custom-resources/telemetry-02-logparser.md
 
-.PHONY: run
-run: tracepipeline logparser logpipeline
+.PHONY: telemetry-docs
+telemetry-docs: tracepipeline logparser logpipeline
+
+.PHONY: generate
+generate: telemetry-docs
