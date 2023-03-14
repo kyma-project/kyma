@@ -31,8 +31,6 @@ For further LogParser examples, see the [samples](https://github.com/kyma-projec
 <!-- Some special tags (html comments) are at the end of lines due to markdown requirements. -->
 <!-- The content between "TABLE-START" and "TABLE-END" will be replaced -->
 
-<!-- SKIP-ELEMENT spec -->
-<!-- SKIP-ELEMENT status -->
 <!-- SKIP-WITH-ANCESTORS spec.template -->
 
 <!-- TABLE-START -->
