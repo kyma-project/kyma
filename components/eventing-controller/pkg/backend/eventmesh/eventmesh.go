@@ -128,13 +128,6 @@ func (em *EventMesh) SyncSubscription(subscription *eventingv1alpha2.Subscriptio
 		return false, err
 	}
 
-	log.Infow("Using Webhook configs: ",
-		"TokenURL", eventMeshSub.WebhookAuth.TokenURL,
-		"Type", eventMeshSub.WebhookAuth.Type,
-		"GrantType", eventMeshSub.WebhookAuth.GrantType,
-		"ClientID", eventMeshSub.WebhookAuth.ClientID,
-		"ClientSecret", eventMeshSub.WebhookAuth.ClientSecret)
-
 	// check and handle if Kyma subscription or EventMesh subscription is modified
 	isKymaSubModified := false
 	isEventMeshSubModified := false
