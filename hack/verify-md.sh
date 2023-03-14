@@ -15,11 +15,11 @@ cp -a ${ROOT_PATH}/docs/05-technical-reference/00-custom-resources/. $TMP_DIR/
 
 cd $CURRENT_DIR/table-gen || exit
 
-go run $CURRENT_DIR/table-gen/table-gen.go --crd-filename ../../installation/resources/crds/telemetry/tracepipelines.crd.yaml --md-filename $TMP_DIR/telemetry-03-tracepipeline.md --crd-title TracePipeline
+go run $CURRENT_DIR/table-gen/table-gen.go --crd-filename ../../installation/resources/crds/telemetry/tracepipelines.crd.yaml --md-filename $TMP_DIR/telemetry-03-tracepipeline.md
 
-go run $CURRENT_DIR/table-gen/table-gen.go --crd-filename ../../installation/resources/crds/telemetry/logpipelines.crd.yaml --md-filename $TMP_DIR/telemetry-01-logpipeline.md --crd-title LogPipeline
+go run $CURRENT_DIR/table-gen/table-gen.go --crd-filename ../../installation/resources/crds/telemetry/logpipelines.crd.yaml --md-filename $TMP_DIR/telemetry-01-logpipeline.md
 
-go run $CURRENT_DIR/table-gen/table-gen.go --crd-filename ../../installation/resources/crds/telemetry/logparsers.crd.yaml --md-filename $TMP_DIR/telemetry-02-logparser.md --crd-title LogParser
+go run $CURRENT_DIR/table-gen/table-gen.go --crd-filename ../../installation/resources/crds/telemetry/logparsers.crd.yaml --md-filename $TMP_DIR/telemetry-02-logparser.md
 
 DIFF=$(diff -q $TMP_DIR ${ROOT_PATH}/docs/05-technical-reference/00-custom-resources)
 if [ -n "${DIFF}" ]; then 

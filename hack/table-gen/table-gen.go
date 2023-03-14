@@ -29,7 +29,6 @@ var (
 func main() {
 	flag.StringVar(&CRDFilename, "crd-filename", "../../installation/resources/crds/telemetry/tracepipelines.crd.yaml", "Full or relative path to the .yaml file containing crd")
 	flag.StringVar(&MDFilename, "md-filename", "../../docs/05-technical-reference/00-custom-resources/telemetry-03-tracepipeline.md", "Full or relative path to the .md file containing the file where we should insert table rows")
-	flag.StringVar(&CRDKind, "crd-title", "", "The name of the CRD which was passed in crd-filename")
 	flag.Parse()
 
 	elementsToSkip := getElementsToSkip()
@@ -92,6 +91,8 @@ func generateDocFromCRD(elementsToSkip map[string]bool) string {
 
 	docElements := map[string]string{}
 	versions := getElement(obj, "spec", "versions")
+	kind := getElement(obj, "spec", "names", "kind")
+	CRDKind = kind.(string)
 
 	for _, version := range versions.([]interface{}) {
 		name := getElement(version, "name")
