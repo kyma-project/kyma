@@ -179,8 +179,9 @@ To expose our microservice, we must create an [APIRule](../05-technical-referenc
 1. Go to **Discovery and Network** > **API Rules**, and click on **Create API Rule**.
 2. Provide the **Name** (`orders-service`)
 3. Choose `orders-service` from the **Service Name** dropdown.
-4. Choose your host from the **Host** dropdown and replace the asterix (*) with the name of your subdomain (`orders-service`).
-5. Click **Create**.
+4. Provide your Service **Port** (`80`).
+5. Choose your host from the **Host** dropdown and replace the asterisk (*) with the name of your subdomain (`orders-service`).
+6. Click **Create**.
 
   </details>
   <details>
