@@ -27,8 +27,8 @@ var (
 )
 
 func main() {
-	flag.StringVar(&CRDFilename, "crd-filename", "", "Full or relative path to the .yaml file containing crd")
-	flag.StringVar(&MDFilename, "md-filename", "", "Full or relative path to the .md file containing the file where we should insert table rows")
+	flag.StringVar(&CRDFilename, "crd-filename", "../../installation/resources/crds/telemetry/tracepipelines.crd.yaml", "Full or relative path to the .yaml file containing crd")
+	flag.StringVar(&MDFilename, "md-filename", "../../docs/05-technical-reference/00-custom-resources/telemetry-03-tracepipeline.md", "Full or relative path to the .md file containing the file where we should insert table rows")
 	flag.StringVar(&APIVersion, "api-version", "v1alpha1", "API version your operattor uses")
 	flag.StringVar(&CRDKind, "crd-title", "", "The name of the CRD which was passed in crd-filename")
 	flag.Parse()
@@ -46,7 +46,10 @@ func getElementsToSkip() map[string]bool {
 
 	doc := string(inDoc)
 	reSkip := regexp.MustCompile(RESkipPattern)
-	elementsToSkip := map[string]bool{}
+	elementsToSkip := map[string]bool{
+		"spec":   false,
+		"status": false,
+	}
 
 	pairsToParamsToSkip(elementsToSkip, reSkip.FindAllStringSubmatch(doc, -1), false)
 
