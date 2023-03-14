@@ -6,8 +6,6 @@ import (
 	"strings"
 	"time"
 
-	emstypes "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
-
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 
 	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
@@ -110,11 +108,11 @@ func (c *SubscriptionManager) Start(_ env.DefaultSubscriptionConfig, params subs
 
 	var oauth2credential *backendbeb.OAuth2ClientCredentials
 	var err error
-	if params["xsuaa"] == true {
+	if _, ok := params["xsuaa"]; ok {
 		ctrl.Log.WithName("EventMesh-subscription-manager").Info("using XSUAA oauth2 configs")
 		oauth2credential, err = getXSUAAOAuth2ClientCredentials(params)
 	} else {
-		ctrl.Log.WithName("EventMesh-subscription-manager").Info("using old oauth2 configs")
+		ctrl.Log.WithName("EventMesh-subscription-manager").Info("using default oauth2 configs")
 		oauth2credential, err = getOAuth2ClientCredentials(params)
 	}
 	if err != nil {
@@ -374,44 +372,11 @@ func cleanupEventMesh(backend backendeventmesh.Backend, dynamicClient dynamic.In
 }
 
 func getXSUAAOAuth2ClientCredentials(params subscriptionmanager.Params) (*backendbeb.OAuth2ClientCredentials, error) {
-	providerName, ok := params["provider_name"].(string)
+	credentials, ok := params["xsuaa"].(*backendbeb.OAuth2ClientCredentials)
 	if !ok {
-		return nil, fmt.Errorf("expected string value for client_id")
-	}
-	clientID, ok := params["client_id"].(string)
-	if !ok {
-		return nil, fmt.Errorf("expected string value for client_id")
-	}
-	clientSecret, ok := params["client_secret"].(string)
-	if !ok {
-		return nil, fmt.Errorf("expected string value for client_secret")
-	}
-	authType, ok := params["auth_type"].(string)
-	if !ok {
-		return nil, fmt.Errorf("expected string value for client_secret")
-	}
-	grantType, ok := params["grant_type"].(string)
-	if !ok {
-		return nil, fmt.Errorf("expected string value for client_secret")
-	}
-	tokenURL, ok := params["token_url"].(string)
-	if !ok {
-		return nil, fmt.Errorf("expected string value for client_secret")
-	}
-	apiRuleTokenURL, ok := params["api_rule_token_url"].(string)
-	if !ok {
-		return nil, fmt.Errorf("expected string value for client_secret")
+		return nil, fmt.Errorf("expected OAuth2ClientCredentials value for xsuaa")
 	}
 
-	credentials := &backendbeb.OAuth2ClientCredentials{
-		ProviderName:    providerName,
-		ClientID:        clientID,
-		ClientSecret:    clientSecret,
-		AuthType:        emstypes.AuthType(authType),
-		GrantType:       emstypes.GrantType(grantType),
-		TokenURL:        tokenURL,
-		APIRuleTokenURL: apiRuleTokenURL,
-	}
 	return credentials, nil
 }
 

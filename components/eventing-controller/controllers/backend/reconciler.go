@@ -805,19 +805,19 @@ func (r *Reconciler) getXSUAAOAuth2ClientCredentials(ctx context.Context, name,
 	if _, exists = oauth2Secret.Data["token_url"]; !exists {
 		return nil, errors.New("key 'token_url' not found in secret " + oauth2SecretNamespacedName.String())
 	}
-	if _, exists = oauth2Secret.Data["api_rule_token_url"]; !exists {
-		return nil, errors.New("key 'api_rule_token_url' not found in secret " + oauth2SecretNamespacedName.String())
+	if _, exists = oauth2Secret.Data["auth_url"]; !exists {
+		return nil, errors.New("key 'auth_url' not found in secret " + oauth2SecretNamespacedName.String())
 	}
 
 	// read all values
 	credentials := &backendbebv1.OAuth2ClientCredentials{
-		ProviderName:    name,
-		ClientID:        string(oauth2Secret.Data["client_id"]),
-		ClientSecret:    string(oauth2Secret.Data["client_secret"]),
-		AuthType:        emstypes.AuthType(oauth2Secret.Data["auth_type"]),
-		GrantType:       emstypes.GrantType(oauth2Secret.Data["grant_type"]),
-		TokenURL:        string(oauth2Secret.Data["token_url"]),
-		APIRuleTokenURL: string(oauth2Secret.Data["api_rule_token_url"]),
+		ProviderName: name,
+		ClientID:     string(oauth2Secret.Data["client_id"]),
+		ClientSecret: string(oauth2Secret.Data["client_secret"]),
+		AuthType:     emstypes.AuthType(oauth2Secret.Data["auth_type"]),
+		GrantType:    emstypes.GrantType(oauth2Secret.Data["grant_type"]),
+		TokenURL:     string(oauth2Secret.Data["token_url"]),
+		AuthURL:      string(oauth2Secret.Data["auth_url"]),
 	}
 	return credentials, nil
 }
@@ -910,16 +910,9 @@ func (r *Reconciler) startBEBController(clientID, clientSecret []byte) error {
 		var bebSubMgrParams subscriptionmanager.Params
 		if r.xsuaaOAuth2credentials != nil {
 			bebSubMgrParams = subscriptionmanager.Params{
-				"xsuaa":              true,
-				"provider_name":      r.xsuaaOAuth2credentials.ProviderName,
-				"client_id":          r.xsuaaOAuth2credentials.ClientID,
-				"client_secret":      r.xsuaaOAuth2credentials.ClientSecret,
-				"auth_type":          string(r.xsuaaOAuth2credentials.AuthType),
-				"grant_type":         string(r.xsuaaOAuth2credentials.GrantType),
-				"token_url":          r.xsuaaOAuth2credentials.TokenURL,
-				"api_rule_token_url": r.xsuaaOAuth2credentials.APIRuleTokenURL,
+				"xsuaa": r.xsuaaOAuth2credentials,
 			}
-			r.namedLogger().Info("EventMesh starting with XSUAA params...", bebSubMgrParams)
+			r.namedLogger().Info("Using XSUAA params...")
 		} else {
 			bebSubMgrParams = subscriptionmanager.Params{"client_id": clientID, "client_secret": clientSecret}
 		}

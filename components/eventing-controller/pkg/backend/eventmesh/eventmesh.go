@@ -87,6 +87,16 @@ func (em *EventMesh) Initialize(cfg env.Config) error {
 // getWebHookAuth returns the webhook auth config from the given env config
 // or returns an error if the env config contains invalid grant type or auth type.
 func getWebHookAuth(cfg env.Config, credentials *backendbebv1.OAuth2ClientCredentials) *types.WebhookAuth {
+	if credentials.ProviderName != "" {
+		return &types.WebhookAuth{
+			ClientID:     credentials.ClientID,
+			ClientSecret: credentials.ClientSecret,
+			TokenURL:     credentials.TokenURL,
+			Type:         credentials.AuthType,
+			GrantType:    credentials.GrantType,
+		}
+	}
+
 	return &types.WebhookAuth{
 		ClientID:     credentials.ClientID,
 		ClientSecret: credentials.ClientSecret,
@@ -117,6 +127,13 @@ func (em *EventMesh) SyncSubscription(subscription *eventingv1alpha2.Subscriptio
 		log.Errorw("Failed to get Kyma subscription internal view", errorLogKey, err)
 		return false, err
 	}
+
+	log.Infow("Using Webhook configs: ",
+		"TokenURL", eventMeshSub.WebhookAuth.TokenURL,
+		"Type", eventMeshSub.WebhookAuth.Type,
+		"GrantType", eventMeshSub.WebhookAuth.GrantType,
+		"ClientID", eventMeshSub.WebhookAuth.ClientID,
+		"ClientSecret", eventMeshSub.WebhookAuth.ClientSecret)
 
 	// check and handle if Kyma subscription or EventMesh subscription is modified
 	isKymaSubModified := false

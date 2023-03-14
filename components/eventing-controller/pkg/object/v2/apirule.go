@@ -90,7 +90,7 @@ func WithJWTHandlerForXSUAA(oauth2credentials *beb.OAuth2ClientCredentials) obje
 		handler := apigatewayv1beta1.Handler{
 			Name: object.OAuthJWTHandlerName,
 			Config: &runtime.RawExtension{
-				Raw: []byte(fmt.Sprintf(`{"jwks_urls":"%s"}`, oauth2credentials.APIRuleTokenURL)),
+				Raw: []byte(fmt.Sprintf(`{"jwks_urls":["%s"]}`, oauth2credentials.AuthURL)),
 			},
 		}
 		authenticator := &apigatewayv1beta1.Authenticator{
