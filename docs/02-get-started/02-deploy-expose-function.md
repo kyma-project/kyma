@@ -4,7 +4,7 @@ title: Deploy and expose a Function
 
 Now that you've installed Kyma, let's deploy your first Function. We'll call it `hello-world`.
 
-## Create a function
+## Create a Function
 
 First, let's create the Function and apply it.
 
