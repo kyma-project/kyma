@@ -229,13 +229,6 @@ function shouldIgnoreServiceMonitor(serviceMonitorName) {
   return serviceMonitorsToBeIgnored.includes(serviceMonitorName) || !serviceMonitorName.startsWith('monitoring');
 }
 
-function shouldIgnorePodMonitor(podMonitorName) {
-  const podMonitorsToBeIgnored = [
-    // The targets scraped by these podmonitors will be tested here: https://github.com/kyma-project/kyma/issues/6457
-  ];
-  return podMonitorsToBeIgnored.includes(podMonitorName);
-}
-
 async function buildScrapePoolSet() {
   const serviceMonitors = await getServiceMonitors();
 
