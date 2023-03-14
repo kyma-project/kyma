@@ -231,7 +231,6 @@ function shouldIgnoreServiceMonitor(serviceMonitorName) {
 
 async function buildScrapePoolSet() {
   const serviceMonitors = await getServiceMonitors();
-
   const scrapePools = new Set();
 
   for (const monitor of serviceMonitors) {
