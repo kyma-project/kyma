@@ -74,19 +74,19 @@ spec:
           {{- end }}
           env:
           {{- if  (eq .Values.testSuite "git-auth-integration" ) }}
-            - name: APP_TEST_GITHUB_REPO_CONFIG_URL
+            - name: APP_TEST_GITHUB_CONFIG_URL
               value: "{{ .Values.gitAuth.github.url }}"
-            - name: APP_TEST_GITHUB_REPO_CONFIG_BASE_DIR
+            - name: APP_TEST_GITHUB_CONFIG_BASE_DIR
               value: "{{ .Values.gitAuth.github.baseDir }}"
-            - name: APP_TEST_GITHUB_REPO_CONFIG_REFERENCE
+            - name: APP_TEST_GITHUB_CONFIG_REFERENCE
               value: "{{ .Values.gitAuth.github.reference }}"
             - name: APP_TEST_GITHUB_SSH_AUTH_KEY
               value: "{{ .Values.gitAuth.github.key }}"
-            - name: APP_TEST_AZURE_REPO_CONFIG_URL
+            - name: APP_TEST_AZURE_CONFIG_URL
               value: "{{ .Values.gitAuth.azure.url }}"
-            - name: APP_TEST_AZURE_REPO_CONFIG_BASE_DIR
+            - name: APP_TEST_AZURE_CONFIG_BASE_DIR
               value: "{{ .Values.gitAuth.azure.baseDir }}"
-            - name: APP_TEST_AZURE_REPO_CONFIG_REFERENCE
+            - name: APP_TEST_AZURE_CONFIG_REFERENCE
               value: "{{ .Values.gitAuth.azure.reference }}"
             - name: APP_TEST_AZURE_BASIC_AUTH_USERNAME
               value: "{{ .Values.gitAuth.azure.username }}"

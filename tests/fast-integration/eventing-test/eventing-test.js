@@ -5,6 +5,18 @@ const httpsAgent = new https.Agent({
 });
 axios.defaults.httpsAgent = httpsAgent;
 const {
+  checkFunctionResponse,
+  sendLegacyEventAndCheckResponse,
+  sendCloudEventStructuredModeAndCheckResponse,
+  sendCloudEventBinaryModeAndCheckResponse,
+  checkInClusterEventDelivery,
+  checkFullyQualifiedTypeWithExactSub,
+  waitForSubscriptionsTillReady,
+  checkInClusterEventTracing,
+  orderReceivedSubName,
+  getRandomEventId,
+} = require('../test/fixtures/commerce-mock');
+const {
   getEventingBackend,
   waitForNamespace,
   switchEventingBackend,
@@ -14,6 +26,10 @@ const {
   createApiRuleForService,
   deleteApiRule,
   getSubscription,
+  k8sApply,
+  waitForSubscription,
+  eventingSubscriptionV1Alpha2,
+  deleteK8sConfigMap,
 } = require('../utils');
 const {
   eventingMonitoringTest,
@@ -25,6 +41,14 @@ const {
   timeoutTime,
   slowTime,
   isSKR,
+  isUpgradeJob,
+  testCompassFlow,
+  testSubscriptionV1Alpha2,
+  subCRDVersion,
+  isStreamCreationTimeMissing,
+  isConsumerCreationTimeMissing,
+  getJetStreamStreamData,
+  testDataConfigMapName,
   eventingNatsSvcName,
   eventingNatsApiRuleAName,
   eventingSinkName,
@@ -46,6 +70,13 @@ const {
   waitForEventingSinkFunction,
   deployV1Alpha2Subscriptions,
   subCRDVersion,
+  deployEventingSinkFunction,
+  eventingUpgradeSinkName,
+  waitForEventingSinkFunction,
+  ensureEventReceivedWithRetry,
+  undeployEventingFunction,
+  checkFunctionUnreachable,
+  publishEventWithRetry,
 } = require('./utils');
 const {
   bebBackend,
@@ -264,6 +295,130 @@ describe('Eventing tests', function() {
     });
   }
 
+  function jsTestAtLeastOnceDeliveryTestSuite(upgradeStage='pre') {
+    // The test scenario is:
+    // 1. Create a second sink + subscription and wait for them to be healthy.
+    // 2. Send an event and verify if it is received by the sink.
+    // 3. Delete the sink.
+    // 4. Publish an event.
+    // 5. Upgrade the Kyma cluster.
+    // 6. Revert/Deploy back the second sink.
+    // 7. Check if the sink receives the event which was sent before the upgrade.
+    context('Test jetStream at-least once delivery during kyma upgrade', function() {
+      const encoding = 'binary';
+      const subName = `upgrade-${subscriptionsTypes[0].name}`;
+      const subscriptions = [
+        eventingSubscriptionV1Alpha2(
+            subscriptionsTypes[0].type,
+            subscriptionsTypes[0].source,
+            `http://${eventingUpgradeSinkName}.${testNamespace}.svc.cluster.local`,
+            `upgrade-${subscriptionsTypes[0].name}`,
+            testNamespace),
+      ];
+
+      before('Check if this is an upgrade job', async function() {
+        if (!isUpgradeJob) {
+          debug(`Skipping jetStream at-least once delivery test isUpgradeJob: ${isUpgradeJob}`);
+          this.skip();
+        }
+      });
+
+      context('Pre-upgrade tasks to publish event which should not be delivered', function() {
+        before('Check if this is pre-upgrade stage', async function() {
+          if (upgradeStage !== 'pre') {
+            debug(`Skipping pre-upgrade tasks...`);
+            this.skip();
+          }
+        });
+
+        it('Deploy eventing-upgrade-sink', async function() {
+          await deployEventingSinkFunction(eventingUpgradeSinkName);
+          await waitForEventingSinkFunction(eventingUpgradeSinkName);
+          debug(`checking if eventing upgrade sink is reachable through the api rule`);
+          await checkFunctionReachable(eventingUpgradeSinkName, testNamespace, clusterHost);
+        });
+
+        it('Create subscriptions during pre-upgrade phase', async function() {
+          await k8sApply(subscriptions, testNamespace);
+          await waitForSubscription(subName, testNamespace, 'v1alpha2');
+        });
+
+        it('Verify if events delivery is working', async function() {
+          await checkEventDelivery(clusterHost, 'binary', subscriptionsTypes[0].type,
+              subscriptionsTypes[0].source, false, eventingUpgradeSinkName);
+        });
+
+        it('Delete the eventing-upgrade-sink', async function() {
+          await undeployEventingFunction(eventingUpgradeSinkName);
+          debug(`checking if eventing upgrade sink is not alive anymore...`);
+          await checkFunctionUnreachable(eventingUpgradeSinkName, testNamespace, clusterHost);
+        });
+
+        it('Generate new eventId, save the id and publish events', async function() {
+          let existingCMData = {};
+          // get existing configMap
+          const cm = await getConfigMapWithRetries(testDataConfigMapName, testNamespace);
+          if (cm && cm.data) {
+            existingCMData = cm.data;
+          }
+
+          const eventIdBinary = getRandomEventId(encoding);
+          await createK8sConfigMap(
+              {
+                ...existingCMData,
+                upgradeEventID: eventIdBinary,
+              },
+              testDataConfigMapName,
+          );
+          // publish the event, which should be delivered after the upgrade
+          await publishEventWithRetry(clusterHost, encoding, eventIdBinary,
+              subscriptionsTypes[0].type, subscriptionsTypes[0].source);
+        });
+      });
+
+      context('Post-upgrade tasks to verify that event is delivered after sink is available', function() {
+        let eventID;
+        before('Check if this is pre-upgrade stage', async function() {
+          if (upgradeStage !== 'post') {
+            debug(`Skipping post-upgrade tasks...`);
+            this.skip();
+          }
+
+          const cm = await getConfigMapWithRetries(testDataConfigMapName, 'default');
+          if (!cm || !cm.data || !cm.data.upgradeEventID) {
+            debug(`Skipping post-upgrade tasks because config map is not configured...`);
+            this.skip();
+          }
+          eventID = cm.data.upgradeEventID;
+        });
+
+        it(`deploy again and wait for function: ${eventingUpgradeSinkName}`, async function() {
+          await deployEventingSinkFunction(eventingUpgradeSinkName);
+          await waitForEventingSinkFunction(eventingUpgradeSinkName);
+          debug(`checking if eventing upgrade sink is reachable through the api rule`);
+          await checkFunctionReachable(eventingUpgradeSinkName, testNamespace, clusterHost);
+        });
+
+        it('Label subscription to trigger reconciliation', async function() {
+          subscriptions[0].metadata.labels = {
+            'changed': 'now',
+          };
+          await k8sApply(subscriptions, testNamespace);
+          await waitForSubscription(subName, testNamespace, 'v1alpha2');
+        });
+
+        it('Wait for the pending event to be delivered', async function() {
+          await ensureEventReceivedWithRetry(eventingUpgradeSinkName, clusterHost,
+              encoding, eventID, subscriptionsTypes[0].type, subscriptionsTypes[0].source);
+        });
+
+        it(`Delete configMap: ${testDataConfigMapName}`, async function() {
+          await deleteK8sConfigMap(testDataConfigMapName);
+        });
+      });
+    });
+  }
+
   // Tests
   context('with Nats backend', function() {
     it('Switch Eventing Backend to Nats', async function() {
@@ -285,6 +440,9 @@ describe('Eventing tests', function() {
 
     // Running JetStream stream and consumers not re-created by upgrade tests.
     jsStreamAndConsumersNotReCreatedTestSuite();
+
+    // Running JetStream At-least Once delivery Test during Upgrade
+    jsTestAtLeastOnceDeliveryTestSuite('post');
   });
 
   context('with BEB backend', function() {
@@ -328,6 +486,9 @@ describe('Eventing tests', function() {
 
     // Record stream and consumer data for Kyma upgrade
     jsSaveStreamAndConsumersDataSuite();
+
+    // Running JetStream At-least Once delivery Test during Upgrade
+    jsTestAtLeastOnceDeliveryTestSuite('pre');
   });
 
   after('Delete the created APIRule', async function() {
