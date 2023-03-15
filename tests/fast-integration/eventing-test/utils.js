@@ -458,7 +458,6 @@ async function ensureEventReceivedWithRetry(sink, proxyHost,
       debug('Received event data:', {
         payload: response.data.event.payload,
         headers: response.data.event.headers,
-        ceHeaders: response.data.event.ceHeaders,
       });
     }
 
@@ -687,6 +686,13 @@ async function createK8sNamespace(name) {
   await k8sApply([namespaceObj(name)]);
 }
 
+function debugBanner(message) {
+  const line = '[BANNER] ***************************************************************************************';
+  debug(line);
+  debug(`[BANNER] ${message}`);
+  debug(line);
+}
+
 module.exports = {
   appName,
   testNamespace,
@@ -716,6 +722,7 @@ module.exports = {
   isStreamCreationTimeMissing,
   isConsumerCreationTimeMissing,
   eppInClusterUrl,
+  ensureEventReceivedWithRetry,
   eventingSinkName,
   eventingUpgradeSinkName,
   v1alpha1SubscriptionsTypes,
@@ -741,4 +748,5 @@ module.exports = {
   checkConsumerNotReCreated,
   createK8sNamespace,
   publishEventWithRetry,
+  debugBanner,
 };

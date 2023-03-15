@@ -5,15 +5,6 @@ const httpsAgent = new https.Agent({
 });
 axios.defaults.httpsAgent = httpsAgent;
 const {
-  checkFunctionResponse,
-  sendLegacyEventAndCheckResponse,
-  sendCloudEventStructuredModeAndCheckResponse,
-  sendCloudEventBinaryModeAndCheckResponse,
-  checkInClusterEventDelivery,
-  checkFullyQualifiedTypeWithExactSub,
-  waitForSubscriptionsTillReady,
-  checkInClusterEventTracing,
-  orderReceivedSubName,
   getRandomEventId,
 } = require('../test/fixtures/commerce-mock');
 const {
@@ -21,6 +12,7 @@ const {
   waitForNamespace,
   switchEventingBackend,
   debug,
+  createK8sConfigMap,
   waitForEndpoint,
   waitForPodWithLabelAndCondition,
   createApiRuleForService,
@@ -41,13 +33,6 @@ const {
   timeoutTime,
   slowTime,
   isSKR,
-  isUpgradeJob,
-  testCompassFlow,
-  testSubscriptionV1Alpha2,
-  subCRDVersion,
-  isStreamCreationTimeMissing,
-  isConsumerCreationTimeMissing,
-  getJetStreamStreamData,
   testDataConfigMapName,
   eventingNatsSvcName,
   eventingNatsApiRuleAName,
@@ -67,7 +52,6 @@ const {
   checkStreamNotReCreated,
   checkConsumerNotReCreated,
   isUpgradeJob,
-  waitForEventingSinkFunction,
   deployV1Alpha2Subscriptions,
   subCRDVersion,
   deployEventingSinkFunction,
@@ -77,6 +61,7 @@ const {
   undeployEventingFunction,
   checkFunctionUnreachable,
   publishEventWithRetry,
+  debugBanner,
 } = require('./utils');
 const {
   bebBackend,
@@ -97,6 +82,7 @@ const {
 } = require('../monitoring');
 
 let clusterHost = '';
+let isJSAtLeastOnceTested = false;
 
 describe('Eventing tests', function() {
   let natsApiRuleVSHost;
@@ -121,6 +107,11 @@ describe('Eventing tests', function() {
   });
 
   before('Create an ApiRule for NATS', async () => {
+    if (!isUpgradeJob) {
+      debug(`Skipping creating ApiRule for NATS because it is not upgrade test job`);
+      return;
+    }
+
     const vs = await createApiRuleForService(eventingNatsApiRuleAName,
         kymaSystem,
         eventingNatsSvcName,
@@ -176,6 +167,7 @@ describe('Eventing tests', function() {
         eventSource = getEventMeshNamespace();
       }
       for (let i=0; i < v1alpha1SubscriptionsTypes.length; i++) {
+        debugBanner(`Testing Cloud Events [binary] [v1alpha1] ${v1alpha1SubscriptionsTypes[i].type}`);
         await checkEventDelivery(clusterHost, 'binary', v1alpha1SubscriptionsTypes[i].type, eventSource, true);
       }
     });
@@ -186,30 +178,35 @@ describe('Eventing tests', function() {
         eventSource = getEventMeshNamespace();
       }
       for (let i=0; i < v1alpha1SubscriptionsTypes.length; i++) {
+        debugBanner(`Testing Cloud Events [structured] [v1alpha1] ${v1alpha1SubscriptionsTypes[i].type}`);
         await checkEventDelivery(clusterHost, 'structured', v1alpha1SubscriptionsTypes[i].type, eventSource, true);
       }
     });
 
     it('Legacy Events with v1alpha1 subscription should be delivered to eventing-sink ', async function() {
       for (let i=0; i < v1alpha1SubscriptionsTypes.length; i++) {
+        debugBanner(`Testing Cloud Events [Legacy] [v1alpha1] ${v1alpha1SubscriptionsTypes[i].type}`);
         await checkEventDelivery(clusterHost, 'legacy', v1alpha1SubscriptionsTypes[i].type, 'test', true);
       }
     });
 
     it('Cloud Events [binary] with v1alpha2 subscription should be delivered to eventing-sink ', async function() {
       for (let i=0; i < subscriptionsTypes.length; i++) {
+        debugBanner(`Testing Cloud Events [binary] [v1alpha2] ${subscriptionsTypes[i].type}`);
         await checkEventDelivery(clusterHost, 'binary', subscriptionsTypes[i].type, subscriptionsTypes[i].source);
       }
     });
 
     it('Cloud Events [structured] with v1alpha2 subscription should be delivered to eventing-sink ', async function() {
       for (let i=0; i < subscriptionsTypes.length; i++) {
+        debugBanner(`Testing Cloud Events [structured] [v1alpha2] ${subscriptionsTypes[i].type}`);
         await checkEventDelivery(clusterHost, 'structured', subscriptionsTypes[i].type, subscriptionsTypes[i].source);
       }
     });
 
     it('Legacy Events with v1alpha2 subscription should be delivered to eventing-sink ', async function() {
       for (let i=0; i < subscriptionsTypes.length; i++) {
+        debugBanner(`Testing Cloud Events [legacy] [v1alpha2] ${subscriptionsTypes[i].type}`);
         await checkEventDelivery(clusterHost, 'legacy', subscriptionsTypes[i].type, subscriptionsTypes[i].source);
       }
     });
@@ -220,6 +217,7 @@ describe('Eventing tests', function() {
         eventSource = getEventMeshNamespace();
       }
       for (let i=0; i < subscriptionsExactTypeMatching.length; i++) {
+        debugBanner(`Testing Cloud Events (type matching: exact) ${subscriptionsExactTypeMatching[i].type}`);
         await checkEventDelivery(clusterHost, 'binary', subscriptionsExactTypeMatching[i].type, eventSource);
       }
     });
@@ -325,10 +323,11 @@ describe('Eventing tests', function() {
 
       context('Pre-upgrade tasks to publish event which should not be delivered', function() {
         before('Check if this is pre-upgrade stage', async function() {
-          if (upgradeStage !== 'pre') {
+          if (upgradeStage !== 'pre' || isJSAtLeastOnceTested) {
             debug(`Skipping pre-upgrade tasks...`);
             this.skip();
           }
+          debugBanner('Pre-upgrade tasks to publish event which should not be delivered');
         });
 
         it('Deploy eventing-upgrade-sink', async function() {
@@ -390,6 +389,7 @@ describe('Eventing tests', function() {
             this.skip();
           }
           eventID = cm.data.upgradeEventID;
+          debugBanner('Post-upgrade tasks to verify that event is delivered after sink is available');
         });
 
         it(`deploy again and wait for function: ${eventingUpgradeSinkName}`, async function() {
@@ -410,6 +410,8 @@ describe('Eventing tests', function() {
         it('Wait for the pending event to be delivered', async function() {
           await ensureEventReceivedWithRetry(eventingUpgradeSinkName, clusterHost,
               encoding, eventID, subscriptionsTypes[0].type, subscriptionsTypes[0].source);
+          // change the flag to true we do not prepare test again
+          isJSAtLeastOnceTested = true;
         });
 
         it(`Delete configMap: ${testDataConfigMapName}`, async function() {
@@ -492,6 +494,11 @@ describe('Eventing tests', function() {
   });
 
   after('Delete the created APIRule', async function() {
+    if (!isUpgradeJob) {
+      debug(`Skipping deleting ApiRule for NATS because it is not upgrade test job`);
+      return;
+    }
+
     await deleteApiRule(eventingNatsApiRuleAName, kymaSystem);
   });
 
