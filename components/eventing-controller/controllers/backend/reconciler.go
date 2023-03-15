@@ -334,7 +334,11 @@ func (r *Reconciler) syncXSUAAOauth2ClientIDAndSecret(ctx context.Context,
 	oauth2CredentialsNotFound := k8serrors.IsNotFound(err)
 	oauth2CredentialsChanged := false
 	if err == nil {
-		oauth2CredentialsChanged = !reflect.DeepEqual(r.xsuaaOAuth2credentials, credentials)
+		if r.xsuaaOAuth2credentials == nil {
+			oauth2CredentialsChanged = true
+		} else {
+			oauth2CredentialsChanged = !reflect.DeepEqual(r.xsuaaOAuth2credentials, credentials)
+		}
 	}
 	if oauth2CredentialsNotFound || oauth2CredentialsChanged {
 		// Stop the controller and mark all subs as not ready
