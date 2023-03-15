@@ -402,7 +402,6 @@ env:
   GF_DASHBOARDS_MIN_REFRESH_INTERVAL: "10s"
   # https://grafana.com/docs/grafana/v7.5/administration/configuration/#snapshots
 # https://grafana.com/docs/grafana/v7.5/administration/configuration/#snapshots
-GF_SNAPSHOTS_ENABLED: "false"
 GF_SNAPSHOTS_EXTERNAL_ENABLED: "false"
 
 ## "valueFrom" environment variable references that will be added to deployment pods
