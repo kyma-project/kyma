@@ -1,27 +1,14 @@
 #!/usr/bin/env bash
 
 readonly CURRENT_DIR="$( cd "$( dirname "$0" )" && pwd )"
-readonly ROOT_PATH="$( cd "${CURRENT_DIR}/../" && pwd )"
-
-TMP_DIR=$(mktemp -d)
-
-cleanup() {
-    rm -rf "${TMP_DIR}" || true
-}
 
 trap cleanup EXIT SIGINT
 
-cp -a ${ROOT_PATH}/docs/05-technical-reference/00-custom-resources/. $TMP_DIR/
-
 cd $CURRENT_DIR/table-gen || exit
 
-go run $CURRENT_DIR/table-gen/table-gen.go --crd-filename ../../installation/resources/crds/telemetry/tracepipelines.crd.yaml --md-filename $TMP_DIR/telemetry-03-tracepipeline.md
+make generate
 
-go run $CURRENT_DIR/table-gen/table-gen.go --crd-filename ../../installation/resources/crds/telemetry/logpipelines.crd.yaml --md-filename $TMP_DIR/telemetry-01-logpipeline.md
-
-go run $CURRENT_DIR/table-gen/table-gen.go --crd-filename ../../installation/resources/crds/telemetry/logparsers.crd.yaml --md-filename $TMP_DIR/telemetry-02-logparser.md
-
-DIFF=$(diff -q $TMP_DIR ${ROOT_PATH}/docs/05-technical-reference/00-custom-resources)
+DIFF=$(git diff --exit-code)
 if [ -n "${DIFF}" ]; then 
     echo -e "ERROR: there is a difference between operator CRD and documentation"
     echo -e "Please, go to the hack/table-gen, and run 'make run'"
