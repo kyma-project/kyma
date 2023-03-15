@@ -411,7 +411,7 @@ describe('Eventing tests', function() {
 
         it('Wait for the pending event to be delivered', async function() {
           await ensureEventReceivedWithRetry(eventingUpgradeSinkName, clusterHost,
-              encoding, eventID, subscriptionsTypes[0].type, subscriptionsTypes[0].source);
+              encoding, eventID, subscriptionsTypes[0].type, subscriptionsTypes[0].source, 50);
           // change the flag to true we do not prepare test again
           isJSAtLeastOnceTested = true;
         });
