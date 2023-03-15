@@ -24,6 +24,7 @@ var (
 	MDFilename  string
 	APIVersion  string
 	CRDKind     string
+	CRDGroup    string
 )
 
 func main() {
@@ -92,7 +93,9 @@ func generateDocFromCRD(elementsToSkip map[string]bool) string {
 	docElements := map[string]string{}
 	versions := getElement(obj, "spec", "versions")
 	kind := getElement(obj, "spec", "names", "kind")
+	group := getElement(obj, "spec", "group")
 	CRDKind = kind.(string)
+	CRDGroup = group.(string)
 
 	for _, version := range versions.([]interface{}) {
 		name := getElement(version, "name")
@@ -111,7 +114,7 @@ func generateDocFromCRD(elementsToSkip map[string]bool) string {
 	}
 
 	doc = append([]string{
-		"<!-- " + CRDKind + " " + APIVersion + " -->",
+		"<!-- " + CRDKind + " " + APIVersion + " " + CRDGroup + " -->",
 		"| Parameter         | Description                                   |",
 		"| ---------------------------------------- | ---------|",
 	}, doc...)

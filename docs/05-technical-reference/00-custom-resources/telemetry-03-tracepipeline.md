@@ -43,7 +43,7 @@ For details, see the [TracePipeline specification file](https://github.com/kyma-
 <!-- The content between "TABLE-START" and "TABLE-END" will be replaced -->
 
 <!-- TABLE-START -->
-<!-- TracePipeline v1alpha1 -->
+<!-- TracePipeline v1alpha1 telemetry.kyma-project.io -->
 | Parameter         | Description                                   |
 | ---------------------------------------- | ---------|
 | **spec.output** | Configures the trace receiver of a TracePipeline. |

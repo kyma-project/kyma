@@ -34,7 +34,7 @@ For details, see the [LogParser specification file](https://github.com/kyma-proj
 <!-- The content between "TABLE-START" and "TABLE-END" will be replaced -->
 
 <!-- TABLE-START -->
-<!-- LogParser v1alpha1 -->
+<!-- LogParser v1alpha1 telemetry.kyma-project.io -->
 | Parameter         | Description                                   |
 | ---------------------------------------- | ---------|
 | **spec.parser** | Configures a user defined Fluent Bit parser to be applied to the logs. |

@@ -68,7 +68,7 @@ For details, see the [LogPipeline specification file](https://github.com/kyma-pr
 <!-- The content between "TABLE-START" and "TABLE-END" will be replaced -->
 
 <!-- TABLE-START -->
-<!-- LogPipeline v1alpha1 -->
+<!-- LogPipeline v1alpha1 telemetry.kyma-project.io -->
 | Parameter         | Description                                   |
 | ---------------------------------------- | ---------|
 | **spec.files** | Provides file content to be consumed by a LogPipeline configuration |
