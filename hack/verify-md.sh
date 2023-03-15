@@ -2,8 +2,6 @@
 
 readonly CURRENT_DIR="$( cd "$( dirname "$0" )" && pwd )"
 
-trap cleanup EXIT SIGINT
-
 cd $CURRENT_DIR/table-gen || exit
 
 make generate
