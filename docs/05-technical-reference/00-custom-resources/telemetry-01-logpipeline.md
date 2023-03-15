@@ -67,8 +67,6 @@ For details, see the [LogPipeline specification file](https://github.com/kyma-pr
 <!-- Some special tags (html comments) are at the end of lines due to markdown requirements. -->
 <!-- The content between "TABLE-START" and "TABLE-END" will be replaced -->
 
-<!-- SKIP-WITH-ANCESTORS spec.template -->
-
 <!-- TABLE-START -->
 <!-- LogPipeline v1alpha1 -->
 | Parameter         | Description                                   |
