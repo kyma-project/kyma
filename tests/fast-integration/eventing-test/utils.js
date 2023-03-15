@@ -17,6 +17,7 @@ const {
   getSubscription,
   waitForVirtualService,
   k8sApply,
+  k8sDelete,
   waitForFunction,
   eventingSubscription,
   waitForSubscription,
@@ -45,6 +46,7 @@ const skrInstanceId = process.env.INSTANCE_ID || '';
 const testCompassFlow = process.env.TEST_COMPASS_FLOW || false;
 const testSubscriptionV1Alpha2 = process.env.ENABLE_SUBSCRIPTION_V1_ALPHA2 === 'true';
 const subCRDVersion = testSubscriptionV1Alpha2 ? 'v1alpha2' : 'v1alpha1';
+const isUpgradeJob = process.env.EVENTING_UPGRADE_JOB || false;
 const skipResourceCleanup = process.env.SKIP_CLEANUP || false;
 const suffix = getSuffix(isSKR, testCompassFlow);
 const appName = `app-${suffix}`;
@@ -65,6 +67,7 @@ const subscriptionNames = {
   orderReceived: 'order-received',
 };
 const eventingSinkName = 'eventing-sink';
+const eventingUpgradeSinkName = 'eventing-upgrade-sink';
 
 // ****** Event types to test ***********//
 const v1alpha1SubscriptionsTypes = [
@@ -240,20 +243,27 @@ function createNewEventId() {
   return uuidv4();
 }
 
-async function deployEventingSinkFunction() {
+function getK8sFunctionObject(funcName) {
   const functionYaml = fs.readFileSync(
-      path.join(__dirname, './assets/eventing-function.yaml'),
+      path.join(__dirname, `./assets/${funcName}.yaml`),
       {
         encoding: 'utf8',
       },
   );
 
-  const k8sObjs = k8s.loadAllYaml(functionYaml);
-  await k8sApply(k8sObjs, testNamespace, true);
+  return k8s.loadAllYaml(functionYaml);
 }
 
-async function waitForEventingSinkFunction() {
-  await waitForFunction(eventingSinkName, testNamespace);
+async function deployEventingSinkFunction(funcName = eventingSinkName) {
+  await k8sApply(getK8sFunctionObject(funcName), testNamespace, true);
+}
+
+async function undeployEventingFunction(funcName) {
+  await k8sDelete(getK8sFunctionObject(funcName), testNamespace);
+}
+
+async function waitForEventingSinkFunction(funcName = eventingSinkName) {
+  await waitForFunction(funcName, testNamespace);
 }
 
 async function deployV1Alpha1Subscriptions() {
@@ -347,6 +357,20 @@ async function checkFunctionReachable(name, namespace, host) {
   expect(res.status).to.be.equal(200);
 }
 
+async function checkFunctionUnreachable(name, namespace, host) {
+  return await retryPromise(
+      async () => {
+        const response = await axios.post(`https://${name}.${host}/function`, {orderCode: '789'}, {
+          timeout: 5000,
+        });
+        expect(response.status).to.not.equal(200);
+        return response;
+      }, 45, 2 * 1000)
+      .catch((err) => {
+        debug(err);
+      });
+}
+
 async function checkEventTracing(proxyHost, eventType, eventSource, namespace) {
   // first send an event and verify if it was delivered
   const result = await checkEventDelivery(proxyHost, 'binary', eventType, eventSource);
@@ -376,14 +400,16 @@ async function checkEventTracing(proxyHost, eventType, eventSource, namespace) {
 
 // checks if the event publish and receive is working.
 // Possible values for encoding are [binary, structured, legacy].
-async function checkEventDelivery(proxyHost, encoding, eventType, eventSource, isSubV1Alpha1 = false) {
+async function checkEventDelivery(proxyHost, encoding, eventType, eventSource,
+    isSubV1Alpha1 = false, sinkName=eventingSinkName) {
   const eventId = createNewEventId();
 
   debug(`Publishing event with id:${eventId}, type: ${eventType}, source: ${eventSource}...`);
   const result = await publishEventWithRetry(proxyHost, encoding, eventId, eventType, eventSource, isSubV1Alpha1);
 
   debug(`Verifying if event with id:${eventId}, type: ${eventType}, source: ${eventSource} was received by sink...`);
-  const result2 = await ensureEventReceivedWithRetry(proxyHost, encoding, eventId, eventType, eventSource);
+  const result2 = await ensureEventReceivedWithRetry(sinkName, proxyHost,
+      encoding, eventId, eventType, eventSource);
   return {
     eventId,
     traceParentId: result.traceParentId,
@@ -441,11 +467,12 @@ async function publishEventWithRetry(proxyHost, encoding, eventId, eventType, ev
 }
 
 // verify if event was received using function
-async function ensureEventReceivedWithRetry(proxyHost, encoding, eventId, eventType, eventSource, retriesLeft = 10) {
+async function ensureEventReceivedWithRetry(sink, proxyHost,
+    encoding, eventId, eventType, eventSource, retriesLeft = 10) {
   return await retryPromise(async () => {
     debug(`Waiting to receive CE event "${eventId}"`);
 
-    const response = await axios.get(`https://${eventingSinkName}.${proxyHost}`,
+    const response = await axios.get(`https://${sink}.${proxyHost}`,
         {params: {eventid: eventId}});
 
     debug('Received response:', {
@@ -491,7 +518,7 @@ async function ensureEventReceivedWithRetry(proxyHost, encoding, eventId, eventT
       });
 }
 
-function createBinaryCloudEventRequestBody(proxyHost, eventId, eventType, eventSource, traceparent) {
+function createBinaryCloudEventRequestBody(proxyHost, eventId, eventType, eventSource, traceParent = '') {
   debug('setting headers and payload for binary cloud event');
   const reqBody = {
     url: `http://${eppInClusterUrl}/publish`,
@@ -505,7 +532,7 @@ function createBinaryCloudEventRequestBody(proxyHost, eventId, eventType, eventS
     'ce-id': eventId,
     'ce-type': eventType,
     'Content-Type': 'application/json',
-    'traceparent': traceparent,
+    'traceparent': traceParent,
   };
 
   reqBody.data.payload = {
@@ -690,6 +717,7 @@ module.exports = {
   mockNamespace,
   kymaVersion,
   isSKR,
+  isUpgradeJob,
   skrInstanceId,
   testCompassFlow,
   testSubscriptionV1Alpha2,
@@ -714,16 +742,20 @@ module.exports = {
   isStreamCreationTimeMissing,
   isConsumerCreationTimeMissing,
   eppInClusterUrl,
+  ensureEventReceivedWithRetry,
   subscriptionNames,
   getSubscriptionConsumerName,
   eventingSinkName,
+  eventingUpgradeSinkName,
   v1alpha1SubscriptionsTypes,
   subscriptionsTypes,
   subscriptionsExactTypeMatching,
   getClusterHost,
   checkFunctionReachable,
+  checkFunctionUnreachable,
   checkEventDelivery,
   deployEventingSinkFunction,
+  undeployEventingFunction,
   waitForEventingSinkFunction,
   deployV1Alpha1Subscriptions,
   deployV1Alpha2Subscriptions,
@@ -736,4 +768,5 @@ module.exports = {
   getConfigMapWithRetries,
   checkStreamNotReCreated,
   checkConsumerNotReCreated,
+  publishEventWithRetry,
 };
