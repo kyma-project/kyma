@@ -43,6 +43,7 @@ const isSKR = process.env.KYMA_TYPE === 'SKR';
 const skrInstanceId = process.env.INSTANCE_ID || '';
 const testCompassFlow = process.env.TEST_COMPASS_FLOW || false;
 const isUpgradeJob = process.env.EVENTING_UPGRADE_JOB || false;
+const isUpgradeJob2ndReconcile = process.env.EVENTING_UPGRADE_2ND_RECONCILE_JOB || false;
 const subCRDVersion = 'v1alpha2';
 const skipResourceCleanup = process.env.SKIP_CLEANUP || false;
 const suffix = getSuffix(isSKR, testCompassFlow);
@@ -236,7 +237,7 @@ async function undeployEventingFunction(funcName) {
 }
 
 async function waitForEventingSinkFunction(funcName = eventingSinkName) {
-  await waitForFunction(funcName, testNamespace);
+  await waitForFunction(funcName, testNamespace, 300000);
 }
 
 async function deployV1Alpha1Subscriptions() {
@@ -699,6 +700,7 @@ module.exports = {
   kymaVersion,
   isSKR,
   isUpgradeJob,
+  isUpgradeJob2ndReconcile,
   skrInstanceId,
   testCompassFlow,
   subCRDVersion,

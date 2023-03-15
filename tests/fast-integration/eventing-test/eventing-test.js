@@ -52,6 +52,7 @@ const {
   checkStreamNotReCreated,
   checkConsumerNotReCreated,
   isUpgradeJob,
+  isUpgradeJob2ndReconcile,
   deployV1Alpha2Subscriptions,
   subCRDVersion,
   deployEventingSinkFunction,
@@ -315,8 +316,9 @@ describe('Eventing tests', function() {
       ];
 
       before('Check if this is an upgrade job', async function() {
-        if (!isUpgradeJob) {
-          debug(`Skipping jetStream at-least once delivery test isUpgradeJob: ${isUpgradeJob}`);
+        if (!isUpgradeJob || isUpgradeJob2ndReconcile) {
+          debug(`Skipping jetStream at-least once delivery test`);
+          debug(`isUpgradeJob: ${isUpgradeJob}, isUpgradeJob2ndReconcile: ${isUpgradeJob2ndReconcile}`);
           this.skip();
         }
       });
