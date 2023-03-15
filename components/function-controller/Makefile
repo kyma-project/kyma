@@ -5,7 +5,7 @@ APP_NAME = function-controller
 APP_PATH = components/$(APP_NAME)
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
-override VERIFY_IGNORE := /vendor\|/automock\|/pkg/apis/serverless/v1alpha2/zz_generated.deepcopy.go\|/pkg/apis/serverless/v1alpha1/zz_generated.deepcopy.go
+override VERIFY_IGNORE := /vendor\|/automock\|/pkg/apis/serverless/v1alpha2/zz_generated.deepcopy.go\|/pkg/apis/serverless/v1alpha2/zz_generated.deepcopy.go
 
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
