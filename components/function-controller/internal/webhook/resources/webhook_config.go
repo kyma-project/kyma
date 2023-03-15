@@ -139,11 +139,10 @@ func getFunctionMutatingWebhookCfg(config WebhookConfig) admissionregistrationv1
 		Rules: []admissionregistrationv1.RuleWithOperations{
 			{
 				Rule: admissionregistrationv1.Rule{
-					APIGroups: []string{
-						serverlessAPIGroup,
-					},
-					Resources: []string{"functions", "functions/status"},
-					Scope:     &scope,
+					APIGroups:   []string{serverlessAPIGroup},
+					APIVersions: []string{ServerlessCurrentAPIVersion},
+					Resources:   []string{"functions", "functions/status"},
+					Scope:       &scope,
 				},
 				Operations: []admissionregistrationv1.OperationType{
 					admissionregistrationv1.Create,
@@ -232,32 +231,14 @@ func createValidatingWebhookConfiguration(config WebhookConfig) *admissionregist
 				Rules: []admissionregistrationv1.RuleWithOperations{
 					{
 						Rule: admissionregistrationv1.Rule{
-							APIGroups: []string{
-								serverlessAPIGroup,
-							},
-							Resources: []string{"functions", "functions/status"},
-							Scope:     &scope,
+							APIGroups:   []string{serverlessAPIGroup},
+							APIVersions: []string{ServerlessCurrentAPIVersion},
+							Resources:   []string{"functions", "functions/status"},
+							Scope:       &scope,
 						},
 						Operations: []admissionregistrationv1.OperationType{
 							admissionregistrationv1.Create,
 							admissionregistrationv1.Update,
-						},
-					},
-					{
-						Rule: admissionregistrationv1.Rule{
-							APIGroups: []string{
-								serverlessAPIGroup,
-							},
-							APIVersions: []string{
-								ServerlessCurrentAPIVersion,
-							},
-							Resources: []string{"gitrepositories", "gitrepositories/status"},
-							Scope:     &scope,
-						},
-						Operations: []admissionregistrationv1.OperationType{
-							admissionregistrationv1.Create,
-							admissionregistrationv1.Update,
-							admissionregistrationv1.Delete,
 						},
 					},
 				},

@@ -61,8 +61,6 @@ func TestEnsureWebhookConfigurationFor(t *testing.T) {
 		require.Equal(t, wc.ServiceNamespace, vwh.Webhooks[0].ClientConfig.Service.Namespace)
 		require.Contains(t, vwh.Webhooks[0].Rules[0].Resources, "functions")
 		require.Contains(t, vwh.Webhooks[0].Rules[0].Resources, "functions/status")
-		require.Contains(t, vwh.Webhooks[0].Rules[1].Resources, "gitrepositories")
-		require.Contains(t, vwh.Webhooks[0].Rules[1].Resources, "gitrepositories/status")
 
 	})
 
@@ -140,7 +138,6 @@ func validateMutatingWebhook(t *testing.T, wc WebhookConfig, webhooks []admissio
 	require.Len(t, functionWebhook.Rules, 1)
 	require.Contains(t, functionWebhook.Rules[0].Resources, "functions")
 	require.Contains(t, functionWebhook.Rules[0].Resources, "functions/status")
-	require.Contains(t, functionWebhook.Rules[0].APIVersions, DeprecatedServerlessAPIVersion)
 	require.Contains(t, functionWebhook.Rules[0].APIVersions, ServerlessCurrentAPIVersion)
 
 	secretWebhook := webhooks[1]
@@ -165,11 +162,8 @@ func validateValidationWebhook(t *testing.T, wc WebhookConfig, webhook *admissio
 	require.Equal(t, FunctionValidationWebhookPath, *functionWebhook.ClientConfig.Service.Path)
 	require.Equal(t, wc.ServiceName, functionWebhook.ClientConfig.Service.Name)
 	require.Equal(t, wc.ServiceNamespace, functionWebhook.ClientConfig.Service.Namespace)
-	require.Len(t, functionWebhook.Rules, 2)
+	require.Len(t, functionWebhook.Rules, 1)
 	require.Contains(t, functionWebhook.Rules[0].Resources, "functions")
 	require.Contains(t, functionWebhook.Rules[0].Resources, "functions/status")
-	require.Contains(t, functionWebhook.Rules[0].APIVersions, DeprecatedServerlessAPIVersion)
 	require.Contains(t, functionWebhook.Rules[0].APIVersions, ServerlessCurrentAPIVersion)
-	require.Contains(t, functionWebhook.Rules[1].Resources, "gitrepositories")
-	require.Contains(t, functionWebhook.Rules[1].Resources, "gitrepositories/status")
 }
