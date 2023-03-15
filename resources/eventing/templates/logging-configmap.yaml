@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: loggingConfigMap
+  labels: {{ include "eventing.labels" . | nindent 4 }}
+data:
+  APP_LOG_LEVEL: "info"

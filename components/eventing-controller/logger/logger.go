@@ -46,3 +46,27 @@ func build(format, level string) (KLogger, error) {
 
 	return &Logger{Logger: log}, nil
 }
+
+func NewWithAtomicLevel(format, level string) (*Logger, error) {
+	logFormat, err := logger.MapFormat(format)
+	if err != nil {
+		return nil, err
+	}
+
+	logLevel, err := logger.MapLevel(level)
+	if err != nil {
+		return nil, err
+	}
+
+	atomicLevel := zap.NewAtomicLevel()
+	log, err := logger.NewWithAtomicLevel(logFormat, atomicLevel)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = logger.InitKlog(log, logLevel); err != nil {
+		return nil, err
+	}
+
+	return &Logger{Logger: log}, nil
+}

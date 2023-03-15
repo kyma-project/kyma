@@ -2,6 +2,7 @@ package main
 
 import (
 	golog "log"
+	"net/http"
 
 	"github.com/kelseyhightower/envconfig"
 	kymalogger "github.com/kyma-project/kyma/components/eventing-controller/logger"
@@ -10,9 +11,14 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/commander"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/commander/beb"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/commander/nats"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/health"
+
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/k8s"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/logger"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics/latency"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/watcher"
 )
 
 const (
@@ -43,8 +49,17 @@ func main() {
 		golog.Fatalf("Failed to read configuration, error: %v", err)
 	}
 
+	appConfig := watcher.New()
+	k8sConfig := k8s.ConfigOrDie()
+	k8sClient := k8s.ClientOrDie(k8sConfig)
+	loggerInstance := logger.New(appConfig, k8sConfig)
+
+	watcher.NewWatcher(k8sClient, logger.Namespace, logger.ConfigMapName).
+		OnUpdateNotify(loggerInstance).
+		Watch()
+
 	// init the logger
-	logger, err := kymalogger.New(cfg.AppLogFormat, cfg.AppLogLevel)
+	logger, err := kymalogger.NewWithAtomicLevel(cfg.AppLogFormat, cfg.AppLogLevel)
 	if err != nil {
 		golog.Fatalf("Failed to initialize logger, error: %v", err)
 	}
@@ -54,6 +69,10 @@ func main() {
 		}
 	}()
 	setupLogger := logger.WithContext().With("backend", cfg.Backend)
+
+	http.HandleFunc(health.ReadinessURI, health.DefaultCheck)
+	http.HandleFunc(health.LivenessURI, health.DefaultCheck)
+	setupLogger.Infof("Somekind of problem", http.ListenAndServe(appConfig.ServerAddress, nil))
 
 	// metrics collector
 	metricsCollector := metrics.NewCollector(latency.NewBucketsProvider())
