@@ -28,9 +28,17 @@ var (
 )
 
 func main() {
-	flag.StringVar(&CRDFilename, "crd-filename", "../../installation/resources/crds/telemetry/tracepipelines.crd.yaml", "Full or relative path to the .yaml file containing crd")
-	flag.StringVar(&MDFilename, "md-filename", "../../docs/05-technical-reference/00-custom-resources/telemetry-03-tracepipeline.md", "Full or relative path to the .md file containing the file where we should insert table rows")
+	flag.StringVar(&CRDFilename, "crd-filename", "", "Full or relative path to the .yaml file containing crd")
+	flag.StringVar(&MDFilename, "md-filename", "", "Full or relative path to the .md file containing the file where we should insert table rows")
 	flag.Parse()
+
+	if CRDFilename == "" {
+		panic(fmt.Errorf("crd-filename cannot be empty. Please, enter the correct filename"))
+	}
+
+	if MDFilename == "" {
+		panic(fmt.Errorf("md-filename cannot be empty. Please, enter the correct filename"))
+	}
 
 	elementsToSkip := getElementsToSkip()
 	doc := generateDocFromCRD(elementsToSkip)
