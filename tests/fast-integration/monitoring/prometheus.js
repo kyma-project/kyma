@@ -221,44 +221,20 @@ async function getServiceMonitors() {
   return resources.filter((r) => !shouldIgnoreServiceMonitor(r.metadata.name));
 }
 
-async function getPodMonitors() {
-  const path = '/apis/monitoring.coreos.com/v1/podmonitors';
-
-  const resources = await listResources(path);
-
-  return resources.filter((r) => !shouldIgnorePodMonitor(r.metadata.name));
-}
-
 function shouldIgnoreServiceMonitor(serviceMonitorName) {
   const serviceMonitorsToBeIgnored = [
     // tracing-metrics is created automatically by jaeger operator and can't be disabled
     'tracing-metrics',
   ];
-  return serviceMonitorsToBeIgnored.includes(serviceMonitorName);
-}
-
-function shouldIgnorePodMonitor(podMonitorName) {
-  const podMonitorsToBeIgnored = [
-    // The targets scraped by these podmonitors will be tested here: https://github.com/kyma-project/kyma/issues/6457
-  ];
-  return podMonitorsToBeIgnored.includes(podMonitorName);
+  return serviceMonitorsToBeIgnored.includes(serviceMonitorName) || !serviceMonitorName.startsWith('monitoring');
 }
 
 async function buildScrapePoolSet() {
   const serviceMonitors = await getServiceMonitors();
-  const podMonitors = await getPodMonitors();
-
   const scrapePools = new Set();
 
   for (const monitor of serviceMonitors) {
     const endpoints = monitor.spec.endpoints;
-    for (let i = 0; i < endpoints.length; i++) {
-      const scrapePool = `${monitor.metadata.namespace}/${monitor.metadata.name}/${i}`;
-      scrapePools.add(scrapePool);
-    }
-  }
-  for (const monitor of podMonitors) {
-    const endpoints = monitor.spec.podmetricsendpoints;
     for (let i = 0; i < endpoints.length; i++) {
       const scrapePool = `${monitor.metadata.namespace}/${monitor.metadata.name}/${i}`;
       scrapePools.add(scrapePool);

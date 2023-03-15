@@ -55,7 +55,7 @@ By default, you install Kyma with Serverless that uses the internal Docker regis
 
 1. Run the `export {VARIABLE}={value}` command to set up these environment variables, where:
 
-    - **USERNAME** is the name of the account in the Docker Hub.
+    - **USER_NAME** is the name of the account in the Docker Hub.
     - **PASSWORD** is the password for the account in the Docker Hub.
     - **SERVER_ADDRESS** is the server address of the Docker Hub. At the moment, Kyma only supports the `https://index.docker.io/v1/` server address.
     - **REGISTRY_ADDRESS** is the registry address in the Docker Hub.
@@ -65,7 +65,7 @@ By default, you install Kyma with Serverless that uses the internal Docker regis
     Example:
 
     ```bash
-    export USERNAME=kyma-rocks
+    export USER_NAME=kyma-rocks
     export PASSWORD=admin123
     export SERVER_ADDRESS=https://index.docker.io/v1/
     export REGISTRY_ADDRESS=kyma-rocks
@@ -217,7 +217,7 @@ cat > docker-registry-overrides.yaml <<EOF
 serverless:
   dockerRegistry:
     enableInternal: false
-    username: "${USERNAME}"
+    username: "${USER_NAME}"
     password: "${PASSWORD}"
     serverAddress: "${SERVER_ADDRESS}"
     registryAddress: "${REGISTRY_ADDRESS}"

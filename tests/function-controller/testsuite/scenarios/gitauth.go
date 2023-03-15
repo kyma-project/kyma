@@ -37,8 +37,8 @@ type testRepo struct {
 }
 
 type config struct {
-	Azure  AzureRepo `envconfig:"AZURE"`
-	Github GithubRepo
+	Azure  AzureRepo  `envconfig:"AZURE"`
+	Github GithubRepo `envconfig:"GITHUB"`
 }
 
 type SSHAuth struct {
@@ -53,14 +53,14 @@ type BasicAuth struct {
 type GithubRepo struct {
 	Reference string `envconfig:"default=main"`
 	URL       string `envconfig:"default=git@github.com:kyma-project/private-fn-for-e2e-serverless-tests.git"`
-	BaseDir   string `envconfig:"default=/code"`
+	BaseDir   string `envconfig:"default=/"`
 	SSHAuth
 }
 
 type AzureRepo struct {
 	Reference string `envconfig:"default=main"`
 	URL       string `envconfig:"default=https://kyma-wookiee@dev.azure.com/kyma-wookiee/kyma-function/_git/kyma-function"`
-	BaseDir   string `envconfig:"default=/"`
+	BaseDir   string `envconfig:"default=/code"`
 	BasicAuth
 }
 

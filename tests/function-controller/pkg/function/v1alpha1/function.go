@@ -43,6 +43,10 @@ func NewFunction(name string, proxyEnabled bool, c shared.Container) *Function {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: c.Namespace,
+			Labels: map[string]string{
+				serverlessv1alpha1.FunctionResourcesPresetLabel: "M",
+				serverlessv1alpha1.BuildResourcesPresetLabel:    "normal",
+			},
 		},
 	}
 
