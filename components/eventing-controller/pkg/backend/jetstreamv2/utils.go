@@ -46,6 +46,7 @@ func (js *JetStream) getDefaultSubscriptionOptions(consumer SubscriptionSubjectI
 		nats.MaxAckPending(maxInFlightMessages),
 		nats.MaxDeliver(jsConsumerMaxRedeliver),
 		nats.AckWait(jsConsumerAcKWait),
+		nats.BackOff(jsConsumerBackOff),
 		nats.Bind(js.Config.JSStreamName, consumer.ConsumerName()),
 	}
 }
