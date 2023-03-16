@@ -50,10 +50,10 @@ readinessProbe:
 fluentbit:
   resources:
     limits:
-      cpu: 400m
-      memory: 256Mi
+      cpu: "1"
+      memory: 1Gi
     requests:
-      cpu: 10m
+      cpu: 100m
       memory: 50Mi
   fullnameOverride: telemetry-fluent-bit
   dashboards:
@@ -116,7 +116,7 @@ networkPolicy:
   enabled: true
 
 syncPeriod: 1h
-maxLogPipelines: 3
+maxLogPipelines: 5
 
 filesystemBufferLimit: 1G
 
