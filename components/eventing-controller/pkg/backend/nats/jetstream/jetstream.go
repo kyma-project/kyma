@@ -40,7 +40,6 @@ const (
 	jsHandlerName                      = "jetstream-handler"
 	idleHeartBeatDuration              = 1 * time.Minute
 	jsConsumerMaxRedeliver             = 8
-	jsConsumerAcKWait                  = 30 * time.Second
 	jsMaxStreamNameLength              = 32
 	separator                          = "/"
 	MissingNATSSubscriptionMsg         = "failed to create NATS JetStream subscription"
@@ -652,7 +651,6 @@ func (js *JetStream) getDefaultSubscriptionOptions(consumer SubscriptionSubjectI
 		toJetStreamConsumerDeliverPolicyOptOrDefault(js.Config.JSConsumerDeliverPolicy),
 		nats.MaxAckPending(subConfig.MaxInFlightMessages),
 		nats.MaxDeliver(jsConsumerMaxRedeliver),
-		nats.AckWait(jsConsumerAcKWait),
 		nats.BackOff(JsConsumerBackOff),
 	}
 	return defaultOpts
