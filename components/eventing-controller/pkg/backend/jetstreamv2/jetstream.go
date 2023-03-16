@@ -36,7 +36,7 @@ const (
 	jsMaxStreamNameLength  = 32
 	idleHeartBeatDuration  = 1 * time.Minute
 	jsConsumerMaxRedeliver = 8
-	jsConsumerAckWait      = 30 * time.Second
+	jsConsumerAcKWait      = 30 * time.Second
 	originalTypeHeaderName = "originaltype"
 )
 
