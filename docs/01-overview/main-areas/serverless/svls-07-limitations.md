@@ -72,7 +72,7 @@ Obviously, the bigger the runtime profile, the more resources are available to s
 ### Scaling
 
 Function runtime Pods can be scaled horizontally from zero up to the limits of the available resources at the the Kubernetes worker nodes.
-See the [Use external scalers](../..///03-tutorials/00-serverless/svls-15-use-external-scalers.md) tutorial for more information.
+See the [Use external scalers](../../03-tutorials/00-serverless/svls-15-use-external-scalers.md) tutorial for more information.
 
 ## In-cluster Docker registry limitations
 
