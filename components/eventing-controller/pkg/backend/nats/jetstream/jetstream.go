@@ -38,7 +38,7 @@ var _ Backend = &JetStream{}
 const (
 	jsHandlerName                      = "jetstream-handler"
 	idleHeartBeatDuration              = 1 * time.Minute
-	jsConsumerMaxRedeliver             = 100
+	jsConsumerMaxRedeliver             = 8
 	jsConsumerAcKWait                  = 30 * time.Second
 	jsMaxStreamNameLength              = 32
 	separator                          = "/"
@@ -652,6 +652,7 @@ func (js *JetStream) getDefaultSubscriptionOptions(consumer SubscriptionSubjectI
 		nats.MaxAckPending(subConfig.MaxInFlightMessages),
 		nats.MaxDeliver(jsConsumerMaxRedeliver),
 		nats.AckWait(jsConsumerAcKWait),
+		nats.BackOff([]time.Duration{25 * time.Second, 100 * time.Second, 250 * time.Second, 475 * time.Second, 775 * time.Second, 1150 * time.Second, 1600 * time.Second}),
 	}
 	return defaultOpts
 }
