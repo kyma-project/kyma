@@ -34,13 +34,12 @@ import (
 )
 
 var _ Backend = &JetStream{}
-var jsConsumerBackOff = []time.Duration{25 * time.Second, 100 * time.Second, 250 * time.Second,
-	475 * time.Second, 775 * time.Second, 1150 * time.Second, 1675 * time.Second}
+var JsConsumerBackOff = []time.Duration{25 * time.Second, 100 * time.Second, 250 * time.Second, 475 * time.Second, 775 * time.Second, 1150 * time.Second, 1675 * time.Second}
 
 const (
 	jsHandlerName                      = "jetstream-handler"
 	idleHeartBeatDuration              = 1 * time.Minute
-	jsConsumerMaxRedeliver             = 7
+	jsConsumerMaxRedeliver             = 8
 	jsMaxStreamNameLength              = 32
 	separator                          = "/"
 	MissingNATSSubscriptionMsg         = "failed to create NATS JetStream subscription"
@@ -652,7 +651,7 @@ func (js *JetStream) getDefaultSubscriptionOptions(consumer SubscriptionSubjectI
 		toJetStreamConsumerDeliverPolicyOptOrDefault(js.Config.JSConsumerDeliverPolicy),
 		nats.MaxAckPending(subConfig.MaxInFlightMessages),
 		nats.MaxDeliver(jsConsumerMaxRedeliver),
-		nats.BackOff(jsConsumerBackOff),
+		nats.BackOff(JsConsumerBackOff),
 	}
 	return defaultOpts
 }

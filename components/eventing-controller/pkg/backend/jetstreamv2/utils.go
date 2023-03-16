@@ -45,7 +45,7 @@ func (js *JetStream) getDefaultSubscriptionOptions(consumer SubscriptionSubjectI
 		toJetStreamConsumerDeliverPolicyOptOrDefault(js.Config.JSConsumerDeliverPolicy),
 		nats.MaxAckPending(maxInFlightMessages),
 		nats.MaxDeliver(jsConsumerMaxRedeliver),
-		nats.BackOff(jsConsumerBackOff),
+		nats.BackOff(JsConsumerBackOff),
 		nats.Bind(js.Config.JSStreamName, consumer.ConsumerName()),
 	}
 }
@@ -173,7 +173,7 @@ func (js *JetStream) getConsumerConfig(jsSubKey SubscriptionSubjectIdentifier,
 		MaxAckPending:  maxInFlight,
 		AckPolicy:      nats.AckExplicitPolicy,
 		MaxDeliver:     jsConsumerMaxRedeliver,
-		BackOff:        jsConsumerBackOff,
+		BackOff:        JsConsumerBackOff,
 		FilterSubject:  jsSubject,
 		ReplayPolicy:   nats.ReplayInstantPolicy,
 		DeliverSubject: nats.NewInbox(),
