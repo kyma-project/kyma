@@ -1,7 +1,5 @@
 const {
   cleanMockTestFixture,
-  eventTypeOrderReceivedHash,
-  cleanCompassResourcesSKR,
   generateTraceParentHeader,
   checkTrace,
 } = require('../test/fixtures/commerce-mock');
@@ -14,9 +12,9 @@ const {
   getShootNameFromK8sServerUrl,
   listPods,
   retryPromise,
-  getSubscription,
   waitForVirtualService,
   k8sApply,
+  k8sDelete,
   waitForFunction,
   eventingSubscription,
   waitForSubscription,
@@ -25,6 +23,7 @@ const {
   sleep,
   getConfigMap,
   createK8sConfigMap,
+  namespaceObj,
 } = require('../utils');
 
 const {DirectorClient, DirectorConfig, getAlreadyAssignedScenarios} = require('../compass');
@@ -43,14 +42,13 @@ const kymaStreamName = 'sap';
 const isSKR = process.env.KYMA_TYPE === 'SKR';
 const skrInstanceId = process.env.INSTANCE_ID || '';
 const testCompassFlow = process.env.TEST_COMPASS_FLOW || false;
-const testSubscriptionV1Alpha2 = process.env.ENABLE_SUBSCRIPTION_V1_ALPHA2 === 'true';
-const subCRDVersion = testSubscriptionV1Alpha2 ? 'v1alpha2' : 'v1alpha1';
+const isUpgradeJob = process.env.EVENTING_UPGRADE_JOB || false;
+const isUpgradeJob2ndReconcile = process.env.EVENTING_UPGRADE_2ND_RECONCILE_JOB || false;
+const subCRDVersion = 'v1alpha2';
 const skipResourceCleanup = process.env.SKIP_CLEANUP || false;
 const suffix = getSuffix(isSKR, testCompassFlow);
 const appName = `app-${suffix}`;
-const scenarioName = `test-${suffix}`;
 const testNamespace = `test-${suffix}`;
-const mockNamespace = process.env.MOCK_NAMESPACE || 'mocks';
 const backendK8sSecretName = process.env.BACKEND_SECRET_NAME || 'eventing-backend';
 const backendK8sSecretNamespace = process.env.BACKEND_SECRET_NAMESPACE || 'default';
 const testDataConfigMapName = 'eventing-test-data';
@@ -60,11 +58,8 @@ const eventingNatsApiRuleAName = `${eventingNatsSvcName}-apirule`;
 const timeoutTime = 10 * 60 * 1000;
 const slowTime = 5000;
 const eppInClusterUrl = 'eventing-event-publisher-proxy.kyma-system';
-const subscriptionNames = {
-  orderCreated: 'order-created',
-  orderReceived: 'order-received',
-};
 const eventingSinkName = 'eventing-sink';
+const eventingUpgradeSinkName = 'eventing-upgrade-sink';
 
 // ****** Event types to test ***********//
 const v1alpha1SubscriptionsTypes = [
@@ -131,13 +126,6 @@ if (isSKR) {
 
 // cleans up all the test resources including the compass scenario
 async function cleanupTestingResources() {
-  if (isSKR && testCompassFlow) {
-    debug('Cleaning compass resources');
-    // Get shoot info from gardener to get compassID for this shoot
-    const skrInfo = await gardener.getShoot(shootName);
-    await cleanCompassResourcesSKR(director, appName, scenarioName, skrInfo.compassID);
-  }
-
   // skip the cluster resources cleanup if the SKIP_CLEANUP env flag is set
   if (skipResourceCleanup === 'true') {
     return;
@@ -153,8 +141,8 @@ async function cleanupTestingResources() {
   await deleteK8sConfigMap(testDataConfigMapName);
   await deleteK8sConfigMap(jetStreamTestConfigMapName);
 
-  debug(`Removing ${testNamespace} and ${mockNamespace} namespaces`);
-  await cleanMockTestFixture(mockNamespace, testNamespace, true);
+  debug(`Removing ${testNamespace} and mocks namespaces`);
+  await cleanMockTestFixture('mocks', testNamespace, true);
 }
 
 // gets the suffix depending on kyma type
@@ -198,17 +186,6 @@ async function getJetStreamStreamData(host) {
   }
 }
 
-async function getSubscriptionConsumerName(subscriptionName, namespace='default', crdVersion='v1alpha1') {
-  if (crdVersion === 'v1alpha1') {
-    // the logic is temporary because consumer name is missing in the v1alpha1 subscription
-    // will be deleted as we will upgrade to v1alpha2
-    return eventTypeOrderReceivedHash;
-  } else {
-    const sub = await getSubscription(subscriptionName, namespace, crdVersion);
-    return sub.status.backend.types[0].consumerName;
-  }
-}
-
 async function getJetStreamConsumerData(consumerName, host) {
   const responseJson = await retryPromise(async () => await axios.get(`https://${host}/jsz?consumers=true`), 5, 1000);
   const consumers = responseJson.data.account_details[0].stream_detail[0].consumer_detail;
@@ -240,20 +217,27 @@ function createNewEventId() {
   return uuidv4();
 }
 
-async function deployEventingSinkFunction() {
+function getK8sFunctionObject(funcName) {
   const functionYaml = fs.readFileSync(
-      path.join(__dirname, './assets/eventing-function.yaml'),
+      path.join(__dirname, `./assets/${funcName}.yaml`),
       {
         encoding: 'utf8',
       },
   );
 
-  const k8sObjs = k8s.loadAllYaml(functionYaml);
-  await k8sApply(k8sObjs, testNamespace, true);
+  return k8s.loadAllYaml(functionYaml);
 }
 
-async function waitForEventingSinkFunction() {
-  await waitForFunction(eventingSinkName, testNamespace);
+async function deployEventingSinkFunction(funcName = eventingSinkName) {
+  await k8sApply(getK8sFunctionObject(funcName), testNamespace, true);
+}
+
+async function undeployEventingFunction(funcName) {
+  await k8sDelete(getK8sFunctionObject(funcName), testNamespace);
+}
+
+async function waitForEventingSinkFunction(funcName = eventingSinkName) {
+  await waitForFunction(funcName, testNamespace, 300000);
 }
 
 async function deployV1Alpha1Subscriptions() {
@@ -347,6 +331,20 @@ async function checkFunctionReachable(name, namespace, host) {
   expect(res.status).to.be.equal(200);
 }
 
+async function checkFunctionUnreachable(name, namespace, host) {
+  return await retryPromise(
+      async () => {
+        const response = await axios.post(`https://${name}.${host}/function`, {orderCode: '789'}, {
+          timeout: 5000,
+        });
+        expect(response.status).to.not.equal(200);
+        return response;
+      }, 45, 2 * 1000)
+      .catch((err) => {
+        debug(err);
+      });
+}
+
 async function checkEventTracing(proxyHost, eventType, eventSource, namespace) {
   // first send an event and verify if it was delivered
   const result = await checkEventDelivery(proxyHost, 'binary', eventType, eventSource);
@@ -376,14 +374,16 @@ async function checkEventTracing(proxyHost, eventType, eventSource, namespace) {
 
 // checks if the event publish and receive is working.
 // Possible values for encoding are [binary, structured, legacy].
-async function checkEventDelivery(proxyHost, encoding, eventType, eventSource, isSubV1Alpha1 = false) {
+async function checkEventDelivery(proxyHost, encoding, eventType, eventSource,
+    isSubV1Alpha1 = false, sinkName=eventingSinkName) {
   const eventId = createNewEventId();
 
   debug(`Publishing event with id:${eventId}, type: ${eventType}, source: ${eventSource}...`);
   const result = await publishEventWithRetry(proxyHost, encoding, eventId, eventType, eventSource, isSubV1Alpha1);
 
   debug(`Verifying if event with id:${eventId}, type: ${eventType}, source: ${eventSource} was received by sink...`);
-  const result2 = await ensureEventReceivedWithRetry(proxyHost, encoding, eventId, eventType, eventSource);
+  const result2 = await ensureEventReceivedWithRetry(sinkName, proxyHost,
+      encoding, eventId, eventType, eventSource);
   return {
     eventId,
     traceParentId: result.traceParentId,
@@ -441,11 +441,12 @@ async function publishEventWithRetry(proxyHost, encoding, eventId, eventType, ev
 }
 
 // verify if event was received using function
-async function ensureEventReceivedWithRetry(proxyHost, encoding, eventId, eventType, eventSource, retriesLeft = 10) {
+async function ensureEventReceivedWithRetry(sink, proxyHost,
+    encoding, eventId, eventType, eventSource, retriesLeft = 10) {
   return await retryPromise(async () => {
     debug(`Waiting to receive CE event "${eventId}"`);
 
-    const response = await axios.get(`https://${eventingSinkName}.${proxyHost}`,
+    const response = await axios.get(`https://${sink}.${proxyHost}`,
         {params: {eventid: eventId}});
 
     debug('Received response:', {
@@ -458,7 +459,6 @@ async function ensureEventReceivedWithRetry(proxyHost, encoding, eventId, eventT
       debug('Received event data:', {
         payload: response.data.event.payload,
         headers: response.data.event.headers,
-        ceHeaders: response.data.event.ceHeaders,
       });
     }
 
@@ -491,7 +491,7 @@ async function ensureEventReceivedWithRetry(proxyHost, encoding, eventId, eventT
       });
 }
 
-function createBinaryCloudEventRequestBody(proxyHost, eventId, eventType, eventSource, traceparent) {
+function createBinaryCloudEventRequestBody(proxyHost, eventId, eventType, eventSource, traceParent = '') {
   debug('setting headers and payload for binary cloud event');
   const reqBody = {
     url: `http://${eppInClusterUrl}/publish`,
@@ -505,7 +505,7 @@ function createBinaryCloudEventRequestBody(proxyHost, eventId, eventType, eventS
     'ce-id': eventId,
     'ce-type': eventType,
     'Content-Type': 'application/json',
-    'traceparent': traceparent,
+    'traceparent': traceParent,
   };
 
   reqBody.data.payload = {
@@ -683,16 +683,26 @@ function getTimeStampsWithZeroMilliSeconds(timestamp) {
   return (new Date(ts)).toISOString();
 }
 
+async function createK8sNamespace(name) {
+  await k8sApply([namespaceObj(name)]);
+}
+
+function debugBanner(message) {
+  const line = '[BANNER] ***************************************************************************************';
+  debug(line);
+  debug(`[BANNER] ${message}`);
+  debug(line);
+}
+
 module.exports = {
   appName,
-  scenarioName,
   testNamespace,
-  mockNamespace,
   kymaVersion,
   isSKR,
+  isUpgradeJob,
+  isUpgradeJob2ndReconcile,
   skrInstanceId,
   testCompassFlow,
-  testSubscriptionV1Alpha2,
   subCRDVersion,
   backendK8sSecretName,
   backendK8sSecretNamespace,
@@ -714,16 +724,18 @@ module.exports = {
   isStreamCreationTimeMissing,
   isConsumerCreationTimeMissing,
   eppInClusterUrl,
-  subscriptionNames,
-  getSubscriptionConsumerName,
+  ensureEventReceivedWithRetry,
   eventingSinkName,
+  eventingUpgradeSinkName,
   v1alpha1SubscriptionsTypes,
   subscriptionsTypes,
   subscriptionsExactTypeMatching,
   getClusterHost,
   checkFunctionReachable,
+  checkFunctionUnreachable,
   checkEventDelivery,
   deployEventingSinkFunction,
+  undeployEventingFunction,
   waitForEventingSinkFunction,
   deployV1Alpha1Subscriptions,
   deployV1Alpha2Subscriptions,
@@ -736,4 +748,7 @@ module.exports = {
   getConfigMapWithRetries,
   checkStreamNotReCreated,
   checkConsumerNotReCreated,
+  createK8sNamespace,
+  publishEventWithRetry,
+  debugBanner,
 };
