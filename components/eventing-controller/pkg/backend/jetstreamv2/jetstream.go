@@ -29,13 +29,12 @@ import (
 )
 
 var _ Backend = &JetStream{}
-var JsConsumerBackOff = []time.Duration{25 * time.Second, 100 * time.Second, 250 * time.Second, 475 * time.Second, 775 * time.Second, 1150 * time.Second}
 
 const (
 	jsHandlerName          = "jetstream-handler"
 	jsMaxStreamNameLength  = 32
 	idleHeartBeatDuration  = 1 * time.Minute
-	jsConsumerMaxRedeliver = 8
+	jsConsumerMaxRedeliver = 10
 	originalTypeHeaderName = "originaltype"
 )
 

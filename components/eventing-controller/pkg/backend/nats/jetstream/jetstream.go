@@ -34,12 +34,11 @@ import (
 )
 
 var _ Backend = &JetStream{}
-var JsConsumerBackOff = []time.Duration{25 * time.Second, 100 * time.Second, 250 * time.Second, 475 * time.Second, 775 * time.Second, 1150 * time.Second, 1675 * time.Second}
 
 const (
 	jsHandlerName                      = "jetstream-handler"
 	idleHeartBeatDuration              = 1 * time.Minute
-	jsConsumerMaxRedeliver             = 8
+	jsConsumerMaxRedeliver             = 10
 	jsMaxStreamNameLength              = 32
 	separator                          = "/"
 	MissingNATSSubscriptionMsg         = "failed to create NATS JetStream subscription"
@@ -651,7 +650,7 @@ func (js *JetStream) getDefaultSubscriptionOptions(consumer SubscriptionSubjectI
 		toJetStreamConsumerDeliverPolicyOptOrDefault(js.Config.JSConsumerDeliverPolicy),
 		nats.MaxAckPending(subConfig.MaxInFlightMessages),
 		nats.MaxDeliver(jsConsumerMaxRedeliver),
-		nats.BackOff(JsConsumerBackOff),
+		nats.BackOff(getExponentialBackOff()),
 	}
 	return defaultOpts
 }
@@ -771,6 +770,19 @@ func (js *JetStream) checkJetStreamConnection() error {
 		}
 	}
 	return nil
+}
+
+func getExponentialBackOff() []time.Duration {
+	count := jsConsumerMaxRedeliver - 1
+	start := 2 * time.Second
+	factor := 2
+
+	backoff := make([]time.Duration, count)
+	for i := range backoff {
+		backoff[i] = start
+		start *= time.Duration(factor)
+	}
+	return backoff
 }
 
 // GetAllSubscriptions returns the map which contains details of all subscriptions and consumers.

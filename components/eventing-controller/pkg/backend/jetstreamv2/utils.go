@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"strings"
+	"time"
 
 	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
 	pkgerrors "github.com/kyma-project/kyma/components/eventing-controller/pkg/errors"
@@ -45,7 +46,7 @@ func (js *JetStream) getDefaultSubscriptionOptions(consumer SubscriptionSubjectI
 		toJetStreamConsumerDeliverPolicyOptOrDefault(js.Config.JSConsumerDeliverPolicy),
 		nats.MaxAckPending(maxInFlightMessages),
 		nats.MaxDeliver(jsConsumerMaxRedeliver),
-		nats.BackOff(JsConsumerBackOff),
+		nats.BackOff(getExponentialBackOff()),
 		nats.Bind(js.Config.JSStreamName, consumer.ConsumerName()),
 	}
 }
@@ -173,7 +174,7 @@ func (js *JetStream) getConsumerConfig(jsSubKey SubscriptionSubjectIdentifier,
 		MaxAckPending:  maxInFlight,
 		AckPolicy:      nats.AckExplicitPolicy,
 		MaxDeliver:     jsConsumerMaxRedeliver,
-		BackOff:        JsConsumerBackOff,
+		BackOff:        getExponentialBackOff(),
 		FilterSubject:  jsSubject,
 		ReplayPolicy:   nats.ReplayInstantPolicy,
 		DeliverSubject: nats.NewInbox(),
@@ -210,6 +211,19 @@ func getUniqueEventTypes(eventTypes []string) []string {
 	}
 
 	return unique
+}
+
+func getExponentialBackOff() []time.Duration {
+	count := jsConsumerMaxRedeliver - 1
+	start := 2 * time.Second
+	factor := 2
+
+	backoff := make([]time.Duration, count)
+	for i := range backoff {
+		backoff[i] = start
+		start *= time.Duration(factor)
+	}
+	return backoff
 }
 
 // GetCleanEventTypes returns a list of clean eventTypes from the unique types in the subscription.
