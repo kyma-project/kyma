@@ -95,7 +95,7 @@ data:
     
     COPY /src/requirements.txt $KUBELESS_INSTALL_VOLUME/requirements.txt
     COPY /registry-config/* /etc/
-    RUN pip install -r $KUBELESS_INSTALL_VOLUME/requirements.txt
+    RUN pip install --no-cache-dir -r $KUBELESS_INSTALL_VOLUME/requirements.txt
     COPY /src $KUBELESS_INSTALL_VOLUME
 
     RUN rm -rf /etc/pip.conf

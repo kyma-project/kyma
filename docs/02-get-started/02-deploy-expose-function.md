@@ -4,7 +4,7 @@ title: Deploy and expose a Function
 
 Now that you've installed Kyma, let's deploy your first Function. We'll call it `hello-world`.
 
-## Create a function
+## Create a Function
 
 First, let's create the Function and apply it.
 
@@ -85,7 +85,8 @@ First, let's create an [APIRule](../05-technical-reference/00-custom-resources/a
 2. Click on **Create API Rule**.
 3. Provide the **Name** (`hello-world`).
 4. From the **Service Name** dropdown, select `hello-world`.
-5. Choose your host from the **Host** dropdown and replace the asterix (*) with the name of your subdomain (`hello-world`).
+5. Provide your Service **Port** (`80`).
+6. Choose your host from the **Host** dropdown and replace the asterisk (*) with the name of your subdomain (`hello-world`).
 
   </details>
   <details>
