@@ -12,6 +12,7 @@ The TLS certificate is a vital security element. Follow this tutorial to set up 
 - Generate a `kubeconfig` file for the Kubernetes cluster that hosts the Kyma instance.
 
 ## Steps
+>**NOTE:** You can use this procedure to update your certificate after manual rotation.
 
 1. Export your domain, new certificate, and key as the environment variables.
 
