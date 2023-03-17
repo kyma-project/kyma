@@ -34,7 +34,7 @@ Sometimes Oathkeeper Maester controller stops reconciling Rules on long-living c
     kubectl get pods -n kyma-system -l app.kubernetes.io/name=oathkeeper -o jsonpath='{.items[*].metadata.name}'
     ```
 
-2. Fetch the access Rules from every Oathkeeper Pod and save them to a file:
+2. Fetch the Access Rules from every Oathkeeper Pod and save them to a file:
 
     ```bash
    kubectl cp -n kyma-system -c oathkeeper "{POD_NAME}":etc/rules/access-rules.json "access-rules.{POD_NAME}.json" 
@@ -48,4 +48,4 @@ Sometimes Oathkeeper Maester controller stops reconciling Rules on long-living c
 
     The files are considered different by jd if there are any differences between the files other than the order of Rules.
    
-4. Compare the Rules in the files with the Rules present in the cluster. If the files are different, Oathkeeper Pods are out of sync.
+4. Compare Rules in the files with those present in the cluster. If the files are different, Oathkeeper Pods are out of sync.
