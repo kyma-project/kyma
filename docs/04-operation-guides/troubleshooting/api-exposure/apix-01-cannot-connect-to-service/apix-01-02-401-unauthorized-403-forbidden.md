@@ -91,7 +91,7 @@ Make sure that the following conditions are met:
       2020-05-04T12:26:30.835Z  INFO  controllers.OAuth2Client  using default client
       2020-05-04T12:26:31.468Z  DEBUG controller-runtime.controller Successfully Reconciled {"controller": "oauth2client", "request": "test-ns/test-client"}
       ```
-    The last log entry in the example output informs us that a client has been created and should be visible within Hydra.
+    The last log entry in the example output informs you that a client has been created and should be visible within Hydra.
 
     - To check logs from the Hydra application, run:
 
