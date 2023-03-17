@@ -7,7 +7,7 @@ title: Could not resolve host
 After all the steps required to [prepare your custom domain](../../../../03-tutorials/00-api-exposure/apix-02-setup-custom-domain-for-workload.md) are finished, you receive the `could not resolve host` error when you try to expose a service. It shows up when you call the service endpoint by sending a `GET` request. The error looks as follows:
 
 ```txt
-curl: (6) Could not resolve host: httpbin.kyma-goat.ga
+curl: (6) Could not resolve host: httpbin.mydomain.com
 ```
 
 ## Cause
