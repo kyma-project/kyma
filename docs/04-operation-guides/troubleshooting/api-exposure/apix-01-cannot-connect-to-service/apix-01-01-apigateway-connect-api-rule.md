@@ -2,7 +2,7 @@
 title: Basic diagnostics
 ---
 
-API Gateway is a Kubernetes controller, which operates on APIRule custom resources (CRs). To diagnose problems, inspect the [`status` field](../../../../05-technical-reference/00-custom-resources/apix-01-apirule.md#status-codes) of the APIRule CR:
+API Gateway is a Kubernetes controller, which operates on APIRule custom resources (CRs). To diagnose problems, inspect the [`status` code](../../../../05-technical-reference/00-custom-resources/apix-01-apirule.md#status-codes) of the APIRule CR:
 
    ```bash
    kubectl describe apirules.gateway.kyma-project.io -n {NAMESPACE} {APIRULE_NAME}
