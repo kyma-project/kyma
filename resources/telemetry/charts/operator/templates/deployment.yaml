@@ -62,6 +62,17 @@ spec:
             - --trace-collector-cpu-request={{ .Values.traceCollector.resources.requests.cpu }}
             - --trace-collector-memory-request={{ .Values.traceCollector.resources.requests.memory }}
 {{- end }}
+{{- if not .Values.controllers.metrics.enabled }}
+            - --enable-metrics=false
+{{- else }}
+{{- if or .Values.priorityClassName .Values.global.priorityClassName }}
+            - --metric-gateway-priority-class={{ coalesce .Values.priorityClassName .Values.global.priorityClassName }}
+{{- end }}
+            - --metric-gateway-cpu-limit={{ .Values.metricGateway.resources.limits.cpu }}
+            - --metric-gateway-memory-limit={{ .Values.metricGateway.resources.limits.memory }}
+            - --metric-gateway-cpu-request={{ .Values.metricGateway.resources.requests.cpu }}
+            - --metric-gateway-memory-request={{ .Values.metricGateway.resources.requests.memory }}
+{{- end }}
           name: manager
           ports:
           - containerPort: 9443

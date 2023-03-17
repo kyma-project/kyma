@@ -111,6 +111,8 @@ controllers:
     enabled: true
   tracing:
     enabled: true
+  metrics:
+    enabled: false
 
 networkPolicy:
   enabled: true
@@ -127,6 +129,15 @@ tolerations: []
 affinity: {}
 
 traceCollector:
+  resources:
+    limits:
+      cpu: 1
+      memory: 1Gi
+    requests:
+      cpu: 25m
+      memory: 32Mi
+
+metricGateway:
   resources:
     limits:
       cpu: 1
