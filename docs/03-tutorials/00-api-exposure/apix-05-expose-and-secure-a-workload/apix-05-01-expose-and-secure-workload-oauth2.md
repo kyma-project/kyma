@@ -35,7 +35,7 @@ This tutorial shows how to expose and secure services or Functions using API Gat
     </details>
   </div>  
 
-  * Create an application using an OICD-compliant provider of your choice. Configure your **client ID**, **client secret**, and generate the OAuth2 tokens. Then, export the following values as environmental variables:
+* Create an application using an OICD-compliant provider of your choice. Configure your **client ID**, **client secret**, and generate the OAuth2 tokens. Then, export the following values as environmental variables:
   ```shell
    export TOKEN_URL={YOUR_TOKEN_URL}
    export INTROSPECTION_URL={YOUR_INTROSPECTION_URL}
