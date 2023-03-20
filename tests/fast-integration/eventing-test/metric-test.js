@@ -16,7 +16,6 @@ const {
 
 const {queryPrometheus} = require('../monitoring/client');
 const {
-  subscriptionNames,
   subscriptionsTypes,
   eventingSinkName,
 } = require('./utils');
@@ -205,17 +204,9 @@ function runDashboardTestCase(dashboardName, test) {
   }, 120, 5000);
 }
 
-async function eventingMonitoringTest(backend, isSkr, isEventingSinkDeployed=false) {
-  let allDashboards = {};
-
-  // // add OSS related dashboard entries for tests.
-  if (isEventingSinkDeployed) {
-    debug(`Using dashboards w.r.t. ${eventingSinkName} function`);
-    allDashboards = getOSSDashboards(eventingSinkName, subscriptionsTypes[0].name);
-  } else {
-    debug('Using dashboards w.r.t. lastorder function');
-    allDashboards = getOSSDashboards('lastorder', subscriptionNames.orderReceived);
-  }
+async function eventingMonitoringTest(backend, isSkr) {
+  debug(`Using dashboards w.r.t. ${eventingSinkName} function`);
+  let allDashboards = getOSSDashboards(eventingSinkName, subscriptionsTypes[0].name);
 
   // add JetStream dashboard entries for tests.
   allDashboards = Object.assign(allDashboards, getJetStreamDashboardTests());
