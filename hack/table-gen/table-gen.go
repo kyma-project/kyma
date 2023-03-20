@@ -220,7 +220,7 @@ func generateTableRow(fullName string, description string, name string) string {
 		fullName, normalizeDescription(description, name))
 }
 
-// goes through the map, and returns a specific element based on a path we provided
+// getElement returns a specific element from obj based on the provided path.
 func getElement(obj interface{}, path ...string) interface{} {
 	elem := obj
 	for _, p := range path {
