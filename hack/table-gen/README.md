@@ -29,7 +29,7 @@ Most importantly, you need to go to the MD file you want to generate table in, a
 Now, if you want to skip some elements, you can use `SKIP-ELEMENT` or `SKIP-WITH-CHILDREN` tags, brefore start and end tags
 
 ```
-<!-- SKIP-ELEMENT status.condition -->
+<!-- SKIP-ELEMENT status.conditions -->
 <!-- SKIP-WITH-CHILDREN spec.output -->
 
 <!-- TABLE-START -->

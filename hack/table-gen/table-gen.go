@@ -150,8 +150,8 @@ func generateElementDoc(elementsToSkip map[string]bool, obj interface{}, name st
 	}
 
 	fullName := fmt.Sprintf("%s%s", parentPath, name)
-	skipWithAncestors, shouldBeSkipped := elementsToSkip[fullName]
-	if shouldBeSkipped && skipWithAncestors {
+	skipWithChildren, shouldBeSkipped := elementsToSkip[fullName]
+	if shouldBeSkipped && skipWithChildren {
 		return result
 	}
 
@@ -190,6 +190,12 @@ func generateObjectDoc(elementsToSkip map[string]bool, element map[string]interf
 // It returns a map where the key is the path of an element and the value is the table row for this element.
 func generateArrayDoc(elementsToSkip map[string]bool, element map[string]interface{}, name string, parentPath string) map[string]string {
 	result := map[string]string{}
+
+	skipWithChildren, shouldBeSkipped := elementsToSkip[parentPath+name]
+	if skipWithChildren {
+		return result
+	}
+
 	items := getElement(element, "items")
 	if items == nil {
 		return result
@@ -211,7 +217,9 @@ func generateArrayDoc(elementsToSkip map[string]bool, element map[string]interfa
 
 	result = generateObjectDoc(elementsToSkip, itemsMap, name, parentPath)
 
-	result[parentPath+name] = generateTableRow(parentPath+name, description, name)
+	if !shouldBeSkipped {
+		result[parentPath+name] = generateTableRow(parentPath+name, description, name)
+	}
 
 	return result
 }
