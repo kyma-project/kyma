@@ -156,6 +156,6 @@ func codeRewriter(rw http.ResponseWriter, err error) {
 		rw.WriteHeader(http.StatusGatewayTimeout)
 		return
 	}
-	log.Warnf("in reverseproxy.go/codeRewriter: %v", err)
+	log.Errorf("in reverseproxy.go/codeRewriter: %v", err)
 	rw.WriteHeader(http.StatusBadGateway)
 }
