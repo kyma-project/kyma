@@ -229,7 +229,7 @@ func getElement(obj interface{}, path ...string) interface{} {
 	return elem
 }
 
-// transforms description, so it would be a better fit for the table
+// normalizeDescription transforms description, so it would be a better fit for the table.
 func normalizeDescription(description string, name string) string {
 	description_trimmed := strings.Trim(description, " ")
 	name_trimmed := strings.Trim(name, " ")
