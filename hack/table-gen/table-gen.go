@@ -37,7 +37,7 @@ func main() {
 	flag.Parse()
 
 	if CRDFilename == "" {
-		panic(fmt.Errorf("crd-filename cannot be empty. Please, enter the correct filename"))
+		panic(fmt.Errorf("crd-filename cannot be empty. Please enter the correct filename"))
 	}
 
 	if MDFilename == "" {
