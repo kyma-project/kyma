@@ -197,12 +197,14 @@ func generateArrayDoc(elementsToSkip map[string]bool, element map[string]interfa
 
 	description := ""
 
+	// in case array has a description before items element, it would take this description
 	if element["description"] != nil {
 		description = element["description"].(string)
 	}
 
 	itemsMap := items.(map[string]interface{})
 
+	// in case array has a description within items element, and there is no description above, it would take this description
 	if description == "" && itemsMap["description"] != nil {
 		description = itemsMap["description"].(string)
 	}
@@ -217,7 +219,7 @@ func generateArrayDoc(elementsToSkip map[string]bool, element map[string]interfa
 // generateTableRow generates a row of the resulting table which we include into our MD file.
 func generateTableRow(fullName string, description string, name string) string {
 	return fmt.Sprintf("| **%s** | %s |",
-		fullName, normalizeDescription(description, name))
+		fullName, description)
 }
 
 // getElement returns a specific element from obj based on the provided path.
@@ -227,25 +229,6 @@ func getElement(obj interface{}, path ...string) interface{} {
 		elem = elem.(map[string]interface{})[p]
 	}
 	return elem
-}
-
-// normalizeDescription transforms description, so it would be a better fit for the table.
-func normalizeDescription(description string, name string) string {
-	description_trimmed := strings.Trim(description, " ")
-	name_trimmed := strings.Trim(name, " ")
-	if len(name_trimmed) == 0 {
-		return description_trimmed
-	}
-	dParts := strings.SplitN(description_trimmed, " ", 2)
-	if len(dParts) < 2 {
-		return description
-	}
-	if !strings.EqualFold(name_trimmed, dParts[0]) {
-		return description
-	}
-	description_trimmed = strings.Trim(dParts[1], " ")
-	description_trimmed = strings.ToUpper(description_trimmed[:1]) + description_trimmed[1:]
-	return description_trimmed
 }
 
 func pairsToParamsToSkip(toSkip map[string]bool, pairs [][]string, isToSkipChildren bool) {
