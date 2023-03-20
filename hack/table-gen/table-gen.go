@@ -190,8 +190,8 @@ func generateObjectDoc(elementsToSkip map[string]bool, element map[string]interf
 // It returns a map where the key is the path of an element and the value is the table row for this element.
 func generateArrayDoc(elementsToSkip map[string]bool, element map[string]interface{}, name string, parentPath string) map[string]string {
 	result := map[string]string{}
-	properties := getElement(element, "items")
-	if properties == nil {
+	items := getElement(element, "items")
+	if items == nil {
 		return result
 	}
 
@@ -201,13 +201,13 @@ func generateArrayDoc(elementsToSkip map[string]bool, element map[string]interfa
 		description = element["description"].(string)
 	}
 
-	propMap := properties.(map[string]interface{})
+	itemsMap := items.(map[string]interface{})
 
-	if description == "" && propMap["description"] != nil {
-		description = propMap["description"].(string)
+	if description == "" && itemsMap["description"] != nil {
+		description = itemsMap["description"].(string)
 	}
 
-	result = generateObjectDoc(elementsToSkip, propMap, name, parentPath)
+	result = generateObjectDoc(elementsToSkip, itemsMap, name, parentPath)
 
 	result[parentPath+name] = generateTableRow(parentPath+name, description, name)
 
@@ -248,10 +248,10 @@ func normalizeDescription(description string, name string) string {
 	return description_trimmed
 }
 
-func pairsToParamsToSkip(toSkip map[string]bool, pairs [][]string, isToSkip bool) {
+func pairsToParamsToSkip(toSkip map[string]bool, pairs [][]string, isToSkipChildren bool) {
 	for _, pair := range pairs {
 		paramName := pair[1]
-		toSkip[paramName] = isToSkip
+		toSkip[paramName] = isToSkipChildren
 	}
 }
 
