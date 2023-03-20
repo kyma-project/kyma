@@ -21,7 +21,7 @@ jobs:
       github.event_name == 'repository_dispatch'
     steps:
     - name: Set up Go 1.14
-      uses: actions/setup-go@v3
+      uses: actions/setup-go@v4
       with:
         go-version: ^1.14
 

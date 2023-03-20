@@ -1,5 +1,5 @@
 ---
-title: Cannot connect to a service exposed by an API Rule - 401 Unauthorized or 403 Forbidden
+title: 401 Unauthorized or 403 Forbidden
 ---
 
 ## Symptom
@@ -10,7 +10,7 @@ When you try to reach your service, you get `401 Unauthorized` or `403 Forbidden
 
 Make sure that the following conditions are met:
 
-- You are using an access token with proper scopes and it is active:
+- You are using an access token with proper scopes, and it is active:
 
   1. Export the credentials of your OAuth2Client as environment variables:
 
@@ -33,7 +33,7 @@ Make sure that the following conditions are met:
       curl -X POST "https://oauth2.{CLUSTER_DOMAIN}/oauth2/introspect" -H "Authorization: Basic $ENCODED_CREDENTIALS" -F "token={ACCESS_TOKEN}"
       ```
 
-  4. Generate a [new access token](../../../03-tutorials/00-api-exposure/apix-05-expose-and-secure-a-workload/apix-05-01-expose-and-secure-workload-oauth2.md#register-an-oauth2-client-and-get-tokens) if needed.
+  4. Generate a [new access token](../../../../03-tutorials/00-api-exposure/apix-05-expose-and-secure-a-workload/apix-05-01-expose-and-secure-workload-oauth2.md#register-an-oauth2-client-and-get-tokens) if needed.
 
 - Your client from the OAuth2Client resource is registered properly in Hydra OAuth2 and the OpenID Connect server. You need to call the Hydra administrative endpoint `/client` from inside of the cluster. Follow these steps:
 
@@ -76,20 +76,25 @@ Make sure that the following conditions are met:
 
   4. If the Client ID from step 1 is not available on the client list, make sure Hydra has access to the database and/or restart the Hydra Measter Pod. You can check the logs using the following commands:
 
-     ```bash
-      # Check logs from the Hydra-Maester controller application
+    - To check logs from the Hydra-Maester controller application, run:
+
+      ```bash
       kubectl logs -n kyma-system -l "app.kubernetes.io/name=hydra-maester" -c hydra-maester
-      # Example output
+      ```
+      Here's an example output:
+
+      ```bash
       2020-05-04T12:19:04.472Z  INFO  controller-runtime.controller Starting EventSource  {"controller": "oauth2client", "source": "kind source: /, Kind="}2020-05-04T12:19:04.472Z  INFO  setup starting manager
       2020-05-04T12:19:04.573Z  INFO  controller-runtime.controller Starting Controller {"controller": "oauth2client"}
       2020-05-04T12:19:04.673Z  INFO  controller-runtime.controller Starting workers  {"controller": "oauth2client", "worker count": 1}
       2020-05-04T12:26:30.819Z  INFO  controllers.OAuth2Client  using default client
       2020-05-04T12:26:30.835Z  INFO  controllers.OAuth2Client  using default client
-      # This log entry informs us that a client has been created, and should be visible within Hydra
       2020-05-04T12:26:31.468Z  DEBUG controller-runtime.controller Successfully Reconciled {"controller": "oauth2client", "request": "test-ns/test-client"}
       ```
+    The last log entry in the example output informs you that a client has been created and should be visible within Hydra.
+
+    - To check logs from the Hydra application, run:
 
       ```bash
-      # Check logs from the Hydra application
       kubectl logs -n kyma-system -l "app.kubernetes.io/name=hydra" -c hydra
       ```

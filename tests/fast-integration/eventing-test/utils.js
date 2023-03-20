@@ -1,7 +1,5 @@
 const {
   cleanMockTestFixture,
-  eventTypeOrderReceivedHash,
-  cleanCompassResourcesSKR,
   generateTraceParentHeader,
   checkTrace,
 } = require('../test/fixtures/commerce-mock');
@@ -14,7 +12,6 @@ const {
   getShootNameFromK8sServerUrl,
   listPods,
   retryPromise,
-  getSubscription,
   waitForVirtualService,
   k8sApply,
   k8sDelete,
@@ -26,6 +23,7 @@ const {
   sleep,
   getConfigMap,
   createK8sConfigMap,
+  namespaceObj,
 } = require('../utils');
 
 const {DirectorClient, DirectorConfig, getAlreadyAssignedScenarios} = require('../compass');
@@ -44,15 +42,13 @@ const kymaStreamName = 'sap';
 const isSKR = process.env.KYMA_TYPE === 'SKR';
 const skrInstanceId = process.env.INSTANCE_ID || '';
 const testCompassFlow = process.env.TEST_COMPASS_FLOW || false;
-const testSubscriptionV1Alpha2 = process.env.ENABLE_SUBSCRIPTION_V1_ALPHA2 === 'true';
-const subCRDVersion = testSubscriptionV1Alpha2 ? 'v1alpha2' : 'v1alpha1';
 const isUpgradeJob = process.env.EVENTING_UPGRADE_JOB || false;
+const isUpgradeJob2ndReconcile = process.env.EVENTING_UPGRADE_2ND_RECONCILE_JOB || false;
+const subCRDVersion = 'v1alpha2';
 const skipResourceCleanup = process.env.SKIP_CLEANUP || false;
 const suffix = getSuffix(isSKR, testCompassFlow);
 const appName = `app-${suffix}`;
-const scenarioName = `test-${suffix}`;
 const testNamespace = `test-${suffix}`;
-const mockNamespace = process.env.MOCK_NAMESPACE || 'mocks';
 const backendK8sSecretName = process.env.BACKEND_SECRET_NAME || 'eventing-backend';
 const backendK8sSecretNamespace = process.env.BACKEND_SECRET_NAMESPACE || 'default';
 const testDataConfigMapName = 'eventing-test-data';
@@ -62,10 +58,6 @@ const eventingNatsApiRuleAName = `${eventingNatsSvcName}-apirule`;
 const timeoutTime = 10 * 60 * 1000;
 const slowTime = 5000;
 const eppInClusterUrl = 'eventing-event-publisher-proxy.kyma-system';
-const subscriptionNames = {
-  orderCreated: 'order-created',
-  orderReceived: 'order-received',
-};
 const eventingSinkName = 'eventing-sink';
 const eventingUpgradeSinkName = 'eventing-upgrade-sink';
 
@@ -134,13 +126,6 @@ if (isSKR) {
 
 // cleans up all the test resources including the compass scenario
 async function cleanupTestingResources() {
-  if (isSKR && testCompassFlow) {
-    debug('Cleaning compass resources');
-    // Get shoot info from gardener to get compassID for this shoot
-    const skrInfo = await gardener.getShoot(shootName);
-    await cleanCompassResourcesSKR(director, appName, scenarioName, skrInfo.compassID);
-  }
-
   // skip the cluster resources cleanup if the SKIP_CLEANUP env flag is set
   if (skipResourceCleanup === 'true') {
     return;
@@ -156,8 +141,8 @@ async function cleanupTestingResources() {
   await deleteK8sConfigMap(testDataConfigMapName);
   await deleteK8sConfigMap(jetStreamTestConfigMapName);
 
-  debug(`Removing ${testNamespace} and ${mockNamespace} namespaces`);
-  await cleanMockTestFixture(mockNamespace, testNamespace, true);
+  debug(`Removing ${testNamespace} and mocks namespaces`);
+  await cleanMockTestFixture('mocks', testNamespace, true);
 }
 
 // gets the suffix depending on kyma type
@@ -198,17 +183,6 @@ async function getJetStreamStreamData(host) {
         streamCreationTime: stream.created,
       };
     }
-  }
-}
-
-async function getSubscriptionConsumerName(subscriptionName, namespace='default', crdVersion='v1alpha1') {
-  if (crdVersion === 'v1alpha1') {
-    // the logic is temporary because consumer name is missing in the v1alpha1 subscription
-    // will be deleted as we will upgrade to v1alpha2
-    return eventTypeOrderReceivedHash;
-  } else {
-    const sub = await getSubscription(subscriptionName, namespace, crdVersion);
-    return sub.status.backend.types[0].consumerName;
   }
 }
 
@@ -263,7 +237,7 @@ async function undeployEventingFunction(funcName) {
 }
 
 async function waitForEventingSinkFunction(funcName = eventingSinkName) {
-  await waitForFunction(funcName, testNamespace);
+  await waitForFunction(funcName, testNamespace, 300000);
 }
 
 async function deployV1Alpha1Subscriptions() {
@@ -485,7 +459,6 @@ async function ensureEventReceivedWithRetry(sink, proxyHost,
       debug('Received event data:', {
         payload: response.data.event.payload,
         headers: response.data.event.headers,
-        ceHeaders: response.data.event.ceHeaders,
       });
     }
 
@@ -710,17 +683,26 @@ function getTimeStampsWithZeroMilliSeconds(timestamp) {
   return (new Date(ts)).toISOString();
 }
 
+async function createK8sNamespace(name) {
+  await k8sApply([namespaceObj(name)]);
+}
+
+function debugBanner(message) {
+  const line = '[BANNER] ***************************************************************************************';
+  debug(line);
+  debug(`[BANNER] ${message}`);
+  debug(line);
+}
+
 module.exports = {
   appName,
-  scenarioName,
   testNamespace,
-  mockNamespace,
   kymaVersion,
   isSKR,
   isUpgradeJob,
+  isUpgradeJob2ndReconcile,
   skrInstanceId,
   testCompassFlow,
-  testSubscriptionV1Alpha2,
   subCRDVersion,
   backendK8sSecretName,
   backendK8sSecretNamespace,
@@ -743,8 +725,6 @@ module.exports = {
   isConsumerCreationTimeMissing,
   eppInClusterUrl,
   ensureEventReceivedWithRetry,
-  subscriptionNames,
-  getSubscriptionConsumerName,
   eventingSinkName,
   eventingUpgradeSinkName,
   v1alpha1SubscriptionsTypes,
@@ -768,5 +748,7 @@ module.exports = {
   getConfigMapWithRetries,
   checkStreamNotReCreated,
   checkConsumerNotReCreated,
+  createK8sNamespace,
   publishEventWithRetry,
+  debugBanner,
 };

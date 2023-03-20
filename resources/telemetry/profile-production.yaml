@@ -1,9 +1,0 @@
-operator:
-  maxLogPipelines: 5
-  fluentbit:
-    resources:
-      requests:
-        cpu: 100m
-      limits:
-        cpu: "1"
-        memory: 1Gi
