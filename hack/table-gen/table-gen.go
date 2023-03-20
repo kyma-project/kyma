@@ -19,7 +19,8 @@ const (
 	RESkipPattern  = `<!--\s*` + SkipIdentifier + `\s*([^\s]+)\s*-->`
 	// TODO: change to skip with children
 	SkipWithAncestorsIdentifier = `SKIP-WITH-ANCESTORS`
-	RESkipWithAncestorsPattern  = `<!--\s*` + SkipWithAncestorsIdentifier + `\s*([^\s-]+)\s*-->` // Regular expression pattern for skipping an element with its children
+	// Regular expression pattern for skipping an element with its children
+	RESkipWithAncestorsPattern  = `<!--\s*` + SkipWithAncestorsIdentifier + `\s*([^\s-]+)\s*-->`
 )
 
 var (
