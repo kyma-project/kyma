@@ -12,7 +12,8 @@ import (
 )
 
 const (
-	REPattern      = `(?s)<!--\s*TABLE-START\s* -->.*<!--\s*TABLE-END\s*-->` //Regular expression patter for reading everything between TABLE-START and TABLE-END tags
+	// Regular expression pattern for reading everything between TABLE-START and TABLE-END tags
+	REPattern      = `(?s)<!--\s*TABLE-START\s* -->.*<!--\s*TABLE-END\s*-->` 
 	SkipIdentifier = `SKIP-ELEMENT`
 	RESkipPattern  = `<!--\s*` + SkipIdentifier + `\s*([^\s]+)\s*-->` // Regular expression pattern for skipping one element without children that was specified in MD
 	// TODO: change to skip with children
