@@ -41,7 +41,7 @@ func main() {
 	}
 
 	if MDFilename == "" {
-		panic(fmt.Errorf("md-filename cannot be empty. Please, enter the correct filename"))
+		panic(fmt.Errorf("md-filename cannot be empty. Please enter the correct filename"))
 	}
 
 	elementsToSkip := getElementsToSkip()
