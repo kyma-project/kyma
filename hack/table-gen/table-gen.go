@@ -139,7 +139,8 @@ func generateDocFromCRD(elementsToSkip map[string]bool) string {
 	return strings.Join(doc, "\n")
 }
 
-// generates table row out of some CRD element. Returns resulting map with path of an element and table row
+// generateElementDoc generates table row out of some CRD element.
+// It returns a map where the key is the path of an element and the value is the table row for this element.
 func generateElementDoc(elementsToSkip map[string]bool, obj interface{}, name string, parentPath string) map[string]string {
 	result := map[string]string{}
 	element := obj.(map[string]interface{})
