@@ -72,7 +72,7 @@ func getElementsToSkip() map[string]bool {
 	return elementsToSkip
 }
 
-// replaces content between TABLE-START and TABLE-END tags with newly generated content in doc
+// replaceDocInMD replaces the content between TABLE-START and TABLE-END tags with the newly generated content in doc.
 func replaceDocInMD(doc string) {
 	inDoc, err := os.ReadFile(MDFilename)
 	if err != nil {
