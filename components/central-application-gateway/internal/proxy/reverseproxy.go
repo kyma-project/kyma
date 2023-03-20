@@ -97,6 +97,7 @@ func responseModifier(
 	urlRewriter func(gatewayURL, target, loc *url.URL) *url.URL,
 ) func(*http.Response) error {
 	return func(resp *http.Response) error {
+		log.Warnf("in reverseproxy.go/responseModifier: StatusCode: %v", resp.StatusCode)
 		if (resp.StatusCode < 300 || resp.StatusCode >= 400) &&
 			resp.StatusCode != http.StatusCreated {
 			return nil
@@ -105,23 +106,26 @@ func responseModifier(
 		const locationHeader = "Location"
 
 		locRaw := resp.Header.Get(locationHeader)
+		log.Warnf("in reverseproxy.go/responseModifier: Location: %v", locRaw)
 
 		if locRaw == "" {
 			return nil
 		}
 
 		loc, err := resp.Request.URL.Parse(locRaw)
+		log.Warnf("in reverseproxy.go/responseModifier: Location after parse: %v", loc.String())
 		if err != nil {
 			return nil
 		}
 
 		target, err := url.Parse(targetURL)
+		log.Warnf("in reverseproxy.go/responseModifier: TargetURL after parse: %v", target.String())
 		if err != nil {
 			return nil
 		}
 
 		newURL := urlRewriter(gatewayURL, target, loc)
-
+		log.Warnf("in reverseproxy.go/responseModifier: URL after rewriting: %v", newURL.String())
 		if newURL != nil {
 			resp.Header.Set(locationHeader, newURL.String())
 		}
