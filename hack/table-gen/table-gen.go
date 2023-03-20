@@ -171,7 +171,8 @@ func generateElementDoc(elementsToSkip map[string]bool, obj interface{}, name st
 	return result
 }
 
-// generates table row out of CRD object with type object. Returns resulting map with path of an element and table row
+// generateObjectDoc generates table row out of CRD object with type object. 
+// It returns a map where the key is the path of an element and the value is the table row for this element.
 func generateObjectDoc(elementsToSkip map[string]bool, element map[string]interface{}, name string, parentPath string) map[string]string {
 	result := map[string]string{}
 	properties := getElement(element, "properties")
