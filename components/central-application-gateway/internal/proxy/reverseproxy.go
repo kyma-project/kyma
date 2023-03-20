@@ -39,6 +39,7 @@ func newProxy(targetURL string, requestParameters *authorization.RequestParamete
 		req.Host = target.Host
 
 		combinedPath := joinPaths(target.Path, req.URL.Path)
+		log.Warnf("in reverseproxy.go/newProxy, combinedPath: %v", combinedPath)
 		req.URL.RawPath = combinedPath
 		req.URL.Path = combinedPath
 
@@ -54,6 +55,7 @@ func newProxy(targetURL string, requestParameters *authorization.RequestParamete
 		}
 
 		log.Infof("Modified request url : '%s', schema : '%s', path : '%s'", req.URL.String(), req.URL.Scheme, req.URL.Path)
+		log.Warnf("in reverseproxy.go/newProxy, full request: %v", req)
 	}
 	errorHandler := func(rw http.ResponseWriter, req *http.Request, err error) {
 		codeRewriter(rw, err)
@@ -154,5 +156,6 @@ func codeRewriter(rw http.ResponseWriter, err error) {
 		rw.WriteHeader(http.StatusGatewayTimeout)
 		return
 	}
+	log.Warnf("in reverseproxy.go/codeRewriter: %v", err)
 	rw.WriteHeader(http.StatusBadGateway)
 }

@@ -22,7 +22,7 @@ func RequestLogger(label string, h http.Handler) http.Handler {
 		responseCode := lw.status
 		duration := time.Since(lw.start).Nanoseconds() / int64(time.Millisecond)
 
-		log.Infof("%s: %s %s %s %d %d", label, method, fullPath, proto, responseCode, duration)
+		log.Warnf("in logging.go/RequestLogger, %s: %s %s %s %d %d", label, method, fullPath, proto, responseCode, duration)
 	})
 }
 

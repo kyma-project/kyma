@@ -25,7 +25,7 @@ func parseArgs() *options {
 	applicationSecretsNamespace := flag.String("applicationSecretsNamespace", "kyma-system", "Namespace where Application secrets used by the Application Gateway exist")
 	requestTimeout := flag.Int("requestTimeout", 1, "Timeout for services.")
 	proxyTimeout := flag.Int("proxyTimeout", 10, "Timeout for proxy call.")
-	requestLogging := flag.Bool("requestLogging", false, "Flag for logging incoming requests.")
+	requestLogging := flag.Bool("requestLogging", true, "Flag for logging incoming requests.")
 	proxyCacheTTL := flag.Int("proxyCacheTTL", 120, "TTL, in seconds, for proxy cache of Remote API information")
 	kubeConfig := flag.String("kubeConfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
 	apiServerURL := flag.String("apiServerURL", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")

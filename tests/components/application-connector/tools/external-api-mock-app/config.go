@@ -26,7 +26,7 @@ type Config struct {
 
 func NewConfig() *Config {
 	return &Config{
-		LogLevel:               "info",
+		LogLevel:               "debug",
 		Port:                   8080,
 		BasicAuthUser:          "user",
 		BasicAuthPassword:      "passwd",
