@@ -15,7 +15,8 @@ const (
 	// Regular expression pattern for reading everything between TABLE-START and TABLE-END tags
 	REPattern      = `(?s)<!--\s*TABLE-START\s* -->.*<!--\s*TABLE-END\s*-->` 
 	SkipIdentifier = `SKIP-ELEMENT`
-	RESkipPattern  = `<!--\s*` + SkipIdentifier + `\s*([^\s]+)\s*-->` // Regular expression pattern for skipping one element without children that was specified in MD
+	// Regular expression pattern for skipping an element without its children
+	RESkipPattern  = `<!--\s*` + SkipIdentifier + `\s*([^\s]+)\s*-->`
 	// TODO: change to skip with children
 	SkipWithAncestorsIdentifier = `SKIP-WITH-ANCESTORS`
 	RESkipWithAncestorsPattern  = `<!--\s*` + SkipWithAncestorsIdentifier + `\s*([^\s-]+)\s*-->` // Regular expression pattern for skipping an element with its children
