@@ -214,7 +214,7 @@ func generateArrayDoc(elementsToSkip map[string]bool, element map[string]interfa
 	return result
 }
 
-// generates a row of the resulting table which we include into our MD file
+// generateTableRow generates a row of the resulting table which we include into our MD file.
 func generateTableRow(fullName string, description string, name string) string {
 	return fmt.Sprintf("| **%s** | %s |",
 		fullName, normalizeDescription(description, name))
