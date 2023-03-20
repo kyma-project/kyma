@@ -49,7 +49,8 @@ func main() {
 	replaceDocInMD(doc)
 }
 
-// reads MD file for SKIP tags, returns map with the name of the element to skip as well as true value if element should be skipped with children and false if element should be skipped as itself
+// getElementsToSkip reads MD file for SKIP tags.
+// It returns a map where the key is the name of the element and the value is true if the element should be skipped with its children and it is false if the element should be skipped without its children.
 func getElementsToSkip() map[string]bool {
 	inDoc, err := os.ReadFile(MDFilename)
 	if err != nil {
