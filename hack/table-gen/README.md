@@ -24,7 +24,7 @@ You must specify the following parameters:
 
    <!-- TABLE-END -->
 
-Now, if you want to skip some elements, you can use `SKIP-ELEMENT` or `SKIP-WITH-CHILDREN` tags, brefore start and end tags
+2. If you want to skip some elements, use the `SKIP-ELEMENT` or `SKIP-WITH-CHILDREN` tags before the `TABLE-START` tag.
 
 ```
 <!-- SKIP-ELEMENT status.conditions -->
