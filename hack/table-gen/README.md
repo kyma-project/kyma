@@ -41,7 +41,6 @@ You can call this tool from command line. In order to do so, you should either b
 Here is an example on how to call the tool:
 `go run table-gen.go --crd-filename ../../installation/resources/crds/telemetry/logpipelines.crd.yaml --md-filename ../../docs/05-technical-reference/00-custom-resources/telemetry-01-logpipeline.md`
 
-### Call the tool using makefile
 - If you update a CRD that is already present in the makefile, you can just call `make generate`.
 
   If you want to compare only a particular operator or a specific CRD, specify the label you need while calling `make`; for example, `make telemetry-docs`.
