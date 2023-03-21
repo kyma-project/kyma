@@ -16,7 +16,7 @@ You must specify the following parameters:
 - `crd-filename` - full or relative path to the `.yaml` file containing the CRD
 - `md-filename` - full or relative path to the `.md` file in which to insert the table rows
 
-## How to use?
+## Set up the table generator
 
 1. Open the `.md` file you want to generate table in, and in the place where you want to insert a table, enter the tags `TABLE-START` and `TABLE-END`. 
 
