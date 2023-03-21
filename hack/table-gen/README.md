@@ -49,3 +49,6 @@ Here is an example on how to call the tool:
 
   To update the makefile, just introduce a new label for your CRD, and then add it to the `generate`.
   Alternatively, if you want to group your `go run` commands, you can create different labels, group them under the one, and include it to the `generate`, the same way as with `make telemetry-docs`.
+
+## Verifying the result
+Go to the .md files and check that the table has been generated as specified.
