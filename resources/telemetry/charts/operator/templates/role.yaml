@@ -8,7 +8,7 @@ rules:
 - apiGroups:
   - ""
   resources:
-  - configmaps
+  - pods
   verbs:
   - get
   - list
@@ -24,31 +24,7 @@ rules:
 - apiGroups:
   - ""
   resources:
-  - pods
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - ""
-  resources:
   - secrets
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - serviceaccounts
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - services
   verbs:
   - get
   - list
@@ -61,30 +37,6 @@ rules:
   - create
   - get
   - update
-- apiGroups:
-  - apps
-  resources:
-  - daemonsets
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - apps
-  resources:
-  - deployments
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - apps
-  resources:
-  - replicasets
-  verbs:
-  - get
-  - list
-  - watch
 - apiGroups:
   - rbac.authorization.k8s.io
   resources:
