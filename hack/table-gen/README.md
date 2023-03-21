@@ -47,4 +47,5 @@ Here is an example on how to call the tool:
 
 In case you need want to run the comparison only for a particular operator, or for specific crd, you should specify the label you need while calling `make`, like `make telemetry-docs`.
 
-In order to update makefile, just inroduce new label for your crd, and then add it to the `generate`. Or, if you want to group your `go run` commands, you can create different labels, group them uder the one, and include it to the `generate`, the same way we do with `make telemetry-docs`
+  To update the makefile, just introduce a new label for your CRD, and then add it to the `generate`.
+  Alternatively, if you want to group your `go run` commands, you can create different labels, group them under the one, and include it to the `generate`, the same way as with `make telemetry-docs`.
