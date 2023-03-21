@@ -45,7 +45,7 @@ Here is an example on how to call the tool:
 ### Call the tool using makefile
 - If you update a CRD that is already present in the makefile, you can just call `make generate`.
 
-In case you need want to run the comparison only for a particular operator, or for specific crd, you should specify the label you need while calling `make`, like `make telemetry-docs`.
+  If you want to compare only a particular operator or a specific CRD, specify the label you need while calling `make`; for example, `make telemetry-docs`.
 
   To update the makefile, just introduce a new label for your CRD, and then add it to the `generate`.
   Alternatively, if you want to group your `go run` commands, you can create different labels, group them under the one, and include it to the `generate`, the same way as with `make telemetry-docs`.
