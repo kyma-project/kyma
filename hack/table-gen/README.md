@@ -2,7 +2,7 @@
 
 ## Overview
 
-This package contains a tool used by kyma developers which purpose is to automatically generate documentation table which documents CRD, and write it to specified MD files. 
+This package contains a tool that automatically generates a documentation table documenting a CRD, and writes it to specified `.md` files. 
 
 ## Functionality
 
