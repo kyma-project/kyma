@@ -8,7 +8,7 @@ This package contains a tool that automatically generates a documentation table 
 
 This particular tool allows us to:
 - Skip some specific element during the table generation by using the tag SKIP-ELEMENT
-- Skip specified elements with all its children by using the tag SKIP-WITH-CHILDREN
+- Skip specified elements with all their children with the tag `SKIP-WITH-CHILDREN`.
 
 ## Parameters
 
