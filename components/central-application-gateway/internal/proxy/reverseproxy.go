@@ -125,8 +125,8 @@ func responseModifier(
 		}
 
 		newURL := urlRewriter(gatewayURL, target, loc)
-		log.Warnf("in reverseproxy.go/responseModifier: URL after rewriting: %v", newURL.String())
 		if newURL != nil {
+			log.Warnf("in reverseproxy.go/responseModifier: URL after rewriting: %v", newURL.String())
 			resp.Header.Set(locationHeader, newURL.String())
 		}
 
