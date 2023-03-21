@@ -35,7 +35,7 @@ You must specify the following parameters:
 ```
 
 ### Call the tool using command line
-You can call this tool from command line. In order to do so, you should either build it and start it, or use `go run`.
+- If you want to call the table generator from the command line, you can either build it and start it, or use `go run`. See the following example:
 Here is an example on how to call the tool:
 `go run table-gen.go --crd-filename ../../installation/resources/crds/telemetry/logpipelines.crd.yaml --md-filename ../../docs/05-technical-reference/00-custom-resources/telemetry-01-logpipeline.md`
 
