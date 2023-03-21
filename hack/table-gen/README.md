@@ -44,7 +44,6 @@ Here is an example on how to call the tool:
 
 ### Call the tool using makefile
 - If you update a CRD that is already present in the makefile, you can just call `make generate`.
-`make generate`
 
 In case you need want to run the comparison only for a particular operator, or for specific crd, you should specify the label you need while calling `make`, like `make telemetry-docs`.
 
