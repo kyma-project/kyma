@@ -19,19 +19,20 @@ You must specify the following parameters:
 ## Set up the table generator
 
 1. Open the `.md` file you want to generate table in, and in the place where you want to insert a table, enter the tags `TABLE-START` and `TABLE-END`. 
-
+```
    <!-- TABLE-START -->
 
    <!-- TABLE-END -->
+```
 
 2. If you want to skip some elements, use the `SKIP-ELEMENT` or `SKIP-WITH-CHILDREN` tags before the `TABLE-START` tag.
+```
+   <!-- SKIP-ELEMENT status.conditions -->
+   <!-- SKIP-WITH-CHILDREN spec.output -->
+   
+   <!-- TABLE-START -->
 
-<!-- SKIP-ELEMENT status.conditions -->
-<!-- SKIP-WITH-CHILDREN spec.output -->
-
-<!-- TABLE-START -->
-
-<!-- TABLE-END -->
+   <!-- TABLE-END -->
 ```
 
 ### Call the table generator
@@ -48,4 +49,4 @@ You can call the table generator either from the command line, or with the makef
   Alternatively, if you want to group your `go run` commands, you can create different labels, group them under the one, and include it to the `generate`, the same way as with `make telemetry-docs`.
 
 ## Verifying the result
-Go to the .md files and check that the table has been generated as specified.
+Go to the `.md` files and check that the table has been generated as specified.
