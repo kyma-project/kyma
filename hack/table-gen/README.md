@@ -18,7 +18,7 @@ There are two parameters one should specify in order to use the tool:
 
 ## How to use?
 
-Most importantly, you need to go to the MD file you want to generate table in, and put down tags TABLE-START and TABLE-END on a place where you want to insert a table. 
+1. Open the `.md` file you want to generate table in, and in the place where you want to insert a table, enter the tags `TABLE-START` and `TABLE-END`. 
 
    <!-- TABLE-START -->
 
