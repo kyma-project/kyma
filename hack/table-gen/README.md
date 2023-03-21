@@ -12,7 +12,7 @@ This particular tool allows us to:
 
 ## Parameters
 
-There are two parameters one should specify in order to use the tool:
+You must specify the following parameters:
 - `crd-filename` - full or relative path to the `.yaml` file containing the CRD
 - `md-filename` - full or relative path to the `.md` file in which to insert the table rows
 
