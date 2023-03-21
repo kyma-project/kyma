@@ -1,4 +1,4 @@
-# The tool to generate documentation table out of CRDs
+# The Table Generator: Generate documentation tables automatically from CRDs
 
 ## Overview
 
