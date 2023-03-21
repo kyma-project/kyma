@@ -104,7 +104,6 @@ replace (
 
 replace (
 	github.com/kyma-incubator/api-gateway => github.com/kyma-project/api-gateway v0.0.0-20220819093753-296e6704d413
-	github.com/opencontainers/runc => github.com/opencontainers/runc v1.0.0-rc93
 	github.com/prometheus/client_golang => github.com/prometheus/client_golang v1.14.0
 	golang.org/x/crypto => golang.org/x/crypto v0.7.0
 )
