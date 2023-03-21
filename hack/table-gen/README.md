@@ -39,7 +39,7 @@ You must specify the following parameters:
 You can call the table generator either from the command line, or with the makefile:
 - If you want to call the table generator from the command line, you can either build it and start it, or use `go run`. See the following example:
 Here is an example on how to call the tool:
-`go run table-gen.go --crd-filename ../../installation/resources/crds/telemetry/logpipelines.crd.yaml --md-filename ../../docs/05-technical-reference/00-custom-resources/telemetry-01-logpipeline.md`
+  `go run table-gen.go --crd-filename ../../installation/resources/crds/telemetry/logpipelines.crd.yaml --md-filename ../../docs/05-technical-reference/00-custom-resources/telemetry-01-logpipeline.md`
 
 - If you update a CRD that is already present in the makefile, you can just call `make generate`.
 
