@@ -14,7 +14,7 @@ global:
       directory: "tpi"
     fluent_bit:
       name: "fluent-bit"
-      version: "2.0.9-a3475b24"
+      version: "2.0.10-050eef31"
       directory: "tpi"
   highPriorityClassName: "kyma-system-priority"
   log:
