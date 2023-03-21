@@ -26,7 +26,6 @@ You must specify the following parameters:
 
 2. If you want to skip some elements, use the `SKIP-ELEMENT` or `SKIP-WITH-CHILDREN` tags before the `TABLE-START` tag.
 
-```
 <!-- SKIP-ELEMENT status.conditions -->
 <!-- SKIP-WITH-CHILDREN spec.output -->
 
