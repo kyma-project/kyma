@@ -14,7 +14,7 @@ This particular tool allows us to:
 
 There are two parameters one should specify in order to use the tool:
 - `crd-filename` - full or relative path to the .yaml file containing crd
-- `md-filename` - full or relative path to the .md file containing the file where we should insert table rows
+- `md-filename` - full or relative path to the `.md` file in which to insert the table rows
 
 ## How to use?
 
