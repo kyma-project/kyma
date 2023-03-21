@@ -1,0 +1,7 @@
+[
+  {
+    "op": "replace",
+    "path": "/data/Corefile",
+    "value": ". {\n    forward . tls://1.1.1.1 tls://1.0.0.1 {\n        tls_servername cloudflare-dns.com\n        health_check 5s\n    }\n    cache 30\n}\n"
+  }
+]
