@@ -40,7 +40,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: Defines the desired state of TracePipeline
+            description: Defines something custom the desired state of TracePipeline
             properties:
               output:
                 description: Configures the trace receiver of a TracePipeline.
