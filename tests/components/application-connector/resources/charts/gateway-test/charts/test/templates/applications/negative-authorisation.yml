@@ -1,0 +1,47 @@
+apiVersion: applicationconnector.kyma-project.io/v1alpha1
+kind: Application
+metadata:
+  name: negative-authorisation
+  namespace: {{ .Values.global.namespace }}
+spec:
+  description: Negative authorisation
+  skipVerify: true
+  labels:
+    app: negative-authorisation
+  services:
+    - displayName: mtls-negative-other-ca
+      name: mtls-negative-other-ca
+      providerDisplayName: mTLS
+      description: Should return 502 for mTLS with client certificate generated from other CA
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "https://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8090/v1/api/mtls/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/mtls-negative-other-ca"
+          credentials:
+            secretName: mtls-negative-other-ca
+            type: CertificateGen
+    - displayName: mtls-negative-expired-client-cert
+      name: mtls-negative-expired-client-cert
+      providerDisplayName: mTLS
+      description: Should return 502 for mTLS with expired client certificate
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "https://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8090/v1/api/mtls/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/mtls-negative-expired-client-cert"
+          credentials:
+            secretName: mtls-negative-expired-client-cert
+            type: CertificateGen
+    - displayName: mtls-negative-expired-server-cert
+      name: mtls-negative-expired-server-cert
+      providerDisplayName: mTLS
+      description: Should return 502 for mTLS with expired server certificate
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "https://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8091/v1/api/mtls/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/mtls-negative-expired-server-cert"
+          credentials:
+            secretName: mtls-negative-expired-client-cert
+            type: CertificateGen
