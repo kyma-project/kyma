@@ -41,4 +41,4 @@ clean-compass-runtime-agent-test:
 
 .PHONY: patch-coredns
 patch-coredns:
-	kubectl -n kube-system patch configmap/coredns --type json --patch-file resources/patches/coredns.json
+	kubectl -n kube-system apply -f resources/patches/coredns.yaml

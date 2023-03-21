@@ -1,0 +1,32 @@
+apiVersion: v1
+data:
+  Corefile: |2
+
+    .:53 {
+        errors
+        health
+        rewrite name regex (.*)\.local\.kyma\.dev istio-ingressgateway.istio-system.svc.cluster.local
+        ready
+        kubernetes cluster.local in-addr.arpa ip6.arpa {
+          pods insecure
+          fallthrough in-addr.arpa ip6.arpa
+        }
+        hosts /etc/coredns/NodeHosts {
+          reload 1s
+          fallthrough
+        }
+        prometheus :9153
+        forward . /etc/resolv.conf
+        cache 30
+        loop
+        reload
+        loadbalance
+    }
+  NodeHosts: |
+    172.18.0.2 k3d-kyma-registry
+    172.18.0.3 k3d-kyma-server-0
+    172.18.0.4 k3d-kyma-agent-0
+kind: ConfigMap
+metadata:
+  name: coredns
+  namespace: kube-system
