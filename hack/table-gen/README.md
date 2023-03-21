@@ -22,7 +22,7 @@ You must specify the following parameters:
 
    <!-- TABLE-START -->
 
-<!-- TABLE-END -->
+   <!-- TABLE-END -->
 ```
 
 Now, if you want to skip some elements, you can use `SKIP-ELEMENT` or `SKIP-WITH-CHILDREN` tags, brefore start and end tags
