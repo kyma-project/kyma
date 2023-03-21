@@ -64,8 +64,8 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	log.Warnf("apiIdentifier: Application: %v, Service: %v, Entry: %v", apiIdentifier.Application, apiIdentifier.Service, apiIdentifier.Entry)
 	log.Warnf("serviceAPI: TargetURL: %v, SkipVerify: %v", serviceAPI.TargetUrl, serviceAPI.SkipVerify)
 	if serviceAPI.Credentials != nil {
-		log.Warnf("serviceAPI - credentials: OAuth %v, OAuthWithCert %v, BasicAuth %v, CertificateGen %v", serviceAPI.Credentials.OAuth, serviceAPI.Credentials.OAuthWithCert,
-			serviceAPI.Credentials.BasicAuth, &serviceAPI.Credentials.CertificateGen)
+		log.Warnf("serviceAPI - credentials: OAuth %v, OAuthWithCert %v, BasicAuth %v, CertificateGen %v", &serviceAPI.Credentials.OAuth, &serviceAPI.Credentials.OAuthWithCert,
+			&serviceAPI.Credentials.BasicAuth, &serviceAPI.Credentials.CertificateGen)
 	}
 
 	cacheEntry, err := p.getOrCreateCacheEntry(apiIdentifier, *serviceAPI)
