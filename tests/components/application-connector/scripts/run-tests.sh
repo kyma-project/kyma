@@ -1,4 +1,6 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
+
+./jobguard.sh
 
 service docker start
 curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
