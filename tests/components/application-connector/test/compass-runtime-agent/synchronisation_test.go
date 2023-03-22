@@ -13,9 +13,11 @@ import (
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/random"
 )
 
-const checkAppExistsPeriod = 10 * time.Second
-const appCreationTimeout = 2 * time.Minute
-const appUpdateTimeout = 2 * time.Minute
+const (
+	checkAppExistsPeriod = 10 * time.Second
+	appCreationTimeout   = 2 * time.Minute
+	appUpdateTimeout     = 2 * time.Minute
+)
 
 const updatedDescription = "The app was updated"
 
@@ -24,6 +26,8 @@ type ApplicationReader interface {
 }
 
 func (cs *CompassRuntimeAgentSuite) TestApplication() {
+	cs.FailNow("Simulated fail")
+
 	expectedAppName := "app1"
 	updatedAppName := "app1-updated"
 
@@ -31,7 +35,7 @@ func (cs *CompassRuntimeAgentSuite) TestApplication() {
 
 	correctState := false
 
-	//Create Application in Director
+	// Create Application in Director
 	applicationID, err := cs.directorClient.RegisterApplication(compassAppName, "Test Application for testing Compass Runtime Agent")
 	cs.Require().NoError(err)
 
