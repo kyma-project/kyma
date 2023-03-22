@@ -16,19 +16,14 @@ data:
           fallthrough
         }
         prometheus :9153
-        forward . /etc/resolv.conf
-        cache 30
-        loop
-        reload
-        loadbalance
-    }
-
-    . {
         forward . tls://1.1.1.1 tls://1.0.0.1 {
            tls_servername cloudflare-dns.com
            health_check 5s
         }
         cache 30
+        loop
+        reload
+        loadbalance
     }
 
   NodeHosts: |

@@ -11,7 +11,10 @@ cd tests/components/application-connector
 echo "----------HERE----------"
 kubectl run --image curlimages/curl -i --rm experiment1 -- curl oauth2.mps.dev.kyma.cloud.sap
 echo "----------HERE----------"
+
 kubectl apply -f resources/patches/coredns.yaml
+kubectl -n kube-system delete pods -l k8s-app=kube-dns
+
 echo "----------HERE----------"
 kubectl run --image curlimages/curl -i --rm experiment2 -- curl oauth2.mps.dev.kyma.cloud.sap
 echo "----------HERE----------"
