@@ -8,23 +8,12 @@ kubectl cluster-info
 kyma-release/kyma deploy --ci --components-file tests/components/application-connector/resources/installation-config/mini-kyma-skr.yaml --source local --workspace $PWD
 cd tests/components/application-connector
 
-echo "----------HERE----------"
-kubectl run --image curlimages/curl -i --rm experiment1 -- curl oauth2.mps.dev.kyma.cloud.sap
-echo "----------HERE----------"
-
+# reconfigure DNS
 kubectl apply -f resources/patches/coredns.yaml
 kubectl -n kube-system delete pods -l k8s-app=kube-dns
 
-echo "----------HERE----------"
-kubectl run --image curlimages/curl -i --rm experiment2 -- curl oauth2.mps.dev.kyma.cloud.sap
-echo "----------HERE----------"
-
 make -f Makefile.test-compass-runtime-agent test-compass-runtime-agent
-
-echo "----------HERE----------"
-kubectl run --image curlimages/curl -i --rm experiment3 -- curl oauth2.mps.dev.kyma.cloud.sap
-echo "----------HERE----------"
-
 failed=$?
+
 k3d cluster delete kyma
 exit $failed
