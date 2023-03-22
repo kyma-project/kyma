@@ -98,6 +98,4 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ template "webhook.fullname" . }}-envs
-    {{- if .Values.global.highPriorityClassName }}
-      priorityClassName: {{ .Values.global.highPriorityClassName }}
-    {{- end }}
+      priorityClassName: {{ .Values.global.serverlessPriorityClassName }}
