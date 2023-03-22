@@ -41,6 +41,9 @@ func newProxy(targetURL string, requestParameters *authorization.RequestParamete
 
 		combinedPath := joinPaths(target.Path, req.URL.Path)
 		combinedPathEscaped := joinPaths(target.Path, req.URL.RawPath)
+		log.Warnf("in reverseproxy.go/newProxy, combinedPath: %v", combinedPath)
+		log.Warnf("in reverseproxy.go/newProxy, combinedPathEscaped: %v", combinedPathEscaped)
+
 		req.URL.Path = combinedPath
 		req.URL.RawPath = combinedPathEscaped
 
@@ -56,6 +59,7 @@ func newProxy(targetURL string, requestParameters *authorization.RequestParamete
 		}
 
 		log.Infof("Modified request url : '%s', schema : '%s', path : '%s'", req.URL.String(), req.URL.Scheme, req.URL.Path)
+		log.Warnf("in reverseproxy.go/newProxy, full request: %v", req)
 	}
 	errorHandler := func(rw http.ResponseWriter, req *http.Request, err error) {
 		codeRewriter(rw, err)
@@ -97,6 +101,7 @@ func responseModifier(
 	urlRewriter func(gatewayURL, target, loc *url.URL) *url.URL,
 ) func(*http.Response) error {
 	return func(resp *http.Response) error {
+		log.Warnf("in reverseproxy.go/responseModifier: StatusCode: %v", resp.StatusCode)
 		if (resp.StatusCode < 300 || resp.StatusCode >= 400) &&
 			resp.StatusCode != http.StatusCreated {
 			return nil
@@ -105,17 +110,20 @@ func responseModifier(
 		const locationHeader = "Location"
 
 		locRaw := resp.Header.Get(locationHeader)
+		log.Warnf("in reverseproxy.go/responseModifier: Location: %v", locRaw)
 
 		if locRaw == "" {
 			return nil
 		}
 
 		loc, err := resp.Request.URL.Parse(locRaw)
+		log.Warnf("in reverseproxy.go/responseModifier: Location after parse: %v", loc.String())
 		if err != nil {
 			return nil
 		}
 
 		target, err := url.Parse(targetURL)
+		log.Warnf("in reverseproxy.go/responseModifier: TargetURL after parse: %v", target.String())
 		if err != nil {
 			return nil
 		}
@@ -123,6 +131,7 @@ func responseModifier(
 		newURL := urlRewriter(gatewayURL, target, loc)
 
 		if newURL != nil {
+			log.Warnf("in reverseproxy.go/responseModifier: URL after rewriting: %v", newURL.String())
 			resp.Header.Set(locationHeader, newURL.String())
 		}
 
@@ -156,5 +165,6 @@ func codeRewriter(rw http.ResponseWriter, err error) {
 		rw.WriteHeader(http.StatusGatewayTimeout)
 		return
 	}
+	log.Errorf("in reverseproxy.go/codeRewriter: %v", err)
 	rw.WriteHeader(http.StatusBadGateway)
 }

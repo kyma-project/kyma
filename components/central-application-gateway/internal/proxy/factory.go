@@ -1,6 +1,7 @@
 package proxy
 
 import (
+	log "github.com/sirupsen/logrus"
 	"net/http"
 	"net/url"
 	"strings"
@@ -43,8 +44,9 @@ func New(
 		gwURL.Path = "/" + strings.Join(split[:2], "/")
 
 		targetURL, err := url.Parse(targetAPIPath)
-
+		log.Warnf("in proxy/factory.go: Parsed targetURL: %v", targetURL.String())
 		if err != nil {
+			log.Errorf("in proxy/factory.go: Non valid path: %v", err)
 			return model.APIIdentifier{}, nil, nil, apperrors.WrongInput("Path has to be a valid path")
 		}
 

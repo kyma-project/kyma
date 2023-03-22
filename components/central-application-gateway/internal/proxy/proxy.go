@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	log "github.com/sirupsen/logrus"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -55,11 +56,20 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Warnf("start in proxy.go/ServeHTTP")
+	log.Warnf("request: Method: %v, Version: %v, requestURI: %v", r.Method, r.Proto, r.RequestURI)
+	log.Warnf("apiIdentifier: Application: %v, Service: %v, Entry: %v", apiIdentifier.Application, apiIdentifier.Service, apiIdentifier.Entry)
+	log.Warnf("serviceAPI: TargetURL: %v, SkipVerify: %v, EnodeUrl: %v", serviceAPI.TargetUrl, serviceAPI.SkipVerify, serviceAPI.EncodeUrl)
+	if serviceAPI.Credentials != nil {
+		log.Warnf("serviceAPI - credentials: OAuth %v, OAuthWithCert %v, BasicAuth %v, CertificateGen %v", &serviceAPI.Credentials.OAuth, &serviceAPI.Credentials.OAuthWithCert,
+			&serviceAPI.Credentials.BasicAuth, &serviceAPI.Credentials.CertificateGen)
+	}
+
 	r.URL.Path = path.Path
 	if !serviceAPI.EncodeUrl {
 		r.URL.RawPath = path.RawPath
 	}
-
+	log.Warnf("urlPath: %v", r.URL.Path)
 	cacheEntry, err := p.getOrCreateCacheEntry(apiIdentifier, *serviceAPI)
 	if err != nil {
 		handleErrors(w, err)
@@ -75,6 +85,7 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Warnf("end in proxy.go/ServeHTTP")
 	cacheEntry.Proxy.ModifyResponse = responseModifier(gwURL, serviceAPI.TargetUrl, urlRewriter)
 	cacheEntry.Proxy.ServeHTTP(w, newRequest)
 }

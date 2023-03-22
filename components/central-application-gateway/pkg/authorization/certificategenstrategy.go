@@ -2,6 +2,7 @@ package authorization
 
 import (
 	"crypto/tls"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
@@ -23,6 +24,7 @@ func newCertificateGenStrategy(certificate, privateKey []byte) certificateGenStr
 func (b certificateGenStrategy) AddAuthorization(r *http.Request, setter clientcert.SetClientCertificateFunc, _ bool) apperrors.AppError {
 	cert, err := b.prepareCertificate()
 	if err != nil {
+		log.Errorf("in AddAuthorization/certgenstrat.go: %v", err)
 		return apperrors.Internal("Failed to prepare certificate, %s", err.Error())
 	}
 	setter(&cert)
