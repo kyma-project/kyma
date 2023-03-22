@@ -8,6 +8,9 @@ kubectl cluster-info
 kyma-release/kyma deploy --ci --components-file tests/components/application-connector/resources/installation-config/mini-kyma-skr.yaml --source local --workspace $PWD
 cd tests/components/application-connector
 make -f Makefile.test-compass-runtime-agent test-compass-runtime-agent
+
+kubectl run --image curlimages/curl -i --rm some-name -- curl oauth2.mps.dev.kyma.cloud.sap
+
 failed=$?
 k3d cluster delete kyma
 exit $failed

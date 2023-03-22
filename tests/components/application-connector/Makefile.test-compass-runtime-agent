@@ -14,7 +14,7 @@ TEST_TIMEOUT = "6m"
 test: test-compass-runtime-agent
 clean: clean-compass-runtime-agent-test
 
-test-compass-runtime-agent: patch-coredns test-compass-runtime-agent-debug clean-compass-runtime-agent-test
+test-compass-runtime-agent: test-compass-runtime-agent-debug clean-compass-runtime-agent-test
 
 test-compass-runtime-agent-debug:
 	@echo $(GOPATH)/bin/go-junit-report --help
