@@ -9,7 +9,7 @@ spec:
   displayName: ""
   longDescription: ""
   providerDisplayName: ""
-  skipVerify: true
+  skipVerify: false
   services:
   - description: Foo bar
     displayName: bndl-app-1
@@ -56,4 +56,4 @@ spec:
     identifier: ""
     name: bndl-app-1-0d79e
     providerDisplayName: ""
-  skipVerify: true
+  skipVerify: false
