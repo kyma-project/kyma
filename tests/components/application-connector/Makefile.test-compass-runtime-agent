@@ -38,7 +38,3 @@ test-compass-runtime-agent-debug:
 clean-compass-runtime-agent-test:
 	helm template resources/charts/compass-runtime-agent-test  | kubectl delete -f -
 	kubectl delete ns $(NAMESPACE) --ignore-not-found
-
-.PHONY: patch-coredns
-patch-coredns:
-	kubectl -n kube-system apply -f resources/patches/coredns.yaml

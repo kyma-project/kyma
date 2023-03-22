@@ -7,9 +7,20 @@ kyma-release/kyma provision k3d
 kubectl cluster-info
 kyma-release/kyma deploy --ci --components-file tests/components/application-connector/resources/installation-config/mini-kyma-skr.yaml --source local --workspace $PWD
 cd tests/components/application-connector
+
+echo "----------HERE----------"
+kubectl run --image curlimages/curl -i --rm some-name -- curl oauth2.mps.dev.kyma.cloud.sap
+echo "----------HERE----------"
+kubectl apply -f resources/patches/coredns.yaml
+echo "----------HERE----------"
+kubectl run --image curlimages/curl -i --rm some-name -- curl oauth2.mps.dev.kyma.cloud.sap
+echo "----------HERE----------"
+
 make -f Makefile.test-compass-runtime-agent test-compass-runtime-agent
 
+echo "----------HERE----------"
 kubectl run --image curlimages/curl -i --rm some-name -- curl oauth2.mps.dev.kyma.cloud.sap
+echo "----------HERE----------"
 
 failed=$?
 k3d cluster delete kyma

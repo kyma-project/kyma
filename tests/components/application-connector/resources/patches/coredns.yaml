@@ -23,10 +23,14 @@ data:
         loadbalance
     }
   NodeHosts: |
-    172.18.0.2 k3d-kyma-registry
     172.18.0.3 k3d-kyma-server-0
+    172.18.0.2 k3d-kyma-registry
     172.18.0.4 k3d-kyma-agent-0
 kind: ConfigMap
 metadata:
+  annotations:
+    objectset.rio.cattle.io/owner-gvk: k3s.cattle.io/v1, Kind=Addon
+    objectset.rio.cattle.io/owner-name: coredns
+    objectset.rio.cattle.io/owner-namespace: kube-system
   name: coredns
   namespace: kube-system
