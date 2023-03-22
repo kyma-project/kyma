@@ -9,17 +9,17 @@ kyma-release/kyma deploy --ci --components-file tests/components/application-con
 cd tests/components/application-connector
 
 echo "----------HERE----------"
-kubectl run --image curlimages/curl -i --rm some-name -- curl oauth2.mps.dev.kyma.cloud.sap
+kubectl run --image curlimages/curl -i --rm experiment1 -- curl oauth2.mps.dev.kyma.cloud.sap
 echo "----------HERE----------"
 kubectl apply -f resources/patches/coredns.yaml
 echo "----------HERE----------"
-kubectl run --image curlimages/curl -i --rm some-name -- curl oauth2.mps.dev.kyma.cloud.sap
+kubectl run --image curlimages/curl -i --rm experiment2 -- curl oauth2.mps.dev.kyma.cloud.sap
 echo "----------HERE----------"
 
 make -f Makefile.test-compass-runtime-agent test-compass-runtime-agent
 
 echo "----------HERE----------"
-kubectl run --image curlimages/curl -i --rm some-name -- curl oauth2.mps.dev.kyma.cloud.sap
+kubectl run --image curlimages/curl -i --rm experiment3 -- curl oauth2.mps.dev.kyma.cloud.sap
 echo "----------HERE----------"
 
 failed=$?
