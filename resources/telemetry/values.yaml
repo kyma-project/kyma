@@ -7,14 +7,14 @@ global:
       version: "v20230308-ff6cf204"
     telemetry_operator:
       name: "telemetry-manager"
-      version: "v20230313-ce81d48e"
+      version: "v20230321-41de4e43"
     telemetry_otel_collector:
       name: "otel-collector"
       version: "0.73.0-a3475b24"
       directory: "tpi"
     fluent_bit:
       name: "fluent-bit"
-      version: "2.0.9-a3475b24"
+      version: "2.0.10-050eef31"
       directory: "tpi"
   highPriorityClassName: "kyma-system-priority"
   log:

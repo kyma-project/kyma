@@ -113,12 +113,6 @@ func main() {
 	whs := mgr.GetWebhookServer()
 	whs.CertName = resources.CertFile
 	whs.KeyName = resources.KeyFile
-	whs.Register(resources.FunctionConvertWebhookPath,
-		webhook.NewConvertingWebhook(
-			mgr.GetClient(),
-			scheme,
-			logWithCtx.Named("converting-webhook")),
-	)
 	whs.Register(resources.FunctionDefaultingWebhookPath, &ctrlwebhook.Admission{
 		Handler: webhook.NewDefaultingWebhook(
 			defaultingConfigv1alpha1,

@@ -1,19 +1,19 @@
 ---
-title: Set up a custom domain TLS certificate in Kyma
+title: Set up or update a custom domain TLS certificate in Kyma
 ---
 
-The TLS certificate is a vital security element. Follow this tutorial to set up your custom TLS certificate in Kyma.
+The TLS certificate is a vital security element. Follow this tutorial to set up your custom TLS certificate in Kyma or update a manually rotated one.
 
 >**NOTE:** This procedure can interrupt the communication between your cluster and the outside world for a limited period of time.
 
 ## Prerequisites
 
-- Generate a new TLS certificate and key for custom domain deployments, base64-encoded.
+- Generate a new TLS certificate and key for custom domain deployments, base64-encoded. If you want to update your custom TLS certificate in Kyma, rotate or renew it manually.
 - Generate a `kubeconfig` file for the Kubernetes cluster that hosts the Kyma instance.
 
 ## Steps
 
-1. Export your domain, new certificate, and key as the environment variables.
+1. Export your domain, new or rotated certificate, and key as the environment variables.
 
 ```bash
 export DOMAIN={YOUR_DOMAIN}

@@ -3,27 +3,15 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.6.2
+  creationTimestamp: null
   name: functions.serverless.kyma-project.io
 spec:
-  conversion:
-    strategy: Webhook
-    webhook:
-      clientConfig:
-        service:
-          name: serverless-webhook
-          namespace: kyma-system
-          path: /convert/functions
-          port: 443
-      conversionReviewVersions:
-      - v1beta1
-      - v1
   group: serverless.kyma-project.io
   names:
     kind: Function
     listKind: FunctionList
     plural: functions
     singular: function
-  preserveUnknownFields: false
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
