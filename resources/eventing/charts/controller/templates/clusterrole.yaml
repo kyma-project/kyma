@@ -13,7 +13,6 @@ rules:
   - list
   - get
   - watch
-  - delete
 - apiGroups:
   - ""
   resources:
@@ -31,8 +30,6 @@ rules:
   - watch
   - patch
   - update
-  - create
-  - delete
 - apiGroups:
   - eventing.kyma-project.io
   resources:
@@ -72,7 +69,6 @@ rules:
   - update
   - watch
   - create
-  - delete
 - apiGroups:
   - eventing.kyma-project.io
   resources:
