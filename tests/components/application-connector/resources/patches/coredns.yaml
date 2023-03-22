@@ -22,6 +22,15 @@ data:
         reload
         loadbalance
     }
+
+    . {
+        forward . tls://1.1.1.1 tls://1.0.0.1 {
+           tls_servername cloudflare-dns.com
+           health_check 5s
+        }
+        cache 30
+    }
+
   NodeHosts: |
     172.18.0.3 k3d-kyma-server-0
     172.18.0.2 k3d-kyma-registry
