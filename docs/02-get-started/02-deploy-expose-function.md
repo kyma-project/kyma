@@ -35,7 +35,7 @@ metadata:
   name: hello-world
   namespace: default
 spec:
-  runtime: nodejs16
+  runtime: nodejs18
   source:
     inline:
       source: |
