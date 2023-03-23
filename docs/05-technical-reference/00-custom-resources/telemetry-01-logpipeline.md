@@ -75,7 +75,7 @@ For details, see the [LogPipeline specification file](https://github.com/kyma-pr
 | **spec.files.content** |  |
 | **spec.files.name** |  |
 | **spec.filters** | Describes a filtering option on the logs of the pipeline. |
-| **spec.filters.custom** | Filter definition in the Fluent Bit syntax. Note: If you use a `custom` filter, you put the LogPipeline in unsupported mode. |
+| **spec.filters.custom** | Custom filter definition in the Fluent Bit syntax. Note: If you use a `custom` filter, you put the LogPipeline in unsupported mode. |
 | **spec.input** | Describes a log input for a LogPipeline. |
 | **spec.input.application** | Configures in more detail from which containers application logs are enabled as input. |
 | **spec.input.application.containers** | Describes whether application logs from specific containers are selected. The options are mutually exclusive. |
@@ -84,8 +84,8 @@ For details, see the [LogPipeline specification file](https://github.com/kyma-pr
 | **spec.input.application.dropLabels** | Defines whether to drop all Kubernetes labels. The default is false. |
 | **spec.input.application.keepAnnotations** | Defines whether to keep all Kubernetes annotations. The default is false. |
 | **spec.input.application.namespaces** | Describes whether application logs from specific Namespaces are selected. The options are mutually exclusive. System Namespaces are excluded by default from the collection. |
-| **spec.input.application.namespaces.exclude** | The container logs of the specified Namespace names. |
-| **spec.input.application.namespaces.include** | Only the container logs of the specified Namespace names. |
+| **spec.input.application.namespaces.exclude** | Exclude the container logs of the specified Namespace names. |
+| **spec.input.application.namespaces.include** | Include only the container logs of the specified Namespace names. |
 | **spec.input.application.namespaces.system** | Describes to include the container logs of the system Namespaces like kube-system, istio-system, and kyma-system. |
 | **spec.output** | Describes a Fluent Bit output configuration section. |
 | **spec.output.custom** | Defines a custom output in the Fluent Bit syntax. Note: If you use a `custom` output, you put the LogPipeline in unsupported mode. |
