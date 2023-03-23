@@ -41,7 +41,7 @@ spec:
       source: |
         module.exports = {
           main: function(event, context) {
-            return 'Hello World!'
+            return 'Hello Serverless'
           }
         }
 EOF
