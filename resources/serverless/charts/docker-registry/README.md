@@ -45,7 +45,6 @@ their default values.
 | `podDisruptionBudget`       | Pod disruption budget                                                                      | `{}`            |
 | `resources.limits.cpu`      | Container requested CPU                                                                    | `nil`           |
 | `resources.limits.memory`   | Container requested memory                                                                 | `nil`           |
-| `priorityClassName      `   | priorityClassName                                                                          | `""`            |
 | `storage`                   | Storage system to use                                                                      | `filesystem`    |
 | `tlsSecretName`             | Name of Secret for TLS certs                                                               | `nil`           |
 | `secrets.htpasswd`          | Htpasswd authentication                                                                    | `nil`           |

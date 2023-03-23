@@ -121,7 +121,8 @@ global:
     git_server:
       name: "gitserver"
       version: "708f6a87"
-  highPriorityClassName: "kyma-system-priority"
+  serverlessPriorityClassValue: 2000000
+  serverlessPriorityClassName: "serverless-priority"
 
 images:
   function_controller:
