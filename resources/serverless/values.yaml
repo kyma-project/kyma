@@ -80,13 +80,13 @@ global:
       directory: "tpi"
     function_controller:
       name: "function-controller"
-      version: "PR-17090"
+      version: "PR-17145"
     function_webhook:
       name: "function-webhook"
-      version: "PR-17090"
+      version: "PR-17145"
     function_build_init:
       name: "function-build-init"
-      version: "PR-17090"
+      version: "PR-17145"
     function_runtime_nodejs14:
       name: "function-runtime-nodejs14"
       version: "v20230302-a6a85f47"
@@ -101,15 +101,15 @@ global:
       version: "PR-17125"
     kaniko_executor:
       name: "kaniko-executor"
-      version: "1.9.1-d4dfc177"
+      version: "1.9.1-ddcfbdf0"
       directory: "tpi"
     registry:
       name: "registry"
-      version: "2.8.1-c5da2c0d"
+      version: "2.8.1-ddcfbdf0"
       directory: "tpi"
     function_registry_gc:
       name: "function-registry-gc"
-      version: "v20230302-9166a23d"
+      version: "PR-17097"
     google_pause:
       name: "pause-amd64"
       version: "3.2"
@@ -121,7 +121,8 @@ global:
     git_server:
       name: "gitserver"
       version: "708f6a87"
-  highPriorityClassName: "kyma-system-priority"
+  serverlessPriorityClassValue: 2000000
+  serverlessPriorityClassName: "serverless-priority"
 
 images:
   function_controller:

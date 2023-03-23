@@ -349,7 +349,7 @@ func calculateInlineImageTag(instance *serverlessv1alpha2.Function) string {
 	hash := sha256.Sum256([]byte(strings.Join([]string{
 		string(instance.GetUID()),
 		fmt.Sprintf("%v", *instance.Spec.Source.Inline),
-		string(instance.Status.Runtime),
+		instance.EffectiveRuntime(),
 	}, "-")))
 
 	return fmt.Sprintf("%x", hash)
@@ -360,7 +360,7 @@ func calculateGitImageTag(instance *serverlessv1alpha2.Function) string {
 		string(instance.GetUID()),
 		instance.Status.Commit,
 		instance.Status.BaseDir,
-		string(instance.Status.Runtime),
+		instance.EffectiveRuntime(),
 	}, "-")
 	hash := sha256.Sum256([]byte(data))
 	return fmt.Sprintf("%x", hash)

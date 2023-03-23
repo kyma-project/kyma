@@ -4,7 +4,6 @@ import (
 	"context"
 	"reflect"
 
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 
 	"github.com/pkg/errors"
@@ -30,11 +29,10 @@ const (
 	serverlessAPIGroup          = "serverless.kyma-project.io"
 	ServerlessCurrentAPIVersion = serverlessv1alpha2.FunctionVersion
 
-	DeprecatedServerlessAPIVersion = serverlessv1alpha1.FunctionVersion
-	DefaultingWebhookName          = "defaulting.webhook.serverless.kyma-project.io"
-	SecretMutationWebhookName      = "mutating.secret.webhook.serverless.kyma-project.io"
-	ValidationWebhookName          = "validation.webhook.serverless.kyma-project.io"
-	ConvertingWebHookName          = "converting.webhook.serverless.kyma-project.io"
+	DefaultingWebhookName     = "defaulting.webhook.serverless.kyma-project.io"
+	SecretMutationWebhookName = "mutating.secret.webhook.serverless.kyma-project.io"
+	ValidationWebhookName     = "validation.webhook.serverless.kyma-project.io"
+	ConvertingWebHookName     = "converting.webhook.serverless.kyma-project.io"
 
 	WebhookTimeout = 10
 
@@ -141,14 +139,10 @@ func getFunctionMutatingWebhookCfg(config WebhookConfig) admissionregistrationv1
 		Rules: []admissionregistrationv1.RuleWithOperations{
 			{
 				Rule: admissionregistrationv1.Rule{
-					APIGroups: []string{
-						serverlessAPIGroup,
-					},
-					APIVersions: []string{
-						ServerlessCurrentAPIVersion, DeprecatedServerlessAPIVersion,
-					},
-					Resources: []string{"functions", "functions/status"},
-					Scope:     &scope,
+					APIGroups:   []string{serverlessAPIGroup},
+					APIVersions: []string{ServerlessCurrentAPIVersion},
+					Resources:   []string{"functions", "functions/status"},
+					Scope:       &scope,
 				},
 				Operations: []admissionregistrationv1.OperationType{
 					admissionregistrationv1.Create,
@@ -237,35 +231,14 @@ func createValidatingWebhookConfiguration(config WebhookConfig) *admissionregist
 				Rules: []admissionregistrationv1.RuleWithOperations{
 					{
 						Rule: admissionregistrationv1.Rule{
-							APIGroups: []string{
-								serverlessAPIGroup,
-							},
-							APIVersions: []string{
-								ServerlessCurrentAPIVersion, DeprecatedServerlessAPIVersion,
-							},
-							Resources: []string{"functions", "functions/status"},
-							Scope:     &scope,
+							APIGroups:   []string{serverlessAPIGroup},
+							APIVersions: []string{ServerlessCurrentAPIVersion},
+							Resources:   []string{"functions", "functions/status"},
+							Scope:       &scope,
 						},
 						Operations: []admissionregistrationv1.OperationType{
 							admissionregistrationv1.Create,
 							admissionregistrationv1.Update,
-						},
-					},
-					{
-						Rule: admissionregistrationv1.Rule{
-							APIGroups: []string{
-								serverlessAPIGroup,
-							},
-							APIVersions: []string{
-								ServerlessCurrentAPIVersion,
-							},
-							Resources: []string{"gitrepositories", "gitrepositories/status"},
-							Scope:     &scope,
-						},
-						Operations: []admissionregistrationv1.OperationType{
-							admissionregistrationv1.Create,
-							admissionregistrationv1.Update,
-							admissionregistrationv1.Delete,
 						},
 					},
 				},

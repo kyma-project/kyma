@@ -9,7 +9,6 @@ import (
 	"github.com/kyma-project/kyma/components/function-controller/internal/logging"
 	"github.com/kyma-project/kyma/components/function-controller/internal/webhook"
 	"github.com/kyma-project/kyma/components/function-controller/internal/webhook/resources"
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	"github.com/pkg/errors"
 	"github.com/vrischmann/envconfig"
@@ -32,7 +31,6 @@ var (
 // nolint
 func init() {
 	_ = serverlessv1alpha2.AddToScheme(scheme)
-	_ = serverlessv1alpha1.AddToScheme(scheme)
 	_ = admissionregistrationv1.AddToScheme(scheme)
 	_ = corev1.AddToScheme(scheme)
 	// +kubebuilder:scaffold:scheme
@@ -76,9 +74,7 @@ func main() {
 	logrZap := zapr.NewLogger(logWithCtx.Desugar())
 	ctrl.SetLogger(logrZap)
 
-	validationConfigv1alpha1 := webhook.ReadValidationConfigV1Alpha1OrDie()
 	validationConfigv1alpha2 := webhook.ReadValidationConfigV1Alpha2OrDie()
-	defaultingConfigv1alpha1 := webhook.ReadDefaultingConfigV1Alpha1OrDie()
 	defaultingConfigv1alpha2 := webhook.ReadDefaultingConfigV1Alpha2OrDie()
 
 	// manager setup
@@ -115,7 +111,6 @@ func main() {
 	whs.KeyName = resources.KeyFile
 	whs.Register(resources.FunctionDefaultingWebhookPath, &ctrlwebhook.Admission{
 		Handler: webhook.NewDefaultingWebhook(
-			defaultingConfigv1alpha1,
 			defaultingConfigv1alpha2,
 			mgr.GetClient(),
 			logWithCtx.Named("defaulting-webhook")),
@@ -123,7 +118,6 @@ func main() {
 
 	whs.Register(resources.FunctionValidationWebhookPath, &ctrlwebhook.Admission{
 		Handler: webhook.NewValidatingWebhook(
-			validationConfigv1alpha1,
 			validationConfigv1alpha2,
 			mgr.GetClient(),
 			logWithCtx.Named("validating-webhook")),
