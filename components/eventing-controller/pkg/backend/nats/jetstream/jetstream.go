@@ -38,7 +38,8 @@ var _ Backend = &JetStream{}
 const (
 	jsHandlerName                      = "jetstream-handler"
 	idleHeartBeatDuration              = 1 * time.Minute
-	jsConsumerMaxRedeliver             = 10
+	jsConsumerMaxRedeliver             = 100
+	jsConsumerNakDelay                 = 30 * time.Second
 	jsMaxStreamNameLength              = 32
 	separator                          = "/"
 	MissingNATSSubscriptionMsg         = "failed to create NATS JetStream subscription"
@@ -650,7 +651,6 @@ func (js *JetStream) getDefaultSubscriptionOptions(consumer SubscriptionSubjectI
 		toJetStreamConsumerDeliverPolicyOptOrDefault(js.Config.JSConsumerDeliverPolicy),
 		nats.MaxAckPending(subConfig.MaxInFlightMessages),
 		nats.MaxDeliver(jsConsumerMaxRedeliver),
-		nats.BackOff(getExponentialBackOff()),
 	}
 	return defaultOpts
 }
@@ -699,8 +699,13 @@ func (js *JetStream) getCallback(subKeyPrefix, subscriptionName string) nats.Msg
 				http.StatusInternalServerError,
 			)
 			js.metricsCollector.RecordDeliveryPerSubscription(subscriptionName, ce.Type(), sink, http.StatusInternalServerError)
+
+			// NAK the msg with a delay so it is redelivered after jsConsumerNakDelay period.
+			if err := msg.NakWithDelay(jsConsumerNakDelay); err != nil {
+				js.namedLogger().Errorw("failed to NAK an event on JetStream")
+			}
+
 			ceLogger.Errorw("Failed to dispatch the CloudEvent", "error", result.Error())
-			// Do not NAK the msg so that the server waits for AckWait and then redeliver the msg.
 			return
 		}
 
@@ -770,19 +775,6 @@ func (js *JetStream) checkJetStreamConnection() error {
 		}
 	}
 	return nil
-}
-
-func getExponentialBackOff() []time.Duration {
-	count := jsConsumerMaxRedeliver - 1
-	start := 2 * time.Second
-	factor := 2
-
-	backoff := make([]time.Duration, count)
-	for i := range backoff {
-		backoff[i] = start
-		start *= time.Duration(factor)
-	}
-	return backoff
 }
 
 // GetAllSubscriptions returns the map which contains details of all subscriptions and consumers.
