@@ -28,8 +28,23 @@ First, let's create the Function and apply it.
 Run:
 
 ```bash
-kyma init function --name hello-world
-kyma apply function
+cat <<EOF | kubectl apply -f -
+apiVersion: serverless.kyma-project.io/v1alpha2
+kind: Function
+metadata:
+  name: hello-world
+  namespace: default
+spec:
+  runtime: nodejs16
+  source:
+    inline:
+      source: |
+        module.exports = {
+          main: function(event, context) {
+            return 'Hello World!'
+          }
+        }
+EOF
 ```
 
   </details>
