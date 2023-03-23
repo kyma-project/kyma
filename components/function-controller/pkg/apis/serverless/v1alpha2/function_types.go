@@ -299,6 +299,13 @@ func (f *Function) TypeOf(t FunctionType) bool {
 	}
 }
 
+func (f *Function) EffectiveRuntime() string {
+	if f.Spec.RuntimeImageOverride != "" {
+		return f.Spec.RuntimeImageOverride
+	}
+	return string(f.Spec.Runtime)
+}
+
 //+kubebuilder:object:root=true
 
 // FunctionList contains a list of Function
