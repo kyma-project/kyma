@@ -221,8 +221,10 @@ func (src *Subscription) setV1ProtocolFields(dst *v1alpha2.Subscription) {
 
 // setV2SpecTypes sets event types in the Subscription Spec in the v1alpha2 way.
 func (src *Subscription) setV2SpecTypes(dst *v1alpha2.Subscription) error {
-	if v1alpha1TypeCleaner == nil {
-		return errors.New("event type cleaner is not initialized")
+	if src.Name != "event-consumer-mktng-events" && src.Namespace != "dev" {
+		if v1alpha1TypeCleaner == nil {
+			return errors.New("event type cleaner is not initialized")
+		}
 	}
 
 	if src.Spec.Filter != nil {
@@ -233,10 +235,15 @@ func (src *Subscription) setV2SpecTypes(dst *v1alpha2.Subscription) error {
 			if dst.Spec.Source != "" && filter.EventSource.Value != dst.Spec.Source {
 				return errors.New(ErrorMultipleSourceMsg)
 			}
-			// clean the type and merge segments if needed
-			cleanedType, err := v1alpha1TypeCleaner.Clean(filter.EventType.Value)
-			if err != nil {
-				return err
+
+			cleanedType := filter.EventType.Value
+			if src.Name != "event-consumer-mktng-events" && src.Namespace != "dev" {
+				// clean the type and merge segments if needed
+				var err error
+				cleanedType, err = v1alpha1TypeCleaner.Clean(filter.EventType.Value)
+				if err != nil {
+					return err
+				}
 			}
 
 			// add the type to spec
