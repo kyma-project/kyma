@@ -113,6 +113,7 @@ spec:
           {{- end }}
             - name: APP_HEALTHZ_ADDRESS
               value: ":{{ .Values.containers.manager.healthz.port }}"
+            {{ include "createEnv" ( dict "name" "APP_KUBERNETES_BASE_NAMESPACE" "value" .Values.containers.manager.envs.baseNamespace "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_KUBERNETES_CONFIG_MAP_REQUEUE_DURATION" "value" .Values.containers.manager.envs.configMapRequeueDuration "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_KUBERNETES_SECRET_REQUEUE_DURATION" "value" .Values.containers.manager.envs.secretRequeueDuration "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_KUBERNETES_SERVICE_ACCOUNT_REQUEUE_DURATION" "value" .Values.containers.manager.envs.serviceAccountRequeueDuration "context" . ) | nindent 12 }}
