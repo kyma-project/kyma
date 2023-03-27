@@ -97,5 +97,5 @@ describe('SKR nightly', function() {
   });
 
   oidcE2ETest(getShootOptionsFunc, getShootInfoFunc);
-  commerceMockTest(options)
+  commerceMockTest(options);
 });
