@@ -396,7 +396,7 @@ function waitForEndpoint(name, namespace = 'default', timeout = 300_000) {
 
 function waitForFunction(name, namespace = 'default', timeout = 90_000) {
   return waitForK8sObject(
-      `/apis/serverless.kyma-project.io/v1alpha1/namespaces/${namespace}/functions`,
+      `/apis/serverless.kyma-project.io/v1alpha2/namespaces/${namespace}/functions`,
       {},
       (_type, _apiObj, watchObj) => {
         return (
