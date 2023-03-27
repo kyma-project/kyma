@@ -15,7 +15,7 @@ const {
   withScenarioName,
   gardener,
   keb,
-  director,
+  oidcE2ETest,
 } = require('../../skr-test');
 
 // Mocha root hook
@@ -92,5 +92,4 @@ describe('SKR nightly', function() {
   });
 
   oidcE2ETest(getShootOptionsFunc, getShootInfoFunc);
-  commerceMockTest(options);
 });
