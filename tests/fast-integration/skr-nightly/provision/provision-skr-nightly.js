@@ -20,6 +20,7 @@ const {
   director,
 >>>>>>> ae241d1c1 (Delete commerce test from skr nightly)
   oidcE2ETest,
+  commerceMockTests,
 } = require('../../skr-test');
 
 // Mocha root hook
@@ -96,4 +97,5 @@ describe('SKR nightly', function() {
   });
 
   oidcE2ETest(getShootOptionsFunc, getShootInfoFunc);
+  commerceMockTests(options)
 });
