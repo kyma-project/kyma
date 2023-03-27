@@ -3,7 +3,6 @@
 # It should be run by config/default
 resources:
 - bases/serverless.kyma-project.io_functions.yaml
-- bases/serverless.kyma-project.io_gitrepositories.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 # patchesStrategicMerge:
