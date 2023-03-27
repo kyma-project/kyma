@@ -15,7 +15,6 @@
 # Owners of the .kyma-project-io folder
 /.kyma-project-io/ @kyma-project/Hasselhoff
 
-/common @kyma-project/gopher @kyma-project/Framefrog
 # Logging library
 /common/logging @kyma-project/Framefrog
 
@@ -63,7 +62,7 @@
 /tests/application-gateway-legacy-tests @kyma-project/Framefrog
 
 # Fast Integration Tests
-/tests/fast-integration @kyma-project/observability @kyma-project/eventing @kyma-project/gopher
+/tests/fast-integration/test @kyma-project/observability @kyma-project/eventing @kyma-project/Otters @kyma-project/goat
 /tests/fast-integration/eventing-test @kyma-project/eventing
 /tests/fast-integration/image @kyma-project/eventing
 /tests/fast-integration/kcp @kyma-project/gopher
