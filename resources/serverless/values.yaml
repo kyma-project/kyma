@@ -197,6 +197,8 @@ containers:
         logLevel: "info"
         logFormat: "json"
     envs:
+      baseNamespace:
+        value: "{{ .Release.Namespace }}"
       configPath:
         value: "{{ .Values.global.configuration.targetDir }}/{{ .Values.global.configuration.filename }}"
       configMapRequeueDuration:
