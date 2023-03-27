@@ -1799,6 +1799,22 @@ function waitForDeploymentWithLabel(
   );
 }
 
+
+function k8sDeleteSecret(name, namespace, type) {
+  const secretJson = {
+    apiVersion: 'v1',
+    kind: 'Secret',
+    type: type,
+    metadata: {
+      name,
+      namespace,
+    },
+  };
+
+  return k8sDelete([secretJson], namespace);
+}
+
+
 module.exports = {
   initializeK8sClient,
   getShootNameFromK8sServerUrl,
@@ -1892,4 +1908,5 @@ module.exports = {
   waitForEndpoint,
   waitForPodWithLabelAndCondition,
   waitForDeploymentWithLabel,
+  k8sDeleteSecret
 };
