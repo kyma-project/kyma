@@ -2,7 +2,7 @@
 title: Expose and secure a workload with OAuth2
 ---
 
-This tutorial shows how to expose and secure services or Functions using API Gateway Controller. The controller reacts to an instance of the APIRule custom resource (CR) and creates an Istio VirtualService, Istio Request Authentication and Istio Authorization Policy according to the details specified in the CR. To interact with the secured services, you must create an application using an OICD-compliant provider.
+This tutorial shows how to expose and secure services or Functions using API Gateway Controller. The controller reacts to an instance of the APIRule custom resource (CR) and creates an Istio VirtualService and [Oathkeeper Access Rules](https://www.ory.sh/docs/oathkeeper/api-access-rules) according to the details specified in the CR.
 
 ## Prerequisites
 
@@ -35,11 +35,58 @@ This tutorial shows how to expose and secure services or Functions using API Gat
     </details>
   </div>  
 
-* Create an application using an OICD-compliant provider of your choice. Configure your **client ID**, **client secret**, and generate the OAuth2 tokens. Then, export the following values as environmental variables:
+* Create an application using an OAuth2-compliant provider of your choice, and export the following values as environmental variables:
   ```shell
-   export TOKEN_URL={YOUR_TOKEN_URL}
-   export INTROSPECTION_URL={YOUR_INTROSPECTION_URL}
+    export CLIENT_ID={CLIENT_ID}
+    export CLIENT_SECRET={CLIENT_SECRET}
+    export TOKEN_URL={TOKEN_URL}
+    export INTROSPECTION_URL={INTROSPECTION_URL}
    ```
+
+## Get the tokens
+
+1. Encode the client's credentials and export them as environment variables:
+   ```shell
+   export ENCODED_CREDENTIALS=$(echo -n "$CLIENT_ID:$CLIENT_SECRET" | base64)
+   ```
+
+2. Get tokens to interact with secured resources using the client credentials flow:
+   <div tabs>
+     <details>
+     <summary>
+     Token with `read` scope
+     </summary>
+     * Export the following value as an environment variable:
+        ```shell
+        export KYMA_DOMAIN={KYMA_DOMAIN_NAME}
+        ```  
+     * Get the token:
+         ```shell
+          curl --location --request POST “$TOKEN_URL?grant_type=client_credentials&client_id=$CLIENT_SECRET” --header “Content-Type: application/x-www-form-urlencoded” --header “Authorization: Basic $ENCODED_CREDENTIALS”
+         ```
+     * Export the issued token as an environment variable:
+         ```shell
+         export ACCESS_TOKEN_READ={ISSUED_READ_TOKEN}
+         ```
+     </details>
+     <details>
+     <summary>
+     Token with `write` scope
+     </summary>
+     * Export the following value as an environment variable:
+        ```shell
+        export KYMA_DOMAIN={KYMA_DOMAIN_NAME}
+        ```  
+     * Get the token:
+         ```shell
+         curl --location --request POST “$TOKEN_URL?grant_type=client_credentials&client_id=$CLIENT_SECRET” --header “Content-Type: application/x-www-form-urlencoded” --header “Authorization: Basic $ENCODED_CREDENTIALS”
+         ```
+     * Export the issued token as an environment variable:
+         ```shell
+         export ACCESS_TOKEN_WRITE={ISSUED_WRITE_TOKEN}
+         ```
+      </details>
+   </div>
 
 
 ## Expose and secure your workload
@@ -55,33 +102,40 @@ Follow the instructions to expose an instance of the HttpBin service or a sample
 
 1. Expose the service and secure it by creating an APIRule CR in your Namespace. Run:
 
-   ```shell
-   cat <<EOF | kubectl apply -f -
-   apiVersion: gateway.kyma-project.io/v1beta1
-   kind: APIRule
-   metadata:
-     name: httpbin
-     namespace: $NAMESPACE
-   spec:
-     gateway: $GATEWAY
-     host: httpbin.$DOMAIN_TO_EXPOSE_WORKLOADS
-     service:
-       name: httpbin
-       port: 8000
-     rules:
-       - path: /.*
-         methods: ["GET"]
-         accessStrategies:
-           - handler: oauth2_introspection
-             config:
-               required_scope: ["read"]
-       - path: /post
-         methods: ["POST"]
-         accessStrategies:
-           - handler: oauth2_introspection
-             config:
-               required_scope: ["write"]
-   EOF
+  ```shell
+   
+  cat <<EOF | kubectl apply -f -
+  apiVersion: gateway.kyma-project.io/v1beta1
+  kind: APIRule
+  metadata:
+    name: httpbin
+    namespace: $NAMESPACE
+  spec:
+    gateway: $GATEWAY
+    host: httpbin.$DOMAIN_TO_EXPOSE_WORKLOADS
+    service:
+      name: httpbin
+      port: 8000
+    rules:
+      - path: /.*
+        methods: ["GET"]
+        accessStrategies:
+          - handler: oauth2_introspection
+            config:
+              required_scope: ["read"]
+              introspection_url: "$INTROSPECTION_URL"
+              introspection_request_headers:
+                Authorization: "Basic $ENCODED_CREDENTIALS"
+      - path: /post
+        methods: ["POST"]
+        accessStrategies:
+          - handler: oauth2_introspection
+            config:
+              required_scope: ["write"]
+              introspection_url: "$INTROSPECTION_URL"
+              introspection_request_headers:
+              Authorization: "Basic $ENCODED_CREDENTIALS"
+  EOF
    ```
 
    >**NOTE:** If you are running Kyma on k3d, add `httpbin.kyma.local` to the entry with k3d IP in your system's `/etc/hosts` file.
@@ -114,9 +168,12 @@ Follow the instructions to expose an instance of the HttpBin service or a sample
        - path: /function
          methods: ["GET"]
          accessStrategies:
-           - handler: oauth2_introspection
-             config:
-               required_scope: ["read"]
+          - handler: oauth2_introspection
+            config:
+              required_scope: ["read"]
+              introspection_url: "$INTROSPECTION_URL"
+              introspection_request_headers:
+                Authorization: "Basic $ENCODED_CREDENTIALS"
    EOF
    ```
 
