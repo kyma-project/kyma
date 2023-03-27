@@ -114,16 +114,8 @@ global:
       name: "pause-amd64"
       version: "3.2"
       directory: "external/gcr.io/google-containers"
-  testImages:
-    function_controller_test:
-      name: "function-controller-test"
-      version: "PR-17089"
-    git_server:
-      name: "gitserver"
-      version: "708f6a87"
   serverlessPriorityClassValue: 2000000
   serverlessPriorityClassName: "serverless-priority"
-
 images:
   function_controller:
     pullPolicy: IfNotPresent
