@@ -85,7 +85,7 @@
 /tests/function-controller @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
 /tests/components/api-gateway @strekm @werdes72 @dariusztutaj @cnvergence @barchw @videlov @triffer
 /tests/components/istio @strekm @dariusztutaj @cnvergence @barchw @werdes72 @videlov @triffer
-/tests/components/application-connector @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
+/tests/components/application-connector @VOID404 @akgalwas @koala7659 @m00g3n @mvshao
 /tests/components/reconciler @khlifi411 @jeremyharisch @ruanxin @tobiscr @Tomasz-Smelcerz-SAP @jakobmoellersap
 
 # performance tests
