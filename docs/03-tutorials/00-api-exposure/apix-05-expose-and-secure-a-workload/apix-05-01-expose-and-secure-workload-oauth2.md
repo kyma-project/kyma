@@ -35,7 +35,7 @@ This tutorial shows how to expose and secure services or Functions using API Gat
     </details>
   </div>  
 
-* Create an application using an OAuth2-compliant provider of your choice, and export the following values as environmental variables:
+* Configure your client ID and client secret using an OAuth2-compliant provider. Then, export the following values as environmental variables:
   ```shell
     export CLIENT_ID={CLIENT_ID}
     export CLIENT_SECRET={CLIENT_SECRET}
@@ -134,7 +134,7 @@ Follow the instructions to expose an instance of the HttpBin service or a sample
               required_scope: ["write"]
               introspection_url: "$INTROSPECTION_URL"
               introspection_request_headers:
-              Authorization: "Basic $ENCODED_CREDENTIALS"
+               Authorization: "Basic $ENCODED_CREDENTIALS"
   EOF
    ```
 
