@@ -23,6 +23,18 @@ webhooks:
         operator: NotIn
         values:
         - kube-system
+    rules:
+      - apiGroups:
+          - serverless.kyma-project.io
+        apiVersions:
+          - v1alpha2
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - functions
+          - functions/status
+        scope: '*'
 ---
 apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
@@ -63,3 +75,15 @@ webhooks:
         operator: NotIn
         values:
         - kube-system
+    rules:
+      - apiGroups:
+          - serverless.kyma-project.io
+        apiVersions:
+          - v1alpha2
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - functions
+          - functions/status
+        scope: '*'
