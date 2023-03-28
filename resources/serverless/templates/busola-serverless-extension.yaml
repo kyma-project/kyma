@@ -64,7 +64,7 @@ data:
       - name: header.runtime
         source: >-
           spec.runtime = 'nodejs16' ? 'Node.js 16' : (spec.runtime = 'nodejs14' ?
-          'Node.js 14' : (spec.runtime = 'python39' ? 'Python 3.9' : spec.runtime))
+          'Node.js 14 - deprecated' : (spec.runtime = 'python39' ? 'Python 3.9' : (spec.runtime = 'nodejs18' ? 'Node.js 18' : spec.runtime)))
     body:
       - widget: Tabs
         children:
@@ -212,14 +212,14 @@ data:
       enum: [nodejs, python]
       trigger: [language]
       dynamicValue: |
-        spec.runtime in ['nodejs14', 'nodejs16'] ? 'nodejs' :
+        spec.runtime in ['nodejs14', 'nodejs16', 'nodejs18'] ? 'nodejs' :
         spec.runtime in ['python39'] ? 'python' :
         ''
     - simple: true
       path: spec.runtime
       placeholder: placeholders.spec.runtime
       enum: |
-        $language = 'nodejs' ? ['nodejs14', 'nodejs16'] :
+        $language = 'nodejs' ? ['nodejs14', 'nodejs16', 'nodejs18'] :
         $language = 'python' ? ['python39'] :
         []
       subscribe:
@@ -392,7 +392,7 @@ data:
     - name: header.runtime
       source: >-
         spec.runtime = 'nodejs16' ? 'Node.js 16' : (spec.runtime = 'nodejs14' ?
-        'Node.js 14' : (spec.runtime = 'python39' ? 'Python 3.9' : spec.runtime))
+        'Node.js 14 - deprecated' : (spec.runtime = 'python39' ? 'Python 3.9' : (spec.runtime = 'nodejs18' ? 'Node.js 18' : spec.runtime)))
     - name: header.sourceType
       source: 'spec.source.gitRepository ? "Git Repository" : "Inline Editor"'
     - name: header.status
@@ -503,8 +503,9 @@ data:
       Status: Status
       Runtime: Runtime
       'Source Type': Source Type
-      spec.runtime.nodejs14: Node.js 14
+      spec.runtime.nodejs14: Node.js 14 - deprecated
       spec.runtime.nodejs16: Node.js 16
+      spec.runtime.nodejs18: Node.js 18
       spec.runtime.python39: Python 3.9
       spec.resourceConfiguration.build: Build
       spec.resourceConfiguration.function: Function
@@ -528,7 +529,7 @@ data:
     - name: Node.js Function
       value:
         spec:
-          runtime: nodejs14
+          runtime: nodejs18
           source:
             inline:
               source: |-
