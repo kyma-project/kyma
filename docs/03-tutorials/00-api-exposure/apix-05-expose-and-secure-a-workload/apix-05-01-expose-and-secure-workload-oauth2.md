@@ -35,7 +35,7 @@ This tutorial shows how to expose and secure services or Functions using API Gat
     </details>
   </div>  
 
-* Configure your client ID and client secret using an OAuth2-compliant provider. Then, export the following values as environmental variables:
+* Configure your client ID and client secret using an OAuth2-compliant provider. Then, export the following values as environment variables:
   ```shell
     export CLIENT_ID={CLIENT_ID}
     export CLIENT_SECRET={CLIENT_SECRET}
