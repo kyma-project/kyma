@@ -16,7 +16,7 @@ Feature: Istio is installed
     Then "proxy" has "requests" set to cpu - "10m" and memory - "32Mi"
     And "proxy" has "limits" set to cpu - "250m" and memory - "254Mi"
     And "ingress-gateway" has "requests" set to cpu - "10m" and memory - "32Mi"
-    And "ingress-gateway" has "limits" set to cpu - "1000m" and memory - "1024i"
+    And "ingress-gateway" has "limits" set to cpu - "1000m" and memory - "1024Mi"
     And "proxy_init" has "requests" set to cpu - "10m" and memory - "10Mi"
     And "proxy_init" has "limits" set to cpu - "100m" and memory - "50Mi"
     And "pilot" has "requests" set to cpu - "10m" and memory - "128Mi"
