@@ -1,6 +1,6 @@
 module github.com/kyma-project/kyma/components/event-publisher-proxy
 
-go 1.19
+go 1.20
 
 require (
 	github.com/cloudevents/sdk-go/v2 v2.13.0
@@ -103,9 +103,7 @@ replace (
 )
 
 replace (
-	github.com/kyma-incubator/api-gateway => github.com/kyma-project/api-gateway v0.0.0-20220819093753-296e6704d413
-	github.com/opencontainers/runc => github.com/opencontainers/runc v1.0.0-rc93
+	github.com/kyma-incubator/api-gateway => github.com/kyma-project/api-gateway v0.0.0-20230321131415-ea1b79aa2ddb
 	github.com/prometheus/client_golang => github.com/prometheus/client_golang v1.14.0
-	golang.org/x/crypto => golang.org/x/crypto v0.3.0
-	k8s.io/utils => k8s.io/utils v0.0.0-20220210201930-3a6ce19ff2f9
+	golang.org/x/crypto => golang.org/x/crypto v0.7.0
 )

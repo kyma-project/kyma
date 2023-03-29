@@ -155,7 +155,6 @@ pod:
     seccompProfile: # Optional. This option can also be set on container level but it is recommended to set it on Pod level and leave it undefined on container level.
       type: RuntimeDefault
 
-priorityClassName: ""
 
 podDisruptionBudget: {}
   # maxUnavailable: 1

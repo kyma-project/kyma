@@ -1,5 +1,5 @@
-# image builder base on golang:1.19.4-alpine3.17-v1
-FROM eu.gcr.io/kyma-project/external/golang@sha256:a9b24b67dc83b3383d22a14941c2b2b2ca6a103d805cac6820fd1355943beaf1 as builder
+# image builder base on golang:1.20.2-alpine3.17
+FROM eu.gcr.io/kyma-project/external/golang@sha256:4e6bc0eafc261b6c8ba9bd9999b6698e8cefbe21e6d90fbc10c34599d75dc608 as builder
 
 ENV BASE_APP_DIR=/workspace/go/src/github.com/kyma-project/kyma/components/function-controller \
     CGO_ENABLED=1 \
