@@ -25,7 +25,7 @@ func SetupResourcesController(ctx context.Context, mgr ctrl.Manager, serviceName
 	certPath := path.Join(DefaultCertDir, CertFile)
 	certBytes, err := ioutil.ReadFile(certPath)
 	if err != nil {
-		return errors.Wrapf(err, "failed to read caBundel file: %s", certPath)
+		return errors.Wrapf(err, "failed to read caBundle file: %s", certPath)
 	}
 
 	webhookConfig := WebhookConfig{
