@@ -82,6 +82,13 @@ components:
       hpaSpec:
         maxReplicas: 5
         minReplicas: 2
+      resources:
+        limits:
+          cpu: 4000m
+          memory: 2Gi
+        requests:
+          cpu: 100m
+          memory: 512Mi
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
