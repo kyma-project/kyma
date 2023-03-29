@@ -49,6 +49,8 @@ webhooks:
       service:
         name: {{ template "webhook.fullname" . }}
         namespace: {{ .Release.Namespace }}
+        path: /defaulting/registry-config-secrets
+        port: {{ .Values.service.ports.httpsWebhook.port}}
     failurePolicy: Fail
     sideEffects: None
     matchPolicy: Exact
@@ -61,10 +63,23 @@ webhooks:
         operator: NotIn
         values:
         - kube-system
+    rules:
+      - apiGroups:
+          - ""
+        apiVersions:
+          - v1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - secrets
+        scope: '*'
   - clientConfig:
       service:
         name: {{ template "webhook.fullname" . }}
         namespace: {{ .Release.Namespace }}
+        path: "/defaulting/functions"
+        port: {{ .Values.service.ports.httpsWebhook.port}}
     failurePolicy: Fail
     sideEffects: None
     matchPolicy: Exact

@@ -29,7 +29,7 @@ func SetupResourcesController(ctx context.Context, mgr ctrl.Manager, serviceName
 	}
 
 	webhookConfig := WebhookConfig{
-		CABundel:         certBytes,
+		CABundle:         certBytes,
 		ServiceName:      serviceName,
 		ServiceNamespace: serviceNamespace,
 	}
