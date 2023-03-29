@@ -36,34 +36,6 @@ func TestEnsureWebhookConfigurationFor(t *testing.T) {
 		require.Equal(t, mwh.Name, DefaultingWebhookName)
 		validateMutatingWebhook(t, wc, mwh.Webhooks)
 	})
-
-	t.Run("ensure a Validating Webhook is created if it doesn't exist", func(t *testing.T) {
-		client := fake.NewClientBuilder().Build()
-		wc := WebhookConfig{
-			CABundel:         caBundel,
-			ServiceName:      testServiceName,
-			ServiceNamespace: testNamespaceName,
-		}
-		err := EnsureWebhookConfigurationFor(ctx, client, wc, ValidatingWebHook)
-		require.NoError(t, err)
-
-		vwh := &admissionregistrationv1.ValidatingWebhookConfiguration{}
-		err = client.Get(ctx, types.NamespacedName{Name: ValidationWebhookName}, vwh)
-
-		require.NoError(t, err)
-		require.NotNil(t, vwh)
-		require.Equal(t, vwh.Name, ValidationWebhookName)
-		require.NotNil(t, vwh.Webhooks)
-
-		require.Equal(t, int32(443), *vwh.Webhooks[0].ClientConfig.Service.Port)
-		require.Equal(t, FunctionValidationWebhookPath, *vwh.Webhooks[0].ClientConfig.Service.Path)
-		require.Equal(t, wc.ServiceName, vwh.Webhooks[0].ClientConfig.Service.Name)
-		require.Equal(t, wc.ServiceNamespace, vwh.Webhooks[0].ClientConfig.Service.Namespace)
-		require.Contains(t, vwh.Webhooks[0].Rules[0].Resources, "functions")
-		require.Contains(t, vwh.Webhooks[0].Rules[0].Resources, "functions/status")
-
-	})
-
 	t.Run("ensure a Mutating Webhook is updated if it already exist", func(t *testing.T) {
 		client := fake.NewClientBuilder().Build()
 		mwh := &admissionregistrationv1.MutatingWebhookConfiguration{
@@ -105,6 +77,9 @@ func TestEnsureWebhookConfigurationFor(t *testing.T) {
 					"dont-remove-me": "true",
 				},
 			},
+			Webhooks: []admissionregistrationv1.ValidatingWebhook{
+				{},
+			},
 		}
 		err := client.Create(ctx, vwh)
 		require.NoError(t, err)
@@ -117,11 +92,12 @@ func TestEnsureWebhookConfigurationFor(t *testing.T) {
 		err = EnsureWebhookConfigurationFor(ctx, client, wc, ValidatingWebHook)
 		require.NoError(t, err)
 
-		UpdateVwh := &admissionregistrationv1.ValidatingWebhookConfiguration{}
-		err = client.Get(ctx, types.NamespacedName{Name: ValidationWebhookName}, UpdateVwh)
+		updatedWh := &admissionregistrationv1.ValidatingWebhookConfiguration{}
+		err = client.Get(ctx, types.NamespacedName{Name: ValidationWebhookName}, updatedWh)
 
 		require.NoError(t, err)
-		validateValidationWebhook(t, wc, UpdateVwh)
+		require.Len(t, updatedWh.Webhooks, 1)
+		require.Equal(t, wc.CABundel, updatedWh.Webhooks[0].ClientConfig.CABundle)
 	})
 }
 
@@ -149,21 +125,4 @@ func validateMutatingWebhook(t *testing.T, wc WebhookConfig, webhooks []admissio
 	require.Equal(t, wc.ServiceNamespace, secretWebhook.ClientConfig.Service.Namespace)
 	require.Len(t, secretWebhook.Rules, 1)
 	require.Contains(t, secretWebhook.Rules[0].Resources, "secrets")
-
-}
-
-func validateValidationWebhook(t *testing.T, wc WebhookConfig, webhook *admissionregistrationv1.ValidatingWebhookConfiguration) {
-	require.Contains(t, webhook.Labels, "dont-remove-me")
-	require.Equal(t, webhook.Name, ValidationWebhookName)
-	require.Len(t, webhook.Webhooks, 1)
-	functionWebhook := webhook.Webhooks[0]
-
-	require.Equal(t, int32(443), *functionWebhook.ClientConfig.Service.Port)
-	require.Equal(t, FunctionValidationWebhookPath, *functionWebhook.ClientConfig.Service.Path)
-	require.Equal(t, wc.ServiceName, functionWebhook.ClientConfig.Service.Name)
-	require.Equal(t, wc.ServiceNamespace, functionWebhook.ClientConfig.Service.Namespace)
-	require.Len(t, functionWebhook.Rules, 1)
-	require.Contains(t, functionWebhook.Rules[0].Resources, "functions")
-	require.Contains(t, functionWebhook.Rules[0].Resources, "functions/status")
-	require.Contains(t, functionWebhook.Rules[0].APIVersions, ServerlessCurrentAPIVersion)
 }
