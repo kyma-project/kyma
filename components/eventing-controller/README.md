@@ -2,6 +2,9 @@
 
 ## Overview
 
+
+
+
 The Eventing Controller components contain reconcilers for various CRDs related to Eventing in Kyma:
 
 - Subscription reconciler, which lays down the Eventing infrastructure in Business Event Bus (BEB) or [NATS](https://docs.nats.io/nats-concepts/intro)
