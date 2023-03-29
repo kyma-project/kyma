@@ -56,18 +56,21 @@ spec:
                         description: Defines authentication options for the OTLP output
                         properties:
                           basic:
-                            description: Contains credentials for HTTP basic auth
+                            description: Activates `Basic` authentication for the
+                              destination providing relevant Secrets.
                             properties:
                               password:
                                 description: Contains the basic auth password or a
-                                  secret reference.
+                                  Secret reference.
                                 properties:
                                   value:
+                                    description: Value that can contain references
+                                      to Secret values.
                                     type: string
                                   valueFrom:
                                     properties:
                                       secretKeyRef:
-                                        description: Reference to a key in a Secret.
+                                        description: Refers to a key in a Secret.
                                           You must provide `name` and `namespace`
                                           of the Secret, as well as the name of the
                                           `key`.
@@ -83,14 +86,16 @@ spec:
                                 type: object
                               user:
                                 description: Contains the basic auth username or a
-                                  secret reference.
+                                  Secret reference.
                                 properties:
                                   value:
+                                    description: Value that can contain references
+                                      to Secret values.
                                     type: string
                                   valueFrom:
                                     properties:
                                       secretKeyRef:
-                                        description: Reference to a key in a Secret.
+                                        description: Refers to a key in a Secret.
                                           You must provide `name` and `namespace`
                                           of the Secret, as well as the name of the
                                           `key`.
@@ -114,11 +119,13 @@ spec:
                           an OTLP endpoint.
                         properties:
                           value:
+                            description: Value that can contain references to Secret
+                              values.
                             type: string
                           valueFrom:
                             properties:
                               secretKeyRef:
-                                description: Reference to a key in a Secret. You must
+                                description: Refers to a key in a Secret. You must
                                   provide `name` and `namespace` of the Secret, as
                                   well as the name of the `key`.
                                 properties:
@@ -140,12 +147,14 @@ spec:
                               description: Defines the header name.
                               type: string
                             value:
+                              description: Value that can contain references to Secret
+                                values.
                               type: string
                             valueFrom:
                               properties:
                                 secretKeyRef:
-                                  description: Reference to a key in a Secret. You
-                                    must provide `name` and `namespace` of the Secret,
+                                  description: Refers to a key in a Secret. You must
+                                    provide `name` and `namespace` of the Secret,
                                     as well as the name of the `key`.
                                   properties:
                                     key:

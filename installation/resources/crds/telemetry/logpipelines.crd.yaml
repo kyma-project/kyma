@@ -68,8 +68,7 @@ spec:
                   type: object
                 type: array
               input:
-                description: Definition where to collect logs, including selector
-                  mechanisms.
+                description: Defines where to collect logs, including selector mechanisms.
                 properties:
                   application:
                     description: Configures in more detail from which containers application
@@ -158,11 +157,13 @@ spec:
                         description: Grafana Loki URL.
                         properties:
                           value:
+                            description: Value that can contain references to Secret
+                              values.
                             type: string
                           valueFrom:
                             properties:
                               secretKeyRef:
-                                description: Reference to a key in a Secret. You must
+                                description: Refers to a key in a Secret. You must
                                   provide `name` and `namespace` of the Secret, as
                                   well as the name of the `key`.
                                 properties:
@@ -196,11 +197,13 @@ spec:
                         description: Defines the host of the HTTP receiver.
                         properties:
                           value:
+                            description: Value that can contain references to Secret
+                              values.
                             type: string
                           valueFrom:
                             properties:
                               secretKeyRef:
-                                description: Reference to a key in a Secret. You must
+                                description: Refers to a key in a Secret. You must
                                   provide `name` and `namespace` of the Secret, as
                                   well as the name of the `key`.
                                 properties:
@@ -217,11 +220,13 @@ spec:
                         description: Defines the basic auth password.
                         properties:
                           value:
+                            description: Value that can contain references to Secret
+                              values.
                             type: string
                           valueFrom:
                             properties:
                               secretKeyRef:
-                                description: Reference to a key in a Secret. You must
+                                description: Refers to a key in a Secret. You must
                                   provide `name` and `namespace` of the Secret, as
                                   well as the name of the `key`.
                                 properties:
@@ -239,7 +244,7 @@ spec:
                           is 443.
                         type: string
                       tls:
-                        description: TLS Configuration of the HTTP target server.
+                        description: Configures TLS for the HTTP target server.
                         properties:
                           disabled:
                             description: Indicates if TLS is disabled or enabled.
@@ -258,11 +263,13 @@ spec:
                         description: Defines the basic auth user.
                         properties:
                           value:
+                            description: Value that can contain references to Secret
+                              values.
                             type: string
                           valueFrom:
                             properties:
                               secretKeyRef:
-                                description: Reference to a key in a Secret. You must
+                                description: Refers to a key in a Secret. You must
                                   provide `name` and `namespace` of the Secret, as
                                   well as the name of the `key`.
                                 properties:
@@ -292,7 +299,7 @@ spec:
                     valueFrom:
                       properties:
                         secretKeyRef:
-                          description: Reference to a key in a Secret. You must provide
+                          description: Refers to a key in a Secret. You must provide
                             `name` and `namespace` of the Secret, as well as the name
                             of the `key`.
                           properties:

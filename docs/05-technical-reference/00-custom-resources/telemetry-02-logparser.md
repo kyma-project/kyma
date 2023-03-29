@@ -37,7 +37,7 @@ For details, see the [LogParser specification file](https://github.com/kyma-proj
 <!-- LogParser v1alpha1 telemetry.kyma-project.io -->
 | Parameter         | Description                                   |
 | ---------------------------------------- | ---------|
-| **spec.parser** | [Fluent Bit Parsers](https://docs.fluentbit.io/manual/pipeline/parsers). The parser specified here has no effect until it is referenced by a [Pod annotation](https://docs.fluentbit.io/manual/pipeline/filters/kubernetes#kubernetes-annotations) on your workload or by a [Parser Filter](https://docs.fluentbit.io/manual/pipeline/filters/parser) defined in a pipelines filters section. |
+| **spec.parser** | [Fluent Bit Parsers](https://docs.fluentbit.io/manual/pipeline/parsers). The parser specified here has no effect until it is referenced by a [Pod annotation](https://docs.fluentbit.io/manual/pipeline/filters/kubernetes#kubernetes-annotations) on your workload or by a [Parser Filter](https://docs.fluentbit.io/manual/pipeline/filters/parser) defined in a pipeline's filters section. |
 | **status.conditions** | An array of conditions describing the status of the parser. |
 | **status.conditions.lastTransitionTime** | An array of conditions describing the status of the parser. |
 | **status.conditions.reason** | An array of conditions describing the status of the parser. |
