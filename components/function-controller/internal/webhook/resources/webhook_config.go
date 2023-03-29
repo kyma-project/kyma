@@ -28,7 +28,7 @@ const (
 	FunctionValidationWebhookPath       = "/validation/function"
 )
 
-func EnsureWebhookConfigurationFor(ctx context.Context, client ctlrclient.Client, config WebhookConfig, wt WebHookType) error {
+func InjectCABundleIntoWebhooks(ctx context.Context, client ctlrclient.Client, config WebhookConfig, wt WebHookType) error {
 	switch wt {
 	case MutatingWebhook:
 		return injectCAIntoMutatingWebhook(ctx, client, config.CABundle)
