@@ -52,8 +52,8 @@ func injectCAIntoMutatingWebhook(ctx context.Context, client ctlrclient.Client, 
 			webhook.ClientConfig.CABundle = CABundle
 			updatedWebhooks = append(updatedWebhooks, webhook)
 		}
-
 	}
+
 	if shouldBeUpdated {
 		mwhc.Webhooks = updatedWebhooks
 		return errors.Wrap(client.Update(ctx, mwhc), "while  injecting CA Bundle into mutation webhook configuration")
@@ -77,6 +77,7 @@ func injectCAIntoValidationWebhook(ctx context.Context, client ctlrclient.Client
 		}
 
 	}
+
 	if shouldBeUpdated {
 		vwhc.Webhooks = updatedWebhooks
 		return errors.Wrap(client.Update(ctx, vwhc), "while injecting CA Bundle into validation webhook configuration")
