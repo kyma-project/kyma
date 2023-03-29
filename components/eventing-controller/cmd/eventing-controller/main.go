@@ -23,6 +23,7 @@ import (
 
 func main() {
 	opts := options.New()
+	// dummy comment
 	if err := opts.Parse(); err != nil {
 		log.Fatalf("Failed to parse options, error: %v", err)
 	}
