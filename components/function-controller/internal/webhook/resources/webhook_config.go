@@ -90,15 +90,18 @@ func injectCaBundleIntoValidationWebhook(ctx context.Context, client ctlrclient.
 		return errors.Wrapf(err, "failed to get validation ValidatingWebhookConfiguration: %s", ValidationWebhookName)
 	}
 
+	updatedWebhooks := []admissionregistrationv1.ValidatingWebhook{}
 	shouldBeUpdated := false
-	for _, webhooks := range vwhc.Webhooks {
-		if !bytes.Equal(webhooks.ClientConfig.CABundle, config.CABundel) {
+	for _, webhook := range vwhc.Webhooks {
+		if !bytes.Equal(webhook.ClientConfig.CABundle, config.CABundel) {
 			shouldBeUpdated = true
-			webhooks.ClientConfig.CABundle = config.CABundel
+			webhook.ClientConfig.CABundle = config.CABundel
+			updatedWebhooks = append(updatedWebhooks, webhook)
 		}
 
 	}
 	if shouldBeUpdated {
+		vwhc.Webhooks = updatedWebhooks
 		return errors.Wrap(client.Update(ctx, vwhc), "while updating webhook mutation configuration")
 	}
 	return nil
