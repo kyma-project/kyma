@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.9.2
+    controller-gen.kubebuilder.io/version: v0.11.3
   creationTimestamp: null
   name: logpipelines.telemetry.kyma-project.io
 spec:
@@ -68,7 +68,8 @@ spec:
                   type: object
                 type: array
               input:
-                description: Describes a log input for a LogPipeline.
+                description: Definition where to collect logs, including selector
+                  mechanisms.
                 properties:
                   application:
                     description: Configures in more detail from which containers application
@@ -93,11 +94,11 @@ spec:
                         type: object
                       dropLabels:
                         description: Defines whether to drop all Kubernetes labels.
-                          The default is false.
+                          The default is `false`.
                         type: boolean
                       keepAnnotations:
                         description: Defines whether to keep all Kubernetes annotations.
-                          The default is false.
+                          The default is `false`.
                         type: boolean
                       namespaces:
                         description: Describes whether application logs from specific
@@ -117,15 +118,16 @@ spec:
                               type: string
                             type: array
                           system:
-                            description: Describes to include the container logs of
-                              the system Namespaces like kube-system, istio-system,
-                              and kyma-system.
+                            description: Set to `true` if collecting from all Namespaces
+                              must also include the system Namespaces like kube-system,
+                              istio-system, and kyma-system.
                             type: boolean
                         type: object
                     type: object
                 type: object
               output:
-                description: Describes a Fluent Bit output configuration section.
+                description: '[Fluent Bit output](https://docs.fluentbit.io/manual/pipeline/outputs)
+                  where you want to push the logs. Only one output can be specified.'
                 properties:
                   custom:
                     description: 'Defines a custom output in the Fluent Bit syntax.
@@ -133,28 +135,36 @@ spec:
                       in unsupported mode.'
                     type: string
                   grafana-loki:
-                    description: 'Configures an output to the Kyma-internal Loki instance.
-                      Note: This output is considered legacy and is only provided
-                      for backwards compatibility with the in-cluster Loki instance.
-                      It might not be compatible with latest Loki versions. For integration
-                      with a Loki-based system, use the `custom` output with name
-                      `loki` instead.'
+                    description: Configures an output to the Kyma-internal Loki instance.
+                      [Fluent Bit grafana-loki output](https://grafana.com/docs/loki/v2.2.x/clients/fluentbit/).
+                      **Note:** This output is considered legacy and is only provided
+                      for backward compatibility with the [deprecated](https://kyma-project.io/blog/2022/11/2/loki-deprecation/)
+                      in-cluster Loki instance. It might not be compatible with the
+                      latest Loki versions. For integration with a custom Loki installation
+                      use the `custom` output with the name `loki` instead, see also
+                      [Installing a custom Loki stack in Kyma](https://github.com/kyma-project/examples/tree/main/loki).
                     properties:
                       labels:
                         additionalProperties:
                           type: string
+                        description: Labels to set for each log record.
                         type: object
                       removeKeys:
+                        description: Attributes to be removed from a log record.
                         items:
                           type: string
                         type: array
                       url:
+                        description: Grafana Loki URL.
                         properties:
                           value:
                             type: string
                           valueFrom:
                             properties:
                               secretKeyRef:
+                                description: Reference to a key in a Secret. You must
+                                  provide `name` and `namespace` of the Secret, as
+                                  well as the name of the `key`.
                                 properties:
                                   key:
                                     type: string
@@ -176,11 +186,11 @@ spec:
                       dedot:
                         description: Enables de-dotting of Kubernetes labels and annotations
                           for compatibility with ElasticSearch based backends. Dots
-                          (.) will be replaced by underscores (_).
+                          (.) will be replaced by underscores (_). Default is `false`.
                         type: boolean
                       format:
-                        description: Defines the log encoding to be used. Default
-                          is json.
+                        description: Data format to be used in the HTTP request body.
+                          Default is `json`.
                         type: string
                       host:
                         description: Defines the host of the HTTP receiver.
@@ -190,6 +200,9 @@ spec:
                           valueFrom:
                             properties:
                               secretKeyRef:
+                                description: Reference to a key in a Secret. You must
+                                  provide `name` and `namespace` of the Secret, as
+                                  well as the name of the `key`.
                                 properties:
                                   key:
                                     type: string
@@ -208,6 +221,9 @@ spec:
                           valueFrom:
                             properties:
                               secretKeyRef:
+                                description: Reference to a key in a Secret. You must
+                                  provide `name` and `namespace` of the Secret, as
+                                  well as the name of the `key`.
                                 properties:
                                   key:
                                     type: string
@@ -223,13 +239,15 @@ spec:
                           is 443.
                         type: string
                       tls:
-                        description: Defines TLS settings for the HTTP connection.
+                        description: TLS Configuration of the HTTP target server.
                         properties:
                           disabled:
-                            description: Disable TLS.
+                            description: Indicates if TLS is disabled or enabled.
+                              Default is `false`.
                             type: boolean
                           skipCertificateValidation:
-                            description: Disable TLS certificate validation.
+                            description: If `true`, the validation of certificates
+                              is skipped. Default is `false`.
                             type: boolean
                         type: object
                       uri:
@@ -244,6 +262,9 @@ spec:
                           valueFrom:
                             properties:
                               secretKeyRef:
+                                description: Reference to a key in a Secret. You must
+                                  provide `name` and `namespace` of the Secret, as
+                                  well as the name of the `key`.
                                 properties:
                                   key:
                                     type: string
@@ -257,15 +278,23 @@ spec:
                     type: object
                 type: object
               variables:
+                description: A list of mappings from Kubernetes Secret keys to environment
+                  variables. Mapped keys are mounted as environment variables, so
+                  that they are available as [Variables](https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/classic-mode/variables)
+                  in the sections.
                 items:
                   description: References a Kubernetes secret that should be provided
                     as environment variable to Fluent Bit
                   properties:
                     name:
+                      description: Name of the variable to map.
                       type: string
                     valueFrom:
                       properties:
                         secretKeyRef:
+                          description: Reference to a key in a Secret. You must provide
+                            `name` and `namespace` of the Secret, as well as the name
+                            of the `key`.
                           properties:
                             key:
                               type: string
@@ -282,20 +311,30 @@ spec:
             description: Shows the observed state of the LogPipeline
             properties:
               conditions:
+                description: An array of conditions describing the status of the pipeline.
                 items:
                   description: LogPipelineCondition contains details for the current
                     condition of this LogPipeline
                   properties:
                     lastTransitionTime:
+                      description: An array of conditions describing the status of
+                        the pipeline.
                       format: date-time
                       type: string
                     reason:
+                      description: An array of conditions describing the status of
+                        the pipeline.
                       type: string
                     type:
+                      description: 'The possible transition types are:<br>- `Running`:
+                        The instance is ready and usable.<br>- `Pending`: The pipeline
+                        is being activated.'
                       type: string
                   type: object
                 type: array
               unsupportedMode:
+                description: Is active when the LogPipeline uses a `custom` output
+                  or filter; see [unsupported mode](./../../01-overview/main-areas/telemetry/telemetry-02-logs.md#unsupported-mode#unsupported-mode).
                 type: boolean
             type: object
         type: object

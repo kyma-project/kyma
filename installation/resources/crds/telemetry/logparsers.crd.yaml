@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.9.2
+    controller-gen.kubebuilder.io/version: v0.11.3
   creationTimestamp: null
   name: logparsers.telemetry.kyma-project.io
 spec:
@@ -43,24 +43,33 @@ spec:
             description: Defines the desired state of LogParser.
             properties:
               parser:
-                description: Configures a user defined Fluent Bit parser to be applied
-                  to the logs.
+                description: '[Fluent Bit Parsers](https://docs.fluentbit.io/manual/pipeline/parsers).
+                  The parser specified here has no effect until it is referenced by
+                  a [Pod annotation](https://docs.fluentbit.io/manual/pipeline/filters/kubernetes#kubernetes-annotations)
+                  on your workload or by a [Parser Filter](https://docs.fluentbit.io/manual/pipeline/filters/parser)
+                  defined in a pipelines filters section.'
                 type: string
             type: object
           status:
             description: Shows the observed state of the LogParser.
             properties:
               conditions:
+                description: An array of conditions describing the status of the parser.
                 items:
-                  description: LogParserCondition contains details for the current
-                    condition of this LogParser
                   properties:
                     lastTransitionTime:
+                      description: An array of conditions describing the status of
+                        the parser.
                       format: date-time
                       type: string
                     reason:
+                      description: An array of conditions describing the status of
+                        the parser.
                       type: string
                     type:
+                      description: 'The possible transition types are:<br>- `Running`:
+                        The parser is ready and usable.<br>- `Pending`: The parser
+                        is being activated.'
                       type: string
                   type: object
                 type: array
