@@ -1,6 +1,7 @@
 package resources
 
 import (
+	"bytes"
 	"context"
 	"reflect"
 
@@ -64,7 +65,7 @@ func EnsureWebhookConfigurationFor(ctx context.Context, client ctlrclient.Client
 		}
 		return ensureMutatingWebhookConfigFor(ctx, client, config)
 	}
-	return ensureValidatingWebhookConfigFor(ctx, client, config)
+	return injectCaBundleIntoValidationWebhook(ctx, client, config)
 }
 
 func ensureMutatingWebhookConfigFor(ctx context.Context, client ctlrclient.Client, config WebhookConfig) error {
@@ -83,18 +84,22 @@ func ensureMutatingWebhookConfigFor(ctx context.Context, client ctlrclient.Clien
 	return nil
 }
 
-func ensureValidatingWebhookConfigFor(ctx context.Context, client ctlrclient.Client, config WebhookConfig) error {
+func injectCaBundleIntoValidationWebhook(ctx context.Context, client ctlrclient.Client, config WebhookConfig) error {
 	vwhc := &admissionregistrationv1.ValidatingWebhookConfiguration{}
 	if err := client.Get(ctx, types.NamespacedName{Name: ValidationWebhookName}, vwhc); err != nil {
-		if apiErrors.IsNotFound(err) {
-			return client.Create(ctx, createValidatingWebhookConfiguration(config))
-		}
 		return errors.Wrapf(err, "failed to get validation ValidatingWebhookConfiguration: %s", ValidationWebhookName)
 	}
-	ensuredVwhc := createValidatingWebhookConfiguration(config)
-	if !reflect.DeepEqual(ensuredVwhc.Webhooks, vwhc.Webhooks) {
-		ensuredVwhc.ObjectMeta = *vwhc.ObjectMeta.DeepCopy()
-		return client.Update(ctx, ensuredVwhc)
+
+	shouldBeUpdated := false
+	for _, webhooks := range vwhc.Webhooks {
+		if !bytes.Equal(webhooks.ClientConfig.CABundle, config.CABundel) {
+			shouldBeUpdated = true
+			webhooks.ClientConfig.CABundle = config.CABundel
+		}
+
+	}
+	if shouldBeUpdated {
+		return errors.Wrap(client.Update(ctx, vwhc), "while updating webhook mutation configuration")
 	}
 	return nil
 }
@@ -195,56 +200,6 @@ func getRegistryConfigSecretMutatingWebhook(config WebhookConfig) admissionregis
 					admissionregistrationv1.Create,
 					admissionregistrationv1.Update,
 				},
-			},
-		},
-	}
-}
-
-func createValidatingWebhookConfiguration(config WebhookConfig) *admissionregistrationv1.ValidatingWebhookConfiguration {
-	failurePolicy := admissionregistrationv1.Fail
-	matchPolicy := admissionregistrationv1.Exact
-	scope := admissionregistrationv1.AllScopes
-	sideEffects := admissionregistrationv1.SideEffectClassNone
-
-	return &admissionregistrationv1.ValidatingWebhookConfiguration{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: ValidationWebhookName,
-		},
-		Webhooks: []admissionregistrationv1.ValidatingWebhook{
-			{
-				Name: ValidationWebhookName,
-				AdmissionReviewVersions: []string{
-					"v1beta1",
-					"v1",
-				},
-				ClientConfig: admissionregistrationv1.WebhookClientConfig{
-					CABundle: config.CABundel,
-					Service: &admissionregistrationv1.ServiceReference{
-						Namespace: config.ServiceNamespace,
-						Name:      config.ServiceName,
-						Path:      pointer.String(FunctionValidationWebhookPath),
-						Port:      pointer.Int32(443),
-					},
-				},
-				FailurePolicy: &failurePolicy,
-				MatchPolicy:   &matchPolicy,
-				Rules: []admissionregistrationv1.RuleWithOperations{
-					{
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{serverlessAPIGroup},
-							APIVersions: []string{ServerlessCurrentAPIVersion},
-							Resources:   []string{"functions", "functions/status"},
-							Scope:       &scope,
-						},
-						Operations: []admissionregistrationv1.OperationType{
-							admissionregistrationv1.Create,
-							admissionregistrationv1.Update,
-						},
-					},
-				},
-				SideEffects:       &sideEffects,
-				TimeoutSeconds:    pointer.Int32(WebhookTimeout),
-				NamespaceSelector: createExcludeKubeSystemNamespacesSelector(),
 			},
 		},
 	}

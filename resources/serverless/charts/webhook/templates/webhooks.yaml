@@ -11,6 +11,8 @@ webhooks:
       service:
         name: {{ template "webhook.fullname" . }}
         namespace: {{ .Release.Namespace }}
+        path:  "/validation/function"
+        port : {{ .Values.service.ports.httpsWebhook.port}}
     failurePolicy: Fail
     sideEffects: None
     matchPolicy: Exact
