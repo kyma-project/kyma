@@ -58,7 +58,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: FunctionSpec defines the desired state of Function
+            description: Spec defines the desired state of Function
             properties:
               env:
                 description: Env specifies an array of key-value pairs to be used
