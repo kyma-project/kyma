@@ -39,11 +39,11 @@ const (
 )
 
 type Source struct {
-	// GitRepository defines Function as git-sourced. Can't be used at the same time with Inline.
+	// GitRepository defines Function as git-sourced. Can't be used at the same time with *inline*.
 	// +optional
 	GitRepository *GitRepositorySource `json:"gitRepository,omitempty"`
 
-	// Inline defines Function as the inline Function. Can't be used at the same time with GitRepository.
+	// Inline defines Function as the inline Function. Can't be used at the same time with *gitRepository*.
 	// +optional
 	Inline *InlineSource `json:"inline,omitempty"`
 }
@@ -74,7 +74,7 @@ type GitRepositorySource struct {
 
 // RepositoryAuth defines authentication method used for repository operations
 type RepositoryAuth struct {
-	// RepositoryAuthType defines if you must authenticate to the repository with a password or token (`basic`),
+	// Type defines if you must authenticate to the repository with a password or token (`basic`),
 	// or an SSH key (`key`). For SSH, this parameter must be set to `key`.
 	Type RepositoryAuthType `json:"type"`
 
@@ -103,11 +103,12 @@ type Template struct {
 }
 
 type ResourceRequirements struct {
-	// Profile defines name of predefined set of values of resource. Can't be used at the same time with Resources.
+	// Profile defines name of predefined set of values of resource. Can't be used at the same time with *resources*.
 	// +optional
 	Profile string `json:"profile,omitempty"`
 
-	// Resources defines amount of resources available for the Pod to use. Can't be used at the same time with Profile.
+	// Resources defines amount of resources available for the Pod to use. Can't be used at the same time
+	// with *profile*.
 	// +optional
 	Resources *v1.ResourceRequirements `json:"resources,omitempty"`
 }
@@ -160,7 +161,9 @@ type FunctionSpec struct {
 	Source Source `json:"source"`
 
 	// Env specifies an array of key-value pairs to be used as environment variables for the Function.
-	// You can define values as static strings or reference values from ConfigMaps or Secrets.
+	// You can define values as static strings or reference values from ConfigMaps
+	// (more info: https://kyma-project.io/docs/kyma/latest/05-technical-reference/00-configuration-parameters/svls-02-environment-variables.md#define-environment-variables-in-a-config-map)
+	// or Secrets.
 	Env []v1.EnvVar `json:"env,omitempty"`
 
 	// ResourceConfiguration specifies resources requested by Function and build Job.
@@ -168,14 +171,14 @@ type FunctionSpec struct {
 	ResourceConfiguration *ResourceConfiguration `json:"resourceConfiguration,omitempty"`
 
 	// ScaleConfig defines minimum and maximum number of Function's Pods to run at a time.
-	// When it is configured, a HorizontalPodAutoscaler will be deployed and will control the Replicas field
+	// When it is configured, a HorizontalPodAutoscaler will be deployed and will control the *replicas* field
 	// to scale Function based on the CPU utilisation.
 	// +optional
 	ScaleConfig *ScaleConfig `json:"scaleConfig,omitempty"`
 
 	// Replicas defines the exact number of Function's Pods to run at a time.
-	// If ScaleConfig is configured, or if Function is targeted by an external scaler,
-	// then the Replicas field is used by the relevant HorizontalPodAutoscaler to control the number of active replicas.
+	// If *scaleConfig* is configured, or if Function is targeted by an external scaler,
+	// then the *replicas* field is used by the relevant HorizontalPodAutoscaler to control the number of active replicas.
 	// +optional
 	Replicas *int32 `json:"replicas,omitempty"`
 
