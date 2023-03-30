@@ -111,9 +111,11 @@ spec:
 
 This table lists all the possible parameters of a given resource together with their descriptions:
 
-<!-- Part of the table bellow is generated automatically don't touch them. When you want to change description, do it in components/function-controller/pkg/apis/serverless/v1alpha2/function_types.go -->
+<!-- Part of the table bellow is generated automatically, please don't touch them. When you want to change description, do it in components/function-controller/pkg/apis/serverless/v1alpha2/function_types.go, then regenerate using "make manifests" in components/function-controller. -->
 <!-- Some special tags (html comments) are at the end of lines due to markdown requirements. -->
-<!-- The content between "FUNCTION-SPEC-START" and "FUNCTION-SPEC-END" will be replaced but rows with "KEEP-THIS" at the end will be preserved-->
+<!-- The content between "FUNCTION-SPEC-START" and "FUNCTION-SPEC-END" will be replaced but rows with "KEEP-THIS" at the end will be preserved. -->
+<!-- All comments in this file that contain SKIP-ELEMENT and the name of the element will skip the generation of that element. Similarly with SKIP-WITH-ANCESTORS comments, which skip elements along with their descendants. -->
+<!-- Words in descriptions that are surrounded by asterisks will be replaced with parameter names with full path and surrounded by double asterisks -->
 
 <!-- SKIP-ELEMENT spec -->
 <!-- SKIP-WITH-ANCESTORS spec.template -->
@@ -141,10 +143,10 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.resourceConfiguration.function**       |       No       | Specifies resources requested by the Function's Pod. |
 | **spec.resourceConfiguration.function.profile**                         |       No       | Defines name of predefined set of values of resource. Can't be used at the same time with **spec.resourceConfiguration.function.resources**. |
 | **spec.resourceConfiguration.function.resources**                       |       No       | Defines amount of resources available for the Function's Pod to use. Can't be used at the same time with **spec.resourceConfiguration.function.profile**. |
-| **spec.resourceConfiguration.function.resources.limits.cpu**            |       No       | Defines the maximum number of CPUs available for the Function's Pod to use. |<!-- KEEP-THIS -->
-| **spec.resourceConfiguration.function.resources.requests.cpu**          |       No       | Specifies the number of CPUs requested by the Function's Pod to operate. |<!-- KEEP-THIS -->
-| **spec.resourceConfiguration.function.resources.requests.memory**       |       No       | Specifies the amount of memory requested by the Function's Pod to operate. |<!-- KEEP-THIS -->
-| **spec.resourceConfiguration.function.resources.limits.memory**         |       No       | Defines the maximum amount of memory available for the Function's Pod to use. |<!-- KEEP-THIS -->
+| **spec.resourceConfiguration.function.resources.limits.cpu**            |       No       | Defines the maximum number of CPUs available for the Function's Pod to use. |
+| **spec.resourceConfiguration.function.resources.requests.cpu**          |       No       | Specifies the number of CPUs requested by the Function's Pod to operate. |
+| **spec.resourceConfiguration.function.resources.requests.memory**       |       No       | Specifies the amount of memory requested by the Function's Pod to operate. |
+| **spec.resourceConfiguration.function.resources.limits.memory**         |       No       | Defines the maximum amount of memory available for the Function's Pod to use. |
 | **spec.resourceConfiguration.build**          |       No       | Specifies resources requested by the build Job's Pod. |
 | **spec.resourceConfiguration.build.profile**  |       No       | Defines name of predefined set of values of resource. Can't be used at the same time with **spec.resourceConfiguration.build.resources**. |
 | **spec.resourceConfiguration.build.resources**                       |       No       | Defines amount of resources available for the build Job's Pod to use. Can't be used at the same time with **spec.resourceConfiguration.build.profile**. |
@@ -157,8 +159,8 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.scaleConfig.minReplicas**              |      Yes       | Defines the minimum number of Function's Pods to run at a time. |
 | **spec.scaleConfig.maxReplicas**              |      Yes       | Defines the maximum number of Function's Pods to run at a time. |
 | **spec.secretMounts**                         |       No       | Specifies Secrets to mount into the Function's container filesystem. |
-| **spec.secretMounts.secretName**              |      Yes       | Specifies name of the Secret in the Function's Namespace to use. |
-| **spec.secretMounts.mountPath**               |      Yes       | Specifies path within the container at which the Secret should be mounted. |<!-- FUNCTION-SPEC-END -->
+| **spec.secretMounts.secretName**              |      Yes       | Specifies name of the Secret in the Function's Namespace to use. |<!-- KEEP-THIS -->
+| **spec.secretMounts.mountPath**               |      Yes       | Specifies path within the container at which the Secret should be mounted. |<!-- KEEP-THIS --><!-- FUNCTION-SPEC-END -->
 | **status.conditions.lastTransitionTime** | Not applicable | Provides a timestamp for the last time the Function's condition status changed from one to another.    |
 | **status.conditions.message**            | Not applicable | Describes a human-readable message on the CR processing progress, success, or failure.   |
 | **status.conditions.reason**             | Not applicable | Provides information on the Function CR processing success or failure. See the [**Reasons**](#status-reasons) section for the full list of possible status reasons and their descriptions. All status reasons are in camelCase.   |
