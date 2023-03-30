@@ -10,7 +10,6 @@ const {
   deleteEventingBackendK8sSecret,
   deleteK8sConfigMap,
   getShootNameFromK8sServerUrl,
-  listPods,
   retryPromise,
   waitForVirtualService,
   k8sApply,
@@ -44,7 +43,6 @@ const skrInstanceId = process.env.INSTANCE_ID || '';
 const testCompassFlow = process.env.TEST_COMPASS_FLOW || false;
 const isUpgradeJob = process.env.EVENTING_UPGRADE_JOB || false;
 const isUpgradeJob2ndReconcile = process.env.EVENTING_UPGRADE_2ND_RECONCILE_JOB || false;
-const subCRDVersion = 'v1alpha2';
 const skipResourceCleanup = process.env.SKIP_CLEANUP || false;
 const suffix = getSuffix(isSKR, testCompassFlow);
 const appName = `app-${suffix}`;
@@ -168,45 +166,6 @@ async function getRegisteredCompassScenarios() {
   }
 }
 
-async function getNatsPods() {
-  const labelSelector = 'app.kubernetes.io/name=nats';
-  return await listPods(labelSelector, 'kyma-system');
-}
-
-async function getJetStreamStreamData(host) {
-  const responseJson = await retryPromise(async () => await axios.get(`https://${host}/jsz?streams=true`), 5, 1000);
-  const streams = responseJson.data.account_details[0].stream_detail;
-  for (const stream of streams) {
-    if (stream.name === kymaStreamName) {
-      return {
-        streamName: kymaStreamName,
-        streamCreationTime: stream.created,
-      };
-    }
-  }
-}
-
-async function getJetStreamConsumerData(consumerName, host) {
-  const responseJson = await retryPromise(async () => await axios.get(`https://${host}/jsz?consumers=true`), 5, 1000);
-  const consumers = responseJson.data.account_details[0].stream_detail[0].consumer_detail;
-  for (const con of consumers) {
-    if (con.name === consumerName) {
-      return {
-        consumerName: con.name,
-        consumerCreationTime: con.created,
-      };
-    }
-  }
-}
-
-function isStreamCreationTimeMissing(streamData) {
-  return streamData.streamCreationTime === undefined;
-}
-
-function isConsumerCreationTimeMissing(streamData) {
-  return streamData.consumerCreationTime === undefined;
-}
-
 async function getClusterHost(apiRuleName, namespace) {
   const vs = await waitForVirtualService(namespace, apiRuleName);
   const mockHost = vs.spec.hosts[0];
@@ -228,7 +187,7 @@ function getK8sFunctionObject(funcName) {
   return k8s.loadAllYaml(functionYaml);
 }
 
-async function deployEventingSinkFunction(funcName = eventingSinkName) {
+async function deployEventingSinkFunction(funcName) {
   await k8sApply(getK8sFunctionObject(funcName), testNamespace, true);
 }
 
@@ -236,7 +195,7 @@ async function undeployEventingFunction(funcName) {
   await k8sDelete(getK8sFunctionObject(funcName), testNamespace);
 }
 
-async function waitForEventingSinkFunction(funcName = eventingSinkName) {
+async function waitForEventingSinkFunction(funcName) {
   await waitForFunction(funcName, testNamespace, 300000);
 }
 
@@ -399,11 +358,11 @@ async function publishEventWithRetry(proxyHost, encoding, eventId, eventType, ev
     const traceParentId = await generateTraceParentHeader();
 
     if (encoding === 'binary') { // binary CE
-      reqBody = createBinaryCloudEventRequestBody(proxyHost, eventId, eventType, eventSource, traceParentId);
+      reqBody = createBinaryCloudEventRequestBody(eventId, eventType, eventSource, traceParentId);
     } else if (encoding === 'structured') { // structured CE
-      reqBody = createStructuredCloudEventRequestBody(proxyHost, eventId, eventType, eventSource, traceParentId);
+      reqBody = createStructuredCloudEventRequestBody(eventId, eventType, eventSource, traceParentId);
     } else if (encoding === 'legacy') {
-      reqBody = createLegacyEventRequestBody(proxyHost, eventId, eventType, eventSource, isSubV1Alpha1);
+      reqBody = createLegacyEventRequestBody(eventId, eventType, eventSource, isSubV1Alpha1);
     } else {
       throw new Error('Invalid encoding. Possible values are [binary, structured, legacy]');
     }
@@ -491,7 +450,7 @@ async function ensureEventReceivedWithRetry(sink, proxyHost,
       });
 }
 
-function createBinaryCloudEventRequestBody(proxyHost, eventId, eventType, eventSource, traceParent = '') {
+function createBinaryCloudEventRequestBody(eventId, eventType, eventSource, traceParent = '') {
   debug('setting headers and payload for binary cloud event');
   const reqBody = {
     url: `http://${eppInClusterUrl}/publish`,
@@ -515,7 +474,7 @@ function createBinaryCloudEventRequestBody(proxyHost, eventId, eventType, eventS
   return reqBody;
 }
 
-function createStructuredCloudEventRequestBody(proxyHost, eventId, eventType, eventSource, traceparent) {
+function createStructuredCloudEventRequestBody(eventId, eventType, eventSource, traceparent) {
   debug('setting headers and payload for structured cloud event');
   const reqBody = {
     url: `http://${eppInClusterUrl}/publish`,
@@ -540,7 +499,7 @@ function createStructuredCloudEventRequestBody(proxyHost, eventId, eventType, ev
   return reqBody;
 }
 
-function createLegacyEventRequestBody(proxyHost, eventId, eventType, eventSource, isSubV1Alpha1 = true) {
+function createLegacyEventRequestBody(eventId, eventType, eventSource, isSubV1Alpha1 = true) {
   debug('setting url, headers and payload for legacy event');
   // event types are different between subscription v1alpha1 and v1alpha2.
   // so extracting the appropriate types for legacy format.
@@ -703,7 +662,6 @@ module.exports = {
   isUpgradeJob2ndReconcile,
   skrInstanceId,
   testCompassFlow,
-  subCRDVersion,
   backendK8sSecretName,
   backendK8sSecretNamespace,
   testDataConfigMapName,
@@ -716,20 +674,16 @@ module.exports = {
   gardener,
   shootName,
   suffix,
-  cleanupTestingResources,
-  getRegisteredCompassScenarios,
-  getNatsPods,
-  getJetStreamStreamData,
-  getJetStreamConsumerData,
-  isStreamCreationTimeMissing,
-  isConsumerCreationTimeMissing,
   eppInClusterUrl,
-  ensureEventReceivedWithRetry,
   eventingSinkName,
   eventingUpgradeSinkName,
   v1alpha1SubscriptionsTypes,
   subscriptionsTypes,
   subscriptionsExactTypeMatching,
+  kymaStreamName,
+  getRegisteredCompassScenarios,
+  ensureEventReceivedWithRetry,
+  cleanupTestingResources,
   getClusterHost,
   checkFunctionReachable,
   checkFunctionUnreachable,
@@ -742,8 +696,6 @@ module.exports = {
   waitForV1Alpha1Subscriptions,
   waitForV1Alpha2Subscriptions,
   checkEventTracing,
-  getTimeStampsWithZeroMilliSeconds,
-  kymaStreamName,
   saveJetStreamDataForRecreateTest,
   getConfigMapWithRetries,
   checkStreamNotReCreated,

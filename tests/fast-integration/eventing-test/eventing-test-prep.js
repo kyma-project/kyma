@@ -93,8 +93,8 @@ describe('Eventing tests preparation', function() {
 
   it('Prepare eventing-sink function', async function() {
     debug('Preparing EventingSinkFunction');
-    await deployEventingSinkFunction();
-    await waitForEventingSinkFunction();
+    await deployEventingSinkFunction(eventingSinkName);
+    await waitForEventingSinkFunction(eventingSinkName);
   });
 
   it('Eventing-sink function should be reachable through API Rule', async function() {

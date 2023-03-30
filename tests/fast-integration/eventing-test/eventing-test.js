@@ -17,7 +17,6 @@ const {
   waitForPodWithLabelAndCondition,
   createApiRuleForService,
   deleteApiRule,
-  getSubscription,
   k8sApply,
   waitForSubscription,
   eventingSubscriptionV1Alpha2,
@@ -53,8 +52,6 @@ const {
   checkConsumerNotReCreated,
   isUpgradeJob,
   isUpgradeJob2ndReconcile,
-  deployV1Alpha2Subscriptions,
-  subCRDVersion,
   deployEventingSinkFunction,
   eventingUpgradeSinkName,
   waitForEventingSinkFunction,
@@ -121,25 +118,7 @@ describe('Eventing tests', function() {
   });
 
   before('Ensure eventing-sink function is ready', async function() {
-    await waitForEventingSinkFunction();
-  });
-
-  before('Ensure subscriptions exists', async function() {
-    if (!isUpgradeJob) {
-      return;
-    }
-
-    // Creating v1alpha2 subscriptions if they do not exists in upgrade tests
-    // Only temporarily - will be removed
-    const sub1 = await getSubscription(subscriptionsTypes[0].name, testNamespace, subCRDVersion);
-    if (sub1) {
-      debug('Subscription v1alpha2 exists');
-      return;
-    }
-
-    debug('Subscription v1alpha2 do not exists');
-    debug('Creating v1alpha2 subscriptions...');
-    await deployV1Alpha2Subscriptions();
+    await waitForEventingSinkFunction(eventingSinkName);
   });
 
   before('Get cluster host name from Virtual Services', async function() {
