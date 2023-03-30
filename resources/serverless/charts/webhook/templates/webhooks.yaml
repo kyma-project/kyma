@@ -6,7 +6,8 @@ metadata:
   labels:
     {{- include "tplValue" ( dict "value" .Values.commonLabels "context" . ) | nindent 4 }}
 webhooks:
-  - clientConfig:
+  - name: validation.webhook.serverless.kyma-project.io
+    clientConfig:
       service:
         name: {{ template "webhook.fullname" . }}
         namespace: {{ .Release.Namespace }}
@@ -17,7 +18,6 @@ webhooks:
     matchPolicy: Exact
     timeoutSeconds: 10
     admissionReviewVersions: [ "v1beta1", "v1" ]
-    name: validation.webhook.serverless.kyma-project.io
     namespaceSelector:
       matchExpressions:
         - key: gardener.cloud/purpose
