@@ -46,7 +46,10 @@ manifests: controller-gen-local generate-local
 	kustomize build config/crd > config/crd/crd-serverless.yaml
 	cp config/crd/crd-serverless.yaml ../../installation/resources/crds/serverless/
 	cp config/crd/crd-serverless.yaml ../../resources/serverless/templates/crds.yaml
-	@go run ./hack/function-spec-doc-gen.go
+	@go run ./hack/function-spec-doc-gen.go \
+		v1alpha2 \
+		config/crd/bases/serverless.kyma-project.io_functions.yaml \
+		../../docs/05-technical-reference/00-custom-resources/svls-01-function.md
 
 # Generate code
 .PHONY: generate-local

@@ -11,14 +11,9 @@ import (
 	"strings"
 )
 
-// TODO: consider move to param?
-const APIVersion = "v1alpha2"
-
-// TODO: use relative path or from param
-const CRDFilename = `/Users/I567085/src/2022jul/kyma/components/function-controller/config/crd/bases/serverless.kyma-project.io_functions.yaml`
-
-// TODO: use relative path or from param
-const MDFilename = `/Users/I567085/src/2022jul/kyma/docs/05-technical-reference/00-custom-resources/svls-01-function.md`
+var APIVersion = os.Args[1]
+var CRDFilename = os.Args[2]
+var MDFilename = os.Args[3]
 
 const FunctionSpecIdentifier = `FUNCTION-SPEC`
 const REFunctionSpecPattern = `(?s)<!--\s*` + FunctionSpecIdentifier + `-START\s* -->.*<!--\s*` + FunctionSpecIdentifier + `-END\s*-->`
