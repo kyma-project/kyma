@@ -7,6 +7,7 @@ import (
 )
 
 func TestParseApplicationNameFromPath(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		name           string
 		givenInputPath string

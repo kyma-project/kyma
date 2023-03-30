@@ -82,6 +82,20 @@ func TestNewDeployment(t *testing.T) {
 	}
 }
 
+func TestNewDeploymentSecurityContext(t *testing.T) {
+	// given
+	config := env.GetBackendConfig()
+	deployment := NewDeployment(config.PublisherConfig, WithContainers(config.PublisherConfig))
+
+	// when
+	podSecurityContext := deployment.Spec.Template.Spec.SecurityContext
+	containerSecurityContext := deployment.Spec.Template.Spec.Containers[0].SecurityContext
+
+	// then
+	assert.Equal(t, getPodSecurityContext(), podSecurityContext)
+	assert.Equal(t, getContainerSecurityContext(), containerSecurityContext)
+}
+
 func Test_GetNATSEnvVars(t *testing.T) {
 	testCases := []struct {
 		name            string

@@ -70,7 +70,7 @@ Follow these steps:
 
     ```bash
     NAME            CONFIGURED   BUILT     RUNNING   RUNTIME    VERSION   AGE
-    test-function   True         True      True      nodejs14   1         96s
+    test-function   True         True      True      nodejs16   1         96s
     ```
 
   </details>
@@ -88,23 +88,25 @@ Follow these steps:
 
 2.  Create a Function CR that specifies the Function's logic:
 
-    ```yaml
-    cat <<EOF | kubectl apply -f -
-    apiVersion: serverless.kyma-project.io/v1alpha1
-    kind: Function
-    metadata:
-      name: $NAME
-      namespace: $NAMESPACE
-    spec:
-      runtime: nodejs14
-      source: |
-        module.exports = {
-          main: function(event, context) {
-            return 'Hello World!'
-          }
-        }
-    EOF
-    ```
+   ```yaml
+   cat <<EOF | kubectl apply -f -
+   apiVersion: serverless.kyma-project.io/v1alpha2
+   kind: Function
+   metadata:
+     name: $NAME
+     namespace: $NAMESPACE
+   spec:
+     runtime: nodejs16
+     source:
+       inline:
+         source: |
+           module.exports = {
+             main: function(event, context) {
+               return 'Hello World!'
+             }
+           }
+   EOF
+   ```
 
 3.  Check if your Function was created successfully and all conditions are set to `True`:
 
@@ -116,7 +118,7 @@ Follow these steps:
 
     ```bash
     NAME            CONFIGURED   BUILT     RUNNING   RUNTIME    VERSION   AGE
-    test-function   True         True      True      nodejs14   1         96s
+    test-function   True         True      True      nodejs16   1         96s
     ```
 
     </details>

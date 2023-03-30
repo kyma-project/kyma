@@ -78,7 +78,7 @@ In the following steps, you can see how to set up a typical LogPipeline. For an 
 
     - **http**, which sends the data to the specified HTTP destination. The output is designed to integrate with a [Fluentd HTTP Input](https://docs.fluentd.org/input/http), which opens up a huge ecosystem of integration possibilities.
     - **grafana-loki**, which sends the data to the Kyma-internal Loki instance. 
-    > **Note:** This output is considered legacy and is only provided for backward compatibility with the [deprecated](https://kyma-project.io/blog/2022/11/2/loki-deprecation/) in-cluster Loki instance. It might not be compatible with the latest Loki versions. For integration with a custom Loki installation, use the `custom` output with the name `loki` instead. See also [this tutorial](https://github.com/kyma-project/examples/tree/main/loki).
+    > **Note:** This output is considered legacy and is only provided for backward compatibility with the [deprecated](https://kyma-project.io/blog/2022/11/2/loki-deprecation/) in-cluster Loki instance. It might not be compatible with the latest Loki versions. For integration with a custom Loki installation, use the `custom` output with the name `loki` instead. See also [Installing a custom Loki stack in Kyma](https://github.com/kyma-project/examples/tree/main/loki).
     - **custom**, which supports the configuration of any destination in the Fluent Bit configuration syntax. 
     > **Note:** If you use a `custom` output, you put the LogPipeline in the [unsupported mode](#unsupported-mode).
 
@@ -456,7 +456,6 @@ Fluent Bit buffers up to 1 GB of logs if a configured output cannot receive logs
 
 Each Fluent Bit Pod can process up to 10 MB/s of logs for a single LogPipeline. With multiple pipelines, the throughput per pipeline is reduced. The used logging backend or performance characteristics of the output plugin might limit the throughput earlier.
 
-### Max amount of pipelines - CPU/Mem constraints
+### Max amount of pipelines
 
-In the production profile, no more than 5 LogPipelines.
-In the evaluation profile, no more than 3 LogPipelines.
+The maximum amount of LogPipelines is 5.

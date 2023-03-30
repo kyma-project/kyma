@@ -62,7 +62,7 @@ Follow these steps:
 
 ## Kyma users
 
-[Read](https://kyma-project.io/#used-by) how these companies use Kyma:
+The following companies use Kyma:
 
 <p align="center">
   <img src="https://github.com/kyma-project/website/blob/main/content/adopters/logos/sap.svg" alt="SAP" width="120" height="70" />
@@ -130,7 +130,7 @@ If you would like to join us and work together on the Kyma project, there are so
   - Pushing and managing images in your Docker Hub account
   - Executing `bash` commands inside containers
 
-> **TIP:** Complete the [Docker and Kubernetes fundamentals](https://github.tools.sap/kubernetes/docker-k8s-training) training to get the basic Docker and Kubernetes knowledge.
+> **TIP:** Complete the [Docker and Kubernetes fundamentals](https://github.com/K8sAcademy/Fundamentals-HandsOn) training to get the basic Docker and Kubernetes knowledge.
 
 - Cloud services skillset:
   - Logging in to Google Cloud Platform (GCP)

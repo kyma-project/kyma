@@ -11,8 +11,6 @@ clusterRole:
   # name defines optionally another name than the default name for the cluster role
   name: ""
 
-podSecurityContext:
-
 bebSecret:
   nameSuffix: "-beb-oauth2"
 
@@ -42,16 +40,12 @@ metrics:
     port: 8080
     portName: metrics
     nameSuffix: "-metrics"
-    interval: 30s
 
 webhook:
   port: 443
   targetPort: 9443
   crdName: subscriptions.eventing.kyma-project.io
   secretName: eventing-webhook-server-cert
-  certHandler:
-    name: api-gateway-webhook-certificates
-    version: v20221027-987e5471
   mutating:
     name: subscription-mutating-webhook-configuration
   validating:
@@ -109,4 +103,4 @@ jetstream:
   maxMessages: -1 # no limit
   maxBytes: -1
 
-enableNewCRDVersion: false
+enableNewCRDVersion: true

@@ -275,7 +275,6 @@ func (em *EventMesh) handleCreateEventMeshSub(eventMeshSub *types.Subscription, 
 func (em *EventMesh) handleKymaSubStatusUpdate(eventMeshServerSub *types.Subscription,
 	eventMeshSub *types.Subscription, kymaSub *eventingv1alpha2.Subscription,
 	typesInfo []backendutils.EventTypeInfo) (bool, error) {
-
 	// Update status.types
 	kymaSub.Status.Types = statusCleanEventTypes(typesInfo)
 

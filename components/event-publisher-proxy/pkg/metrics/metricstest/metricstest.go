@@ -38,7 +38,8 @@ func ensureMetricCount(t *testing.T, collector metrics.PublishingMetricsCollecto
 	}
 }
 
-// EnsureMetricMatchesTextExpositionFormat ensures that metrics collected by the given collector match the given metric output in TextExpositionFormat.
+// EnsureMetricMatchesTextExpositionFormat ensures that metrics collected by the given collector
+// match the given metric output in TextExpositionFormat.
 // This is useful to compare metrics with their given labels.
 func EnsureMetricMatchesTextExpositionFormat(t *testing.T, collector metrics.PublishingMetricsCollector, tef string, metricNames ...string) {
 	if err := testutil.CollectAndCompare(collector, strings.NewReader(tef), metricNames...); err != nil {

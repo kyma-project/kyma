@@ -16,7 +16,7 @@ echo "------------------------"
 echo "Updating deployment"
 echo "------------------------"
 
-kubectl -n compass-system patch deployment compass-runtime-agent --patch 'spec:
+kubectl -n kyma-system patch deployment compass-runtime-agent --patch 'spec:
   template:
     spec:
       containers:
@@ -29,4 +29,4 @@ echo "------------------------"
 echo "Removing old pods"
 echo "------------------------"
 
-kubectl -n compass-system delete po -l app=compass-runtime-agent --now --wait=false
+kubectl -n kyma-system delete po -l app=compass-runtime-agent --now --wait=false

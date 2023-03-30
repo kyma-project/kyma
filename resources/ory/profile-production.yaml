@@ -30,10 +30,9 @@ hydra:
   deployment:
     resources:
       requests:
-        cpu: "200m"
+        cpu: "250m"
         memory: "256Mi"
       limits:
-        cpu: "500m"
         memory: "1Gi"
     autoscaling:
       enabled: true
@@ -45,10 +44,9 @@ oathkeeper:
   deployment:
     resources:
       limits:
-        cpu: "800m"
         memory: "512Mi"
       requests:
-        cpu: "50m"
+        cpu: "100m"
         memory: "64Mi"
     autoscaling:
       enabled: true

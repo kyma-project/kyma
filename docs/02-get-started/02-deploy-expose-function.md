@@ -4,7 +4,7 @@ title: Deploy and expose a Function
 
 Now that you've installed Kyma, let's deploy your first Function. We'll call it `hello-world`.
 
-## Create a function
+## Create a Function
 
 First, let's create the Function and apply it.
 
@@ -17,7 +17,8 @@ First, let's create the Function and apply it.
 1. In Kyma Dashboard, go to the `default` Namespace.
 2. Go to **Workloads** > **Functions**.
 3. Click on **Create Function**.
-4. Name the Function `hello-world` and click **Create**.
+4. Name the Function `hello-world`.
+5. From the **Language** dropdown, choose `nodejs` and click **Create**.
   </details>
   <details>
   <summary label="kubectl">
@@ -27,8 +28,23 @@ First, let's create the Function and apply it.
 Run:
 
 ```bash
-kyma init function --name hello-world
-kyma apply function
+cat <<EOF | kubectl apply -f -
+apiVersion: serverless.kyma-project.io/v1alpha2
+kind: Function
+metadata:
+  name: hello-world
+  namespace: default
+spec:
+  runtime: nodejs18
+  source:
+    inline:
+      source: |
+        module.exports = {
+          main: function(event, context) {
+            return 'Hello Serverless'
+          }
+        }
+EOF
 ```
 
   </details>
@@ -84,7 +100,8 @@ First, let's create an [APIRule](../05-technical-reference/00-custom-resources/a
 2. Click on **Create API Rule**.
 3. Provide the **Name** (`hello-world`).
 4. From the **Service Name** dropdown, select `hello-world`.
-5. Choose your host from the **Host** dropdown and replace the asterix (*) with the name of your subdomain (`hello-world`).
+5. Provide your Service **Port** (`80`).
+6. Choose your host from the **Host** dropdown and replace the asterisk (*) with the name of your subdomain (`hello-world`).
 
   </details>
   <details>
@@ -140,7 +157,7 @@ This opens the Function's external address as a new page.
 
 > **NOTE:** Alternatively, from the left navigation go to **API Rules**, and click on the **Host** URL there.
 
-The operation was successful if the page says `Hello World from the Kyma Function main running on nodejs14!`.
+The operation was successful if the page says `Hello World from the Kyma Function main running on nodejs16!`.
   </details>
   <details>
   <summary label="kubectl">
@@ -157,3 +174,6 @@ The operation was successful if the call returns `Hello Serverless`.
 
   </details>
 </div>
+
+> **NOTE:** Local installation provides the self-signed certificates out of the box, but if you want to access your API through your browser, you must add them to your local trust store. 
+To do this, call the `kyma import certs` command with proper permissions. For more information, read [Kyma import certs](https://github.com/kyma-project/cli/blob/main/docs/gen-docs/kyma_import_certs.md). 

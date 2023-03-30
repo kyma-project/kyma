@@ -5,34 +5,23 @@ const httpsAgent = new https.Agent({
 });
 axios.defaults.httpsAgent = httpsAgent;
 const {
-  checkFunctionResponse,
-  sendLegacyEventAndCheckResponse,
-  sendCloudEventStructuredModeAndCheckResponse,
-  sendCloudEventBinaryModeAndCheckResponse,
-  checkInClusterEventDelivery,
-  waitForSubscriptionsTillReady,
-  waitForSubscriptions,
-  checkInClusterEventTracing,
   getRandomEventId,
-  getVirtualServiceHost,
-  sendInClusterEventWithRetry,
-  ensureInClusterEventReceivedWithRetry,
 } = require('../test/fixtures/commerce-mock');
 const {
   getEventingBackend,
   waitForNamespace,
   switchEventingBackend,
-  waitForEventingBackendToReady,
-  printAllSubscriptions,
-  printEventingControllerLogs,
-  printEventingPublisherProxyLogs,
-  k8sDelete,
   debug,
-  isDebugEnabled,
+  createK8sConfigMap,
+  waitForEndpoint,
+  waitForPodWithLabelAndCondition,
+  createApiRuleForService,
+  deleteApiRule,
+  getSubscription,
   k8sApply,
-  deleteK8sPod,
-  eventingSubscription, waitForEndpoint, waitForPodStatusWithLabel, waitForPodWithLabelAndCondition,
-  createApiRuleForService, getConfigMap, deleteApiRule,
+  waitForSubscription,
+  eventingSubscriptionV1Alpha2,
+  deleteK8sConfigMap,
 } = require('../utils');
 const {
   eventingMonitoringTest,
@@ -43,41 +32,66 @@ const {
   backendK8sSecretNamespace,
   timeoutTime,
   slowTime,
-  mockNamespace,
   isSKR,
-  testCompassFlow,
-  testSubscriptionV1Alpha2,
-  subCRDVersion,
-  getNatsPods,
-  getStreamConfigForJetStream,
-  skipAtLeastOnceDeliveryTest,
-  isStreamCreationTimeMissing,
-  getJetStreamStreamData,
-  streamDataConfigMapName,
+  testDataConfigMapName,
   eventingNatsSvcName,
   eventingNatsApiRuleAName,
-  subscriptionNames,
+  eventingSinkName,
+  v1alpha1SubscriptionsTypes,
+  subscriptionsTypes,
+  subscriptionsExactTypeMatching,
+  getClusterHost,
+  checkFunctionReachable,
+  checkEventDelivery,
+  waitForV1Alpha1Subscriptions,
+  waitForV1Alpha2Subscriptions,
+  checkEventTracing,
+  saveJetStreamDataForRecreateTest,
+  jetStreamTestConfigMapName,
+  getConfigMapWithRetries,
+  checkStreamNotReCreated,
+  checkConsumerNotReCreated,
+  isUpgradeJob,
+  isUpgradeJob2ndReconcile,
+  deployV1Alpha2Subscriptions,
+  subCRDVersion,
+  deployEventingSinkFunction,
+  eventingUpgradeSinkName,
+  waitForEventingSinkFunction,
+  ensureEventReceivedWithRetry,
+  undeployEventingFunction,
+  checkFunctionUnreachable,
+  publishEventWithRetry,
+  debugBanner,
 } = require('./utils');
 const {
   bebBackend,
-  natsBackend, getEventMeshNamespace,
-  kymaSystem, telemetryOperatorLabel, conditionReady, jaegerLabel, jaegerEndpoint,
+  natsBackend,
+  getEventMeshNamespace,
+  kymaSystem,
+  telemetryOperatorLabel,
+  conditionReady,
+  jaegerLabel,
+  jaegerEndpoint,
 } = require('./common/common');
 const {
-  assert,
+  expect,
 } = require('chai');
 const {
   exposeGrafana,
   unexposeGrafana,
 } = require('../monitoring');
 
+let clusterHost = '';
+let isJSAtLeastOnceTested = false;
+
 describe('Eventing tests', function() {
+  let natsApiRuleVSHost;
   this.timeout(timeoutTime);
   this.slow(slowTime);
 
-  before('Ensure the test and mock namespaces exist', async function() {
+  before('Ensure the test namespace exist', async function() {
     await waitForNamespace(testNamespace);
-    await waitForNamespace(mockNamespace);
   });
 
   before('Ensure tracing is ready', async function() {
@@ -88,196 +102,326 @@ describe('Eventing tests', function() {
 
   before('Expose Grafana', async function() {
     await exposeGrafana();
+    this.test.retries(3);
     await waitForPodWithLabelAndCondition( telemetryOperatorLabel.key, telemetryOperatorLabel.value, kymaSystem,
         conditionReady.condition, conditionReady.status, 60_000);
   });
 
-  before('Get stream config for JetStream', async function() {
-    const success = await getStreamConfigForJetStream();
-    assert.isTrue(success);
+  before('Create an ApiRule for NATS', async () => {
+    if (!isUpgradeJob) {
+      debug(`Skipping creating ApiRule for NATS because it is not upgrade test job`);
+      return;
+    }
+
+    const vs = await createApiRuleForService(eventingNatsApiRuleAName,
+        kymaSystem,
+        eventingNatsSvcName,
+        8222);
+    natsApiRuleVSHost = vs.spec.hosts[0];
   });
 
-  // eventingTestSuite - Runs Eventing tests
-  function eventingTestSuite(backend, isSKR, testCompassFlow=false) {
-    it('lastorder function should be reachable through secured API Rule', async function() {
-      await checkFunctionResponse(testNamespace, mockNamespace);
+  before('Ensure eventing-sink function is ready', async function() {
+    await waitForEventingSinkFunction();
+  });
+
+  before('Ensure subscriptions exists', async function() {
+    if (!isUpgradeJob) {
+      return;
+    }
+
+    // Creating v1alpha2 subscriptions if they do not exists in upgrade tests
+    // Only temporarily - will be removed
+    const sub1 = await getSubscription(subscriptionsTypes[0].name, testNamespace, subCRDVersion);
+    if (sub1) {
+      debug('Subscription v1alpha2 exists');
+      return;
+    }
+
+    debug('Subscription v1alpha2 do not exists');
+    debug('Creating v1alpha2 subscriptions...');
+    await deployV1Alpha2Subscriptions();
+  });
+
+  before('Get cluster host name from Virtual Services', async function() {
+    clusterHost = await getClusterHost(eventingSinkName, testNamespace);
+    expect(clusterHost).to.not.empty;
+    debug(`host name fetched: ${clusterHost}`);
+  });
+
+  // eventDeliveryTestSuite - Runs Eventing tests for event delivery
+  function eventDeliveryTestSuite(backend) {
+    it('Wait for subscriptions to be ready', async function() {
+      // waiting for v1alpha1 subscriptions
+      await waitForV1Alpha1Subscriptions();
+
+      // waiting for v1alpha2 subscriptions
+      await waitForV1Alpha2Subscriptions();
     });
 
-    it('In-cluster v1alpha1 subscription events should be delivered ' +
-        '(legacy events, structured and binary cloud events)', async function() {
-      await checkInClusterEventDelivery(testNamespace);
+    it('Eventing-sink function should be reachable through API Rule', async function() {
+      await checkFunctionReachable(eventingSinkName, testNamespace, clusterHost);
     });
 
-    it('In-cluster v1alpha2 subscription events should be delivered ' +
-        '(legacy events, structured and binary cloud events)', async function() {
-      if (!testSubscriptionV1Alpha2) {
-        this.skip();
+    it('Cloud Events [binary] with v1alpha1 subscription should be delivered to eventing-sink ', async function() {
+      let eventSource = 'eventing-test';
+      if (backend === bebBackend) {
+        eventSource = getEventMeshNamespace();
       }
-      await checkInClusterEventDelivery(testNamespace, true);
+      for (let i=0; i < v1alpha1SubscriptionsTypes.length; i++) {
+        debugBanner(`Testing Cloud Events [binary] [v1alpha1] ${v1alpha1SubscriptionsTypes[i].type}`);
+        await checkEventDelivery(clusterHost, 'binary', v1alpha1SubscriptionsTypes[i].type, eventSource, true);
+      }
     });
 
-    if (isSKR && testCompassFlow) {
-      eventingE2ETestSuiteWithCommerceMock(backend);
-    }
-
-    if (backend === natsBackend) {
-      testStreamNotReCreated();
-      testJetStreamAtLeastOnceDelivery();
-    }
-  }
-
-  // eventingE2ETestSuiteWithCommerceMock - Runs Eventing end-to-end tests with Compass
-  function eventingE2ETestSuiteWithCommerceMock(backend) {
-    it('order.created.v1 legacy event from CommerceMock should trigger the lastorder function', async function() {
-      await sendLegacyEventAndCheckResponse(mockNamespace);
+    it('Cloud Events [structured] with v1alpha1 subscription should be delivered to eventing-sink ', async function() {
+      let eventSource = 'eventing-test';
+      if (backend === bebBackend) {
+        eventSource = getEventMeshNamespace();
+      }
+      for (let i=0; i < v1alpha1SubscriptionsTypes.length; i++) {
+        debugBanner(`Testing Cloud Events [structured] [v1alpha1] ${v1alpha1SubscriptionsTypes[i].type}`);
+        await checkEventDelivery(clusterHost, 'structured', v1alpha1SubscriptionsTypes[i].type, eventSource, true);
+      }
     });
 
-    it('order.created.v1 cloud event from CommerceMock should trigger the lastorder function', async function() {
-      await sendCloudEventStructuredModeAndCheckResponse(backend, mockNamespace);
+    it('Legacy Events with v1alpha1 subscription should be delivered to eventing-sink ', async function() {
+      for (let i=0; i < v1alpha1SubscriptionsTypes.length; i++) {
+        debugBanner(`Testing Cloud Events [Legacy] [v1alpha1] ${v1alpha1SubscriptionsTypes[i].type}`);
+        await checkEventDelivery(clusterHost, 'legacy', v1alpha1SubscriptionsTypes[i].type, 'test', true);
+      }
     });
 
-    it('order.created.v1 binary cloud event from CommerceMock should trigger the lastorder function', async function() {
-      await sendCloudEventBinaryModeAndCheckResponse(backend, mockNamespace);
+    it('Cloud Events [binary] with v1alpha2 subscription should be delivered to eventing-sink ', async function() {
+      for (let i=0; i < subscriptionsTypes.length; i++) {
+        debugBanner(`Testing Cloud Events [binary] [v1alpha2] ${subscriptionsTypes[i].type}`);
+        await checkEventDelivery(clusterHost, 'binary', subscriptionsTypes[i].type, subscriptionsTypes[i].source);
+      }
     });
-  }
 
-  // testStreamNotReCreated - compares the stream creation timestamp before and after upgrade
-  // and if the timestamp is the same, we conclude that the stream is not re created.
-  function testStreamNotReCreated() {
-    context('stream check with JetStream backend', function() {
-      let wantStreamData = null;
-      let gotStreamData = null;
-      before('check if stream creation timestamp is available', async function() {
-        try {
-          const cm = await getConfigMap(streamDataConfigMapName);
-          wantStreamData = cm.data;
-        } catch (err) {
-          console.log('Skipping the stream recreation check due to missing configmap!');
-          this.skip();
-        }
-        if (isStreamCreationTimeMissing(wantStreamData)) {
-          console.log('Skipping the stream recreation check as the stream creation timestamp is missing!');
-          this.skip();
-        }
-      });
+    it('Cloud Events [structured] with v1alpha2 subscription should be delivered to eventing-sink ', async function() {
+      for (let i=0; i < subscriptionsTypes.length; i++) {
+        debugBanner(`Testing Cloud Events [structured] [v1alpha2] ${subscriptionsTypes[i].type}`);
+        await checkEventDelivery(clusterHost, 'structured', subscriptionsTypes[i].type, subscriptionsTypes[i].source);
+      }
+    });
 
-      it('Get the current stream creation timestamp', async function() {
-        const vs = await createApiRuleForService(eventingNatsApiRuleAName,
-            kymaSystem,
-            eventingNatsSvcName,
-            8222);
-        const vsHost = vs.spec.hosts[0];
-        gotStreamData = await getJetStreamStreamData(vsHost);
-      });
+    it('Legacy Events with v1alpha2 subscription should be delivered to eventing-sink ', async function() {
+      for (let i=0; i < subscriptionsTypes.length; i++) {
+        debugBanner(`Testing Cloud Events [legacy] [v1alpha2] ${subscriptionsTypes[i].type}`);
+        await checkEventDelivery(clusterHost, 'legacy', subscriptionsTypes[i].type, subscriptionsTypes[i].source);
+      }
+    });
 
-      it('Compare the stream creation timestamp', async function() {
-        assert.equal(gotStreamData.streamName, wantStreamData.streamName);
-        assert.equal(gotStreamData.streamCreationTime, wantStreamData.streamCreationTime);
-      });
-
-
-      it('Delete the created APIRule', async function() {
-        await deleteApiRule(eventingNatsApiRuleAName, kymaSystem);
-      });
+    it('Cloud Events with subscription (exact) should be delivered to eventing-sink ', async function() {
+      let eventSource = 'eventing-test';
+      if (backend === bebBackend) {
+        eventSource = getEventMeshNamespace();
+      }
+      for (let i=0; i < subscriptionsExactTypeMatching.length; i++) {
+        debugBanner(`Testing Cloud Events (type matching: exact) ${subscriptionsExactTypeMatching[i].type}`);
+        await checkEventDelivery(clusterHost, 'binary', subscriptionsExactTypeMatching[i].type, eventSource);
+      }
     });
   }
 
-
-  function testJetStreamAtLeastOnceDelivery() {
-    context('with JetStream file storage', function() {
-      const minute = 60 * 1000;
-      const funcName = 'lastorder';
-      const encodingBinary = 'binary';
-      const encodingStructured = 'structured';
-      const eventIdBinary = getRandomEventId(encodingBinary);
-      const eventIdStructured = getRandomEventId(encodingStructured);
-      const sink = `http://lastorder.${testNamespace}.svc.cluster.local`;
-      const subscriptions = [
-        eventingSubscription(`sap.kyma.custom.inapp.order.received.v1`,
-            sink, subscriptionNames.orderReceived, testNamespace),
-        eventingSubscription(`sap.kyma.custom.commerce.order.created.v1`,
-            sink, subscriptionNames.orderCreated, testNamespace),
-      ];
-
-      before('check if at least once delivery tests need to be skipped', async function() {
-        if (skipAtLeastOnceDeliveryTest()) {
-          console.log('Skipping the at least once delivery tests for NATS JetStream');
-          this.skip();
-        }
-      });
-
-      it('Delete subscriptions', async function() {
-        await k8sDelete(subscriptions);
-      });
-
-      it('Publish events', async function() {
-        const host = await getVirtualServiceHost(testNamespace, funcName);
-        assert.isNotEmpty(host);
-
-        await sendInClusterEventWithRetry(host, eventIdBinary, encodingBinary);
-        await sendInClusterEventWithRetry(host, eventIdStructured, encodingStructured);
-      });
-
-      it('Delete all Nats pods', async function() {
-        const natsPods = await getNatsPods();
-        for (let i = 0; i < natsPods.body.items.length; i++) {
-          const pod = natsPods.body.items[i];
-          await deleteK8sPod(pod);
-        }
-      });
-
-      it('Wait until all Nats pods are deleted', async function() {
-        // Assuming that Nats pods had the status.phase equals to "Running", so if it changed to "Pending"
-        // this means that they were successfully deleted and recreated.
-        await waitForPodStatusWithLabel('app.kubernetes.io/name', 'nats', 'kyma-system', 'Pending', 5 * minute);
-      });
-
-      it('Wait until any Nats pod is ready', async function() {
-        // When the status.phase changes from "Pending" to "Running" this means that Nats pod containers are starting.
-        await waitForPodStatusWithLabel('app.kubernetes.io/name', 'nats', 'kyma-system', 'Running', 5 * minute);
-      });
-
-      it('Wait until eventing backend is ready', async function() {
-        await waitForEventingBackendToReady(natsBackend, 'eventing-backend', 'kyma-system', 5 * minute);
-      });
-
-      it('Recreate subscriptions', async function() {
-        await k8sApply(subscriptions);
-        await waitForSubscriptions(subscriptions);
-      });
-
-      it('Wait for events to be delivered', async function() {
-        const host = await getVirtualServiceHost(testNamespace, funcName);
-        assert.isNotEmpty(host);
-
-        await ensureInClusterEventReceivedWithRetry(host, eventIdBinary);
-        await ensureInClusterEventReceivedWithRetry(host, eventIdStructured);
-      });
+  // eventingMonitoringTestSuite - Runs Eventing tests for monitoring
+  function eventingMonitoringTestSuite(backend, isSKR) {
+    it('Run Eventing Monitoring tests', async function() {
+      await eventingMonitoringTest(backend, isSKR, true);
     });
   }
 
   // eventingTracingTestSuite - Runs Eventing tracing tests
-  function eventingTracingTestSuite(isSKR) {
+  function eventingTracingTestSuiteV2(isSKR) {
     // Only run tracing tests on OSS
     if (isSKR) {
       debug('Skipping eventing tracing tests on SKR');
       return;
     }
 
-    it('In-cluster event should have correct tracing spans', async function() {
-      await checkInClusterEventTracing(testNamespace);
+    it('In-cluster event should have correct tracing spans [v2]', async function() {
+      await checkEventTracing(clusterHost, subscriptionsTypes[0].type, subscriptionsTypes[0].source, testNamespace);
     });
   }
 
-  // runs after each test in every block
-  afterEach(async function() {
-    // if the test is failed, then printing some debug logs
-    if (this.currentTest.state === 'failed' && isDebugEnabled()) {
-      await printAllSubscriptions(testNamespace, subCRDVersion);
-      await printEventingControllerLogs();
-      await printEventingPublisherProxyLogs();
-    }
-  });
+  function jsSaveStreamAndConsumersDataSuite() {
+    context('save stream and consumer data', function() {
+      it('saving JetStream data to test stream and consumers will not be re-created by kyma upgrade', async function() {
+        if (!isUpgradeJob) {
+          debug(`Skipping saving JetStream test data into a configMap: ${jetStreamTestConfigMapName}`);
+          this.skip();
+        }
+        debug(`Using NATS host: ${natsApiRuleVSHost}`);
+        await saveJetStreamDataForRecreateTest(natsApiRuleVSHost, jetStreamTestConfigMapName);
+      });
+    });
+  }
+
+  // jsStreamAndConsumersNotReCreatedTestSuite - compares the stream creation timestamp before and after upgrade
+  // and if the timestamp is the same, we conclude that the stream is not re-created.
+  // It also compares the consumers creation timestamp before and after upgrade
+  // and if the timestamp is the same, we conclude that the consumer is not re-created.
+  function jsStreamAndConsumersNotReCreatedTestSuite() {
+    context('stream and consumer not re-created check with NATS backend', function() {
+      let preUpgradeStreamData = null;
+      let preUpgradeConsumersData = null;
+
+      before('fetch eventing-js-test data configMap', async function() {
+        debug(`fetch configMap: ${jetStreamTestConfigMapName}...`);
+        const cm = await getConfigMapWithRetries(jetStreamTestConfigMapName, testNamespace);
+        if (!cm || !isUpgradeJob) {
+          debug(`Skipping stream and consumers not re-created check`);
+          this.skip();
+          return;
+        }
+
+        // if configMap is found, then check for re-creation
+        expect(cm.data).to.have.nested.property('stream');
+        expect(cm.data).to.have.nested.property('consumers');
+        preUpgradeStreamData = JSON.parse(cm.data.stream);
+        preUpgradeConsumersData = JSON.parse(cm.data.consumers);
+      });
+
+      it('upgrade should not have re-created stream', async function() {
+        debug('Verifying that the stream was not re-created by the kyma upgrade...');
+        await checkStreamNotReCreated(natsApiRuleVSHost, preUpgradeStreamData);
+      });
+
+      it('upgrade should not have re-created consumers', async function() {
+        debug('Verifying that the consumers were not re-created by the kyma upgrade...');
+        await checkConsumerNotReCreated(natsApiRuleVSHost, preUpgradeConsumersData);
+      });
+    });
+  }
+
+  function jsTestAtLeastOnceDeliveryTestSuite(upgradeStage='pre') {
+    // The test scenario is:
+    // 1. Create a second sink + subscription and wait for them to be healthy.
+    // 2. Send an event and verify if it is received by the sink.
+    // 3. Delete the sink.
+    // 4. Publish an event.
+    // 5. Upgrade the Kyma cluster.
+    // 6. Revert/Deploy back the second sink.
+    // 7. Check if the sink receives the event which was sent before the upgrade.
+    context('Test jetStream at-least once delivery during kyma upgrade', function() {
+      const encoding = 'binary';
+      const subName = `upgrade-${subscriptionsTypes[0].name}`;
+      const subscriptions = [
+        eventingSubscriptionV1Alpha2(
+            subscriptionsTypes[0].type,
+            subscriptionsTypes[0].source,
+            `http://${eventingUpgradeSinkName}.${testNamespace}.svc.cluster.local`,
+            `upgrade-${subscriptionsTypes[0].name}`,
+            testNamespace),
+      ];
+
+      before('Check if this is an upgrade job', async function() {
+        if (!isUpgradeJob || isUpgradeJob2ndReconcile) {
+          debug(`Skipping jetStream at-least once delivery test`);
+          debug(`isUpgradeJob: ${isUpgradeJob}, isUpgradeJob2ndReconcile: ${isUpgradeJob2ndReconcile}`);
+          this.skip();
+        }
+      });
+
+      context('Pre-upgrade tasks to publish event which should not be delivered', function() {
+        before('Check if this is pre-upgrade stage', async function() {
+          if (upgradeStage !== 'pre' || isJSAtLeastOnceTested) {
+            debug(`Skipping pre-upgrade tasks...`);
+            this.skip();
+          }
+          debugBanner('Pre-upgrade tasks to publish event which should not be delivered');
+        });
+
+        it('Deploy eventing-upgrade-sink', async function() {
+          await deployEventingSinkFunction(eventingUpgradeSinkName);
+          await waitForEventingSinkFunction(eventingUpgradeSinkName);
+          debug(`checking if eventing upgrade sink is reachable through the api rule`);
+          await checkFunctionReachable(eventingUpgradeSinkName, testNamespace, clusterHost);
+        });
+
+        it('Create subscriptions during pre-upgrade phase', async function() {
+          await k8sApply(subscriptions, testNamespace);
+          await waitForSubscription(subName, testNamespace, 'v1alpha2');
+        });
+
+        it('Verify if events delivery is working', async function() {
+          await checkEventDelivery(clusterHost, 'binary', subscriptionsTypes[0].type,
+              subscriptionsTypes[0].source, false, eventingUpgradeSinkName);
+        });
+
+        it('Delete the eventing-upgrade-sink', async function() {
+          await undeployEventingFunction(eventingUpgradeSinkName);
+          debug(`checking if eventing upgrade sink is not alive anymore...`);
+          await checkFunctionUnreachable(eventingUpgradeSinkName, testNamespace, clusterHost);
+        });
+
+        it('Generate new eventId, save the id and publish events', async function() {
+          let existingCMData = {};
+          // get existing configMap
+          const cm = await getConfigMapWithRetries(testDataConfigMapName, testNamespace);
+          if (cm && cm.data) {
+            existingCMData = cm.data;
+          }
+
+          const eventIdBinary = getRandomEventId(encoding);
+          await createK8sConfigMap(
+              {
+                ...existingCMData,
+                upgradeEventID: eventIdBinary,
+              },
+              testDataConfigMapName,
+          );
+          // publish the event, which should be delivered after the upgrade
+          await publishEventWithRetry(clusterHost, encoding, eventIdBinary,
+              subscriptionsTypes[0].type, subscriptionsTypes[0].source);
+        });
+      });
+
+      context('Post-upgrade tasks to verify that event is delivered after sink is available', function() {
+        let eventID;
+        before('Check if this is pre-upgrade stage', async function() {
+          if (upgradeStage !== 'post') {
+            debug(`Skipping post-upgrade tasks...`);
+            this.skip();
+          }
+
+          const cm = await getConfigMapWithRetries(testDataConfigMapName, 'default');
+          if (!cm || !cm.data || !cm.data.upgradeEventID) {
+            debug(`Skipping post-upgrade tasks because config map is not configured...`);
+            this.skip();
+          }
+          eventID = cm.data.upgradeEventID;
+          debugBanner('Post-upgrade tasks to verify that event is delivered after sink is available');
+        });
+
+        it(`deploy again and wait for function: ${eventingUpgradeSinkName}`, async function() {
+          await deployEventingSinkFunction(eventingUpgradeSinkName);
+          await waitForEventingSinkFunction(eventingUpgradeSinkName);
+          debug(`checking if eventing upgrade sink is reachable through the api rule`);
+          await checkFunctionReachable(eventingUpgradeSinkName, testNamespace, clusterHost);
+        });
+
+        it('Label subscription to trigger reconciliation', async function() {
+          subscriptions[0].metadata.labels = {
+            'changed': 'now',
+          };
+          await k8sApply(subscriptions, testNamespace);
+          await waitForSubscription(subName, testNamespace, 'v1alpha2');
+        });
+
+        it('Wait for the pending event to be delivered', async function() {
+          await ensureEventReceivedWithRetry(eventingUpgradeSinkName, clusterHost,
+              encoding, eventID, subscriptionsTypes[0].type, subscriptionsTypes[0].source, 50);
+          // change the flag to true we do not prepare test again
+          isJSAtLeastOnceTested = true;
+        });
+
+        it(`Delete configMap: ${testDataConfigMapName}`, async function() {
+          await deleteK8sConfigMap(testDataConfigMapName);
+        });
+      });
+    });
+  }
 
   // Tests
   context('with Nats backend', function() {
@@ -288,17 +432,21 @@ describe('Eventing tests', function() {
       }
       await switchEventingBackend(backendK8sSecretName, backendK8sSecretNamespace, natsBackend);
     });
-    it('Wait until subscriptions are ready', async function() {
-      await waitForSubscriptionsTillReady(testNamespace);
-    });
-    // Running Eventing end-to-end tests
-    eventingTestSuite(natsBackend, isSKR, testCompassFlow);
-    // Running Eventing tracing tests
-    eventingTracingTestSuite(isSKR);
 
-    it('Run Eventing Monitoring tests', async function() {
-      await eventingMonitoringTest(natsBackend, isSKR);
-    });
+    // Running Eventing end-to-end event delivery tests
+    eventDeliveryTestSuite(natsBackend);
+
+    // Running Eventing tracing tests [v2]
+    eventingTracingTestSuiteV2(isSKR);
+
+    // Running Eventing monitoring tests.
+    eventingMonitoringTestSuite(natsBackend, isSKR);
+
+    // Running JetStream stream and consumers not re-created by upgrade tests.
+    jsStreamAndConsumersNotReCreatedTestSuite();
+
+    // Running JetStream At-least Once delivery Test during Upgrade
+    jsTestAtLeastOnceDeliveryTestSuite('post');
   });
 
   context('with BEB backend', function() {
@@ -314,18 +462,12 @@ describe('Eventing tests', function() {
       }
       await switchEventingBackend(backendK8sSecretName, backendK8sSecretNamespace, bebBackend);
     });
-    it('Wait until subscriptions are ready', async function() {
-      await waitForSubscriptionsTillReady(testNamespace); // print subscriptions status when debugLogs is enabled
-      if (isDebugEnabled()) {
-        await printAllSubscriptions(testNamespace, subCRDVersion);
-      }
-    });
-    // Running Eventing end-to-end tests
-    eventingTestSuite(bebBackend, isSKR, testCompassFlow);
 
-    it('Run Eventing Monitoring tests', async function() {
-      await eventingMonitoringTest(bebBackend, isSKR);
-    });
+    // Running Eventing end-to-end event delivery tests
+    eventDeliveryTestSuite(bebBackend);
+
+    // Running Eventing monitoring tests.
+    eventingMonitoringTestSuite(bebBackend, isSKR);
   });
 
   context('with Nats backend switched back from BEB', async function() {
@@ -336,20 +478,34 @@ describe('Eventing tests', function() {
       }
       await switchEventingBackend(backendK8sSecretName, backendK8sSecretNamespace, natsBackend);
     });
-    it('Wait until subscriptions are ready', async function() {
-      await waitForSubscriptionsTillReady(testNamespace);
-    });
-    // Running Eventing end-to-end tests
-    eventingTestSuite(natsBackend, isSKR, testCompassFlow);
-    // Running Eventing tracing tests
-    eventingTracingTestSuite(isSKR);
 
-    it('Run Eventing Monitoring tests', async function() {
-      await eventingMonitoringTest(natsBackend, isSKR);
-    });
+    // Running Eventing end-to-end event delivery tests
+    eventDeliveryTestSuite(natsBackend);
+
+    // Running Eventing tracing tests [v2]
+    eventingTracingTestSuiteV2(isSKR);
+
+    // Running Eventing monitoring tests.
+    eventingMonitoringTestSuite(natsBackend, isSKR);
+
+    // Record stream and consumer data for Kyma upgrade
+    jsSaveStreamAndConsumersDataSuite();
+
+    // Running JetStream At-least Once delivery Test during Upgrade
+    jsTestAtLeastOnceDeliveryTestSuite('pre');
+  });
+
+  after('Delete the created APIRule', async function() {
+    if (!isUpgradeJob) {
+      debug(`Skipping deleting ApiRule for NATS because it is not upgrade test job`);
+      return;
+    }
+
+    await deleteApiRule(eventingNatsApiRuleAName, kymaSystem);
   });
 
   after('Unexpose Grafana', async function() {
     await unexposeGrafana(isSKR);
+    this.test.retries(3);
   });
 });

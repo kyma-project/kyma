@@ -134,7 +134,7 @@ func WithRules(subs []eventingv1alpha1.Subscription, svc apigatewayv1beta1.Servi
 }
 
 // RemoveDuplicateValues appends the values if the key (values of the slice) is not equal
-// to the already present value in new slice (list)
+// to the already present value in new slice (list).
 func RemoveDuplicateValues(values []string) []string {
 	keys := make(map[string]bool)
 	list := make([]string, 0)

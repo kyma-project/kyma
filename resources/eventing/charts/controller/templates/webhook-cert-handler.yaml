@@ -53,7 +53,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: init-certificates
-          image: "{{include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.webhook.certHandler) }}"
+          image: "{{include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.certHandler) }}"
           imagePullPolicy: IfNotPresent
           env:
             - name: CRD_NAME
@@ -83,7 +83,7 @@ spec:
           restartPolicy: Never
           containers:
             - name: update-certificates
-              image: "{{include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.webhook.certHandler) }}"
+              image: "{{include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.certHandler) }}"
               imagePullPolicy: IfNotPresent
               env:
                 - name: CRD_NAME

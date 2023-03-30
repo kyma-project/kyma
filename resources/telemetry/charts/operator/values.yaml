@@ -47,6 +47,25 @@ readinessProbe:
   initialDelaySeconds: 5
   periodSeconds: 10
 
+fluentbit:
+  resources:
+    limits:
+      cpu: "1"
+      memory: 1Gi
+    requests:
+      cpu: 100m
+      memory: 50Mi
+  fullnameOverride: telemetry-fluent-bit
+  dashboards:
+    enabled: true
+    labelKey: grafana_dashboard
+    annotations: {}
+    namespace: ""
+  rbac:
+    create: true
+  podSecurityPolicy:
+    create: true
+
 resources:
   limits:
     cpu: 100m
@@ -54,16 +73,6 @@ resources:
   requests:
     cpu: 5m
     memory: 20Mi
-
-initContainers:
-  webhookInit:
-    resources:
-        limits:
-          cpu: 100m
-          memory: 64Mi
-        requests:
-          cpu: 5m
-          memory: 20Mi
 
 terminationGracePeriodSeconds: 10
 
@@ -74,8 +83,12 @@ service:
   type: ClusterIP
   port: 8080
   portName: http-metrics
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8080"
 
 webhook:
+  enabled: true
   name: validation.webhook.telemetry.kyma-project.io
   timeout: 15
   service:
@@ -83,26 +96,6 @@ webhook:
     port: 443
     protocol: TCP
     targetPort: 9443
-
-certificateVolumeMount:
-  name: telemetry-webhook-cert-dir
-  mountPath: /var/run/telemetry-webhook
-
-serviceMonitor:
-  endpoints:
-    path: /metrics
-    port: http-metrics
-    scheme: https
-    bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
-    tlsConfig:
-      insecureSkipVerify: true
-      caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
-      certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
-      keyFile: /etc/prometheus/secrets/istio.default/key.pem
-    metricRelabelings:
-     - action: keep
-       regex: ^(go_gc_duration_seconds|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|go_threads|http_requests_total|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes|rest_client_requests_total|workqueue_adds_total|workqueue_depth|workqueue_queue_duration_seconds_bucket|controller_runtime_reconcile_errors_total|telemetry_.*)$
-       sourceLabels: [ __name__ ]
 
 logProcessor: fluent-bit
 
@@ -118,12 +111,14 @@ controllers:
     enabled: true
   tracing:
     enabled: true
+  metrics:
+    enabled: false
 
 networkPolicy:
   enabled: true
 
 syncPeriod: 1h
-maxLogPipelines: 3
+maxLogPipelines: 5
 
 filesystemBufferLimit: 1G
 
@@ -134,6 +129,15 @@ tolerations: []
 affinity: {}
 
 traceCollector:
+  resources:
+    limits:
+      cpu: 1
+      memory: 1Gi
+    requests:
+      cpu: 25m
+      memory: 32Mi
+
+metricGateway:
   resources:
     limits:
       cpu: 1

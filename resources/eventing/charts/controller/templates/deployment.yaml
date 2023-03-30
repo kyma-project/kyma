@@ -19,7 +19,7 @@ spec:
     spec:
       serviceAccountName: {{ include "controller.fullname" . }}
       terminationGracePeriodSeconds: 10
-      securityContext: {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      securityContext: {{- toYaml .Values.global.podSecurityContext | nindent 8 }}
       containers:
         - image: "{{include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.eventing_controller) }}"
           imagePullPolicy: "{{ .Values.global.images.eventing_controller.pullPolicy }}"
@@ -119,8 +119,8 @@ spec:
             periodSeconds: {{ .Values.healthProbe.readiness.periodSeconds }}
             successThreshold: {{ .Values.healthProbe.readiness.successThreshold }}
             timeoutSeconds: {{ .Values.healthProbe.readiness.timeoutSeconds }}
-          {{- if .Values.global.securityContext }}
-          securityContext: {{- toYaml .Values.global.securityContext | nindent 12 }}
+          {{- if .Values.global.containerSecurityContext }}
+          securityContext: {{- toYaml .Values.global.containerSecurityContext | nindent 12 }}
           {{- end }}
           ports:
             - containerPort: {{ .Values.metrics.config.port }}

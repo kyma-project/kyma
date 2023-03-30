@@ -23,15 +23,14 @@ To subscribe to events, we need a [Subscription](../../05-technical-reference/00
   Kyma Dashboard
   </summary>
 
-1. In Kyma Dashboard, go to the view of your Function `lastorder`.
-2. Go to **Configuration** > **Create Subscription+**.
+1. Go to **Namespaces** and select the default Namespace.
+2. Go to **Configuration** > **Subscriptions** and click **Create Subscription+**.
 3. Provide the following parameters:
    - **Subscription name**: `lastorder-sub`
-   - **Application name**: `myapp`
-   - **Event name**: `order.received`
-   - **Event version**: `v1`
-
-   - **Event type** is generated automatically. For this example, it's `sap.kyma.custom.myapp.order.received.v1`.
+   - **Types**: `order.received.v1`
+   - **Service**: `lastorder` (The sink field will be populated automatically.)
+   - **Type matching:**: `standard`
+   - **Source**: `myapp`
 
 4. Click **Create**.
 5. Wait a few seconds for the Subscription to have status `READY`.
@@ -45,23 +44,16 @@ To subscribe to events, we need a [Subscription](../../05-technical-reference/00
 Run:
 ```bash
 cat <<EOF | kubectl apply -f -
-   apiVersion: eventing.kyma-project.io/v1alpha1
+   apiVersion: eventing.kyma-project.io/v1alpha2
    kind: Subscription
    metadata:
      name: lastorder-sub
      namespace: default
    spec:
      sink: http://lastorder.default.svc.cluster.local
-     filter:
-       filters:
-       - eventSource:
-           property: source
-           type: exact
-           value: ""
-         eventType:
-           property: type
-           type: exact
-           value: sap.kyma.custom.myapp.order.received.v1
+     source: myapp
+     types:
+       - order.received.v1
 EOF
 ```
 

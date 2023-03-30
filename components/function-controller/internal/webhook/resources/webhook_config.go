@@ -4,7 +4,6 @@ import (
 	"context"
 	"reflect"
 
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 
 	"github.com/pkg/errors"
@@ -30,13 +29,12 @@ const (
 	serverlessAPIGroup          = "serverless.kyma-project.io"
 	ServerlessCurrentAPIVersion = serverlessv1alpha2.FunctionVersion
 
-	DeprecatedServerlessAPIVersion = serverlessv1alpha1.FunctionVersion
-	DefaultingWebhookName          = "defaulting.webhook.serverless.kyma-project.io"
-	SecretMutationWebhookName      = "mutating.secret.webhook.serverless.kyma-project.io"
-	ValidationWebhookName          = "validation.webhook.serverless.kyma-project.io"
-	ConvertingWebHookName          = "converting.webhook.serverless.kyma-project.io"
+	DefaultingWebhookName     = "defaulting.webhook.serverless.kyma-project.io"
+	SecretMutationWebhookName = "mutating.secret.webhook.serverless.kyma-project.io"
+	ValidationWebhookName     = "validation.webhook.serverless.kyma-project.io"
+	ConvertingWebHookName     = "converting.webhook.serverless.kyma-project.io"
 
-	WebhookTimeout = 15
+	WebhookTimeout = 10
 
 	FunctionDefaultingWebhookPath       = "/defaulting/functions"
 	RegistryConfigDefaultingWebhookPath = "/defaulting/registry-config-secrets"
@@ -46,6 +44,18 @@ const (
 
 	RemoteRegistryLabelKey = "serverless.kyma-project.io/remote-registry"
 )
+
+func createExcludeKubeSystemNamespacesSelector() *metav1.LabelSelector {
+	return &metav1.LabelSelector{
+		MatchExpressions: []metav1.LabelSelectorRequirement{
+			{
+				Key:      "gardener.cloud/purpose",
+				Operator: metav1.LabelSelectorOpNotIn,
+				Values:   []string{"kube-system"},
+			},
+		},
+	}
+}
 
 func EnsureWebhookConfigurationFor(ctx context.Context, client ctlrclient.Client, config WebhookConfig, wt WebHookType) error {
 	if wt == MutatingWebhook {
@@ -129,14 +139,10 @@ func getFunctionMutatingWebhookCfg(config WebhookConfig) admissionregistrationv1
 		Rules: []admissionregistrationv1.RuleWithOperations{
 			{
 				Rule: admissionregistrationv1.Rule{
-					APIGroups: []string{
-						serverlessAPIGroup,
-					},
-					APIVersions: []string{
-						ServerlessCurrentAPIVersion, DeprecatedServerlessAPIVersion,
-					},
-					Resources: []string{"functions", "functions/status"},
-					Scope:     &scope,
+					APIGroups:   []string{serverlessAPIGroup},
+					APIVersions: []string{ServerlessCurrentAPIVersion},
+					Resources:   []string{"functions", "functions/status"},
+					Scope:       &scope,
 				},
 				Operations: []admissionregistrationv1.OperationType{
 					admissionregistrationv1.Create,
@@ -144,8 +150,9 @@ func getFunctionMutatingWebhookCfg(config WebhookConfig) admissionregistrationv1
 				},
 			},
 		},
-		SideEffects:    &sideEffects,
-		TimeoutSeconds: pointer.Int32(WebhookTimeout),
+		SideEffects:       &sideEffects,
+		TimeoutSeconds:    pointer.Int32(WebhookTimeout),
+		NamespaceSelector: createExcludeKubeSystemNamespacesSelector(),
 	}
 }
 
@@ -171,6 +178,7 @@ func getRegistryConfigSecretMutatingWebhook(config WebhookConfig) admissionregis
 		FailurePolicy:           &failurePolicy,
 		MatchPolicy:             &matchPolicy,
 		TimeoutSeconds:          pointer.Int32(WebhookTimeout),
+		NamespaceSelector:       createExcludeKubeSystemNamespacesSelector(),
 		SideEffects:             &sideEffects,
 		AdmissionReviewVersions: []string{"v1beta1", "v1"},
 		ObjectSelector: &metav1.LabelSelector{
@@ -223,40 +231,20 @@ func createValidatingWebhookConfiguration(config WebhookConfig) *admissionregist
 				Rules: []admissionregistrationv1.RuleWithOperations{
 					{
 						Rule: admissionregistrationv1.Rule{
-							APIGroups: []string{
-								serverlessAPIGroup,
-							},
-							APIVersions: []string{
-								ServerlessCurrentAPIVersion, DeprecatedServerlessAPIVersion,
-							},
-							Resources: []string{"functions", "functions/status"},
-							Scope:     &scope,
+							APIGroups:   []string{serverlessAPIGroup},
+							APIVersions: []string{ServerlessCurrentAPIVersion},
+							Resources:   []string{"functions", "functions/status"},
+							Scope:       &scope,
 						},
 						Operations: []admissionregistrationv1.OperationType{
 							admissionregistrationv1.Create,
 							admissionregistrationv1.Update,
-						},
-					},
-					{
-						Rule: admissionregistrationv1.Rule{
-							APIGroups: []string{
-								serverlessAPIGroup,
-							},
-							APIVersions: []string{
-								ServerlessCurrentAPIVersion,
-							},
-							Resources: []string{"gitrepositories", "gitrepositories/status"},
-							Scope:     &scope,
-						},
-						Operations: []admissionregistrationv1.OperationType{
-							admissionregistrationv1.Create,
-							admissionregistrationv1.Update,
-							admissionregistrationv1.Delete,
 						},
 					},
 				},
-				SideEffects:    &sideEffects,
-				TimeoutSeconds: pointer.Int32(WebhookTimeout),
+				SideEffects:       &sideEffects,
+				TimeoutSeconds:    pointer.Int32(WebhookTimeout),
+				NamespaceSelector: createExcludeKubeSystemNamespacesSelector(),
 			},
 		},
 	}
@@ -288,6 +276,7 @@ func getFunctionConvertingWebhookCfg(config WebhookConfig) admissionregistration
 		ReinvocationPolicy: &reinvocationPolicy,
 		SideEffects:        &sideEffects,
 		TimeoutSeconds:     pointer.Int32(WebhookTimeout),
+		NamespaceSelector:  createExcludeKubeSystemNamespacesSelector(),
 	}
 }
 

@@ -84,6 +84,8 @@ This configures the underlying OTel Collector with a pipeline for traces. The re
 
 ### Step 2. Enable Istio tracing
 
+>**CAUTION:** The provided Istio feature uses an API in alpha state, which may change in future releases.
+
 By default, the tracing feature of the Istio module is disabled to avoid increased network utilization in the case of the TracePipeline absence.
 To activate the [Istio tracing](#istio) feature with a sampling rate of 100% (not recommended on production), use a resource similar to the following:
 
@@ -118,7 +120,9 @@ spec:
 
 ### Step 4: Add authentication details
 
-To integrate with external systems, you must configure authentication details. At the moment, only Basic Authentication is supported. A more general token-based authentication will be supported [soon](https://github.com/kyma-project/kyma/issues/16258).
+To integrate with external systems, you must configure authentication details. At the moment, Basic Authentication and custom headers are supported.
+
+The following example configures Basic Authentication for a TracePipeline:
 
 ```yaml
 apiVersion: telemetry.kyma-project.io/v1alpha1
@@ -138,11 +142,28 @@ spec:
             value: myPwd
 ```
 
+To use custom headers for authentication, use the following example that adds a bearer token for authentication:
+
+```yaml
+apiVersion: telemetry.kyma-project.io/v1alpha1
+kind: TracePipeline
+metadata:
+  name: jaeger
+spec:
+  output:
+    otlp:
+      endpoint:
+        value: http://jaeger-collector.jaeger.svc.cluster.local:4317
+      headers:
+         - name: Authorization
+           value: "Bearer myToken"
+```
+
 ### Step 5: Add authentication details from Secrets
 
 Integrations into external systems usually require authentication details dealing with sensitive data. To handle that data properly in Secrets, TracePipeline supports the reference of Secrets.
 
-Use the **valueFrom** attribute to map Secret keys as in the following example:
+Use the **valueFrom** attribute to map Secret keys as in the following example for Basic Authentication:
 
 ```yaml
 apiVersion: telemetry.kyma-project.io/v1alpha1
@@ -174,6 +195,27 @@ spec:
                  key: password
 ```
 
+And the following example for the token-based authentication with a custom header:
+
+```yaml
+apiVersion: telemetry.kyma-project.io/v1alpha1
+kind: TracePipeline
+metadata:
+  name: jaeger
+spec:
+  output:
+    otlp:
+      endpoint:
+        value: http://jaeger-collector.jaeger.svc.cluster.local:4317
+      headers:
+         - name: Authorization
+           valueFrom:
+             secretKeyRef:
+                name: backend
+                namespace: default
+                key: token 
+```
+
 The related Secret must fulfill the referenced name and Namespace, and contain the mapped key as in the following example:
 
 ```yaml
@@ -186,6 +228,7 @@ stringData:
   endpoint: https://myhost:4317
   user: myUser
   password: XXX
+  token: Bearer YYY
 ```
 
 ### Step 6: Rotate the Secret
@@ -199,6 +242,8 @@ Kyma bundles several modules which are potentially involved in user flows. Appli
 ### Istio
 
 The Istio module is a crucial enabler in distributed tracing as it provides [ingress gateway](https://istio.io/latest/docs/tasks/traffic-management/ingress/ingress-control/) where usually external requests enter the cluster scope and are enriched with trace context if it hasn't happened yet. Furthermore, every component being part of the Istio Service Mesh is running an Istio proxy, which propagates the context properly but also creates span data. Having Istio tracing activated and doing trace propagation in your application already ensures that you will get a complete picture of a trace, as every component will automatically contribute span data.
+
+>**CAUTION:** The provided Istio feature uses an API in alpha state, which may change in future releases.
 
 The Istio module is configured with an [extension provider](https://istio.io/latest/docs/tasks/observability/telemetry/) called `kyma-traces`. The provider can be activated on the global mesh label using the Istio [Telemetry API](https://istio.io/latest/docs/reference/config/telemetry/#Tracing) by placing a resource to the istio-system namespace like that:
 

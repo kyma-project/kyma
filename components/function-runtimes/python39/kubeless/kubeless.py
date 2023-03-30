@@ -14,6 +14,7 @@ from ce import Event
 from tracing import set_req_context
 
 
+
 def create_service_name(pod_name: str, service_namespace: str) -> str:
     # remove generated pods suffix ( two last sections )
     deployment_name = '-'.join(pod_name.split('-')[0:pod_name.count('-') - 1])
@@ -55,16 +56,13 @@ function_context = {
     'memory-limit': os.getenv('FUNC_MEMORY_LIMIT'),
 }
 
-tracecollector_endpoint = os.getenv('TRACE_COLLECTOR_ENDPOINT')
 pod_name = os.getenv('HOSTNAME')
 service_namespace = os.getenv('SERVICE_NAMESPACE')
 service_name = create_service_name(pod_name, service_namespace)
 
-tracer_provider = None
-# To not create several tracer providers, when the server start forking.
-if __name__ == "__main__":
-    tracer_provider = tracing.ServerlessTracerProvider(tracecollector_endpoint, service_name)
 
+if __name__ == "__main__":
+    tracer = tracing._setup_tracer(service_name)
 
 def func_with_context(e, function_context):
     ex = e.ceHeaders["extensions"]
@@ -91,7 +89,6 @@ def exception_handler():
 @app.route('/<:re:.*>', method=['GET', 'POST', 'PATCH', 'DELETE'])
 def handler():
     req = bottle.request
-    tracer = tracer_provider.get_tracer(req)
     event = Event(req, tracer)
 
     method = req.method
@@ -103,7 +100,7 @@ def handler():
             t.start()
             try:
                 res = que.get(block=True, timeout=timeout)
-                if hasattr(res, 'headers') and res.headers["content-type"]:
+                if hasattr(res, 'headers') and 'content-type' in res.headers:
                     bottle.response.content_type = res.headers["content-type"]
             except queue.Empty:
                 return bottle.HTTPError(408, "Timeout while processing the function")

@@ -72,7 +72,7 @@ class Event:
     def publishCloudEvent(self, data):
         return requests.post(
             publisher_proxy_address,
-            data = json.dumps(data),
+            data = json.dumps(data, default=str),
             headers = {"Content-Type": "application/cloudevents+json"}
             )
     

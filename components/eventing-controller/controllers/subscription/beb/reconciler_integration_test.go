@@ -1185,7 +1185,6 @@ func ensureAPIRuleStatusUpdatedWithStatusReady(ctx context.Context, apiRule *api
 	By(fmt.Sprintf("Ensuring the APIRule %q is updated", apiRule.Name))
 
 	return Eventually(func() error {
-
 		lookupKey := types.NamespacedName{
 			Namespace: apiRule.Namespace,
 			Name:      apiRule.Name,
@@ -1385,7 +1384,8 @@ var _ = BeforeSuite(func(done Done) {
 	useExistingCluster := useExistingCluster
 	testEnv = &envtest.Environment{
 		CRDDirectoryPaths: []string{
-			filepath.Join("../../../", "config", "crd", "bases"),
+			filepath.Join("../../../", "config", "crd", "bases", "eventing.kyma-project.io_eventingbackends.yaml"),
+			filepath.Join("../../../", "config", "crd", "basesv1alpha1"),
 			filepath.Join("../../../", "config", "crd", "external"),
 		},
 		AttachControlPlaneOutput: attachControlPlaneOutput,

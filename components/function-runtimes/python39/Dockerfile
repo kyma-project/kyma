@@ -7,8 +7,8 @@
 # We use this code to manually use newest alpine and nodejs.
 # Use official build when it will be available.
 
-# image base on alpine:3.17.0
-FROM alpine@sha256:c0d488a800e4127c334ad20d61d7bc21b4097540327217dfab52262adc02380c
+# image base on alpine:3.17.2
+FROM alpine@sha256:e2e16842c9b54d985bf1ef9242a313f36b856181f188de21313820e177002501
 
 SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 
@@ -164,5 +164,7 @@ COPY kubeless/ /
 WORKDIR /
 
 USER 1000
+# Tracing propagators are configured based on OTEL_PROPAGATORS env variable https://opentelemetry.io/docs/instrumentation/python/manual/#using-environment-variables
+ENV OTEL_PROPAGATORS=tracecontext,baggage,b3
 
 CMD ["python", "/kubeless.py"]

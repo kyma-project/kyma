@@ -383,7 +383,7 @@ func WithEventType(eventType string) SubscriptionOpt {
 	return func(subscription *eventingv1alpha2.Subscription) { AddEventType(eventType, subscription) }
 }
 
-// WithEventSource is a SubscriptionOpt for creating a Subscription with a specific event source,
+// WithEventSource is a SubscriptionOpt for creating a Subscription with a specific event source,.
 func WithEventSource(source string) SubscriptionOpt {
 	return func(subscription *eventingv1alpha2.Subscription) { subscription.Spec.Source = source }
 }
@@ -404,7 +404,7 @@ func WithStandardTypeMatching() SubscriptionOpt {
 	return WithTypeMatching(eventingv1alpha2.TypeMatchingStandard)
 }
 
-// WithTypeMatching is a SubscriptionOpt for creating a Subscription with a specific type matching,
+// WithTypeMatching is a SubscriptionOpt for creating a Subscription with a specific type matching,.
 func WithTypeMatching(typeMatching eventingv1alpha2.TypeMatching) SubscriptionOpt {
 	return func(subscription *eventingv1alpha2.Subscription) { subscription.Spec.TypeMatching = typeMatching }
 }
@@ -719,26 +719,27 @@ func WithCleanEventSourceAndType() SubscriptionOpt {
 	return WithSourceAndType(EventSourceClean, OrderCreatedV1Event)
 }
 
-// WithNotCleanEventSourceAndType is a SubscriptionOpt that initializes subscription with a not clean event source and type
+// WithNotCleanEventSourceAndType is a SubscriptionOpt that initializes subscription with a not clean event source
+// and type.
 func WithNotCleanEventSourceAndType() SubscriptionOpt {
 	return WithSourceAndType(EventSourceUnclean, OrderCreatedUncleanEvent)
 }
 
-// WithTypeMatchingStandard is a SubscriptionOpt that initializes the subscription with type matching to standard
+// WithTypeMatchingStandard is a SubscriptionOpt that initializes the subscription with type matching to standard.
 func WithTypeMatchingStandard() SubscriptionOpt {
 	return func(subscription *eventingv1alpha2.Subscription) {
 		subscription.Spec.TypeMatching = eventingv1alpha2.TypeMatchingStandard
 	}
 }
 
-// WithTypeMatchingExact is a SubscriptionOpt that initializes the subscription with type matching to exact
+// WithTypeMatchingExact is a SubscriptionOpt that initializes the subscription with type matching to exact.
 func WithTypeMatchingExact() SubscriptionOpt {
 	return func(subscription *eventingv1alpha2.Subscription) {
 		subscription.Spec.TypeMatching = eventingv1alpha2.TypeMatchingExact
 	}
 }
 
-// WithMaxInFlight is a SubscriptionOpt that sets the status with the maxInFlightMessages int value
+// WithMaxInFlight is a SubscriptionOpt that sets the status with the maxInFlightMessages int value.
 func WithMaxInFlight(maxInFlight int) SubscriptionOpt {
 	return func(subscription *eventingv1alpha2.Subscription) {
 		subscription.Spec.Config = map[string]string{
@@ -747,7 +748,7 @@ func WithMaxInFlight(maxInFlight int) SubscriptionOpt {
 	}
 }
 
-// WithMaxInFlightMessages is a SubscriptionOpt that sets the status with the maxInFlightMessages string value
+// WithMaxInFlightMessages is a SubscriptionOpt that sets the status with the maxInFlightMessages string value.
 func WithMaxInFlightMessages(maxInFlight string) SubscriptionOpt {
 	return func(sub *eventingv1alpha2.Subscription) {
 		if sub.Spec.Config == nil {

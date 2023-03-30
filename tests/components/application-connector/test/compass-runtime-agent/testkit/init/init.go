@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	CompassSystemNamespace        = "compass-system"
+	CompassSystemNamespace        = "kyma-system"
 	IstioSystemNamespace          = "istio-system"
 	CompassRuntimeAgentDeployment = "compass-runtime-agent"
 	NewCompassRuntimeConfigName   = "test-compass-runtime-agent-config"

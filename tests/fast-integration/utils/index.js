@@ -245,7 +245,7 @@ async function getSecret(name, namespace) {
 }
 
 async function getFunction(name, namespace) {
-  const path = `/apis/serverless.kyma-project.io/v1alpha1/namespaces/${namespace}/functions/${name}`;
+  const path = `/apis/serverless.kyma-project.io/v1alpha2/namespaces/${namespace}/functions/${name}`;
   const response = await k8sDynamicApi.requestPromise({
     url: k8sDynamicApi.basePath + path,
   });
@@ -396,7 +396,7 @@ function waitForEndpoint(name, namespace = 'default', timeout = 300_000) {
 
 function waitForFunction(name, namespace = 'default', timeout = 90_000) {
   return waitForK8sObject(
-      `/apis/serverless.kyma-project.io/v1alpha1/namespaces/${namespace}/functions`,
+      `/apis/serverless.kyma-project.io/v1alpha2/namespaces/${namespace}/functions`,
       {},
       (_type, _apiObj, watchObj) => {
         return (
@@ -410,6 +410,25 @@ function waitForFunction(name, namespace = 'default', timeout = 90_000) {
       timeout,
       `Waiting for ${name} function timeout (${timeout} ms)`,
   );
+}
+
+async function getSubscription(name, namespace = 'default', crdVersion='v1alpha1') {
+  try {
+    const path = `/apis/eventing.kyma-project.io/${crdVersion}/namespaces/${namespace}/subscriptions/${name}`;
+    const response = await k8sDynamicApi.requestPromise({
+      url: k8sDynamicApi.basePath + path,
+      qs: {limit: 500},
+    });
+    const body = JSON.parse(response.body);
+    return body;
+  } catch (e) {
+    if (e.statusCode === 404 || e.statusCode === 405) {
+      // do nothing
+    } else {
+      error(e);
+      throw e;
+    }
+  }
 }
 
 async function getAllSubscriptions(namespace = 'default', crdVersion='v1alpha1') {
@@ -1909,4 +1928,5 @@ module.exports = {
   waitForPodWithLabelAndCondition,
   waitForDeploymentWithLabel,
   k8sDeleteSecret
+  getSubscription,
 };

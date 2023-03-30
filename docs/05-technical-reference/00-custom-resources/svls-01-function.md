@@ -104,7 +104,7 @@ spec:
       auth:
         type: basic
         secretName: secret-name
-  runtime: "nodejs14"
+  runtime: "nodejs16"
 ```
 
 ## Custom resource parameters
@@ -116,7 +116,7 @@ This table lists all the possible parameters of a given resource together with t
 | **metadata.name**              |      Yes       | Specifies the name of the CR.                 |
 | **metadata.namespace**     |       No       | Defines the Namespace in which the CR is available. It is set to `default` unless you specify otherwise.      |
 | **metadata.labels**                          |       No       | Specifies the Function's Pod labels.    |
-| **spec.runtime**                         |      Yes       | Specifies the runtime of the Function. The available values are `nodejs14`, `nodejs16`, and `python39`. |
+| **spec.runtime**                         |      Yes       | Specifies the runtime of the Function. The available values are `nodejs16`, `nodejs16`, and `python39`. |
 | **spec.runtimeImageOverride**                 |       No       | Specifies the runtimes image which must be used instead of the default one. |
 | **spec.source**                               |      Yes       | Contains the Function's specification. Only one specification is allowed. |
 | **spec.source.inline**                        |       No       | Defines Function as the inline Function. |

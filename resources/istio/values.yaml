@@ -97,11 +97,15 @@ components:
         metrics:
           - resource:
               name: cpu
-              targetAverageUtilization: 80
+              target:
+                type: Utilization
+                averageUtilization: 80
             type: Resource
           - resource:
               name: memory
-              targetAverageUtilization: 80
+              target:
+                type: Utilization
+                averageUtilization: 80
             type: Resource
       securityContext:
         seccompProfile:
@@ -141,14 +145,6 @@ components:
         runAsNonRoot: true
         runAsGroup: 65534
 
-monitoring:
-  enabled: true
-  dashboards:
-    enabled: true
-  istioServiceMonitor:
-    enabled: true
-    scrapeInterval: ""
-
 global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
@@ -156,17 +152,17 @@ global:
     # these definitions aren't used by the chart, but they are required by external tool for list generation
     istio_proxyv2:
       name: "proxyv2"
-      version: "1.16.1-distroless"
+      version: "1.17.1-distroless"
       directory: "external/istio"
       containerRegistryPath: "eu.gcr.io/kyma-project"
     istio_pilot:
       name: "pilot"
-      version: "1.16.1-distroless"
+      version: "1.17.1-distroless"
       directory: "external/istio"
       containerRegistryPath: "eu.gcr.io/kyma-project"
     istio_install-cni:
       name: "install-cni"
-      version: "1.16.1-distroless"
+      version: "1.17.1-distroless"
       directory: "external/istio"
       containerRegistryPath: "eu.gcr.io/kyma-project"
   tracing:

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"testing"
 
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
@@ -67,28 +66,6 @@ func ValidV1Alpha2Function() serverlessv1alpha2.Function {
 
 func Marshall(t *testing.T, obj interface{}) string {
 	out, err := json.Marshal(obj)
-	require.NoError(t, err)
-	return string(out)
-}
-
-func ValidV1Alpha1Function(t *testing.T) string {
-	f := serverlessv1alpha1.Function{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       serverlessv1alpha1.FunctionKind,
-			APIVersion: serverlessv1alpha1.FunctionApiVersion,
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "testfunc",
-			Namespace: "default",
-		},
-		Spec: serverlessv1alpha1.FunctionSpec{
-			Source:  `def main(event, context):\n  return \"hello world\"\n`,
-			Deps:    "",
-			Runtime: serverlessv1alpha1.Python39,
-		},
-	}
-
-	out, err := json.Marshal(f)
 	require.NoError(t, err)
 	return string(out)
 }

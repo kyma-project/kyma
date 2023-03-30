@@ -10,9 +10,10 @@ spec:
   profile: default
   components:
     cni:
+      namespace: {{ .Release.Namespace }}
       enabled: {{ .Values.components.cni.enabled }}
       k8s:
-{{- toYaml .Values.components.cni.config | nindent 8}}  
+{{- toYaml .Values.components.cni.config | nindent 8}}
     egressGateways:
     - enabled: {{ .Values.components.egressGateways.enabled }}
       k8s:
@@ -31,6 +32,8 @@ spec:
             DO NOT EDIT - This resource is managed by Kyma.
             Any modifications are discarded and the resource is reverted to the original state.
         serviceAnnotations:
+          prometheus.io/scrape: "true"
+          prometheus.io/port: "15014"
           reconciler.kyma-project.io/managed-by-reconciler-disclaimer: |
             DO NOT EDIT - This resource is managed by Kyma.
             Any modifications are discarded and the resource is reverted to the original state.

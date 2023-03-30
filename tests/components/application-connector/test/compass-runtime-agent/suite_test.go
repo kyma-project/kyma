@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	cli "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
+	cli "github.com/kyma-project/kyma/components/central-application-gateway/pkg/client/clientset/versioned"
 	ccclientset "github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/client/clientset/versioned"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/suite"
@@ -111,7 +111,7 @@ func (cs *CompassRuntimeAgentSuite) initCompassRuntimeAgentConfigurator() {
 		initcra.NewCertificateSecretConfigurator(cs.coreClientSet),
 		initcra.NewConfigurationSecretConfigurator(cs.coreClientSet),
 		initcra.NewCompassConnectionCRConfiguration(cs.compassConnectionClientSet.CompassV1alpha1().CompassConnections()),
-		initcra.NewDeploymentConfiguration(cs.coreClientSet, "compass-runtime-agent", cs.testConfig.CompassSystemNamespace),
+		initcra.NewDeploymentConfiguration(cs.coreClientSet, "compass-runtime-agent", cs.testConfig.CompassNamespace),
 		cs.testConfig.OAuthCredentialsNamespace)
 }
 

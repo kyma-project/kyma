@@ -36,7 +36,7 @@ const (
 	ConditionReasonNATSSubscriptionActive    ConditionReason = "NATS Subscription active"
 	ConditionReasonNATSSubscriptionNotActive ConditionReason = "NATS Subscription not active"
 
-	// EventMesh Conditions
+	// EventMesh Conditions.
 	ConditionReasonSubscriptionCreated        ConditionReason = "EventMesh Subscription created"
 	ConditionReasonSubscriptionCreationFailed ConditionReason = "EventMesh Subscription creation failed"
 	ConditionReasonSubscriptionActive         ConditionReason = "EventMesh Subscription active"
@@ -51,13 +51,13 @@ const (
 func initializeConditions(initialConditions, currentConditions []Condition) []Condition {
 	givenConditions := make(map[ConditionType]Condition)
 
-	// create map of Condition per ConditionType
+	// Create map of Condition per ConditionType.
 	for _, condition := range currentConditions {
 		givenConditions[condition.Type] = condition
 	}
 
 	finalConditions := currentConditions
-	// check if every Condition is present in the current Conditions
+	// Check if every Condition is present in the current Conditions.
 	for _, expectedCondition := range initialConditions {
 		if _, ok := givenConditions[expectedCondition.Type]; !ok {
 			// and add it if it is missing
@@ -78,7 +78,7 @@ func (s SubscriptionStatus) IsReady() bool {
 		return false
 	}
 
-	// the subscription is ready if all its conditions are evaluated to true
+	// The Subscription is ready if all its conditions are evaluated to true.
 	for _, c := range s.Conditions {
 		if c.Status != corev1.ConditionTrue {
 			return false
@@ -97,7 +97,7 @@ func (s SubscriptionStatus) FindCondition(conditionType ConditionType) *Conditio
 }
 
 // ShouldUpdateReadyStatus checks if there is a mismatch between the
-// subscription Ready Status and the Ready status of all the conditions.
+// Subscription Ready status and the Ready status of all the conditions.
 func (s SubscriptionStatus) ShouldUpdateReadyStatus() bool {
 	if !s.Ready && s.IsReady() || s.Ready && !s.IsReady() {
 		return true
@@ -162,7 +162,6 @@ func MakeCondition(conditionType ConditionType, reason ConditionReason, status c
 		Status:             status,
 		LastTransitionTime: metav1.Now(),
 		Reason:             reason,
-		// TODO: https://github.com/kyma-project/kyma/issues/9770
 		Message: message,
 	}
 }

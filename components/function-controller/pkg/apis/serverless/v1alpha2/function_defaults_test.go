@@ -15,8 +15,6 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 )
 
-const v1alpha1ReplicasPresetLabel = "serverless.kyma-project.io/replicas-preset"
-
 func TestSetDefaults(t *testing.T) {
 	zero := int32(0)
 	one := int32(1)
@@ -398,31 +396,6 @@ func TestSetDefaults(t *testing.T) {
 					},
 					Replicas: &one,
 				}},
-		},
-		"Should ignore label replicas-preset": {
-			givenFunc: Function{
-				ObjectMeta: v1.ObjectMeta{
-					Labels: map[string]string{
-						v1alpha1ReplicasPresetLabel: "XL",
-					},
-				},
-				Spec: FunctionSpec{
-					Runtime: NodeJs14,
-				},
-			},
-			expectedFunc: Function{
-				ObjectMeta: v1.ObjectMeta{
-					Labels: map[string]string{
-						v1alpha1ReplicasPresetLabel: "XL",
-					},
-				}, Spec: FunctionSpec{
-					Runtime: NodeJs14,
-					ResourceConfiguration: &ResourceConfiguration{
-						Function: ResourceRequirementsBuilder{}.Limits("100m", "128Mi").Requests("50m", "64Mi").Build(),
-					},
-					Replicas: &one,
-				},
-			},
 		},
 	}
 

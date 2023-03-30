@@ -37,7 +37,7 @@ This guide shows how to call a registered external service from Kyma using a sim
 
    ```bash
    cat <<EOF | kubectl apply -f -
-   apiVersion: serverless.kyma-project.io/v1alpha1
+   apiVersion: serverless.kyma-project.io/v1alpha2
    kind: Function
    metadata:
      name: $FUNCTION_NAME
@@ -45,36 +45,39 @@ This guide shows how to call a registered external service from Kyma using a sim
      labels:
        app: $APP_NAME
    spec:
-     deps: |-
-       {
-           "name": "example-1",
-           "version": "0.0.1",
-           "dependencies": {
-             "request": "^2.85.0"
-           }
-       }
-     source: |-
-       const request = require('request');
-   
-       module.exports = { main: function (event, context) {
+     runtime: nodejs16
+     source:
+       inline:
+         source: |-
+          const request = require('request');
+
+          module.exports = { main: function (event, context) {
            return new Promise((resolve, reject) => {
                const url = process.env.GATEWAY_URL + "/uuid";
                const options = {
                    url: url,
                };
-   
+
                sendReq(url, resolve, reject)
            })
-       } }
-   
-       function sendReq(url, resolve, reject) {
+          } }
+
+          function sendReq(url, resolve, reject) {
            request.get(url, { json: true }, (error, response, body) => {
                if(error){
                    resolve(error);
                }
                resolve(response.body);
            })
-       }
+          }
+         dependencies: |-
+          {
+           "name": "example-1",
+           "version": "0.0.1",
+           "dependencies": {
+             "request": "^2.85.0"
+           }
+          }
      env:
      - name: GATEWAY_URL
        value: $GATEWAY_URL

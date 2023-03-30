@@ -39,29 +39,31 @@ The "in-flight messages" config defines the number of events that Kyma Eventing 
    
    ```bash
    cat <<EOF | kubectl apply -f -
-     apiVersion: serverless.kyma-project.io/v1alpha1
-     kind: Function
-     metadata:
-       labels:
-         serverless.kyma-project.io/build-resources-preset: local-dev
-         serverless.kyma-project.io/function-resources-preset: S
-         serverless.kyma-project.io/replicas-preset: S
-       name: lastorder
-       namespace: default
-     spec:
-       deps: '{ "dependencies": {}}'
-       maxReplicas: 1
-       minReplicas: 1
-       source: |
-         module.exports = {
-           main: async function (event, context) {
-             console.log("Processing event:", event.data);
-             // sleep/wait for 5 seconds
-             await new Promise(r => setTimeout(r, 5 * 1000));
-             console.log("Completely processed event:", event.data);
-             return;
-           } 
-         }
+   apiVersion: serverless.kyma-project.io/v1alpha2
+   kind: Function
+   metadata:
+     name: lastorder
+     namespace: default
+   spec:
+     replicas: 1
+     resourceConfiguration:
+       function:
+         profile: S
+       build:
+         profile: local-dev
+     runtime: nodejs16
+     source:
+       inline:
+         source: |-
+           module.exports = {
+             main: async function (event, context) {
+               console.log("Processing event:", event.data);
+               // sleep/wait for 5 seconds
+               await new Promise(r => setTimeout(r, 5 * 1000));
+               console.log("Completely processed event:", event.data);
+               return;
+             }
+           }
    EOF
    ```
    
@@ -78,33 +80,18 @@ Create a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01
   Kyma Dashboard
   </summary>
 
-1. In Kyma Dashboard, go to the view of your Function `lastorder`.
-2. Go to **Configuration** > **Create Subscription+**.
-3. Switch to the **Advanced** tab, and replace the yaml with the following:
-   ```bash
-   apiVersion: eventing.kyma-project.io/v1alpha1
-   kind: Subscription
-   metadata:
-     name: lastorder-sub
-     namespace: default
-   spec:
-     config:
-       maxInFlightMessages: 5
-     sink: 'http://lastorder.default.svc.cluster.local'
-     filter:
-       filters:
-         - eventSource:
-             property: source
-             type: exact
-             value: ''
-           eventType:
-             property: type
-             type: exact
-             value: sap.kyma.custom.myapp.order.received.v1
-   ```
-
-4. Click **Create**.
-5. Wait a few seconds for the Subscription to have status `READY`.
+1. Go to **Namespaces** and select the default Namespace.
+2. Go to **Configuration** > **Subscriptions** and click **Create Subscription+**.
+3. Switch to the **Advanced** tab, and provide the following parameters:
+   - **Subscription name**: `lastorder-sub`
+   - **Config**: `maxInFlightMessages: 5`
+   - **Types**: `order.received.v1`
+   - **Service**: `lastorder` (The sink field will be populated automatically.)
+   - **Type matching:**: `standard`
+   - **Source**: `myapp`
+     
+5. Click **Create**.
+6. Wait a few seconds for the Subscription to have status `READY`.
 
   </details>
   <details>
@@ -115,25 +102,18 @@ Create a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01
 Run:
 ```bash
 cat <<EOF | kubectl apply -f -
-   apiVersion: eventing.kyma-project.io/v1alpha1
+   apiVersion: eventing.kyma-project.io/v1alpha2
    kind: Subscription
    metadata:
      name: lastorder-sub
      namespace: default
    spec:
      config:
-       maxInFlightMessages: 5
+       maxInFlightMessages: "5"
      sink: 'http://lastorder.default.svc.cluster.local'
-     filter:
-       filters:
-         - eventSource:
-             property: source
-             type: exact
-             value: ''
-           eventType:
-             property: type
-             type: exact
-             value: sap.kyma.custom.myapp.order.received.v1
+     source: myapp
+     types:
+       - order.received.v1
 EOF
 ```
 
@@ -167,7 +147,7 @@ Next, publish 15 events at once and see how Kyma Eventing triggers the workload.
      for i in {1..15}
      do
        cloudevents send http://localhost:3000/publish \
-         --type sap.kyma.custom.myapp.order.received.v1 \
+         --type order.received.v1 \
          --id e4bcc616-c3a9-4840-9321-763aa23851f${i} \
          --source myapp \
          --datacontenttype application/json \
@@ -187,7 +167,7 @@ Next, publish 15 events at once and see how Kyma Eventing triggers the workload.
      do
        curl -v -X POST \
          -H "ce-specversion: 1.0" \
-         -H "ce-type: sap.kyma.custom.myapp.order.received.v1" \
+         -H "ce-type: order.received.v1" \
          -H "ce-source: myapp" \
          -H "ce-eventtypeversion: v1" \
          -H "ce-id: e4bcc616-c3a9-4840-9321-763aa23851f${i}" \

@@ -91,6 +91,7 @@ func NewDeployment(publisherConfig env.PublisherConfig, opts ...DeployOpt) *apps
 					ServiceAccountName:            publisherConfig.ServiceAccount,
 					TerminationGracePeriodSeconds: &TerminationGracePeriodSeconds,
 					PriorityClassName:             publisherConfig.PriorityClassName,
+					SecurityContext:               getPodSecurityContext(),
 				},
 			},
 		},
@@ -147,7 +148,7 @@ func WithContainers(publisherConfig env.PublisherConfig) DeployOpt {
 				LivenessProbe:   getLivenessProbe(),
 				ReadinessProbe:  getReadinessProbe(),
 				ImagePullPolicy: getImagePullPolicy(publisherConfig.ImagePullPolicy),
-				SecurityContext: getSecurityContext(),
+				SecurityContext: getContainerSecurityContext(),
 				Resources: getResources(publisherConfig.RequestsCPU,
 					publisherConfig.RequestsMemory,
 					publisherConfig.LimitsCPU,
@@ -200,10 +201,27 @@ func getImagePullPolicy(imagePullPolicy string) v1.PullPolicy {
 	}
 }
 
-func getSecurityContext() *v1.SecurityContext {
+func getPodSecurityContext() *v1.PodSecurityContext {
+	const id = 10001
+	return &v1.PodSecurityContext{
+		FSGroup:      utils.Int64Ptr(id),
+		RunAsUser:    utils.Int64Ptr(id),
+		RunAsGroup:   utils.Int64Ptr(id),
+		RunAsNonRoot: utils.BoolPtr(true),
+		SeccompProfile: &v1.SeccompProfile{
+			Type: v1.SeccompProfileTypeRuntimeDefault,
+		},
+	}
+}
+
+func getContainerSecurityContext() *v1.SecurityContext {
 	return &v1.SecurityContext{
 		Privileged:               utils.BoolPtr(false),
 		AllowPrivilegeEscalation: utils.BoolPtr(false),
+		RunAsNonRoot:             utils.BoolPtr(true),
+		Capabilities: &v1.Capabilities{
+			Drop: []v1.Capability{"ALL"},
+		},
 	}
 }
 

@@ -120,7 +120,7 @@ func getArg(args []string, arg string) string {
 
 func getPackageConfigVolumeMountsForRuntime(rtm serverlessv1alpha2.Runtime) []corev1.VolumeMount {
 	switch rtm {
-	case serverlessv1alpha2.NodeJs14, serverlessv1alpha2.NodeJs16:
+	case serverlessv1alpha2.NodeJs14, serverlessv1alpha2.NodeJs16, serverlessv1alpha2.NodeJs18:
 		return []corev1.VolumeMount{
 			{
 				Name:      "registry-config",
@@ -349,7 +349,7 @@ func calculateInlineImageTag(instance *serverlessv1alpha2.Function) string {
 	hash := sha256.Sum256([]byte(strings.Join([]string{
 		string(instance.GetUID()),
 		fmt.Sprintf("%v", *instance.Spec.Source.Inline),
-		string(instance.Status.Runtime),
+		instance.EffectiveRuntime(),
 	}, "-")))
 
 	return fmt.Sprintf("%x", hash)
@@ -360,7 +360,7 @@ func calculateGitImageTag(instance *serverlessv1alpha2.Function) string {
 		string(instance.GetUID()),
 		instance.Status.Commit,
 		instance.Status.BaseDir,
-		string(instance.Status.Runtime),
+		instance.EffectiveRuntime(),
 	}, "-")
 	hash := sha256.Sum256([]byte(data))
 	return fmt.Sprintf("%x", hash)

@@ -5,35 +5,35 @@ type EventType struct {
 	CleanType    string `json:"cleanType"`
 }
 
-// Backend contains Backend-specific fields
+// Backend contains Backend-specific fields.
 type Backend struct {
-	// BEB-specific fields
+	// EventMesh-specific fields
 
-	// Ev2hash defines the hash for the Subscription custom resource
+	// Ev2hash defines the hash for the Subscription custom resource.
 	// +optional
 	Ev2hash int64 `json:"ev2hash,omitempty"`
 
-	// Emshash defines the hash for the Subscription in BEB
+	// Emshash defines the hash for the Subscription in EventType.
 	// +optional
 	Emshash int64 `json:"emshash,omitempty"`
 
-	// ExternalSink defines the webhook URL which is used by BEB to trigger subscribers
+	// ExternalSink defines the webhook URL which is used by EventMesh to trigger subscribers.
 	// +optional
 	ExternalSink string `json:"externalSink,omitempty"`
 
-	// FailedActivation defines the reason if a Subscription had failed activation in BEB
+	// FailedActivation defines the reason if a Subscription had failed activation in EventMesh.
 	// +optional
 	FailedActivation string `json:"failedActivation,omitempty"`
 
-	// APIRuleName defines the name of the APIRule which is used by the Subscription
+	// APIRuleName defines the name of the APIRule which is used by the Subscription.
 	// +optional
 	APIRuleName string `json:"apiRuleName,omitempty"`
 
-	// EmsSubscriptionStatus defines the status of Subscription in BEB
+	// EmsSubscriptionStatus defines the status of Subscription in EventMesh.
 	// +optional
 	EmsSubscriptionStatus *EmsSubscriptionStatus `json:"emsSubscriptionStatus,omitempty"`
 
-	// NATS-specific fields
+	// NATS-specific fields.
 
 	// +optional
 	Types []JetStreamTypes `json:"types,omitempty"`
@@ -43,23 +43,23 @@ type Backend struct {
 }
 
 type EmsSubscriptionStatus struct {
-	// Status defines the status of the Subscription
+	// Status defines the status of the Subscription.
 	// +optional
 	Status string `json:"status,omitempty"`
 
-	// StatusReason defines the reason of the status
+	// StatusReason defines the reason of the status.
 	// +optional
 	StatusReason string `json:"statusReason,omitempty"`
 
-	// LastSuccessfulDelivery defines the timestamp of the last successful delivery
+	// LastSuccessfulDelivery defines the timestamp of the last successful delivery.
 	// +optional
 	LastSuccessfulDelivery string `json:"lastSuccessfulDelivery,omitempty"`
 
-	// LastFailedDelivery defines the timestamp of the last failed delivery
+	// LastFailedDelivery defines the timestamp of the last failed delivery.
 	// +optional
 	LastFailedDelivery string `json:"lastFailedDelivery,omitempty"`
 
-	// LastFailedDeliveryReason defines the reason of failed delivery
+	// LastFailedDeliveryReason defines the reason of failed delivery.
 	// +optional
 	LastFailedDeliveryReason string `json:"lastFailedDeliveryReason,omitempty"`
 }

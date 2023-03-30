@@ -66,7 +66,7 @@ func GitopsSteps(restConfig *rest.Config, cfg testsuite.Config, logf *logrus.Ent
 	return step.NewSerialTestRunner(logf, "create git func",
 		teststep.NewNamespaceStep("Create test namespace", coreCli, genericContainer),
 		teststep.NewGitServer(gitCfg, "Start in-cluster Git Server", appsCli.Deployments(genericContainer.Namespace), coreCli.Services(genericContainer.Namespace), cfg.KubectlProxyEnabled, cfg.IstioEnabled),
-		teststep.CreateFunction(logf, gitFn, "Create Git Function", gitops.GitopsFunction(gitCfg.GetGitServerInClusterURL(), "/", "master", serverlessv1alpha2.NodeJs16, nil)),
+		teststep.CreateFunction(logf, gitFn, "Create Git Function", gitops.GitopsFunction(gitCfg.GetGitServerInClusterURL(), "/", "master", serverlessv1alpha2.NodeJs18, nil)),
 		teststep.NewDefaultedFunctionCheck("Check if Git Function has correct default values", gitFn),
 		teststep.NewHTTPCheck(logf, "Git Function pre update simple check through service", gitFn.FunctionURL, poll, "GITOPS 1"),
 		teststep.NewCommitChanges(logf, "Commit changes to Git Function", gitCfg.GetGitServerURL(cfg.KubectlProxyEnabled)),

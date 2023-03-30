@@ -43,7 +43,7 @@ func (dc deploymentConfiguration) Do(newCANamespacedSecretName, newClusterNamesp
 	}
 
 	if len(deployment.Spec.Template.Spec.Containers) < 1 {
-		return nil, fmt.Errorf("no containers found in %s/%s deployment", "compass-system", dc.deploymentName)
+		return nil, fmt.Errorf("no containers found in %s/%s deployment", "kyma-system", dc.deploymentName)
 	}
 
 	previousConfigSecretNamespacedName, found := replaceEnvValue(deployment, ConfigurationSecretEnvName, newConfigNamespacedSecretName)

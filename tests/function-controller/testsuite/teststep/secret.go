@@ -37,7 +37,7 @@ func (s Secrets) Cleanup() error {
 }
 
 func (s Secrets) OnError() error {
-	return s.secret.LogResource()
+	return nil
 }
 
 var _ step.Step = Secrets{}
