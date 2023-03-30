@@ -1,3 +1,5 @@
+// kubectl explain --api-version='serverless.kyma-project.io/v1alpha2' function
+
 package main
 
 import (
@@ -28,6 +30,8 @@ const SkipIdentifier = `SKIP-ELEMENT`
 const RESkipPattern = `<!--\s*` + SkipIdentifier + `\s*([^\s]+)\s*-->`
 const SkipWithAncestorsIdentifier = `SKIP-WITH-ANCESTORS`
 const RESkipWithAncestorsPattern = `<!--\s*` + SkipWithAncestorsIdentifier + `\s*([^\s-]+)\s*-->`
+
+const REElementInDescription = `\*(\w+)\*`
 
 type FunctionSpecGenerator struct {
 	elementsToKeep map[string]string
@@ -165,9 +169,11 @@ func (g *FunctionSpecGenerator) generateElementDoc(obj interface{}, name string,
 	}
 	_, isRowToKeep := g.elementsToKeep[fullName]
 	if !shouldBeSkipped && !isRowToKeep {
+		description = normalizeDescription(description, name)
+		description = expandElementLinksInDescription(description, parentPath)
 		result[fullName] =
 			fmt.Sprintf("| **%s** | %s | %s |",
-				fullName, yesNo(required), normalizeDescription(description, name))
+				fullName, yesNo(required), description)
 	}
 
 	if elementType == "object" {
@@ -208,7 +214,7 @@ func getElement(obj interface{}, path ...string) interface{} {
 	return elem
 }
 
-func normalizeDescription(description string, name string) any {
+func normalizeDescription(description string, name string) string {
 	d := strings.Trim(description, " ")
 	n := strings.Trim(name, " ")
 	if len(n) == 0 {
@@ -224,6 +230,12 @@ func normalizeDescription(description string, name string) any {
 	d = strings.Trim(dParts[1], " ")
 	d = strings.ToUpper(d[:1]) + d[1:]
 	return d
+}
+
+func expandElementLinksInDescription(description string, parentPath string) string {
+	newContent := fmt.Sprintf("**" + parentPath + "$1**")
+	re := regexp.MustCompile(REElementInDescription)
+	return re.ReplaceAllString(description, newContent)
 }
 
 func sortedKeys[T any](propMap map[string]T) []string {
