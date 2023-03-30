@@ -1,3 +1,17 @@
+// This program generate part of table inside markdown file.
+// Generated table rows have format:
+// | <parameter-name> | <required> | <description> |
+
+// The markdown content between html comments "<!-- FUNCTION-SPEC-START -->" and "<!-- FUNCTION-SPEC-END -->"
+// will be replaced but rows with "<!-- KEEP-THIS -->" at the end will be preserved.
+// Special tags (html comments) must be at the end of lines due to markdown requirements.
+// All comments in markdown file that contain "<!-- SKIP-ELEMENT -->" and the name of the element
+// will skip the generation of that element. Similarly with "<!-- SKIP-WITH-ANCESTORS -->" comments,
+// which skip elements along with their descendants.
+// Words in descriptions that are surrounded by asterisks will be replaced with parameter names
+// with full path and surrounded by double asterisks.
+
+// Generated documentation is equivalent with:
 // kubectl explain --api-version='serverless.kyma-project.io/v1alpha2' function
 
 package main
