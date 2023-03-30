@@ -63,9 +63,11 @@ spec:
             description: Spec defines the desired state of Function
             properties:
               env:
-                description: Env specifies an array of key-value pairs to be used
+                description: 'Env specifies an array of key-value pairs to be used
                   as environment variables for the Function. You can define values
-                  as static strings or reference values from ConfigMaps or Secrets.
+                  as static strings or reference values from ConfigMaps (more info:
+                  https://kyma-project.io/docs/kyma/latest/05-technical-reference/00-configuration-parameters/svls-02-environment-variables.md#define-environment-variables-in-a-config-map)
+                  or Secrets.'
                 items:
                   description: EnvVar represents an environment variable present in
                     a Container.
@@ -171,10 +173,10 @@ spec:
                 type: array
               replicas:
                 description: Replicas defines the exact number of Function's Pods
-                  to run at a time. If ScaleConfig is configured, or if Function is
-                  targeted by an external scaler, then the Replicas field is used
-                  by the relevant HorizontalPodAutoscaler to control the number of
-                  active replicas.
+                  to run at a time. If *scaleConfig* is configured, or if Function
+                  is targeted by an external scaler, then the *replicas* field is
+                  used by the relevant HorizontalPodAutoscaler to control the number
+                  of active replicas.
                 format: int32
                 type: integer
               resourceConfiguration:
@@ -187,12 +189,12 @@ spec:
                     properties:
                       profile:
                         description: Profile defines name of predefined set of values
-                          of resource. Can't be used at the same time with Resources.
+                          of resource. Can't be used at the same time with *resources*.
                         type: string
                       resources:
                         description: Resources defines amount of resources available
                           for the Pod to use. Can't be used at the same time with
-                          Profile.
+                          *profile*.
                         properties:
                           limits:
                             additionalProperties:
@@ -225,12 +227,12 @@ spec:
                     properties:
                       profile:
                         description: Profile defines name of predefined set of values
-                          of resource. Can't be used at the same time with Resources.
+                          of resource. Can't be used at the same time with *resources*.
                         type: string
                       resources:
                         description: Resources defines amount of resources available
                           for the Pod to use. Can't be used at the same time with
-                          Profile.
+                          *profile*.
                         properties:
                           limits:
                             additionalProperties:
@@ -269,8 +271,8 @@ spec:
               scaleConfig:
                 description: ScaleConfig defines minimum and maximum number of Function's
                   Pods to run at a time. When it is configured, a HorizontalPodAutoscaler
-                  will be deployed and will control the Replicas field to scale Function
-                  based on the CPU utilisation.
+                  will be deployed and will control the *replicas* field to scale
+                  Function based on the CPU utilisation.
                 properties:
                   maxReplicas:
                     description: MaxReplicas defines the maximum number of Function's
@@ -311,7 +313,7 @@ spec:
                 properties:
                   gitRepository:
                     description: GitRepository defines Function as git-sourced. Can't
-                      be used at the same time with Inline.
+                      be used at the same time with *inline*.
                     properties:
                       auth:
                         description: Auth specifies that you must authenticate to
@@ -326,10 +328,10 @@ spec:
                               CR.
                             type: string
                           type:
-                            description: RepositoryAuthType defines if you must authenticate
-                              to the repository with a password or token (`basic`),
-                              or an SSH key (`key`). For SSH, this parameter must
-                              be set to `key`.
+                            description: Type defines if you must authenticate to
+                              the repository with a password or token (`basic`), or
+                              an SSH key (`key`). For SSH, this parameter must be
+                              set to `key`.
                             enum:
                             - basic
                             - key
@@ -361,7 +363,7 @@ spec:
                     type: object
                   inline:
                     description: Inline defines Function as the inline Function. Can't
-                      be used at the same time with GitRepository.
+                      be used at the same time with *gitRepository*.
                     properties:
                       dependencies:
                         description: Dependencies specifies the Function's dependencies.
