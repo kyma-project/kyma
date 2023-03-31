@@ -86,7 +86,7 @@ spec:
                             type: array
                           include:
                             description: Specifies to include only the container logs
-                              with the specified container names.
+                              with the specified container names. qwe.
                             items:
                               type: string
                             type: array
