@@ -80,7 +80,7 @@ For details, see the [LogPipeline specification file](https://github.com/kyma-pr
 | **spec.input.application** | Configures in more detail from which containers application logs are enabled as input. |
 | **spec.input.application.containers** | Describes whether application logs from specific containers are selected. The options are mutually exclusive. |
 | **spec.input.application.containers.exclude** | Specifies to exclude only the container logs with the specified container names. |
-| **spec.input.application.containers.include** | Specifies to include only the container logs with the specified container names. |
+| **spec.input.application.containers.include** | Specifies to include only the container logs with the specified container names. qwe. |
 | **spec.input.application.dropLabels** | Defines whether to drop all Kubernetes labels. The default is `false`. |
 | **spec.input.application.keepAnnotations** | Defines whether to keep all Kubernetes annotations. The default is `false`. |
 | **spec.input.application.namespaces** | Describes whether application logs from specific Namespaces are selected. The options are mutually exclusive. System Namespaces are excluded by default from the collection. |
