@@ -71,7 +71,7 @@ For details, see the [LogPipeline specification file](https://github.com/kyma-pr
 <!-- LogPipeline v1alpha1 telemetry.kyma-project.io -->
 | Parameter         | Description                                   |
 | ---------------------------------------- | ---------|
-| **spec.files** | Provides file content to be consumed by a LogPipeline configuration |
+| **spec.files** | Provides file content to be consumed by a LogPipeline configuration, super duper |
 | **spec.files.content** |  |
 | **spec.files.name** |  |
 | **spec.filters** | Describes a filtering option on the logs of the pipeline. |
