@@ -64,7 +64,7 @@ spec:
                       type: string
                     reason:
                       description: An array of conditions describing the status of
-                        the parser.
+                        the parser. asdasd
                       type: string
                     type:
                       description: 'The possible transition types are:<br>- `Running`:
