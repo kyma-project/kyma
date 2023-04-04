@@ -36,7 +36,7 @@ const path = require('path');
 const k8s = require('@kubernetes/client-node');
 const {expect} = require('chai');
 
-// Variables
+// Variables changed
 const kymaVersion = process.env.KYMA_VERSION || '';
 const kymaStreamName = 'sap';
 const isSKR = process.env.KYMA_TYPE === 'SKR';
