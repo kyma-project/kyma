@@ -121,7 +121,7 @@ function convertAxiosError(axiosError, message) {
   return new Error(message);
 }
 
-// 'polyfill' for Promise.allSettled
+// "polyfill" for Promise.allSettled
 async function promiseAllSettled(promises) {
   return Promise.all(
       promises.map((promise) =>
