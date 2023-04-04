@@ -171,10 +171,6 @@ function kubectlDelete(file, namespace) {
   return k8sDelete(listOfSpecs, namespace);
 }
 
-async function k8sDeleteWithRetries(listOfSpecs, namespace, retries = 5, interval=1500) {
-  return retryPromise(async () => await k8sDelete(listOfSpecs, namespace), retries, interval);
-}
-
 async function k8sDelete(listOfSpecs, namespace) {
   for (const res of listOfSpecs) {
     if (namespace) {
@@ -262,10 +258,6 @@ async function getConfigMap(name, namespace='default') {
     url: k8sDynamicApi.basePath + path,
   });
   return JSON.parse(response.body);
-}
-
-async function k8sApplyWithRetries(resources, namespace, patch = true, retries = 5, interval=1500) {
-  return retryPromise(async () => await k8sApply(resources, namespace, patch), retries, interval);
 }
 
 async function k8sApply(resources, namespace, patch = true) {

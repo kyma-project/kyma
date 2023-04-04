@@ -13,8 +13,8 @@ const {
   listPods,
   retryPromise,
   waitForVirtualService,
-  k8sApplyWithRetries,
-  k8sDeleteWithRetries,
+  k8sApply,
+  k8sDelete,
   waitForFunction,
   eventingSubscription,
   waitForSubscription,
@@ -226,6 +226,14 @@ function getK8sFunctionObject(funcName) {
   );
 
   return k8s.loadAllYaml(functionYaml);
+}
+
+async function k8sApplyWithRetries(resources, namespace, patch = true, retries = 5, interval=1500) {
+  return retryPromise(async () => await k8sApply(resources, namespace, patch), retries, interval);
+}
+
+async function k8sDeleteWithRetries(listOfSpecs, namespace, retries = 5, interval=1500) {
+  return retryPromise(async () => await k8sDelete(listOfSpecs, namespace), retries, interval);
 }
 
 async function deployEventingSinkFunction(funcName = eventingSinkName) {
