@@ -20,19 +20,19 @@ const eventingBackendName = 'eventing-backend';
 function initializeK8sClient(opts) {
   opts = opts || {};
   try {
-    console.log("Trying to initialize a K8S client");
+    console.log('Trying to initialize a K8S client');
     if (opts.kubeconfigPath) {
-      console.log("Path initialization");
+      console.log('Path initialization');
       kc.loadFromFile(opts.kubeconfigPath);
     } else if (opts.kubeconfig) {
-      console.log("Kubeconfig initialization");
+      console.log('Kubeconfig initialization');
       kc.loadFromString(opts.kubeconfig);
     } else {
-      console.log("Default initialization");
+      console.log('Default initialization');
       kc.loadFromDefault();
     }
 
-    console.log("Clients creation");
+    console.log('Clients creation');
     k8sDynamicApi = kc.makeApiClient(k8s.KubernetesObjectApi);
     k8sAppsApi = kc.makeApiClient(k8s.AppsV1Api);
     k8sCoreV1Api = kc.makeApiClient(k8s.CoreV1Api);
@@ -85,7 +85,7 @@ async function retryPromise(fn, retriesLeft = 10, interval = 30) {
             return;
           }
           setTimeout(() => {
-          // Passing on "reject" is the important part
+          // Passing on 'reject' is the important part
             retryPromise(fn, retriesLeft - 1, interval).then(resolve, reject);
           }, interval);
         });
@@ -121,7 +121,7 @@ function convertAxiosError(axiosError, message) {
   return new Error(message);
 }
 
-// "polyfill" for Promise.allSettled
+// 'polyfill' for Promise.allSettled
 async function promiseAllSettled(promises) {
   return Promise.all(
       promises.map((promise) =>
