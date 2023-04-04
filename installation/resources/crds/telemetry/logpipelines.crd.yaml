@@ -68,7 +68,7 @@ spec:
                   type: object
                 type: array
               input:
-                description: Defines where to collect logs, including selector mechanisms.
+                description: Defines where to collect logs, including selector mechanisms. Here is an update
                 properties:
                   application:
                     description: Configures in more detail from which containers application
