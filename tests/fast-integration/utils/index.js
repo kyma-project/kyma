@@ -85,7 +85,7 @@ async function retryPromise(fn, retriesLeft = 10, interval = 30) {
             return;
           }
           setTimeout(() => {
-          // Passing on 'reject' is the important part
+          // Passing on "reject" is the important part
             retryPromise(fn, retriesLeft - 1, interval).then(resolve, reject);
           }, interval);
         });
