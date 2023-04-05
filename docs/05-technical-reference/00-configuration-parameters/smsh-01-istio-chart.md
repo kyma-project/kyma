@@ -12,23 +12,23 @@ The Istio installation in Kyma uses the [IstioOperator](https://istio.io/docs/re
 
 This table lists the configurable parameters, their descriptions, and default values:
 
-| Parameter |  Description | Default value |
-|-------|-------|:--------:|
-| **helmValues.global.proxy.resources.requests.cpu** | Defines requests for CPU resources for the Proxy component. | `75m` |
-| **helmValues.global.proxy.resources.requests.memory** | Defines requests for memory resources for the Proxy component. | `64Mi` |
-| **helmValues.global.proxy.resources.limits.cpu** | Defines limits for CPU resources for the Proxy component. | `250m` |
-| **helmValues.global.proxy.resources.limits.memory** | Defines limits for memory resources for the Proxy component. | `256Mi` |
-| **components.ingressGateways.config.hpaSpec.maxReplicas** | Defines the maximum number of replicas managed by the autoscaler. | `5` |
-| **components.ingressGateways.config.hpaSpec.minReplicas** | Defines the minimum number of replicas managed by the autoscaler. | `1` |
-| **components.ingressGateways.resources.limits.cpu** | Defines limits for CPU resources for the Ingress Gateway component. | `200m` |
-| **components.ingressGateways.resources.limits.memory** | Defines limits for memory resources for the Ingress Gateway component. | `1024Mi` |
-| **components.ingressGateways.resources.requests.cpu** | Defines requests for CPU resources for the Ingress Gateway component. | `100m` |
-| **components.ingressGateways.resources.requests.memory** | Defines requests for memory resources for the Ingress Gateway component.| `128Mi` |
-| **components.pilot.resources.limits.cpu** | Defines limits for CPU resources for the Pilot component. | `500m` |
-| **components.pilot.resources.limits.memory** | Defines limits for memory resources for the Pilot component. | `1024Mi` |
-| **components.pilot.resources.requests.cpu** | Defines requests for CPU resources for the Pilot component. | `100m` |
-| **components.pilot.resources.requests.memory** | Defines requests for memory resources for the Pilot component. | `512Mi` |
-| **components.cni.resources.limits.cpu** | Defines limits for CPU resources for the CNI node component. | `500m` |
-| **components.cni.resources.limits.memory** | Defines limits for memory resources for the CNI node component. | `1024Mi` |
-| **components.cni.resources.requests.cpu** | Defines requests for CPU resources for the CNI node component. | `100m` |
-| **components.cni.resources.requests.memory** | Defines requests for memory resources for the CNI node component. | `512Mi` |
+| Parameter                                                 | Description                                                              | Default value |
+|-----------------------------------------------------------|--------------------------------------------------------------------------|:-------------:|
+| **helmValues.global.proxy.resources.requests.cpu**        | Defines requests for CPU resources for the Proxy component.              |     `10m`     |
+| **helmValues.global.proxy.resources.requests.memory**     | Defines requests for memory resources for the Proxy component.           |    `64Mi`     |
+| **helmValues.global.proxy.resources.limits.cpu**          | Defines limits for CPU resources for the Proxy component.                |    `250m`     |
+| **helmValues.global.proxy.resources.limits.memory**       | Defines limits for memory resources for the Proxy component.             |    `256Mi`    |
+| **components.ingressGateways.config.hpaSpec.maxReplicas** | Defines the maximum number of replicas managed by the autoscaler.        |      `5`      |
+| **components.ingressGateways.config.hpaSpec.minReplicas** | Defines the minimum number of replicas managed by the autoscaler.        |      `1`      |
+| **components.ingressGateways.resources.limits.cpu**       | Defines limits for CPU resources for the Ingress Gateway component.      |    `2000m`    |
+| **components.ingressGateways.resources.limits.memory**    | Defines limits for memory resources for the Ingress Gateway component.   |   `1024Mi`    |
+| **components.ingressGateways.resources.requests.cpu**     | Defines requests for CPU resources for the Ingress Gateway component.    |    `100m`     |
+| **components.ingressGateways.resources.requests.memory**  | Defines requests for memory resources for the Ingress Gateway component. |    `128Mi`    |
+| **components.pilot.resources.limits.cpu**                 | Defines limits for CPU resources for the Pilot component.                |    `500m`     |
+| **components.pilot.resources.limits.memory**              | Defines limits for memory resources for the Pilot component.             |   `1024Mi`    |
+| **components.pilot.resources.requests.cpu**               | Defines requests for CPU resources for the Pilot component.              |    `100m`     |
+| **components.pilot.resources.requests.memory**            | Defines requests for memory resources for the Pilot component.           |    `512Mi`    |
+| **components.cni.resources.limits.cpu**                   | Defines limits for CPU resources for the CNI node component.             |    `500m`     |
+| **components.cni.resources.limits.memory**                | Defines limits for memory resources for the CNI node component.          |   `1024Mi`    |
+| **components.cni.resources.requests.cpu**                 | Defines requests for CPU resources for the CNI node component.           |    `100m`     |
+| **components.cni.resources.requests.memory**              | Defines requests for memory resources for the CNI node component.        |    `512Mi`    |
