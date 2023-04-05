@@ -9,10 +9,10 @@ global:
       pullPolicy: "IfNotPresent"
     publisher_proxy:
       name: event-publisher-proxy
-      version: PR-17124
+      version: PR-17192
     certHandler:
       name: api-gateway-webhook-certificates
-      version: "1.4.0"
+      version: "1.4.1"
     nats:
       name: nats
       version: v20230314-2.9.15-alpine3.17

@@ -141,7 +141,7 @@ global:
       directory: "external/prom"
     node_exporter:
       name: "node-exporter"
-      version: "1.5.0-791da1af"
+      version: "1.5.0-945764ea"
       directory: "tpi"
     kube_state_metrics:
       name: "kube-state-metrics"
@@ -160,12 +160,12 @@ global:
       sha: ""
     k8s_sidecar:
       name: "k8s-sidecar"
-      version: "1.15.9-9cbf4bd6"
+      version: "1.15.9-945764ea"
       directory: "tpi"
       sha: ""
     oauth2_proxy:
       name: "oauth2-proxy"
-      version: "7.4.0-a3475b24"
+      version: "7.4.0-945764ea"
       directory: "tpi"
       sha: ""
 

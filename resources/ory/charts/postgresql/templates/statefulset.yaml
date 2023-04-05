@@ -130,6 +130,10 @@ spec:
       containers:
         - name: {{ template "postgresql.fullname" . }}
           image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.postgres) }}
+          {{- if or (.Files.Glob "files/pg_hba.conf") .Values.pgHbaConfiguration }}
+          args:
+            - '-chba_file=/bitnami/postgresql/conf/pg_hba.conf'
+          {{- end }}
           imagePullPolicy: "{{ .Values.image.pullPolicy }}"
           {{- if .Values.resources }}
           resources: {{- toYaml .Values.resources | nindent 12 }}

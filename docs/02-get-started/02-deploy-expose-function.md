@@ -28,8 +28,23 @@ First, let's create the Function and apply it.
 Run:
 
 ```bash
-kyma init function --name hello-world
-kyma apply function
+cat <<EOF | kubectl apply -f -
+apiVersion: serverless.kyma-project.io/v1alpha2
+kind: Function
+metadata:
+  name: hello-world
+  namespace: default
+spec:
+  runtime: nodejs18
+  source:
+    inline:
+      source: |
+        module.exports = {
+          main: function(event, context) {
+            return 'Hello Serverless'
+          }
+        }
+EOF
 ```
 
   </details>
@@ -159,3 +174,6 @@ The operation was successful if the call returns `Hello Serverless`.
 
   </details>
 </div>
+
+> **NOTE:** Local installation provides the self-signed certificates out of the box, but if you want to access your API through your browser, you must add them to your local trust store. 
+To do this, call the `kyma import certs` command with proper permissions. For more information, read [Kyma import certs](https://github.com/kyma-project/cli/blob/main/docs/gen-docs/kyma_import_certs.md). 

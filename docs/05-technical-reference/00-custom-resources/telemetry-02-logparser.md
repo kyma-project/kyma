@@ -37,8 +37,8 @@ For details, see the [LogParser specification file](https://github.com/kyma-proj
 <!-- LogParser v1alpha1 telemetry.kyma-project.io -->
 | Parameter         | Description                                   |
 | ---------------------------------------- | ---------|
-| **spec.parser** | Configures a user defined Fluent Bit parser to be applied to the logs. |
-| **status.conditions** | LogParserCondition contains details for the current condition of this LogParser |
-| **status.conditions.lastTransitionTime** |  |
-| **status.conditions.reason** |  |
-| **status.conditions.type** |  |<!-- TABLE-END -->
+| **spec.parser** | [Fluent Bit Parsers](https://docs.fluentbit.io/manual/pipeline/parsers). The parser specified here has no effect until it is referenced by a [Pod annotation](https://docs.fluentbit.io/manual/pipeline/filters/kubernetes#kubernetes-annotations) on your workload or by a [Parser Filter](https://docs.fluentbit.io/manual/pipeline/filters/parser) defined in a pipeline's filters section. |
+| **status.conditions** | An array of conditions describing the status of the parser. |
+| **status.conditions.lastTransitionTime** | An array of conditions describing the status of the parser. |
+| **status.conditions.reason** | An array of conditions describing the status of the parser. |
+| **status.conditions.type** | The possible transition types are:<br>- `Running`: The parser is ready and usable.<br>- `Pending`: The parser is being activated. |<!-- TABLE-END -->

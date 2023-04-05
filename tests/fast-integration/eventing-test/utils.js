@@ -41,9 +41,9 @@ const kymaVersion = process.env.KYMA_VERSION || '';
 const kymaStreamName = 'sap';
 const isSKR = process.env.KYMA_TYPE === 'SKR';
 const skrInstanceId = process.env.INSTANCE_ID || '';
-const testCompassFlow = process.env.TEST_COMPASS_FLOW || false;
-const isUpgradeJob = process.env.EVENTING_UPGRADE_JOB || false;
-const isUpgradeJob2ndReconcile = process.env.EVENTING_UPGRADE_2ND_RECONCILE_JOB || false;
+const testCompassFlow = process.env.TEST_COMPASS_FLOW === 'true';
+const isUpgradeJob = process.env.EVENTING_UPGRADE_JOB === 'true';
+const isUpgradeJob2ndReconcile = process.env.EVENTING_UPGRADE_2ND_RECONCILE_JOB === 'true';
 const subCRDVersion = 'v1alpha2';
 const skipResourceCleanup = process.env.SKIP_CLEANUP || false;
 const suffix = getSuffix(isSKR, testCompassFlow);
@@ -228,12 +228,20 @@ function getK8sFunctionObject(funcName) {
   return k8s.loadAllYaml(functionYaml);
 }
 
+async function k8sApplyWithRetries(resources, namespace, patch = true, retries = 5, interval=1500) {
+  return retryPromise(async () => await k8sApply(resources, namespace, patch), retries, interval);
+}
+
+async function k8sDeleteWithRetries(listOfSpecs, namespace, retries = 5, interval=1500) {
+  return retryPromise(async () => await k8sDelete(listOfSpecs, namespace), retries, interval);
+}
+
 async function deployEventingSinkFunction(funcName = eventingSinkName) {
-  await k8sApply(getK8sFunctionObject(funcName), testNamespace, true);
+  await k8sApplyWithRetries(getK8sFunctionObject(funcName), testNamespace, true);
 }
 
 async function undeployEventingFunction(funcName) {
-  await k8sDelete(getK8sFunctionObject(funcName), testNamespace);
+  await k8sDeleteWithRetries(getK8sFunctionObject(funcName), testNamespace);
 }
 
 async function waitForEventingSinkFunction(funcName = eventingSinkName) {
@@ -250,7 +258,7 @@ async function deployV1Alpha1Subscriptions() {
     const eventType = v1alpha1SubscriptionsTypes[i].type;
 
     debug(`Creating subscription: ${subName} with type: ${eventType}`);
-    await k8sApply([eventingSubscription(eventType, sink, subName, testNamespace)]);
+    await k8sApplyWithRetries([eventingSubscription(eventType, sink, subName, testNamespace)]);
     debug(`Waiting for subscription: ${subName} with type: ${eventType}`);
     await waitForSubscription(subName, testNamespace);
   }
@@ -267,7 +275,7 @@ async function deployV1Alpha2Subscriptions() {
     const eventSource = subscriptionsTypes[i].source;
 
     debug(`Creating subscription: ${subName} with type: ${eventType}, source: ${eventSource}`);
-    await k8sApply([eventingSubscriptionV1Alpha2(eventType, eventSource, sink, subName, testNamespace)]);
+    await k8sApplyWithRetries([eventingSubscriptionV1Alpha2(eventType, eventSource, sink, subName, testNamespace)]);
     debug(`Waiting for subscription: ${subName} with type: ${eventType}, source: ${eventSource}`);
     await waitForSubscription(subName, testNamespace);
   }
@@ -282,7 +290,8 @@ async function deployV1Alpha2Subscriptions() {
     }
 
     debug(`Creating subscription (TypeMatching: exact): ${subName} with type: ${eventType}, source: ${eventSource}`);
-    await k8sApply([eventingSubscriptionV1Alpha2(eventType, eventSource, sink, subName, testNamespace, 'exact')]);
+    await k8sApplyWithRetries(
+        [eventingSubscriptionV1Alpha2(eventType, eventSource, sink, subName, testNamespace, 'exact')]);
     debug(`Waiting for subscription: ${subName} with type: ${eventType}, source: ${eventSource}`);
     await waitForSubscription(subName, testNamespace);
   }
@@ -684,7 +693,7 @@ function getTimeStampsWithZeroMilliSeconds(timestamp) {
 }
 
 async function createK8sNamespace(name) {
-  await k8sApply([namespaceObj(name)]);
+  await k8sApplyWithRetries([namespaceObj(name)]);
 }
 
 function debugBanner(message) {

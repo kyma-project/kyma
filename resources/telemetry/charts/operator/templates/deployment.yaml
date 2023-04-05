@@ -31,6 +31,7 @@ spec:
             - /manager
           args:
             - --cert-dir=/tmp
+            - --manager-namespace=$(MY_POD_NAMESPACE)
             - --fluent-bit-filesystem-buffer-limit={{ .Values.filesystemBufferLimit }}
             - --fluent-bit-cpu-limit={{ .Values.fluentbit.resources.limits.cpu }}
             - --fluent-bit-memory-limit={{ .Values.fluentbit.resources.limits.memory }}
@@ -97,3 +98,7 @@ spec:
           env:
             - name: APP_LOG_LEVEL
               value: {{ .Values.global.log.level | quote }}
+            - name: MY_POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace

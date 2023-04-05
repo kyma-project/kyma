@@ -20,14 +20,19 @@ const eventingBackendName = 'eventing-backend';
 function initializeK8sClient(opts) {
   opts = opts || {};
   try {
+    console.log('Trying to initialize a K8S client');
     if (opts.kubeconfigPath) {
+      console.log('Path initialization');
       kc.loadFromFile(opts.kubeconfigPath);
     } else if (opts.kubeconfig) {
+      console.log('Kubeconfig initialization');
       kc.loadFromString(opts.kubeconfig);
     } else {
+      console.log('Default initialization');
       kc.loadFromDefault();
     }
 
+    console.log('Clients creation');
     k8sDynamicApi = kc.makeApiClient(k8s.KubernetesObjectApi);
     k8sAppsApi = kc.makeApiClient(k8s.AppsV1Api);
     k8sCoreV1Api = kc.makeApiClient(k8s.CoreV1Api);
@@ -245,7 +250,7 @@ async function getSecret(name, namespace) {
 }
 
 async function getFunction(name, namespace) {
-  const path = `/apis/serverless.kyma-project.io/v1alpha1/namespaces/${namespace}/functions/${name}`;
+  const path = `/apis/serverless.kyma-project.io/v1alpha2/namespaces/${namespace}/functions/${name}`;
   const response = await k8sDynamicApi.requestPromise({
     url: k8sDynamicApi.basePath + path,
   });
@@ -396,7 +401,7 @@ function waitForEndpoint(name, namespace = 'default', timeout = 300_000) {
 
 function waitForFunction(name, namespace = 'default', timeout = 90_000) {
   return waitForK8sObject(
-      `/apis/serverless.kyma-project.io/v1alpha1/namespaces/${namespace}/functions`,
+      `/apis/serverless.kyma-project.io/v1alpha2/namespaces/${namespace}/functions`,
       {},
       (_type, _apiObj, watchObj) => {
         return (
