@@ -6,14 +6,16 @@ title: Ory limitations
 
 Ory components have the following configuration for resources by default:
 
-| Component          |          | CPU   | Memory |
-|--------------------|----------|-------|--------|
-| Hydra              | Limits   | 500m  | 256Mi  |
-| Hydra              | Requests | 10m   | 128Mi  |
-| Oathkeeper         | Limits   | 500m  | 1024Mi |
-| Oathkeeper         | Requests | 100m  | 512Mi  |
-| Oathkeeper Maester | Limits   | 100m  | 50Mi   |
-| Oathkeeper Maester | Requests | 10m   | 20Mi   |
+| Component          |          | CPU  | Memory |
+|--------------------|----------|------|--------|
+| Hydra              | Limits   | 500m | 1Gi    |
+| Hydra              | Requests | 250m | 256Mi  |
+| Hydra maester      | Limits   | 400m | 1Gi    |
+| Hydra maester      | Requests | 10m  | 256Mi  |
+| Oathkeeper         | Limits   | 500m | 512Mi  |
+| Oathkeeper         | Requests | 100m | 64Mi   |
+| Oathkeeper Maester | Limits   | 400m | 1Gi    |
+| Oathkeeper Maester | Requests | 10m  | 32Mi   |
 
 ## Autoscaling configuration
 
@@ -21,8 +23,8 @@ The default configuration in terms of autoscaling of Ory components is as follow
 
 | Component          | Min replicas       | Max replicas       |
 |--------------------|--------------------|--------------------|
-| Oathkeeper         | 1                  | 3                  |
+| Oathkeeper         | 3                  | 10                 |
 | Oathkeeper Maester | Same as Oathkeeper | Same as Oathkeeper |
-| Hydra              | 1                  | 3                  |
+| Hydra              | 2                  | 5                  |
 
 As Oathkeeper Maester is set up as a separate container in the same Pod as Oathkeeper the autoscaling configuration is the same.
