@@ -150,7 +150,7 @@ global:
       sha: ""
     grafana:
       name: "grafana"
-      version: "7.5.17-a3475b24"
+      version: "7.5.17-1c0ae577"
       directory: "tpi"
       sha: ""
     busybox:
