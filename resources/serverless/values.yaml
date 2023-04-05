@@ -65,6 +65,7 @@ global:
     app.kubernetes.io/version: "{{ .Values.global.images.function_controller.version }}"
     helm.sh/chart: '{{ include "chart" . }}'
   dockerServicePort: 5000
+  dockerNodePort: 32137
   configuration:
     configmapName: "serverless-configuration"
     targetDir: "/appdata"
@@ -277,8 +278,8 @@ dockerRegistry:
   username: "{{ randAlphaNum 20 | b64enc }}" # for gcr "_json_key"
   password: "{{ randAlphaNum 40 | b64enc }}" # for gcr data from json key
   internalServerAddress: '{{ template "registry-fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.dockerServicePort }}'
-  serverAddress: "registry.{{ .Values.global.domainName -}}"
-  registryAddress: "registry.{{ .Values.global.domainName -}}"
+  registryAddress: '{{ template "registry-fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.dockerServicePort }}'
+  serverAddress: "localhost:32137"
 
 docker-registry:
   fullnameOverride: "serverless-docker-registry"
