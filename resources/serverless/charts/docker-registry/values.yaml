@@ -15,7 +15,7 @@ image:
     # - name: docker
 service:
   name: registry
-  port: "{{ .Values.global.dockerServicePort }}"    # same as configData.http.addr
+  port: "{{ .Values.global.registryServicePort }}"    # same as configData.http.addr
   annotations: {}
 ingress:
   enabled: false

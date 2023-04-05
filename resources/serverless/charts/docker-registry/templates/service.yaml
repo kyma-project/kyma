@@ -14,10 +14,10 @@ metadata:
 spec:
   type: NodePort
   ports:
-    - port: {{ .Values.global.dockerServicePort }}
+    - port: {{ .Values.global.registryServicePort }}
       protocol: TCP
       name: http-{{ .Values.service.name }}
-      targetPort: {{ .Values.global.dockerServicePort }}
+      targetPort: {{ .Values.global.registryServicePort }}
       nodePort: {{ .Values.global.dockerNodePort }}
   selector:
     app: {{ template "docker-registry.name" . }}

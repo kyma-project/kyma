@@ -35,5 +35,5 @@ spec:
         - destination:
             host: {{ template "registry-fullname" . }}
             port:
-              number: {{ .Values.global.dockerServicePort }}
+              number: {{ .Values.global.registryServicePort }}
 {{- end }}
