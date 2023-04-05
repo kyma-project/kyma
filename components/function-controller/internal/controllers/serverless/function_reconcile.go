@@ -181,21 +181,20 @@ func (r *FunctionReconciler) readDockerConfig(ctx context.Context, instance *ser
 	}
 
 	// try reading default config
-	if err := r.client.Get(ctx, client.ObjectKey{Namespace: instance.Namespace, Name: r.config.ImageRegistryDefaultDockerConfigSecretName}, &secret); err == nil {
-		data := readSecretData(secret.Data)
-		if data["isInternal"] == "true" {
-			return DockerConfig{
-				ActiveRegistryConfigSecretName: r.config.ImageRegistryDefaultDockerConfigSecretName,
-				PushAddress:                    data["registryAddress"],
-				PullAddress:                    data["serverAddress"],
-			}, nil
-		}
+	if err := r.client.Get(ctx, client.ObjectKey{Namespace: instance.Namespace, Name: r.config.ImageRegistryDefaultDockerConfigSecretName}, &secret); err != nil {
+		return DockerConfig{}, errors.Wrapf(err, "Docker registry configuration not found, none of configuration secrets (%s, %s) found in function namespace", r.config.ImageRegistryDefaultDockerConfigSecretName, r.config.ImageRegistryExternalDockerConfigSecretName)
+	}
+	data := readSecretData(secret.Data)
+	if data["isInternal"] == "true" {
 		return DockerConfig{
 			ActiveRegistryConfigSecretName: r.config.ImageRegistryDefaultDockerConfigSecretName,
 			PushAddress:                    data["registryAddress"],
-			PullAddress:                    data["registryAddress"],
+			PullAddress:                    data["serverAddress"],
 		}, nil
 	}
-
-	return DockerConfig{}, errors.Errorf("Docker registry configuration not found, none of configuration secrets (%s, %s) found in function namespace", r.config.ImageRegistryDefaultDockerConfigSecretName, r.config.ImageRegistryExternalDockerConfigSecretName)
+	return DockerConfig{
+		ActiveRegistryConfigSecretName: r.config.ImageRegistryDefaultDockerConfigSecretName,
+		PushAddress:                    data["registryAddress"],
+		PullAddress:                    data["registryAddress"],
+	}, nil
 }
