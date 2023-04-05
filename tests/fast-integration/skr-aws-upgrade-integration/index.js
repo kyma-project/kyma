@@ -47,7 +47,7 @@ describe('SKR-Upgrade-test', function() {
   before(`Provision SKR with ID ${options.instanceID} and version ${kymaVersion}`, async function() {
     this.timeout(provisioningTimeout);
     skr = await getOrProvisionSKR(options, skipProvisioning, provisioningTimeout);
-    console.log('SKR provisioned')
+    console.log('SKR provisioned');
     options = skr.options;
   });
 
