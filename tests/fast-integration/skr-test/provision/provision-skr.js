@@ -38,6 +38,7 @@ async function getOrProvisionSKR(options, skipProvisioning, provisioningTimeout)
 
   console.log('Initiating K8s config...');
   await initK8sConfig(shoot);
+  console.log('Initialization of K8s finished...');
 
   return {
     options,
