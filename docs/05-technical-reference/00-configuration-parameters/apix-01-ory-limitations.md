@@ -4,7 +4,7 @@ title: Ory limitations
 
 ## Resource configuration
 
-Ory components have the following configuration for resources by default:
+By default, the Ory components' resources have the following configuration:
 
 | Component          |          | CPU  | Memory |
 |--------------------|----------|------|--------|
@@ -27,4 +27,4 @@ The default configuration in terms of autoscaling of Ory components is as follow
 | Oathkeeper Maester | Same as Oathkeeper | Same as Oathkeeper |
 | Hydra              | 2                  | 5                  |
 
-As Oathkeeper Maester is set up as a separate container in the same Pod as Oathkeeper the autoscaling configuration is the same.
+Oathkeeper Maester is set up as a separate container in the same Pod as Oathkeeper. Because of that, their autoscaling configuration is similar.

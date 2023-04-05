@@ -19,11 +19,11 @@ By default, Istio resources are configured in the following matter:
 
 ## Autoscaling configuration
 
-The autoscaling configuration for Istio components is as follows:
+The autoscaling configuration of the Istio components is as follows:
 
 | Component       | Min replicas | Max replicas |
 |-----------------|--------------|--------------|
 | Pilot           | 2            | 5            |
 | Ingress Gateway | 3            | 10           |
 
-`CNI` component is provided as a `DaemonSet` meaning that one replica will be present on every node of target cluster. `Proxy` doesn't have any configuration in terms of autoscaling as it is deployed by injecting a `Pod` with [sidecar injection enabled](../../../04-operation-guides/operations/smsh-01-istio-enable-sidecar-injection.md).
+The CNI component is provided as a DaemonSet, meaning that one replica is present on every node of the target cluster. Istio sidecar proxy isn't configured in terms of autoscaling as it is injected into a Pod with the [sidecar injection enabled](../../../04-operation-guides/operations/smsh-01-istio-enable-sidecar-injection.md).
