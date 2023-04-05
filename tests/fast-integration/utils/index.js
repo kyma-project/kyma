@@ -31,6 +31,7 @@ function initializeK8sClient(opts) {
       console.log('Default initialization');
       kc.loadFromDefault();
     }
+
     console.log('Clients creation');
     k8sDynamicApi = kc.makeApiClient(k8s.KubernetesObjectApi);
     console.log('Making Api client - Apps');
