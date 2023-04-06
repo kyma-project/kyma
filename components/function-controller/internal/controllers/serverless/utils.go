@@ -352,7 +352,6 @@ func calculateGitImageTag(instance *serverlessv1alpha2.Function) string {
 		instance.Status.Commit,
 		instance.Status.BaseDir,
 		instance.EffectiveRuntime(),
-		instance.Status.RuntimeImage,
 	}, "-")
 	hash := sha256.Sum256([]byte(data))
 	return fmt.Sprintf("%x", hash)
