@@ -184,6 +184,14 @@ type FunctionSpec struct {
 
 	// SecretMounts specifies Secrets to mount into the Function's container filesystem.
 	SecretMounts []SecretMount `json:"secretMounts,omitempty"`
+
+	// Labels will be used in Deployment's PodTemplate and will be applied on the function's runtime Pod.
+	// +optional
+	Labels map[string]string `json:"labels,omitempty"`
+
+	// Annotations will be used in Deployment's PodTemplate and will be applied on the function's runtime Pod.
+	// +optional
+	Annotations map[string]string `json:"annotations,omitempty"`
 }
 
 // TODO: Status related things needs to be developed.

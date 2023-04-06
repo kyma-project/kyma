@@ -2,6 +2,7 @@ package v1alpha2
 
 import (
 	"fmt"
+	labels2 "k8s.io/apimachinery/pkg/labels"
 	"net/url"
 	"regexp"
 	"strings"
@@ -55,6 +56,7 @@ func (fn *Function) getBasicValidations() []validationFunction {
 		fn.Spec.validateRuntime,
 		fn.Spec.validateEnv,
 		fn.Spec.validateLabels,
+		fn.Spec.validateAnnotations,
 		fn.Spec.validateReplicas,
 		fn.Spec.validateFunctionResources,
 		fn.Spec.validateBuildResources,
@@ -318,13 +320,64 @@ func (spec *FunctionSpec) validateReplicas(vc *ValidationConfig) error {
 }
 
 func (spec *FunctionSpec) validateLabels(_ *ValidationConfig) error {
-	var labels map[string]string
+	var templateLabels map[string]string
 	if spec.Template != nil && spec.Template.Labels != nil {
-		labels = spec.Template.Labels
+		templateLabels = spec.Template.Labels
 	}
-	fieldPath := field.NewPath("spec.labels")
 
-	errs := v1validation.ValidateLabels(labels, fieldPath)
+	var labels map[string]string
+	if spec.Labels != nil {
+		labels = spec.Labels
+	}
+
+	errs := field.ErrorList{}
+	errs = append(errs, validateFunctionLabels(templateLabels, "spec.template.labels")...)
+	errs = append(errs, validateFunctionLabels(labels, "spec.labels")...)
+	errs = append(errs, validateLabelConflicts(templateLabels, "spec.template.labels", labels, "spec.labels")...)
+
+	return errs.ToAggregate()
+}
+
+func validateLabelConflicts(lab1 map[string]string, path1 string, lab2 map[string]string, path2 string) field.ErrorList {
+	errs := field.ErrorList{}
+	if labels2.Conflicts(lab1, lab2) {
+		fieldPath1 := field.NewPath(path1)
+		errs = append(errs, field.Invalid(fieldPath1, path2, "conflict between labels"))
+	}
+	return errs
+}
+
+func validateFunctionLabels(labels map[string]string, path string) field.ErrorList {
+	errs := field.ErrorList{}
+
+	fieldPath := field.NewPath(path)
+	errs = append(errs, v1validation.ValidateLabels(labels, fieldPath)...)
+
+	errs = append(errs, validateFunctionLabelsByOwnGroup(labels, fieldPath)...)
+
+	return errs
+}
+
+func validateFunctionLabelsByOwnGroup(labels map[string]string, fieldPath *field.Path) field.ErrorList {
+	forbiddenPrefix := FunctionGroup + "/"
+	errorMessage := fmt.Sprintf("label from domain %s is not allowed", FunctionGroup)
+	allErrs := field.ErrorList{}
+	for k, _ := range labels {
+		if strings.HasPrefix(k, forbiddenPrefix) {
+			allErrs = append(allErrs, field.Invalid(fieldPath, k, errorMessage))
+		}
+	}
+	return allErrs
+}
+
+func (spec *FunctionSpec) validateAnnotations(_ *ValidationConfig) error {
+	var annotations map[string]string
+	if spec.Annotations != nil {
+		annotations = spec.Annotations
+	}
+	fieldPath := field.NewPath("spec.annotations")
+	errs := validation.ValidateAnnotations(annotations, fieldPath)
+
 	return errs.ToAggregate()
 }
 
