@@ -279,7 +279,7 @@ dockerRegistry:
   password: "{{ randAlphaNum 40 | b64enc }}" # for gcr data from json key
   internalServerAddress: '{{ template "registry-fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.registryServicePort }}'
   registryAddress: '{{ template "registry-fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.registryServicePort }}'
-  serverAddress: "localhost: {{ .Values.global.registryNodePort }}"
+  serverAddress: "localhost:{{ .Values.global.registryNodePort }}"
 
 docker-registry:
   fullnameOverride: "serverless-docker-registry"

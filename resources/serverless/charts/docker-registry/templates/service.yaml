@@ -18,7 +18,7 @@ spec:
       protocol: TCP
       name: http-{{ .Values.service.name }}
       targetPort: {{ .Values.global.registryServicePort }}
-      nodePort: {{ .Values.global.dockerNodePort }}
+      nodePort: {{ .Values.global.registryNodePort }}
   selector:
     app: {{ template "docker-registry.name" . }}
     release: {{ .Release.Name }}
