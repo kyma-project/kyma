@@ -1295,8 +1295,8 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 	t.Run("should reconcile function with RuntimeImageOverride", func(t *testing.T) {
 		//GIVEN
 		g := gomega.NewGomegaWithT(t)
-		runtimeImageOverride := "any-custom-image"
-		inFunction := newFixFunctionWithCustomImage(testNamespace, "custom-runtime-image", "initial-custom-image", 1, 2)
+		runtimeImageOverride := "any-custom-fnImage"
+		inFunction := newFixFunctionWithCustomImage(testNamespace, "custom-runtime-fnImage", "initial-custom-fnImage", 1, 2)
 		g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
 		defer deleteFunction(g, resourceClient, inFunction)
 

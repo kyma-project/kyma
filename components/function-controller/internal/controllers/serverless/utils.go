@@ -92,7 +92,7 @@ func equalJobs(existing batchv1.Job, expected batchv1.Job) bool {
 	existingArgs := existing.Spec.Template.Spec.Containers[0].Args
 	expectedArgs := expected.Spec.Template.Spec.Containers[0].Args
 
-	// Compare destination argument as it contains image tag
+	// Compare destination argument as it contains fnImage tag
 	existingDst := getArg(existingArgs, destinationArg)
 	expectedDst := getArg(expectedArgs, destinationArg)
 
@@ -340,6 +340,7 @@ func calculateInlineImageTag(instance *serverlessv1alpha2.Function) string {
 		string(instance.GetUID()),
 		fmt.Sprintf("%v", *instance.Spec.Source.Inline),
 		instance.EffectiveRuntime(),
+		instance.Status.RuntimeImage,
 	}, "-")))
 
 	return fmt.Sprintf("%x", hash)
@@ -351,6 +352,7 @@ func calculateGitImageTag(instance *serverlessv1alpha2.Function) string {
 		instance.Status.Commit,
 		instance.Status.BaseDir,
 		instance.EffectiveRuntime(),
+		instance.Status.RuntimeImage,
 	}, "-")
 	hash := sha256.Sum256([]byte(data))
 	return fmt.Sprintf("%x", hash)

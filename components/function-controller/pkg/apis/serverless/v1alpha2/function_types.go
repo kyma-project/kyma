@@ -256,6 +256,7 @@ type FunctionStatus struct {
 	PodSelector          string `json:"podSelector,omitempty"`
 	Commit               string `json:"commit,omitempty"`
 	RuntimeImageOverride string `json:"runtimeImageOverride,omitempty"`
+	RuntimeImage         string `json:"runtimeImage,omitempty"`
 }
 
 const (

@@ -131,6 +131,7 @@ func buildGenericStatusUpdateStateFn(condition serverlessv1alpha2.Condition, rep
 func (m *reconciler) populateStatusFromSystemState(status *serverlessv1alpha2.FunctionStatus, s *systemState) error {
 	status.Runtime = s.instance.Spec.Runtime
 	status.RuntimeImageOverride = s.instance.Spec.RuntimeImageOverride
+	status.RuntimeImage = s.instance.Status.RuntimeImage
 
 	// set scale sub-resource
 	selector, err := metav1.LabelSelectorAsSelector(&metav1.LabelSelector{MatchLabels: s.podLabels()})

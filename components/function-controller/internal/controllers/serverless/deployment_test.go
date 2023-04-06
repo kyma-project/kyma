@@ -295,7 +295,7 @@ func TestFunctionReconciler_equalDeployments(t *testing.T) {
 			want: false,
 		},
 		{
-			name: "different image",
+			name: "different fnImage",
 			args: args{
 				existing: appsv1.Deployment{
 					Spec: appsv1.DeploymentSpec{
@@ -316,7 +316,7 @@ func TestFunctionReconciler_equalDeployments(t *testing.T) {
 							Spec: corev1.PodSpec{
 								Containers: []corev1.Container{
 									{
-										Image: "different-image",
+										Image: "different-fnImage",
 									},
 								},
 							},

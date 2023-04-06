@@ -29,7 +29,7 @@ type SystemState interface{}
 // TODO extract interface
 type systemState struct {
 	instance    serverlessv1alpha2.Function
-	image       string               // TODO make sure this is needed
+	fnImage     string               // TODO make sure this is needed
 	configMaps  corev1.ConfigMapList // TODO create issue to refactor this (only 1 config map should be here)
 	deployments appsv1.DeploymentList
 	jobs        batchv1.JobList
@@ -116,7 +116,7 @@ func (s *systemState) fnJobChanged(expectedJob batchv1.Job) bool {
 	)
 
 	if len(s.deployments.Items) == 1 &&
-		s.deployments.Items[0].Spec.Template.Spec.Containers[0].Image == s.image &&
+		s.deployments.Items[0].Spec.Template.Spec.Containers[0].Image == s.fnImage &&
 		conditionStatus != corev1.ConditionUnknown &&
 		len(s.jobs.Items) > 0 &&
 		mapsEqual(expectedJob.GetLabels(), s.jobs.Items[0].GetLabels()) {
@@ -126,7 +126,7 @@ func (s *systemState) fnJobChanged(expectedJob batchv1.Job) bool {
 
 	return len(s.jobs.Items) != 1 ||
 		len(s.jobs.Items[0].Spec.Template.Spec.Containers) != 1 ||
-		// Compare image argument
+		// Compare fnImage argument
 		!equalJobs(s.jobs.Items[0], expectedJob) ||
 		!mapsEqual(expectedJob.GetLabels(), s.jobs.Items[0].GetLabels()) ||
 		conditionStatus == corev1.ConditionUnknown ||
