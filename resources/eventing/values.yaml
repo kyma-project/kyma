@@ -9,7 +9,7 @@ global:
       pullPolicy: "IfNotPresent"
     publisher_proxy:
       name: event-publisher-proxy
-      version: PR-17222
+      version: v20230405-337c13fe
     certHandler:
       name: api-gateway-webhook-certificates
       version: "1.4.1"
