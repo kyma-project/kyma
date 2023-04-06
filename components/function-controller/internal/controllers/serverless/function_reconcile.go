@@ -24,7 +24,9 @@ import (
 )
 
 const (
-	healthCheckTimeout = time.Second
+	healthCheckTimeout  = time.Second
+	registryPullAddrKey = "pullRegAddr"
+	registryPushAddrKey = "pushRegAddr"
 )
 
 //go:generate mockery --name=GitClient --output=automock --outpkg=automock --case=underscore
@@ -175,26 +177,20 @@ func (r *FunctionReconciler) readDockerConfig(ctx context.Context, instance *ser
 		data := readSecretData(secret.Data)
 		return DockerConfig{
 			ActiveRegistryConfigSecretName: r.config.ImageRegistryExternalDockerConfigSecretName,
-			PushAddress:                    data["registryAddress"],
-			PullAddress:                    data["registryAddress"],
+			PushAddress:                    data[registryPushAddrKey],
+			PullAddress:                    data[registryPullAddrKey],
 		}, nil
 	}
 
 	// try reading default config
-	if err := r.client.Get(ctx, client.ObjectKey{Namespace: instance.Namespace, Name: r.config.ImageRegistryDefaultDockerConfigSecretName}, &secret); err != nil {
-		return DockerConfig{}, errors.Wrapf(err, "docker registry configuration not found, none of configuration secrets (%s, %s) found in function namespace", r.config.ImageRegistryDefaultDockerConfigSecretName, r.config.ImageRegistryExternalDockerConfigSecretName)
-	}
-	data := readSecretData(secret.Data)
-	if data["isInternal"] == "true" {
+	if err := r.client.Get(ctx, client.ObjectKey{Namespace: instance.Namespace, Name: r.config.ImageRegistryDefaultDockerConfigSecretName}, &secret); err == nil {
+		data := readSecretData(secret.Data)
 		return DockerConfig{
 			ActiveRegistryConfigSecretName: r.config.ImageRegistryDefaultDockerConfigSecretName,
-			PushAddress:                    data["registryAddress"],
-			PullAddress:                    data["serverAddress"],
+			PushAddress:                    data[registryPushAddrKey],
+			PullAddress:                    data[registryPullAddrKey],
 		}, nil
 	}
-	return DockerConfig{
-		ActiveRegistryConfigSecretName: r.config.ImageRegistryDefaultDockerConfigSecretName,
-		PushAddress:                    data["registryAddress"],
-		PullAddress:                    data["registryAddress"],
-	}, nil
+
+	return DockerConfig{}, errors.Errorf("Docker registry configuration not found, none of configuration secrets (%s, %s) found in function namespace", r.config.ImageRegistryDefaultDockerConfigSecretName, r.config.ImageRegistryExternalDockerConfigSecretName)
 }
