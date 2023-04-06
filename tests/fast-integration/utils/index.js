@@ -34,10 +34,15 @@ function initializeK8sClient(opts) {
 
     console.log('Clients creation');
     k8sDynamicApi = kc.makeApiClient(k8s.KubernetesObjectApi);
+    console.log('Making Api client - Apps');
     k8sAppsApi = kc.makeApiClient(k8s.AppsV1Api);
+    console.log('Making Api client - Core');
     k8sCoreV1Api = kc.makeApiClient(k8s.CoreV1Api);
+    console.log('Making Api client - Auth');
     k8sRbacAuthorizationV1Api = kc.makeApiClient(k8s.RbacAuthorizationV1Api);
+    console.log('Making Api client - Logs');
     k8sLog = new k8s.Log(kc);
+    console.log('Making Api client - Watch');
     watch = new k8s.Watch(kc);
     k8sServerUrl = kc.getCurrentCluster() ? kc.getCurrentCluster().server : null;
   } catch (err) {
