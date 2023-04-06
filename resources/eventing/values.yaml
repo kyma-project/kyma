@@ -5,11 +5,11 @@ global:
   images:
     eventing_controller:
       name: eventing-controller
-      version: PR-17191
+      version: v20230406-e69b8617
       pullPolicy: "IfNotPresent"
     publisher_proxy:
       name: event-publisher-proxy
-      version: PR-17222
+      version: v20230405-337c13fe
     certHandler:
       name: api-gateway-webhook-certificates
       version: "1.4.1"
