@@ -19,16 +19,6 @@ const (
 	FunctionDepsKey   = "dependencies"
 )
 
-func mergeLabels(labelsCollection ...map[string]string) map[string]string {
-	result := make(map[string]string, 0)
-	for _, labels := range labelsCollection {
-		for key, value := range labels {
-			result[key] = value
-		}
-	}
-	return result
-}
-
 func getConditionStatus(conditions []serverlessv1alpha2.Condition, conditionType serverlessv1alpha2.ConditionType) corev1.ConditionStatus {
 	for _, condition := range conditions {
 		if condition.Type == conditionType {

@@ -2,6 +2,7 @@ package serverless
 
 import (
 	"fmt"
+	amlabels "k8s.io/apimachinery/pkg/labels"
 	"path"
 	"strings"
 
@@ -49,7 +50,7 @@ func (s *systemState) functionLabels() map[string]string {
 	internalLabels := s.internalFunctionLabels()
 	functionLabels := s.instance.GetLabels()
 
-	return mergeLabels(functionLabels, internalLabels)
+	return amlabels.Merge(functionLabels, internalLabels)
 }
 
 func (s *systemState) buildImageAddress(registryAddress string) string {
@@ -323,7 +324,7 @@ func (s *systemState) buildJobRuntimeVolume() corev1.Volume {
 }
 
 func (s *systemState) deploymentSelectorLabels() map[string]string {
-	return mergeLabels(
+	return amlabels.Merge(
 		map[string]string{
 			serverlessv1alpha2.FunctionResourceLabel: serverlessv1alpha2.FunctionResourceLabelDeploymentValue,
 		},
@@ -342,12 +343,14 @@ func getBuildResourceRequirements(s *systemState) corev1.ResourceRequirements {
 }
 
 func (s *systemState) podLabels() map[string]string {
-	selectorLabels := s.deploymentSelectorLabels()
+	result := s.deploymentSelectorLabels()
 	if s.instance.Spec.Template != nil && s.instance.Spec.Template.Labels != nil {
-		return mergeLabels(s.instance.Spec.Template.Labels, selectorLabels)
-	} else {
-		return selectorLabels
+		result = amlabels.Merge(s.instance.Spec.Template.Labels, result)
 	}
+	if s.instance.Spec.Labels != nil {
+		result = amlabels.Merge(s.instance.Spec.Labels, result)
+	}
+	return result
 }
 
 type buildDeploymentArgs struct {
