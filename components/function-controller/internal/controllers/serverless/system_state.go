@@ -353,6 +353,20 @@ func (s *systemState) podLabels() map[string]string {
 	return result
 }
 
+func (s *systemState) defaultAnnotations() map[string]string {
+	return map[string]string{
+		"proxy.istio.io/config": "{ \"holdApplicationUntilProxyStarts\": true }",
+	}
+}
+
+func (s *systemState) podAnnotations() map[string]string {
+	result := s.defaultAnnotations()
+	if s.instance.Spec.Annotations != nil {
+		result = amlabels.Merge(s.instance.Spec.Annotations, result)
+	}
+	return result
+}
+
 type buildDeploymentArgs struct {
 	DockerPullAddress      string
 	JaegerServiceEndpoint  string
@@ -362,10 +376,7 @@ type buildDeploymentArgs struct {
 }
 
 func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment {
-
 	imageName := s.buildImageAddress(cfg.DockerPullAddress)
-	deploymentLabels := s.functionLabels()
-	podLabels := s.podLabels()
 
 	const volumeName = "tmp-dir"
 	emptyDirVolumeSize := resource.MustParse("100Mi")
@@ -472,7 +483,7 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: fmt.Sprintf("%s-", s.instance.GetName()),
 			Namespace:    s.instance.GetNamespace(),
-			Labels:       deploymentLabels,
+			Labels:       s.functionLabels(),
 		},
 		Spec: appsv1.DeploymentSpec{
 			Replicas: s.getReplicas(DefaultDeploymentReplicas),
@@ -482,10 +493,8 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels: podLabels, // podLabels contains InternalFnLabels, so it's ok
-					Annotations: map[string]string{
-						"proxy.istio.io/config": "{ \"holdApplicationUntilProxyStarts\": true }",
-					},
+					Labels:      s.podLabels(), // podLabels contains InternalFnLabels, so it's ok
+					Annotations: s.podAnnotations(),
 				},
 				Spec: templateSpec,
 			},

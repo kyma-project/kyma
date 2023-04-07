@@ -18,10 +18,12 @@ func Test_systemState_podLabels(t *testing.T) {
 	}{
 		{
 			name: "Should work on function with no labels",
-			args: args{instance: &v1alpha2.Function{ObjectMeta: metav1.ObjectMeta{
-				Name: "fn-name",
-				UID:  "fn-uuid",
-			}}},
+			args: args{instance: &v1alpha2.Function{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "fn-name",
+					UID:  "fn-uuid",
+				}},
+			},
 			want: map[string]string{
 				v1alpha2.FunctionUUIDLabel:      "fn-uuid",
 				v1alpha2.FunctionManagedByLabel: v1alpha2.FunctionControllerValue,
@@ -31,10 +33,11 @@ func Test_systemState_podLabels(t *testing.T) {
 		},
 		{
 			name: "Should work with function with some labels",
-			args: args{instance: &v1alpha2.Function{ObjectMeta: metav1.ObjectMeta{
-				Name: "fn-name",
-				UID:  "fn-uuid",
-			},
+			args: args{instance: &v1alpha2.Function{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "fn-name",
+					UID:  "fn-uuid",
+				},
 				Spec: v1alpha2.FunctionSpec{
 					Template: &v1alpha2.Template{
 						Labels: map[string]string{
@@ -56,10 +59,11 @@ func Test_systemState_podLabels(t *testing.T) {
 		},
 		{
 			name: "Should work with function with some labels from spec.template.labels",
-			args: args{instance: &v1alpha2.Function{ObjectMeta: metav1.ObjectMeta{
-				Name: "fn-name",
-				UID:  "fn-uuid",
-			},
+			args: args{instance: &v1alpha2.Function{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "fn-name",
+					UID:  "fn-uuid",
+				},
 				Spec: v1alpha2.FunctionSpec{
 					Template: &v1alpha2.Template{
 						Labels: map[string]string{
@@ -77,10 +81,11 @@ func Test_systemState_podLabels(t *testing.T) {
 		},
 		{
 			name: "Should work with function with some labels from spec.labels",
-			args: args{instance: &v1alpha2.Function{ObjectMeta: metav1.ObjectMeta{
-				Name: "fn-name",
-				UID:  "fn-uuid",
-			},
+			args: args{instance: &v1alpha2.Function{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "fn-name",
+					UID:  "fn-uuid",
+				},
 				Spec: v1alpha2.FunctionSpec{
 					Labels: map[string]string{
 						"test-some": "test-label",
@@ -96,10 +101,11 @@ func Test_systemState_podLabels(t *testing.T) {
 		},
 		{
 			name: "Should not overwrite internal labels",
-			args: args{instance: &v1alpha2.Function{ObjectMeta: metav1.ObjectMeta{
-				Name: "fn-name",
-				UID:  "fn-uuid",
-			},
+			args: args{instance: &v1alpha2.Function{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "fn-name",
+					UID:  "fn-uuid",
+				},
 				Spec: v1alpha2.FunctionSpec{
 					Template: &v1alpha2.Template{
 						Labels: map[string]string{
@@ -131,7 +137,63 @@ func Test_systemState_podLabels(t *testing.T) {
 				instance: *tt.args.instance,
 			}
 			got := s.podLabels()
-			g.Expect(got).To(gomega.Equal(tt.want))
+			g.Expect(tt.want).To(gomega.Equal(got))
+		})
+	}
+}
+
+func Test_systemState_podAnnotations(t *testing.T) {
+	type args struct {
+		instance *v1alpha2.Function
+	}
+	tests := []struct {
+		name string
+		args args
+		want map[string]string
+	}{
+		{
+			name: "Should work on function with no annotations",
+			args: args{instance: &v1alpha2.Function{}},
+			want: map[string]string{
+				"proxy.istio.io/config": "{ \"holdApplicationUntilProxyStarts\": true }",
+			},
+		},
+		{
+			name: "Should work with function with some labels",
+			args: args{instance: &v1alpha2.Function{
+				Spec: v1alpha2.FunctionSpec{
+					Annotations: map[string]string{
+						"test-some": "test-annotation",
+					},
+				}}},
+			want: map[string]string{
+				"proxy.istio.io/config": "{ \"holdApplicationUntilProxyStarts\": true }",
+				"test-some":             "test-annotation",
+			},
+		},
+		{
+			name: "Should not overwrite internal annotations",
+			args: args{instance: &v1alpha2.Function{
+				Spec: v1alpha2.FunctionSpec{
+					Annotations: map[string]string{
+						"test-some":             "test-annotation",
+						"proxy.istio.io/config": "another-config",
+					},
+				}}},
+			want: map[string]string{
+				"proxy.istio.io/config": "{ \"holdApplicationUntilProxyStarts\": true }",
+				"test-some":             "test-annotation",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := gomega.NewGomegaWithT(t)
+			s := &systemState{
+				instance: *tt.args.instance,
+			}
+			got := s.podAnnotations()
+			g.Expect(tt.want).To(gomega.Equal(got))
 		})
 	}
 }

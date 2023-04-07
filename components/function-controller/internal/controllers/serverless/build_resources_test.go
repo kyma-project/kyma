@@ -85,7 +85,7 @@ func TestFunctionReconciler_buildDeployment(t *testing.T) {
 		args args
 	}{
 		{
-			name: "spec.template.labels should contain every element from spec.selector.MatchLabels",
+			name: "deployment should contain needed elements",
 			args: args{
 				instance: newFixFunction("ns", "name", 1, 2),
 			},
@@ -101,12 +101,21 @@ func TestFunctionReconciler_buildDeployment(t *testing.T) {
 
 			got := s.buildDeployment(buildDeploymentArgs{})
 
+			// deployment selector labels are equal with pod labels
 			for key, value := range got.Spec.Selector.MatchLabels {
 				g.Expect(got.Spec.Template.Labels[key]).To(gomega.Equal(value))
 			}
 			g.Expect(got.Spec.Template.Spec.Containers).To(gomega.HaveLen(1))
 			g.Expect(got.Spec.Template.Spec.Containers[0].Env).To(gomega.ContainElements(rtmCfg.RuntimeEnvs))
 
+			// pod labels & annotations
+			g.Expect(got.Spec.Template.ObjectMeta.Labels).To(gomega.HaveLen(4 + 3))
+			g.Expect(got.Spec.Template.ObjectMeta.Labels).To(
+				gomega.ContainElements("bar", "foobar", got.Spec.Template.ObjectMeta.Name))
+			g.Expect(got.Spec.Template.ObjectMeta.Annotations).To(gomega.HaveLen(1 + 1))
+			g.Expect(got.Spec.Template.ObjectMeta.Annotations).To(gomega.ContainElement("bar"))
+
+			// volumes
 			const expectedVolumeCount = 3
 			g.Expect(got.Spec.Template.Spec.Volumes).To(gomega.HaveLen(expectedVolumeCount))
 			g.Expect(got.Spec.Template.Spec.Containers[0].VolumeMounts).To(gomega.HaveLen(expectedVolumeCount))
