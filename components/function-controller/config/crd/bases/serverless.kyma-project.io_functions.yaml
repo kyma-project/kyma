@@ -62,6 +62,12 @@ spec:
           spec:
             description: FunctionSpec defines the desired state of Function
             properties:
+              annotations:
+                additionalProperties:
+                  type: string
+                description: Annotations will be used in Deployment's PodTemplate
+                  and will be applied on the function's runtime Pod.
+                type: object
               env:
                 description: Env specifies an array of key-value pairs to be used
                   as environment variables for the Function. You can define values
@@ -169,6 +175,12 @@ spec:
                   - name
                   type: object
                 type: array
+              labels:
+                additionalProperties:
+                  type: string
+                description: Labels will be used in Deployment's PodTemplate and will
+                  be applied on the function's runtime Pod.
+                type: object
               replicas:
                 description: Replicas defines the exact number of Function's Pods
                   to run at a time. If ScaleConfig is configured, or if Function is
