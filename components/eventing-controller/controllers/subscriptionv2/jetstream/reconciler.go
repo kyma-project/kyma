@@ -130,6 +130,14 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return r.addFinalizer(ctx, desiredSubscription)
 	}
 
+	if r.isLengthSame(desiredSubscription, log) != nil {
+		if syncErr := r.syncSubscriptionStatus(ctx, desiredSubscription, err, log); syncErr != nil {
+			return ctrl.Result{}, err
+		}
+		// No point in reconciling as the sink is invalid, return latest error to requeue the reconciliation request
+		return ctrl.Result{}, err
+	}
+
 	// update the cleanEventTypes and config values in the subscription status, if changed
 	r.syncEventTypes(desiredSubscription)
 
@@ -287,6 +295,30 @@ func (r *Reconciler) addFinalizer(ctx context.Context, sub *eventingv1alpha2.Sub
 	}
 
 	return ctrl.Result{}, nil
+}
+
+// isLengthSame checks if lengths are same.
+func (r *Reconciler) isLengthSame(desiredSubscription *eventingv1alpha2.Subscription,
+	logger *zap.SugaredLogger) error {
+	// clean types
+	cleanedTypes := jetstream.GetCleanEventTypes(desiredSubscription, r.cleaner)
+	if !reflect.DeepEqual(desiredSubscription.Status.Types, cleanedTypes) {
+		desiredSubscription.Status.Types = cleanedTypes
+	}
+
+	// jetStreamTypes
+	jsSubjects := r.Backend.GetJetStreamSubjects(desiredSubscription.Spec.Source,
+		jetstream.GetCleanEventTypesFromEventTypes(cleanedTypes),
+		desiredSubscription.Spec.TypeMatching)
+
+	if len(jsSubjects) != len(desiredSubscription.Spec.Types) {
+		errMsg := "length of events types do not match after cleaning"
+		logger.Errorw(errMsg, "cleanedTypes", cleanedTypes, "jsSubjects", jsSubjects)
+		logger.Errorw(errMsg, "subscriptionSpec", desiredSubscription.Spec)
+
+		return errors.New(errMsg)
+	}
+	return nil
 }
 
 // syncEventTypes sets the latest cleaned types and jetStreamTypes to the subscription status.
