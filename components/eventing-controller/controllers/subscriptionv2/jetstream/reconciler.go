@@ -130,7 +130,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return r.addFinalizer(ctx, desiredSubscription)
 	}
 
-	if r.isLengthSame(desiredSubscription, log) != nil {
+	if err = r.isLengthSame(desiredSubscription, log); err != nil {
 		if syncErr := r.syncSubscriptionStatus(ctx, desiredSubscription, err, log); syncErr != nil {
 			return ctrl.Result{}, err
 		}
