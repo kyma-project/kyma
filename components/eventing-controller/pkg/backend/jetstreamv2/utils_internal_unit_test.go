@@ -298,24 +298,6 @@ func TestGetCleanEventTypes(t *testing.T) {
 				},
 			},
 		},
-		{
-			name: "Should clean duplicate eventTypes",
-			givenSubscription: evtestingv2.NewSubscription("sub2", "test",
-				evtestingv2.WithNotCleanEventSourceAndType(),
-				evtestingv2.WithNotCleanEventSourceAndType(),
-				evtestingv2.WithTypeMatchingStandard(),
-			),
-			wantEventTypes: []eventingv1alpha2.EventType{
-				{
-					OriginalType: evtestingv2.OrderCreatedUncleanEvent,
-					CleanType:    evtestingv2.OrderCreatedCleanEvent,
-				},
-				{
-					OriginalType: evtestingv2.OrderCreatedUncleanEvent,
-					CleanType:    evtestingv2.OrderCreatedCleanEvent,
-				},
-			},
-		},
 	}
 	for _, tc := range testCases {
 		tc := tc

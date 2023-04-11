@@ -199,10 +199,26 @@ func GetCleanEventTypesFromEventTypes(eventTypes []eventingv1alpha2.EventType) [
 	return cleantypes
 }
 
+// TODO: to be moved to subscription types
+func getUniqueEventTypes(eventTypes []string) []string {
+	unique := make([]string, 0, len(eventTypes))
+	mapper := make(map[string]bool)
+
+	for _, val := range eventTypes {
+		if _, ok := mapper[val]; !ok {
+			mapper[val] = true
+			unique = append(unique, val)
+		}
+	}
+
+	return unique
+}
+
 // GetCleanEventTypes returns a list of clean eventTypes from the unique types in the subscription.
 func GetCleanEventTypes(sub *eventingv1alpha2.Subscription, cleaner cleaner.Cleaner) []eventingv1alpha2.EventType {
+	uniqueTypes := getUniqueEventTypes(sub.Spec.Types)
 	var cleanEventTypes []eventingv1alpha2.EventType
-	for _, eventType := range sub.Spec.Types {
+	for _, eventType := range uniqueTypes {
 		cleanType := eventType
 		if sub.Spec.TypeMatching != eventingv1alpha2.TypeMatchingExact {
 			cleanType, _ = cleaner.CleanEventType(eventType)
