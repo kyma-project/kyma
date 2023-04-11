@@ -110,7 +110,7 @@ webhook:
 global:
   domainName: kyma.example.com
   containerRegistry:
-    path: eu.gcr.io/kyma-project
+    path: europe-docker.pkg.dev/kyma-project/prod
   images:
     api_gateway_controller:
       name: "api-gateway-controller"
