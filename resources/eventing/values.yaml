@@ -1,7 +1,7 @@
 # globally shared values among Helm subcharts
 global:
   containerRegistry:
-    path: eu.gcr.io/kyma-project
+    path: europe-docker.pkg.dev/kyma-project/prod
   images:
     eventing_controller:
       name: eventing-controller
