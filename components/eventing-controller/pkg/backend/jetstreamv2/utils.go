@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/pkg/errors"
+
 	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
 	pkgerrors "github.com/kyma-project/kyma/components/eventing-controller/pkg/errors"
 	"github.com/nats-io/nats.go"
@@ -197,26 +199,10 @@ func GetCleanEventTypesFromEventTypes(eventTypes []eventingv1alpha2.EventType) [
 	return cleantypes
 }
 
-// TODO: to be moved to subscription types
-func getUniqueEventTypes(eventTypes []string) []string {
-	unique := make([]string, 0, len(eventTypes))
-	mapper := make(map[string]bool)
-
-	for _, val := range eventTypes {
-		if _, ok := mapper[val]; !ok {
-			mapper[val] = true
-			unique = append(unique, val)
-		}
-	}
-
-	return unique
-}
-
 // GetCleanEventTypes returns a list of clean eventTypes from the unique types in the subscription.
 func GetCleanEventTypes(sub *eventingv1alpha2.Subscription, cleaner cleaner.Cleaner) []eventingv1alpha2.EventType {
-	uniqueTypes := getUniqueEventTypes(sub.Spec.Types)
 	var cleanEventTypes []eventingv1alpha2.EventType
-	for _, eventType := range uniqueTypes {
+	for _, eventType := range sub.Spec.Types {
 		cleanType := eventType
 		if sub.Spec.TypeMatching != eventingv1alpha2.TypeMatchingExact {
 			cleanType, _ = cleaner.CleanEventType(eventType)
@@ -233,14 +219,18 @@ func GetCleanEventTypes(sub *eventingv1alpha2.Subscription, cleaner cleaner.Clea
 // GetBackendJetStreamTypes gets the original event type and the consumer name for all the subscriptions
 // and this slice is set as the backend specific status for JetStream.
 func GetBackendJetStreamTypes(subscription *eventingv1alpha2.Subscription,
-	jsSubjects []string) []eventingv1alpha2.JetStreamTypes {
+	jsSubjects []string) ([]eventingv1alpha2.JetStreamTypes, error) {
+	if len(jsSubjects) != len(subscription.Spec.Types) {
+		return nil, errors.New("length of JetStream subjects do not match with eventTypes from spec")
+	}
+
 	var jsTypes []eventingv1alpha2.JetStreamTypes
 	for i, ot := range subscription.Spec.Types {
 		jt := eventingv1alpha2.JetStreamTypes{OriginalType: ot,
 			ConsumerName: computeConsumerName(subscription, jsSubjects[i])}
 		jsTypes = append(jsTypes, jt)
 	}
-	return jsTypes
+	return jsTypes, nil
 }
 
 // isJsSubAssociatedWithKymaSub returns true if the given SubscriptionSubjectIdentifier and Kyma subscription
