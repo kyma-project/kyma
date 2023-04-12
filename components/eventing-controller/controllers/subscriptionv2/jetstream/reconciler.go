@@ -131,7 +131,12 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	// update the cleanEventTypes and config values in the subscription status, if changed
-	r.syncEventTypes(desiredSubscription)
+	if err = r.syncEventTypes(desiredSubscription); err != nil {
+		if syncErr := r.syncSubscriptionStatus(ctx, desiredSubscription, err, log); syncErr != nil {
+			return ctrl.Result{}, err
+		}
+		return ctrl.Result{}, err
+	}
 
 	// Check for valid sink
 	if err := r.sinkValidator.Validate(desiredSubscription); err != nil {
@@ -290,7 +295,7 @@ func (r *Reconciler) addFinalizer(ctx context.Context, sub *eventingv1alpha2.Sub
 }
 
 // syncEventTypes sets the latest cleaned types and jetStreamTypes to the subscription status.
-func (r *Reconciler) syncEventTypes(desiredSubscription *eventingv1alpha2.Subscription) {
+func (r *Reconciler) syncEventTypes(desiredSubscription *eventingv1alpha2.Subscription) error {
 	// clean types
 	cleanedTypes := jetstream.GetCleanEventTypes(desiredSubscription, r.cleaner)
 	if !reflect.DeepEqual(desiredSubscription.Status.Types, cleanedTypes) {
@@ -301,10 +306,14 @@ func (r *Reconciler) syncEventTypes(desiredSubscription *eventingv1alpha2.Subscr
 	jsSubjects := r.Backend.GetJetStreamSubjects(desiredSubscription.Spec.Source,
 		jetstream.GetCleanEventTypesFromEventTypes(cleanedTypes),
 		desiredSubscription.Spec.TypeMatching)
-	jsTypes := jetstream.GetBackendJetStreamTypes(desiredSubscription, jsSubjects)
+	jsTypes, err := jetstream.GetBackendJetStreamTypes(desiredSubscription, jsSubjects)
+	if err != nil {
+		return err
+	}
 	if !reflect.DeepEqual(desiredSubscription.Status.Backend.Types, jsTypes) {
 		desiredSubscription.Status.Backend.Types = jsTypes
 	}
+	return nil
 }
 
 func (r *Reconciler) namedLogger() *zap.SugaredLogger {
