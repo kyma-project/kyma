@@ -324,7 +324,9 @@ func Test_CleanupInV1ToV2Conversion(t *testing.T) {
 			givenCleaner: true,
 			givenPrefix:  "prefix",
 			givenAlpha1Sub: newDefaultSubscription(
-				testingv1.WithFilter(eventSource, "invalid.test-app.Segme@@nt1.Segment2.Segment3.Segment4-Part1-Part2-Ä.Segment5-Part1-Part2-Ä.v1"),
+				testingv1.WithFilter(eventSource,
+					"invalid.test-app.Segme@@nt1.Segment2.Segment3.Segment4-Part1-Part2-Ä.Segment5-Part1-Part2-Ä.v1",
+				),
 			),
 			wantTypes: []string{
 				"invalid.test-app.Segme@@nt1.Segment2.Segment3.Segment4-Part1-Part2-Ä.Segment5-Part1-Part2-Ä.v1",
@@ -336,7 +338,9 @@ func Test_CleanupInV1ToV2Conversion(t *testing.T) {
 			givenCleaner: true,
 			givenPrefix:  "prefix",
 			givenAlpha1Sub: newDefaultSubscription(
-				testingv1.WithFilter(eventSource, "test-app.Segme@@nt1.Segment2.Segment3.Segment4-Part1-Part2-Ä.Segment5-Part1-Part2-Ä.v1"),
+				testingv1.WithFilter(eventSource,
+					"test-app.Segme@@nt1.Segment2.Segment3.Segment4-Part1-Part2-Ä.Segment5-Part1-Part2-Ä.v1",
+				),
 			),
 			wantTypes: []string{
 				"test-app.Segme@@nt1.Segment2.Segment3.Segment4-Part1-Part2-Ä.Segment5-Part1-Part2-Ä.v1",
