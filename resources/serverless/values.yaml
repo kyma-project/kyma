@@ -66,7 +66,7 @@ global:
     helm.sh/chart: '{{ include "chart" . }}'
   dockerServicePort: 5000
   configuration:
-    configmapName: 'serverless-configuration'
+    configmapName: "serverless-configuration"
     targetDir: "/appdata"
     filename: "config.yaml"
   ingress:
@@ -76,17 +76,17 @@ global:
   images:
     k8s_tools:
       name: "k8s-tools"
-      version: "v20230307-b83bd5e3"
+      version: "v20230330-fdf134f3"
       directory: "tpi"
     function_controller:
       name: "function-controller"
-      version: "PR-17092"
+      version: "PR-17252"
     function_webhook:
       name: "function-webhook"
-      version: "PR-17092"
+      version: "PR-17252"
     function_build_init:
       name: "function-build-init"
-      version: "PR-17092"
+      version: "PR-17252"
     function_runtime_nodejs14:
       name: "function-runtime-nodejs14"
       version: "v20230302-a6a85f47"
@@ -98,7 +98,7 @@ global:
       version: "v20230302-a6a85f47"
     function_runtime_python39:
       name: "function-runtime-python39"
-      version: "PR-17125"
+      version: "v20230329-905b2788"
     kaniko_executor:
       name: "kaniko-executor"
       version: "1.9.1-ddcfbdf0"
@@ -109,7 +109,7 @@ global:
       directory: "tpi"
     function_registry_gc:
       name: "function-registry-gc"
-      version: "PR-17097"
+      version: "v20230407-602e2c0f"
     google_pause:
       name: "pause-amd64"
       version: "3.2"
@@ -119,7 +119,6 @@ global:
 images:
   function_controller:
     pullPolicy: IfNotPresent
-
 
 deployment:
   replicas: 1
@@ -249,8 +248,8 @@ metrics:
       targerPort: 8080
       protocol: TCP
   pod:
-    labels: { }
-    annotations: { }
+    labels: {}
+    annotations: {}
 
 backendModule:
   enabled: true

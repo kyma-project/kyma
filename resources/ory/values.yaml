@@ -30,7 +30,7 @@ global:
   images:
     k8s_tools:
       name: "k8s-tools"
-      version: "v20230307-b83bd5e3"
+      version: "v20230330-fdf134f3"
       directory: "tpi"
     ## Google Cloud SQL Proxy image
     ## ref: https://cloud.google.com/sql/docs/mysql/sql-proxy
@@ -69,7 +69,7 @@ global:
       directory: "external/bitnami"
     alpine:
       name: "alpine"
-      version: "3.17.2"
+      version: "3.17.3"
       directory: "external"
 
 headerRewrite:
@@ -156,7 +156,7 @@ oathkeeper:
             # If unset, all requests are forwarded.
             # If set, only requests that have at least one of the set cookies will be forwarded, others will be passed to the next authenticator
             only:
-            - sessionid
+              - sessionid
         oauth2_client_credentials:
           enabled: true
           config:
@@ -176,7 +176,7 @@ oathkeeper:
           enabled: true
           config:
             jwks_urls:
-            - http://ory-hydra-public.kyma-system.svc.cluster.local:4444/.well-known/jwks.json
+              - http://ory-hydra-public.kyma-system.svc.cluster.local:4444/.well-known/jwks.json
             scope_strategy: wildcard
       authorizers:
         allow:
