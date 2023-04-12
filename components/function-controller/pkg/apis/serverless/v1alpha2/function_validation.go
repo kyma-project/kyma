@@ -2,7 +2,7 @@ package v1alpha2
 
 import (
 	"fmt"
-	labels2 "k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/labels"
 	"net/url"
 	"regexp"
 	"strings"
@@ -321,26 +321,21 @@ func (spec *FunctionSpec) validateReplicas(vc *ValidationConfig) error {
 
 func (spec *FunctionSpec) validateLabels(_ *ValidationConfig) error {
 	var templateLabels map[string]string
-	if spec.Template != nil && spec.Template.Labels != nil {
+	if spec.Template != nil {
 		templateLabels = spec.Template.Labels
-	}
-
-	var labels map[string]string
-	if spec.Labels != nil {
-		labels = spec.Labels
 	}
 
 	errs := field.ErrorList{}
 	errs = append(errs, validateFunctionLabels(templateLabels, "spec.template.labels")...)
-	errs = append(errs, validateFunctionLabels(labels, "spec.labels")...)
-	errs = append(errs, validateLabelConflicts(templateLabels, "spec.template.labels", labels, "spec.labels")...)
+	errs = append(errs, validateFunctionLabels(spec.Labels, "spec.labels")...)
+	errs = append(errs, validateLabelConflicts(templateLabels, "spec.template.labels", spec.Labels, "spec.labels")...)
 
 	return errs.ToAggregate()
 }
 
 func validateLabelConflicts(lab1 map[string]string, path1 string, lab2 map[string]string, path2 string) field.ErrorList {
 	errs := field.ErrorList{}
-	if labels2.Conflicts(lab1, lab2) {
+	if labels.Conflicts(lab1, lab2) {
 		fieldPath1 := field.NewPath(path1)
 		errs = append(errs, field.Invalid(fieldPath1, path2, "conflict between labels"))
 	}

@@ -927,7 +927,6 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 
 			// when
 			errs := testData.givenFunc.Validate(config)
-			t.Logf("err: %s", errs)
 			// then
 			g.Expect(errs).To(testData.expectedError)
 			if testData.specifiedExpectedError != nil {
