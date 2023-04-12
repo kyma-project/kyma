@@ -59,8 +59,6 @@
 /resources/telemetry @kyma-project/observability
 /resources/tracing @kyma-project/observability
 
-/tests/application-gateway-legacy-tests @kyma-project/Framefrog
-
 # Fast Integration Tests
 /tests/fast-integration/test @kyma-project/observability @kyma-project/eventing @kyma-project/Otters @kyma-project/goat
 /tests/fast-integration/eventing-test @kyma-project/eventing
