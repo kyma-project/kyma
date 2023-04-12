@@ -44,6 +44,11 @@ describe('SKR-Upgrade-test', function() {
     return options;
   };
 
+  it(`Perform kcp login`, async function() {
+    console.log("Performing kcp login") 
+    await kcp.login();
+  });
+
   before(`Provision SKR with ID ${options.instanceID} and version ${kymaVersion}`, async function() {
     this.timeout(provisioningTimeout);
     skr = await getOrProvisionSKR(options, skipProvisioning, provisioningTimeout);
@@ -55,6 +60,7 @@ describe('SKR-Upgrade-test', function() {
   oidcE2ETest(getShootOptionsFunc, getShootInfoFunc);
 
   it('Perform Upgrade', async function() {
+    console.log('Performing upgrade');
     await upgradeSKRInstance(options, kymaUpgradeVersion, upgradeTimeoutMin);
   });
 
