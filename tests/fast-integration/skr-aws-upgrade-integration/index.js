@@ -45,7 +45,7 @@ describe('SKR-Upgrade-test', function() {
   };
 
   it(`Perform kcp login`, async function() {
-    console.log("Performing kcp login") 
+    console.log('Performing kcp login');
     await kcp.login();
   });
 
