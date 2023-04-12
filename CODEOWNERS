@@ -86,9 +86,6 @@
 /tests/perf @kyma-project/observability
 /tests/serverless-bench @kyma-project/Otters
 
-# The tools/event-subscriber directory
-/tools/event-subscriber/ @kyma-project/eventing
-
 # The tools/gitserver directory
 /tools/gitserver/ @kyma-project/Otters
 
