@@ -182,7 +182,7 @@ func (r *FunctionReconciler) readDockerConfig(ctx context.Context, instance *ser
 
 	// try reading default config
 	if err := r.client.Get(ctx, client.ObjectKey{Namespace: instance.Namespace, Name: r.config.ImageRegistryDefaultDockerConfigSecretName}, &secret); err != nil {
-		return DockerConfig{}, errors.Wrapf(err, "Docker registry configuration not found, none of configuration secrets (%s, %s) found in function namespace", r.config.ImageRegistryDefaultDockerConfigSecretName, r.config.ImageRegistryExternalDockerConfigSecretName)
+		return DockerConfig{}, errors.Wrapf(err, "docker registry configuration not found, none of configuration secrets (%s, %s) found in function namespace", r.config.ImageRegistryDefaultDockerConfigSecretName, r.config.ImageRegistryExternalDockerConfigSecretName)
 	}
 	data := readSecretData(secret.Data)
 	if data["isInternal"] == "true" {
