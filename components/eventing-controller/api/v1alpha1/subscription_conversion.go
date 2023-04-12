@@ -221,28 +221,33 @@ func (src *Subscription) setV1ProtocolFields(dst *v1alpha2.Subscription) {
 
 // setV2SpecTypes sets event types in the Subscription Spec in the v1alpha2 way.
 func (src *Subscription) setV2SpecTypes(dst *v1alpha2.Subscription) error {
-	if v1alpha1TypeCleaner == nil {
-		return errors.New("event type cleaner is not initialized")
+	if src.Spec.Filter == nil {
+		return nil
 	}
 
-	if src.Spec.Filter != nil {
-		for _, filter := range src.Spec.Filter.Filters {
-			if dst.Spec.Source == "" {
-				dst.Spec.Source = filter.EventSource.Value
-			}
-			if dst.Spec.Source != "" && filter.EventSource.Value != dst.Spec.Source {
-				return errors.New(ErrorMultipleSourceMsg)
-			}
-			// clean the type and merge segments if needed
-			cleanedType, err := v1alpha1TypeCleaner.Clean(filter.EventType.Value)
-			if err != nil {
-				return err
-			}
+	for _, filter := range src.Spec.Filter.Filters {
+		// migrate the event source
+		// fail if there are multiple different event sources
+		if dst.Spec.Source == "" {
+			dst.Spec.Source = filter.EventSource.Value
+		}
+		if dst.Spec.Source != "" && filter.EventSource.Value != dst.Spec.Source {
+			return errors.New(ErrorMultipleSourceMsg)
+		}
 
-			// add the type to spec
-			dst.Spec.Types = append(dst.Spec.Types, cleanedType)
+		// migrate the event type
+		// use the original event type if it cannot be cleaned
+		if v1alpha1TypeCleaner == nil {
+			dst.Spec.Types = append(dst.Spec.Types, filter.EventType.Value)
+			continue
+		}
+		if cleanEventType, err := v1alpha1TypeCleaner.Clean(filter.EventType.Value); err != nil {
+			dst.Spec.Types = append(dst.Spec.Types, filter.EventType.Value)
+		} else {
+			dst.Spec.Types = append(dst.Spec.Types, cleanEventType)
 		}
 	}
+
 	return nil
 }
 

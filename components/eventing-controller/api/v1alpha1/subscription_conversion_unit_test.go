@@ -243,6 +243,7 @@ func Test_Conversion(t *testing.T) {
 func Test_CleanupInV1ToV2Conversion(t *testing.T) {
 	type TestCase struct {
 		name           string
+		givenCleaner   bool
 		givenAlpha1Sub *v1alpha1.Subscription
 		givenPrefix    string
 		wantTypes      []string
@@ -251,7 +252,8 @@ func Test_CleanupInV1ToV2Conversion(t *testing.T) {
 
 	testCases := []TestCase{
 		{
-			name: "success if prefix is empty",
+			name:         "success if prefix is empty",
+			givenCleaner: true,
 			givenAlpha1Sub: newDefaultSubscription(
 				testingv1.WithFilter(eventSource, "testapp.Segment1-Part1-Part2-Ä.Segment2-Part1-Part2-Ä.v1"),
 			),
@@ -259,10 +261,12 @@ func Test_CleanupInV1ToV2Conversion(t *testing.T) {
 			wantTypes: []string{
 				"testapp.Segment1Part1Part2.Segment2Part1Part2.v1",
 			},
+			wantError: false,
 		},
 		{
-			name:        "success if the given event has more than two segments",
-			givenPrefix: "prefix",
+			name:         "success if the given event has more than two segments",
+			givenCleaner: true,
+			givenPrefix:  "prefix",
 			givenAlpha1Sub: newDefaultSubscription(
 				testingv1.WithFilter(eventSource, "prefix.testapp.Segment1.Segment2.Segment3."+
 					"Segment4-Part1-Part2-Ä.Segment5-Part1-Part2-Ä.v1"),
@@ -273,8 +277,9 @@ func Test_CleanupInV1ToV2Conversion(t *testing.T) {
 			wantError: false,
 		},
 		{
-			name:        "success if the application name needs to be cleaned",
-			givenPrefix: "prefix",
+			name:         "success if the application name needs to be cleaned",
+			givenCleaner: true,
+			givenPrefix:  "prefix",
 			givenAlpha1Sub: newDefaultSubscription(
 				testingv1.WithFilter(eventSource, "prefix.te--s__t!!a@@p##p%%.Segment1-Part1-Part2-Ä."+
 					"Segment2-Part1-Part2-Ä.v1"),
@@ -285,8 +290,9 @@ func Test_CleanupInV1ToV2Conversion(t *testing.T) {
 			wantError: false,
 		},
 		{
-			name:        "success if the application name needs to be cleaned and event has more than two segments",
-			givenPrefix: "prefix",
+			name:         "success if the application name needs to be cleaned and event has more than two segments",
+			givenCleaner: true,
+			givenPrefix:  "prefix",
 			givenAlpha1Sub: newDefaultSubscription(
 				testingv1.WithFilter(eventSource, "prefix.te--s__t!!a@@p##p%%.Segment1.Segment2.Segment3."+
 					"Segment4-Part1-Part2-Ä.Segment5-Part1-Part2-Ä.v1"),
@@ -297,8 +303,9 @@ func Test_CleanupInV1ToV2Conversion(t *testing.T) {
 			wantError: false,
 		},
 		{
-			name:        "success if there are multiple filters",
-			givenPrefix: "prefix",
+			name:         "success if there are multiple filters",
+			givenCleaner: true,
+			givenPrefix:  "prefix",
 			givenAlpha1Sub: newDefaultSubscription(
 				testingv1.WithFilter(eventSource, "prefix.test-app.Segme@@nt1.Segment2.Segment3."+
 					"Segment4-Part1-Part2-Ä.Segment5-Part1-Part2-Ä.v1"),
@@ -313,28 +320,60 @@ func Test_CleanupInV1ToV2Conversion(t *testing.T) {
 		},
 		// invalid even-types
 		{
-			name:        "fail if the prefix is invalid",
-			givenPrefix: "prefix",
+			name:         "success if the prefix is invalid",
+			givenCleaner: true,
+			givenPrefix:  "prefix",
 			givenAlpha1Sub: newDefaultSubscription(
-				testingv1.WithFilter(eventSource, "invalid.test-app.Segme@@nt1.Segment2.Segment3."+
-					"Segment4-Part1-Part2-Ä.Segment5-Part1-Part2-Ä.v1"),
+				testingv1.WithFilter(eventSource, "invalid.test-app.Segme@@nt1.Segment2.Segment3.Segment4-Part1-Part2-Ä.Segment5-Part1-Part2-Ä.v1"),
 			),
-			wantError: true,
+			wantTypes: []string{
+				"invalid.test-app.Segme@@nt1.Segment2.Segment3.Segment4-Part1-Part2-Ä.Segment5-Part1-Part2-Ä.v1",
+			},
+			wantError: false,
 		},
 		{
-			name:        "fail if the prefix is missing",
-			givenPrefix: "prefix",
+			name:         "success if the prefix is missing",
+			givenCleaner: true,
+			givenPrefix:  "prefix",
 			givenAlpha1Sub: newDefaultSubscription(
-				testingv1.WithFilter(eventSource, "test-app.Segme@@nt1.Segment2.Segment3."+
-					"Segment4-Part1-Part2-Ä.Segment5-Part1-Part2-Ä.v1"),
+				testingv1.WithFilter(eventSource, "test-app.Segme@@nt1.Segment2.Segment3.Segment4-Part1-Part2-Ä.Segment5-Part1-Part2-Ä.v1"),
 			),
-			wantError: true,
+			wantTypes: []string{
+				"test-app.Segme@@nt1.Segment2.Segment3.Segment4-Part1-Part2-Ä.Segment5-Part1-Part2-Ä.v1",
+			},
+			wantError: false,
 		},
 		{
-			name:        "fail if the event-type is incomplete",
-			givenPrefix: "prefix",
+			name:         "success if the event-type is incomplete",
+			givenCleaner: true,
+			givenPrefix:  "prefix",
 			givenAlpha1Sub: newDefaultSubscription(
 				testingv1.WithFilter(eventSource, "prefix.testapp.Segment1-Part1-Part2-Ä.v1"),
+			),
+			wantTypes: []string{
+				"prefix.testapp.Segment1-Part1-Part2-Ä.v1",
+			},
+			wantError: false,
+		},
+		{
+			name:         "success if the cleaner is nil",
+			givenCleaner: false,
+			givenPrefix:  "prefix",
+			givenAlpha1Sub: newDefaultSubscription(
+				testingv1.WithFilter(eventSource, "prefix.testapp.Segment1-Part1-Part2-Ä.v1"),
+			),
+			wantTypes: []string{
+				"prefix.testapp.Segment1-Part1-Part2-Ä.v1",
+			},
+			wantError: false,
+		},
+		{
+			name:         "fail if there are different event sources",
+			givenCleaner: true,
+			givenPrefix:  "prefix",
+			givenAlpha1Sub: newDefaultSubscription(
+				testingv1.WithFilter("source-1", "prefix.testapp.Segment1-Part1-Part2-Ä.v1"),
+				testingv1.WithFilter("source-2", "prefix.testapp.Segment1-Part1-Part2-Ä.v1"),
 			),
 			wantError: true,
 		},
@@ -347,9 +386,13 @@ func Test_CleanupInV1ToV2Conversion(t *testing.T) {
 			testLogger, err := logger.New("json", "info")
 			require.NoError(t, err)
 
-			// initialize dummy cleaner
-			cleaner := eventtype.NewSimpleCleaner(tc.givenPrefix, testLogger)
-			v1alpha1.InitializeEventTypeCleaner(cleaner)
+			// initialize cleaner
+			if tc.givenCleaner {
+				cleaner := eventtype.NewSimpleCleaner(tc.givenPrefix, testLogger)
+				v1alpha1.InitializeEventTypeCleaner(cleaner)
+			} else {
+				v1alpha1.InitializeEventTypeCleaner(nil)
+			}
 
 			// initialize v1alpha2 Subscription instance
 			convertedV1Alpha2 := &v1alpha2.Subscription{}
