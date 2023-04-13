@@ -135,7 +135,7 @@ class KCPWrapper {
     const args = ['upgrade', 'kyma', `--version=${kymaUpgradeVersion}`, '--target', `instance-id=${instanceID}`];
     try {
       console.log('Executing kcp upgrade')
-      const res = await this.exec(args);
+      const res = await this.exec(args, true, true);
 
       console.log('Checking orchestration')
       // output if successful:
@@ -348,19 +348,24 @@ class KCPWrapper {
     }
   }
 
-  async exec(args) {
+  async exec(args, pipeStdout = false, sendYes = false) {
     try {
       const defaultArgs = [
         '--config', `${this.kcpConfigPath}`,
       ];
       // debug([`>  kcp`, defaultArgs.concat(args).join(" ")].join(" "))
       const subprocess = execa('kcp', defaultArgs.concat(args), {stdio: 'pipe'});
-      subprocess.stdout.pipe(process.stdout);
 
-      var inStream = new stream.Readable();
-      inStream.push('Y');  
-      inStream.push(null);   
-      inStream.pipe(subprocess.stdin);
+      if(pipeStdout) {
+        subprocess.stdout.pipe(process.stdout);
+      }
+
+      if(sendYes) {
+        var inStream = new stream.Readable();
+        inStream.push('Y');  
+        inStream.push(null);   
+        inStream.pipe(subprocess.stdin);
+      }
 
       const output = await subprocess
       
