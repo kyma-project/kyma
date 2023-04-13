@@ -38,6 +38,7 @@ const (
 	idleHeartBeatDuration  = 1 * time.Minute
 	jsConsumerMaxRedeliver = 100
 	jsConsumerNakDelay     = 30 * time.Second
+	jsConsumerAckWait      = 30 * time.Second
 	originalTypeHeaderName = "originaltype"
 )
 
