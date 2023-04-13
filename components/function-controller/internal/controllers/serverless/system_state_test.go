@@ -17,7 +17,7 @@ func Test_systemState_podLabels(t *testing.T) {
 		want map[string]string
 	}{
 		{
-			name: "Should work on function with no labels",
+			name: "Should create internal labels",
 			args: args{instance: &v1alpha2.Function{
 				ObjectMeta: metav1.ObjectMeta{
 					Name: "fn-name",
@@ -32,7 +32,7 @@ func Test_systemState_podLabels(t *testing.T) {
 			},
 		},
 		{
-			name: "Should work with function with some labels",
+			name: "Should create internal and additional labels",
 			args: args{instance: &v1alpha2.Function{
 				ObjectMeta: metav1.ObjectMeta{
 					Name: "fn-name",
@@ -58,7 +58,7 @@ func Test_systemState_podLabels(t *testing.T) {
 			},
 		},
 		{
-			name: "Should work with function with some labels from spec.template.labels",
+			name: "Should create internal and from `spec.template.labels` labels",
 			args: args{instance: &v1alpha2.Function{
 				ObjectMeta: metav1.ObjectMeta{
 					Name: "fn-name",
@@ -80,7 +80,7 @@ func Test_systemState_podLabels(t *testing.T) {
 			},
 		},
 		{
-			name: "Should work with function with some labels from spec.labels",
+			name: "Should create internal and from `spec.labels` labels",
 			args: args{instance: &v1alpha2.Function{
 				ObjectMeta: metav1.ObjectMeta{
 					Name: "fn-name",
@@ -132,11 +132,14 @@ func Test_systemState_podLabels(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			//GIVEN
 			g := gomega.NewGomegaWithT(t)
 			s := &systemState{
 				instance: *tt.args.instance,
 			}
+			//WHEN
 			got := s.podLabels()
+			//THEN
 			g.Expect(tt.want).To(gomega.Equal(got))
 		})
 	}
@@ -152,14 +155,14 @@ func Test_systemState_podAnnotations(t *testing.T) {
 		want map[string]string
 	}{
 		{
-			name: "Should work on function with no annotations",
+			name: "Should create internal annotations",
 			args: args{instance: &v1alpha2.Function{}},
 			want: map[string]string{
-				"proxy.istio.io/config": "{ \"holdApplicationUntilProxyStarts\": true }",
+				istioConfigLabelKey: istioEnableHoldUntilProxyStartLabelValue,
 			},
 		},
 		{
-			name: "Should work with function with some labels",
+			name: "Should create internal and from `.spec.annotations` annotations",
 			args: args{instance: &v1alpha2.Function{
 				Spec: v1alpha2.FunctionSpec{
 					Annotations: map[string]string{
@@ -167,8 +170,8 @@ func Test_systemState_podAnnotations(t *testing.T) {
 					},
 				}}},
 			want: map[string]string{
-				"proxy.istio.io/config": "{ \"holdApplicationUntilProxyStarts\": true }",
-				"test-some":             "test-annotation",
+				istioConfigLabelKey: istioEnableHoldUntilProxyStartLabelValue,
+				"test-some":         "test-annotation",
 			},
 		},
 		{
@@ -181,18 +184,21 @@ func Test_systemState_podAnnotations(t *testing.T) {
 					},
 				}}},
 			want: map[string]string{
-				"proxy.istio.io/config": "{ \"holdApplicationUntilProxyStarts\": true }",
-				"test-some":             "test-annotation",
+				istioConfigLabelKey: istioEnableHoldUntilProxyStartLabelValue,
+				"test-some":         "test-annotation",
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			//GIVEN
 			g := gomega.NewGomegaWithT(t)
 			s := &systemState{
 				instance: *tt.args.instance,
 			}
+			//WHEN
 			got := s.podAnnotations()
+			//THEN
 			g.Expect(tt.want).To(gomega.Equal(got))
 		})
 	}
