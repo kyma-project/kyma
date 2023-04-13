@@ -326,8 +326,8 @@ func (spec *FunctionSpec) validateLabels(_ *ValidationConfig) error {
 	}
 
 	errs := field.ErrorList{}
-	errs = append(errs, validateFunctionLabels(templateLabels, "spec.template.labels")...)
 	errs = append(errs, validateFunctionLabels(spec.Labels, "spec.labels")...)
+	errs = append(errs, validateFunctionLabels(templateLabels, "spec.template.labels")...)
 	errs = append(errs, validateLabelConflicts(templateLabels, "spec.template.labels", spec.Labels, "spec.labels")...)
 
 	return errs.ToAggregate()
@@ -337,7 +337,8 @@ func validateLabelConflicts(lab1 map[string]string, path1 string, lab2 map[strin
 	errs := field.ErrorList{}
 	if labels.Conflicts(lab1, lab2) {
 		fieldPath1 := field.NewPath(path1)
-		errs = append(errs, field.Invalid(fieldPath1, path2, "conflict between labels"))
+		fieldPath2 := field.NewPath(path2)
+		errs = append(errs, field.Invalid(fieldPath1, fieldPath2, "conflict between labels"))
 	}
 	return errs
 }
