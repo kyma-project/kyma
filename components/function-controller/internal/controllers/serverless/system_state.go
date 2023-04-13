@@ -2,7 +2,7 @@ package serverless
 
 import (
 	"fmt"
-	amlabels "k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/labels"
 	"path"
 	"strings"
 
@@ -37,20 +37,20 @@ type systemState struct {
 var _ SystemState = systemState{}
 
 func (s *systemState) internalFunctionLabels() map[string]string {
-	labels := make(map[string]string, 3)
+	intLabels := make(map[string]string, 3)
 
-	labels[serverlessv1alpha2.FunctionNameLabel] = s.instance.Name
-	labels[serverlessv1alpha2.FunctionManagedByLabel] = serverlessv1alpha2.FunctionControllerValue
-	labels[serverlessv1alpha2.FunctionUUIDLabel] = string(s.instance.GetUID())
+	intLabels[serverlessv1alpha2.FunctionNameLabel] = s.instance.Name
+	intLabels[serverlessv1alpha2.FunctionManagedByLabel] = serverlessv1alpha2.FunctionControllerValue
+	intLabels[serverlessv1alpha2.FunctionUUIDLabel] = string(s.instance.GetUID())
 
-	return labels
+	return intLabels
 }
 
 func (s *systemState) functionLabels() map[string]string {
 	internalLabels := s.internalFunctionLabels()
 	functionLabels := s.instance.GetLabels()
 
-	return amlabels.Merge(functionLabels, internalLabels)
+	return labels.Merge(functionLabels, internalLabels)
 }
 
 func (s *systemState) buildImageAddress(registryAddress string) string {
@@ -69,7 +69,7 @@ func (s *systemState) inlineFnSrcChanged(dockerPullAddress string) bool {
 	image := s.buildImageAddress(dockerPullAddress)
 	configurationStatus := getConditionStatus(s.instance.Status.Conditions, serverlessv1alpha2.ConditionConfigurationReady)
 	rtm := fnRuntime.GetRuntime(s.instance.Spec.Runtime)
-	labels := s.functionLabels()
+	fnLabels := s.functionLabels()
 
 	if len(s.deployments.Items) == 1 &&
 		len(s.configMaps.Items) == 1 &&
@@ -77,7 +77,7 @@ func (s *systemState) inlineFnSrcChanged(dockerPullAddress string) bool {
 		s.instance.Spec.Source.Inline.Source == s.configMaps.Items[0].Data[FunctionSourceKey] &&
 		rtm.SanitizeDependencies(s.instance.Spec.Source.Inline.Dependencies) == s.configMaps.Items[0].Data[FunctionDepsKey] &&
 		configurationStatus != corev1.ConditionUnknown &&
-		mapsEqual(s.configMaps.Items[0].Labels, labels) {
+		mapsEqual(s.configMaps.Items[0].Labels, fnLabels) {
 		return false
 	}
 
@@ -85,7 +85,7 @@ func (s *systemState) inlineFnSrcChanged(dockerPullAddress string) bool {
 		s.instance.Spec.Source.Inline.Source == s.configMaps.Items[0].Data[FunctionSourceKey] &&
 		rtm.SanitizeDependencies(s.instance.Spec.Source.Inline.Dependencies) == s.configMaps.Items[0].Data[FunctionDepsKey] &&
 		configurationStatus == corev1.ConditionTrue &&
-		mapsEqual(s.configMaps.Items[0].Labels, labels))
+		mapsEqual(s.configMaps.Items[0].Labels, fnLabels))
 }
 
 func (s *systemState) buildConfigMap() corev1.ConfigMap {
@@ -94,11 +94,11 @@ func (s *systemState) buildConfigMap() corev1.ConfigMap {
 		FunctionSourceKey: s.instance.Spec.Source.Inline.Source,
 		FunctionDepsKey:   rtm.SanitizeDependencies(s.instance.Spec.Source.Inline.Dependencies),
 	}
-	labels := s.functionLabels()
+	fnLabels := s.functionLabels()
 
 	return corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Labels:       labels,
+			Labels:       fnLabels,
 			GenerateName: fmt.Sprintf("%s-", s.instance.GetName()),
 			Namespace:    s.instance.GetNamespace(),
 		},
@@ -187,12 +187,12 @@ func (s *systemState) buildJob(configMapName string, cfg cfg) batchv1.Job {
 }
 
 func (s *systemState) buildJobJob(templateSpec corev1.PodSpec) batchv1.Job {
-	labels := s.functionLabels()
+	fnLabels := s.functionLabels()
 	return batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: fmt.Sprintf("%s-build-", s.instance.GetName()),
 			Namespace:    s.instance.GetNamespace(),
-			Labels:       labels,
+			Labels:       fnLabels,
 		},
 		Spec: batchv1.JobSpec{
 			Parallelism:           pointer.Int32(1),
@@ -201,7 +201,7 @@ func (s *systemState) buildJobJob(templateSpec corev1.PodSpec) batchv1.Job {
 			BackoffLimit:          pointer.Int32(0),
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels:      labels,
+					Labels:      fnLabels,
 					Annotations: istioSidecarInjectFalse,
 				},
 				Spec: templateSpec,
@@ -324,7 +324,7 @@ func (s *systemState) buildJobRuntimeVolume() corev1.Volume {
 }
 
 func (s *systemState) deploymentSelectorLabels() map[string]string {
-	return amlabels.Merge(
+	return labels.Merge(
 		map[string]string{
 			serverlessv1alpha2.FunctionResourceLabel: serverlessv1alpha2.FunctionResourceLabelDeploymentValue,
 		},
@@ -345,10 +345,10 @@ func getBuildResourceRequirements(s *systemState) corev1.ResourceRequirements {
 func (s *systemState) podLabels() map[string]string {
 	result := s.deploymentSelectorLabels()
 	if s.instance.Spec.Template != nil && s.instance.Spec.Template.Labels != nil {
-		result = amlabels.Merge(s.instance.Spec.Template.Labels, result)
+		result = labels.Merge(s.instance.Spec.Template.Labels, result)
 	}
 	if s.instance.Spec.Labels != nil {
-		result = amlabels.Merge(s.instance.Spec.Labels, result)
+		result = labels.Merge(s.instance.Spec.Labels, result)
 	}
 	return result
 }
@@ -362,7 +362,7 @@ func (s *systemState) defaultAnnotations() map[string]string {
 func (s *systemState) podAnnotations() map[string]string {
 	result := s.defaultAnnotations()
 	if s.instance.Spec.Annotations != nil {
-		result = amlabels.Merge(s.instance.Spec.Annotations, result)
+		result = labels.Merge(s.instance.Spec.Annotations, result)
 	}
 	return result
 }
