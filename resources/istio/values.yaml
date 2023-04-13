@@ -38,15 +38,13 @@ helmValues:
     rewriteAppHTTPProbe: true
 
 meshConfig:
-  accessLogFile: /dev/stdout
-  accessLogEncoding: JSON
   trustDomain: cluster.local
   defaultProviders:
     tracing: []
   defaultConfig:
     holdApplicationUntilProxyStarts: true
   enablePrometheusMerge: false
-  enableTracing: "{{ .Values.global.tracing.enabled }}"
+  enableTracing: false
   extensionProviders:
     - name: kyma-traces
       opencensus:
@@ -165,7 +163,6 @@ global:
       version: "1.17.1-distroless"
       directory: "external/istio"
       containerRegistryPath: "eu.gcr.io/kyma-project"
-  tracing:
-    enabled: true
+
   # This configuration is only temporary and will be removed in kyma version 2.7.x.
   sidecarMigration: false
