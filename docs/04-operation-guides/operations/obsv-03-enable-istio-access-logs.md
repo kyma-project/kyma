@@ -58,6 +58,9 @@ spec:
   selector:
     matchLabels:
       service.istio.io/canonical-name: {YOUR_LABEL}
+  accessLogging:
+    - providers:
+      - name: stdout-json
 ```
 
 ### Configure Istio access logs for a specific gateway
@@ -74,4 +77,7 @@ spec:
   selector:
     matchLabels:
       istio: ingressgateway
+  accessLogging:
+    - providers:
+      - name: stdout-json
 ```
