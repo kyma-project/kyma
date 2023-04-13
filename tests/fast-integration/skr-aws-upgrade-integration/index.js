@@ -44,11 +44,6 @@ describe('SKR-Upgrade-test', function() {
     return options;
   };
 
-  it(`Perform kcp login`, async function() {
-    console.log('Performing kcp login');
-    await kcp.login();
-  });
-
   before(`Provision SKR with ID ${options.instanceID} and version ${kymaVersion}`, async function() {
     this.timeout(provisioningTimeout);
     skr = await getOrProvisionSKR(options, skipProvisioning, provisioningTimeout);
