@@ -2,7 +2,7 @@
 title: Enable Istio access logs
 ---
 
-You can enable [Istio access logs](https://istio.io/latest/docs/tasks/observability/logs/access-log/) to provide fine-grained details about the access to workloads which are part of the Istio service mesh. This can help in indicating the four “golden signals” of monitoring (latency, traffic, errors, and saturation), and troubleshooting anomalies.
+You can enable [Istio access logs](https://istio.io/latest/docs/tasks/observability/logs/access-log/) to provide fine-grained details about the access to workloads that are part of the Istio service mesh. This can help in indicating the four “golden signals” of monitoring (latency, traffic, errors, and saturation), and troubleshooting anomalies.
 The Istio setup shipped with Kyma provides a pre-configured [extension provider](https://istio.io/latest/docs/tasks/observability/telemetry) for access logs which will configure the istio-proxies to print access logs to stdout using JSON format. It uses a configuration like this:
 ```yaml
   extensionProviders:
@@ -23,7 +23,7 @@ The [log format](https://github.com/kyma-project/kyma/blob/main/resources/istio/
 
 ## Configuration
 
-Istio access logs can be enabled selectively using the Telemetry API. User can enable access logs for the entire namespace, for a selective workload or on Istio gateway scope.
+Istio access logs can be enabled selectively using the Telemetry API. User can enable access logs for the entire Namespace, for a selective workload, or on Istio gateway scope.
 
 ### Configure Istio access logs for the entire Namespace
 
@@ -35,7 +35,7 @@ apiVersion: telemetry.istio.io/v1alpha1
 kind: Telemetry
 metadata:
   name: access-config
-  namespace: istio-system
+  namespace: {YOUR_NAMESPACE}
 spec:
   accessLogging:
     - providers:
@@ -62,7 +62,7 @@ spec:
 
 ### Configure Istio access logs for a specific gateway
 
-Instead of enabling the access logs for all the individual proxies of the workloads you have, you could instead enable the logs for the proxy used by the related Istio ingress gateway.
+Instead of enabling the access logs for all the individual proxies of the workloads you have, you can enable the logs for the proxy used by the related Istio ingress gateway:
 
 ```yaml
 apiVersion: telemetry.istio.io/v1alpha1

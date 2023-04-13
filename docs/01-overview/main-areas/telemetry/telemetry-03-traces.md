@@ -241,7 +241,7 @@ Kyma bundles several modules which are potentially involved in user flows. Appli
 
 ### Istio
 
-The Istio module is a crucial enabler in distributed tracing as it provides [ingress gateway](https://istio.io/latest/docs/tasks/traffic-management/ingress/ingress-control/) where usually external requests enter the cluster scope and are enriched with trace context if it hasn't happened yet. Furthermore, every component being part of the Istio Service Mesh is running an Istio proxy, which propagates the context properly but also creates span data. Having Istio tracing activated and doing trace propagation in your application already ensures that you will get a complete picture of a trace, as every component will automatically contribute span data. Also, Istio tracing is preconfigured to be based on the vendor-neutral [w3c-tracecontext](https://www.w3.org/TR/trace-context/) protocol.
+The Istio module is a crucial enabler in distributed tracing as it provides [ingress gateway](https://istio.io/latest/docs/tasks/traffic-management/ingress/ingress-control/) where usually external requests enter the cluster scope and are enriched with trace context if it hasn't happened yet. Furthermore, every component being part of the Istio Service Mesh is running an Istio proxy, which propagates the context properly but also creates span data. Having Istio tracing activated and doing trace propagation in your application already ensures that you will get a complete picture of a trace, as every component will automatically contribute span data. Also, Istio tracing is pre-configured to be based on the vendor-neutral [w3c-tracecontext](https://www.w3.org/TR/trace-context/) protocol.
 
 >**CAUTION:** The provided Istio feature uses an API in alpha state, which may change in future releases.
 
@@ -294,7 +294,7 @@ spec:
     randomSamplingPercentage: 100.00
 ```
 
-To enable the propagation of the [w3c-tracecontext](https://www.w3.org/TR/trace-context/) only, without reporting any spans ( so having the actual tracing feature disabled), you need to enable the `kyma-traces` provider with a sampling rate of 0. Having that, you will get for example the relevant trace context in to the [access logs](../../../04-operation-guides/operations/obsv-01-access-logs.md) without having any trace reporting active.
+To enable the propagation of the [w3c-tracecontext](https://www.w3.org/TR/trace-context/) only, without reporting any spans (so the actual tracing feature is disabled), you must enable the `kyma-traces` provider with a sampling rate of 0. With this configuration, you get the relevant trace context into the [access logs](../../../04-operation-guides/operations/obsv-01-access-logs.md) without any active trace reporting.
 
 ```yaml
 apiVersion: telemetry.istio.io/v1alpha1
