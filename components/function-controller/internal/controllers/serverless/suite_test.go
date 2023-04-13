@@ -20,7 +20,11 @@ import (
 )
 
 const (
-	testNamespace = "test-namespace-name"
+	testNamespace  = "test-namespace-name"
+	fakeDockerfile = `ARG base_image={{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_runtime_python39) }}
+    FROM ${base_image}
+    USER root
+    ENV KUBELESS_INSTALL_VOLUME=/kubeless`
 )
 
 func setUpTestEnv(g *gomega.GomegaWithT) (cl resource.Client, env *envtest.Environment) {
@@ -86,6 +90,9 @@ func createDockerfileForRuntime(g *gomega.GomegaWithT, client resource.Client, r
 			Labels: map[string]string{kubernetes.ConfigLabel: "runtime",
 				kubernetes.RuntimeLabel: string(rtm)},
 			Namespace: testNamespace,
+		},
+		Data: map[string]string{
+			"Dockerfile": fakeDockerfile,
 		},
 	}
 	g.Expect(client.Create(context.TODO(), &runtimeDockerfileConfigMap)).To(gomega.Succeed())

@@ -138,7 +138,11 @@ func getRuntimeImageFromConfigMap(ctx context.Context, r *reconciler, s *systemS
 	err := r.client.Get(ctx, types.NamespacedName{Namespace: s.instance.Namespace, Name: dockerfileConfigMapName}, instance)
 	baseImage := instance.Data["Dockerfile"]
 	re := regexp.MustCompile(`base_image=.*`)
-	runtimeImage := strings.TrimPrefix(re.FindStringSubmatch(baseImage)[0], "base_image=")
+	matchedLines := re.FindStringSubmatch(baseImage)
+	if len(matchedLines) == 0 {
+		return "", errors.New("could not find the base image")
+	}
+	runtimeImage := strings.TrimPrefix(matchedLines[0], "base_image=")
 	return runtimeImage, err
 }
 
