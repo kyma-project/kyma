@@ -110,10 +110,12 @@ func TestFunctionReconciler_buildDeployment(t *testing.T) {
 
 			// pod labels & annotations
 			g.Expect(got.Spec.Template.ObjectMeta.Labels).To(gomega.HaveLen(4 + 3))
-			g.Expect(got.Spec.Template.ObjectMeta.Labels).To(
-				gomega.ContainElements("bar", "foobar", got.Spec.Template.ObjectMeta.Name))
+			g.Expect(got.Spec.Template.ObjectMeta.Labels).To(gomega.HaveKeyWithValue("foo", "bar"))
+			g.Expect(got.Spec.Template.ObjectMeta.Labels).To(gomega.HaveKeyWithValue(testBindingLabel1, "foobar"))
+			g.Expect(got.Spec.Template.ObjectMeta.Labels).To(gomega.HaveKeyWithValue(testBindingLabel2, testBindingLabelValue))
+
 			g.Expect(got.Spec.Template.ObjectMeta.Annotations).To(gomega.HaveLen(1 + 1))
-			g.Expect(got.Spec.Template.ObjectMeta.Annotations).To(gomega.ContainElement("bar"))
+			g.Expect(got.Spec.Template.ObjectMeta.Annotations).To(gomega.HaveKeyWithValue("foo", "bar"))
 
 			// volumes
 			const expectedVolumeCount = 3
