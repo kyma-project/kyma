@@ -21,6 +21,9 @@ import (
 
 const DefaultDeploymentReplicas int32 = 1
 
+const istioConfigLabelKey = "proxy.istio.io/config"
+const istioEnableHoldUntilProxyStartLabelValue = "{ \"holdApplicationUntilProxyStarts\": true }"
+
 type SystemState interface{}
 
 // TODO extract interface
@@ -355,7 +358,7 @@ func (s *systemState) podLabels() map[string]string {
 
 func (s *systemState) defaultAnnotations() map[string]string {
 	return map[string]string{
-		"proxy.istio.io/config": "{ \"holdApplicationUntilProxyStarts\": true }",
+		istioConfigLabelKey: istioEnableHoldUntilProxyStartLabelValue,
 	}
 }
 
