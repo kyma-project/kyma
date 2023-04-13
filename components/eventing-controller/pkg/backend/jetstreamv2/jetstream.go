@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	http2 "github.com/cloudevents/sdk-go/v2/protocol/http"
+
 	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
 	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 	pkgerrors "github.com/kyma-project/kyma/components/eventing-controller/pkg/errors"
@@ -477,9 +479,18 @@ func (js *JetStream) getCallback(subKeyPrefix, subscriptionName string) nats.Msg
 		ceLogger.Debugw("Sending the CloudEvent")
 
 		// dispatch the event to sink
+		start := time.Now()
 		result := js.client.Send(traceCtxWithCE, *ce)
+		duration := time.Since(start)
+		var res *http2.Result
 		if !cev2protocol.IsACK(result) {
-			js.metricsCollector.RecordDeliveryPerSubscription(subscriptionName, ce.Type(), sink, http.StatusInternalServerError)
+			status := http.StatusInternalServerError
+			if cev2.ResultAs(result, &res) {
+				status = res.StatusCode
+			}
+
+			js.metricsCollector.RecordDeliveryPerSubscription(subscriptionName, ce.Type(), sink, status)
+			js.metricsCollector.RecordLatencyPerSubscription(duration, subscriptionName, ce.Type(), sink, status)
 
 			// NAK the msg with a delay so it is redelivered after jsConsumerNakDelay period.
 			if err := msg.NakWithDelay(jsConsumerNakDelay); err != nil {
@@ -496,7 +507,13 @@ func (js *JetStream) getCallback(subKeyPrefix, subscriptionName string) nats.Msg
 			ceLogger.Errorw("Failed to ACK an event on JetStream")
 		}
 
-		js.metricsCollector.RecordDeliveryPerSubscription(subscriptionName, ce.Type(), sink, http.StatusOK)
+		status := http.StatusOK
+		if cev2.ResultAs(result, &res) {
+			status = res.StatusCode
+		}
+
+		js.metricsCollector.RecordDeliveryPerSubscription(subscriptionName, ce.Type(), sink, status)
+		js.metricsCollector.RecordLatencyPerSubscription(duration, subscriptionName, ce.Type(), sink, status)
 		ceLogger.Debugw("CloudEvent was dispatched")
 	}
 }

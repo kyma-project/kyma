@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/pkg/errors"
+
 	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
 	pkgerrors "github.com/kyma-project/kyma/components/eventing-controller/pkg/errors"
 	"github.com/nats-io/nats.go"
@@ -231,14 +233,18 @@ func GetCleanEventTypes(sub *eventingv1alpha2.Subscription, cleaner cleaner.Clea
 // GetBackendJetStreamTypes gets the original event type and the consumer name for all the subscriptions
 // and this slice is set as the backend specific status for JetStream.
 func GetBackendJetStreamTypes(subscription *eventingv1alpha2.Subscription,
-	jsSubjects []string) []eventingv1alpha2.JetStreamTypes {
+	jsSubjects []string) ([]eventingv1alpha2.JetStreamTypes, error) {
+	if len(jsSubjects) != len(subscription.Spec.Types) {
+		return nil, errors.New("length of JetStream subjects do not match with eventTypes from spec")
+	}
+
 	var jsTypes []eventingv1alpha2.JetStreamTypes
 	for i, ot := range subscription.Spec.Types {
 		jt := eventingv1alpha2.JetStreamTypes{OriginalType: ot,
 			ConsumerName: computeConsumerName(subscription, jsSubjects[i])}
 		jsTypes = append(jsTypes, jt)
 	}
-	return jsTypes
+	return jsTypes, nil
 }
 
 // isJsSubAssociatedWithKymaSub returns true if the given SubscriptionSubjectIdentifier and Kyma subscription

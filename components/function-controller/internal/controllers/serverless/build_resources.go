@@ -21,10 +21,6 @@ var (
 	svcTargetPort = intstr.FromInt(8080) // https://github.com/kubeless/runtimes/blob/master/stable/nodejs/kubeless.js#L28
 )
 
-func boolPtr(b bool) *bool {
-	return &b
-}
-
 func buildRepoFetcherEnvVars(instance *serverlessv1alpha2.Function, gitOptions git.Options) []corev1.EnvVar {
 	vars := []corev1.EnvVar{
 		{
@@ -104,6 +100,7 @@ func buildRepoFetcherEnvVars(instance *serverlessv1alpha2.Function, gitOptions g
 	return vars
 }
 
+// TODO:is used only in tests - probably to remove (after move tests in proper place)
 func (r *FunctionReconciler) internalFunctionLabels(instance *serverlessv1alpha2.Function) map[string]string {
 	labels := make(map[string]string, 3)
 
@@ -112,25 +109,4 @@ func (r *FunctionReconciler) internalFunctionLabels(instance *serverlessv1alpha2
 	labels[serverlessv1alpha2.FunctionUUIDLabel] = string(instance.GetUID())
 
 	return labels
-}
-
-func (r *FunctionReconciler) deploymentSelectorLabels(instance *serverlessv1alpha2.Function) map[string]string {
-	return r.mergeLabels(map[string]string{serverlessv1alpha2.FunctionResourceLabel: serverlessv1alpha2.FunctionResourceLabelDeploymentValue}, r.internalFunctionLabels(instance))
-}
-
-func (r *FunctionReconciler) podLabels(instance *serverlessv1alpha2.Function) map[string]string {
-	if instance.Spec.Template == nil {
-		return r.deploymentSelectorLabels(instance)
-	}
-	return r.mergeLabels(instance.Spec.Template.Labels, r.deploymentSelectorLabels(instance))
-}
-
-func (r *FunctionReconciler) mergeLabels(labelsCollection ...map[string]string) map[string]string {
-	result := make(map[string]string, 0)
-	for _, labels := range labelsCollection {
-		for key, value := range labels {
-			result[key] = value
-		}
-	}
-	return result
 }
