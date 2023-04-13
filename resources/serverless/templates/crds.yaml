@@ -384,6 +384,8 @@ spec:
                     type: object
                 type: object
               template:
+                description: 'Deprecated: `.spec.Labels` and `.spec.Annotations` should
+                  be used to annotate/label function''s pods.'
                 properties:
                   annotations:
                     additionalProperties:

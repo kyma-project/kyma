@@ -180,6 +180,7 @@ type FunctionSpec struct {
 	Replicas *int32 `json:"replicas,omitempty"`
 
 	// +optional
+	// Deprecated: `.spec.Labels` and `.spec.Annotations` should be used to annotate/label function's pods.
 	Template *Template `json:"template,omitempty"`
 
 	// SecretMounts specifies Secrets to mount into the Function's container filesystem.

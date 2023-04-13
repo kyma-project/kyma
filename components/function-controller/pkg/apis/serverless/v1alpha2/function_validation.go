@@ -348,7 +348,6 @@ func validateFunctionLabels(labels map[string]string, path string) field.ErrorLi
 
 	fieldPath := field.NewPath(path)
 	errs = append(errs, v1validation.ValidateLabels(labels, fieldPath)...)
-
 	errs = append(errs, validateFunctionLabelsByOwnGroup(labels, fieldPath)...)
 
 	return errs
@@ -367,12 +366,8 @@ func validateFunctionLabelsByOwnGroup(labels map[string]string, fieldPath *field
 }
 
 func (spec *FunctionSpec) validateAnnotations(_ *ValidationConfig) error {
-	var annotations map[string]string
-	if spec.Annotations != nil {
-		annotations = spec.Annotations
-	}
 	fieldPath := field.NewPath("spec.annotations")
-	errs := validation.ValidateAnnotations(annotations, fieldPath)
+	errs := validation.ValidateAnnotations(spec.Annotations, fieldPath)
 
 	return errs.ToAggregate()
 }
