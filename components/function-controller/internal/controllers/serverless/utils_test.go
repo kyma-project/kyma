@@ -29,7 +29,7 @@ func Test_calculateGitImageTag(t *testing.T) {
 					Runtime: "nodejs16",
 				},
 			},
-			want: "3266394d95f5704c0bfe73506ea65e42c78db1284cd659bac1a8add25566f8e3",
+			want: "5e75a855ada0eb1fc5534e42387566508e03a1ef0d927ac281d5248a0ef1d0cc",
 		},
 		{
 			name: "should use runtimeOverride",
@@ -48,7 +48,7 @@ func Test_calculateGitImageTag(t *testing.T) {
 					RuntimeImageOverride: "nodejs18",
 				},
 			},
-			want: "80b5e6d2ad0b1cabc1f0ece4bd453247c56aae400c416606faadf41326416dfc",
+			want: "4480d14ea252bf15f18c6632caff283b55beb6f38d5cf8cc43b1b116a151e78d",
 		},
 		{
 			name: "should use runtime when runtimeOverride is empty",
@@ -67,7 +67,7 @@ func Test_calculateGitImageTag(t *testing.T) {
 					RuntimeImageOverride: "",
 				},
 			},
-			want: "3266394d95f5704c0bfe73506ea65e42c78db1284cd659bac1a8add25566f8e3",
+			want: "5e75a855ada0eb1fc5534e42387566508e03a1ef0d927ac281d5248a0ef1d0cc",
 		},
 	}
 	for _, tt := range tests {
@@ -105,7 +105,7 @@ func Test_calculateInlineImageTag(t *testing.T) {
 					},
 				},
 			},
-			want: "0ab9efcbe07c216fbe2e0f1c5159a3416bfc9fc54c7dfa9d0debe8ed33372ab0",
+			want: "61373f52b742aec1e1be9b8b6a9984ea087524deffe6bb38f1788c0ae4d7d62b",
 		},
 		{
 			name: "should use runtimeOverride",
@@ -130,7 +130,7 @@ func Test_calculateInlineImageTag(t *testing.T) {
 					},
 				},
 			},
-			want: "c6db298f18aabd8edb01db594c0e041e80742ce0c32174791326548fdee37f26",
+			want: "e6ca45293444d4f6f1b43437f96cd2606842bf7cf9e14a126f52c0b7c216c677",
 		},
 		{
 			name: "should use runtime instead of runtimeOverride",
@@ -155,7 +155,7 @@ func Test_calculateInlineImageTag(t *testing.T) {
 					},
 				},
 			},
-			want: "0ab9efcbe07c216fbe2e0f1c5159a3416bfc9fc54c7dfa9d0debe8ed33372ab0",
+			want: "61373f52b742aec1e1be9b8b6a9984ea087524deffe6bb38f1788c0ae4d7d62b",
 		},
 	}
 	for _, tt := range tests {
