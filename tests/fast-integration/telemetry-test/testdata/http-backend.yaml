@@ -20,7 +20,7 @@ spec:
             - -i http
             - -o stdout
             - -q
-          image: eu.gcr.io/kyma-project/tpi/2.0.10-050eef31
+          image: eu.gcr.io/kyma-project/tpi/2.0.11-f89ab2e3
           livenessProbe:
             tcpSocket:
               port: serviceport
