@@ -54,6 +54,7 @@ func buildStateFnCheckImageJob(expectedJob batchv1.Job) stateFn {
 
 		if jobFailed {
 			r.result = ctrl.Result{
+				//Move it to config
 				RequeueAfter: time.Minute * 5,
 				Requeue:      true,
 			}
