@@ -357,7 +357,7 @@ func validateFunctionLabelsByOwnGroup(labels map[string]string, fieldPath *field
 	forbiddenPrefix := FunctionGroup + "/"
 	errorMessage := fmt.Sprintf("label from domain %s is not allowed", FunctionGroup)
 	allErrs := field.ErrorList{}
-	for k, _ := range labels {
+	for k := range labels {
 		if strings.HasPrefix(k, forbiddenPrefix) {
 			allErrs = append(allErrs, field.Invalid(fieldPath, k, errorMessage))
 		}
