@@ -87,7 +87,7 @@ async function verifyIstioAccessLogFormat(startTimestamp) {
   verifyLogAttributeIsPresent('upstream_local_address', log);
   verifyLogAttributeIsPresent('downstream_local_address', log);
   verifyLogAttributeIsPresent('downstream_remote_address', log);
-  verifyLogAttributeIsPresent('requested_server_name'), log;
+  verifyLogAttributeIsPresent('requested_server_name', log);
   verifyLogAttributeIsPresent('route_name', log);
   verifyLogAttributeIsPresent('traceparent', log);
   verifyLogAttributeIsPresent('tracestate', log);
