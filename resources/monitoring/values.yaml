@@ -108,7 +108,7 @@ additionalPrometheusRulesMap: {}
 global:
   domainName: "kyma.example.com"
   containerRegistry:
-    path: eu.gcr.io/kyma-project
+    path: europe-docker.pkg.dev/kyma-project
   images:
     prometheus_operator:
       name: "prometheus-operator"
@@ -142,16 +142,16 @@ global:
     node_exporter:
       name: "node-exporter"
       version: "1.5.0-945764ea"
-      directory: "tpi"
+      directory: "prod/tpi"
     kube_state_metrics:
       name: "kube-state-metrics"
       version: "2.8.1-a3475b24"
-      directory: "tpi"
+      directory: "prod/tpi"
       sha: ""
     grafana:
       name: "grafana"
       version: "7.5.17-1c0ae577"
-      directory: "tpi"
+      directory: "prod/tpi"
       sha: ""
     busybox:
       name: "busybox"
@@ -161,12 +161,12 @@ global:
     k8s_sidecar:
       name: "k8s-sidecar"
       version: "1.15.9-945764ea"
-      directory: "tpi"
+      directory: "prod/tpi"
       sha: ""
     oauth2_proxy:
       name: "oauth2-proxy"
       version: "7.4.0-945764ea"
-      directory: "tpi"
+      directory: "prod/tpi"
       sha: ""
 
   istio:
