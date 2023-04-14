@@ -21,6 +21,7 @@
       "area/monitoring": "Monitoring",
       "area/logging": "Logging",
       "area/tracing": "Tracing",
+      "area/telemetry": "Telemetry",
       "area/console": "Console",
       "area/luigi": "Luigi",
       "area/documentation": "Documentation",
