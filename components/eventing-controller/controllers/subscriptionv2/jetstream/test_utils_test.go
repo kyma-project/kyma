@@ -32,7 +32,6 @@ import (
 	cleanerv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
-	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
 	sinkv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink/v2"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	v1 "github.com/kyma-project/kyma/components/eventing-controller/testing"
@@ -166,7 +165,7 @@ func startReconciler() error {
 		return err
 	}
 
-	envConf := backendnats.Config{
+	envConf := jetstreamv2.Config{
 		URL:                     jsTestEnsemble.NatsServer.ClientURL(),
 		MaxReconnects:           MaxReconnects,
 		ReconnectWait:           time.Second,
@@ -178,7 +177,6 @@ func startReconciler() error {
 		JSStreamMaxBytes:        "-1",
 		JSStreamMaxMessages:     -1,
 		JSStreamRetentionPolicy: "interest",
-		EnableNewCRDVersion:     true,
 	}
 
 	// init the metrics collector

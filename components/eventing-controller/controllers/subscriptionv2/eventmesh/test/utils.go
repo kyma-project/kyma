@@ -254,7 +254,6 @@ func getEnvConfig() env.Config {
 		EventTypePrefix:          reconcilertesting.EventMeshPrefix,
 		BEBNamespace:             reconcilertesting.EventMeshNamespaceNS,
 		Qos:                      string(eventMeshtypes.QosAtLeastOnce),
-		EnableNewCRDVersion:      true,
 	}
 }
 

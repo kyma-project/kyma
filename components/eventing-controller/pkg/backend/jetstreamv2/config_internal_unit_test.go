@@ -9,29 +9,28 @@ import (
 	"testing"
 	"time"
 
-	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestUnitValidate_For_Errors(t *testing.T) {
 	tests := []struct {
 		name        string
-		givenConfig backendnats.Config
+		givenConfig Config
 		wantError   error
 	}{
 		{
 			name:        "ErrorEmptyStream",
-			givenConfig: backendnats.Config{JSStreamName: ""},
+			givenConfig: Config{JSStreamName: ""},
 			wantError:   ErrEmptyStreamName,
 		},
 		{
 			name:        "ErrorStreamToLong",
-			givenConfig: backendnats.Config{JSStreamName: fixtureStreamNameTooLong()},
+			givenConfig: Config{JSStreamName: fixtureStreamNameTooLong()},
 			wantError:   ErrStreamNameTooLong,
 		},
 		{
 			name: "ErrorStorageType",
-			givenConfig: backendnats.Config{
+			givenConfig: Config{
 				JSStreamName:        "not-empty",
 				JSStreamStorageType: "invalid-storage-type",
 			},
@@ -39,7 +38,7 @@ func TestUnitValidate_For_Errors(t *testing.T) {
 		},
 		{
 			name: "ErrorRetentionPolicy",
-			givenConfig: backendnats.Config{
+			givenConfig: Config{
 				JSStreamName:            "not-empty",
 				JSStreamStorageType:     StorageTypeMemory,
 				JSStreamRetentionPolicy: "invalid-retention-policy",
@@ -48,7 +47,7 @@ func TestUnitValidate_For_Errors(t *testing.T) {
 		},
 		{
 			name: "ErrorDiscardPolicy",
-			givenConfig: backendnats.Config{
+			givenConfig: Config{
 				JSStreamName:            "not-empty",
 				JSStreamStorageType:     StorageTypeMemory,
 				JSStreamRetentionPolicy: RetentionPolicyInterest,
@@ -74,7 +73,7 @@ func Test_GetNATSConfig(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		want    backendnats.Config
+		want    Config
 		wantErr bool
 	}{
 		{name: "Empty env triggers error",
@@ -91,7 +90,7 @@ func Test_GetNATSConfig(t *testing.T) {
 				maxReconnects: 1,
 				reconnectWait: 1 * time.Second,
 			},
-			want: backendnats.Config{
+			want: Config{
 				URL:                     "natsurl",
 				MaxReconnects:           1,
 				ReconnectWait:           1 * time.Second,
@@ -109,7 +108,6 @@ func Test_GetNATSConfig(t *testing.T) {
 				JSStreamMaxBytes:        "-1",
 				JSConsumerDeliverPolicy: "new",
 				JSStreamDiscardPolicy:   "new",
-				EnableNewCRDVersion:     false,
 			},
 			wantErr: false,
 		},
@@ -130,13 +128,12 @@ func Test_GetNATSConfig(t *testing.T) {
 					"JS_STREAM_MAX_MSGS":         "5",
 					"JS_STREAM_MAX_BYTES":        "6",
 					"JS_CONSUMER_DELIVER_POLICY": "jcdp",
-					"ENABLE_NEW_CRD_VERSION":     "true",
 					"JS_STREAM_DISCARD_POLICY":   "jsdp",
 				},
 				maxReconnects: 1,
 				reconnectWait: 1 * time.Second,
 			},
-			want: backendnats.Config{
+			want: Config{
 				URL:                     "natsurl",
 				MaxReconnects:           1,
 				ReconnectWait:           1 * time.Second,
@@ -153,7 +150,6 @@ func Test_GetNATSConfig(t *testing.T) {
 				JSStreamMaxMessages:     5,
 				JSStreamMaxBytes:        "6",
 				JSConsumerDeliverPolicy: "jcdp",
-				EnableNewCRDVersion:     true,
 				JSStreamDiscardPolicy:   "jsdp",
 			},
 			wantErr: false,
@@ -179,7 +175,7 @@ func Test_GetNATSConfig(t *testing.T) {
 				t.Setenv(k, v)
 			}
 
-			got, err := backendnats.GetNATSConfig(tt.args.maxReconnects, tt.args.reconnectWait)
+			got, err := GetNATSConfig(tt.args.maxReconnects, tt.args.reconnectWait)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetNATSConfig() error = %v, wantErr %v", err, tt.wantErr)
 				return

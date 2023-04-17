@@ -337,7 +337,7 @@ func getBEBEnvVars(publisherConfig env.PublisherConfig) []v1.EnvVar {
 		},
 		{
 			Name:  "ENABLE_NEW_CRD_VERSION",
-			Value: strconv.FormatBool(publisherConfig.EnableNewCRDVersion),
+			Value: strconv.FormatBool(true),
 		},
 	}
 }
@@ -362,7 +362,7 @@ func getNATSEnvVars(natsConfig backendnats.Config, publisherConfig env.Publisher
 		},
 		// JetStream-specific config
 		{Name: "JS_STREAM_NAME", Value: natsConfig.JSStreamName},
-		{Name: "ENABLE_NEW_CRD_VERSION", Value: strconv.FormatBool(publisherConfig.EnableNewCRDVersion)},
+		{Name: "ENABLE_NEW_CRD_VERSION", Value: strconv.FormatBool(true)},
 	}
 }
 
