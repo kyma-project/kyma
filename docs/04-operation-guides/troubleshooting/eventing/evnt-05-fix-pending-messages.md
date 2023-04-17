@@ -41,7 +41,13 @@ echo -n "tunas-testing/test-noapp3/kyma.noapp.order.created.v1" | md5
 
 this shell command results in `ebcabfe5c902612f0ba3ebde7653f30b`.
 
-4. Then, you need to find consumer's leader:
+4. You must port-forward to a NATS replica:
+
+```bash
+kubectl port-forward -n kyma-system eventing-nats-0 4222  
+```
+
+5. Then, you need to find consumer's leader:
 
 ```bash
 nats consumer info sap ebcabfe5c902612f0ba3ebde7653f30b
@@ -68,14 +74,20 @@ You can see, that its leader is the `eventing-nats-1` replica.
 
 #### Find the broken consumers using the NATS cli
 
+You must port-forward to a NATS replica:
+
+```bash
+kubectl port-forward -n kyma-system eventing-nats-0 4222  
+```
+
 If you have NATS cli installed on your machine, you can simply run this shell script:
 
-   ```bash
-   for consumer in $(nats consumer list -n sap) # sap is the stream name
-   do
-     nats consumer info sap $consumer -j | jq -c '{name: .name, pending: .num_pending, leader: .cluster.leader}'
-   done
-   ```
+```bash
+for consumer in $(nats consumer list -n sap) # sap is the stream name
+do
+  nats consumer info sap $consumer -j | jq -c '{name: .name, pending: .num_pending, leader: .cluster.leader}'
+done
+```
 
 You must get the following output:
 
