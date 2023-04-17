@@ -1,6 +1,6 @@
 const execa = require('execa');
 const fs = require('fs');
-var stream = require('stream');
+const stream = require('stream');
 const {
   getEnvOrThrow,
   debug,
@@ -134,10 +134,10 @@ class KCPWrapper {
   async upgradeKyma(instanceID, kymaUpgradeVersion, upgradeTimeoutMin = 30) {
     const args = ['upgrade', 'kyma', `--version=${kymaUpgradeVersion}`, '--target', `instance-id=${instanceID}`];
     try {
-      console.log('Executing kcp upgrade')
+      console.log('Executing kcp upgrade');
       const res = await this.exec(args, true, true);
 
-      console.log('Checking orchestration')
+      console.log('Checking orchestration');
       // output if successful:
       // "Note: Ignore sending slack notification when slackAPIURL is empty\n" +
       // "OrchestrationID: 22f19856-679b-4e68-b533-f1a0a46b1eed"
@@ -149,7 +149,7 @@ class KCPWrapper {
       debug(`OrchestrationID: ${orchestrationID}`);
 
       try {
-        console.log('Ensure execution suceeded')
+        console.log('Ensure execution suceeded');
         const orchestrationStatus = await this.ensureOrchestrationSucceeded(orchestrationID, upgradeTimeoutMin);
         return orchestrationStatus;
       } catch (error) {
@@ -157,7 +157,7 @@ class KCPWrapper {
       }
 
       try {
-        console.log('Check runtime status')
+        console.log('Check runtime status');
         const runtime = await this.runtimes({instanceID: instanceID});
         debug(`Runtime Status: ${inspect(runtime, false, null, false)}`);
       } catch (error) {
@@ -165,7 +165,7 @@ class KCPWrapper {
       }
 
       try {
-        console.log('Check orchestration')
+        console.log('Check orchestration');
         const orchestration = await this.getOrchestrationStatus(orchestrationID);
         debug(`Orchestration Status: ${inspect(orchestration, false, null, false)}`);
       } catch (error) {
@@ -173,7 +173,7 @@ class KCPWrapper {
       }
 
       try {
-        console.log('Check operations')
+        console.log('Check operations');
         const operations = await this.getOrchestrationsOperations(orchestrationID);
         debug(`Operations: ${inspect(operations, false, null, false)}`);
       } catch (error) {
@@ -356,19 +356,19 @@ class KCPWrapper {
       // debug([`>  kcp`, defaultArgs.concat(args).join(" ")].join(" "))
       const subprocess = execa('kcp', defaultArgs.concat(args), {stdio: 'pipe'});
 
-      if(pipeStdout) {
+      if ( pipeStdout ) {
         subprocess.stdout.pipe(process.stdout);
       }
 
-      if(sendYes) {
-        var inStream = new stream.Readable();
-        inStream.push('Y');  
-        inStream.push(null);   
+      if ( sendYes ) {
+        const inStream = new stream.Readable();
+        inStream.push('Y');
+        inStream.push(null);
         inStream.pipe(subprocess.stdin);
       }
 
-      const output = await subprocess
-      
+      const output = await subprocess;
+       
       return output.stdout;
     } catch (err) {
       if (err.stderr === undefined) {
