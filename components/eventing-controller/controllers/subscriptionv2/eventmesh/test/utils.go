@@ -32,10 +32,9 @@ import (
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	eventmeshreconciler "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscriptionv2/eventmesh"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-	backendbeb "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/beb"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 	backendeventmesh "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventmesh"
-	sink "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink/v2"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
 	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 	eventMeshtypes "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
@@ -139,12 +138,12 @@ func setupSuite() error {
 	}
 
 	// setup nameMapper for EventMesh
-	emTestEnsemble.nameMapper = backendutils.NewBEBSubscriptionNameMapper(domain, backendbeb.MaxBEBSubscriptionNameLength)
+	emTestEnsemble.nameMapper = backendutils.NewBEBSubscriptionNameMapper(domain, backendeventmesh.MaxSubscriptionNameLength)
 
 	// setup eventMesh reconciler
 	recorder := k8sManager.GetEventRecorderFor("eventing-controller")
 	sinkValidator := sink.NewValidator(context.Background(), k8sManager.GetClient(), recorder)
-	credentials := &backendbeb.OAuth2ClientCredentials{
+	credentials := &backendeventmesh.OAuth2ClientCredentials{
 		ClientID:     "foo-client-id",
 		ClientSecret: "foo-client-secret",
 	}

@@ -1,7 +1,7 @@
 package jetstreamv2
 
 import (
-	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	pkgerrors "github.com/kyma-project/kyma/components/eventing-controller/pkg/errors"
 	"github.com/nats-io/nats.go"
 )
@@ -12,10 +12,10 @@ type Builder interface {
 
 // ConnectionBuilder helps in establishing a connection to NATS.
 type ConnectionBuilder struct {
-	config backendnats.Config
+	config env.NATSConfig
 }
 
-func NewConnectionBuilder(config backendnats.Config) Builder {
+func NewConnectionBuilder(config env.NATSConfig) Builder {
 	return ConnectionBuilder{config: config}
 }
 

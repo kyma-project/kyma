@@ -15,7 +15,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
-	sinkv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink/v2"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
 	backendutilsv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils/v2"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 	"go.uber.org/zap"
@@ -44,12 +44,12 @@ type Reconciler struct {
 	recorder            record.EventRecorder
 	logger              *logger.Logger
 	cleaner             cleaner.Cleaner
-	sinkValidator       sinkv2.Validator
+	sinkValidator       sink.Validator
 	customEventsChannel chan event.GenericEvent
 }
 
 func NewReconciler(ctx context.Context, client client.Client, jsBackend jetstream.Backend, logger *logger.Logger,
-	recorder record.EventRecorder, cleaner cleaner.Cleaner, defaultSinkValidator sinkv2.Validator) *Reconciler {
+	recorder record.EventRecorder, cleaner cleaner.Cleaner, defaultSinkValidator sink.Validator) *Reconciler {
 	reconciler := &Reconciler{
 		Client:              client,
 		ctx:                 ctx,

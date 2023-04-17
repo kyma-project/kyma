@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"os"
 
-	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
 	pkgerrors "github.com/kyma-project/kyma/components/eventing-controller/pkg/errors"
 	"golang.org/x/xerrors"
 
@@ -79,7 +78,7 @@ type Reconciler struct {
 	client.Client
 	ctx               context.Context
 	natsSubMgr        subscriptionmanager.Manager
-	natsConfig        backendnats.Config
+	natsConfig        env.NATSConfig
 	natsSubMgrStarted bool
 	bebSubMgr         subscriptionmanager.Manager
 	bebSubMgrStarted  bool
@@ -93,7 +92,7 @@ type Reconciler struct {
 	oauth2ClientSecret []byte
 }
 
-func NewReconciler(ctx context.Context, natsSubMgr subscriptionmanager.Manager, natsConfig backendnats.Config,
+func NewReconciler(ctx context.Context, natsSubMgr subscriptionmanager.Manager, natsConfig env.NATSConfig,
 	bebSubMgr subscriptionmanager.Manager, client client.Client, logger *logger.Logger,
 	recorder record.EventRecorder) *Reconciler {
 	cfg := env.GetBackendConfig()
@@ -118,10 +117,8 @@ func NewReconciler(ctx context.Context, natsSubMgr subscriptionmanager.Manager, 
 // +kubebuilder:rbac:groups="",resources=pods,verbs=get;list;watch;delete
 
 func (r *Reconciler) Reconcile(ctx context.Context, _ ctrl.Request) (ctrl.Result, error) {
-	if r.natsConfig.EnableNewCRDVersion {
-		if err := r.updateMutatingValidatingWebhookWithCABundle(ctx); err != nil {
-			return ctrl.Result{}, err
-		}
+	if err := r.updateMutatingValidatingWebhookWithCABundle(ctx); err != nil {
+		return ctrl.Result{}, err
 	}
 
 	// Create NATS Secret for the eventing-nats statefulset

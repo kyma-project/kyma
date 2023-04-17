@@ -40,7 +40,7 @@ const (
 	originalTypeHeaderName = "originaltype"
 )
 
-func NewJetStream(config Config, metricsCollector *backendmetrics.Collector,
+func NewJetStream(config env.NATSConfig, metricsCollector *backendmetrics.Collector,
 	cleaner cleaner.Cleaner, subsConfig env.DefaultSubscriptionConfig, logger *logger.Logger) *JetStream {
 	return &JetStream{
 		Config:           config,
@@ -301,7 +301,7 @@ func (js *JetStream) initJSContext() error {
 	return nil
 }
 
-func (js *JetStream) initCloudEventClient(config Config) error {
+func (js *JetStream) initCloudEventClient(config env.NATSConfig) error {
 	if js.client != nil {
 		return nil
 	}

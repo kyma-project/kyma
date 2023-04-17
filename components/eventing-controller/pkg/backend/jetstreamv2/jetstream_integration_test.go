@@ -685,9 +685,9 @@ func TestJetStream_ServerAndSinkRestart(t *testing.T) {
 	require.NoError(t, newSubscriber.CheckEvent(expectedEv2Data))
 }
 
-func defaultNATSConfig(url string, port int) Config {
+func defaultNATSConfig(url string, port int) env.NATSConfig {
 	streamName := fmt.Sprintf("%s%d", DefaultStreamName, port)
-	return Config{
+	return env.NATSConfig{
 		URL:                     url,
 		MaxReconnects:           DefaultMaxReconnects,
 		ReconnectWait:           3 * time.Second,

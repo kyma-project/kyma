@@ -26,10 +26,9 @@ import (
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/subscriptionv2/eventmesh"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-	backendbeb "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/beb"
 	backendeventmesh "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventmesh"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
-	sinkv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink/v2"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 	backendutilsv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils/v2"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
@@ -107,10 +106,10 @@ func (c *SubscriptionManager) Start(_ env.DefaultSubscriptionConfig, params subs
 
 	// Need to read env to read BEB related secrets
 	c.envCfg = env.GetConfig()
-	nameMapper := utils.NewBEBSubscriptionNameMapper(strings.TrimSpace(c.envCfg.Domain), backendbeb.MaxBEBSubscriptionNameLength)
+	nameMapper := utils.NewBEBSubscriptionNameMapper(strings.TrimSpace(c.envCfg.Domain), backendeventmesh.MaxSubscriptionNameLength)
 	ctrl.Log.WithName("BEB-subscription-manager").Info("using BEB name mapper",
 		"domainName", c.envCfg.Domain,
-		"maxNameLength", backendbeb.MaxBEBSubscriptionNameLength)
+		"maxNameLength", backendeventmesh.MaxSubscriptionNameLength)
 
 	client := c.mgr.GetClient()
 	recorder := c.mgr.GetEventRecorderFor("eventing-controller-beb")
@@ -132,7 +131,7 @@ func (c *SubscriptionManager) Start(_ env.DefaultSubscriptionConfig, params subs
 		eventMeshHandler,
 		oauth2credential,
 		nameMapper,
-		sinkv2.NewValidator(ctx, client, recorder),
+		sink.NewValidator(ctx, client, recorder),
 	)
 	c.eventMeshBackend = eventMeshReconciler.Backend
 	if err := eventMeshReconciler.SetupUnmanaged(c.mgr); err != nil {
@@ -244,7 +243,7 @@ func cleanupEventMesh(backend backendeventmesh.Backend, dynamicClient dynamic.In
 	return nil
 }
 
-func getOAuth2ClientCredentials(params subscriptionmanager.Params) (*backendbeb.OAuth2ClientCredentials, error) {
+func getOAuth2ClientCredentials(params subscriptionmanager.Params) (*backendeventmesh.OAuth2ClientCredentials, error) {
 	val := params["client_id"]
 	id, ok := val.([]byte)
 	if !ok {
@@ -255,7 +254,7 @@ func getOAuth2ClientCredentials(params subscriptionmanager.Params) (*backendbeb.
 	if !ok {
 		return nil, fmt.Errorf("expected []byte value for client_secret, but received %T", val)
 	}
-	return &backendbeb.OAuth2ClientCredentials{
+	return &backendeventmesh.OAuth2ClientCredentials{
 		ClientID:     string(id),
 		ClientSecret: string(secret),
 	}, nil

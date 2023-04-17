@@ -10,6 +10,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/subscriptionv2/jetstream"
 
 	"github.com/avast/retry-go/v3"
@@ -32,7 +34,6 @@ import (
 	cleanerv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
-	sinkv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink/v2"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	v1 "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	v2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
@@ -165,7 +166,7 @@ func startReconciler() error {
 		return err
 	}
 
-	envConf := jetstreamv2.Config{
+	envConf := env.NATSConfig{
 		URL:                     jsTestEnsemble.NatsServer.ClientURL(),
 		MaxReconnects:           MaxReconnects,
 		ReconnectWait:           time.Second,
@@ -200,7 +201,7 @@ func startReconciler() error {
 		defaultLogger,
 		recorder,
 		cleaner,
-		sinkv2.NewValidator(ctx, k8sClient, recorder),
+		sink.NewValidator(ctx, k8sClient, recorder),
 	)
 
 	if err := jsTestEnsemble.Reconciler.SetupUnmanaged(k8sManager); err != nil {

@@ -6,9 +6,10 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+
 	"github.com/pkg/errors"
 
-	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
 	pkgerrors "github.com/kyma-project/kyma/components/eventing-controller/pkg/errors"
 	"github.com/nats-io/nats.go"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -121,7 +122,7 @@ func toJetStreamConsumerDeliverPolicy(deliverPolicy string) nats.DeliverPolicy {
 	return nats.DeliverNewPolicy
 }
 
-func getStreamConfig(natsConfig backendnats.Config) (*nats.StreamConfig, error) {
+func getStreamConfig(natsConfig env.NATSConfig) (*nats.StreamConfig, error) {
 	storage, err := toJetStreamStorageType(natsConfig.JSStreamStorageType)
 	if err != nil {
 		return nil, err

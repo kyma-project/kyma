@@ -4,13 +4,14 @@ import (
 	"context"
 	"log"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+
 	"github.com/go-logr/zapr"
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/backend"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/options"
-	backendjetstream "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2"
 	backendmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager/beb"
@@ -52,7 +53,7 @@ func main() {
 
 	var natsSubMgr subscriptionmanager.Manager
 
-	natsConfig, err := backendjetstream.GetNATSConfig(opts.MaxReconnects, opts.ReconnectWait)
+	natsConfig, err := env.GetNATSConfig(opts.MaxReconnects, opts.ReconnectWait)
 	if err != nil {
 		setupLogger.Fatalw("Failed to load configuration", "error", err)
 	}

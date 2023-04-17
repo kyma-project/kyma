@@ -12,7 +12,6 @@ import (
 
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-	backendbebv1 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/beb"
 	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 	PublisherManagerMock "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/client/mocks"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
@@ -27,7 +26,7 @@ func Test_getProcessedEventTypes(t *testing.T) {
 	require.NoError(t, err)
 
 	nameMapper := backendutils.NewBEBSubscriptionNameMapper("mydomain.com",
-		maxSubscriptionNameLength)
+		MaxSubscriptionNameLength)
 
 	// cases
 	testCases := []struct {
@@ -143,7 +142,7 @@ func Test_getProcessedEventTypes(t *testing.T) {
 			t.Parallel()
 
 			// given
-			eventMesh := NewEventMesh(&backendbebv1.OAuth2ClientCredentials{}, nameMapper, defaultLogger)
+			eventMesh := NewEventMesh(&OAuth2ClientCredentials{}, nameMapper, defaultLogger)
 			emCleaner := cleaner.NewEventMeshCleaner(defaultLogger)
 			err = eventMesh.Initialize(env.Config{EventTypePrefix: tc.givenEventTypePrefix})
 			require.NoError(t, err)
@@ -166,7 +165,7 @@ func Test_handleKymaSubModified(t *testing.T) {
 	require.NoError(t, err)
 
 	nameMapper := backendutils.NewBEBSubscriptionNameMapper("mydomain.com",
-		maxSubscriptionNameLength)
+		MaxSubscriptionNameLength)
 
 	// cases
 	testCases := []struct {
@@ -260,7 +259,7 @@ func Test_handleKymaSubModified(t *testing.T) {
 			t.Parallel()
 
 			// given
-			eventMesh := NewEventMesh(&backendbebv1.OAuth2ClientCredentials{}, nameMapper, defaultLogger)
+			eventMesh := NewEventMesh(&OAuth2ClientCredentials{}, nameMapper, defaultLogger)
 			// Set a mock client interface for EventMesh
 			mockClient := new(PublisherManagerMock.PublisherManager)
 			mockClient.On("Delete", tc.givenEventMeshSub.Name).Return(tc.givenClientDeleteResponse, nil)
@@ -284,7 +283,7 @@ func Test_handleEventMeshSubModified(t *testing.T) {
 	require.NoError(t, err)
 
 	nameMapper := backendutils.NewBEBSubscriptionNameMapper("mydomain.com",
-		maxSubscriptionNameLength)
+		MaxSubscriptionNameLength)
 
 	// cases
 	testCases := []struct {
@@ -378,7 +377,7 @@ func Test_handleEventMeshSubModified(t *testing.T) {
 			t.Parallel()
 
 			// given
-			eventMesh := NewEventMesh(&backendbebv1.OAuth2ClientCredentials{}, nameMapper, defaultLogger)
+			eventMesh := NewEventMesh(&OAuth2ClientCredentials{}, nameMapper, defaultLogger)
 			// Set a mock client interface for EventMesh
 			mockClient := new(PublisherManagerMock.PublisherManager)
 			mockClient.On("Delete", tc.givenEventMeshSub.Name).Return(tc.givenClientDeleteResponse, nil)
@@ -402,7 +401,7 @@ func Test_handleCreateEventMeshSub(t *testing.T) {
 	require.NoError(t, err)
 
 	nameMapper := backendutils.NewBEBSubscriptionNameMapper("mydomain.com",
-		maxSubscriptionNameLength)
+		MaxSubscriptionNameLength)
 
 	// cases
 	testCases := []struct {
@@ -474,7 +473,7 @@ func Test_handleCreateEventMeshSub(t *testing.T) {
 			t.Parallel()
 
 			// given
-			eventMesh := NewEventMesh(&backendbebv1.OAuth2ClientCredentials{}, nameMapper, defaultLogger)
+			eventMesh := NewEventMesh(&OAuth2ClientCredentials{}, nameMapper, defaultLogger)
 			// Set a mock client interface for EventMesh
 			mockClient := new(PublisherManagerMock.PublisherManager)
 			mockClient.On("Create", tc.givenEventMeshSub).Return(tc.givenClientCreateResponse, nil)
@@ -578,7 +577,7 @@ func Test_handleKymaSubStatusUpdate(t *testing.T) {
 }
 
 func Test_SyncSubscription(t *testing.T) {
-	credentials := &backendbebv1.OAuth2ClientCredentials{
+	credentials := &OAuth2ClientCredentials{
 		ClientID:     "foo-client-id",
 		ClientSecret: "foo-client-secret",
 	}
@@ -587,7 +586,7 @@ func Test_SyncSubscription(t *testing.T) {
 	require.NoError(t, err)
 
 	nameMapper := backendutils.NewBEBSubscriptionNameMapper("mydomain.com",
-		maxSubscriptionNameLength)
+		MaxSubscriptionNameLength)
 	eventMesh := NewEventMesh(credentials, nameMapper, defaultLogger)
 
 	// start BEB Mock

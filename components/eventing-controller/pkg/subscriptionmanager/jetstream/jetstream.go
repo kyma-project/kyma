@@ -4,8 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2"
-	sinkv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink/v2"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
 	backendutilsv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils/v2"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
@@ -31,7 +30,6 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
 	backendjetstreamv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2"
 	backendmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
-	backendjetstream "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats/jetstream"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
 )
@@ -61,18 +59,17 @@ func AddV1Alpha2ToScheme(scheme *runtime.Scheme) error {
 
 type SubscriptionManager struct {
 	cancel           context.CancelFunc
-	envCfg           backendnats.Config
+	envCfg           env.NATSConfig
 	restCfg          *rest.Config
 	metricsAddr      string
 	metricsCollector *backendmetrics.Collector
 	mgr              manager.Manager
-	backend          backendjetstream.Backend
 	backendv2        backendjetstreamv2.Backend
 	logger           *logger.Logger
 }
 
 // NewSubscriptionManager creates the subscription manager for JetStream.
-func NewSubscriptionManager(restCfg *rest.Config, natsConfig backendnats.Config, metricsAddr string,
+func NewSubscriptionManager(restCfg *rest.Config, natsConfig env.NATSConfig, metricsAddr string,
 	metricsCollector *backendmetrics.Collector, logger *logger.Logger) *SubscriptionManager {
 	return &SubscriptionManager{
 		envCfg:           natsConfig,
@@ -115,7 +112,7 @@ func (sm *SubscriptionManager) Start(defaultSubsConfig env.DefaultSubscriptionCo
 		sm.logger,
 		recorder,
 		jsCleaner,
-		sinkv2.NewValidator(ctx, client, recorder),
+		sink.NewValidator(ctx, client, recorder),
 	)
 	sm.backendv2 = jetStreamReconciler.Backend
 

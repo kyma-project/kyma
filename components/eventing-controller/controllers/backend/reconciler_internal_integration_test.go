@@ -12,8 +12,6 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2"
-
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -111,7 +109,7 @@ var _ = BeforeSuite(func(done Done) {
 	Expect(err).To(BeNil())
 
 	// populate with required env variables
-	natsConfig := backendnats.Config{
+	natsConfig := env.NATSConfig{
 		EventTypePrefix: reconcilertesting.EventTypePrefix,
 		JSStreamName:    reconcilertesting.JSStreamName,
 	}

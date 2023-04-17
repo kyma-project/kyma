@@ -5,11 +5,11 @@ package jetstreamv2
 import (
 	"testing"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+
 	cev2 "github.com/cloudevents/sdk-go/v2/event"
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
-
 	jetstreamv2mocks "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2/mocks"
 	"github.com/nats-io/nats.go"
 
@@ -728,7 +728,7 @@ func Test_revertEventTypeToOriginal(t *testing.T) {
 	require.NoError(t, err)
 
 	jsBackend := &JetStream{
-		Config: backendnats.Config{
+		Config: env.NATSConfig{
 			JSSubjectPrefix: "kyma",
 		},
 		logger: defaultLogger,

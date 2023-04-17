@@ -39,7 +39,7 @@ type Backend interface {
 }
 
 type JetStream struct {
-	Config        Config
+	Config        env.NATSConfig
 	Conn          *nats.Conn
 	jsCtx         nats.JetStreamContext
 	client        cev2.Client

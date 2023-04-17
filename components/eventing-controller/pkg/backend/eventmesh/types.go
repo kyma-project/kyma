@@ -1,12 +1,6 @@
-package beb
+package eventmesh
 
-import (
-	"fmt"
-)
-
-const (
-	MaxBEBSubscriptionNameLength = 50
-)
+import "fmt"
 
 type HTTPStatusError struct {
 	StatusCode int

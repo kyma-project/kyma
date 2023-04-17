@@ -71,7 +71,7 @@ func (o *Options) Parse() error {
 
 // String implements the fmt.Stringer interface.
 func (o Options) String() string {
-	return fmt.Sprintf("--%s=%v --%s=%v --%s=%v --%s=%v --%s=%v --%s=%v --%s=%v %s=%v %s=%v %s=%v",
+	return fmt.Sprintf("--%s=%v --%s=%v --%s=%v --%s=%v --%s=%v --%s=%v %s=%v %s=%v %s=%v",
 		argNameMaxReconnects, o.MaxReconnects,
 		argNameMetricsAddr, o.MetricsAddr,
 		argNameReconnectWait, o.ReconnectWait,

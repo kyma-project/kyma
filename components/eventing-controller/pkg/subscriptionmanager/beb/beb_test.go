@@ -20,7 +20,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-	backendbeb "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/beb"
 	backendeventmesh "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventmesh"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/client"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
@@ -85,7 +84,7 @@ func Test_cleanupEventMesh(t *testing.T) {
 		BEBNamespace:             "/default/ns",
 		Qos:                      string(types.QosAtLeastOnce),
 	}
-	credentials := &backendbeb.OAuth2ClientCredentials{
+	credentials := &backendeventmesh.OAuth2ClientCredentials{
 		ClientID:     "webhook_client_id",
 		ClientSecret: "webhook_client_secret",
 	}
@@ -94,7 +93,7 @@ func Test_cleanupEventMesh(t *testing.T) {
 	require.NoError(t, err)
 
 	// create a EventMesh handler to connect to BEB Mock
-	nameMapper := utils.NewBEBSubscriptionNameMapper("mydomain.com", backendbeb.MaxBEBSubscriptionNameLength)
+	nameMapper := utils.NewBEBSubscriptionNameMapper("mydomain.com", backendeventmesh.MaxSubscriptionNameLength)
 	eventMeshHandler := backendeventmesh.NewEventMesh(credentials, nameMapper, defaultLogger)
 	err = eventMeshHandler.Initialize(envConf)
 	require.NoError(t, err)

@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	natstesting "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats/testing"
 	evtestingv2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
@@ -35,7 +37,7 @@ type TestEnvironment struct {
 	logger     *logger.Logger
 	natsServer *server.Server
 	jsClient   *jetStreamClient
-	natsConfig Config
+	natsConfig env.NATSConfig
 	cleaner    cleaner.Cleaner
 	natsPort   int
 }
