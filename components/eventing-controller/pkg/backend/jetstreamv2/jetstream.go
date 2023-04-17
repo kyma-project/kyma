@@ -37,7 +37,8 @@ const (
 	jsMaxStreamNameLength  = 32
 	idleHeartBeatDuration  = 1 * time.Minute
 	jsConsumerMaxRedeliver = 100
-	jsConsumerAcKWait      = 30 * time.Second
+	jsConsumerNakDelay     = 30 * time.Second
+	jsConsumerAckWait      = 30 * time.Second
 	originalTypeHeaderName = "originaltype"
 )
 
@@ -491,8 +492,13 @@ func (js *JetStream) getCallback(subKeyPrefix, subscriptionName string) nats.Msg
 
 			js.metricsCollector.RecordDeliveryPerSubscription(subscriptionName, ce.Type(), sink, status)
 			js.metricsCollector.RecordLatencyPerSubscription(duration, subscriptionName, ce.Type(), sink, status)
+
+			// NAK the msg with a delay so it is redelivered after jsConsumerNakDelay period.
+			if err := msg.NakWithDelay(jsConsumerNakDelay); err != nil {
+				js.namedLogger().Errorw("failed to NAK an event on JetStream")
+			}
+
 			ceLogger.Errorw("Failed to dispatch the CloudEvent", "error", result.Error())
-			// Do not NAK the msg so that the server waits for AckWait and then redeliver the msg.
 			return
 		}
 
