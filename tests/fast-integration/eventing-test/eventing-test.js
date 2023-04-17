@@ -46,12 +46,11 @@ const {
   waitForV1Alpha2Subscriptions,
   checkEventTracing,
   saveJetStreamDataForRecreateTest,
-  jetStreamTestConfigMapName,
+  jsRecreatedTestConfigMapName,
   getConfigMapWithRetries,
   checkStreamNotReCreated,
   checkConsumerNotReCreated,
   isUpgradeJob,
-  isUpgradeJob2ndReconcile,
   deployEventingSinkFunction,
   eventingUpgradeSinkName,
   waitForEventingSinkFunction,
@@ -60,6 +59,8 @@ const {
   checkFunctionUnreachable,
   publishEventWithRetry,
   debugBanner,
+  isJSRecreatedTestEnabled,
+  isJSAtLeastOnceDeliveryTestEnabled,
 } = require('./utils');
 const {
   bebBackend,
@@ -223,52 +224,78 @@ describe('Eventing tests', function() {
     });
   }
 
-  function jsSaveStreamAndConsumersDataSuite() {
-    context('save stream and consumer data', function() {
-      it('saving JetStream data to test stream and consumers will not be re-created by kyma upgrade', async function() {
-        if (!isUpgradeJob) {
-          debug(`Skipping saving JetStream test data into a configMap: ${jetStreamTestConfigMapName}`);
+  function jsTestStreamConsumerNotRecreatedTestSuite(upgradeStage='pre') {
+    // The test scenario is:
+    // 1. Before upgrade, save the stream and consumer creation timestamp in a configMap.
+    // 2. Upgrade the Kyma cluster.
+    // 3. After upgrade, fetch again the stream and consumer creation timestamp from NATS.
+    // 4. Compares the stream and consumer creation timestamp before and after upgrade.
+    // 5. If the timestamps are same, we conclude that the stream/consumer is not re-created.
+    // Note: It only checks consumer of first subscription (i.e. subscriptionsTypes[0]).
+    context('Test jetStream stream and consumer not re-created during kyma upgrade', function() {
+      before('Check if this is an upgrade job and test enabled', async function() {
+        if (!isUpgradeJob || !isJSRecreatedTestEnabled) {
+          debug(`Skipping jetStream stream and consumer not re-created test`);
+          debug(`isUpgradeJob: ${isUpgradeJob}, isJSRecreatedTestEnabled: ${isJSRecreatedTestEnabled}`);
           this.skip();
         }
-        debug(`Using NATS host: ${natsApiRuleVSHost}`);
-        await saveJetStreamDataForRecreateTest(natsApiRuleVSHost, jetStreamTestConfigMapName);
-      });
-    });
-  }
-
-  // jsStreamAndConsumersNotReCreatedTestSuite - compares the stream creation timestamp before and after upgrade
-  // and if the timestamp is the same, we conclude that the stream is not re-created.
-  // It also compares the consumers creation timestamp before and after upgrade
-  // and if the timestamp is the same, we conclude that the consumer is not re-created.
-  function jsStreamAndConsumersNotReCreatedTestSuite() {
-    context('stream and consumer not re-created check with NATS backend', function() {
-      let preUpgradeStreamData = null;
-      let preUpgradeConsumersData = null;
-
-      before('fetch eventing-js-test data configMap', async function() {
-        debug(`fetch configMap: ${jetStreamTestConfigMapName}...`);
-        const cm = await getConfigMapWithRetries(jetStreamTestConfigMapName, testNamespace);
-        if (!cm || !isUpgradeJob) {
-          debug(`Skipping stream and consumers not re-created check`);
-          this.skip();
-          return;
-        }
-
-        // if configMap is found, then check for re-creation
-        expect(cm.data).to.have.nested.property('stream');
-        expect(cm.data).to.have.nested.property('consumers');
-        preUpgradeStreamData = JSON.parse(cm.data.stream);
-        preUpgradeConsumersData = JSON.parse(cm.data.consumers);
       });
 
-      it('upgrade should not have re-created stream', async function() {
-        debug('Verifying that the stream was not re-created by the kyma upgrade...');
-        await checkStreamNotReCreated(natsApiRuleVSHost, preUpgradeStreamData);
+      context('Pre-upgrade tasks to save stream and consumer data', function() {
+        before('Check if this is pre-upgrade stage', async function() {
+          if (upgradeStage !== 'pre') {
+            debug(`Skipping pre-upgrade tasks...`);
+            this.skip();
+          }
+          debugBanner('Pre-upgrade tasks to save stream and consumer data');
+        });
+
+        it('saving JetStream data to test stream and consumers will not be re-created ' +
+            'by kyma upgrade', async function() {
+          debug(`Using NATS host: ${natsApiRuleVSHost}`);
+          await saveJetStreamDataForRecreateTest(natsApiRuleVSHost, jsRecreatedTestConfigMapName);
+        });
       });
 
-      it('upgrade should not have re-created consumers', async function() {
-        debug('Verifying that the consumers were not re-created by the kyma upgrade...');
-        await checkConsumerNotReCreated(natsApiRuleVSHost, preUpgradeConsumersData);
+      context('Post-upgrade tasks to verify that stream and consumer not re-created ' +
+          'check with NATS backend', function() {
+        let preUpgradeStreamData = null;
+        let preUpgradeConsumersData = null;
+
+        before('Check if this is post-upgrade stage', async function() {
+          if (upgradeStage !== 'post') {
+            debug(`Skipping post-upgrade tasks...`);
+            this.skip();
+          }
+          debugBanner('Post-upgrade tasks to verify that stream and consumer not re-created check with NATS backend');
+        });
+
+        before('fetch data stream and consumer data from configMap', async function() {
+          debug(`fetch configMap: ${jsRecreatedTestConfigMapName}...`);
+          const cm = await getConfigMapWithRetries(jsRecreatedTestConfigMapName, testNamespace);
+          if (!cm) {
+            // TODO: Remove this once these changes are migrated to release-branch
+            debug(`Skipping stream and consumers not re-created check because configMap was not found!`);
+            this.skip();
+            return;
+          }
+
+          // if configMap is found, then check for re-creation
+          expect(cm.data).to.have.nested.property('stream');
+          expect(cm.data).to.have.nested.property('consumers');
+          preUpgradeStreamData = JSON.parse(cm.data.stream);
+          preUpgradeConsumersData = JSON.parse(cm.data.consumers);
+        });
+
+        it('upgrade should not have re-created stream', async function() {
+          debug('Verifying that the stream was not re-created by the kyma upgrade...');
+          await checkStreamNotReCreated(natsApiRuleVSHost, preUpgradeStreamData);
+        });
+
+        it('upgrade should not have re-created consumers', async function() {
+          debug('Verifying that the consumers were not re-created by the kyma upgrade...');
+          await checkConsumerNotReCreated(natsApiRuleVSHost, preUpgradeConsumersData);
+        });
       });
     });
   }
@@ -294,10 +321,11 @@ describe('Eventing tests', function() {
             testNamespace),
       ];
 
-      before('Check if this is an upgrade job', async function() {
-        if (!isUpgradeJob || isUpgradeJob2ndReconcile) {
-          debug(`Skipping jetStream at-least once delivery test`);
-          debug(`isUpgradeJob: ${isUpgradeJob}, isUpgradeJob2ndReconcile: ${isUpgradeJob2ndReconcile}`);
+      before('Check if this is an upgrade job and test enabled', async function() {
+        if (!isUpgradeJob || !isJSAtLeastOnceDeliveryTestEnabled) {
+          debug(`Skipping jetStream at-least once delivery during upgrade test`);
+          debug(`isUpgradeJob: ${isUpgradeJob}, 
+          isJSAtLeastOnceDeliveryTestEnabled: ${isJSAtLeastOnceDeliveryTestEnabled}`);
           this.skip();
         }
       });
@@ -421,8 +449,8 @@ describe('Eventing tests', function() {
     // Running Eventing monitoring tests.
     eventingMonitoringTestSuite(natsBackend, isSKR);
 
-    // Running JetStream stream and consumers not re-created by upgrade tests.
-    jsStreamAndConsumersNotReCreatedTestSuite();
+    // Running JetStream stream and consumers not re-created by upgrade test.
+    jsTestStreamConsumerNotRecreatedTestSuite('post');
 
     // Running JetStream At-least Once delivery Test during Upgrade
     jsTestAtLeastOnceDeliveryTestSuite('post');
@@ -467,8 +495,8 @@ describe('Eventing tests', function() {
     // Running Eventing monitoring tests.
     eventingMonitoringTestSuite(natsBackend, isSKR);
 
-    // Record stream and consumer data for Kyma upgrade
-    jsSaveStreamAndConsumersDataSuite();
+    // Running stream and consumer not re-created by upgrade test
+    jsTestStreamConsumerNotRecreatedTestSuite('pre');
 
     // Running JetStream At-least Once delivery Test during Upgrade
     jsTestAtLeastOnceDeliveryTestSuite('pre');
