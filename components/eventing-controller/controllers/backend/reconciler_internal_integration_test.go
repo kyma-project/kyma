@@ -4,9 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/rand"
 	"path/filepath"
 	"testing"
 	"time"
+
+	admissionv1 "k8s.io/api/admissionregistration/v1"
 
 	"github.com/go-logr/zapr"
 	. "github.com/onsi/ginkgo"
@@ -71,6 +74,43 @@ func TestAPIs(t *testing.T) {
 var _ = BeforeSuite(func(done Done) {
 	By("bootstrapping test environment")
 	useExistingCluster := useExistingCluster
+
+	dummyCABundle := make([]byte, 20)
+	rand.Read(dummyCABundle)
+	newCABundle := make([]byte, 20)
+	rand.Read(newCABundle)
+
+	// setup dummy mutating webhook
+	url := "https://eventing-controller.kyma-system.svc.cluster.local"
+	sideEffectClassNone := admissionv1.SideEffectClassNone
+	mwh := getMutatingWebhookConfig([]admissionv1.MutatingWebhook{
+		{
+			Name: "reconciler.eventing.test",
+			ClientConfig: admissionv1.WebhookClientConfig{
+				URL:      &url,
+				CABundle: dummyCABundle,
+			},
+			SideEffects:             &sideEffectClassNone,
+			AdmissionReviewVersions: []string{"v1"},
+		},
+	})
+	mwh.Name = "subscription-mutating-webhook-configuration"
+
+	// setup dummy validating webhook
+	vwh := getValidatingWebhookConfig([]admissionv1.ValidatingWebhook{
+		{
+			Name: "reconciler2.eventing.test",
+			ClientConfig: admissionv1.WebhookClientConfig{
+				URL:      &url,
+				CABundle: dummyCABundle,
+			},
+			SideEffects:             &sideEffectClassNone,
+			AdmissionReviewVersions: []string{"v1"},
+		},
+	})
+	vwh.Name = "subscription-validating-webhook-configuration"
+
+	// define testEnv
 	testEnv = &envtest.Environment{
 		CRDDirectoryPaths: []string{
 			filepath.Join("../../", "config", "crd", "bases"),
@@ -78,6 +118,10 @@ var _ = BeforeSuite(func(done Done) {
 		},
 		AttachControlPlaneOutput: attachControlPlaneOutput,
 		UseExistingCluster:       &useExistingCluster,
+		WebhookInstallOptions: envtest.WebhookInstallOptions{
+			MutatingWebhooks:   []*admissionv1.MutatingWebhookConfiguration{mwh},
+			ValidatingWebhooks: []*admissionv1.ValidatingWebhookConfiguration{vwh},
+		},
 	}
 
 	var err error
@@ -97,6 +141,17 @@ var _ = BeforeSuite(func(done Done) {
 	k8sClient, err = client.New(cfg, client.Options{Scheme: scheme.Scheme})
 	Expect(err).NotTo(HaveOccurred())
 	Expect(k8sClient).ToNot(BeNil())
+
+	// create kyma-system namespace
+	ensureKymaSystemNamespaceCreated(context.Background())
+
+	// create secret for webhooks
+	caSecret := getSecretWithTLSSecret(newCABundle)
+	caSecret.Name = "eventing-webhook-server-cert"
+	err = k8sClient.Create(context.Background(), caSecret)
+	if !k8serrors.IsAlreadyExists(err) {
+		Expect(err).Should(BeNil())
+	}
 
 	syncPeriod := time.Second * 2
 	shutdownTimeout := time.Duration(0)
