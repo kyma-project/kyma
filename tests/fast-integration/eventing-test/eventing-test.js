@@ -270,7 +270,7 @@ describe('Eventing tests', function() {
           debugBanner('Post-upgrade tasks to verify that stream and consumer not re-created check with NATS backend');
         });
 
-        before('fetch data from configMap', async function() {
+        before('fetch data stream and consumer data from configMap', async function() {
           debug(`fetch configMap: ${jsRecreatedTestConfigMapName}...`);
           const cm = await getConfigMapWithRetries(jsRecreatedTestConfigMapName, testNamespace);
           if (!cm) {
