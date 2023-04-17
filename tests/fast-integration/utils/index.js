@@ -555,6 +555,21 @@ function waitForDeployment(name, namespace = 'default', timeout = 90_000) {
   );
 }
 
+function waitForService(name, namespace = 'default', timeout = 90_000) {
+  return waitForK8sObject(
+      `/apis/apps/v1/namespaces/${namespace}/service`,
+      {},
+      (_type, _apiObj, watchObj) => {
+        return (
+          watchObj.object.metadata.name === name &&
+          watchObj.object.clusterIP
+        );
+      },
+      timeout,
+      `Waiting for service ${name} timeout (${timeout} ms)`,
+  );
+}
+
 function waitForStatefulSet(name, namespace = 'default', timeout = 90_000) {
   return waitForK8sObject(
       `/apis/apps/v1/namespaces/${namespace}/statefulsets`,
@@ -1848,6 +1863,7 @@ module.exports = {
   waitForClusterAddonsConfiguration,
   waitForVirtualService,
   waitForDeployment,
+  waitForService,
   waitForDaemonSet,
   waitForStatefulSet,
   waitForTokenRequest,
