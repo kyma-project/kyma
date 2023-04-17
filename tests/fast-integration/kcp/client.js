@@ -368,7 +368,6 @@ class KCPWrapper {
       }
 
       const output = await subprocess;
-       
       return output.stdout;
     } catch (err) {
       if (err.stderr === undefined) {
