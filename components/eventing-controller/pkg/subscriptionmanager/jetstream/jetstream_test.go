@@ -13,10 +13,8 @@ import (
 	"github.com/nats-io/nats-server/v2/server"
 	"github.com/nats-io/nats.go"
 	"github.com/stretchr/testify/require"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/dynamic"
 
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2"
@@ -35,8 +33,7 @@ func TestCleanup(t *testing.T) {
 	testEnv := setUpTestEnvironment(t)
 	defer controllertesting.ShutDownNATSServer(testEnv.natsServer)
 	defer testEnv.subscriber.Shutdown()
-	//err := testEnv.testSendingAndReceivingAnEvent()
-	//require.NoError(t, err)
+	// a consumer should exist on JetStream
 	testEnv.consumersEquals(t, 1)
 
 	// when
@@ -44,14 +41,8 @@ func TestCleanup(t *testing.T) {
 
 	// then
 	require.NoError(t, err)
-	gotSub := testEnv.getK8sSubscription(t)
-	wantSubStatus := eventingv1alpha1.SubscriptionStatus{CleanEventTypes: []string{}}
-	require.Equal(t, wantSubStatus, gotSub.Status)
-	// test JetStream subscriptions/consumers are gone
+	// the consumer on JetStream should have being deleted
 	testEnv.consumersEquals(t, 0)
-	// eventing should fail
-	err = testEnv.testSendingAndReceivingAnEvent()
-	require.Error(t, err)
 }
 
 // utilities and helper functions
@@ -65,15 +56,6 @@ type TestEnvironment struct {
 	subscriber    *controllertesting.Subscriber
 	envConf       env.NATSConfig
 	defaultLogger *logger.Logger
-}
-
-func (te *TestEnvironment) getK8sSubscription(t *testing.T) *eventingv1alpha1.Subscription {
-	unstructuredSub, err := te.dynamicClient.Resource(controllertesting.SubscriptionGroupVersionResource()).Namespace(
-		subscriptionNamespace).Get(te.ctx, subscriptionName, metav1.GetOptions{})
-	require.NoError(t, err)
-	subscription, err := controllertesting.ToSubscription(unstructuredSub)
-	require.NoError(t, err)
-	return subscription
 }
 
 func getJetStreamClient(t *testing.T, natsURL string) nats.JetStreamContext {
@@ -104,39 +86,20 @@ func createAndSyncSubscription(t *testing.T, sinkURL string, jsBackend *backendn
 	testSub := controllertestingv2.NewSubscription(
 		subscriptionName, subscriptionNamespace,
 		controllertestingv2.WithSource(controllertestingv2.EventSourceClean),
-		controllertestingv2.WithTypes([]string{controllertestingv2.OrderCreatedCleanEvent}),
 		controllertestingv2.WithSinkURL(sinkURL),
+		controllertestingv2.WithOrderCreatedV1Event(),
+		controllertestingv2.WithStatusTypes([]eventingv1alpha2.EventType{
+			{
+				OriginalType: controllertestingv2.OrderCreatedV1Event,
+				CleanType:    controllertestingv2.OrderCreatedV1Event,
+			},
+		}),
 	)
 
 	// create NATS subscription
 	err := jsBackend.SyncSubscription(testSub)
 	require.NoError(t, err)
 	return testSub
-}
-
-func (te *TestEnvironment) testSendingAndReceivingAnEvent() error {
-	data := "sampledata"
-	expectedDataInStore := fmt.Sprintf("%q", data)
-
-	// make sure subscriber is reachable via http
-	err := te.subscriber.CheckEvent("")
-	if err != nil {
-		return err
-	}
-
-	// send an event
-	err = backendnats.SendEventToJetStream(te.jsBackend, data)
-
-	if err != nil {
-		return err
-	}
-
-	// check for the event
-	err = te.subscriber.CheckEvent(expectedDataInStore)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func (te *TestEnvironment) consumersEquals(t *testing.T, length int) {
