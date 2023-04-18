@@ -28,7 +28,7 @@ global:
     alpine:
       name: "alpine"
       version: "3.17.3"
-      directory: "external"
+      directory: "prod/external"
   kymaRuntime:
     adminGroup: runtimeAdmin
     operatorGroup: runtimeOperator
