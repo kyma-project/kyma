@@ -8,7 +8,7 @@ global:
       directory: "prod"
     telemetry_operator:
       name: "telemetry-manager"
-      version: "v20230405-3cb46dc7"
+      version: "v20230414-e04962ae"
       directory: "prod"
     telemetry_otel_collector:
       name: "otel-collector"
@@ -16,7 +16,7 @@ global:
       directory: "prod/tpi"
     fluent_bit:
       name: "fluent-bit"
-      version: "2.0.10-050eef31"
+      version: "2.0.11-f89ab2e3"
       directory: "prod/tpi"
   highPriorityClassName: "kyma-system-priority"
   log:

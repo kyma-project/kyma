@@ -42,7 +42,8 @@ const isSKR = process.env.KYMA_TYPE === 'SKR';
 const skrInstanceId = process.env.INSTANCE_ID || '';
 const testCompassFlow = process.env.TEST_COMPASS_FLOW === 'true';
 const isUpgradeJob = process.env.EVENTING_UPGRADE_JOB === 'true';
-const isUpgradeJob2ndReconcile = process.env.EVENTING_UPGRADE_2ND_RECONCILE_JOB === 'true';
+const isJSRecreatedTestEnabled = process.env.EVENTING_JS_RECREATED_TEST === 'true';
+const isJSAtLeastOnceDeliveryTestEnabled = process.env.EVENTING_JS_ATLEASTONCE_TEST === 'true';
 const skipResourceCleanup = process.env.SKIP_CLEANUP || false;
 const suffix = getSuffix(isSKR, testCompassFlow);
 const appName = `app-${suffix}`;
@@ -50,7 +51,7 @@ const testNamespace = `test-${suffix}`;
 const backendK8sSecretName = process.env.BACKEND_SECRET_NAME || 'eventing-backend';
 const backendK8sSecretNamespace = process.env.BACKEND_SECRET_NAMESPACE || 'default';
 const testDataConfigMapName = 'eventing-test-data';
-const jetStreamTestConfigMapName = 'jetstream-test-data';
+const jsRecreatedTestConfigMapName = 'eventing-fi-js-recreated-test';
 const eventingNatsSvcName = 'eventing-nats';
 const eventingNatsApiRuleAName = `${eventingNatsSvcName}-apirule`;
 const timeoutTime = 10 * 60 * 1000;
@@ -137,7 +138,7 @@ async function cleanupTestingResources() {
 
   debug('Removing JetStream data configmap');
   await deleteK8sConfigMap(testDataConfigMapName);
-  await deleteK8sConfigMap(jetStreamTestConfigMapName);
+  await deleteK8sConfigMap(jsRecreatedTestConfigMapName);
 
   debug(`Removing ${testNamespace} and mocks namespaces`);
   await cleanMockTestFixture('mocks', testNamespace, true);
@@ -571,6 +572,10 @@ async function getConfigMapWithRetries(name, namespace, retriesLeft = 10) {
   }, retriesLeft, 1000);
 }
 
+async function createK8sConfigMapWithRetries(data, name, namespace, retriesLeft = 10) {
+  return retryPromise(async () => createK8sConfigMap(data, name, namespace), retriesLeft, 1000);
+}
+
 async function getJetStreamStreamDataV2(host, streamName) {
   const responseJson = await retryPromise(async () => await axios.get(`https://${host}/jsz?streams=true`), 5, 1000);
   const streams = responseJson.data.account_details[0].stream_detail;
@@ -612,7 +617,7 @@ async function saveJetStreamDataForRecreateTest(host, configMapName) {
   };
 
   debug(`Saving fetched stream and consumers details in configMap (name: ${configMapName})...`);
-  await createK8sConfigMap(cmData, configMapName, testNamespace);
+  await createK8sConfigMapWithRetries(cmData, configMapName, testNamespace);
 }
 
 async function checkStreamNotReCreated(host, preUpgradeStreamData) {
@@ -668,13 +673,12 @@ module.exports = {
   kymaVersion,
   isSKR,
   isUpgradeJob,
-  isUpgradeJob2ndReconcile,
   skrInstanceId,
   testCompassFlow,
   backendK8sSecretName,
   backendK8sSecretNamespace,
   testDataConfigMapName,
-  jetStreamTestConfigMapName,
+  jsRecreatedTestConfigMapName,
   eventingNatsSvcName,
   eventingNatsApiRuleAName,
   timeoutTime,
@@ -712,4 +716,6 @@ module.exports = {
   createK8sNamespace,
   publishEventWithRetry,
   debugBanner,
+  isJSRecreatedTestEnabled,
+  isJSAtLeastOnceDeliveryTestEnabled,
 };
