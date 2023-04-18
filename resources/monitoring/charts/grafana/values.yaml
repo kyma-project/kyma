@@ -324,6 +324,9 @@ initChownData:
   ## initChownData container image
   ##
   image:
+    repository: busybox
+    tag: "1.31.1"
+    sha: ""
     pullPolicy: IfNotPresent
 
   ## initChownData resource requests and limits

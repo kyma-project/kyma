@@ -1,21 +1,23 @@
 global:
   containerRegistry:
-    path: eu.gcr.io/kyma-project
+    path: europe-docker.pkg.dev/kyma-project
   images:
     directory_size_exporter:
       name: "directory-size-exporter"
       version: "v20230308-ff6cf204"
+      directory: "prod"
     telemetry_operator:
       name: "telemetry-manager"
       version: "v20230414-e04962ae"
+      directory: "prod"
     telemetry_otel_collector:
       name: "otel-collector"
       version: "0.74.0-acb36420"
-      directory: "tpi"
+      directory: "prod/tpi"
     fluent_bit:
       name: "fluent-bit"
       version: "2.0.11-f89ab2e3"
-      directory: "tpi"
+      directory: "prod/tpi"
   highPriorityClassName: "kyma-system-priority"
   log:
     level: "info"

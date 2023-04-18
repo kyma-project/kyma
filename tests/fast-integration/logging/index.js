@@ -5,7 +5,12 @@ module.exports = {
 };
 
 const loki = require('./loki');
-const {k8sApply, k8sDelete, sleep} = require('../utils');
+const {
+  k8sApply,
+  k8sDelete,
+  sleep,
+  waitForService,
+} = require('../utils');
 const fs = require('fs');
 const path = require('path');
 const k8s = require('@kubernetes/client-node');
@@ -45,6 +50,7 @@ function istioAccessLogsTests(startTimestamp) {
     it('Should create the Istio Access Logs resource for Loki', async () => {
       await k8sApply(istioAccessLogsResource, namespace);
       await sleep(20000);
+      waitForService('telemetry-trace-collector-internal', 'kyma-system');
     });
 
     it('Should query Loki and verify format of Istio Access Logs', async () => {
