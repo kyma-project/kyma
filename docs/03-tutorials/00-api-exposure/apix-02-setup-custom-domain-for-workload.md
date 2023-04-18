@@ -81,38 +81,7 @@ This tutorial shows how to set up a custom domain and prepare a certificate requ
        EOF
        ```
 
-4. Create an Issuer CR.
-
-     * Export the following values as environment variables:
-
-       ```bash
-       export EMAIL={YOUR_EMAIL_ADDRESS}
-       ```
-     * To create an Issuer CR, run: 
-
-       ```bash
-       cat <<EOF | kubectl apply -f -
-       apiVersion: cert.gardener.cloud/v1alpha1
-       kind: Issuer
-       metadata:
-         name: letsencrypt-staging
-         namespace: $NAMESPACE
-       spec:
-         acme:
-           server: https://acme-staging-v02.api.letsencrypt.org/directory
-           email: $EMAIL
-           autoRegistration: true
-           privateKeySecretRef:
-             name: letsencrypt-staging-secret
-             namespace: $NAMESPACE
-           domains:
-             include:
-               - $DOMAIN_TO_EXPOSE_WORKLOADS
-               - "*.$DOMAIN_TO_EXPOSE_WORKLOADS"
-       EOF
-       ```
-
-5. Create a Certificate CR.
+4. Create a Certificate CR.
 
      * Export the following values as environment variables:
 
@@ -120,7 +89,6 @@ This tutorial shows how to set up a custom domain and prepare a certificate requ
 
         ```bash
         export TLS_SECRET={TLS_SECRET_NAME}
-        export ISSUER={ISSUER_NAME}
         ```
 
      * To create a Certificate CR, run:
@@ -135,9 +103,6 @@ This tutorial shows how to set up a custom domain and prepare a certificate requ
         spec:  
           secretName: $TLS_SECRET
           commonName: $DOMAIN_TO_EXPOSE_WORKLOADS
-          issuerRef:
-            name: $ISSUER
-            namespace: $NAMESPACE
         EOF
         ```
         >**NOTE:** While using the default configuration, certificates with the Let's Encrypt issuer are valid for 90 days and automatically renewed 60 days before their validity expires. Use the `--issuer.renewal-window` command line parameter to adjust the time window between the renewal and the expiration of a certificate. For more information on Gardener Certificate Management, read the [Gardener documentation](https://github.com/gardener/cert-management#requesting-a-certificate).
@@ -148,6 +113,6 @@ This tutorial shows how to set up a custom domain and prepare a certificate requ
         kubectl get certificate httpbin-cert -n istio-system
         ```
        
-6. Follow [this tutorial](./apix-03-set-up-tls-gateway.md) to set up a TLS Gateway.
+5. Follow [this tutorial](./apix-03-set-up-tls-gateway.md) to set up a TLS Gateway.
 
 Visit the [Gardener external DNS management documentation](https://github.com/gardener/external-dns-management/tree/master/examples) to see more examples of custom resources for services and ingresses.
