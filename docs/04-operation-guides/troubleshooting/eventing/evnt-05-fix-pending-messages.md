@@ -78,7 +78,7 @@ You can see, that its leader is the `eventing-nats-1` replica.
    ```bash
    kubectl port-forward -n kyma-system eventing-nats-0 4222  
 
-If you have NATS cli installed on your machine, you can simply run this shell script:
+2. If you have NATS cli installed on your machine, you can simply run this shell script:
 
 ```bash
    for consumer in $(nats consumer list -n sap) # sap is the stream name
