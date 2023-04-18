@@ -46,7 +46,7 @@ this shell command results in `ebcabfe5c902612f0ba3ebde7653f30b`.
    ```bash
    kubectl port-forward -n kyma-system eventing-nats-0 4222  
 
-5. Then, you need to find consumer's leader:
+5. Find the consumer's leader:
 
 ```bash
 nats consumer info sap ebcabfe5c902612f0ba3ebde7653f30b
