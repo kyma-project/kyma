@@ -73,7 +73,7 @@ You can see, that its leader is the `eventing-nats-1` replica.
 
 #### Find the broken consumers using the NATS cli
 
-You must port-forward to a NATS replica:
+1. Port forward to a NATS replica:
 
 ```bash
 kubectl port-forward -n kyma-system eventing-nats-0 4222  
