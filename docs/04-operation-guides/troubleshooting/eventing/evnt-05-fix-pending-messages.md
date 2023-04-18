@@ -43,7 +43,7 @@ this shell command results in `ebcabfe5c902612f0ba3ebde7653f30b`.
 
 4. Port forward to a NATS replica:
 
-```bash
+   ```bash
 kubectl port-forward -n kyma-system eventing-nats-0 4222  
 ```
 
