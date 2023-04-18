@@ -1,5 +1,3 @@
-//go:build integration
-
 package jetstreamv2_test
 
 import (
@@ -7,9 +5,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2"
-	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
-	natstesting "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats/testing"
 	evtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	testingv2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
 	"github.com/nats-io/nats-server/v2/server"
@@ -27,7 +25,7 @@ func Test_ConnectionBuilder_Build(t *testing.T) {
 	// given: a NATS server.
 	natsServer := startManagedNATSServer(t)
 
-	config := backendnats.Config{URL: natsServer.ClientURL()}
+	config := env.NATSConfig{URL: natsServer.ClientURL()}
 	cb := jetstreamv2.NewConnectionBuilder(config)
 
 	// when: connection establishment should work.
@@ -57,7 +55,7 @@ func Test_ConnectionBuilder_Build_ForErrConnect(t *testing.T) {
 	// given: a free port on localhost without a NATS server running.
 	url := fixtureUnusedLocalhostURL(t)
 
-	config := backendnats.Config{URL: url}
+	config := env.NATSConfig{URL: url}
 	cb := jetstreamv2.NewConnectionBuilder(config)
 
 	// when: connection establishment should fail as
@@ -77,7 +75,7 @@ func Test_ConnectionBuilder_IsConnected(t *testing.T) {
 	// given
 	natsServer := startManagedNATSServer(t)
 
-	config := backendnats.Config{URL: natsServer.ClientURL()}
+	config := env.NATSConfig{URL: natsServer.ClientURL()}
 	cb := jetstreamv2.NewConnectionBuilder(config)
 
 	// when: a NATS server is online
@@ -99,7 +97,7 @@ func Test_ConnectionBuilder_IsConnected(t *testing.T) {
 // startManagedNATSServer starts a NATS server and shuts the server down as soon as the test is
 // completed (also when it failed!).
 func startManagedNATSServer(t *testing.T) *server.Server {
-	natsServer, _, err := natstesting.StartNATSServer(evtesting.WithJetStreamEnabled())
+	natsServer, _, err := jetstreamv2.StartNATSServer(evtesting.WithJetStreamEnabled())
 	require.NoError(t, err)
 	t.Cleanup(func() {
 		natsServer.Shutdown()

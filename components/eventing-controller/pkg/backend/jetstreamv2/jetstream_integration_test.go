@@ -17,7 +17,6 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
-	natstesting "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats/testing"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	evtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
@@ -718,7 +717,7 @@ func getJetStreamClient(t *testing.T, serverURL string) *jetStreamClient {
 
 // setupTestEnvironment is a TestEnvironment constructor.
 func setupTestEnvironment(t *testing.T) *TestEnvironment {
-	natsServer, natsPort, err := natstesting.StartNATSServer(evtesting.WithJetStreamEnabled())
+	natsServer, natsPort, err := StartNATSServer(evtesting.WithJetStreamEnabled())
 	require.NoError(t, err)
 	natsConfig := defaultNATSConfig(natsServer.ClientURL(), natsPort)
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))

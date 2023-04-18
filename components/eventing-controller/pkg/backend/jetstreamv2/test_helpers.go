@@ -3,13 +3,13 @@ package jetstreamv2
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-	natstesting "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats/testing"
 	evtestingv2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
 	"github.com/nats-io/nats-server/v2/server"
 
@@ -42,12 +42,27 @@ type TestEnvironment struct {
 	natsPort   int
 }
 
+func StartNATSServer(serverOpts ...evtesting.NatsServerOpt) (*server.Server, int, error) {
+	natsPort, err := evtesting.GetFreePort()
+	if err != nil {
+		return nil, 0, err
+	}
+	serverOpts = append(serverOpts, evtesting.WithPort(natsPort))
+	natsServer := evtesting.RunNatsServerOnPort(serverOpts...)
+	return natsServer, natsPort, nil
+}
+
+func NewNatsMessagePayload(data, id, source, eventTime, eventType string) string {
+	jsonCE := fmt.Sprintf("{\"data\":\"%s\",\"datacontenttype\":\"application/json\",\"id\":\"%s\",\"source\":\"%s\",\"specversion\":\"1.0\",\"time\":\"%s\",\"type\":\"%s\"}", data, id, source, eventTime, eventType)
+	return jsonCE
+}
+
 func SendEventToJetStream(jsClient *JetStream, data string) error {
 	// assumption: the event-type used for publishing is already cleaned from none-alphanumeric characters
 	// because the publisher-application should have cleaned it already before publishing
 	eventType := evtestingv2.OrderCreatedCleanEvent
 	eventTime := time.Now().Format(time.RFC3339)
-	sampleEvent := natstesting.NewNatsMessagePayload(data, "id", evtestingv2.EventSourceClean, eventTime, eventType)
+	sampleEvent := NewNatsMessagePayload(data, "id", evtestingv2.EventSourceClean, eventTime, eventType)
 	return jsClient.Conn.Publish(jsClient.GetJetStreamSubject(evtestingv2.EventSourceClean,
 		eventType,
 		v1alpha2.TypeMatchingStandard,
