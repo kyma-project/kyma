@@ -4,10 +4,8 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"time"
 
 	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
-	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -18,14 +16,8 @@ import (
 	dynamicfake "k8s.io/client-go/dynamic/fake"
 
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
-	"github.com/kyma-project/kyma/components/eventing-controller/utils"
-
-	ce "github.com/cloudevents/sdk-go/v2"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/testing/event/cehelper"
 )
 
 const (
@@ -46,60 +38,23 @@ const (
 	EventTypePrefixEmpty        = ""
 	OrderCreatedV1Event         = "order.created.v1"
 	OrderCreatedV2Event         = "order.created.v2"
-	OrderCreatedV3Event         = "order.created.v3"
-	OrderCreatedV4Event         = "order.created.v4"
 	OrderCreatedV1EventNotClean = "order.c*r%e&a!te#d.v1"
-	OrderCreatedV2EventNotClean = "o-r_d+e$r.created.v2"
 	JetStreamSubject            = "kyma" + "." + EventSourceClean + "." + OrderCreatedV1Event
 	JetStreamSubjectV2          = "kyma" + "." + EventSourceClean + "." + OrderCreatedCleanEvent
 
 	EventMeshExactType          = EventMeshPrefix + "." + ApplicationNameNotClean + "." + OrderCreatedV1EventNotClean
 	EventMeshOrderCreatedV1Type = EventMeshPrefix + "." + ApplicationName + "." + OrderCreatedV1Event
-	EventMeshOrderCreatedV2Type = EventMeshPrefix + "." + ApplicationName + "." + OrderCreatedV2Event
 
-	OrderCreatedEventType                    = EventTypePrefix + "." + ApplicationName + "." + OrderCreatedV1Event
-	NewOrderCreatedEventType                 = EventTypePrefix + "." + ApplicationName + "." + OrderCreatedV2Event
-	OrderCreatedEventTypeNotClean            = EventTypePrefix + "." + ApplicationNameNotClean + "." + OrderCreatedV1Event
-	OrderCreatedEventTypePrefixEmpty         = ApplicationName + "." + OrderCreatedV1Event
-	OrderCreatedEventTypeNotCleanPrefixEmpty = ApplicationNameNotClean + "." + OrderCreatedV1Event
-	EventID                                  = "8945ec08-256b-11eb-9928-acde48001122"
-	EventSpecVersion                         = "1.0"
-	EventData                                = "test-data"
+	OrderCreatedEventType            = EventTypePrefix + "." + ApplicationName + "." + OrderCreatedV1Event
+	OrderCreatedEventTypeNotClean    = EventTypePrefix + "." + ApplicationNameNotClean + "." + OrderCreatedV1Event
+	OrderCreatedEventTypePrefixEmpty = ApplicationName + "." + OrderCreatedV1Event
 
-	CloudEventType        = EventTypePrefix + "." + ApplicationName + ".order.created.v1"
-	CloudEventSource      = "/default/sap.kyma/id"
-	CloudEventSpecVersion = "1.0"
-	CloudEventData        = "{\"foo\":\"bar\"}"
-	CloudEventData2       = "{\"foo\":\"bar2\"}"
-
-	CeIDHeader          = "ce-id"
-	CeTypeHeader        = "ce-type"
-	CeSourceHeader      = "ce-source"
-	CeSpecVersionHeader = "ce-specversion"
-
-	StructuredCloudEvent = `{
-           "id":"` + EventID + `",
-           "type":"` + OrderCreatedEventType + `",
-           "specversion":"` + EventSpecVersion + `",
-           "source":"` + EventSource + `",
-           "data":"` + EventData + `"
-        }`
+	CloudEventType  = EventTypePrefix + "." + ApplicationName + ".order.created.v1"
+	CloudEventData  = "{\"foo\":\"bar\"}"
+	CloudEventData2 = "{\"foo\":\"bar2\"}"
 
 	JSStreamName = "kyma"
 )
-
-// CloudEvent returns the pointer to a simple CloudEvent for testing purpose.
-func CloudEvent() (*ce.Event, error) {
-	return cehelper.NewEvent(
-		cehelper.WithSubject(CloudEventType),
-		cehelper.WithSpecVersion(CloudEventSpecVersion),
-		cehelper.WithID(CloudEventSpecVersion),
-		cehelper.WithSource(CloudEventSource),
-		cehelper.WithType(CloudEventType),
-		cehelper.WithData(ce.ApplicationJSON, CloudEventData),
-		cehelper.WithTime(time.Now()),
-	)
-}
 
 type APIRuleOption func(r *apigatewayv1beta1.APIRule)
 
@@ -293,24 +248,6 @@ func WithStatusJSBackendTypes(types []eventingv1alpha2.JetStreamTypes) Subscript
 	}
 }
 
-func CustomReadyCondition(msg string) eventingv1alpha2.Condition {
-	return eventingv1alpha2.MakeCondition(
-		eventingv1alpha2.ConditionSubscriptionActive,
-		eventingv1alpha2.ConditionReasonNATSSubscriptionActive,
-		corev1.ConditionTrue, msg)
-}
-
-func MultipleDefaultConditions() []eventingv1alpha2.Condition {
-	return []eventingv1alpha2.Condition{CustomReadyCondition("One"), CustomReadyCondition("Two")}
-}
-
-// WithMultipleConditions is a SubscriptionOpt for creating Subscriptions with multiple conditions.
-func WithMultipleConditions() SubscriptionOpt {
-	return func(s *eventingv1alpha2.Subscription) {
-		s.Status.Conditions = MultipleDefaultConditions()
-	}
-}
-
 func WithEmsSubscriptionStatus(status string) SubscriptionOpt {
 	return func(sub *eventingv1alpha2.Subscription) {
 		sub.Status.Backend.EmsSubscriptionStatus = &eventingv1alpha2.EmsSubscriptionStatus{
@@ -388,12 +325,6 @@ func WithEventSource(source string) SubscriptionOpt {
 	return func(subscription *eventingv1alpha2.Subscription) { subscription.Spec.Source = source }
 }
 
-// WithNotCleanFilter initializes subscription filter with a not clean event-type
-// A not clean event-type means it contains none-alphanumeric characters.
-func WithNotCleanFilter() SubscriptionOpt {
-	return WithEventType(OrderCreatedEventTypeNotClean)
-}
-
 // WithExactTypeMatching is a SubscriptionOpt for creating a Subscription with an exact type matching.
 func WithExactTypeMatching() SubscriptionOpt {
 	return WithTypeMatching(eventingv1alpha2.TypeMatchingExact)
@@ -413,14 +344,6 @@ func WithTypeMatching(typeMatching eventingv1alpha2.TypeMatching) SubscriptionOp
 // A not clean event-type means it contains none-alphanumeric characters.
 func WithNotCleanType() SubscriptionOpt {
 	return WithEventType(OrderCreatedV1EventNotClean)
-}
-
-// WithEmptyTypes is a SubscriptionOpt for creating a subscription with an empty event type filter.
-// Note that this is different from setting Types to nil.
-func WithEmptyTypes() SubscriptionOpt {
-	return func(subscription *eventingv1alpha2.Subscription) {
-		subscription.Spec.Types = make([]string, 0)
-	}
 }
 
 func WithEmptyStatus() SubscriptionOpt {
@@ -460,10 +383,6 @@ func WithDefaultSource() SubscriptionOpt {
 	return WithEventSource(ApplicationName)
 }
 
-func WithEventMeshNamespaceSource() SubscriptionOpt {
-	return WithEventSource(EventMeshNamespace)
-}
-
 func WithNotCleanSource() SubscriptionOpt {
 	return WithEventSource(ApplicationNameNotClean)
 }
@@ -472,11 +391,6 @@ func WithNotCleanSource() SubscriptionOpt {
 // the svcNamespace and the svcName.
 func WithValidSink(svcNamespace, svcName string) SubscriptionOpt {
 	return WithSinkURL(ValidSinkURL(svcNamespace, svcName))
-}
-
-// WithSinkURLFromSvcAndPath sets a kubernetes service as the sink.
-func WithSinkURLFromSvcAndPath(svc *corev1.Service, path string) SubscriptionOpt {
-	return WithSinkURL(fmt.Sprintf("%s%s", ValidSinkURL(svc.Namespace, svc.Name), path))
 }
 
 // WithSinkURLFromSvc sets a kubernetes service as the sink.
@@ -535,99 +449,6 @@ func NewSubscriberSvc(name, namespace string) *corev1.Service {
 	}
 }
 
-func NewBEBMessagingSecret(name, namespace string) *corev1.Secret {
-	messagingValue := `
-				[{
-					"broker": {
-						"type": "sapmgw"
-					},
-					"oa2": {
-						"clientid": "clientid",
-						"clientsecret": "clientsecret",
-						"granttype": "client_credentials",
-						"tokenendpoint": "https://token"
-					},
-					"protocol": ["amqp10ws"],
-					"uri": "wss://amqp"
-				}, {
-					"broker": {
-						"type": "sapmgw"
-					},
-					"oa2": {
-						"clientid": "clientid",
-						"clientsecret": "clientsecret",
-						"granttype": "client_credentials",
-						"tokenendpoint": "https://token"
-					},
-					"protocol": ["amqp10ws"],
-					"uri": "wss://amqp"
-				}, {
-					"broker": {
-						"type": "saprestmgw"
-					},
-					"oa2": {
-						"clientid": "rest-clientid",
-						"clientsecret": "rest-client-secret",
-						"granttype": "client_credentials",
-						"tokenendpoint": "https://rest-token"
-					},
-					"protocol": ["httprest"],
-					"uri": "https://rest-messaging"
-				}]`
-
-	return &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
-		StringData: map[string]string{
-			"messaging": messagingValue,
-			"namespace": "test/ns",
-		},
-	}
-}
-
-func NewNamespace(name string) *corev1.Namespace {
-	namespace := corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: name,
-		},
-	}
-	return &namespace
-}
-
-func NewEventingControllerDeployment() *appsv1.Deployment {
-	labels := map[string]string{
-		"app.kubernetes.io/name": "value",
-	}
-	return &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      deployment.ControllerName,
-			Namespace: deployment.ControllerNamespace,
-			Labels:    labels,
-		},
-		Spec: appsv1.DeploymentSpec{
-			Replicas: utils.Int32Ptr(1),
-			Selector: metav1.SetAsLabelSelector(labels),
-			Template: corev1.PodTemplateSpec{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:   deployment.ControllerName,
-					Labels: labels,
-				},
-				Spec: corev1.PodSpec{
-					Containers: []corev1.Container{
-						{
-							Name:  deployment.ControllerName,
-							Image: "eventing-controller-pod-image",
-						},
-					},
-				},
-			},
-		},
-		Status: appsv1.DeploymentStatus{},
-	}
-}
-
 // ToSubscription converts an unstructured subscription into a typed one.
 func ToSubscription(unstructuredSub *unstructured.Unstructured) (*eventingv1alpha2.Subscription, error) {
 	sub := new(eventingv1alpha2.Subscription)
@@ -680,19 +501,6 @@ func NewFakeSubscriptionClient(sub *eventingv1alpha2.Subscription) (dynamic.Inte
 
 	dynamicClient := dynamicfake.NewSimpleDynamicClient(scheme, sub)
 	return dynamicClient, nil
-}
-
-func GetStructuredMessageHeaders() http.Header {
-	return http.Header{"Content-Type": []string{"application/cloudevents+json"}}
-}
-
-func GetBinaryMessageHeaders() http.Header {
-	headers := make(http.Header)
-	headers.Add(CeIDHeader, EventID)
-	headers.Add(CeTypeHeader, CloudEventType)
-	headers.Add(CeSourceHeader, CloudEventSource)
-	headers.Add(CeSpecVersionHeader, CloudEventSpecVersion)
-	return headers
 }
 
 // AddSource adds the source value to the subscription.
