@@ -41,7 +41,7 @@ echo -n "tunas-testing/test-noapp3/kyma.noapp.order.created.v1" | md5
 
 this shell command results in `ebcabfe5c902612f0ba3ebde7653f30b`.
 
-4. You must port-forward to a NATS replica:
+4. Port forward to a NATS replica:
 
 ```bash
 kubectl port-forward -n kyma-system eventing-nats-0 4222  
