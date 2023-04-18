@@ -80,7 +80,7 @@ You can see, that its leader is the `eventing-nats-1` replica.
 
 2. If you have NATS cli installed on your machine, you can simply run this shell script:
 
-```bash
+   ```bash
    for consumer in $(nats consumer list -n sap) # sap is the stream name
    do
      nats consumer info sap $consumer -j | jq -c '{name: .name, pending: .num_pending, leader: .cluster.leader}'
