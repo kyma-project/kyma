@@ -44,7 +44,8 @@ type Backend interface {
 	DeleteSubscription(subscription *eventingv1alpha2.Subscription) error
 }
 
-func NewEventMesh(credentials *OAuth2ClientCredentials, mapper backendutils.NameMapper, logger *logger.Logger) *EventMesh {
+func NewEventMesh(credentials *OAuth2ClientCredentials, mapper backendutils.NameMapper,
+	logger *logger.Logger) *EventMesh {
 	return &EventMesh{
 		oAuth2credentials: credentials,
 		logger:            logger,

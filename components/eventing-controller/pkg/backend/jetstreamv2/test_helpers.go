@@ -53,7 +53,9 @@ func StartNATSServer(serverOpts ...evtesting.NatsServerOpt) (*server.Server, int
 }
 
 func NewNatsMessagePayload(data, id, source, eventTime, eventType string) string {
-	jsonCE := fmt.Sprintf("{\"data\":\"%s\",\"datacontenttype\":\"application/json\",\"id\":\"%s\",\"source\":\"%s\",\"specversion\":\"1.0\",\"time\":\"%s\",\"type\":\"%s\"}", data, id, source, eventTime, eventType)
+	jsonCE := fmt.Sprintf("{\"data\":\"%s\",\"datacontenttype\":\"application/json\""+
+		",\"id\":\"%s\",\"source\":\"%s\",\"specversion\":\"1.0\",\"time\":\"%s\""+
+		",\"type\":\"%s\"}", data, id, source, eventTime, eventType)
 	return jsonCE
 }
 

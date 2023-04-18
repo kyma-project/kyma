@@ -138,7 +138,8 @@ func setupSuite() error {
 	}
 
 	// setup nameMapper for EventMesh
-	emTestEnsemble.nameMapper = backendutils.NewBEBSubscriptionNameMapper(domain, backendeventmesh.MaxSubscriptionNameLength)
+	emTestEnsemble.nameMapper = backendutils.NewBEBSubscriptionNameMapper(domain,
+		backendeventmesh.MaxSubscriptionNameLength)
 
 	// setup eventMesh reconciler
 	recorder := k8sManager.GetEventRecorderFor("eventing-controller")

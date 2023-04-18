@@ -11,7 +11,7 @@ func (e HTTPStatusError) Error() string {
 }
 
 func (e *HTTPStatusError) Is(target error) bool {
-	t, ok := target.(*HTTPStatusError)
+	t, ok := target.(*HTTPStatusError) //nolint: errorlint // converted to pointer and checked.
 	if !ok {
 		return false
 	}

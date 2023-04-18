@@ -81,7 +81,8 @@ func getNATSConf(natsURL string, natsPort int) env.NATSConfig {
 	}
 }
 
-func createAndSyncSubscription(t *testing.T, sinkURL string, jsBackend *backendnats.JetStream) *eventingv1alpha2.Subscription {
+func createAndSyncSubscription(t *testing.T, sinkURL string,
+	jsBackend *backendnats.JetStream) *eventingv1alpha2.Subscription {
 	// create test subscription
 	testSub := controllertestingv2.NewSubscription(
 		subscriptionName, subscriptionNamespace,

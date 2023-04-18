@@ -475,7 +475,7 @@ func TestJetStream_NATSSubscriptionCount(t *testing.T) {
 
 // TestJetStream_ServerRestart tests that eventing works when NATS server is restarted
 // for scenarios involving the stream storage type and when reconnect attempts are exhausted or not.
-func TestJetStream_ServerRestart(t *testing.T) { //nolint:gocognit
+func TestJetStream_ServerRestart(t *testing.T) {
 	// given
 	subscriber := evtesting.NewSubscriber()
 	defer subscriber.Shutdown()
@@ -524,8 +524,7 @@ func TestJetStream_ServerRestart(t *testing.T) { //nolint:gocognit
 
 			// Create a subscription
 			subName := fmt.Sprintf("%s%d", "sub", id)
-			var subv2 *eventingv1alpha2.Subscription
-			subv2 = evtestingv2.NewSubscription(subName, "foo",
+			subv2 := evtestingv2.NewSubscription(subName, "foo",
 				evtestingv2.WithNotCleanEventSourceAndType(),
 				evtestingv2.WithSinkURL(subscriber.SinkURL),
 				evtestingv2.WithTypeMatchingStandard(),
@@ -610,8 +609,7 @@ func TestJetStream_ServerAndSinkRestart(t *testing.T) {
 	err = testEnvironment.jsBackend.Initialize(nil)
 	require.NoError(t, err)
 
-	var subv2 *eventingv1alpha2.Subscription
-	subv2 = evtestingv2.NewSubscription("sub", "foo",
+	subv2 := evtestingv2.NewSubscription("sub", "foo",
 		evtestingv2.WithNotCleanEventSourceAndType(),
 		evtestingv2.WithSinkURL(subscriber.SinkURL),
 		evtestingv2.WithTypeMatchingStandard(),

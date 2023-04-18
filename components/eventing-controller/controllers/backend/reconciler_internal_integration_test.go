@@ -2,9 +2,9 @@ package backend
 
 import (
 	"context"
+	"crypto/rand"
 	"errors"
 	"fmt"
-	"math/rand"
 	"path/filepath"
 	"testing"
 	"time"
@@ -91,7 +91,7 @@ var _ = BeforeSuite(func(done Done) {
 				CABundle: dummyCABundle,
 			},
 			SideEffects:             &sideEffectClassNone,
-			AdmissionReviewVersions: []string{"v1"},
+			AdmissionReviewVersions: []string{"v1beta1"},
 		},
 	})
 	mwh.Name = "subscription-mutating-webhook-configuration"
@@ -105,7 +105,7 @@ var _ = BeforeSuite(func(done Done) {
 				CABundle: dummyCABundle,
 			},
 			SideEffects:             &sideEffectClassNone,
-			AdmissionReviewVersions: []string{"v1"},
+			AdmissionReviewVersions: []string{"v1beta1"},
 		},
 	})
 	vwh.Name = "subscription-validating-webhook-configuration"
