@@ -75,7 +75,7 @@ You can see, that its leader is the `eventing-nats-1` replica.
 
 1. Port forward to a NATS replica:
 
-```bash
+   ```bash
 kubectl port-forward -n kyma-system eventing-nats-0 4222  
 ```
 
