@@ -76,7 +76,7 @@ You can see, that its leader is the `eventing-nats-1` replica.
 1. Port forward to a NATS replica:
 
    ```bash
-kubectl port-forward -n kyma-system eventing-nats-0 4222  
+   kubectl port-forward -n kyma-system eventing-nats-0 4222  
 ```
 
 If you have NATS cli installed on your machine, you can simply run this shell script:
