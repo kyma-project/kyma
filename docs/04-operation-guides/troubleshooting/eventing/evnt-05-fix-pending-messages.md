@@ -77,7 +77,6 @@ You can see, that its leader is the `eventing-nats-1` replica.
 
    ```bash
    kubectl port-forward -n kyma-system eventing-nats-0 4222  
-```
 
 If you have NATS cli installed on your machine, you can simply run this shell script:
 
