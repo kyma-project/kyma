@@ -44,7 +44,7 @@ this shell command results in `ebcabfe5c902612f0ba3ebde7653f30b`.
 4. Port forward to a NATS replica:
 
    ```bash
-kubectl port-forward -n kyma-system eventing-nats-0 4222  
+   kubectl port-forward -n kyma-system eventing-nats-0 4222  
 ```
 
 5. Then, you need to find consumer's leader:
