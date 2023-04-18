@@ -59,8 +59,6 @@
 /resources/telemetry @kyma-project/observability
 /resources/tracing @kyma-project/observability
 
-/tests/application-gateway-legacy-tests @kyma-project/Framefrog
-
 # Fast Integration Tests
 /tests/fast-integration/test @kyma-project/observability @kyma-project/eventing @kyma-project/Otters @kyma-project/goat
 /tests/fast-integration/eventing-test @kyma-project/eventing
@@ -85,9 +83,6 @@
 # performance tests
 /tests/perf @kyma-project/observability
 /tests/serverless-bench @kyma-project/Otters
-
-# The tools/event-subscriber directory
-/tools/event-subscriber/ @kyma-project/eventing
 
 # The tools/gitserver directory
 /tools/gitserver/ @kyma-project/Otters

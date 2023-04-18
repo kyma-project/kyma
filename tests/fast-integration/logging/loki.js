@@ -66,9 +66,33 @@ async function verifyIstioAccessLogFormat(startTimestamp) {
   const entry = JSON.parse(responseBody.data.result[0].values[0][1]);
   const log = parseJson(entry.log);
   assert.isDefined(log, `Istio access log is not in JSON format: ${entry.log}`);
-  assert.isDefined(log['response_code'], `Istio access log does not have 'response_code' field: ${log}`);
-  assert.isDefined(log['bytes_received'], `Istio access log does not have 'bytes_received' field: ${log}`);
-  assert.isDefined(log['bytes_sent'], `Istio access log does not have 'bytes_sent' field: ${log}`);
-  assert.isDefined(log['duration'], `Istio access log does not have 'duration' field: ${log}`);
-  assert.isDefined(log['start_time'], `Istio access log does not have 'start_time' field: ${log}`);
+  verifyLogAttributeIsPresent('method', log);
+  verifyLogAttributeIsPresent('path', log);
+  verifyLogAttributeIsPresent('protocol', log);
+  verifyLogAttributeIsPresent('response_code', log);
+  verifyLogAttributeIsPresent('response_flags', log);
+  verifyLogAttributeIsPresent('response_code_details', log);
+  verifyLogAttributeIsPresent('connection_termination_details', log);
+  verifyLogAttributeIsPresent('upstream_transport_failure_reason', log);
+  verifyLogAttributeIsPresent('bytes_received', log);
+  verifyLogAttributeIsPresent('bytes_sent', log);
+  verifyLogAttributeIsPresent('duration', log);
+  verifyLogAttributeIsPresent('upstream_service_time', log);
+  verifyLogAttributeIsPresent('x_forwarded_for', log);
+  verifyLogAttributeIsPresent('user_agent', log);
+  verifyLogAttributeIsPresent('request_id', log);
+  verifyLogAttributeIsPresent('authority', log);
+  verifyLogAttributeIsPresent('upstream_host', log);
+  verifyLogAttributeIsPresent('upstream_cluster', log);
+  verifyLogAttributeIsPresent('upstream_local_address', log);
+  verifyLogAttributeIsPresent('downstream_local_address', log);
+  verifyLogAttributeIsPresent('downstream_remote_address', log);
+  verifyLogAttributeIsPresent('requested_server_name', log);
+  verifyLogAttributeIsPresent('route_name', log);
+  verifyLogAttributeIsPresent('traceparent', log);
+  verifyLogAttributeIsPresent('tracestate', log);
+}
+
+function verifyLogAttributeIsPresent(attribute, logBody) {
+  assert.isDefined(logBody[attribute], `Istio access log does not have '${attribute}' field: ${logBody}`);
 }
