@@ -76,9 +76,11 @@ var _ = BeforeSuite(func(done Done) {
 	useExistingCluster := useExistingCluster
 
 	dummyCABundle := make([]byte, 20)
-	rand.Read(dummyCABundle)
+	_, err2 := rand.Read(dummyCABundle)
+	Expect(err2).NotTo(HaveOccurred())
 	newCABundle := make([]byte, 20)
-	rand.Read(newCABundle)
+	_, err2 = rand.Read(newCABundle)
+	Expect(err2).NotTo(HaveOccurred())
 
 	// setup dummy mutating webhook
 	url := "https://eventing-controller.kyma-system.svc.cluster.local"
