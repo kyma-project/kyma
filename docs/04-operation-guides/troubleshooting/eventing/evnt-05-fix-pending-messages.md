@@ -82,7 +82,7 @@ kubectl port-forward -n kyma-system eventing-nats-0 4222
 If you have NATS cli installed on your machine, you can simply run this shell script:
 
 ```bash
-for consumer in $(nats consumer list -n sap) # sap is the stream name
+   for consumer in $(nats consumer list -n sap) # sap is the stream name
    do
      nats consumer info sap $consumer -j | jq -c '{name: .name, pending: .num_pending, leader: .cluster.leader}'
    done
