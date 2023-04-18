@@ -86,7 +86,6 @@ for consumer in $(nats consumer list -n sap) # sap is the stream name
    do
      nats consumer info sap $consumer -j | jq -c '{name: .name, pending: .num_pending, leader: .cluster.leader}'
    done
-```
 
 You must get the following output:
 
