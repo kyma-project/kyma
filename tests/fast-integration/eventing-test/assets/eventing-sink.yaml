@@ -39,7 +39,7 @@ spec:
           }
         }
       source: |
-        let receviedEvents = {};
+        let receivedEvents = {};
         const axios = require('axios');
         function sendEvent(url, headers, payload) {
             console.log("Forwarding event to EPP: " + url)
@@ -76,8 +76,8 @@ spec:
               }
             } else if (event.extensions.request.query.eventid) {
               // Send a request with param eventid=<id> to fetch an received event.
-              console.log("Searching and returing event with id: ", event.extensions.request.query.eventid);
-              result = receviedEvents[event.extensions.request.query.eventid]
+              console.log("Searching and returning event with id: ", event.extensions.request.query.eventid);
+              result = receivedEvents[event.extensions.request.query.eventid]
               if (result) {
                 console.log("event found with id: ", event.extensions.request.query.eventid);
                 return { success: true, event:result, metadata: metadata};
@@ -88,7 +88,7 @@ spec:
               // Store all valid received events.
               console.log("Got in-app event:", event["ce-type"], ", id: ", event["ce-id"]);
               savedFormat = { ceHeaders: cloudEventHeaders(event), payload: event.data, headers: event.extensions.request.headers }
-              receviedEvents[event["ce-id"]] = savedFormat;
+              receivedEvents[event["ce-id"]] = savedFormat;
               return { success: true }
             } else {
               console.log("Discarding event with ce-type:", event["ce-type"])
@@ -98,7 +98,7 @@ spec:
           }
         }
 ---
-apiVersion: gateway.kyma-project.io/v1alpha1
+apiVersion: gateway.kyma-project.io/v1beta1
 kind: APIRule
 metadata:
   name: eventing-sink
@@ -115,7 +115,7 @@ spec:
       accessStrategies:
         - handler: allow
           config: {}
+  host: eventing-sink
   service:
-    host: eventing-sink
     name: eventing-sink
     port: 80
