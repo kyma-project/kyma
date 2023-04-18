@@ -33,7 +33,7 @@ initContainers:
 {{- end }}
 {{- if ( and .Values.persistence.enabled .Values.initChownData.enabled ) }}
   - name: init-chown-data
-    image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.busybox) }}"
+    image: "{{ .Values.initChownData.image.repository }}:{{ .Values.initChownData.image.tag }}"
     imagePullPolicy: {{ .Values.initChownData.image.pullPolicy }}
     {{- if .Values.initChownData.securityContext }}
     securityContext:
