@@ -108,65 +108,60 @@ additionalPrometheusRulesMap: {}
 global:
   domainName: "kyma.example.com"
   containerRegistry:
-    path: eu.gcr.io/kyma-project
+    path: europe-docker.pkg.dev/kyma-project
   images:
     prometheus_operator:
       name: "prometheus-operator"
       version: "v0.61.1"
-      directory: "external/quay.io/prometheus-operator"
+      directory: "prod/external/quay.io/prometheus-operator"
       sha: ""
     prometheus_config_reloader:
       name: "prometheus-config-reloader"
       version: "v0.61.1"
-      directory: "external/quay.io/prometheus-operator"
+      directory: "prod/external/quay.io/prometheus-operator"
       sha: ""
     configmap_reload:
       name: "configmap-reload"
       version: "v0.8.0"
-      directory: "external/jimmidyson"
+      directory: "prod/external/jimmidyson"
       sha: ""
     alertmanager:
       name: "alertmanager"
       version: "v0.24.0"
-      directory: "external/quay.io/prometheus"
+      directory: "prod/external/quay.io/prometheus"
       sha: ""
     prometheus:
       name: "prometheus"
       version: "v2.40.7"
-      directory: "external/quay.io/prometheus"
+      directory: "prod/external/quay.io/prometheus"
       sha: ""
     pushgateway:
       name: "pushgateway"
       version: v1.4.3
-      directory: "external/prom"
+      directory: "prod/external/prom"
     node_exporter:
       name: "node-exporter"
       version: "1.5.0-945764ea"
-      directory: "tpi"
+      directory: "prod/tpi"
     kube_state_metrics:
       name: "kube-state-metrics"
       version: "2.8.1-a3475b24"
-      directory: "tpi"
+      directory: "prod/tpi"
       sha: ""
     grafana:
       name: "grafana"
-      version: "7.5.17-a3475b24"
-      directory: "tpi"
-      sha: ""
-    busybox:
-      name: "busybox"
-      version: "1.34.1"
-      directory: "external"
+      version: "7.5.17-1c0ae577"
+      directory: "prod/tpi"
       sha: ""
     k8s_sidecar:
       name: "k8s-sidecar"
       version: "1.15.9-945764ea"
-      directory: "tpi"
+      directory: "prod/tpi"
       sha: ""
     oauth2_proxy:
       name: "oauth2-proxy"
       version: "7.4.0-945764ea"
-      directory: "tpi"
+      directory: "prod/tpi"
       sha: ""
 
   istio:
