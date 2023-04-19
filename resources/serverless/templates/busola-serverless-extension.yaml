@@ -375,6 +375,17 @@ data:
               widget: Text
               enum: $keys($configMap.data)
               visibility: $envType = 'From Config Map'
+    - path: spec
+      widget: FormGroup
+      children:
+        - path: labels
+          widget: KeyValuePair
+        - visibility: $boolean($root.spec.labels)
+          severity: warning
+          alert: "'alert.spec.labels'"
+          widget: Alert
+        - path: annotations
+          widget: KeyValuePair
   general: |-
     resource:
       kind: Function
@@ -518,6 +529,9 @@ data:
       'Python Function': Python Function
       alert.resources.requests: If you want to provide your own requests configuration, leave the Function profile field empty.
       alert.resources.limits: If you want to provide your own limits configuration, leave the Function profile field empty.
+      alert.spec.labels: You can't use labels from domain "serverless.kyma-project.io".
+      spec.labels: Runtime Labels
+      spec.annotations: Runtime Annotations
   presets: |-
     - name: Default
       default: true
