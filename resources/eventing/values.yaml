@@ -1,28 +1,28 @@
 # globally shared values among Helm subcharts
 global:
   containerRegistry:
-    path: europe-docker.pkg.dev/kyma-project/prod
+    path: europe-docker.pkg.dev/kyma-project
   images:
     eventing_controller:
-      name: eventing-controller
+      name: dev/eventing-controller
       version: PR-17102
       pullPolicy: "IfNotPresent"
     publisher_proxy:
-      name: event-publisher-proxy
+      name: prod/event-publisher-proxy
       version: v20230405-337c13fe
     certHandler:
-      name: api-gateway-webhook-certificates
+      name: prod/api-gateway-webhook-certificates
       version: "1.5.0"
     nats:
-      name: nats
+      name: prod/nats
       version: v20230314-2.9.15-alpine3.17
       directory: external
     nats_config_reloader:
-      name: natsio/nats-server-config-reloader
+      name: prod/natsio/nats-server-config-reloader
       version: 0.10.1
       directory: external
     prometheus_nats_exporter:
-      name: natsio/prometheus-nats-exporter
+      name: prod/natsio/prometheus-nats-exporter
       version: 0.10.1
       directory: external
 
