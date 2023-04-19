@@ -85,7 +85,7 @@ This tutorial shows how to set up a custom domain and prepare a certificate requ
 
      * Export the following values as environment variables:
 
-        >**NOTE:** The `TLS_SECRET` is the name of the TLS Secret, for example `httpbin-tls-credentials`. The `ISSUER` value is the name of the Issuer CR, for example, `letsencrypt-staging`.
+        >**NOTE:** The `TLS_SECRET` is the name of the TLS Secret, for example `httpbin-tls-credentials`.
 
         ```bash
         export TLS_SECRET={TLS_SECRET_NAME}
