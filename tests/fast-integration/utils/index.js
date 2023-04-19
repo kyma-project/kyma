@@ -20,19 +20,29 @@ const eventingBackendName = 'eventing-backend';
 function initializeK8sClient(opts) {
   opts = opts || {};
   try {
+    console.log('Trying to initialize a K8S client');
     if (opts.kubeconfigPath) {
+      console.log('Path initialization');
       kc.loadFromFile(opts.kubeconfigPath);
     } else if (opts.kubeconfig) {
+      console.log('Kubeconfig initialization');
       kc.loadFromString(opts.kubeconfig);
     } else {
+      console.log('Default initialization');
       kc.loadFromDefault();
     }
 
+    console.log('Clients creation');
     k8sDynamicApi = kc.makeApiClient(k8s.KubernetesObjectApi);
+    console.log('Making Api client - Apps');
     k8sAppsApi = kc.makeApiClient(k8s.AppsV1Api);
+    console.log('Making Api client - Core');
     k8sCoreV1Api = kc.makeApiClient(k8s.CoreV1Api);
+    console.log('Making Api client - Auth');
     k8sRbacAuthorizationV1Api = kc.makeApiClient(k8s.RbacAuthorizationV1Api);
+    console.log('Making Api client - Logs');
     k8sLog = new k8s.Log(kc);
+    console.log('Making Api client - Watch');
     watch = new k8s.Watch(kc);
     k8sServerUrl = kc.getCurrentCluster() ? kc.getCurrentCluster().server : null;
   } catch (err) {
@@ -245,7 +255,7 @@ async function getSecret(name, namespace) {
 }
 
 async function getFunction(name, namespace) {
-  const path = `/apis/serverless.kyma-project.io/v1alpha1/namespaces/${namespace}/functions/${name}`;
+  const path = `/apis/serverless.kyma-project.io/v1alpha2/namespaces/${namespace}/functions/${name}`;
   const response = await k8sDynamicApi.requestPromise({
     url: k8sDynamicApi.basePath + path,
   });
@@ -396,7 +406,7 @@ function waitForEndpoint(name, namespace = 'default', timeout = 300_000) {
 
 function waitForFunction(name, namespace = 'default', timeout = 90_000) {
   return waitForK8sObject(
-      `/apis/serverless.kyma-project.io/v1alpha1/namespaces/${namespace}/functions`,
+      `/apis/serverless.kyma-project.io/v1alpha2/namespaces/${namespace}/functions`,
       {},
       (_type, _apiObj, watchObj) => {
         return (
@@ -542,6 +552,21 @@ function waitForDeployment(name, namespace = 'default', timeout = 90_000) {
       },
       timeout,
       `Waiting for deployment ${name} timeout (${timeout} ms)`,
+  );
+}
+
+function waitForService(name, namespace = 'default', timeout = 90_000) {
+  return waitForK8sObject(
+      `/apis/apps/v1/namespaces/${namespace}/service`,
+      {},
+      (_type, _apiObj, watchObj) => {
+        return (
+          watchObj.object.metadata.name === name &&
+          watchObj.object.clusterIP
+        );
+      },
+      timeout,
+      `Waiting for service ${name} timeout (${timeout} ms)`,
   );
 }
 
@@ -1838,6 +1863,7 @@ module.exports = {
   waitForClusterAddonsConfiguration,
   waitForVirtualService,
   waitForDeployment,
+  waitForService,
   waitForDaemonSet,
   waitForStatefulSet,
   waitForTokenRequest,

@@ -85,7 +85,7 @@ func TestFunctionReconciler_buildDeployment(t *testing.T) {
 		args args
 	}{
 		{
-			name: "spec.template.labels should contain every element from spec.selector.MatchLabels",
+			name: "deployment should contain needed elements",
 			args: args{
 				instance: newFixFunction("ns", "name", 1, 2),
 			},
@@ -101,12 +101,23 @@ func TestFunctionReconciler_buildDeployment(t *testing.T) {
 
 			got := s.buildDeployment(buildDeploymentArgs{})
 
+			// deployment selector labels are equal with pod labels
 			for key, value := range got.Spec.Selector.MatchLabels {
 				g.Expect(got.Spec.Template.Labels[key]).To(gomega.Equal(value))
 			}
 			g.Expect(got.Spec.Template.Spec.Containers).To(gomega.HaveLen(1))
 			g.Expect(got.Spec.Template.Spec.Containers[0].Env).To(gomega.ContainElements(rtmCfg.RuntimeEnvs))
 
+			// pod labels & annotations
+			g.Expect(got.Spec.Template.ObjectMeta.Labels).To(gomega.HaveLen(4 + 3))
+			g.Expect(got.Spec.Template.ObjectMeta.Labels).To(gomega.HaveKeyWithValue("foo", "bar"))
+			g.Expect(got.Spec.Template.ObjectMeta.Labels).To(gomega.HaveKeyWithValue(testBindingLabel1, "foobar"))
+			g.Expect(got.Spec.Template.ObjectMeta.Labels).To(gomega.HaveKeyWithValue(testBindingLabel2, testBindingLabelValue))
+
+			g.Expect(got.Spec.Template.ObjectMeta.Annotations).To(gomega.HaveLen(1 + 1))
+			g.Expect(got.Spec.Template.ObjectMeta.Annotations).To(gomega.HaveKeyWithValue("foo", "bar"))
+
+			// volumes
 			const expectedVolumeCount = 3
 			g.Expect(got.Spec.Template.Spec.Volumes).To(gomega.HaveLen(expectedVolumeCount))
 			g.Expect(got.Spec.Template.Spec.Containers[0].VolumeMounts).To(gomega.HaveLen(expectedVolumeCount))
@@ -232,45 +243,6 @@ func TestFunctionReconciler_buildHorizontalPodAutoscaler(t *testing.T) {
 	}
 }
 
-func TestFunctionReconciler_mergeLabels(t *testing.T) {
-	type args struct {
-		labelsCollection []map[string]string
-	}
-	tests := []struct {
-		name string
-		args args
-		want map[string]string
-	}{
-		{
-			name: "should work with empty slice",
-			args: args{labelsCollection: []map[string]string{}},
-			want: map[string]string{},
-		},
-		{
-			name: "should work with 1 map as argument",
-			args: args{labelsCollection: []map[string]string{{"key": "value"}}},
-			want: map[string]string{"key": "value"},
-		},
-		{
-			name: "should work with multiple maps",
-			args: args{labelsCollection: []map[string]string{{"key": "value"}, {"key1": "value1"}, {"key2": "value2"}}},
-			want: map[string]string{
-				"key":  "value",
-				"key1": "value1",
-				"key2": "value2",
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			g := gomega.NewGomegaWithT(t)
-			r := &FunctionReconciler{}
-			got := r.mergeLabels(tt.args.labelsCollection...)
-			g.Expect(got).To(gomega.Equal(tt.want))
-		})
-	}
-}
-
 func TestFunctionReconciler_internalFunctionLabels(t *testing.T) {
 	type args struct {
 		instance *serverlessv1alpha2.Function
@@ -300,83 +272,6 @@ func TestFunctionReconciler_internalFunctionLabels(t *testing.T) {
 			got := r.internalFunctionLabels(tt.args.instance)
 			g.Expect(got).To(gomega.Equal(tt.want))
 			g.Expect(got).To(gomega.HaveLen(3))
-		})
-	}
-}
-
-func TestFunctionReconciler_servicePodLabels(t *testing.T) {
-	type args struct {
-		instance *serverlessv1alpha2.Function
-	}
-	tests := []struct {
-		name string
-		args args
-		want map[string]string
-	}{
-		{
-			name: "Should work on function with no labels",
-			args: args{instance: &serverlessv1alpha2.Function{ObjectMeta: metav1.ObjectMeta{
-				Name: "fn-name",
-				UID:  "fn-uuid",
-			}}},
-			want: map[string]string{
-				serverlessv1alpha2.FunctionUUIDLabel:      "fn-uuid",
-				serverlessv1alpha2.FunctionManagedByLabel: serverlessv1alpha2.FunctionControllerValue,
-				serverlessv1alpha2.FunctionNameLabel:      "fn-name",
-				serverlessv1alpha2.FunctionResourceLabel:  serverlessv1alpha2.FunctionResourceLabelDeploymentValue,
-			},
-		},
-		{
-			name: "Should work with function with some labels",
-			args: args{instance: &serverlessv1alpha2.Function{ObjectMeta: metav1.ObjectMeta{
-				Name: "fn-name",
-				UID:  "fn-uuid",
-			},
-				Spec: serverlessv1alpha2.FunctionSpec{
-					Template: &serverlessv1alpha2.Template{
-						Labels: map[string]string{
-							"test-some": "test-label",
-						},
-					},
-				}}},
-			want: map[string]string{
-				serverlessv1alpha2.FunctionUUIDLabel:      "fn-uuid",
-				serverlessv1alpha2.FunctionManagedByLabel: serverlessv1alpha2.FunctionControllerValue,
-				serverlessv1alpha2.FunctionNameLabel:      "fn-name",
-				serverlessv1alpha2.FunctionResourceLabel:  serverlessv1alpha2.FunctionResourceLabelDeploymentValue,
-				"test-some":                               "test-label",
-			},
-		},
-		{
-			name: "Should not overwrite internal labels",
-			args: args{instance: &serverlessv1alpha2.Function{ObjectMeta: metav1.ObjectMeta{
-				Name: "fn-name",
-				UID:  "fn-uuid",
-			},
-				Spec: serverlessv1alpha2.FunctionSpec{
-					Template: &serverlessv1alpha2.Template{
-						Labels: map[string]string{
-							"test-some":                              "test-label",
-							serverlessv1alpha2.FunctionResourceLabel: "job",
-							serverlessv1alpha2.FunctionNameLabel:     "some-other-name",
-						},
-					},
-				}}},
-			want: map[string]string{
-				serverlessv1alpha2.FunctionUUIDLabel:      "fn-uuid",
-				serverlessv1alpha2.FunctionManagedByLabel: serverlessv1alpha2.FunctionControllerValue,
-				serverlessv1alpha2.FunctionNameLabel:      "fn-name",
-				serverlessv1alpha2.FunctionResourceLabel:  serverlessv1alpha2.FunctionResourceLabelDeploymentValue,
-				"test-some":                               "test-label",
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			g := gomega.NewGomegaWithT(t)
-			r := &FunctionReconciler{}
-			got := r.podLabels(tt.args.instance)
-			g.Expect(got).To(gomega.Equal(tt.want))
 		})
 	}
 }

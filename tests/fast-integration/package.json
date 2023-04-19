@@ -18,7 +18,7 @@
     "test-certificate": "mocha --timeout 150000 --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./certificate-test/",
     "test-getting-started": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./test/3-getting-started-guides.js",
     "test-compass": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./compass-test/",
-    "test-skr": "DEBUG=false mocha --timeout 15000 --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./skr-test/test.js",
+    "test-skr": "DEBUG=true mocha --timeout 15000 --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./skr-test/test.js",
     "test-skr-own-cluster": "DEBUG=false mocha --timeout 15000 --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./skr-test/test-own-cluster.js",
     "test-skr-provision": "DEBUG=false mocha --timeout 15000 --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./skr-test/provision-skr.js",
     "test-skr-deprovision": "DEBUG=false mocha --timeout 15000 --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./skr-test/deprovision-skr.js",
@@ -53,7 +53,7 @@
     "axios": "^0.21.0",
     "execa": "^5.0.0",
     "mocha-junit-reporter": "^2.0.0",
-    "mockserver-client": "^5.11.2",
+    "mockserver-client": "^5.15.0",
     "moment": "^2.29.4",
     "node-forge": "^0.10.0",
     "uuid": "^8.3.2"

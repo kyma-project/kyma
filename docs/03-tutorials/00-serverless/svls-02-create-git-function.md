@@ -62,19 +62,24 @@ Follow these steps:
 
     >**NOTE:** Read more about the [supported authentication methods](../../05-technical-reference/svls-04-git-source-type.md).
 
-3. Create a [GitRepository CR](../../05-technical-reference/00-custom-resources/svls-02-gitrepository.md) that specifies the Git repository metadata:
+3. Create a Function CR that specifies the Function's logic and points to the directory with code and dependencies in the given repository. It also specifies the Git repository metadata:
 
-    ```yaml
-    cat <<EOF | kubectl apply -f -
-    apiVersion: serverless.kyma-project.io/v1alpha1
-    kind: GitRepository
-    metadata:
-      name: $GIT_FUNCTION
-      namespace: $NAMESPACE
-    spec:
-      url: "https://github.com/kyma-project/examples.git"
-    EOF
-    ```
+   ```yaml
+   cat <<EOF | kubectl apply -f -
+   apiVersion: serverless.kyma-project.io/v1alpha2
+   kind: Function
+   metadata:
+     name: $GIT_FUNCTION
+     namespace: $NAMESPACE
+   spec:
+     runtime: nodejs16
+     source:
+       gitRepository:
+         baseDir: orders-service/function
+         reference: main
+         url: https://github.com/kyma-project/examples.git
+   EOF
+   ```
 
     >**NOTE:** If you use a secured repository, add the **auth** object with the adequate **type** and **secretName** fields to the spec:
 
@@ -87,27 +92,10 @@ Follow these steps:
     ```
    
     >**NOTE:** To avoid performance degradation caused by large Git repositories and large monorepos, Function Controller implements a configurable backoff period for the source checkout based on `APP_FUNCTION_REQUEUE_DURATION`. This behavior can be disabled, allowing the controller to perform the source checkout with every reconciliation loop by marking the Function CR with the annotation `serverless.kyma-project.io/continuousGitCheckout: true`
-4. Create a Function CR that specifies the Function's logic and points to the directory with code and dependencies in the given repository.
-
-    ```yaml
-    cat <<EOF | kubectl apply -f -
-    apiVersion: serverless.kyma-project.io/v1alpha1
-    kind: Function
-    metadata:
-      name: $GIT_FUNCTION
-      namespace: $NAMESPACE
-    spec:
-      type: git
-      runtime: nodejs16
-      source: $GIT_FUNCTION
-      reference: main
-      baseDir: orders-service/function
-    EOF
-    ```
 
     >**NOTE:** See this [Function's code and dependencies](https://github.com/kyma-project/examples/tree/main/orders-service/function).
 
-5. Check if your Function was created and all conditions are set to `True`:
+4. Check if your Function was created and all conditions are set to `True`:
 
     ```bash
     kubectl get functions $GIT_FUNCTION -n $NAMESPACE

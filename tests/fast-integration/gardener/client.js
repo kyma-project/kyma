@@ -89,17 +89,20 @@ class GardenerClient {
         });
   }
 
-  async waitForShoot(shootName) {
+  async waitForShoot(shootName, lastOpType = 'Create') {
     return waitForK8sObject(
         `/apis/core.gardener.cloud/v1beta1/namespaces/${GARDENER_PROJECT}/shoots`, {}, (_type, _apiObj, watchObj) => {
           if (watchObj.object.metadata.name != shootName) {
+            debug(`Skipping object from watch ${watchObj.object.metadata.name} != ${shootName}`);
             return false;
           }
 
           debug(`Waiting for ${watchObj.object.metadata.name} shoot`);
           const lastOperation = watchObj.object.status.lastOperation;
 
-          return lastOperation.type == 'Create' && lastOperation.state == 'Succeeded';
+          debug(`Check object state ${lastOperation.type} == ${lastOpType} && ${lastOperation.state} == 'Succeeded'`);
+          debug(`Last operation status: ${JSON.stringify(lastOperation)}`);
+          return lastOperation.type == lastOpType && lastOperation.state == 'Succeeded';
         }, 1200 * 1000, 'Waiting for shoot to be ready timeout', this.watch);
   }
 
@@ -126,6 +129,7 @@ class GardenerClient {
       kubeconfig: fromBase64(secretResp.body.data.kubeconfig),
       oidcConfig: shootResp.body.spec.kubernetes.kubeAPIServer.oidcConfig,
       shootDomain: shootResp.body.spec.dns.domain,
+      spec: shootResp.body.spec,
     };
   }
 }

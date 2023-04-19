@@ -514,7 +514,14 @@ describe('Telemetry Operator', function() {
         });
 
         it(`Should filter out noisy spans`, async function() {
-          const services = await retryWithDelay(getJaegerServices, defaultRetryDelayMs, defaultRetries);
+          const services = await retryWithDelay(async function() {
+            const services = await getJaegerServices();
+            if (services.data.length > 0) {
+              return services;
+            }
+
+            throw services;
+          }, defaultRetryDelayMs, defaultRetries);
           assert.isFalse(services.data.includes('grafana.kyma-system'), 'spans are present for grafana');
           assert.isFalse(services.data.includes('jaeger.kyma-system'), 'spans are present for jaeger');
           assert.isFalse(services.data.includes('telemetry-fluent-bit.kyma-system'),

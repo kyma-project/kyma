@@ -1,6 +1,4 @@
 ---
-meshConfig:
-  accessLogFile: ""
 
 helmValues:
   global:
@@ -50,8 +48,8 @@ components:
     config:
       resources:
         limits:
-          cpu: 500m
-          memory: 128Mi
+          cpu: 1000m
+          memory: 1024Mi
         requests:
           cpu: 10m
           memory: 32Mi
@@ -64,10 +62,10 @@ components:
         minReplicas: 1
       resources:
           limits:
-            cpu: 250m
-            memory: 384Mi
+            cpu: 1000m
+            memory: 1024Mi
           requests:
-            cpu: 10m
+            cpu: 50m
             memory: 128Mi
 
 monitoring:

@@ -18,9 +18,9 @@ type Config struct {
 	MaxPollingTime                  time.Duration    `envconfig:"default=5m"`
 	InsecureSkipVerify              bool             `envconfig:"default=true"`
 	Cleanup                         step.CleanupMode `envconfig:"default=yes"`
-	GitServerImage                  string           `envconfig:"default=eu.gcr.io/kyma-project/gitserver:470796a1"`
+	GitServerImage                  string           `envconfig:"default=eu.gcr.io/kyma-project/gitserver:b60c3054"`
 	GitServerRepoName               string           `envconfig:"default=function"`
-	IstioEnabled                    bool             `envconfig:"default=true"`
+	IstioEnabled                    bool             `envconfig:"default=false"`
 	PackageRegistryConfigSecretName string           `envconfig:"default=serverless-package-registry-config"`
 	PackageRegistryConfigURLNode    string           `envconfig:"default=https://pkgs.dev.azure.com/kyma-wookiee/public-packages/_packaging/public-packages%40Release/npm/registry/"`
 	PackageRegistryConfigURLPython  string           `envconfig:"default=https://pkgs.dev.azure.com/kyma-wookiee/public-packages/_packaging/public-packages%40Release/pypi/simple/"`

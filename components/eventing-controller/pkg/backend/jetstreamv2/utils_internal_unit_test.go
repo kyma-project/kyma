@@ -321,6 +321,7 @@ func TestGetBackendJetStreamTypes(t *testing.T) {
 		givenSubscription *eventingv1alpha2.Subscription
 		givenJSSubjects   []string
 		wantJSTypes       []eventingv1alpha2.JetStreamTypes
+		wantError         bool
 	}{
 		{
 			name:              "Should be nil is there are no jsSubjects",
@@ -383,13 +384,29 @@ func TestGetBackendJetStreamTypes(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "should return error if length mismatch",
+			givenSubscription: evtestingv2.NewSubscription(subName, subNamespace,
+				evtestingv2.WithSource(evtestingv2.EventSourceUnclean),
+				evtestingv2.WithEventType(evtestingv2.OrderCreatedCleanEvent),
+				evtestingv2.WithEventType(evtestingv2.OrderCreatedV1Event)),
+			givenJSSubjects: js.GetJetStreamSubjects(evtestingv2.EventSourceUnclean,
+				[]string{evtestingv2.OrderCreatedCleanEvent},
+				eventingv1alpha2.TypeMatchingStandard),
+			wantError: true,
+		},
 	}
 	for _, tc := range testCases {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			jsTypes := GetBackendJetStreamTypes(tc.givenSubscription, tc.givenJSSubjects)
-			require.Equal(t, tc.wantJSTypes, jsTypes)
+			jsTypes, err := GetBackendJetStreamTypes(tc.givenSubscription, tc.givenJSSubjects)
+			if tc.wantError {
+				require.Error(t, err)
+			} else {
+				require.Equal(t, tc.wantJSTypes, jsTypes)
+				require.NoError(t, err)
+			}
 		})
 	}
 }

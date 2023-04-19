@@ -5,7 +5,7 @@
 # For more details read the following article on GitHub: https://help.github.com/articles/about-codeowners/.
 
 # These are the default owners for the whole content of the `kyma` repository. The default owners are automatically added as reviewers when you open a pull request unless different owners are specified in the file.
-* @pbochynski @PK85 @a-thaler
+* @kyma-project/kyma-steering-committee
 
 /.github @kyma-project/prow
 /.github/workflows @kyma-project/prow @kyma-project/gopher
@@ -13,43 +13,41 @@
 
 
 # Owners of the .kyma-project-io folder
-/.kyma-project-io/ @valentinvieriu @akucharska @qbalukom @Sawthis @mrCherry97 @Lyczeq
+/.kyma-project-io/ @kyma-project/Hasselhoff
 
-/common @Tomasz-Smelcerz-SAP @akgalwas @piotrmiskiewicz @VOID404 @koala7659 @franpog859 @mvshao
 # Logging library
-/common/logging @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
+/common/logging @kyma-project/Framefrog
 
-/components/application-operator  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
-/components/central-application-connectivity-validator  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
-/components/central-application-gateway  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
-/components/compass-runtime-agent  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao @PK85
+/components/central-application-connectivity-validator @kyma-project/Framefrog
+/components/central-application-gateway @kyma-project/Framefrog
+/components/compass-runtime-agent @kyma-project/Framefrog
 /components/event-publisher-proxy @kyma-project/eventing
 /components/eventing-controller @kyma-project/eventing
-/components/function-controller @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
-/components/function-runtimes @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
+/components/function-controller @kyma-project/Otters
+/components/function-runtimes @kyma-project/Otters
 
 
 # All files and subdirectories in /docs
 /docs @kyma-project/technical-writers
 
-/installation @khlifi411 @jeremyharisch @ruanxin @tobiscr @moelsayed @Tomasz-Smelcerz-SAP @jakobmoellersap
+/installation @kyma-project/Jellyfish
 /installation/resources/crds/api-gateway @kyma-project/goat
-/installation/resources/crds/application-connector  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
-/installation/resources/crds/compass-runtime-agent  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
+/installation/resources/crds/application-connector @kyma-project/Framefrog
+/installation/resources/crds/compass-runtime-agent @kyma-project/Framefrog
 /installation/resources/crds/eventing @kyma-project/eventing
 /installation/resources/crds/istio @kyma-project/goat
 /installation/resources/crds/monitoring @kyma-project/observability
 /installation/resources/crds/ory @kyma-project/goat
-/installation/resources/crds/serverless @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
+/installation/resources/crds/serverless @kyma-project/Otters
 /installation/resources/crds/telemetry @kyma-project/observability
 /installation/resources/crds/tracing @kyma-project/observability
 
 /resources/api-gateway @kyma-project/goat
-/resources/application-connector  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
+/resources/application-connector @kyma-project/Framefrog
 /resources/certificates @kyma-project/goat
 /resources/cluster-essentials @kyma-project/goat
 /resources/cluster-users @kyma-project/goat
-/resources/compass-runtime-agent  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
+/resources/compass-runtime-agent @kyma-project/Framefrog
 /resources/eventing @kyma-project/eventing
 /resources/istio @kyma-project/goat
 /resources/istio-resources @kyma-project/goat
@@ -57,17 +55,12 @@
 /resources/logging @kyma-project/observability
 /resources/monitoring @kyma-project/observability
 /resources/ory @kyma-project/goat
-/resources/serverless @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
+/resources/serverless @kyma-project/Otters
 /resources/telemetry @kyma-project/observability
 /resources/tracing @kyma-project/observability
 
-/tests/application-gateway-legacy-tests  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
-/tests/application-gateway-tests  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
-/tests/telemetry-operator-perf-tests @kyma-project/observability
-
-
 # Fast Integration Tests
-/tests/fast-integration @lindnerby @rakesh-garimella @jeremyharisch @khlifi411 @ruanxin @pbochynski @dennis-ge @jakobmoellersap @Tomasz-Smelcerz-SAP @PK85 @chrkl
+/tests/fast-integration/test @kyma-project/observability @kyma-project/eventing @kyma-project/Otters @kyma-project/goat
 /tests/fast-integration/eventing-test @kyma-project/eventing
 /tests/fast-integration/image @kyma-project/eventing
 /tests/fast-integration/kcp @kyma-project/gopher
@@ -82,24 +75,20 @@
 /tests/fast-integration/tracing @kyma-project/observability
 
 
-/tests/function-controller @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
-/tests/components/api-gateway @strekm @werdes72 @dariusztutaj @cnvergence @barchw @videlov @triffer
-/tests/components/istio @strekm @dariusztutaj @cnvergence @barchw @werdes72 @videlov @triffer
-/tests/components/application-connector @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
-/tests/components/reconciler @khlifi411 @jeremyharisch @ruanxin @tobiscr @Tomasz-Smelcerz-SAP @jakobmoellersap
+/tests/function-controller @kyma-project/Otters
+/tests/components/api-gateway @kyma-project/goat
+/tests/components/istio @kyma-project/goat
+/tests/components/application-connector @kyma-project/Framefrog
 
 # performance tests
 /tests/perf @kyma-project/observability
-/tests/serverless-bench @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
-
-# The tools/event-subscriber directory
-/tools/event-subscriber/ @kyma-project/eventing
+/tests/serverless-bench @kyma-project/Otters
 
 # The tools/gitserver directory
-/tools/gitserver/ @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
+/tools/gitserver/ @kyma-project/Otters
 
 # Config file for MILV - milv.config.yaml
-milv.config.yaml @m00g3n @pPrecel @kwiatekus @moelsayed @cortey @anoipm @kyma-project/technical-writers
+milv.config.yaml @kyma-project/Otters @kyma-project/technical-writers
 
 # VERSION file
 VERSION @kyma-project/prow
@@ -108,4 +97,4 @@ VERSION @kyma-project/prow
 *.md @kyma-project/technical-writers
 
 # Managed Modules
-/modules @pbochynski @janmedrek @khlifi411 @jeremyharisch @ruanxin @tobiscr @Tomasz-Smelcerz-SAP @jakobmoellersap
+/modules @pbochynski @kyma-project/Jellyfish

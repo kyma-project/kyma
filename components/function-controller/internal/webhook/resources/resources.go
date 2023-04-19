@@ -25,11 +25,11 @@ func SetupResourcesController(ctx context.Context, mgr ctrl.Manager, serviceName
 	certPath := path.Join(DefaultCertDir, CertFile)
 	certBytes, err := ioutil.ReadFile(certPath)
 	if err != nil {
-		return errors.Wrapf(err, "failed to read caBundel file: %s", certPath)
+		return errors.Wrapf(err, "failed to read caBundle file: %s", certPath)
 	}
 
 	webhookConfig := WebhookConfig{
-		CABundel:         certBytes,
+		CABundle:         certBytes,
 		ServiceName:      serviceName,
 		ServiceNamespace: serviceNamespace,
 	}
@@ -43,12 +43,12 @@ func SetupResourcesController(ctx context.Context, mgr ctrl.Manager, serviceName
 	}
 
 	logger.Info("initializing the defaulting webhook configuration")
-	if err := EnsureWebhookConfigurationFor(ctx, serverClient, webhookConfig, MutatingWebhook); err != nil {
+	if err := InjectCABundleIntoWebhooks(ctx, serverClient, webhookConfig, MutatingWebhook); err != nil {
 		return errors.Wrap(err, "failed to ensure defaulting webhook configuration")
 	}
 
 	logger.Info("initializing the validation webhook configuration")
-	if err := EnsureWebhookConfigurationFor(ctx, serverClient, webhookConfig, ValidatingWebHook); err != nil {
+	if err := InjectCABundleIntoWebhooks(ctx, serverClient, webhookConfig, ValidatingWebHook); err != nil {
 		return errors.Wrap(err, "failed to ensure validating webhook configuration")
 	}
 	// watch over the configuration
@@ -117,13 +117,13 @@ func (r *resourceReconciler) Reconcile(ctx context.Context, request reconcile.Re
 func (r *resourceReconciler) reconcilerWebhooks(ctx context.Context, request reconcile.Request) error {
 	if request.Name == DefaultingWebhookName {
 		r.logger.Info("reconciling webhook defaulting webhook configuration")
-		if err := EnsureWebhookConfigurationFor(ctx, r.client, r.webhookConfig, MutatingWebhook); err != nil {
+		if err := InjectCABundleIntoWebhooks(ctx, r.client, r.webhookConfig, MutatingWebhook); err != nil {
 			return errors.Wrap(err, "failed to ensure defaulting webhook configuration")
 		}
 	}
 	if request.Name == ValidationWebhookName {
 		r.logger.Info("reconciling webhook validating webhook configuration")
-		if err := EnsureWebhookConfigurationFor(ctx, r.client, r.webhookConfig, ValidatingWebHook); err != nil {
+		if err := InjectCABundleIntoWebhooks(ctx, r.client, r.webhookConfig, ValidatingWebHook); err != nil {
 			return errors.Wrap(err, "failed to ensure validating webhook configuration")
 		}
 	}

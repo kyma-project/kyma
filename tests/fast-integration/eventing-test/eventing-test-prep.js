@@ -5,26 +5,14 @@ const httpsAgent = new https.Agent({
 });
 axios.defaults.httpsAgent = httpsAgent;
 const {
-  appName,
-  scenarioName,
   testNamespace,
-  mockNamespace,
   kymaVersion,
   isSKR,
-  testCompassFlow,
-  testSubscriptionV1Alpha2,
-  subCRDVersion,
   skrInstanceId,
   backendK8sSecretName,
   backendK8sSecretNamespace,
-  testDataConfigMapName,
-  eventingNatsSvcName,
-  eventingNatsApiRuleAName,
-  getJetStreamStreamData,
   timeoutTime,
   slowTime,
-  gardener,
-  director,
   shootName,
   cleanupTestingResources,
   eventingSinkName,
@@ -34,58 +22,31 @@ const {
   waitForEventingSinkFunction,
   deployV1Alpha1Subscriptions,
   deployV1Alpha2Subscriptions,
+  createK8sNamespace,
 } = require('./utils');
 const {
   eventMeshSecretFilePath,
-  kymaSystem,
 } = require('./common/common');
 const {
-  ensureCommerceMockLocalTestFixture,
   setEventMeshSourceNamespace,
-  ensureCommerceMockWithCompassTestFixture,
 } = require('../test/fixtures/commerce-mock');
 const {
   info,
-  error,
   debug,
   createEventingBackendK8sSecret,
-  createK8sConfigMap,
-  createApiRuleForService,
-  deleteApiRule,
 } = require('../utils');
-const {
-  addScenarioInCompass,
-  assignRuntimeToScenario,
-  scenarioExistsInCompass,
-  isRuntimeAssignedToScenario,
-} = require('../compass');
 const {expect} = require('chai');
 
 describe('Eventing tests preparation', function() {
-  let natsApiRuleVSHost;
-
   this.timeout(timeoutTime);
   this.slow(slowTime);
 
-  before(async () => {
-    debug('expose the eventing-nats service with an apirule');
-    const vs = await createApiRuleForService(eventingNatsApiRuleAName,
-        kymaSystem,
-        eventingNatsSvcName,
-        8222);
-    natsApiRuleVSHost = vs.spec.hosts[0];
-  });
-
   it('Print test initial configs', async function() {
-    debug(`Mock namespace: ${mockNamespace}`);
     debug(`Test namespace: ${testNamespace}`);
     debug(`Kyma version: ${kymaVersion}`);
     debug(`Is SKR cluster: ${isSKR}`);
     debug(`SKR instance Id: ${skrInstanceId}`);
     debug(`SKR shoot name: ${shootName}`);
-    debug(`Test Compass flow enabled: ${testCompassFlow}`);
-    debug(`Test Subscription v1alpha2 CRD enabled: ${testSubscriptionV1Alpha2}`);
-    debug(`Test Subscription CRD version: ${subCRDVersion}`);
   });
 
   it('Prepare SKR Kubeconfig if needed', async function() {
@@ -126,50 +87,17 @@ describe('Eventing tests preparation', function() {
     setEventMeshSourceNamespace(eventMeshInfo['namespace']);
   });
 
-  it('Prepare JetStream data configmap', async function() {
-    // Create a configmap that contains stream data for jetstream so that during the test,
-    // we can verify that the stream was not affected/recreated
-    debug('Creating eventing test data configmap with JetStream stream info');
-    const streamInfo = await getJetStreamStreamData(natsApiRuleVSHost);
-    if (streamInfo) {
-      await createK8sConfigMap(
-          streamInfo,
-          testDataConfigMapName,
-      );
-    } else {
-      debug('Skipping creating eventing test data configmap due to missing stream');
-    }
-  });
-
-  it('Prepare assets without Compass flow', async function() {
-    // Skip this step if compass flow is enabled
-    if (testCompassFlow) {
-      this.skip();
-    }
-
-    // Deploy Commerce mock application, function and subscriptions for tests
-    await prepareAssetsWithoutCompassFlow();
-  });
-
-  it('Prepare assets with Compass flow', async function() {
-    // Skip this step if compass flow is disabled
-    if (!testCompassFlow) {
-      this.skip();
-    }
-
-    // Deploy Commerce mock application, function and subscriptions for tests (includes compass flow)
-    await prepareAssetsWithCompassFlow();
+  it('Create test namespace', async function() {
+    await createK8sNamespace(testNamespace);
   });
 
   it('Prepare eventing-sink function', async function() {
     debug('Preparing EventingSinkFunction');
-    await deployEventingSinkFunction();
-    await waitForEventingSinkFunction();
+    await deployEventingSinkFunction(eventingSinkName);
+    await waitForEventingSinkFunction(eventingSinkName);
   });
 
   it('Eventing-sink function should be reachable through API Rule', async function() {
-    this.test.retries(5);
-
     const host = await getClusterHost(eventingSinkName, testNamespace);
     expect(host).to.not.empty;
     debug('host fetched, now checking if eventing-sink function is reachable...');
@@ -181,9 +109,6 @@ describe('Eventing tests preparation', function() {
   });
 
   it('Prepare v1alpha2 subscriptions', async function() {
-    if (!testSubscriptionV1Alpha2) {
-      this.skip();
-    }
     await deployV1Alpha2Subscriptions();
   });
 
@@ -193,59 +118,4 @@ describe('Eventing tests preparation', function() {
       await cleanupTestingResources();
     }
   });
-
-  after(async () => {
-    await deleteApiRule(eventingNatsApiRuleAName, kymaSystem);
-  });
-
-  // // **** Helper functions ****
-  // prepareAssetsWithoutCompassFlow - Sets up test assets without compass flow
-  async function prepareAssetsWithoutCompassFlow() {
-    debug('Preparing CommerceMock/In-cluster test fixtures on Kyma');
-    await ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace, testSubscriptionV1Alpha2).catch((err) => {
-      error(err); // first error is logged
-      return ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace, testSubscriptionV1Alpha2);
-    });
-  }
-
-  // prepareAssetsWithCompassFlow - Sets up test assets with compass flow
-  async function prepareAssetsWithCompassFlow() {
-    debug('Preparing CommerceMock/In-cluster test fixtures with compass flow on SKR');
-
-    const skrInfo = await gardener.getShoot(shootName);
-
-    debug(
-        `appName: ${appName},
-         scenarioName: ${scenarioName},
-         testNamespace: ${testNamespace},
-         compassID: ${skrInfo.compassID}`,
-    );
-
-    // check if compass scenario setup is needed
-    const compassScenarioAlreadyExist = await scenarioExistsInCompass(director, scenarioName);
-    if (compassScenarioAlreadyExist) {
-      debug(`Compass scenario with the name ${scenarioName} already exist, do not register it again`);
-    } else {
-      debug('Assigning SKR to scenario in Compass');
-      // Create a new scenario (systems/formations) in compass for this test
-      await addScenarioInCompass(director, scenarioName);
-    }
-
-    // check if assigning the runtime to the scenario is needed
-    const runtimeAssignedToScenario = await isRuntimeAssignedToScenario(director, skrInfo.compassID, scenarioName);
-    if (!runtimeAssignedToScenario) {
-      debug('Assigning Runtime to a compass scenario');
-      // map scenario to target SKR
-      await assignRuntimeToScenario(director, skrInfo.compassID, scenarioName);
-    }
-
-    await ensureCommerceMockWithCompassTestFixture(
-        director,
-        appName,
-        scenarioName,
-        mockNamespace,
-        testNamespace,
-        compassScenarioAlreadyExist,
-    );
-  }
 });

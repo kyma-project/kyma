@@ -66,7 +66,7 @@ global:
     helm.sh/chart: '{{ include "chart" . }}'
   dockerServicePort: 5000
   configuration:
-    configmapName: 'serverless-configuration'
+    configmapName: "serverless-configuration"
     targetDir: "/appdata"
     filename: "config.yaml"
   ingress:
@@ -76,17 +76,17 @@ global:
   images:
     k8s_tools:
       name: "k8s-tools"
-      version: "v20230307-b83bd5e3"
+      version: "v20230330-fdf134f3"
       directory: "tpi"
     function_controller:
       name: "function-controller"
-      version: "v20230302-9166a23d"
+      version: "PR-17258"
     function_webhook:
       name: "function-webhook"
-      version: "v20230302-9166a23d"
+      version: "PR-17258"
     function_build_init:
       name: "function-build-init"
-      version: "v20230302-9166a23d"
+      version: "PR-17258"
     function_runtime_nodejs14:
       name: "function-runtime-nodejs14"
       version: "v20230302-a6a85f47"
@@ -98,35 +98,27 @@ global:
       version: "v20230302-a6a85f47"
     function_runtime_python39:
       name: "function-runtime-python39"
-      version: "v20230223-ec41ec1e"
+      version: "v20230329-905b2788"
     kaniko_executor:
       name: "kaniko-executor"
-      version: "1.9.1-d4dfc177"
+      version: "1.9.1-ddcfbdf0"
       directory: "tpi"
     registry:
       name: "registry"
-      version: "2.8.1-c5da2c0d"
+      version: "2.8.1-ddcfbdf0"
       directory: "tpi"
     function_registry_gc:
       name: "function-registry-gc"
-      version: "v20230302-9166a23d"
+      version: "v20230407-602e2c0f"
     google_pause:
       name: "pause-amd64"
       version: "3.2"
       directory: "external/gcr.io/google-containers"
-  testImages:
-    function_controller_test:
-      name: "function-controller-test"
-      version: "v20230302-24107032"
-    git_server:
-      name: "gitserver"
-      version: "708f6a87"
-  highPriorityClassName: "kyma-system-priority"
-
+  serverlessPriorityClassValue: 2000000
+  serverlessPriorityClassName: "serverless-priority"
 images:
   function_controller:
     pullPolicy: IfNotPresent
-
 
 deployment:
   replicas: 1
@@ -196,6 +188,8 @@ containers:
         logLevel: "info"
         logFormat: "json"
     envs:
+      baseNamespace:
+        value: "{{ .Release.Namespace }}"
       configPath:
         value: "{{ .Values.global.configuration.targetDir }}/{{ .Values.global.configuration.filename }}"
       configMapRequeueDuration:
@@ -254,8 +248,8 @@ metrics:
       targerPort: 8080
       protocol: TCP
   pod:
-    labels: { }
-    annotations: { }
+    labels: {}
+    annotations: {}
 
 backendModule:
   enabled: true

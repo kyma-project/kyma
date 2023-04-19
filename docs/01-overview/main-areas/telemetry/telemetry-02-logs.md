@@ -456,7 +456,6 @@ Fluent Bit buffers up to 1 GB of logs if a configured output cannot receive logs
 
 Each Fluent Bit Pod can process up to 10 MB/s of logs for a single LogPipeline. With multiple pipelines, the throughput per pipeline is reduced. The used logging backend or performance characteristics of the output plugin might limit the throughput earlier.
 
-### Max amount of pipelines - CPU/Mem constraints
+### Max amount of pipelines
 
-In the production profile, no more than 5 LogPipelines.
-In the evaluation profile, no more than 3 LogPipelines.
+The maximum amount of LogPipelines is 5.

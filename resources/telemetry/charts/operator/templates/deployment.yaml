@@ -30,16 +30,8 @@ spec:
         - command:
             - /manager
           args:
-            - --leader-elect
-            - --sync-period={{.Values.syncPeriod}}
             - --cert-dir=/tmp
-            - --telemetry-namespace={{ .Release.Namespace }}
-            - --fluent-bit-cm-name={{ .Release.Name }}-{{ .Values.logProcessor }}
-            - --fluent-bit-sections-cm-name={{ .Release.Name }}-{{ .Values.logProcessor }}-sections
-            - --fluent-bit-parser-cm-name={{ .Release.Name }}-{{ .Values.logProcessor }}-parsers
-            - --fluent-bit-ds-name={{ .Release.Name }}-{{ .Values.logProcessor }}
-            - --fluent-bit-env-secret={{ .Release.Name }}-{{ .Values.logProcessor }}-env
-            - --fluent-bit-files-cm={{ .Release.Name }}-{{ .Values.logProcessor }}-files
+            - --manager-namespace=$(MY_POD_NAMESPACE)
             - --fluent-bit-filesystem-buffer-limit={{ .Values.filesystemBufferLimit }}
             - --fluent-bit-cpu-limit={{ .Values.fluentbit.resources.limits.cpu }}
             - --fluent-bit-memory-limit={{ .Values.fluentbit.resources.limits.memory }}
@@ -51,6 +43,7 @@ spec:
             - --fluent-bit-image={{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.fluent_bit) }}
             - --fluent-bit-exporter-image={{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.directory_size_exporter) }}
             - --validating-webhook-enabled={{ .Values.webhook.enabled }}
+            - --enable-telemetry-manager-module=false
 {{- if or .Values.priorityClassName .Values.global.highPriorityClassName }}
             - --fluent-bit-priority-class-name={{ coalesce .Values.priorityClassName .Values.global.highPriorityClassName }}
 {{- end }}
@@ -69,6 +62,17 @@ spec:
             - --trace-collector-memory-limit={{ .Values.traceCollector.resources.limits.memory }}
             - --trace-collector-cpu-request={{ .Values.traceCollector.resources.requests.cpu }}
             - --trace-collector-memory-request={{ .Values.traceCollector.resources.requests.memory }}
+{{- end }}
+{{- if not .Values.controllers.metrics.enabled }}
+            - --enable-metrics=false
+{{- else }}
+{{- if or .Values.priorityClassName .Values.global.priorityClassName }}
+            - --metric-gateway-priority-class={{ coalesce .Values.priorityClassName .Values.global.priorityClassName }}
+{{- end }}
+            - --metric-gateway-cpu-limit={{ .Values.metricGateway.resources.limits.cpu }}
+            - --metric-gateway-memory-limit={{ .Values.metricGateway.resources.limits.memory }}
+            - --metric-gateway-cpu-request={{ .Values.metricGateway.resources.requests.cpu }}
+            - --metric-gateway-memory-request={{ .Values.metricGateway.resources.requests.memory }}
 {{- end }}
           name: manager
           ports:
@@ -92,7 +96,9 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
-            - name: APP_LOG_FORMAT
-              value: {{ .Values.global.log.format | quote }}
             - name: APP_LOG_LEVEL
               value: {{ .Values.global.log.level | quote }}
+            - name: MY_POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace

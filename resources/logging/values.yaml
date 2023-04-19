@@ -19,16 +19,16 @@ loki:
 
 global:
   containerRegistry:
-    path: eu.gcr.io/kyma-project
+    path: europe-docker.pkg.dev/kyma-project
   images:
     loki:
       name: loki
-      version: 2.2.1-791da1af
-      directory: tpi
+      version: 2.2.1-945764ea
+      directory: prod/tpi
     alpine:
       name: "alpine"
-      version: "3.17.2"
-      directory: "external"
+      version: "3.17.3"
+      directory: "prod/external"
   kymaRuntime:
     adminGroup: runtimeAdmin
     operatorGroup: runtimeOperator

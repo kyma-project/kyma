@@ -36,9 +36,7 @@ spec:
       imagePullSecrets:
 {{ toYaml .Values.imagePullSecrets | indent 8 }}
       {{- end }}
-{{- if or .Values.priorityClassName .Values.global.highPriorityClassName }}
-      priorityClassName: "{{ coalesce .Values.priorityClassName .Values.global.highPriorityClassName }}"
-{{- end }}
+      priorityClassName: "{{ .Values.global.serverlessPriorityClassName }}"
 {{- if .Values.pod.securityContext }}
       securityContext:
         {{- include "tplValue" ( dict "value" .Values.pod.securityContext "context" . ) | nindent 12 }}

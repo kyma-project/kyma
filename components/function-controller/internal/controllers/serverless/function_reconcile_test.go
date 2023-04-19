@@ -1228,7 +1228,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 
 		//THEN
 		g.Expect(err).To(gomega.HaveOccurred())
-		g.Expect(err.Error()).To(gomega.ContainSubstring("Docker registry configuration not found"))
+		g.Expect(err.Error()).To(gomega.ContainSubstring("docker registry configuration not found"))
 
 	})
 
@@ -1262,9 +1262,8 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		deployment := &deployments.Items[0]
 		g.Expect(deployment).ToNot(gomega.BeNil())
 
-		g.Expect(deployment.Spec.Template.Annotations).To(gomega.Equal(map[string]string{
-			"proxy.istio.io/config": "{ \"holdApplicationUntilProxyStarts\": true }",
-		}))
+		g.Expect(deployment.Spec.Template.Annotations).To(gomega.HaveKeyWithValue(
+			"proxy.istio.io/config", "{ \"holdApplicationUntilProxyStarts\": true }"))
 		copiedDeploy := deployment.DeepCopy()
 		restartedAtAnnotation := map[string]string{
 			"kubectl.kubernetes.io/restartedAt": "2021-03-10T11:28:01+01:00", // example annotation added by kubectl

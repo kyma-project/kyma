@@ -74,13 +74,35 @@ The following code samples illustrate how to enrich the default trace with custo
    Python
    </summary>
 
-      ```python
-      def main(event, context):
-         span = event.tracer.start_span("foo")
-         span.add_event("bar")
-         span.end()
+      [OpenTelemetry SDK](https://opentelemetry.io/docs/instrumentation/python/manual/#tracing) allows you to customize trace spans and events.
+      Additionally, if you are using the `requests` library then all the HTTP communication can be auto-instrumented:
 
-         return "hello OpenTelemetry"
+      ```python
+
+      import requests
+      import time
+      from opentelemetry.instrumentation.requests import RequestsInstrumentor
+
+      def main(event, context):
+         # Create a new span to track some work
+         with event.tracer.start_as_current_span("parent"):
+            time.sleep(1)
+
+            # Create a nested span to track nested work
+            with event.tracer.start_as_current_span("child"):
+               time.sleep(2)
+               # the nested span is closed when it's out of scope
+
+         # Now the parent span is the current span again
+         time.sleep(1)
+
+         # This span is also closed when it goes out of scope
+
+         RequestsInstrumentor().instrument()
+
+         # This request will be auto-intrumented
+         r = requests.get('https://swapi.dev/api/people/2')
+         return r.json()
       ```
 
    </details>
