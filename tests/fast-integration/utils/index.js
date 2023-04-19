@@ -1843,6 +1843,11 @@ function waitForDeploymentWithLabel(
   );
 }
 
+async function deployJaeger(jaegerObj) {
+  await k8sApply(jaegerObj, 'kyma-system').catch(console.error);
+  await waitForDeployment('tracing-jaeger', 'kyma-system');
+}
+
 module.exports = {
   initializeK8sClient,
   getShootNameFromK8sServerUrl,
@@ -1938,4 +1943,5 @@ module.exports = {
   waitForPodWithLabelAndCondition,
   waitForDeploymentWithLabel,
   getSubscription,
+  deployJaeger,
 };
