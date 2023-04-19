@@ -6,31 +6,28 @@ global:
     eventing_controller:
       name: eventing-controller
       version: PR-17102
-      env: dev
+      directory: dev
       pullPolicy: "IfNotPresent"
     publisher_proxy:
       name: event-publisher-proxy
       version: v20230405-337c13fe
-      env: prod
+      directory: prod
     certHandler:
       name: api-gateway-webhook-certificates
       version: "1.5.0"
-      env: prod
+      directory: prod
     nats:
       name: nats
       version: v20230314-2.9.15-alpine3.17
-      env: prod
-      directory: external
+      directory: prod/external
     nats_config_reloader:
       name: natsio/nats-server-config-reloader
       version: 0.10.1
-      env: prod
-      directory: external
+      directory: prod/external
     prometheus_nats_exporter:
       name: natsio/prometheus-nats-exporter
       version: 0.10.1
-      env: prod
-      directory: external
+      directory: prod/external
 
   jetstream:
     # Storage type of the stream, memory or file.
