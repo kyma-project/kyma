@@ -16,7 +16,7 @@ As a result of this, messages on some consumers can stop being acknowledged and 
 
 ## Remedy
 
-To fix the "broken" consumers with pending messages, you trigger a leader reelection. You can do this either on the consumer that have pending messages, or if that fails, on the stream level.
+To fix the "broken" consumers with pending messages, trigger a leader reelection. You can do this either on the consumer that have pending messages, or if that fails, on the stream level.
 
 You need the latest version of NATS cli installed on your machine.
 
@@ -97,7 +97,7 @@ First, find out which consumer(s) have pending messages. You can find the broken
 
 #### Trigger the consumer leader reelection
 
-With the name of the broken consumer and its leader, you can trigger the reelection:
+Knowing the name of the broken consumer and its leader, you can trigger the reelection:
 
 1. Port forward the leader replica:
 
