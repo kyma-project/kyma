@@ -4,26 +4,32 @@ global:
     path: europe-docker.pkg.dev/kyma-project
   images:
     eventing_controller:
-      name: dev/eventing-controller
+      name: eventing-controller
       version: PR-17102
+      env: dev
       pullPolicy: "IfNotPresent"
     publisher_proxy:
-      name: prod/event-publisher-proxy
+      name: event-publisher-proxy
       version: v20230405-337c13fe
+      env: prod
     certHandler:
-      name: prod/api-gateway-webhook-certificates
+      name: api-gateway-webhook-certificates
       version: "1.5.0"
+      env: prod
     nats:
-      name: prod/nats
+      name: nats
       version: v20230314-2.9.15-alpine3.17
+      env: prod
       directory: external
     nats_config_reloader:
-      name: prod/natsio/nats-server-config-reloader
+      name: natsio/nats-server-config-reloader
       version: 0.10.1
+      env: prod
       directory: external
     prometheus_nats_exporter:
-      name: prod/natsio/prometheus-nats-exporter
+      name: natsio/prometheus-nats-exporter
       version: 0.10.1
+      env: prod
       directory: external
 
   jetstream:
