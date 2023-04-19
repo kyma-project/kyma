@@ -1,0 +1,257 @@
+apiVersion: v1
+data:
+  sampling: '{"default_strategy":{"param":1,"type":"probabilistic"}}'
+kind: ConfigMap
+metadata:
+  labels:
+    app: jaeger
+    app.kubernetes.io/component: sampling-configuration
+    app.kubernetes.io/instance: tracing-jaeger
+    app.kubernetes.io/managed-by: jaeger-operator
+    app.kubernetes.io/name: tracing-jaeger-sampling-configuration
+    app.kubernetes.io/part-of: jaeger
+  name: tracing-jaeger-sampling-configuration
+  namespace: kyma-system
+---
+apiVersion: v1
+data:
+  ui: '{"dependencies":{"menuEnabled":true},"menu":[{"items":[{"label":"Documentation","url":"https://www.jaegertracing.io/docs/latest"}],"label":"About
+    Jaeger"},{"items":[{"label":"Documentation","url":"https://kyma-project.io/docs/kyma/latest/01-overview/main-areas/observability"}],"label":"About
+    Kyma"}],"monitor.menuEnabled":false}'
+kind: ConfigMap
+metadata:
+  labels:
+    app: jaeger
+    app.kubernetes.io/component: ui-configuration
+    app.kubernetes.io/instance: tracing-jaeger
+    app.kubernetes.io/managed-by: jaeger-operator
+    app.kubernetes.io/name: tracing-jaeger-ui-configuration
+    app.kubernetes.io/part-of: jaeger
+  name: tracing-jaeger-ui-configuration
+  namespace: kyma-system
+---
+# Source: tracing/templates/kyma-additions/grafana-datasource.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tracing-jaeger-grafana-datasource
+  labels:
+    
+    app.kubernetes.io/name: tracing
+    app.kubernetes.io/instance: jaeger
+    grafana_datasource: "1"
+data:
+    jaeger-datasource.yaml: |-
+      apiVersion: 1
+      datasources:
+      - name: Jaeger
+        type: jaeger
+        access: proxy
+        url: http://tracing-jaeger-query.kyma-system:16686
+        editable: true
+---
+# Source: tracing/templates/kyma-additions/zipkin-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: zipkin #zipkin service is required for istio and envoy since they use zipkin api for adding spans
+  labels:
+    
+    app.kubernetes.io/name: tracing
+    app.kubernetes.io/instance: jaeger
+    app.kubernetes.io/component: zipkin 
+spec:
+  ports:
+  - name: http-jaeger-collector-zipkin
+    port: 9411
+    targetPort: 9411
+    protocol: TCP
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: jaeger-tracing-jaeger
+    app.kubernetes.io/instance: jaeger-tracing-jaeger
+---
+# Source: tracing/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: jaeger-tracing-jaeger-operator
+  namespace: default
+  labels:
+    
+    app.kubernetes.io/name: tracing
+    app.kubernetes.io/instance: jaeger
+    app.kubernetes.io/component: jaeger-operator
+  annotations:
+    prometheus.io/port: "8383"
+    prometheus.io/scrape: "true"
+spec:
+  ports:
+  - name: http-metrics
+    port: 8383
+    protocol: TCP
+    targetPort: 8383
+  selector:
+    app.kubernetes.io/name: jaeger-tracing-jaeger-operator
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: jaeger
+    app.kubernetes.io/component: all-in-one
+    app.kubernetes.io/instance: tracing-jaeger
+    app.kubernetes.io/managed-by: jaeger-operator
+    app.kubernetes.io/name: tracing-jaeger
+    app.kubernetes.io/part-of: jaeger
+  name: tracing-jaeger
+  namespace: kyma-system
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: jaeger
+      app.kubernetes.io/component: all-in-one
+      app.kubernetes.io/instance: tracing-jaeger
+      app.kubernetes.io/managed-by: jaeger-operator
+      app.kubernetes.io/name: tracing-jaeger
+      app.kubernetes.io/part-of: jaeger
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        linkerd.io/inject: disabled
+        prometheus.io/port: "14269"
+        prometheus.io/scrape: "true"
+        sidecar.istio.io/inject: "true"
+        sidecar.istio.io/rewriteAppHTTPProbers: "true"
+      labels:
+        app: jaeger
+        app.kubernetes.io/component: all-in-one
+        app.kubernetes.io/instance: tracing-jaeger
+        app.kubernetes.io/managed-by: jaeger-operator
+        app.kubernetes.io/name: tracing-jaeger
+        app.kubernetes.io/part-of: jaeger
+    spec:
+      containers:
+      - args:
+        - --collector.otlp.enabled=true
+        - --log-level=info
+        - --memory.max-traces=10000
+        - --query.ui-config=/etc/config/ui.json
+        - --sampling.strategies-file=/etc/jaeger/sampling/sampling.json
+        env:
+        - name: SPAN_STORAGE_TYPE
+          value: memory
+        - name: METRICS_STORAGE_TYPE
+        - name: COLLECTOR_ZIPKIN_HOST_PORT
+          value: :9411
+        - name: JAEGER_DISABLED
+          value: "false"
+        image: eu.gcr.io/kyma-project/external/jaegertracing/all-in-one:1.37.0
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 5
+          httpGet:
+            path: /
+            port: 14269
+            scheme: HTTP
+          initialDelaySeconds: 5
+          periodSeconds: 15
+          successThreshold: 1
+          timeoutSeconds: 1
+        name: jaeger
+        ports:
+        - containerPort: 5775
+          name: zk-compact-trft
+          protocol: UDP
+        - containerPort: 5778
+          name: config-rest
+          protocol: TCP
+        - containerPort: 6831
+          name: jg-compact-trft
+          protocol: UDP
+        - containerPort: 6832
+          name: jg-binary-trft
+          protocol: UDP
+        - containerPort: 9411
+          name: zipkin
+          protocol: TCP
+        - containerPort: 14267
+          name: c-tchan-trft
+          protocol: TCP
+        - containerPort: 14268
+          name: c-binary-trft
+          protocol: TCP
+        - containerPort: 16686
+          name: query
+          protocol: TCP
+        - containerPort: 14269
+          name: admin-http
+          protocol: TCP
+        - containerPort: 14250
+          name: grpc
+          protocol: TCP
+        - containerPort: 4317
+          name: otlp-grpc
+          protocol: TCP
+        - containerPort: 4318
+          name: otlp-http
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /
+            port: 14269
+            scheme: HTTP
+          initialDelaySeconds: 1
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources:
+          limits:
+            cpu: 100m
+            memory: 500Mi
+          requests:
+            cpu: 20m
+            memory: 40Mi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /etc/config
+          name: tracing-jaeger-ui-configuration-volume
+          readOnly: true
+        - mountPath: /etc/jaeger/sampling
+          name: tracing-jaeger-sampling-configuration-volume
+          readOnly: true
+      dnsPolicy: ClusterFirst
+      enableServiceLinks: false
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - configMap:
+          defaultMode: 420
+          items:
+          - key: ui
+            path: ui.json
+          name: tracing-jaeger-ui-configuration
+        name: tracing-jaeger-ui-configuration-volume
+      - configMap:
+          defaultMode: 420
+          items:
+          - key: sampling
+            path: sampling.json
+          name: tracing-jaeger-sampling-configuration
+        name: tracing-jaeger-sampling-configuration-volume

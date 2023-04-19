@@ -37,6 +37,14 @@ const {
 } = require('../utils');
 const {expect} = require('chai');
 
+const jaegerYaml = fs.readFileSync(
+    path.join(__dirname, '../jaeger/jaeger.yaml'),
+    {
+      encoding: 'utf8',
+    },
+);
+
+
 describe('Eventing tests preparation', function() {
   this.timeout(timeoutTime);
   this.slow(slowTime);
@@ -110,6 +118,10 @@ describe('Eventing tests preparation', function() {
 
   it('Prepare v1alpha2 subscriptions', async function() {
     await deployV1Alpha2Subscriptions();
+  });
+
+  if ('Should deploy jaeger', async function() {
+    await deployJaeger(k8s.loadAllYaml(jaegerYaml));
   });
 
   afterEach(async function() {
