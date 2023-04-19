@@ -135,10 +135,6 @@ global:
       version: "v2.40.7"
       directory: "prod/external/quay.io/prometheus"
       sha: ""
-    pushgateway:
-      name: "pushgateway"
-      version: v1.4.3
-      directory: "prod/external/prom"
     node_exporter:
       name: "node-exporter"
       version: "1.5.0-945764ea"

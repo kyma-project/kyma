@@ -9,6 +9,8 @@ nameOverride: ""
 fullnameOverride: ""
 
 image:
+  repository: prom/pushgateway
+  tag: v1.4.3
   pullPolicy: IfNotPresent
 
 # Optional pod imagePullSecrets

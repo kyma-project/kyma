@@ -30,7 +30,7 @@ spec:
     {{- end }}
       containers:
         - name: pushgateway
-          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.pushgateway) }}"
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
         {{- if .Values.extraVars }}
           env:
