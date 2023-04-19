@@ -39,5 +39,5 @@ global:
       directory: "prod"
     busybox:
       name: "busybox"
-      version: "1.34.1"
-      directory: "external"
+      version: "1.34.1-v1"
+      directory: "prod/external"
