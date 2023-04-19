@@ -26,7 +26,12 @@ First, find out which consumer(s) have pending messages. You can find the broken
 
 #### Option 1: Find the broken consumers with NATS cli
 
-1. Run this shell script:
+1. Port forward to a NATS replica:
+
+   ```bash
+   kubectl port-forward -n kyma-system eventing-nats-0 4222  
+
+2. Run this shell script:
 
    ```bash
    for consumer in $(nats consumer list -n sap) # sap is the stream name
@@ -42,14 +47,14 @@ First, find out which consumer(s) have pending messages. You can find the broken
    {"name":"c74c20756af53b592f87edebff67bdf8","pending":0,"leader":"eventing-nats-0"}
    ```
 
-2. Check the output to see which consumer has pending messages and which replica is the leader.
+3. Check the output to see which consumer has pending messages and which replica is the leader.
    In this example, the consumer `ebcabfe5c902612f0ba3ebde7653f30b` has 25 pending messages and has the leader.
    The other one has no pending message and is successfully processing events.
 
 #### Option 2: Find the broken consumers using Grafana dashboard
 
 1. [Access and Expose Grafana](../../security/sec-06-access-expose-grafana.md)
-2. Find the NATS JetStream Dashboard and check the pending messages
+2. Find the NATS JetStream Dashboard and check the pending messages:
    ![Pending consumer](../../assets/grafana_pending_consumer.png)
 3. Find the consumer with pending messages and encode it as an `md5` hash:
 
@@ -59,13 +64,18 @@ First, find out which consumer(s) have pending messages. You can find the broken
 
    This shell command results in `ebcabfe5c902612f0ba3ebde7653f30b`.
 
-4. Get information about the consumer:
+4. Port forward to a NATS replica:
+
+   ```bash
+   kubectl port-forward -n kyma-system eventing-nats-0 4222  
+
+5. Get information about the consumer:
 
    ```bash
    nats consumer info sap ebcabfe5c902612f0ba3ebde7653f30b
    ```
 
-5. In the output, find the consumer's leader.
+6. In the output, find the consumer's leader.
    In the following example, the leader is the `eventing-nats-1` replica:
 
    ```bash
