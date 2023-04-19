@@ -8,10 +8,11 @@ nameOverride: ""
 # Provide a name to substitute for the full names of resources
 fullnameOverride: ""
 
-image:
-  repository: prom/pushgateway
-  tag: v1.4.3
-  pullPolicy: IfNotPresent
+upstream:
+  image:
+    repository: prom/pushgateway
+    tag: v1.4.3
+    pullPolicy: IfNotPresent
 
 # Optional pod imagePullSecrets
 imagePullSecrets: []

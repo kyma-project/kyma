@@ -30,7 +30,7 @@ spec:
     {{- end }}
       containers:
         - name: pushgateway
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ .Values.upstream.image.repository }}:{{ .Values.upstream.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
         {{- if .Values.extraVars }}
           env:
