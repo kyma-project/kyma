@@ -562,7 +562,7 @@ function waitForService(name, namespace = 'default', timeout = 90_000) {
       (_type, _apiObj, watchObj) => {
         return (
           watchObj.object.metadata.name === name &&
-          watchObj.object.clusterIP
+          watchObj.object.spec.clusterIP
         );
       },
       timeout,

@@ -46,6 +46,36 @@ kind: Service
 metadata:
   labels:
     app: jaeger
+    app.kubernetes.io/component: service-collector
+    app.kubernetes.io/instance: tracing-jaeger
+    app.kubernetes.io/managed-by: jaeger-operator
+    app.kubernetes.io/name: tracing-jaeger-collector
+    app.kubernetes.io/part-of: jaeger
+  name: tracing-jaeger-collector
+  namespace: kyma-system
+spec:
+  ports:
+  - name: otlp-grpc
+    port: 4317
+    protocol: TCP
+    targetPort: 4317
+  - name: otlp-http
+    port: 4318
+    protocol: TCP
+    targetPort: 4318
+  selector:
+    app: jaeger
+    app.kubernetes.io/component: all-in-one
+    app.kubernetes.io/instance: tracing-jaeger
+    app.kubernetes.io/managed-by: jaeger-operator
+    app.kubernetes.io/name: tracing-jaeger
+    app.kubernetes.io/part-of: jaeger
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: jaeger
     app.kubernetes.io/component: service-query
     app.kubernetes.io/instance: tracing-jaeger
     app.kubernetes.io/managed-by: jaeger-operator
@@ -90,26 +120,6 @@ data:
         access: proxy
         url: http://tracing-jaeger-query.kyma-system:16686
         editable: true
----
-# Source: tracing/templates/kyma-additions/zipkin-service.yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: zipkin #zipkin service is required for istio and envoy since they use zipkin api for adding spans
-  labels:
-    app.kubernetes.io/name: tracing
-    app.kubernetes.io/instance: jaeger
-    app.kubernetes.io/component: zipkin 
-spec:
-  ports:
-  - name: http-jaeger-collector-zipkin
-    port: 9411
-    targetPort: 9411
-    protocol: TCP
-  clusterIP: None
-  selector:
-    app.kubernetes.io/name: jaeger-tracing-jaeger
-    app.kubernetes.io/instance: jaeger-tracing-jaeger
 ---
 apiVersion: apps/v1
 kind: Deployment
