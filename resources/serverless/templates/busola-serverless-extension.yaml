@@ -380,12 +380,14 @@ data:
       children:
         - path: labels
           widget: KeyValuePair
+          defaultExpanded: false
         - visibility: $boolean($root.spec.labels)
           severity: warning
           alert: "'alert.spec.labels'"
           widget: Alert
         - path: annotations
           widget: KeyValuePair
+          defaultExpanded: false
   general: |-
     resource:
       kind: Function
