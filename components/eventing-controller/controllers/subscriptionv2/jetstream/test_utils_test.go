@@ -111,8 +111,7 @@ func setupSuite() error {
 		NatsServer: natsServer,
 		TestEnv: &envtest.Environment{
 			CRDDirectoryPaths: []string{
-				filepath.Join("../../../", "config", "crd", "bases", "eventing.kyma-project.io_eventingbackends.yaml"),
-				filepath.Join("../../../", "config", "crd", "basesv1alpha2"),
+				filepath.Join("../../../", "config", "crd", "bases"),
 				filepath.Join("../../../", "config", "crd", "external"),
 			},
 			AttachControlPlaneOutput: attachControlPlaneOutput,
