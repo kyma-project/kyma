@@ -291,3 +291,17 @@ spec:
     otlp:
       endpoint:
         value: http://tracing-jaeger-collector.kyma-system.svc.cluster.local:4317
+---
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: tracing-jaeger-metrics
+  labels:
+    app.kubernetes.io/name: tracing
+    app.kubernetes.io/instance: jaeger
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: tracing-jaeger
+  mtls:
+    mode: PERMISSIVE

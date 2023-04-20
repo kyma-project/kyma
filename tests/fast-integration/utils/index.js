@@ -557,7 +557,7 @@ function waitForDeployment(name, namespace = 'default', timeout = 90_000) {
 
 function waitForService(name, namespace = 'default', timeout = 90_000) {
   return waitForK8sObject(
-      `/apis/apps/v1/namespaces/${namespace}/service`,
+      `/api/v1/namespaces/${namespace}/services/${name}`,
       {},
       (_type, _apiObj, watchObj) => {
         return (
