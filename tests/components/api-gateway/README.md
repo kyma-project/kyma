@@ -34,6 +34,7 @@ This command creates a k3d cluster on your local machine, installs Kyma on it, a
 
 ### Set the environment variables with custom domain
 
+If you are using Gardener cluster make sure your k8s cluster have cert & dns extensions. See [here](https://github.com/kyma-project/control-plane/issues/875)
 Obtain a service account access key with permissions to maintain custom domain DNS entries and export it as json. See [here](https://cloud.google.com/iam/docs/keys-create-delete).
 
 - `TEST_DOMAIN` - set this environment variable with your installed by default Kyma domain.
