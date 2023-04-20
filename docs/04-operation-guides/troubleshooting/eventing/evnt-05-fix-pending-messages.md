@@ -16,7 +16,7 @@ As a result, messages on some consumers can stop being acknowledged and start pi
 
 ## Remedy
 
-To fix the "broken" consumers with pending messages, trigger a leader reelection. You can do this either on the consumer that have pending messages, or if that fails, on the stream level.
+To fix the "broken" consumers with pending messages, trigger a leader reelection. You can do this either on the consumers that have pending messages, or if that fails, on the stream level.
 
 You need the latest version of NATS CLI installed on your machine.
 
