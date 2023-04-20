@@ -42,7 +42,7 @@ const {
 const {expect} = require('chai');
 
 const jaegerYaml = fs.readFileSync(
-    path.join(__dirname, '../jaeger/jaeger.yaml'),
+    path.join(__dirname, '../test/fixtures/jaeger/jaeger.yaml'),
     {
       encoding: 'utf8',
     },

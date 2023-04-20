@@ -1963,4 +1963,5 @@ module.exports = {
   waitForDeploymentWithLabel,
   getSubscription,
   deployJaeger,
+  waitForTracePipeline,
 };

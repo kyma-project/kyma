@@ -10,6 +10,7 @@ const {
   k8sDelete,
   sleep,
   waitForService,
+  waitForTracePipeline,
 } = require('../utils');
 const fs = require('fs');
 const path = require('path');
@@ -51,9 +52,12 @@ function istioAccessLogsTests(startTimestamp) {
       await k8sApply(istioAccessLogsResource, namespace);
       await sleep(20000);
       await waitForService('telemetry-trace-collector-internal', namespace);
+      await waitForTracePipeline('jaeger');
     });
 
     it('Should query Loki and verify format of Istio Access Logs', async () => {
+      // Sleep for 10 seconds to wait for logs to come into the istio-proxy container
+      sleep(10000);
       await loki.verifyIstioAccessLogFormat(startTimestamp);
     });
   });
