@@ -445,7 +445,6 @@ spec:
                 type: string
               runtimeImageOverride:
                 type: string
-                description: 'Deprecated: `runtimeImage` should be used when the `runtimeImageOverride` is provided in `spec`'
             type: object
         type: object
     served: true
