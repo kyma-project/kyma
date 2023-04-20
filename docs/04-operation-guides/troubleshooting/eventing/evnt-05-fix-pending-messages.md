@@ -8,23 +8,23 @@ You publish events, but some of them are not received by the subscriber and stay
 
 ## Cause
 
-When the NATS EventingBackend has more than 1 replica, and the `Clustering` property on the NATS Server is enabled, one replica is elected as leader on the stream and consumer levels (see [NATS Documentation](https://docs.nats.io/running-a-nats-service/configuration/clustering/jetstream_clustering)).
+When the NATS EventingBackend has more than 1 replica, and the `Clustering` property on the NATS Server is enabled, one replica is elected as a leader on the stream and consumer levels (see [NATS Documentation](https://docs.nats.io/running-a-nats-service/configuration/clustering/jetstream_clustering)).
 When the leader is elected, all the messages are replicated across the replicas.
 
 Sometimes replicas can go out of sync with the other replicas.
-As a result of this, messages on some consumers can stop being acknowledged and start piling up in the stream.
+As a result, messages on some consumers can stop being acknowledged and start piling up in the stream.
 
 ## Remedy
 
 To fix the "broken" consumers with pending messages, trigger a leader reelection. You can do this either on the consumer that have pending messages, or if that fails, on the stream level.
 
-You need the latest version of NATS cli installed on your machine.
+You need the latest version of NATS CLI installed on your machine.
 
 ### Consumer leader reelection
 
-First, find out which consumer(s) have pending messages. You can find the broken consumer either with the NATS cli command, or with a Grafana dashboard.
+First, find out which consumer(s) have pending messages. You can find the broken consumer either with the NATS CLI command or with a Grafana dashboard.
 
-#### Option 1: Find the broken consumers with NATS cli
+#### Option 1: Find the broken consumers with NATS CLI
 
 1. Port forward to a NATS replica:
 
@@ -53,7 +53,7 @@ First, find out which consumer(s) have pending messages. You can find the broken
 
 #### Option 2: Find the broken consumers using Grafana dashboard
 
-1. [Access and Expose Grafana](../../security/sec-06-access-expose-grafana.md)
+1. [Access and Expose Grafana](../../security/sec-06-access-expose-grafana.md).
 2. Find the NATS JetStream Dashboard and check the pending messages:
    ![Pending consumer](../../assets/grafana_pending_consumer.png)
 3. Find the consumer with pending messages and encode it as an `md5` hash:
