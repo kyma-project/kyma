@@ -116,7 +116,7 @@ func buildStateFnRunJob(expectedJob batchv1.Job) stateFn {
 
 		runtimeImage, err := getRuntimeImageFromConfigMap(ctx, r, s)
 		if err != nil {
-			return nil, errors.Wrap(err, "while extracting runtime fnImage from config map")
+			return nil, errors.Wrap(err, "while extracting runtime fn-image from config map")
 		}
 
 		condition := serverlessv1alpha2.Condition{
@@ -136,6 +136,9 @@ func getRuntimeImageFromConfigMap(ctx context.Context, r *reconciler, s *systemS
 	instance := &corev1.ConfigMap{}
 	dockerfileConfigMapName := fmt.Sprintf("dockerfile-%s", s.instance.Status.Runtime)
 	err := r.client.Get(ctx, types.NamespacedName{Namespace: s.instance.Namespace, Name: dockerfileConfigMapName}, instance)
+	if err != nil {
+		return "", errors.Wrap(err, "while extracting correct config map for given runtime")
+	}
 	baseImage := instance.Data["Dockerfile"]
 	re := regexp.MustCompile(`base_image=.*`)
 	matchedLines := re.FindStringSubmatch(baseImage)

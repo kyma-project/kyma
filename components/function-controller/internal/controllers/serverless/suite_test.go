@@ -21,7 +21,7 @@ import (
 
 const (
 	testNamespace  = "test-namespace-name"
-	fakeDockerfile = `ARG base_image={{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_runtime_python39) }}
+	fakeDockerfile = `ARG base_image=some_image
     FROM ${base_image}
     USER root
     ENV KUBELESS_INSTALL_VOLUME=/kubeless`
