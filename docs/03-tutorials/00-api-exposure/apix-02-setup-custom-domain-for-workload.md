@@ -105,7 +105,7 @@ This tutorial shows how to set up a custom domain and prepare a certificate requ
           commonName: $DOMAIN_TO_EXPOSE_WORKLOADS
         EOF
         ```
-        >**NOTE:** While using the default configuration, certificates with the Let's Encrypt issuer are valid for 90 days and automatically renewed 30 days before their validity expires. For more information, read the documentation on [Gardener Certificate Management](https://github.com/gardener/cert-management#requesting-a-certificate) and [Gardener extensions for certificate srvices](https://gardener.cloud/docs/extensions/others/gardener-extension-shoot-cert-service/).
+        >**NOTE:** While using the default configuration, certificates with the Let's Encrypt Issuer are valid for 90 days and automatically renewed 30 days before their validity expires. For more information, read the documentation on [Gardener Certificate Management](https://github.com/gardener/cert-management#requesting-a-certificate) and [Gardener extensions for certificate srvices](https://gardener.cloud/docs/extensions/others/gardener-extension-shoot-cert-service/).
 
      * To check the certificate status, run: 
      
