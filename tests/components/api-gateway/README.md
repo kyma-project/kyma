@@ -32,21 +32,13 @@ This command creates a k3d cluster on your local machine, installs Kyma on it, a
 
 ## Usage for custom-domain test suite
 
-### Prepare a secret with cloud credentials to manage DNS.
-
-Create the secret in the default namespace:
-
-```
-kubectl create secret generic google-credentials -n default --from-file=serviceaccount.json=serviceaccount.json
-```
-
 ### Set the environment variables with custom domain
 
-- `TEST_CUSTOM_DOMAIN` - set this environment variable with your desired custom domain.
+Obtain a service account access key with permissions to maintain custom domain DNS entries and export it as json. See [here](https://cloud.google.com/iam/docs/keys-create-delete).
+
 - `TEST_DOMAIN` - set this environment variable with your installed by default Kyma domain.
-
-After exporting these domains, run `make setup-custom-domain` to finish the default test setup.
-
+- `TEST_CUSTOM_DOMAIN` - set this environment variable with your custom domain.
+- `TEST_SA_ACCESS_KEY_PATH` - set this environment variable with path to a service account access key, exported as a json.
 
 ### Run the tests
 
