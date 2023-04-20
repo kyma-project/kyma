@@ -257,7 +257,7 @@ type FunctionStatus struct {
 	Commit       string `json:"commit,omitempty"`
 	RuntimeImage string `json:"runtimeImage,omitempty"`
 	// +kubebuilder:deprecatedversion:warning=this will be deprecated at v1alpha3
-	RuntimeImageOverride string `json:"runtimeImage,omitempty"`
+	RuntimeImageOverride string `json:"runtimeImageOverride,omitempty"`
 }
 
 const (
