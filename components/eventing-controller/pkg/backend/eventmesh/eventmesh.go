@@ -11,7 +11,6 @@ import (
 
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-	backendbebv1 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/beb"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 	backendutilsv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils/v2"
@@ -24,7 +23,7 @@ import (
 
 const (
 	eventMeshHandlerName      = "event-mesh-handler"
-	maxSubscriptionNameLength = 50
+	MaxSubscriptionNameLength = 50
 	eventTypeSegmentsLimit    = 7
 	subscriptionNameLogKey    = "eventMeshSubscriptionName"
 	errorLogKey               = "error"
@@ -45,7 +44,8 @@ type Backend interface {
 	DeleteSubscription(subscription *eventingv1alpha2.Subscription) error
 }
 
-func NewEventMesh(credentials *backendbebv1.OAuth2ClientCredentials, mapper backendutils.NameMapper, logger *logger.Logger) *EventMesh {
+func NewEventMesh(credentials *OAuth2ClientCredentials, mapper backendutils.NameMapper,
+	logger *logger.Logger) *EventMesh {
 	return &EventMesh{
 		oAuth2credentials: credentials,
 		logger:            logger,
@@ -59,7 +59,7 @@ type EventMesh struct {
 	protocolSettings  *backendutils.ProtocolSettings
 	namespace         string
 	eventMeshPrefix   string
-	oAuth2credentials *backendbebv1.OAuth2ClientCredentials
+	oAuth2credentials *OAuth2ClientCredentials
 	SubNameMapper     backendutils.NameMapper
 	logger            *logger.Logger
 }
@@ -86,7 +86,7 @@ func (em *EventMesh) Initialize(cfg env.Config) error {
 
 // getWebHookAuth returns the webhook auth config from the given env config
 // or returns an error if the env config contains invalid grant type or auth type.
-func getWebHookAuth(cfg env.Config, credentials *backendbebv1.OAuth2ClientCredentials) *types.WebhookAuth {
+func getWebHookAuth(cfg env.Config, credentials *OAuth2ClientCredentials) *types.WebhookAuth {
 	return &types.WebhookAuth{
 		ClientID:     credentials.ClientID,
 		ClientSecret: credentials.ClientSecret,
@@ -293,7 +293,7 @@ func (em *EventMesh) handleKymaSubStatusUpdate(eventMeshServerSub *types.Subscri
 }
 
 func (em *EventMesh) getSubscriptionIgnoreNotFound(name string) (*types.Subscription, error) {
-	httpStatusNotFoundError := backendbebv1.HTTPStatusError{StatusCode: http.StatusNotFound}
+	httpStatusNotFoundError := HTTPStatusError{StatusCode: http.StatusNotFound}
 
 	// fetch the existing subscription from EventMesh.
 	eventMeshServerSub, err := em.getSubscription(name)
@@ -312,7 +312,7 @@ func (em *EventMesh) getSubscription(name string) (*types.Subscription, error) {
 	}
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("get subscription failed: %w; %v",
-			backendbebv1.HTTPStatusError{StatusCode: resp.StatusCode}, resp.Message)
+			HTTPStatusError{StatusCode: resp.StatusCode}, resp.Message)
 	}
 	return eventMeshSubscription, nil
 }
@@ -325,7 +325,7 @@ func (em *EventMesh) deleteSubscription(name string) error {
 	}
 	if resp.StatusCode != http.StatusNoContent && resp.StatusCode != http.StatusNotFound {
 		return fmt.Errorf("delete subscription failed: %w; %v",
-			backendbebv1.HTTPStatusError{StatusCode: resp.StatusCode}, resp.Message)
+			HTTPStatusError{StatusCode: resp.StatusCode}, resp.Message)
 	}
 	return nil
 }
@@ -338,7 +338,7 @@ func (em *EventMesh) createSubscription(subscription *types.Subscription) error 
 	}
 	if createResponse.StatusCode > http.StatusAccepted && createResponse.StatusCode != http.StatusConflict {
 		return fmt.Errorf("create subscription failed: %w; %v",
-			backendbebv1.HTTPStatusError{StatusCode: createResponse.StatusCode}, createResponse.Message)
+			HTTPStatusError{StatusCode: createResponse.StatusCode}, createResponse.Message)
 	}
 	return nil
 }

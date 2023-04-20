@@ -6,19 +6,19 @@ import (
 	"testing"
 	"time"
 
+	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
+	controllertestingv2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
+
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	"github.com/nats-io/nats-server/v2/server"
 	"github.com/nats-io/nats.go"
 	"github.com/stretchr/testify/require"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/dynamic"
 
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
+	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
-	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
-	backendjetstream "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats/jetstream"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
@@ -33,23 +33,16 @@ func TestCleanup(t *testing.T) {
 	testEnv := setUpTestEnvironment(t)
 	defer controllertesting.ShutDownNATSServer(testEnv.natsServer)
 	defer testEnv.subscriber.Shutdown()
-	err := testEnv.testSendingAndReceivingAnEvent()
-	require.NoError(t, err)
+	// a consumer should exist on JetStream
 	testEnv.consumersEquals(t, 1)
 
 	// when
-	err = cleanup(testEnv.jsBackend, testEnv.dynamicClient, testEnv.defaultLogger.WithContext())
+	err := cleanupv2(testEnv.jsBackend, testEnv.dynamicClient, testEnv.defaultLogger.WithContext())
 
 	// then
 	require.NoError(t, err)
-	gotSub := testEnv.getK8sSubscription(t)
-	wantSubStatus := eventingv1alpha1.SubscriptionStatus{CleanEventTypes: []string{}}
-	require.Equal(t, wantSubStatus, gotSub.Status)
-	// test JetStream subscriptions/consumers are gone
+	// the consumer on JetStream should have being deleted
 	testEnv.consumersEquals(t, 0)
-	// eventing should fail
-	err = testEnv.testSendingAndReceivingAnEvent()
-	require.Error(t, err)
 }
 
 // utilities and helper functions
@@ -57,21 +50,12 @@ func TestCleanup(t *testing.T) {
 type TestEnvironment struct {
 	ctx           context.Context
 	dynamicClient dynamic.Interface
-	jsBackend     *backendjetstream.JetStream
+	jsBackend     *backendnats.JetStream
 	jsCtx         nats.JetStreamContext
 	natsServer    *server.Server
 	subscriber    *controllertesting.Subscriber
-	envConf       backendnats.Config
+	envConf       env.NATSConfig
 	defaultLogger *logger.Logger
-}
-
-func (te *TestEnvironment) getK8sSubscription(t *testing.T) *eventingv1alpha1.Subscription {
-	unstructuredSub, err := te.dynamicClient.Resource(controllertesting.SubscriptionGroupVersionResource()).Namespace(
-		subscriptionNamespace).Get(te.ctx, subscriptionName, metav1.GetOptions{})
-	require.NoError(t, err)
-	subscription, err := controllertesting.ToSubscription(unstructuredSub)
-	require.NoError(t, err)
-	return subscription
 }
 
 func getJetStreamClient(t *testing.T, natsURL string) nats.JetStreamContext {
@@ -82,75 +66,48 @@ func getJetStreamClient(t *testing.T, natsURL string) nats.JetStreamContext {
 	return jsClient
 }
 
-func getNATSConf(natsURL string, natsPort int) backendnats.Config {
+func getNATSConf(natsURL string, natsPort int) env.NATSConfig {
 	streamName := fmt.Sprintf("%s%d", controllertesting.JSStreamName, natsPort)
-	return backendnats.Config{
+	return env.NATSConfig{
 		URL:                     natsURL,
 		MaxReconnects:           10,
 		ReconnectWait:           time.Second,
 		EventTypePrefix:         controllertesting.EventTypePrefix,
 		JSStreamName:            streamName,
 		JSSubjectPrefix:         streamName,
-		JSStreamStorageType:     backendjetstream.StorageTypeMemory,
-		JSStreamRetentionPolicy: backendjetstream.RetentionPolicyInterest,
-		JSStreamDiscardPolicy:   backendjetstream.DiscardPolicyNew,
+		JSStreamStorageType:     backendnats.StorageTypeMemory,
+		JSStreamRetentionPolicy: backendnats.RetentionPolicyInterest,
+		JSStreamDiscardPolicy:   backendnats.DiscardPolicyNew,
 	}
 }
 
-func createAndSyncSubscription(t *testing.T, sinkURL string, jsBackend *backendjetstream.JetStream) *eventingv1alpha1.Subscription {
-	subsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 9}
+func createAndSyncSubscription(t *testing.T, sinkURL string,
+	jsBackend *backendnats.JetStream) *eventingv1alpha2.Subscription {
 	// create test subscription
-	testSub := controllertesting.NewSubscription(
+	testSub := controllertestingv2.NewSubscription(
 		subscriptionName, subscriptionNamespace,
-		controllertesting.WithFakeSubscriptionStatus(),
-		controllertesting.WithOrderCreatedFilter(),
-		controllertesting.WithSinkURL(sinkURL),
-		controllertesting.WithStatusConfig(subsConfig),
+		controllertestingv2.WithSource(controllertestingv2.EventSourceClean),
+		controllertestingv2.WithSinkURL(sinkURL),
+		controllertestingv2.WithOrderCreatedV1Event(),
+		controllertestingv2.WithStatusTypes([]eventingv1alpha2.EventType{
+			{
+				OriginalType: controllertestingv2.OrderCreatedV1Event,
+				CleanType:    controllertestingv2.OrderCreatedV1Event,
+			},
+		}),
 	)
 
-	cleaner := func(et string) (string, error) {
-		return et, nil
-	}
-	cleanEventTypes, err := backendnats.GetCleanSubjects(testSub, eventtype.CleanerFunc(cleaner))
-	require.NoError(t, err)
-	testSub.Status.CleanEventTypes = cleanEventTypes
-
 	// create NATS subscription
-	err = jsBackend.SyncSubscription(testSub)
+	err := jsBackend.SyncSubscription(testSub)
 	require.NoError(t, err)
 	return testSub
-}
-
-func (te *TestEnvironment) testSendingAndReceivingAnEvent() error {
-	data := "sampledata"
-	expectedDataInStore := fmt.Sprintf("%q", data)
-
-	// make sure subscriber is reachable via http
-	err := te.subscriber.CheckEvent("")
-	if err != nil {
-		return err
-	}
-
-	// send an event
-	err = backendjetstream.SendEventToJetStream(te.jsBackend, data)
-
-	if err != nil {
-		return err
-	}
-
-	// check for the event
-	err = te.subscriber.CheckEvent(expectedDataInStore)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func (te *TestEnvironment) consumersEquals(t *testing.T, length int) {
 	// verify that the number of consumers is one
 	info, err := te.jsCtx.StreamInfo(te.envConf.JSStreamName)
 	require.NoError(t, err)
-	require.Equal(t, info.State.Consumers, length)
+	require.Equal(t, length, info.State.Consumers)
 }
 
 func setUpTestEnvironment(t *testing.T) *TestEnvironment {
@@ -171,11 +128,11 @@ func setUpTestEnvironment(t *testing.T) *TestEnvironment {
 	// init the metrics collector
 	metricsCollector := metrics.NewCollector()
 
-	cleaner := backendnats.CreateEventTypeCleaner(controllertesting.EventTypePrefix,
-		controllertesting.ApplicationNameNotClean, defaultLogger)
+	jsCleaner := cleaner.NewJetStreamCleaner(defaultLogger)
+	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 9}
 
 	// Create an instance of the JetStream Backend
-	jsBackend := backendjetstream.NewJetStream(envConf, metricsCollector, cleaner, defaultLogger)
+	jsBackend := backendnats.NewJetStream(envConf, metricsCollector, jsCleaner, defaultSubsConfig, defaultLogger)
 
 	// Initialize JetStream Backend
 	err = jsBackend.Initialize(nil)
@@ -183,7 +140,7 @@ func setUpTestEnvironment(t *testing.T) *TestEnvironment {
 
 	testSub := createAndSyncSubscription(t, subscriber.SinkURL, jsBackend)
 	// create fake Dynamic clients
-	fakeClient, err := controllertesting.NewFakeSubscriptionClient(testSub)
+	fakeClient, err := controllertestingv2.NewFakeSubscriptionClient(testSub)
 	require.NoError(t, err)
 
 	return &TestEnvironment{

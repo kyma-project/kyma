@@ -13,7 +13,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2/mocks"
-	sinkv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink/v2"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
 	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/mock"
@@ -60,8 +60,8 @@ func Test_Reconcile(t *testing.T) {
 	missingSubSyncErr := jetstreamv2.ErrMissingSubscription
 	backendDeleteErr := errors.New("backend delete error")
 	validatorErr := errors.New("invalid sink")
-	happyValidator := sinkv2.ValidatorFunc(func(s *eventingv1alpha2.Subscription) error { return nil })
-	unhappyValidator := sinkv2.ValidatorFunc(func(s *eventingv1alpha2.Subscription) error { return validatorErr })
+	happyValidator := sink.ValidatorFunc(func(s *eventingv1alpha2.Subscription) error { return nil })
+	unhappyValidator := sink.ValidatorFunc(func(s *eventingv1alpha2.Subscription) error { return validatorErr })
 
 	var testCases = []struct {
 		name                 string
@@ -692,7 +692,7 @@ func setupTestEnvironment(t *testing.T, objs ...client.Object) *TestEnvironment 
 		t.Fatalf("initialize logger failed: %v", err)
 	}
 	jsCleaner := cleaner.NewJetStreamCleaner(defaultLogger)
-	defaultSinkValidator := sinkv2.NewValidator(ctx, fakeClient, recorder)
+	defaultSinkValidator := sink.NewValidator(ctx, fakeClient, recorder)
 
 	r := Reconciler{
 		Backend:       mockedBackend,

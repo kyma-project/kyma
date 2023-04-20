@@ -9,8 +9,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
-
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
@@ -457,7 +455,7 @@ func TestPublisherProxyDeploymentEqual(t *testing.T) {
 		LimitsCPU:      "64m",
 		LimitsMemory:   "128Mi",
 	}
-	natsConfig := backendnats.Config{
+	natsConfig := env.NATSConfig{
 		EventTypePrefix: "prefix",
 		JSStreamName:    "kyma",
 	}

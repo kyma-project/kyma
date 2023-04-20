@@ -10,7 +10,6 @@ import (
 
 	http2 "github.com/cloudevents/sdk-go/v2/protocol/http"
 
-	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
 	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 	pkgerrors "github.com/kyma-project/kyma/components/eventing-controller/pkg/errors"
 
@@ -42,7 +41,7 @@ const (
 	originalTypeHeaderName = "originaltype"
 )
 
-func NewJetStream(config backendnats.Config, metricsCollector *backendmetrics.Collector,
+func NewJetStream(config env.NATSConfig, metricsCollector *backendmetrics.Collector,
 	cleaner cleaner.Cleaner, subsConfig env.DefaultSubscriptionConfig, logger *logger.Logger) *JetStream {
 	return &JetStream{
 		Config:           config,
@@ -303,7 +302,7 @@ func (js *JetStream) initJSContext() error {
 	return nil
 }
 
-func (js *JetStream) initCloudEventClient(config backendnats.Config) error {
+func (js *JetStream) initCloudEventClient(config env.NATSConfig) error {
 	if js.client != nil {
 		return nil
 	}

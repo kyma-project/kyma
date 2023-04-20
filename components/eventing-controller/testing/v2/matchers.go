@@ -21,19 +21,11 @@ func HaveSubscriptionName(name string) gomegatypes.GomegaMatcher {
 	return WithTransform(func(s *eventingv1alpha2.Subscription) string { return s.Name }, Equal(name))
 }
 
-func HaveSubscriptionSink(sink string) gomegatypes.GomegaMatcher {
-	return WithTransform(func(s *eventingv1alpha2.Subscription) string { return s.Spec.Sink }, Equal(sink))
-}
-
 func HaveSubscriptionFinalizer(finalizer string) gomegatypes.GomegaMatcher {
 	return WithTransform(
 		func(s *eventingv1alpha2.Subscription) []string {
 			return s.ObjectMeta.Finalizers
 		}, ContainElement(finalizer))
-}
-
-func HaveSubscriptionLabels(labels map[string]string) gomegatypes.GomegaMatcher {
-	return WithTransform(func(s *eventingv1alpha2.Subscription) map[string]string { return s.Labels }, Equal(labels))
 }
 
 func IsAnEmptySubscription() gomegatypes.GomegaMatcher {
@@ -145,20 +137,4 @@ func HaveEvent(event corev1.Event) gomegatypes.GomegaMatcher {
 			"Message": Equal(event.Message),
 			"Type":    Equal(event.Type),
 		})))
-}
-
-func HaveCleanEventTypesEmpty() gomegatypes.GomegaMatcher {
-	return WithTransform(
-		func(s *eventingv1alpha2.Subscription) []eventingv1alpha2.EventType {
-			return s.Status.Types
-		},
-		BeEmpty())
-}
-
-func HaveEventMeshTypes(emsTypes []eventingv1alpha2.EventMeshTypes) gomegatypes.GomegaMatcher {
-	return WithTransform(
-		func(s *eventingv1alpha2.Subscription) []eventingv1alpha2.EventMeshTypes {
-			return s.Status.Backend.EmsTypes
-		},
-		Equal(emsTypes))
 }

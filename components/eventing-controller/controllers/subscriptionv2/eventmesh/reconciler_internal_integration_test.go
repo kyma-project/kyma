@@ -5,13 +5,14 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventmesh"
+
 	"github.com/stretchr/testify/assert"
 
 	backendutilsv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils/v2"
 
 	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/beb"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/mock"
@@ -28,7 +29,7 @@ import (
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	eventinglogger "github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventmesh/mocks"
-	sink "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink/v2"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
 	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
@@ -387,7 +388,7 @@ func Test_syncConditionSubscribed(t *testing.T) {
 	}
 
 	r := Reconciler{
-		nameMapper: backendutils.NewBEBSubscriptionNameMapper(domain, beb.MaxBEBSubscriptionNameLength),
+		nameMapper: backendutils.NewBEBSubscriptionNameMapper(domain, eventmesh.MaxSubscriptionNameLength),
 	}
 
 	for _, tc := range testCases {
@@ -488,7 +489,7 @@ func Test_syncConditionSubscriptionActive(t *testing.T) {
 	}
 
 	r := Reconciler{
-		nameMapper: backendutils.NewBEBSubscriptionNameMapper(domain, beb.MaxBEBSubscriptionNameLength),
+		nameMapper: backendutils.NewBEBSubscriptionNameMapper(domain, eventmesh.MaxSubscriptionNameLength),
 		logger:     logger,
 	}
 
@@ -865,7 +866,7 @@ type testEnvironment struct {
 	logger      *eventinglogger.Logger
 	recorder    *record.FakeRecorder
 	cfg         env.Config
-	credentials *beb.OAuth2ClientCredentials
+	credentials *eventmesh.OAuth2ClientCredentials
 	mapper      backendutils.NameMapper
 	cleaner     cleaner.Cleaner
 }
@@ -880,8 +881,8 @@ func setupTestEnvironment(t *testing.T, objs ...client.Object) *testEnvironment 
 		t.Fatalf("initialize logger failed: %v", err)
 	}
 	emptyConfig := env.Config{}
-	credentials := &beb.OAuth2ClientCredentials{}
-	nameMapper := backendutils.NewBEBSubscriptionNameMapper(domain, beb.MaxBEBSubscriptionNameLength)
+	credentials := &eventmesh.OAuth2ClientCredentials{}
+	nameMapper := backendutils.NewBEBSubscriptionNameMapper(domain, eventmesh.MaxSubscriptionNameLength)
 	cleaner := cleaner.NewEventMeshCleaner(nil)
 
 	return &testEnvironment{

@@ -24,15 +24,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	"github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/beb"
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/subscriptionv2/eventmesh"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
-	backendbeb "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/beb"
 	backendeventmesh "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventmesh"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
-	sinkv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink/v2"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 	backendutilsv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils/v2"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
@@ -73,7 +69,6 @@ type SubscriptionManager struct {
 	metricsAddr      string
 	resyncPeriod     time.Duration
 	mgr              manager.Manager
-	bebBackend       backendbeb.Backend
 	eventMeshBackend backendeventmesh.Backend
 	logger           *logger.Logger
 }
@@ -103,8 +98,6 @@ func (c *SubscriptionManager) Init(mgr manager.Manager) error {
 func (c *SubscriptionManager) Start(_ env.DefaultSubscriptionConfig, params subscriptionmanager.Params) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	c.cancel = cancel
-	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
-	applicationLister := application.NewLister(ctx, dynamicClient)
 
 	oauth2credential, err := getOAuth2ClientCredentials(params)
 	if err != nil {
@@ -113,59 +106,40 @@ func (c *SubscriptionManager) Start(_ env.DefaultSubscriptionConfig, params subs
 
 	// Need to read env to read BEB related secrets
 	c.envCfg = env.GetConfig()
-	nameMapper := utils.NewBEBSubscriptionNameMapper(strings.TrimSpace(c.envCfg.Domain), backendbeb.MaxBEBSubscriptionNameLength)
+	nameMapper := utils.NewBEBSubscriptionNameMapper(strings.TrimSpace(c.envCfg.Domain),
+		backendeventmesh.MaxSubscriptionNameLength)
 	ctrl.Log.WithName("BEB-subscription-manager").Info("using BEB name mapper",
 		"domainName", c.envCfg.Domain,
-		"maxNameLength", backendbeb.MaxBEBSubscriptionNameLength)
+		"maxNameLength", backendeventmesh.MaxSubscriptionNameLength)
 
 	client := c.mgr.GetClient()
 	recorder := c.mgr.GetEventRecorderFor("eventing-controller-beb")
-	if c.envCfg.EnableNewCRDVersion {
-		// Initialize v1alpha1 event type cleaner for conversion webhook
-		simpleCleaner := eventtype.NewSimpleCleaner(c.envCfg.EventTypePrefix, c.logger)
-		eventingv1alpha1.InitializeEventTypeCleaner(simpleCleaner)
 
-		// Initialize v1alpha2 handler for EventMesh
-		eventMeshHandler := backendeventmesh.NewEventMesh(oauth2credential, nameMapper, c.logger)
-		eventMeshcleaner := cleaner.NewEventMeshCleaner(c.logger)
-		eventMeshReconciler := eventmesh.NewReconciler(
-			ctx,
-			client,
-			c.logger,
-			recorder,
-			c.envCfg,
-			eventMeshcleaner,
-			eventMeshHandler,
-			oauth2credential,
-			nameMapper,
-			sinkv2.NewValidator(ctx, client, recorder),
-		)
-		c.eventMeshBackend = eventMeshReconciler.Backend
-		if err := eventMeshReconciler.SetupUnmanaged(c.mgr); err != nil {
-			return xerrors.Errorf("setup EventMesh subscription controller failed: %v", err)
-		}
-		c.namedLogger().Info("Started v1alpha2 EventMesh subscription manager")
-	} else {
-		bebHandler := backendbeb.NewBEB(oauth2credential, nameMapper, c.logger)
-		eventMeshcleaner := eventtype.NewCleaner(c.envCfg.EventTypePrefix, applicationLister, c.logger)
-		bebReconciler := beb.NewReconciler(
-			ctx,
-			client,
-			c.logger,
-			recorder,
-			c.envCfg,
-			eventMeshcleaner,
-			bebHandler,
-			oauth2credential,
-			nameMapper,
-			sink.NewValidator(ctx, client, recorder, c.logger),
-		)
-		c.bebBackend = bebReconciler.Backend
-		if err := bebReconciler.SetupUnmanaged(c.mgr); err != nil {
-			return xerrors.Errorf("setup BEB subscription controller failed: %v", err)
-		}
-		c.namedLogger().Info("Started BEB subscription manager")
+	// Initialize v1alpha1 event type cleaner for conversion webhook
+	simpleCleaner := eventtype.NewSimpleCleaner(c.envCfg.EventTypePrefix, c.logger)
+	eventingv1alpha1.InitializeEventTypeCleaner(simpleCleaner)
+
+	// Initialize v1alpha2 handler for EventMesh
+	eventMeshHandler := backendeventmesh.NewEventMesh(oauth2credential, nameMapper, c.logger)
+	eventMeshcleaner := cleaner.NewEventMeshCleaner(c.logger)
+	eventMeshReconciler := eventmesh.NewReconciler(
+		ctx,
+		client,
+		c.logger,
+		recorder,
+		c.envCfg,
+		eventMeshcleaner,
+		eventMeshHandler,
+		oauth2credential,
+		nameMapper,
+		sink.NewValidator(ctx, client, recorder),
+	)
+	c.eventMeshBackend = eventMeshReconciler.Backend
+	if err := eventMeshReconciler.SetupUnmanaged(c.mgr); err != nil {
+		return xerrors.Errorf("setup EventMesh subscription controller failed: %v", err)
 	}
+	c.namedLogger().Info("Started v1alpha2 EventMesh subscription manager")
+
 	return nil
 }
 
@@ -177,21 +151,7 @@ func (c *SubscriptionManager) Stop(runCleanup bool) error {
 		c.cancel()
 	}
 
-	if c.envCfg.EnableNewCRDVersion {
-		return c.stopEventMeshBackend(runCleanup)
-	}
-
-	return c.stopBebBackend(runCleanup)
-}
-
-// stopBebBackend stops and cleans all EventMesh backend (based on Subscription v1alpha1).
-func (c *SubscriptionManager) stopBebBackend(runCleanup bool) error {
-	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
-	if !runCleanup {
-		return markAllSubscriptionsAsNotReady(dynamicClient, c.namedLogger())
-	}
-
-	return cleanup(c.bebBackend, dynamicClient, c.namedLogger())
+	return c.stopEventMeshBackend(runCleanup)
 }
 
 // stopEventMeshBackend stops and cleans all EventMesh backend (based on Subscription v1alpha2).
@@ -229,85 +189,6 @@ func markAllV1Alpha2SubscriptionsAsNotReady(dynamicClient dynamic.Interface, log
 		}
 	}
 	return err
-}
-
-func markAllSubscriptionsAsNotReady(dynamicClient dynamic.Interface, logger *zap.SugaredLogger) error {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	// Fetch all subscriptions.
-	subscriptionsUnstructured, err := dynamicClient.Resource(utils.SubscriptionGroupVersionResource()).Namespace(corev1.NamespaceAll).List(ctx, metav1.ListOptions{})
-	if err != nil {
-		return errors.Wrapf(err, "list subscriptions failed")
-	}
-	subs, err := utils.ToSubscriptionList(subscriptionsUnstructured)
-	if err != nil {
-		return errors.Wrapf(err, "convert subscriptionList from unstructured list failed")
-	}
-	// Mark all as not ready
-	for _, sub := range subs.Items {
-		if !sub.Status.Ready {
-			continue
-		}
-		desiredSub := utils.SetStatusAsNotReady(sub)
-		if err = utils.UpdateSubscriptionStatus(ctx, dynamicClient, desiredSub); err != nil {
-			logger.Errorw("Failed to update BEB subscription status", "namespace", sub.Namespace, "name", sub.Name, "error", err)
-		}
-	}
-	return err
-}
-
-// cleanup removes all created BEB artifacts (based on Subscription v1alpha1).
-// This method will be depreciated once Subscription v1alpha2 is active.
-func cleanup(backend backendbeb.Backend, dynamicClient dynamic.Interface, logger *zap.SugaredLogger) error {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	var bebBackend *backendbeb.BEB
-	var ok bool
-	if bebBackend, ok = backend.(*backendbeb.BEB); !ok {
-		return xerrors.Errorf("no BEB backend exists: convert backend handler to BEB handler failed")
-	}
-
-	// Fetch all subscriptions.
-	subscriptionsUnstructured, err := dynamicClient.Resource(utils.SubscriptionGroupVersionResource()).Namespace(corev1.NamespaceAll).List(ctx, metav1.ListOptions{})
-	if err != nil {
-		return errors.Wrapf(err, "list subscriptions failed")
-	}
-	subs, err := utils.ToSubscriptionList(subscriptionsUnstructured)
-	if err != nil {
-		return errors.Wrapf(err, "convert subscriptionList from unstructured list failed")
-	}
-
-	// Clean APIRules.
-	isCleanupSuccessful := true
-	for _, v := range subs.Items {
-		sub := v
-		if apiRule := sub.Status.APIRuleName; apiRule != "" {
-			if err := dynamicClient.Resource(utils.APIRuleGroupVersionResource()).Namespace(sub.Namespace).
-				Delete(ctx, apiRule, metav1.DeleteOptions{}); err != nil {
-				isCleanupSuccessful = false
-				logger.Errorw("Failed to delete APIRule", "namespace", sub.Namespace, "name", apiRule, "error", err)
-			}
-		}
-
-		// Clean statuses.
-		desiredSub := utils.ResetStatusToDefaults(sub)
-		if err := utils.UpdateSubscriptionStatus(ctx, dynamicClient, desiredSub); err != nil {
-			isCleanupSuccessful = false
-			logger.Errorw("Failed to update BEB subscription status", "namespace", sub.Namespace, "name", sub.Name, "error", err)
-		}
-
-		// Clean subscriptions from BEB.
-		if bebBackend != nil {
-			if err := bebBackend.DeleteSubscription(&sub); err != nil {
-				isCleanupSuccessful = false
-				logger.Errorw("Failed to delete BEB subscription", "namespace", sub.Namespace, "name", sub.Name, "error", err)
-			}
-		}
-	}
-
-	logger.Debugw("Finished cleanup process", "success", isCleanupSuccessful)
-	return nil
 }
 
 // cleanupEventMesh removes all created EventMesh artifacts (based on Subscription v1alpha2).
@@ -363,7 +244,7 @@ func cleanupEventMesh(backend backendeventmesh.Backend, dynamicClient dynamic.In
 	return nil
 }
 
-func getOAuth2ClientCredentials(params subscriptionmanager.Params) (*backendbeb.OAuth2ClientCredentials, error) {
+func getOAuth2ClientCredentials(params subscriptionmanager.Params) (*backendeventmesh.OAuth2ClientCredentials, error) {
 	val := params["client_id"]
 	id, ok := val.([]byte)
 	if !ok {
@@ -374,7 +255,7 @@ func getOAuth2ClientCredentials(params subscriptionmanager.Params) (*backendbeb.
 	if !ok {
 		return nil, fmt.Errorf("expected []byte value for client_secret, but received %T", val)
 	}
-	return &backendbeb.OAuth2ClientCredentials{
+	return &backendeventmesh.OAuth2ClientCredentials{
 		ClientID:     string(id),
 		ClientSecret: string(secret),
 	}, nil
