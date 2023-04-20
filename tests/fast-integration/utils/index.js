@@ -1843,9 +1843,28 @@ function waitForDeploymentWithLabel(
   );
 }
 
+function waitForTracePipeline(name, timeout = 90_000) {
+  return waitForK8sObject(
+      `/apis/telemetry.kyma-project.io/v1alpha1/tracepipelines`,
+      {},
+      (_type, _apiObj, watchObj) => {
+        return (
+          watchObj.object.metadata.name === name &&
+        watchObj.object.status.conditions &&
+        watchObj.object.status.conditions.some(
+            (c) => c.type === 'Running',
+        )
+        );
+      },
+      timeout,
+      `Waiting for Tracepipeline ${name} timeout (${timeout} ms)`,
+  );
+}
+
 async function deployJaeger(jaegerObj) {
   await k8sApply(jaegerObj, 'kyma-system').catch(console.error);
   await waitForDeployment('tracing-jaeger', 'kyma-system');
+  await waitForTracePipeline('jaeger');
 }
 
 module.exports = {

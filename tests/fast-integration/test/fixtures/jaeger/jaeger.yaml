@@ -271,3 +271,13 @@ spec:
             path: sampling.json
           name: tracing-jaeger-sampling-configuration
         name: tracing-jaeger-sampling-configuration-volume
+---
+apiVersion: telemetry.kyma-project.io/v1alpha1
+kind: TracePipeline
+metadata:
+  name: jaeger
+spec:
+  output:
+    otlp:
+      endpoint:
+        value: http://tracing-jaeger-collector.kyma-system.svc.cluster.local:4317
