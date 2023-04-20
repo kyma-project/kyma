@@ -249,13 +249,14 @@ type Repository struct {
 
 // FunctionStatus defines the observed state of Function
 type FunctionStatus struct {
-	Runtime              Runtime     `json:"runtime,omitempty"`
-	Conditions           []Condition `json:"conditions,omitempty"`
-	Repository           `json:",inline,omitempty"`
-	Replicas             int32  `json:"replicas,omitempty"`
-	PodSelector          string `json:"podSelector,omitempty"`
-	Commit               string `json:"commit,omitempty"`
-	RuntimeImage         string `json:"runtimeImage,omitempty"`
+	Runtime      Runtime     `json:"runtime,omitempty"`
+	Conditions   []Condition `json:"conditions,omitempty"`
+	Repository   `json:",inline,omitempty"`
+	Replicas     int32  `json:"replicas,omitempty"`
+	PodSelector  string `json:"podSelector,omitempty"`
+	Commit       string `json:"commit,omitempty"`
+	RuntimeImage string `json:"runtimeImage,omitempty"`
+	// +kubebuilder:deprecatedversion:warning=this will be deprecated at v1alpha3
 	RuntimeImageOverride string `json:"runtimeImage,omitempty"`
 }
 
