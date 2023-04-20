@@ -50,7 +50,7 @@ function istioAccessLogsTests(startTimestamp) {
     it('Should create the Istio Access Logs resource for Loki', async () => {
       await k8sApply(istioAccessLogsResource, namespace);
       await sleep(20000);
-      waitForService('telemetry-trace-collector-internal', 'kyma-system');
+      await waitForService('telemetry-trace-collector-internal', 'kyma-system');
     });
 
     it('Should query Loki and verify format of Istio Access Logs', async () => {
