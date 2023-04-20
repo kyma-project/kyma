@@ -24,7 +24,7 @@ test: ## Run the tests of the project
 	$(GOTEST) -run TestApiGateway . -v -race
 
 test-custom-domain:
-	source ./custom_domain_test_env.sh && bash -c "trap 'kubectl delete secret generic google-credentials -n default' EXIT; \
+	source ./custom_domain_test_env.sh && bash -c "trap 'kubectl delete secret google-credentials -n default' EXIT; \
              kubectl create secret generic google-credentials -n default --from-file=serviceaccount.json=${TEST_SA_ACCESS_KEY_PATH}; \
              GODEBUG=netdns=cgo CGO_ENABLED=1 $(GOTEST) -run "^TestCustomDomain$$" . -v -race"
 
