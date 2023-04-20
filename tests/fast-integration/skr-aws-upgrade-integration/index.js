@@ -55,6 +55,7 @@ describe('SKR-Upgrade-test', function() {
   oidcE2ETest(getShootOptionsFunc, getShootInfoFunc);
 
   it('Perform Upgrade', async function() {
+    console.log('Performing upgrade');
     await upgradeSKRInstance(options, kymaUpgradeVersion, upgradeTimeoutMin);
   });
 
