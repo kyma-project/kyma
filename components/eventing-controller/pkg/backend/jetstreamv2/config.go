@@ -1,12 +1,10 @@
 package jetstreamv2
 
-import (
-	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
-)
+import "github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 
 // Validate ensures that the NatsConfig is valid and therefore can be used safely.
 // TODO: as soon as backend/nats is gone, make this method a function of backendnats.Config.
-func Validate(natsConfig backendnats.Config) error {
+func Validate(natsConfig env.NATSConfig) error {
 	if natsConfig.JSStreamName == "" {
 		return ErrEmptyStreamName
 	}

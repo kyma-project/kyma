@@ -18,15 +18,8 @@ VERIFY_IGNORE := /vendor\|/mocks
 IMG ?= eventing-controller:latest
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 #
-ifeq ($(shell echo $(ENABLE_NEW_CRD_VERSION)), false)
-# If new ENABLE_NEW_CRD_VERSION is disabled then do not generate changes
-# for v1alpha2 in yaml files
-CRD_OPTIONS ?= "crd:trivialVersions=true,preserveUnknownFields=false"
-MANIFEST_PATH ?= "./api/v1alpha1"
-else
 CRD_OPTIONS ?= "crd"
 MANIFEST_PATH ?= "./..."
-endif
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
@@ -68,7 +61,6 @@ deploy-dry-run: manifests-local copy-crds copy-external-crds set-up-local-env ##
 
 manifests-local: controller-gen-local ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
 	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths=$(MANIFEST_PATH) output:crd:artifacts:config=config/crd/bases
-	$(CONTROLLER_GEN) crd rbac:roleName=manager-role webhook paths="./api/v1alpha2" output:crd:artifacts:config=config/crd/basesv1alpha2 # used in reconciler testing
 
 generate-local: controller-gen-local ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
@@ -77,7 +69,6 @@ set-up-local-env:
 	export NATS_URL ?= eventing-nats.kyma-system.svc.cluster.local
 	export DOMAIN ?= example-domain.com
 	export WEBHOOK_TOKEN_ENDPOINT ?= "https://oauth2.${DOMAIN}/oauth2/token"
-	export ENABLE_NEW_CRD_VERSION ?= true
 
 ENVTEST_ASSETS_DIR=$(PROJECT_DIR)/testbin/$(shell uname)
 test-local: go-test; ## Run tests.
@@ -127,15 +118,9 @@ path-to-referenced-charts:
 ##@ CRD
 
 copy-crds: manifests-local ## copy Eventing CRDs to installation/eventing
-	# patch the CRD only if the new CRD version is enabled
-	@if [ "$(ENABLE_NEW_CRD_VERSION)" = "false" ]; \
- 		then cp ./config/crd/bases/eventing.kyma-project.io_subscriptions.yaml ./../../installation/resources/crds/eventing/subscriptions.eventing.kyma-project.io.crd.yaml; \
- 	else \
-		rm -rf $(HELM_TEMPLATE_CRD_PATCHES_DIR); mkdir $(HELM_TEMPLATE_CRD_PATCHES_DIR); kustomize build config/crd -o $(HELM_TEMPLATE_CRD_PATCHES_DIR); \
-		cp ./$(HELM_TEMPLATE_CRD_PATCHES_DIR)/apiextensions.k8s.io_v1_customresourcedefinition_subscriptions.eventing.kyma-project.io.yaml ./../../installation/resources/crds/eventing/subscriptions.eventing.kyma-project.io.crd.yaml; \
- 		rm -rf $(HELM_TEMPLATE_CRD_PATCHES_DIR); \
- 	fi
+	cp ./config/crd/bases/eventing.kyma-project.io_subscriptions.yaml ./../../installation/resources/crds/eventing/subscriptions.eventing.kyma-project.io.crd.yaml
 	cp ./config/crd/bases/eventing.kyma-project.io_eventingbackends.yaml ./../../installation/resources/crds/eventing/eventingbackends.eventing.kyma-project.io.crd.yaml
+
 copy-external-crds: ## copy external CRDs to config/crd/external
 	mkdir -p config/crd/external
 	cp ../../installation/resources/crds/api-gateway/apirules.gateway.crd.yaml config/crd/external/apirules-gateway-kyma-project-io.yaml

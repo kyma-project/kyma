@@ -3,7 +3,6 @@ package jetstreamv2
 import (
 	"sync"
 
-	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
 	backendutilsv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils/v2"
 
 	cev2 "github.com/cloudevents/sdk-go/v2"
@@ -40,7 +39,7 @@ type Backend interface {
 }
 
 type JetStream struct {
-	Config        backendnats.Config
+	Config        env.NATSConfig
 	Conn          *nats.Conn
 	jsCtx         nats.JetStreamContext
 	client        cev2.Client

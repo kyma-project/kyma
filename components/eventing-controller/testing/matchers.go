@@ -1,16 +1,11 @@
 package testing
 
 import (
-	"reflect"
-
 	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
-	"github.com/nats-io/nats.go"
 	. "github.com/onsi/gomega"         //nolint:revive,stylecheck // using . import for convenience
 	. "github.com/onsi/gomega/gstruct" //nolint:revive,stylecheck // using . import for convenience
 	gomegatypes "github.com/onsi/gomega/types"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
@@ -20,39 +15,6 @@ import (
 //
 // string matchers
 //
-
-func HaveSubscriptionName(name string) gomegatypes.GomegaMatcher {
-	return WithTransform(func(s *eventingv1alpha1.Subscription) string { return s.Name }, Equal(name))
-}
-
-func HaveSubscriptionSink(sink string) gomegatypes.GomegaMatcher {
-	return WithTransform(func(s *eventingv1alpha1.Subscription) string { return s.Spec.Sink }, Equal(sink))
-}
-
-func HaveSubscriptionFinalizer(finalizer string) gomegatypes.GomegaMatcher {
-	return WithTransform(func(s *eventingv1alpha1.Subscription) []string { return s.ObjectMeta.Finalizers }, ContainElement(finalizer))
-}
-
-func HaveSubscriptionLabels(labels map[string]string) gomegatypes.GomegaMatcher {
-	return WithTransform(func(s *eventingv1alpha1.Subscription) map[string]string { return s.Labels }, Equal(labels))
-}
-
-func HaveNotFoundSubscription() gomegatypes.GomegaMatcher {
-	return WithTransform(func(isDeleted bool) bool { return isDeleted }, BeTrue())
-}
-
-func HaveSubsConfiguration(subsConf *eventingv1alpha1.SubscriptionConfig) gomegatypes.GomegaMatcher {
-	return WithTransform(func(s *eventingv1alpha1.Subscription) *eventingv1alpha1.SubscriptionConfig {
-		return s.Status.Config
-	}, Equal(subsConf))
-}
-
-func IsAnEmptySubscription() gomegatypes.GomegaMatcher {
-	return WithTransform(func(s *eventingv1alpha1.Subscription) bool {
-		emptySub := eventingv1alpha1.Subscription{}
-		return reflect.DeepEqual(*s, emptySub)
-	}, BeTrue())
-}
 
 func HaveEventingBackendReady() gomegatypes.GomegaMatcher {
 	return WithTransform(func(s *eventingv1alpha1.EventingBackendStatus) bool {
@@ -84,36 +46,6 @@ func HaveNotEmptyHost() gomegatypes.GomegaMatcher {
 	return WithTransform(func(a apigatewayv1beta1.APIRule) bool {
 		return a.Spec.Service != nil && a.Spec.Host != nil
 	}, BeTrue())
-}
-
-func HaveAPIRuleGateway(gateway string) gomegatypes.GomegaMatcher {
-	return WithTransform(func(a apigatewayv1beta1.APIRule) string {
-		if a.Spec.Gateway == nil {
-			return ""
-		}
-		return *a.Spec.Gateway
-	}, Equal(gateway))
-}
-
-func HaveAPIRuleLabels(labels map[string]string) gomegatypes.GomegaMatcher {
-	return WithTransform(func(a apigatewayv1beta1.APIRule) map[string]string {
-		return a.Labels
-	}, Equal(labels))
-}
-
-func HaveAPIRuleService(serviceName string, port uint32, domain string) gomegatypes.GomegaMatcher {
-	return WithTransform(func(a apigatewayv1beta1.APIRule) apigatewayv1beta1.Service {
-		if a.Spec.Service == nil {
-			return apigatewayv1beta1.Service{}
-		}
-		return *a.Spec.Service
-	}, MatchFields(IgnoreMissing|IgnoreExtras, Fields{
-		"Port":       PointTo(Equal(port)),
-		"Name":       PointTo(Equal(serviceName)),
-		"Host":       PointTo(ContainSubstring(domain)),
-		"IsExternal": PointTo(BeTrue()),
-	}),
-	)
 }
 
 func HaveAPIRuleSpecRules(ruleMethods []string, accessStrategy, path string) gomegatypes.GomegaMatcher {
@@ -149,79 +81,12 @@ func HaveAPIRuleOwnersRefs(uids ...types.UID) gomegatypes.GomegaMatcher {
 // Subscription matchers
 //
 
-func HaveNoneEmptyAPIRuleName() gomegatypes.GomegaMatcher {
-	return WithTransform(func(s *eventingv1alpha1.Subscription) string {
-		return s.Status.APIRuleName
-	}, Not(BeEmpty()))
-}
-
-func HaveAPIRuleName(name string) gomegatypes.GomegaMatcher {
-	return WithTransform(func(s *eventingv1alpha1.Subscription) bool {
-		return s.Status.APIRuleName == name
-	}, BeTrue())
-}
-
-func HaveSubscriptionReady() gomegatypes.GomegaMatcher {
-	return WithTransform(func(s *eventingv1alpha1.Subscription) bool {
-		return s.Status.Ready
-	}, BeTrue())
-}
-
-func HaveSubscriptionNotReady() gomegatypes.GomegaMatcher {
-	return WithTransform(func(s *eventingv1alpha1.Subscription) bool {
-		return s.Status.Ready
-	}, BeFalse())
-}
-
-func HaveCondition(condition eventingv1alpha1.Condition) gomegatypes.GomegaMatcher {
-	return WithTransform(func(s *eventingv1alpha1.Subscription) []eventingv1alpha1.Condition { return s.Status.Conditions }, ContainElement(MatchFields(IgnoreExtras|IgnoreMissing, Fields{
-		"Type":    Equal(condition.Type),
-		"Reason":  Equal(condition.Reason),
-		"Message": Equal(condition.Message),
-		"Status":  Equal(condition.Status),
-	})))
-}
-
 func HaveBackendCondition(condition eventingv1alpha1.Condition) gomegatypes.GomegaMatcher {
 	return WithTransform(func(s *eventingv1alpha1.EventingBackendStatus) []eventingv1alpha1.Condition { return s.Conditions }, ContainElement(MatchFields(IgnoreExtras|IgnoreMissing, Fields{
 		"Type":   Equal(condition.Type),
 		"Reason": Equal(condition.Reason),
 		"Status": Equal(condition.Status),
 	})))
-}
-
-func HaveConditionBadSubject() gomegatypes.GomegaMatcher {
-	condition := eventingv1alpha1.MakeCondition(
-		eventingv1alpha1.ConditionSubscriptionActive,
-		eventingv1alpha1.ConditionReasonNATSSubscriptionNotActive,
-		corev1.ConditionFalse, "failed to get clean subjects: "+nats.ErrBadSubject.Error(),
-	)
-	return HaveCondition(condition)
-}
-
-func HaveConditionInvalidPrefix() gomegatypes.GomegaMatcher {
-	condition := eventingv1alpha1.MakeCondition(
-		eventingv1alpha1.ConditionSubscriptionActive,
-		eventingv1alpha1.ConditionReasonNATSSubscriptionNotActive,
-		corev1.ConditionFalse, "failed to get clean subjects: prefix not found",
-	)
-	return HaveCondition(condition)
-}
-
-func HaveCleanEventTypes(cleanEventTypes []string) gomegatypes.GomegaMatcher {
-	return WithTransform(
-		func(s *eventingv1alpha1.Subscription) []string {
-			return s.Status.CleanEventTypes
-		},
-		Equal(cleanEventTypes))
-}
-
-func HaveCleanEventTypesEmpty() gomegatypes.GomegaMatcher {
-	return WithTransform(
-		func(s *eventingv1alpha1.Subscription) []string {
-			return s.Status.CleanEventTypes
-		},
-		BeEmpty())
 }
 
 func HaveEvent(event corev1.Event) gomegatypes.GomegaMatcher {
@@ -232,17 +97,9 @@ func HaveEvent(event corev1.Event) gomegatypes.GomegaMatcher {
 	})))
 }
 
-func IsK8sUnprocessableEntity() gomegatypes.GomegaMatcher {
-	return WithTransform(func(err *errors.StatusError) metav1.StatusReason { return err.ErrStatus.Reason }, Equal(metav1.StatusReasonInvalid))
-}
-
 //
 // int matchers
 //
-
-func BeGreaterThanOrEqual(a int) gomegatypes.GomegaMatcher {
-	return WithTransform(func(b int) bool { return b >= a }, BeTrue())
-}
 
 func HaveValidClientID(clientIDKey, clientID string) gomegatypes.GomegaMatcher {
 	return WithTransform(func(secret *corev1.Secret) bool {

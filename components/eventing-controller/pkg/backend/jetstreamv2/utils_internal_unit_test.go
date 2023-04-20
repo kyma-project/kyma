@@ -7,7 +7,6 @@ import (
 	"reflect"
 	"testing"
 
-	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/nats-io/nats.go"
 
@@ -108,13 +107,13 @@ func TestGetStreamConfig(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
 		name             string
-		givenNATSConfig  backendnats.Config
+		givenNATSConfig  env.NATSConfig
 		wantStreamConfig *nats.StreamConfig
 		wantError        bool
 	}{
 		{
 			name: "Should throw an error if storage type is invalid",
-			givenNATSConfig: backendnats.Config{
+			givenNATSConfig: env.NATSConfig{
 				JSStreamStorageType: "invalid",
 			},
 			wantStreamConfig: nil,
@@ -122,7 +121,7 @@ func TestGetStreamConfig(t *testing.T) {
 		},
 		{
 			name: "Should throw an error if retention policy is invalid",
-			givenNATSConfig: backendnats.Config{
+			givenNATSConfig: env.NATSConfig{
 				JSStreamRetentionPolicy: "invalid",
 			},
 			wantStreamConfig: nil,
@@ -130,7 +129,7 @@ func TestGetStreamConfig(t *testing.T) {
 		},
 		{
 			name: "Should return valid StreamConfig",
-			givenNATSConfig: backendnats.Config{
+			givenNATSConfig: env.NATSConfig{
 				JSStreamName:            DefaultStreamName,
 				JSSubjectPrefix:         DefaultJetStreamSubjectPrefix,
 				JSStreamStorageType:     StorageTypeMemory,
@@ -154,7 +153,7 @@ func TestGetStreamConfig(t *testing.T) {
 		},
 		{
 			name: "Should parse MaxBytes correctly without unit",
-			givenNATSConfig: backendnats.Config{
+			givenNATSConfig: env.NATSConfig{
 				JSStreamName:            DefaultStreamName,
 				JSSubjectPrefix:         DefaultJetStreamSubjectPrefix,
 				JSStreamStorageType:     StorageTypeMemory,
@@ -178,7 +177,7 @@ func TestGetStreamConfig(t *testing.T) {
 		},
 		{
 			name: "Should parse MaxBytes correctly with unit",
-			givenNATSConfig: backendnats.Config{
+			givenNATSConfig: env.NATSConfig{
 				JSStreamName:            DefaultStreamName,
 				JSSubjectPrefix:         DefaultJetStreamSubjectPrefix,
 				JSStreamStorageType:     StorageTypeMemory,
@@ -313,7 +312,7 @@ func TestGetBackendJetStreamTypes(t *testing.T) {
 	t.Parallel()
 	jsCleaner := cleaner.NewJetStreamCleaner(nil)
 	defaultSub := evtestingv2.NewSubscription(subName, subNamespace)
-	js := NewJetStream(backendnats.Config{
+	js := NewJetStream(env.NATSConfig{
 		JSSubjectPrefix: DefaultJetStreamSubjectPrefix,
 	}, nil, jsCleaner, env.DefaultSubscriptionConfig{}, nil)
 	testCases := []struct {

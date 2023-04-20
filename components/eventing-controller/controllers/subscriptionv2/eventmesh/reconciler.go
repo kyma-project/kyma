@@ -10,7 +10,6 @@ import (
 
 	recerrors "github.com/kyma-project/kyma/components/eventing-controller/controllers/errors"
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/beb"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
@@ -40,7 +39,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-	sink "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink/v2"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
 	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 	backendutilsv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils/v2"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
@@ -55,7 +54,7 @@ type Reconciler struct {
 	Backend           eventmesh.Backend
 	Domain            string
 	cleaner           cleaner.Cleaner
-	oauth2credentials *beb.OAuth2ClientCredentials
+	oauth2credentials *eventmesh.OAuth2ClientCredentials
 	// nameMapper is used to map the Kyma subscription name to a subscription name on EventMesh.
 	nameMapper    backendutils.NameMapper
 	sinkValidator sink.Validator
@@ -73,7 +72,7 @@ const (
 
 func NewReconciler(ctx context.Context, client client.Client, logger *logger.Logger, recorder record.EventRecorder,
 	cfg env.Config, cleaner cleaner.Cleaner, eventMeshBackend eventmesh.Backend,
-	credential *beb.OAuth2ClientCredentials, mapper backendutils.NameMapper, validator sink.Validator) *Reconciler {
+	credential *eventmesh.OAuth2ClientCredentials, mapper backendutils.NameMapper, validator sink.Validator) *Reconciler {
 	if err := eventMeshBackend.Initialize(cfg); err != nil {
 		logger.WithContext().Errorw("Failed to start reconciler", "name",
 			reconcilerName, "error", err)
