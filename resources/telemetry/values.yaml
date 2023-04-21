@@ -1,6 +1,6 @@
 global:
   containerRegistry:
-    path: europe-docker.pkg.dev/kyma-project
+    path: eu.gcr.io/kyma-project
   images:
     directory_size_exporter:
       name: "directory-size-exporter"
