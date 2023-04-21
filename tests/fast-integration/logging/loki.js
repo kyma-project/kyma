@@ -67,6 +67,7 @@ async function verifyIstioAccessLogFormat(startTimestamp) {
   let log;
   const result = responseBody.data.result[0];
   console.log(numberOfLogs);
+  console.log(responseBody.data.result[0].values);
   for (let i =0; i<= numberOfLogs; i++) {
     // Some logs dont have values[i][1]. In such a case skip the log line
     console.log(Array.isArray(result.values[i]));
@@ -82,6 +83,7 @@ async function verifyIstioAccessLogFormat(startTimestamp) {
     if (isJsonString(val[1])) {
       log = JSON.parse(val[1]);
       if (typeof log['method'] === 'undefined') {
+        console.log('skipping while method is not present' + JSON.stringify(log) + '\n');
         continue;
       }
       verifyLogAttributeIsPresent('method', log);
