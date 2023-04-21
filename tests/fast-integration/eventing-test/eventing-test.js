@@ -92,12 +92,6 @@ describe('Eventing tests', function() {
     await waitForNamespace(testNamespace);
   });
 
-  before('Ensure tracing is ready', async function() {
-    await waitForPodWithLabelAndCondition(jaegerLabel.key, jaegerLabel.value, kymaSystem, conditionReady.condition,
-        conditionReady.status);
-    await waitForEndpoint(jaegerEndpoint, kymaSystem);
-  });
-
   before('Expose Grafana', async function() {
     await exposeGrafana();
     this.test.retries(3);

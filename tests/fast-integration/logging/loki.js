@@ -62,15 +62,16 @@ async function verifyIstioAccessLogFormat(startTimestamp) {
   const responseBody = await queryLoki(query, startTimestamp);
   assert.isTrue(responseBody.data.result[0].values.length > 0, 'No Istio access logs found for loki');
   // Iterate over the values
-  const numberOfLogs = responseBody.data.result[0].values.length;
+  const numberOfLogs = responseBody.data.result[0];
   let entry;
   let log;
+  const result = responseBody.data.result[0];
   for (let i =0; i<= numberOfLogs; i++) {
     // Some logs dont have values[i][1]. In such a case skip the log line
-    if (typeof responseBody.data.result[0].values[i][1] === 'undefined') {
+    if ( !Array.isArray(result.values[i])) {
       continue;
     }
-    entry = JSON.parse(responseBody.data.result[0].values[i][1]);
+    entry = JSON.parse(result.values[i][1]);
     log = parseJson(entry.log);
     if (isJsonString(entry.log) ) {
       verifyLogAttributeIsPresent('method', log);
