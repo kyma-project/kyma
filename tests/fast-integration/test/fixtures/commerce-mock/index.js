@@ -737,7 +737,6 @@ async function provisionCommerceMockResources(appName, mockNamespace, targetName
         targetNamespace),
   ]);
   await waitForDeployment('commerce-mock', mockNamespace, 120 * 1000);
-  console.log('i am invoked');
   await deployJaeger(k8s.loadAllYaml(jaegerYaml));
   const vs = await waitForVirtualService(mockNamespace, 'commerce-mock');
   const mockHost = vs.spec.hosts[0];
