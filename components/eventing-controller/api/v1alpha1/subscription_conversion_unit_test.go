@@ -9,8 +9,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 
-	testingv1 "github.com/kyma-project/kyma/components/eventing-controller/testing"
-	testingv2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
+	eventingtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
@@ -31,28 +30,28 @@ func Test_Conversion(t *testing.T) {
 		{
 			name: "Converting NATS Subscription with empty Status",
 			alpha1Sub: newDefaultSubscription(
-				testingv1.WithEmptyFilter(),
-				testingv1.WithEmptyConfig(),
-				testingv1.WithEmptyStatus(),
+				eventingtesting.WithV1alpha1EmptyFilter(),
+				eventingtesting.WithV1alpha1EmptyConfig(),
+				eventingtesting.WithV1alpha1EmptyStatus(),
 			),
 			alpha2Sub: newV2DefaultSubscription(
-				testingv2.WithEmptyStatus(),
-				testingv2.WithEmptyConfig(),
+				eventingtesting.WithEmptyStatus(),
+				eventingtesting.WithEmptyConfig(),
 			),
 		},
 		{
 			name: "Converting NATS Subscription with empty Filters",
 			alpha1Sub: newDefaultSubscription(
-				testingv1.WithEmptyFilter(),
-				testingv1.WithStatusCleanEventTypes(nil),
+				eventingtesting.WithV1alpha1EmptyFilter(),
+				eventingtesting.WithStatusCleanEventTypes(nil),
 			),
 			alpha2Sub: newV2DefaultSubscription(),
 		},
 		{
 			name: "Converting NATS Subscription with multiple source which should result in a conversion error",
 			alpha1Sub: newDefaultSubscription(
-				testingv1.WithFilter("app", orderUpdatedEventType),
-				testingv1.WithFilter("", orderDeletedEventTypeNonClean),
+				eventingtesting.WithV1alpha1Filter("app", orderUpdatedEventType),
+				eventingtesting.WithV1alpha1Filter("", orderDeletedEventTypeNonClean),
 			),
 			alpha2Sub:        newV2DefaultSubscription(),
 			wantErrMsgV1toV2: v1alpha1.ErrorMultipleSourceMsg,
@@ -60,28 +59,28 @@ func Test_Conversion(t *testing.T) {
 		{
 			name: "Converting NATS Subscription with non-convertable maxInFlight in the config which should result in a conversion error",
 			alpha1Sub: newDefaultSubscription(
-				testingv1.WithFilter("", orderUpdatedEventType),
+				eventingtesting.WithV1alpha1Filter("", orderUpdatedEventType),
 			),
 			alpha2Sub: newV2DefaultSubscription(
-				testingv2.WithMaxInFlightMessages("nonint"),
+				eventingtesting.WithMaxInFlightMessages("nonint"),
 			),
 			wantErrMsgV2toV1: "strconv.Atoi: parsing \"nonint\": invalid syntax",
 		},
 		{
 			name: "Converting NATS Subscription with Filters",
 			alpha1Sub: newDefaultSubscription(
-				testingv1.WithFilter(eventSource, orderCreatedEventType),
-				testingv1.WithFilter(eventSource, orderUpdatedEventType),
-				testingv1.WithFilter(eventSource, orderDeletedEventTypeNonClean),
-				testingv1.WithStatusCleanEventTypes([]string{
+				eventingtesting.WithV1alpha1Filter(eventSource, orderCreatedEventType),
+				eventingtesting.WithV1alpha1Filter(eventSource, orderUpdatedEventType),
+				eventingtesting.WithV1alpha1Filter(eventSource, orderDeletedEventTypeNonClean),
+				eventingtesting.WithStatusCleanEventTypes([]string{
 					orderCreatedEventType,
 					orderUpdatedEventType,
 					orderDeletedEventType,
 				}),
 			),
 			alpha2Sub: newV2DefaultSubscription(
-				testingv2.WithEventSource(eventSource),
-				testingv2.WithTypes([]string{
+				eventingtesting.WithEventSource(eventSource),
+				eventingtesting.WithTypes([]string{
 					orderCreatedEventType,
 					orderUpdatedEventType,
 					orderDeletedEventTypeNonClean,
@@ -119,12 +118,12 @@ func Test_Conversion(t *testing.T) {
 		{
 			name: "Converting BEB Subscription",
 			alpha1Sub: newDefaultSubscription(
-				testingv1.WithProtocolBEB(),
+				eventingtesting.WithV1alpha1ProtocolBEB(),
 				v1WithWebhookAuthForBEB(),
-				testingv1.WithFilter(eventSource, orderCreatedEventType),
-				testingv1.WithFilter(eventSource, orderUpdatedEventType),
-				testingv1.WithFilter(eventSource, orderDeletedEventTypeNonClean),
-				testingv1.WithStatusCleanEventTypes([]string{
+				eventingtesting.WithV1alpha1Filter(eventSource, orderCreatedEventType),
+				eventingtesting.WithV1alpha1Filter(eventSource, orderUpdatedEventType),
+				eventingtesting.WithV1alpha1Filter(eventSource, orderDeletedEventTypeNonClean),
+				eventingtesting.WithStatusCleanEventTypes([]string{
 					orderCreatedEventType,
 					orderUpdatedEventType,
 					orderDeletedEventType,
@@ -132,14 +131,14 @@ func Test_Conversion(t *testing.T) {
 				v1WithBEBStatusFields(),
 			),
 			alpha2Sub: newV2DefaultSubscription(
-				testingv2.WithEventSource(eventSource),
-				testingv2.WithTypes([]string{
+				eventingtesting.WithEventSource(eventSource),
+				eventingtesting.WithTypes([]string{
 					orderCreatedEventType,
 					orderUpdatedEventType,
 					orderDeletedEventTypeNonClean,
 				}),
-				testingv2.WithProtocolBEB(),
-				testingv2.WithWebhookAuthForBEB(),
+				eventingtesting.WithProtocolBEB(),
+				eventingtesting.WithWebhookAuthForBEB(),
 				v2WithStatusTypes([]v1alpha2.EventType{
 					{
 						OriginalType: orderCreatedEventType,
@@ -160,31 +159,31 @@ func Test_Conversion(t *testing.T) {
 		{
 			name: "Converting Subscription with Protocol, ProtocolSettings and WebhookAuth",
 			alpha1Sub: newDefaultSubscription(
-				testingv1.WithProtocolBEB(),
-				testingv1.WithProtocolSettings(
-					testingv1.NewProtocolSettings(
-						testingv1.WithAtLeastOnceQOS(),
-						testingv1.WithRequiredWebhookAuth())),
-				testingv1.WithFilter(eventSource, orderCreatedEventType),
-				testingv1.WithStatusCleanEventTypes([]string{
+				eventingtesting.WithV1alpha1ProtocolBEB(),
+				eventingtesting.WithV1alpha1ProtocolSettings(
+					eventingtesting.NewProtocolSettings(
+						eventingtesting.WithAtLeastOnceQOS(),
+						eventingtesting.WithRequiredWebhookAuth())),
+				eventingtesting.WithV1alpha1Filter(eventSource, orderCreatedEventType),
+				eventingtesting.WithStatusCleanEventTypes([]string{
 					orderCreatedEventType,
 				}),
 			),
 			alpha2Sub: newV2DefaultSubscription(
-				testingv2.WithEventSource(eventSource),
-				testingv2.WithTypes([]string{
+				eventingtesting.WithEventSource(eventSource),
+				eventingtesting.WithTypes([]string{
 					orderCreatedEventType,
 				}),
-				testingv2.WithProtocolBEB(),
-				testingv2.WithConfigValue(v1alpha2.ProtocolSettingsQos,
+				eventingtesting.WithProtocolBEB(),
+				eventingtesting.WithConfigValue(v1alpha2.ProtocolSettingsQos,
 					string(types.QosAtLeastOnce)),
-				testingv2.WithConfigValue(v1alpha2.WebhookAuthGrantType,
+				eventingtesting.WithConfigValue(v1alpha2.WebhookAuthGrantType,
 					"client_credentials"),
-				testingv2.WithConfigValue(v1alpha2.WebhookAuthClientID,
+				eventingtesting.WithConfigValue(v1alpha2.WebhookAuthClientID,
 					"xxx"),
-				testingv2.WithConfigValue(v1alpha2.WebhookAuthClientSecret,
+				eventingtesting.WithConfigValue(v1alpha2.WebhookAuthClientSecret,
 					"xxx"),
-				testingv2.WithConfigValue(v1alpha2.WebhookAuthTokenURL,
+				eventingtesting.WithConfigValue(v1alpha2.WebhookAuthTokenURL,
 					"https://oauth2.xxx.com/oauth2/token"),
 				v2WithStatusTypes([]v1alpha2.EventType{
 					{
@@ -253,7 +252,7 @@ func Test_CleanupInV1ToV2Conversion(t *testing.T) {
 		{
 			name: "success if prefix is empty",
 			givenAlpha1Sub: newDefaultSubscription(
-				testingv1.WithFilter(eventSource, "testapp.Segment1-Part1-Part2-Ä.Segment2-Part1-Part2-Ä.v1"),
+				eventingtesting.WithV1alpha1Filter(eventSource, "testapp.Segment1-Part1-Part2-Ä.Segment2-Part1-Part2-Ä.v1"),
 			),
 			givenPrefix: "",
 			wantTypes: []string{
@@ -264,7 +263,7 @@ func Test_CleanupInV1ToV2Conversion(t *testing.T) {
 			name:        "success if the given event has more than two segments",
 			givenPrefix: "prefix",
 			givenAlpha1Sub: newDefaultSubscription(
-				testingv1.WithFilter(eventSource, "prefix.testapp.Segment1.Segment2.Segment3."+
+				eventingtesting.WithV1alpha1Filter(eventSource, "prefix.testapp.Segment1.Segment2.Segment3."+
 					"Segment4-Part1-Part2-Ä.Segment5-Part1-Part2-Ä.v1"),
 			),
 			wantTypes: []string{
@@ -276,7 +275,7 @@ func Test_CleanupInV1ToV2Conversion(t *testing.T) {
 			name:        "success if the application name needs to be cleaned",
 			givenPrefix: "prefix",
 			givenAlpha1Sub: newDefaultSubscription(
-				testingv1.WithFilter(eventSource, "prefix.te--s__t!!a@@p##p%%.Segment1-Part1-Part2-Ä."+
+				eventingtesting.WithV1alpha1Filter(eventSource, "prefix.te--s__t!!a@@p##p%%.Segment1-Part1-Part2-Ä."+
 					"Segment2-Part1-Part2-Ä.v1"),
 			),
 			wantTypes: []string{
@@ -288,7 +287,7 @@ func Test_CleanupInV1ToV2Conversion(t *testing.T) {
 			name:        "success if the application name needs to be cleaned and event has more than two segments",
 			givenPrefix: "prefix",
 			givenAlpha1Sub: newDefaultSubscription(
-				testingv1.WithFilter(eventSource, "prefix.te--s__t!!a@@p##p%%.Segment1.Segment2.Segment3."+
+				eventingtesting.WithV1alpha1Filter(eventSource, "prefix.te--s__t!!a@@p##p%%.Segment1.Segment2.Segment3."+
 					"Segment4-Part1-Part2-Ä.Segment5-Part1-Part2-Ä.v1"),
 			),
 			wantTypes: []string{
@@ -300,9 +299,9 @@ func Test_CleanupInV1ToV2Conversion(t *testing.T) {
 			name:        "success if there are multiple filters",
 			givenPrefix: "prefix",
 			givenAlpha1Sub: newDefaultSubscription(
-				testingv1.WithFilter(eventSource, "prefix.test-app.Segme@@nt1.Segment2.Segment3."+
+				eventingtesting.WithV1alpha1Filter(eventSource, "prefix.test-app.Segme@@nt1.Segment2.Segment3."+
 					"Segment4-Part1-Part2-Ä.Segment5-Part1-Part2-Ä.v1"),
-				testingv1.WithFilter(eventSource, "prefix.testapp.Segment1.Segment2.Segment3."+
+				eventingtesting.WithV1alpha1Filter(eventSource, "prefix.testapp.Segment1.Segment2.Segment3."+
 					"Segment4-Part1-Part2-Ä.Segment5-Part1-Part2-Ä.v1"),
 			),
 			wantTypes: []string{
@@ -316,7 +315,7 @@ func Test_CleanupInV1ToV2Conversion(t *testing.T) {
 			name:        "fail if the prefix is invalid",
 			givenPrefix: "prefix",
 			givenAlpha1Sub: newDefaultSubscription(
-				testingv1.WithFilter(eventSource, "invalid.test-app.Segme@@nt1.Segment2.Segment3."+
+				eventingtesting.WithV1alpha1Filter(eventSource, "invalid.test-app.Segme@@nt1.Segment2.Segment3."+
 					"Segment4-Part1-Part2-Ä.Segment5-Part1-Part2-Ä.v1"),
 			),
 			wantError: true,
@@ -325,7 +324,7 @@ func Test_CleanupInV1ToV2Conversion(t *testing.T) {
 			name:        "fail if the prefix is missing",
 			givenPrefix: "prefix",
 			givenAlpha1Sub: newDefaultSubscription(
-				testingv1.WithFilter(eventSource, "test-app.Segme@@nt1.Segment2.Segment3."+
+				eventingtesting.WithV1alpha1Filter(eventSource, "test-app.Segme@@nt1.Segment2.Segment3."+
 					"Segment4-Part1-Part2-Ä.Segment5-Part1-Part2-Ä.v1"),
 			),
 			wantError: true,
@@ -334,7 +333,7 @@ func Test_CleanupInV1ToV2Conversion(t *testing.T) {
 			name:        "fail if the event-type is incomplete",
 			givenPrefix: "prefix",
 			givenAlpha1Sub: newDefaultSubscription(
-				testingv1.WithFilter(eventSource, "prefix.testapp.Segment1-Part1-Part2-Ä.v1"),
+				eventingtesting.WithV1alpha1Filter(eventSource, "prefix.testapp.Segment1-Part1-Part2-Ä.v1"),
 			),
 			wantError: true,
 		},

@@ -7,7 +7,6 @@ import (
 	"time"
 
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
-	controllertestingv2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	"github.com/nats-io/nats-server/v2/server"
@@ -17,7 +16,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
-	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2"
+	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstream"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
@@ -84,15 +83,15 @@ func getNATSConf(natsURL string, natsPort int) env.NATSConfig {
 func createAndSyncSubscription(t *testing.T, sinkURL string,
 	jsBackend *backendnats.JetStream) *eventingv1alpha2.Subscription {
 	// create test subscription
-	testSub := controllertestingv2.NewSubscription(
+	testSub := controllertesting.NewSubscription(
 		subscriptionName, subscriptionNamespace,
-		controllertestingv2.WithSource(controllertestingv2.EventSourceClean),
-		controllertestingv2.WithSinkURL(sinkURL),
-		controllertestingv2.WithOrderCreatedV1Event(),
-		controllertestingv2.WithStatusTypes([]eventingv1alpha2.EventType{
+		controllertesting.WithSource(controllertesting.EventSourceClean),
+		controllertesting.WithSinkURL(sinkURL),
+		controllertesting.WithOrderCreatedV1Event(),
+		controllertesting.WithStatusTypes([]eventingv1alpha2.EventType{
 			{
-				OriginalType: controllertestingv2.OrderCreatedV1Event,
-				CleanType:    controllertestingv2.OrderCreatedV1Event,
+				OriginalType: controllertesting.OrderCreatedV1Event,
+				CleanType:    controllertesting.OrderCreatedV1Event,
 			},
 		}),
 	)
@@ -140,7 +139,7 @@ func setUpTestEnvironment(t *testing.T) *TestEnvironment {
 
 	testSub := createAndSyncSubscription(t, subscriber.SinkURL, jsBackend)
 	// create fake Dynamic clients
-	fakeClient, err := controllertestingv2.NewFakeSubscriptionClient(testSub)
+	fakeClient, err := controllertesting.NewFakeSubscriptionClient(testSub)
 	require.NoError(t, err)
 
 	return &TestEnvironment{

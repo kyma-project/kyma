@@ -6,7 +6,7 @@ import (
 
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
-	eventingtestingv2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
+	eventingtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	"github.com/stretchr/testify/require"
 )
 
@@ -51,8 +51,8 @@ func Test_GetEventMeshSubject(t *testing.T) {
 			name:                 "success if the segments are in correct order",
 			givenSource:          "test1",
 			givenSubject:         "one.two.three",
-			givenEventMeshPrefix: eventingtestingv2.EventMeshPrefix,
-			wantEventMeshSubject: fmt.Sprintf("%s.test1.one.two.three", eventingtestingv2.EventMeshPrefix),
+			givenEventMeshPrefix: eventingtesting.EventMeshPrefix,
+			wantEventMeshSubject: fmt.Sprintf("%s.test1.one.two.three", eventingtesting.EventMeshPrefix),
 		},
 	}
 
@@ -112,8 +112,8 @@ func Test_setEventMeshServerSubHashInStatus(t *testing.T) {
 	t.Parallel()
 
 	// given
-	eventMeshSubscription := eventingtestingv2.NewSampleEventMeshSubscription()
-	kymaSubscription := eventingtestingv2.NewSubscription("test", "test")
+	eventMeshSubscription := eventingtesting.NewSampleEventMeshSubscription()
+	kymaSubscription := eventingtesting.NewSubscription("test", "test")
 	wantHash, err := backendutils.GetHash(eventMeshSubscription)
 	require.NoError(t, err)
 
@@ -129,8 +129,8 @@ func Test_setEventMeshLocalSubHashInStatus(t *testing.T) {
 	t.Parallel()
 
 	// given
-	eventMeshSubscription := eventingtestingv2.NewSampleEventMeshSubscription()
-	kymaSubscription := eventingtestingv2.NewSubscription("test", "test")
+	eventMeshSubscription := eventingtesting.NewSampleEventMeshSubscription()
+	kymaSubscription := eventingtesting.NewSubscription("test", "test")
 	wantHash, err := backendutils.GetHash(eventMeshSubscription)
 	require.NoError(t, err)
 
@@ -146,8 +146,8 @@ func Test_updateHashesInStatus(t *testing.T) {
 	t.Parallel()
 
 	// given
-	eventMeshSubscription := eventingtestingv2.NewSampleEventMeshSubscription()
-	kymaSubscription := eventingtestingv2.NewSubscription("test", "test")
+	eventMeshSubscription := eventingtesting.NewSampleEventMeshSubscription()
+	kymaSubscription := eventingtesting.NewSubscription("test", "test")
 	wantHash, err := backendutils.GetHash(eventMeshSubscription)
 	require.NoError(t, err)
 
@@ -164,14 +164,14 @@ func Test_setEmsSubscriptionStatus(t *testing.T) {
 	t.Parallel()
 
 	// given
-	eventMeshSubscription := eventingtestingv2.NewSampleEventMeshSubscription()
+	eventMeshSubscription := eventingtesting.NewSampleEventMeshSubscription()
 	eventMeshSubscription.SubscriptionStatus = "ready"
 	eventMeshSubscription.SubscriptionStatusReason = "unknown"
 	eventMeshSubscription.LastSuccessfulDelivery = "09:00"
 	eventMeshSubscription.LastFailedDelivery = "00:00"
 	eventMeshSubscription.LastFailedDeliveryReason = "failed"
 
-	kymaSubscription := eventingtestingv2.NewSubscription("test", "test")
+	kymaSubscription := eventingtesting.NewSubscription("test", "test")
 
 	// when
 	isChanged := setEmsSubscriptionStatus(kymaSubscription, eventMeshSubscription)

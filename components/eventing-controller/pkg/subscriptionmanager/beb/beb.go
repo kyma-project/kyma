@@ -24,13 +24,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	"github.com/kyma-project/kyma/components/eventing-controller/controllers/subscriptionv2/eventmesh"
+	"github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/eventmesh"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	backendeventmesh "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventmesh"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
-	backendutilsv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils/v2"
+	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
 )
@@ -106,7 +105,7 @@ func (c *SubscriptionManager) Start(_ env.DefaultSubscriptionConfig, params subs
 
 	// Need to read env to read BEB related secrets
 	c.envCfg = env.GetConfig()
-	nameMapper := utils.NewBEBSubscriptionNameMapper(strings.TrimSpace(c.envCfg.Domain),
+	nameMapper := backendutils.NewBEBSubscriptionNameMapper(strings.TrimSpace(c.envCfg.Domain),
 		backendeventmesh.MaxSubscriptionNameLength)
 	ctrl.Log.WithName("BEB-subscription-manager").Info("using BEB name mapper",
 		"domainName", c.envCfg.Domain,
@@ -184,7 +183,7 @@ func markAllV1Alpha2SubscriptionsAsNotReady(dynamicClient dynamic.Interface, log
 
 		desiredSub := sub.DuplicateWithStatusDefaults()
 		desiredSub.Status.Ready = false
-		if err = backendutilsv2.UpdateSubscriptionStatus(ctx, dynamicClient, desiredSub); err != nil {
+		if err = backendutils.UpdateSubscriptionStatus(ctx, dynamicClient, desiredSub); err != nil {
 			logger.Errorw("Failed to update subscription status", "namespace", sub.Namespace, "name", sub.Name, "error", err)
 		}
 	}
@@ -217,7 +216,7 @@ func cleanupEventMesh(backend backendeventmesh.Backend, dynamicClient dynamic.In
 	for _, v := range subs.Items {
 		sub := v
 		if apiRule := sub.Status.Backend.APIRuleName; apiRule != "" {
-			if err := dynamicClient.Resource(utils.APIRuleGroupVersionResource()).Namespace(sub.Namespace).
+			if err := dynamicClient.Resource(backendutils.APIRuleGroupVersionResource()).Namespace(sub.Namespace).
 				Delete(ctx, apiRule, metav1.DeleteOptions{}); err != nil {
 				isCleanupSuccessful = false
 				logger.Errorw("Failed to delete APIRule", "namespace", sub.Namespace, "name", apiRule, "error", err)
@@ -226,7 +225,7 @@ func cleanupEventMesh(backend backendeventmesh.Backend, dynamicClient dynamic.In
 
 		// Clean statuses.
 		desiredSub := sub.DuplicateWithStatusDefaults()
-		if err := backendutilsv2.UpdateSubscriptionStatus(ctx, dynamicClient, desiredSub); err != nil {
+		if err := backendutils.UpdateSubscriptionStatus(ctx, dynamicClient, desiredSub); err != nil {
 			isCleanupSuccessful = false
 			logger.Errorw("Failed to update EventMesh subscription status", "namespace", sub.Namespace, "name", sub.Name, "error", err)
 		}
