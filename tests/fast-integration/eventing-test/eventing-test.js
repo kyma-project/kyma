@@ -13,7 +13,6 @@ const {
   switchEventingBackend,
   debug,
   createK8sConfigMap,
-  waitForEndpoint,
   waitForPodWithLabelAndCondition,
   createApiRuleForService,
   deleteApiRule,
@@ -69,8 +68,6 @@ const {
   kymaSystem,
   telemetryOperatorLabel,
   conditionReady,
-  jaegerLabel,
-  jaegerEndpoint,
 } = require('./common/common');
 const {
   expect,
