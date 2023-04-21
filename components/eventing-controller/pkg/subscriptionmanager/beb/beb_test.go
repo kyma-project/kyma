@@ -25,7 +25,6 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
-	controllertestingv2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
 )
 
 const (
@@ -55,17 +54,17 @@ func Test_cleanupEventMesh(t *testing.T) {
 	ctx := context.Background()
 
 	// create a Kyma subscription
-	subscription := controllertestingv2.NewSubscription("test", "test",
-		controllertestingv2.WithWebhookAuthForBEB(),
-		controllertestingv2.WithFakeSubscriptionStatus(),
-		controllertestingv2.WithOrderCreatedFilter(),
+	subscription := controllertesting.NewSubscription("test", "test",
+		controllertesting.WithWebhookAuthForBEB(),
+		controllertesting.WithFakeSubscriptionStatus(),
+		controllertesting.WithOrderCreatedFilter(),
 	)
 	subscription.Spec.Sink = "https://bla.test.svc.cluster.local"
 
 	// create an APIRule
-	apiRule := controllertestingv2.NewAPIRule(subscription,
-		controllertestingv2.WithPath(),
-		controllertestingv2.WithService("svc-test", "host-test"),
+	apiRule := controllertesting.NewAPIRule(subscription,
+		controllertesting.WithPath(),
+		controllertesting.WithService("svc-test", "host-test"),
 	)
 	subscription.Status.Backend.APIRuleName = apiRule.Name
 
@@ -93,21 +92,23 @@ func Test_cleanupEventMesh(t *testing.T) {
 	require.NoError(t, err)
 
 	// create a EventMesh handler to connect to BEB Mock
-	nameMapper := utils.NewBEBSubscriptionNameMapper("mydomain.com", backendeventmesh.MaxSubscriptionNameLength)
+	nameMapper := utils.NewBEBSubscriptionNameMapper("mydomain.com",
+		backendeventmesh.MaxSubscriptionNameLength)
 	eventMeshHandler := backendeventmesh.NewEventMesh(credentials, nameMapper, defaultLogger)
 	err = eventMeshHandler.Initialize(envConf)
 	require.NoError(t, err)
 	bebSubMgr.eventMeshBackend = eventMeshHandler
 
 	// create fake Dynamic clients
-	fakeClient, err := controllertestingv2.NewFakeSubscriptionClient(subscription)
+	fakeClient, err := controllertesting.NewFakeSubscriptionClient(subscription)
 	require.NoError(t, err)
 	bebSubMgr.Client = fakeClient
 
 	// Create APIRule
-	unstructuredAPIRule, err := controllertestingv2.ToUnstructuredAPIRule(apiRule)
+	unstructuredAPIRule, err := controllertesting.ToUnstructuredAPIRule(apiRule)
 	require.NoError(t, err)
-	unstructuredAPIRuleBeforeCleanup, err := bebSubMgr.Client.Resource(utils.APIRuleGroupVersionResource()).Namespace("test").Create(ctx, unstructuredAPIRule, metav1.CreateOptions{})
+	unstructuredAPIRuleBeforeCleanup, err := bebSubMgr.Client.Resource(utils.APIRuleGroupVersionResource()).Namespace(
+		"test").Create(ctx, unstructuredAPIRule, metav1.CreateOptions{})
 	require.NoError(t, err)
 	require.NotNil(t, unstructuredAPIRuleBeforeCleanup)
 
@@ -117,20 +118,23 @@ func Test_cleanupEventMesh(t *testing.T) {
 	require.NoError(t, err)
 
 	// check that the subscription exist in bebMock
-	getSubscriptionURL := fmt.Sprintf(client.GetURLFormat, nameMapper.MapSubscriptionName(subscription.Name, subscription.Namespace))
+	getSubscriptionURL := fmt.Sprintf(client.GetURLFormat, nameMapper.MapSubscriptionName(subscription.Name,
+		subscription.Namespace))
 	getSubscriptionURL = bebMock.MessagingURL + getSubscriptionURL
 	resp, err := http.Get(getSubscriptionURL)
 	require.NoError(t, err)
 	require.Equal(t, resp.StatusCode, http.StatusOK)
 
 	// check that the Kyma subscription exists
-	unstructuredSub, err := bebSubMgr.Client.Resource(controllertestingv2.SubscriptionGroupVersionResource()).Namespace("test").Get(ctx, subscription.Name, metav1.GetOptions{})
+	unstructuredSub, err := bebSubMgr.Client.Resource(controllertesting.SubscriptionGroupVersionResource()).Namespace(
+		"test").Get(ctx, subscription.Name, metav1.GetOptions{})
 	require.NoError(t, err)
-	_, err = controllertestingv2.ToSubscription(unstructuredSub)
+	_, err = controllertesting.ToSubscription(unstructuredSub)
 	require.NoError(t, err)
 
 	// check that the APIRule exists
-	unstructuredAPIRuleBeforeCleanup, err = bebSubMgr.Client.Resource(utils.APIRuleGroupVersionResource()).Namespace("test").Get(ctx, apiRule.Name, metav1.GetOptions{})
+	unstructuredAPIRuleBeforeCleanup, err = bebSubMgr.Client.Resource(utils.APIRuleGroupVersionResource()).Namespace(
+		"test").Get(ctx, apiRule.Name, metav1.GetOptions{})
 	require.NoError(t, err)
 	require.NotNil(t, unstructuredAPIRuleBeforeCleanup)
 
@@ -145,15 +149,17 @@ func Test_cleanupEventMesh(t *testing.T) {
 	require.Equal(t, resp.StatusCode, http.StatusNotFound)
 
 	// the Kyma subscription status should be empty
-	unstructuredSub, err = bebSubMgr.Client.Resource(controllertestingv2.SubscriptionGroupVersionResource()).Namespace("test").Get(ctx, subscription.Name, metav1.GetOptions{})
+	unstructuredSub, err = bebSubMgr.Client.Resource(controllertesting.SubscriptionGroupVersionResource()).Namespace(
+		"test").Get(ctx, subscription.Name, metav1.GetOptions{})
 	require.NoError(t, err)
-	gotSub, err := controllertestingv2.ToSubscription(unstructuredSub)
+	gotSub, err := controllertesting.ToSubscription(unstructuredSub)
 	require.NoError(t, err)
 	expectedSubStatus := eventingv1alpha2.SubscriptionStatus{Types: []eventingv1alpha2.EventType{}}
 	require.Equal(t, expectedSubStatus, gotSub.Status)
 
 	// the associated APIRule should be deleted
-	unstructuredAPIRuleAfterCleanup, err := bebSubMgr.Client.Resource(utils.APIRuleGroupVersionResource()).Namespace("test").Get(ctx, apiRule.Name, metav1.GetOptions{})
+	unstructuredAPIRuleAfterCleanup, err := bebSubMgr.Client.Resource(utils.APIRuleGroupVersionResource()).Namespace(
+		"test").Get(ctx, apiRule.Name, metav1.GetOptions{})
 	require.Error(t, err)
 	require.Nil(t, unstructuredAPIRuleAfterCleanup)
 	bebMock.Stop()
@@ -164,10 +170,10 @@ func Test_markAllV1Alpha2SubscriptionsAsNotReady(t *testing.T) {
 	ctx := context.Background()
 
 	// create a Kyma subscription
-	subscription := controllertestingv2.NewSubscription("test", "test",
-		controllertestingv2.WithDefaultSource(),
-		controllertestingv2.WithOrderCreatedFilter(),
-		controllertestingv2.WithStatus(true),
+	subscription := controllertesting.NewSubscription("test", "test",
+		controllertesting.WithDefaultSource(),
+		controllertesting.WithOrderCreatedFilter(),
+		controllertesting.WithStatus(true),
 	)
 
 	// create logger
@@ -175,13 +181,14 @@ func Test_markAllV1Alpha2SubscriptionsAsNotReady(t *testing.T) {
 	require.NoError(t, err)
 
 	// create fake k8s dynamic client
-	fakeClient, err := controllertestingv2.NewFakeSubscriptionClient(subscription)
+	fakeClient, err := controllertesting.NewFakeSubscriptionClient(subscription)
 	require.NoError(t, err)
 
 	// verify that the subscription status is ready
-	unstructuredSub, err := fakeClient.Resource(controllertestingv2.SubscriptionGroupVersionResource()).Namespace("test").Get(ctx, subscription.Name, metav1.GetOptions{})
+	unstructuredSub, err := fakeClient.Resource(controllertesting.SubscriptionGroupVersionResource()).Namespace(
+		"test").Get(ctx, subscription.Name, metav1.GetOptions{})
 	require.NoError(t, err)
-	gotSub, err := controllertestingv2.ToSubscription(unstructuredSub)
+	gotSub, err := controllertesting.ToSubscription(unstructuredSub)
 	require.NoError(t, err)
 	require.Equal(t, true, gotSub.Status.Ready)
 
@@ -190,9 +197,10 @@ func Test_markAllV1Alpha2SubscriptionsAsNotReady(t *testing.T) {
 	require.NoError(t, err)
 
 	// then
-	unstructuredSub, err = fakeClient.Resource(controllertestingv2.SubscriptionGroupVersionResource()).Namespace("test").Get(ctx, subscription.Name, metav1.GetOptions{})
+	unstructuredSub, err = fakeClient.Resource(controllertesting.SubscriptionGroupVersionResource()).Namespace(
+		"test").Get(ctx, subscription.Name, metav1.GetOptions{})
 	require.NoError(t, err)
-	gotSub, err = controllertestingv2.ToSubscription(unstructuredSub)
+	gotSub, err = controllertesting.ToSubscription(unstructuredSub)
 	require.NoError(t, err)
 	require.Equal(t, false, gotSub.Status.Ready)
 }

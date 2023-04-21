@@ -7,7 +7,6 @@ import (
 
 	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
-	backendutilsv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils/v2"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/mitchellh/hashstructure/v2"
 	"github.com/pkg/errors"
@@ -118,7 +117,7 @@ func ConvertKymaSubToEventMeshSub(subscription *eventingv1alpha2.Subscription, t
 
 	// WebhookURL
 	// set WebhookURL of EventMesh subscription where the events will be dispatched to.
-	urlTobeRegistered, err := backendutilsv2.GetExposedURLFromAPIRule(apiRule, subscription.Spec.Sink)
+	urlTobeRegistered, err := GetExposedURLFromAPIRule(apiRule, subscription.Spec.Sink)
 	if err != nil {
 		return nil, errors.Wrap(err, "get APIRule exposed URL failed")
 	}

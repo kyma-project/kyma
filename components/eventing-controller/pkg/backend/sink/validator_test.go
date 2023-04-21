@@ -13,7 +13,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
-	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
+	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
 func TestSinkValidator(t *testing.T) {

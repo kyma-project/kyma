@@ -13,7 +13,6 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
-	backendutilsv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils/v2"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/client"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/auth"
@@ -101,7 +100,7 @@ func getWebHookAuth(cfg env.Config, credentials *OAuth2ClientCredentials) *types
 func (em *EventMesh) SyncSubscription(subscription *eventingv1alpha2.Subscription, cleaner cleaner.Cleaner,
 	apiRule *apigatewayv1beta1.APIRule) (bool, error) { //nolint:funlen,gocognit
 	// Format logger
-	log := backendutilsv2.LoggerWithSubscription(em.namedLogger(), subscription)
+	log := backendutils.LoggerWithSubscription(em.namedLogger(), subscription)
 
 	// process event types
 	typesInfo, err := em.getProcessedEventTypes(subscription, cleaner)

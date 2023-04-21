@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
-	backendutilsv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils/v2"
+	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 
@@ -25,10 +25,10 @@ import (
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
-	jetstreamv2 "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscriptionv2/jetstream"
+	"github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/jetstream"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
-	backendjetstreamv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2"
+	backendjetstream "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstream"
 	backendmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
@@ -64,7 +64,7 @@ type SubscriptionManager struct {
 	metricsAddr      string
 	metricsCollector *backendmetrics.Collector
 	mgr              manager.Manager
-	backendv2        backendjetstreamv2.Backend
+	backendv2        backendjetstream.Backend
 	logger           *logger.Logger
 }
 
@@ -103,9 +103,9 @@ func (sm *SubscriptionManager) Start(defaultSubsConfig env.DefaultSubscriptionCo
 
 	// Initialize v1alpha2 event type cleaner
 	jsCleaner := cleaner.NewJetStreamCleaner(sm.logger)
-	jetStreamHandler := backendjetstreamv2.NewJetStream(sm.envCfg,
+	jetStreamHandler := backendjetstream.NewJetStream(sm.envCfg,
 		sm.metricsCollector, jsCleaner, defaultSubsConfig, sm.logger)
-	jetStreamReconciler := jetstreamv2.NewReconciler(
+	jetStreamReconciler := jetstream.NewReconciler(
 		ctx,
 		client,
 		jetStreamHandler,
@@ -145,13 +145,13 @@ func (sm *SubscriptionManager) Stop(runCleanup bool) error {
 }
 
 // clean removes all JetStream artifacts.
-func cleanupv2(backend backendjetstreamv2.Backend, dynamicClient dynamic.Interface, logger *zap.SugaredLogger) error {
+func cleanupv2(backend backendjetstream.Backend, dynamicClient dynamic.Interface, logger *zap.SugaredLogger) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	var ok bool
-	var jsBackend *backendjetstreamv2.JetStream
-	if jsBackend, ok = backend.(*backendjetstreamv2.JetStream); !ok {
+	var jsBackend *backendjetstream.JetStream
+	if jsBackend, ok = backend.(*backendjetstream.JetStream); !ok {
 		err := errors.New("converting backend to JetStream v2 backend failed")
 		return err
 	}
@@ -176,7 +176,7 @@ func cleanupv2(backend backendjetstreamv2.Backend, dynamicClient dynamic.Interfa
 		log := logger.With("key", subKey.String())
 
 		desiredSub := sub.DuplicateWithStatusDefaults()
-		if updateErr := backendutilsv2.UpdateSubscriptionStatus(ctx, dynamicClient, desiredSub); updateErr != nil {
+		if updateErr := backendutils.UpdateSubscriptionStatus(ctx, dynamicClient, desiredSub); updateErr != nil {
 			isCleanupSuccessful = false
 			log.Errorw("Failed to update JetStream v2 subscription status", "error", err)
 		}
