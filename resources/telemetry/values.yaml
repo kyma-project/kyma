@@ -1,6 +1,6 @@
 global:
   containerRegistry:
-    path: eu.gcr.io/kyma-project
+    path: europe-docker.pkg.dev/kyma-project
   images:
     directory_size_exporter:
       name: "directory-size-exporter"
@@ -9,6 +9,7 @@ global:
     telemetry_operator:
       name: "telemetry-manager"
       version: "PR-120"
+      directory: "dev"
     telemetry_otel_collector:
       name: "otel-collector"
       version: "0.75.0-6ea7fe7a"
