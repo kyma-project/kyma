@@ -124,7 +124,7 @@ describe('Eventing tests preparation', function() {
     await deployV1Alpha2Subscriptions();
   });
 
-  if ('Should deploy jaeger', async function() {
+  it('Should deploy jaeger', async function() {
     await deployJaeger(k8s.loadAllYaml(jaegerYaml));
   });
 
