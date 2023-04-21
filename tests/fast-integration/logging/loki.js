@@ -67,11 +67,7 @@ async function verifyIstioAccessLogFormat(startTimestamp) {
   let log;
   for (let i =0; i<= numberOfLogs; i++) {
     // Some logs dont have values[i][1]. In such a case skip the log line
-    try {
-      if (typeof responseBody.data.result[0].values[i][1] === 'undefined') {
-        continue;
-      }
-    } catch (e) {
+    if (typeof responseBody.data.result[0].values[i][1] === 'undefined') {
       continue;
     }
     entry = JSON.parse(responseBody.data.result[0].values[i][1]);
