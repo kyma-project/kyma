@@ -35,7 +35,7 @@ This command creates a k3d cluster on your local machine, installs Kyma on it, a
 ### Set the custom domain environment variables
 
 If you are using Gardener, make sure that your Kubernetes cluster has the `shoot-cert-service` and `shoot-dns-service` extensions enabled. The desired shoot specification is mentioned in the description of this [issue](https://github.com/kyma-project/control-plane/issues/875).
-Obtain a service account access key with permissions to maintain custom domain DNS entries and export it as json. See [here](https://cloud.google.com/iam/docs/keys-create-delete).
+Obtain a service account access key with permissions to maintain custom domain DNS entries and export it as a JSON file. To learn how to do it, follow this [guide](https://cloud.google.com/iam/docs/keys-create-delete).
 
 Set the following environment variables:
 - `TEST_DOMAIN` - your Kyma domain installed by default
