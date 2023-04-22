@@ -38,7 +38,7 @@ If you are using Gardener cluster make sure your k8s cluster have cert & dns ext
 Obtain a service account access key with permissions to maintain custom domain DNS entries and export it as json. See [here](https://cloud.google.com/iam/docs/keys-create-delete).
 
 - `TEST_DOMAIN` - set this environment variable with your installed by default Kyma domain.
-- `TEST_CUSTOM_DOMAIN` - set this environment variable with your custom domain.
+- `TEST_CUSTOM_DOMAIN` - your custom domain
 - `TEST_SA_ACCESS_KEY_PATH` - set this environment variable with path to a service account access key, exported as a json.
 
 ### Run the tests
