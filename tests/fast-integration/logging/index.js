@@ -12,6 +12,9 @@ const {
   waitForService,
   waitForTracePipeline,
 } = require('../utils');
+const {
+  restartProxyPod,
+} = require('../monitoring/grafana.js');
 const fs = require('fs');
 const path = require('path');
 const k8s = require('@kubernetes/client-node');
@@ -49,7 +52,7 @@ function istioAccessLogsTests(startTimestamp) {
 
     it('Should create the Istio Access Logs resource for Loki', async () => {
       await k8sApply(istioAccessLogsResource, namespace);
-      await sleep(20000);
+      await restartProxyPod();
       await waitForService('telemetry-trace-collector-internal', namespace);
       await waitForTracePipeline('jaeger');
     });
@@ -57,7 +60,8 @@ function istioAccessLogsTests(startTimestamp) {
     it('Should query Loki and verify format of Istio Access Logs', async () => {
       // Sleep for 10 seconds to wait for logs to come into the istio-proxy container
       await sleep(10*1000);
-      await loki.verifyIstioAccessLogFormat(startTimestamp);
+      newTestStartTimestamp = new Date().toISOString();
+      await loki.verifyIstioAccessLogFormat(newTestStartTimestamp);
     });
   });
 }
