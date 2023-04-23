@@ -38,6 +38,7 @@ const {
   info,
   debug,
   createEventingBackendK8sSecret,
+  deployJaeger,
 } = require('../utils');
 const {expect} = require('chai');
 

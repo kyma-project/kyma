@@ -34,7 +34,6 @@ function loggingTests() {
     it('Persistent Volume Claim Size should be 30Gi', async () => {
       await loki.checkPersistentVolumeClaimSize();
     });
-
     istioAccessLogsTests(testStartTimestamp);
   });
 }
@@ -57,7 +56,7 @@ function istioAccessLogsTests(startTimestamp) {
 
     it('Should query Loki and verify format of Istio Access Logs', async () => {
       // Sleep for 10 seconds to wait for logs to come into the istio-proxy container
-      sleep(10000);
+      await sleep(10*1000);
       await loki.verifyIstioAccessLogFormat(startTimestamp);
     });
   });
