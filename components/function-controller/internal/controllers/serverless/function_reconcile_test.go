@@ -1332,9 +1332,10 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
 
 		function = &serverlessv1alpha2.Function{}
+		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 		g.Expect(function.Spec.RuntimeImageOverride).To(gomega.Equal(""))
 		g.Expect(function.Status.RuntimeImageOverride).To(gomega.Equal(""))
-		g.Expect(function.Status.RuntimeImage).To(gomega.Equal(""))
+		g.Expect(function.Status.RuntimeImage).To(gomega.Equal("some_image"))
 	})
 	t.Run("should reconcile function with SecretMounts", func(t *testing.T) {
 		//GIVEN
