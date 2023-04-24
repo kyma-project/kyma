@@ -27,6 +27,7 @@ async function proxyGrafanaDatasource(datasourceName, path, retries, interval,
   const grafanaUrl = await getGrafanaUrl();
   const datasourceId = await getGrafanaDatasourceId(grafanaUrl, datasourceName);
   const url = `${grafanaUrl}/api/datasources/proxy/${datasourceId}/${path}`;
+  console.log('URL: '+ url + '\n');
 
   return retryPromise(async () => {
     if (debugMsg) {
