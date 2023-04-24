@@ -131,7 +131,9 @@ func buildGenericStatusUpdateStateFn(condition serverlessv1alpha2.Condition, rep
 func (m *reconciler) populateStatusFromSystemState(status *serverlessv1alpha2.FunctionStatus, s *systemState) error {
 	status.Runtime = s.instance.Spec.Runtime
 	status.RuntimeImage = s.instance.Status.RuntimeImage
-	status.RuntimeImage = s.instance.Spec.RuntimeImageOverride
+	if s.instance.Spec.RuntimeImageOverride != "" {
+		status.RuntimeImage = s.instance.Spec.RuntimeImageOverride
+	}
 	status.RuntimeImageOverride = s.instance.Spec.RuntimeImageOverride
 
 	// set scale sub-resource
