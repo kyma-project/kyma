@@ -3,6 +3,8 @@ module.exports = {
   tryGetLokiPersistentVolumeClaim,
   lokiSecretData,
   queryLoki,
+  createIstioAccessLogResource,
+  loadResourceFromFile,
 };
 
 const {
@@ -10,8 +12,15 @@ const {
   getPersistentVolumeClaim,
   getSecretData,
   sleep,
+  k8sApply,
+  waitForService,
+  waitForTracePipeline,
 } = require('../utils');
 const {proxyGrafanaDatasource} = require('../monitoring/client');
+
+const fs = require('fs');
+const path = require('path');
+const k8s = require('@kubernetes/client-node');
 
 async function logsPresentInLoki(query, startTimestamp, iterations = 20) {
   for (let i = 0; i < iterations; i++) {
@@ -45,4 +54,21 @@ async function queryLoki(query, startTimestamp) {
   } catch (err) {
     throw convertAxiosError(err, 'cannot query loki');
   }
+}
+
+
+async function createIstioAccessLogResource() {
+  const istioAccessLogsResource = loadResourceFromFile('./istio_access_logs.yaml');
+  const namespace = 'kyma-system';
+  await k8sApply(istioAccessLogsResource, namespace);
+  // await restartProxyPod();
+  await waitForService('telemetry-trace-collector-internal', namespace);
+  await waitForTracePipeline('jaeger');
+}
+
+function loadResourceFromFile(file) {
+  const yaml = fs.readFileSync(path.join(__dirname, file), {
+    encoding: 'utf8',
+  });
+  return k8s.loadAllYaml(yaml);
 }

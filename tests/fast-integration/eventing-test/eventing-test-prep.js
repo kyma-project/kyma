@@ -2,7 +2,7 @@ const axios = require('axios');
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
-
+const k8s = require('@kubernetes/client-node');
 
 const httpsAgent = new https.Agent({
   rejectUnauthorized: false, // curl -k

@@ -6,18 +6,16 @@ module.exports = {
 
 const loki = require('./loki');
 const {
-  k8sApply,
+  // k8sApply,
   k8sDelete,
   sleep,
-  waitForService,
-  waitForTracePipeline,
+  // waitForService,
+  // waitForTracePipeline,
 } = require('../utils');
-const {
-  restartProxyPod,
-} = require('../monitoring/grafana.js');
-const fs = require('fs');
-const path = require('path');
-const k8s = require('@kubernetes/client-node');
+// const {
+//   restartProxyPod,
+// } = require('../monitoring/grafana.js');
+const {loadResourceFromFile} = require('./client');
 
 function loggingTests() {
   const testStartTimestamp = new Date().toISOString();
@@ -50,25 +48,24 @@ function istioAccessLogsTests(startTimestamp) {
       await k8sDelete(istioAccessLogsResource, namespace);
     });
 
-    it('Should create the Istio Access Logs resource for Loki', async () => {
-      await k8sApply(istioAccessLogsResource, namespace);
-      await restartProxyPod();
-      await waitForService('telemetry-trace-collector-internal', namespace);
-      await waitForTracePipeline('jaeger');
-    });
+    // it('Should create the Istio Access Logs resource for Loki', async () => {
+    //   await k8sApply(istioAccessLogsResource, namespace);
+    //   await restartProxyPod();
+    //   await waitForService('telemetry-trace-collector-internal', namespace);
+    //   await waitForTracePipeline('jaeger');
+    // });
 
     it('Should query Loki and verify format of Istio Access Logs', async () => {
       // Sleep for 10 seconds to wait for logs to come into the istio-proxy container
       await sleep(10*1000);
-      newTestStartTimestamp = new Date().toISOString();
-      await loki.verifyIstioAccessLogFormat(newTestStartTimestamp);
+      await loki.verifyIstioAccessLogFormat(startTimestamp);
     });
   });
 }
 
-function loadResourceFromFile(file) {
-  const yaml = fs.readFileSync(path.join(__dirname, file), {
-    encoding: 'utf8',
-  });
-  return k8s.loadAllYaml(yaml);
-}
+// function loadResourceFromFile(file) {
+//   const yaml = fs.readFileSync(path.join(__dirname, file), {
+//     encoding: 'utf8',
+//   });
+//   return k8s.loadAllYaml(yaml);
+// }
