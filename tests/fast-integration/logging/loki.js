@@ -61,12 +61,10 @@ function parseJson(str) {
 }
 
 async function verifyIstioAccessLogFormat(startTimestamp) {
-  console.log('timestamp: '+ startTimestamp + '\n');
   await sleep(10*1000);
-  timeNow = new Date().toISOString();
-  console.log('time now: '+ timeNow + '\n');
   const query = '{container="istio-proxy",namespace="kyma-system",pod="logging-loki-0"}';
   const responseBody = await queryLoki(query, startTimestamp);
+  assert.isDefined(responseBody.data.result[0].values, 'Empty response for the query for Istio access logs');
   assert.isTrue(responseBody.data.result[0].values.length > 0, 'No Istio access logs found for loki');
   // Iterate over the values
   const numberOfLogs = responseBody.data.result[0].values.length;
@@ -121,9 +119,6 @@ async function verifyIstioAccessLogFormat(startTimestamp) {
       return;
     }
   }
-
-  timeNow1 = new Date().toISOString();
-  console.log('time at end: '+ timeNow1 + '\n');
   log = parseJson(entry.log);
   assert.isDefined(log, `Istio access log is not in JSON format: ${entry.log}`);
 }

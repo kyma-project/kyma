@@ -9,7 +9,7 @@ const {loggingTests} = require('../logging');
 const {createIstioAccessLogResource} = require('../logging/client.js');
 const {cleanMockTestFixture} = require('./fixtures/commerce-mock');
 const {ensureCommerceMockLocalTestFixture} = require('../test/fixtures/commerce-mock');
-// const {tracingTests} = require('../tracing');
+const {tracingTests} = require('../tracing');
 const {error} = require('../utils');
 
 describe('Executing Standard Testsuite:', function() {
@@ -43,5 +43,5 @@ describe('Executing Standard Testsuite:', function() {
   // gettingStartedGuideTests();
 
   loggingTests();
-  // tracingTests(testNamespace);
+  tracingTests(testNamespace);
 });
