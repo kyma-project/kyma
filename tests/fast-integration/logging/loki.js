@@ -52,13 +52,13 @@ async function checkPersistentVolumeClaimSize() {
   assert.equal(pvc.status.capacity.storage, '30Gi');
 }
 
-function parseJson(str) {
-  try {
-    return JSON.parse(str);
-  } catch (e) {
-    return undefined;
-  }
-}
+// function parseJson(str) {
+//   try {
+//     return JSON.parse(str);
+//   } catch (e) {
+//     return undefined;
+//   }
+// }
 
 async function verifyIstioAccessLogFormat(startTimestamp) {
   await sleep(10*1000);
