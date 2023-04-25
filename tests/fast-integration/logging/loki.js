@@ -52,28 +52,15 @@ async function checkPersistentVolumeClaimSize() {
   assert.equal(pvc.status.capacity.storage, '30Gi');
 }
 
-// function parseJson(str) {
-//   try {
-//     return JSON.parse(str);
-//   } catch (e) {
-//     return undefined;
-//   }
-// }
-
 async function verifyIstioAccessLogFormat(startTimestamp) {
-  await sleep(10*1000);
   const query = '{container="istio-proxy",namespace="kyma-system",pod="logging-loki-0"}';
   const responseBody = await queryLoki(query, startTimestamp);
-  console.log('responseBody', JSON.stringify(responseBody));
-  numberOfResults = responseBody.data.result.length;
   assert.isDefined(responseBody.data.result[0].values, 'Empty response for the query for Istio access logs');
   assert.isTrue(responseBody.data.result[0].values.length > 0, 'No Istio access logs found for loki');
-  console.log('number of results', numberOfResults);
+  numberOfResults = responseBody.data.result.length;
   // Iterate over the values
   for (let i = 0; i <= numberOfResults; i++) {
     const result = responseBody.data.result[i];
-    // console.log(numberOfLogs);
-    // console.log(responseBody.data.result[0].values);
     if (accessLogVerified(result)) {
       return;
     }
@@ -85,7 +72,6 @@ function accessLogVerified(result) {
   const numberOfLogs = result.values.length;
   for (let i =0; i<= numberOfLogs; i++) {
     // Some logs dont have values[i][1]. In such a case skip the log line
-    console.log(Array.isArray(result.values[i]));
     const val = result.values[i];
     if ( !Array.isArray(val) ) {
       console.log('skipping while its not an array' + val + '\n');
@@ -133,7 +119,8 @@ function accessLogVerified(result) {
 }
 
 function verifyLogAttributeIsPresent(attribute, logBody) {
-  assert.isDefined(logBody[attribute], `Istio access log does not have '${attribute}' field: ${logBody}`);
+  assert.isDefined(JSON.stringify(logBody[attribute]),
+      `Istio access log does not have '${attribute}' field: ${logBody}`);
 }
 
 function isJsonString(str) {
