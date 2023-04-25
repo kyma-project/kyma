@@ -1,0 +1,7 @@
+global:
+  containerRegistry:
+    path: europe-docker.pkg.dev/kyma-project/prod
+  images:
+    btp_manager:
+      name: "btp-manager"
+      version: "0.3.2"

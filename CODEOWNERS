@@ -60,6 +60,7 @@
 /resources/tracing @kyma-project/observability
 
 /resources/keda-manager @kyma-project/Otters
+/resources/btp-manager @kyma-project/gopher
 
 # Fast Integration Tests
 /tests/fast-integration/test @kyma-project/observability @kyma-project/eventing @kyma-project/Otters @kyma-project/goat
