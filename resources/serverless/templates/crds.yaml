@@ -441,6 +441,8 @@ spec:
               runtime:
                 description: Runtime specifies the name of the Function's runtime.
                 type: string
+              runtimeImage:
+                type: string
               runtimeImageOverride:
                 type: string
             type: object

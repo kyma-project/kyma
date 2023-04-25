@@ -249,12 +249,16 @@ type Repository struct {
 
 // FunctionStatus defines the observed state of Function
 type FunctionStatus struct {
-	Runtime              Runtime     `json:"runtime,omitempty"`
-	Conditions           []Condition `json:"conditions,omitempty"`
-	Repository           `json:",inline,omitempty"`
-	Replicas             int32  `json:"replicas,omitempty"`
-	PodSelector          string `json:"podSelector,omitempty"`
-	Commit               string `json:"commit,omitempty"`
+	Runtime      Runtime     `json:"runtime,omitempty"`
+	Conditions   []Condition `json:"conditions,omitempty"`
+	Repository   `json:",inline,omitempty"`
+	Replicas     int32  `json:"replicas,omitempty"`
+	PodSelector  string `json:"podSelector,omitempty"`
+	Commit       string `json:"commit,omitempty"`
+	RuntimeImage string `json:"runtimeImage,omitempty"`
+	// Deprecated: RuntimeImageOverride exists for historical compatibility
+	// and should be removed with v1alpha3 version. RuntimeImage has the
+	// override image if it isn't empty.
 	RuntimeImageOverride string `json:"runtimeImageOverride,omitempty"`
 }
 

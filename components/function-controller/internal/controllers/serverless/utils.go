@@ -92,7 +92,7 @@ func equalJobs(existing batchv1.Job, expected batchv1.Job) bool {
 	existingArgs := existing.Spec.Template.Spec.Containers[0].Args
 	expectedArgs := expected.Spec.Template.Spec.Containers[0].Args
 
-	// Compare destination argument as it contains image tag
+	// Compare destination argument as it contains fnImage tag
 	existingDst := getArg(existingArgs, destinationArg)
 	expectedDst := getArg(expectedArgs, destinationArg)
 
