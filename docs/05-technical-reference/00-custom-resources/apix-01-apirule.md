@@ -244,3 +244,25 @@ spec:
               - issuer: $ISSUER
                 jwksUri: $JWKS_URI
 ```
+
+## Additional information
+
+When you fetch an existing APIRule CR, the system adds the **status** section which describes the status of the VirtualService and the Oathkeeper Access Rule created for this CR. This table lists the fields of the **status** section.
+
+| Field   |  Description |
+|:---|:---|
+| **status.apiRuleStatus** | Status code describing the APIRule CR. |
+| **status.virtualServiceStatus.code** | Status code describing the VirtualService. |
+| **status.virtualService.desc** | Current state of the VirtualService. |
+| **status.accessRuleStatus.code** | Status code describing the Oathkeeper Rule. |
+| **status.accessRuleStatus.desc** | Current state of the Oathkeeper Rule. |
+
+### Status codes
+
+These are the status codes used to describe the VirtualServices and Oathkeeper Access Rules:
+
+| Code   |  Description |
+|---|---|
+| **OK** | Resource created. |
+| **SKIPPED** | Skipped creating a resource. |
+| **ERROR** | Resource not created. |
