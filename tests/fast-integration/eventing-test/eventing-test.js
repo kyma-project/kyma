@@ -13,6 +13,7 @@ const {
   switchEventingBackend,
   debug,
   createK8sConfigMap,
+  waitForEndpoint,
   waitForPodWithLabelAndCondition,
   createApiRuleForService,
   deleteApiRule,
@@ -68,6 +69,8 @@ const {
   kymaSystem,
   telemetryOperatorLabel,
   conditionReady,
+  jaegerLabel,
+  jaegerEndpoint,
 } = require('./common/common');
 const {
   expect,
@@ -87,6 +90,12 @@ describe('Eventing tests', function() {
 
   before('Ensure the test namespace exist', async function() {
     await waitForNamespace(testNamespace);
+  });
+
+  before('Ensure tracing is ready', async function() {
+    await waitForPodWithLabelAndCondition(jaegerLabel.key, jaegerLabel.value, kymaSystem, conditionReady.condition,
+        conditionReady.status);
+    await waitForEndpoint(jaegerEndpoint, kymaSystem);
   });
 
   before('Expose Grafana', async function() {

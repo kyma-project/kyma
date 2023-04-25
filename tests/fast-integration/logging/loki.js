@@ -16,6 +16,7 @@ const {
 } = require('./client');
 const {
   info,
+  debug,
 } = require('../utils');
 
 async function checkCommerceMockLogs(startTimestamp) {
@@ -73,17 +74,17 @@ function accessLogVerified(result) {
     // Some logs dont have values[i][1]. In such a case skip the log line
     const val = result.values[i];
     if ( !Array.isArray(val) ) {
-      console.log('skipping while its not an array' + val + '\n');
+      debug('skipping while its not an array', val);
       continue;
     }
     if (val.length < 2) {
-      console.log('skipping length not > 1: ' + val[1] + '\n');
+      debug('skipping length not > 1: ', val[1]);
       continue;
     }
     if (isJsonString(val[1])) {
       const log = JSON.parse(val[1]);
       if (typeof log['method'] === 'undefined') {
-        console.log('skipping while method is not present' + JSON.stringify(log) + '\n');
+        debug('skipping while method is not present', JSON.stringify(log));
         continue;
       }
       verifyLogAttributeIsPresent('method', log);
@@ -118,8 +119,8 @@ function accessLogVerified(result) {
 }
 
 function verifyLogAttributeIsPresent(attribute, logBody) {
-  assert.isDefined(JSON.stringify(logBody[attribute]),
-      `Istio access log does not have '${attribute}' field: ${logBody}`);
+  assert.isDefined(logBody[attribute],
+      `Istio access log does not have '${attribute}' field: ${JSON.stringify(logBody)}`);
 }
 
 function isJsonString(str) {
