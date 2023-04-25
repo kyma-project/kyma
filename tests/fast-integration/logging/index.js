@@ -7,7 +7,6 @@ module.exports = {
 const loki = require('./loki');
 const {
   k8sDelete,
-  sleep,
 } = require('../utils');
 const {loadResourceFromFile} = require('./client');
 

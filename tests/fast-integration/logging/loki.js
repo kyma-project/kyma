@@ -65,7 +65,7 @@ async function verifyIstioAccessLogFormat(startTimestamp) {
       return;
     }
   }
-  assert.throws(JSON.stringify(responseBody.data), `Istio access log is not present`);
+  assert.fail('Istio access log is not present: ', JSON.stringify(responseBody.data));
 }
 
 function accessLogVerified(result) {
