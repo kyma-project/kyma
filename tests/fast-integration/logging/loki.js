@@ -16,7 +16,6 @@ const {
 } = require('./client');
 const {
   info,
-  sleep,
 } = require('../utils');
 
 async function checkCommerceMockLogs(startTimestamp) {

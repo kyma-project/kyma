@@ -61,7 +61,6 @@ async function createIstioAccessLogResource() {
   const istioAccessLogsResource = loadResourceFromFile('./istio_access_logs.yaml');
   const namespace = 'kyma-system';
   await k8sApply(istioAccessLogsResource, namespace);
-  // await restartProxyPod();
   await waitForService('telemetry-trace-collector-internal', namespace);
   await waitForTracePipeline('jaeger');
 }
