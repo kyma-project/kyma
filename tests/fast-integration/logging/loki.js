@@ -65,15 +65,24 @@ async function verifyIstioAccessLogFormat(startTimestamp) {
   const query = '{container="istio-proxy",namespace="kyma-system",pod="logging-loki-0"}';
   const responseBody = await queryLoki(query, startTimestamp);
   console.log('responseBody', JSON.stringify(responseBody));
+  numberOfResults = responseBody.data.result.length;
   assert.isDefined(responseBody.data.result[0].values, 'Empty response for the query for Istio access logs');
   assert.isTrue(responseBody.data.result[0].values.length > 0, 'No Istio access logs found for loki');
+  console.log('number of results', numberOfResults);
   // Iterate over the values
-  const numberOfLogs = responseBody.data.result[0].values.length;
-  let entry;
-  let log;
-  const result = responseBody.data.result[0];
-  console.log(numberOfLogs);
-  console.log(responseBody.data.result[0].values);
+  for (let i = 0; i <= numberOfResults; i++) {
+    const result = responseBody.data.result[i];
+    // console.log(numberOfLogs);
+    // console.log(responseBody.data.result[0].values);
+    if (accessLogVerified(result)) {
+      return;
+    }
+  }
+  assert.throws(JSON.stringify(responseBody.data), `Istio access log is not present`);
+}
+
+function accessLogVerified(result) {
+  const numberOfLogs = result.values.length;
   for (let i =0; i<= numberOfLogs; i++) {
     // Some logs dont have values[i][1]. In such a case skip the log line
     console.log(Array.isArray(result.values[i]));
@@ -117,11 +126,10 @@ async function verifyIstioAccessLogFormat(startTimestamp) {
       verifyLogAttributeIsPresent('route_name', log);
       verifyLogAttributeIsPresent('traceparent', log);
       verifyLogAttributeIsPresent('tracestate', log);
-      return;
+      return true;
     }
   }
-  log = parseJson(entry.log);
-  assert.isDefined(log, `Istio access log is not in JSON format: ${entry.log}`);
+  return false;
 }
 
 function verifyLogAttributeIsPresent(attribute, logBody) {
