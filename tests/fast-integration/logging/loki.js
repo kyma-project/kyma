@@ -74,11 +74,11 @@ function accessLogVerified(result) {
     // Some logs dont have values[i][1]. In such a case skip the log line
     const val = result.values[i];
     if ( !Array.isArray(val) ) {
-      debug('skipping while its not an array', val);
+      debug('skipping while its not an array', JSON.stringify(val));
       continue;
     }
     if (val.length < 2) {
-      debug('skipping length not > 1: ', val[1]);
+      debug('skipping length not > 1: ', JSON.stringify(val[1]));
       continue;
     }
     if (isJsonString(val[1])) {

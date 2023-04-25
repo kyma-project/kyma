@@ -43,8 +43,6 @@ function istioAccessLogsTests(startTimestamp) {
     });
 
     it('Should query Loki and verify format of Istio Access Logs', async () => {
-      // Sleep for 10 seconds to wait for logs to come into the istio-proxy container
-      await sleep(10*1000);
       await loki.verifyIstioAccessLogFormat(startTimestamp);
     });
   });
