@@ -3,6 +3,8 @@ package object
 import (
 	"reflect"
 
+	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/conversion"
@@ -266,13 +268,14 @@ func IsBackendStatusEqual(oldStatus, newStatus eventingv1alpha1.EventingBackendS
 	return reflect.DeepEqual(oldStatusWithoutCond, newStatusWithoutCond) && eventingv1alpha1.ConditionsEquals(oldStatus.Conditions, newStatus.Conditions)
 }
 
-func IsSubscriptionStatusEqual(oldStatus, newStatus eventingv1alpha1.SubscriptionStatus) bool {
+func IsSubscriptionStatusEqual(oldStatus, newStatus eventingv1alpha2.SubscriptionStatus) bool {
 	oldStatusWithoutCond := oldStatus.DeepCopy()
 	newStatusWithoutCond := newStatus.DeepCopy()
 
 	// remove conditions, so that we don't compare them
-	oldStatusWithoutCond.Conditions = []eventingv1alpha1.Condition{}
-	newStatusWithoutCond.Conditions = []eventingv1alpha1.Condition{}
+	oldStatusWithoutCond.Conditions = []eventingv1alpha2.Condition{}
+	newStatusWithoutCond.Conditions = []eventingv1alpha2.Condition{}
 
-	return reflect.DeepEqual(oldStatusWithoutCond, newStatusWithoutCond) && eventingv1alpha1.ConditionsEquals(oldStatus.Conditions, newStatus.Conditions)
+	return reflect.DeepEqual(oldStatusWithoutCond, newStatusWithoutCond) &&
+		eventingv1alpha2.ConditionsEquals(oldStatus.Conditions, newStatus.Conditions)
 }

@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	v2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
+	eventingtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	"github.com/pkg/errors"
 
 	"github.com/stretchr/testify/require"
@@ -487,7 +487,7 @@ func Test_SetConditionSubscriptionActive(t *testing.T) {
 		v1alpha2.ConditionReasonNATSSubscriptionNotActive,
 		corev1.ConditionFalse, err.Error())
 	conditionNotReady.LastTransitionTime = metav1.NewTime(time.Now().AddDate(0, 0, -2))
-	sub := v2.NewSubscription("test", "test")
+	sub := eventingtesting.NewSubscription("test", "test")
 
 	testCases := []struct {
 		name                   string

@@ -15,7 +15,7 @@ This tutorial shows how to set up a custom domain and prepare a certificate requ
 
 1. Create a Secret containing credentials for the DNS cloud service provider account in your Namespace.
 
-     * Choose your DNS cloud service provider and create a secret in your Namespace. To learn how to do it, follow [the guidelines](https://github.com/gardener/external-dns-management/blob/master/README.md#external-dns-management) provided in the External DNS Management documentation. 
+     * Choose your DNS cloud service provider and create a Secret in your Namespace. To learn how to do it, follow [the guidelines](https://github.com/gardener/external-dns-management/blob/master/README.md#external-dns-management) provided in the External DNS Management documentation. 
      * Export the name of the created Secret as an environment variable:
 
        ```bash
@@ -81,46 +81,14 @@ This tutorial shows how to set up a custom domain and prepare a certificate requ
        EOF
        ```
 
-4. Create an Issuer CR.
+4. Create a Certificate CR.
 
      * Export the following values as environment variables:
 
-       ```bash
-       export EMAIL={YOUR_EMAIL_ADDRESS}
-       ```
-     * To create an Issuer CR, run: 
-
-       ```bash
-       cat <<EOF | kubectl apply -f -
-       apiVersion: cert.gardener.cloud/v1alpha1
-       kind: Issuer
-       metadata:
-         name: letsencrypt-staging
-         namespace: $NAMESPACE
-       spec:
-         acme:
-           server: https://acme-staging-v02.api.letsencrypt.org/directory
-           email: $EMAIL
-           autoRegistration: true
-           privateKeySecretRef:
-             name: letsencrypt-staging-secret
-             namespace: $NAMESPACE
-           domains:
-             include:
-               - $DOMAIN_TO_EXPOSE_WORKLOADS
-               - "*.$DOMAIN_TO_EXPOSE_WORKLOADS"
-       EOF
-       ```
-
-5. Create a Certificate CR.
-
-     * Export the following values as environment variables:
-
-        >**NOTE:** The `TLS_SECRET` is the name of the TLS Secret, for example `httpbin-tls-credentials`. The `ISSUER` value is the name of the Issuer CR, for example, `letsencrypt-staging`.
+        >**NOTE:** The `TLS_SECRET` is the name of the TLS Secret, for example `httpbin-tls-credentials`.
 
         ```bash
         export TLS_SECRET={TLS_SECRET_NAME}
-        export ISSUER={ISSUER_NAME}
         ```
 
      * To create a Certificate CR, run:
@@ -135,12 +103,9 @@ This tutorial shows how to set up a custom domain and prepare a certificate requ
         spec:  
           secretName: $TLS_SECRET
           commonName: $DOMAIN_TO_EXPOSE_WORKLOADS
-          issuerRef:
-            name: $ISSUER
-            namespace: $NAMESPACE
         EOF
         ```
-        >**NOTE:** While using the default configuration, certificates with the Let's Encrypt issuer are valid for 90 days and automatically renewed 60 days before their validity expires. Use the `--issuer.renewal-window` command line parameter to adjust the time window between the renewal and the expiration of a certificate. For more information on Gardener Certificate Management, read the [Gardener documentation](https://github.com/gardener/cert-management#requesting-a-certificate).
+        >**NOTE:** While using the default configuration, certificates with the Let's Encrypt Issuer are valid for 90 days and automatically renewed 30 days before their validity expires. For more information, read the documentation on [Gardener Certificate Management](https://github.com/gardener/cert-management#requesting-a-certificate) and [Gardener extensions for certificate services](https://gardener.cloud/docs/extensions/others/gardener-extension-shoot-cert-service/).
 
      * To check the certificate status, run: 
      
@@ -148,6 +113,6 @@ This tutorial shows how to set up a custom domain and prepare a certificate requ
         kubectl get certificate httpbin-cert -n istio-system
         ```
        
-6. Follow [this tutorial](./apix-03-set-up-tls-gateway.md) to set up a TLS Gateway.
+5. [Set up a TLS Gateway](./apix-03-set-up-tls-gateway.md).
 
 Visit the [Gardener external DNS management documentation](https://github.com/gardener/external-dns-management/tree/master/examples) to see more examples of custom resources for services and ingresses.
