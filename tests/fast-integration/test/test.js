@@ -24,6 +24,9 @@ describe('Executing Standard Testsuite:', function() {
       error(err);
       return ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace);
     });
+  });
+
+  before('Istio Accesslog Resource should be deployed', async function() {
     await createIstioAccessLogResource();
   });
 

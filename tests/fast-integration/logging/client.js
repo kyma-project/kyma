@@ -13,8 +13,6 @@ const {
   getSecretData,
   sleep,
   k8sApply,
-  waitForService,
-  waitForTracePipeline,
 } = require('../utils');
 const {proxyGrafanaDatasource} = require('../monitoring/client');
 
@@ -61,8 +59,6 @@ async function createIstioAccessLogResource() {
   const istioAccessLogsResource = loadResourceFromFile('./istio_access_logs.yaml');
   const namespace = 'kyma-system';
   await k8sApply(istioAccessLogsResource, namespace);
-  await waitForService('telemetry-trace-collector-internal', namespace);
-  await waitForTracePipeline('jaeger');
 }
 
 function loadResourceFromFile(file) {
