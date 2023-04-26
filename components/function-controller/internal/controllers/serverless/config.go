@@ -14,7 +14,7 @@ type FunctionConfig struct {
 	ImagePullAccountName                        string        `envconfig:"default=serverless-function"`
 	TargetCPUUtilizationPercentage              int32         `envconfig:"default=50"`
 	RequeueDuration                             time.Duration `envconfig:"default=1m"`
-	FunctionReadyRequeueDuration                time.Duration `envconfig:"default=15s"`
+	FunctionReadyRequeueDuration                time.Duration `envconfig:"default=5m"`
 	GitFetchRequeueDuration                     time.Duration `envconfig:"default=30s"`
 	Build                                       BuildConfig
 }
