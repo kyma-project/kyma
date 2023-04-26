@@ -106,13 +106,9 @@ func (c *Commander) Start() error {
 	)
 
 	// configure Subscription Lister
-	subDynamicSharedInfFactory := subscribed.GenerateSubscriptionInfFactory(k8sConfig, c.opts.EnableNewCRDVersion)
+	subDynamicSharedInfFactory := subscribed.GenerateSubscriptionInfFactory(k8sConfig)
 	var subLister cache.GenericLister
-	if c.opts.EnableNewCRDVersion {
-		subLister = subDynamicSharedInfFactory.ForResource(subscribed.GVR).Lister()
-	} else {
-		subLister = subDynamicSharedInfFactory.ForResource(subscribed.GVRV1alpha1).Lister()
-	}
+	subLister = subDynamicSharedInfFactory.ForResource(subscribed.GVR).Lister()
 	subscribedProcessor := &subscribed.Processor{
 		SubscriptionLister: &subLister,
 		Prefix:             c.envCfg.ToConfig().EventTypePrefix,

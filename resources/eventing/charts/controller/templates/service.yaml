@@ -29,7 +29,6 @@ spec:
       port: {{ .Values.global.istio.proxy.statusPort }}
       targetPort: {{ .Values.global.istio.proxy.statusPort }}
 ---
-{{- if .Values.enableNewCRDVersion }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -42,4 +41,3 @@ spec:
       port: {{ .Values.webhook.port }}
       protocol: TCP
       targetPort: {{ .Values.webhook.targetPort }}
-{{- end }}

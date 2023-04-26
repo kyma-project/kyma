@@ -96,15 +96,9 @@ func (h *Handler) setupMux() {
 	router.Use(h.collector.MetricsMiddleware())
 	router.HandleFunc(PublishEndpoint, h.maxBytes(h.publishCloudEvents)).Methods(http.MethodPost)
 	router.HandleFunc(LegacyEndpointPattern, h.maxBytes(h.publishLegacyEventsAsCE)).Methods(http.MethodPost)
-	if h.Options.EnableNewCRDVersion {
-		router.HandleFunc(
-			SubscribedEndpointPattern,
-			h.maxBytes(h.SubscribedProcessor.ExtractEventsFromSubscriptions)).Methods(http.MethodGet)
-	} else {
-		router.HandleFunc(
-			SubscribedEndpointPattern,
-			h.maxBytes(h.SubscribedProcessor.ExtractEventsFromSubscriptionsV1alpha1)).Methods(http.MethodGet)
-	}
+	router.HandleFunc(
+		SubscribedEndpointPattern,
+		h.maxBytes(h.SubscribedProcessor.ExtractEventsFromSubscriptions)).Methods(http.MethodGet)
 	router.HandleFunc(health.ReadinessURI, h.maxBytes(h.HealthChecker.ReadinessCheck))
 	router.HandleFunc(health.LivenessURI, h.maxBytes(h.HealthChecker.LivenessCheck))
 	h.router = router
@@ -202,22 +196,20 @@ func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *h
 		return
 	}
 
-	// publish event for Subscription v1alpha2
-	if h.Options.EnableNewCRDVersion {
-		successResult, publishedEvent = h.handlePublishLegacyEvent(writer, publishRequestData, request)
-		// if publishedEvent is nil, then it means that the publishing failed
-		// and the response is already returned to the user
-		if publishedEvent == nil {
-			return
-		}
+	// publish event for Subscription
+	successResult, publishedEvent = h.handlePublishLegacyEvent(writer, publishRequestData, request)
+	// if publishedEvent is nil, then it means that the publishing failed
+	// and the response is already returned to the user
+	if publishedEvent == nil {
+		return
 	}
 
 	// publish event for Subscription v1alpha1
-	// In case of EnableNewCRDVersion is true and the active backend is JetStream
+	// In case: the active backend is JetStream
 	// then we will publish event on both possible subjects
 	// i.e. with prefix (`sap.kyma.custom`) and without prefix
 	// this behaviour will be deprecated when we remove support for JetStream with Subscription `exact` typeMatching
-	if !h.Options.EnableNewCRDVersion || h.activeBackend == env.JetStreamBackend {
+	if h.activeBackend == env.JetStreamBackend {
 		successResult, publishedEvent = h.handlePublishLegacyEventV1alpha1(writer, publishRequestData, request)
 		// if publishedEvent is nil, then it means that the publishing failed
 		// and the response is already returned to the user
@@ -248,7 +240,7 @@ func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.R
 
 	eventTypeOriginal := event.Type()
 
-	if h.Options.EnableNewCRDVersion && !strings.HasPrefix(eventTypeOriginal, h.OldEventTypePrefix) {
+	if !strings.HasPrefix(eventTypeOriginal, h.OldEventTypePrefix) {
 		// build a new cloud event instance as per specifications per backend
 		event, err = h.ceBuilder.Build(*event)
 		if err != nil {
@@ -322,7 +314,7 @@ func (h *Handler) sendEventAndRecordMetrics(ctx context.Context, event *cev2even
 	originalEventType := event.Type()
 	originalTypeHeader, ok := event.Extensions()[builder.OriginalTypeHeaderName]
 	if !ok {
-		h.namedLogger().With().Warnw("event header doesn't exist", "header",
+		h.namedLogger().With().Debugw("event header doesn't exist", "header",
 			builder.OriginalTypeHeaderName)
 	} else {
 		originalEventType, ok = originalTypeHeader.(string)

@@ -8,7 +8,7 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/kyma-project/kyma/components/application-operator v0.0.0-20221118103320-ffe096ff3455
-	github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20221221134059-d9a237e9ad4f
+	github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20230426090856-c122afc6c6b9
 	github.com/nats-io/nats-server/v2 v2.9.15
 	github.com/nats-io/nats.go v1.25.0
 	github.com/onsi/gomega v1.27.6
@@ -36,7 +36,7 @@ require (
 	github.com/evanphx/json-patch v4.12.0+incompatible // indirect
 	github.com/evanphx/json-patch/v5 v5.6.0 // indirect
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
-	github.com/go-logr/logr v1.2.3 // indirect
+	github.com/go-logr/logr v1.2.4 // indirect
 	github.com/go-logr/zapr v1.2.3 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/jsonreference v0.19.5 // indirect
