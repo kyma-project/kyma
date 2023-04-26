@@ -69,6 +69,7 @@ async function provisionSKRInstance(options, timeout) {
     debug('Fetching runtime status...');
     const runtimeStatus = await kcp.getRuntimeStatusOperations(options.instanceID);
     console.log(`\nRuntime status after provisioning: ${runtimeStatus}`);
+    //TODO: get information from KCP rt (events for the operation)
     await kcp.reconcileInformationLog(runtimeStatus);
   }
 }

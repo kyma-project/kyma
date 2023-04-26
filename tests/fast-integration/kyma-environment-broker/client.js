@@ -16,10 +16,11 @@ class KEBConfig {
         getEnvOrThrow('KEB_USER_ID'),
         getEnvOrThrow('KEB_PLAN_ID'),
         process.env.KEB_REGION,
+        process.env.KEB_TOKEN_URL
     );
   }
 
-  constructor(host, credentials, globalAccountID, subaccountID, userID, planID, region) {
+  constructor(host, credentials, globalAccountID, subaccountID, userID, planID, region, tokenUrl) {
     this.host = host;
     this.credentials = credentials;
     this.globalAccountID = globalAccountID;
@@ -27,12 +28,17 @@ class KEBConfig {
     this.userID = userID;
     this.planID = planID;
     this.region = region;
+    this.tokenUrl = tokenUrl;
   }
 }
 
 class KEBClient {
   constructor(config) {
-    this.token = new OAuthToken(`https://oauth2.${config.host}/oauth2/token`, config.credentials);
+    let tokenUrl = `https://oauth2.${config.host}/oauth2/token`;
+    if (config.tokenUrl) {
+      tokenUrl = config.tokenUrl
+    }
+    this.token = new OAuthToken(tokenUrl, config.credentials);
     this.host = config.host;
     this.globalAccountID = config.globalAccountID;
     this.subaccountID = config.subaccountID;
