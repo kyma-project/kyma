@@ -125,7 +125,6 @@ func InitTestSuite() {
 		log.Fatalf("Unable to setup config: %v", err)
 	}
 
-	log.Printf("Fallback to default http client")
 	httpClient = &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
