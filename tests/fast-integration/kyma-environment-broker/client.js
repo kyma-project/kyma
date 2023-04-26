@@ -16,7 +16,7 @@ class KEBConfig {
         getEnvOrThrow('KEB_USER_ID'),
         getEnvOrThrow('KEB_PLAN_ID'),
         process.env.KEB_REGION,
-        process.env.KEB_TOKEN_URL
+        process.env.KEB_TOKEN_URL,
     );
   }
 
