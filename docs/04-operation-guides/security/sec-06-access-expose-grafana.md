@@ -1,12 +1,9 @@
 ---
-title: Access and Expose Grafana and Jaeger
+title: Access and Expose Grafana
 ---
-
-> **NOTE:** Kyma has deprecated the following components and plans to remove them. You can replace them with a custom stack:
->  - To replace [deprecated](https://kyma-project.io/blog/jaeger-deprecation) Jaeger, take a look at [Install custom Jaeger in Kyma](https://github.com/kyma-project/examples/tree/main/jaeger).
 >  - To replace [deprecated](https://kyma-project.io/blog/2022/12/9/monitoring-deprecation) Prometheus and Grafana, take a look at [Install a custom kube-prometheus-stack in Kyma](https://github.com/kyma-project/examples/tree/main/prometheus).
 
-By default, Kyma does not expose Grafana and Jaeger. However, you can still access them using port forwarding. If you want to expose Grafana and Jaeger securely, use an identity provider of your choice.
+By default, Kyma does not expose Grafana. However, you can still access them using port forwarding. If you want to expose Grafana, use an identity provider of your choice.
 
 ![Access services flow](./assets/obsv-access-services.svg)
 
@@ -15,7 +12,7 @@ By default, Kyma does not expose Grafana and Jaeger. However, you can still acce
 - You have defined the kubeconfig file for your cluster as default (see [Kubernetes: Organizing Cluster Access Using kubeconfig Files](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/)).
 - To expose the services securely with OAuth, you must have a registered OAuth application with one of the [supported providers](https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider#github-auth-provider).
 
-## Access Grafana and Jaeger
+## Access Grafana
 
 ### Steps
 
@@ -32,29 +29,19 @@ By default, Kyma does not expose Grafana and Jaeger. However, you can still acce
   ```
 
   </details>
-  <details>
-  <summary>
-  Jaeger
-  </summary>
-
-  ```bash
-  kubectl -n kyma-system port-forward svc/tracing-jaeger-query 16686:16686
-  ```
-
-  </details>
 </div>
 
 >**NOTE:** `kubectl port-forward` does not return. To stop port forwarding, cancel it with `Ctrl`+`C`.
 
-2. To access the respective service's UI, open `http://localhost:3000` (for Grafana) or `http://localhost:16686` (for Jaeger) in your browser.
+2. To access the Grafana service's UI, open `http://localhost:3000` in your browser.
 
-## Expose Grafana and Jaeger securely
+## Expose Grafana securely
 
-Kyma manages an [OAuth2 Proxy](https://oauth2-proxy.github.io/oauth2-proxy/) instance to secure access to Grafana and Jaeger. To make the services accessible, configure OAuth2 Proxy by creating a Kubernetes Secret with your identity provider credentials.
+Kyma manages an [OAuth2 Proxy](https://oauth2-proxy.github.io/oauth2-proxy/) instance to secure access to Grafana. To make the services accessible, configure OAuth2 Proxy by creating a Kubernetes Secret with your identity provider credentials.
 
 ### Steps
 
-The following example shows how to use an OpenID Connect (OIDC) compliant identity provider for Grafana and Jaeger.
+The following example shows how to use an OpenID Connect (OIDC) compliant identity provider for Grafana.
 
 >**NOTE:** The OAuth2 Proxy supports a wide range of other well-known authentication services or OpenID Connect for custom solutions. To find instructions for other authentication services, see the [list of supported providers](https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider).
 
@@ -92,23 +79,6 @@ The following example shows how to use an OpenID Connect (OIDC) compliant identi
   ```
 
   </details>
-  <details>
-  <summary>
-  Jaeger
-  </summary>
-
-  ```bash
-  kubectl -n kyma-system create secret generic tracing-auth-proxy-user \
-    --from-literal="OAUTH2_PROXY_CLIENT_ID=<my-client-id>" \
-    --from-literal="OAUTH2_PROXY_CLIENT_SECRET=<my-client-secret>" \
-    --from-literal="OAUTH2_PROXY_OIDC_ISSUER_URL=<my-token-issuer>" \
-    --from-literal="OAUTH2_PROXY_PROVIDER=oidc" \
-    --from-literal="OAUTH2_PROXY_SCOPE=openid email" \
-    --from-literal="OAUTH2_PROXY_ALLOWED_GROUPS=<my-groups>" \
-    --from-literal="OAUTH2_PROXY_SKIP_PROVIDER_BUTTON=true"
-  ```
-
-  </details>
 </div>
 
 >**NOTE:** By default, you are redirected to the documentation. To go to the service's UI instead, disable the OAuth2 Proxy provider button by setting `OAUTH2_PROXY_SKIP_PROVIDER_BUTTON=true`.
@@ -123,16 +93,6 @@ The following example shows how to use an OpenID Connect (OIDC) compliant identi
 
   ```bash
   kubectl -n kyma-system rollout restart deployment monitoring-auth-proxy-grafana
-  ```
-
-  </details>
-  <details>
-  <summary>
-  Jaeger
-  </summary>
-
-  ```bash
-  kubectl -n kyma-system rollout restart deployment tracing-auth-proxy
   ```
 
   </details>

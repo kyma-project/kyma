@@ -18,12 +18,8 @@ Every runtime provides its own unique environment configuration which can be rea
 | **SERVICE_NAMESPACE** | | The Namespace where the right Function exists on a cluster. |
 | **KUBELESS_INSTALL_VOLUME** | `/kubeless` | Full path to volume mount with users source code. |
 | **FUNC_RUNTIME** | | The name of the actual runtime. Possible values: `python39`, `nodejs16`, `nodejs16`. |
-| **TRACE_COLLECTOR_ENDPOINT** | `http://tracing-jaeger-collector.kyma-system.svc.cluster.local:4318/v1/traces` | Full address of the Open-Telemetry Trace Collector. |
-| **JAEGER_SERVICE_ENDPOINT** | `http://tracing-jaeger-collector.kyma-system.svc.cluster.local:14268/api/traces` | **Deprecated in 2.8** Full address of the Jaeger service. |
+| **TRACE_COLLECTOR_ENDPOINT** | | Full address of the Open-Telemetry Trace Collector is exported if trace collector endpoint is present |
 | **PUBLISHER_PROXY_ADDRESS** | `http://eventing-publisher-proxy.kyma-system.svc.cluster.local/publish` | Full address of the Publisher Proxy service. |
-
-> **NOTE:** TRACE_COLLECTOR_ENDPOINT replaced JAEGER_SERVICE_ENDPOINT in Kyma 2.8. Functions built (or re-built) after 2.8 use OpenTelemetry protocol-compliant endpoint, as defined by TRACE_COLLECTOR_ENDPOINT. JAEGER_SERVICE_ENDPOINT will be removed in Kyma 2.10.
-
 
 ### Specific environments
 
