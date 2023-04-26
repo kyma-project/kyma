@@ -12,6 +12,7 @@ Additionally, you can extend the default trace context and create your own custo
 Before you start, make sure you have these tools installed:
 
 - [Kyma installed](../../04-operation-guides/operations/02-install-kyma.md) on a cluster
+- Jaeger is installed [TODO]
 
 ## Steps
 
