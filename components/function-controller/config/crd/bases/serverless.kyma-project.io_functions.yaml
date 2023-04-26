@@ -446,6 +446,9 @@ spec:
               runtimeImage:
                 type: string
               runtimeImageOverride:
+                description: 'Deprecated: RuntimeImageOverride exists for historical
+                  compatibility and should be removed with v1alpha3 version. RuntimeImage
+                  has the override image if it isn''t empty.'
                 type: string
             type: object
         type: object
