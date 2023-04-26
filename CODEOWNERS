@@ -70,6 +70,7 @@
 /tests/fast-integration/logging @kyma-project/observability
 /tests/fast-integration/monitoring @kyma-project/observability
 /tests/fast-integration/telemetry-test @kyma-project/observability
+/tests/fast-integration/tracing @kyma-project/observability
 
 
 /tests/function-controller @kyma-project/Otters
