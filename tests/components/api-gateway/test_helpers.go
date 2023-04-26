@@ -132,7 +132,6 @@ func InitTestSuite() {
 		},
 		Timeout: conf.ClientTimeout,
 	}
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
 	commonRetryOpts := []retry.Option{
 		retry.Delay(time.Duration(conf.ReqDelay) * time.Second),
