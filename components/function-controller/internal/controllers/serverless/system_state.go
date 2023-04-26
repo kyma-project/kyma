@@ -540,12 +540,6 @@ func (s *systemState) getReplicas(defaultVal int32) *int32 {
 	return &defaultVal
 }
 
-// TODO do not negate
-func (s *systemState) deploymentEqual(d appsv1.Deployment) bool {
-	return len(s.deployments.Items) == 1 &&
-		equalDeployments(s.deployments.Items[0], d)
-}
-
 func (s *systemState) hasDeploymentConditionTrueStatusWithReason(conditionType appsv1.DeploymentConditionType, reason string) bool {
 	for _, condition := range s.deployments.Items[0].Status.Conditions {
 		if condition.Type == conditionType {
