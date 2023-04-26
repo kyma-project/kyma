@@ -1,5 +1,9 @@
 const axios = require('axios');
 const https = require('https');
+const fs = require('fs');
+const path = require('path');
+const k8s = require('@kubernetes/client-node');
+
 const httpsAgent = new https.Agent({
   rejectUnauthorized: false, // curl -k
 });
@@ -34,8 +38,17 @@ const {
   info,
   debug,
   createEventingBackendK8sSecret,
+  deployJaeger,
 } = require('../utils');
 const {expect} = require('chai');
+
+const jaegerYaml = fs.readFileSync(
+    path.join(__dirname, '../test/fixtures/jaeger/jaeger.yaml'),
+    {
+      encoding: 'utf8',
+    },
+);
+
 
 describe('Eventing tests preparation', function() {
   this.timeout(timeoutTime);
@@ -110,6 +123,10 @@ describe('Eventing tests preparation', function() {
 
   it('Prepare v1alpha2 subscriptions', async function() {
     await deployV1Alpha2Subscriptions();
+  });
+
+  it('Should deploy jaeger', async function() {
+    await deployJaeger(k8s.loadAllYaml(jaegerYaml));
   });
 
   afterEach(async function() {
