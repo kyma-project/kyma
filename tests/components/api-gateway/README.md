@@ -40,7 +40,7 @@ Obtain a service account access key with permissions to maintain custom domain D
 Set the following environment variables:
 - `TEST_DOMAIN` - your default Kyma domain, e.g. `c1f643b.stage.kyma.ondemand.com`
 - `TEST_CUSTOM_DOMAIN` - your custom domain, e.g. `custom.domain.build.kyma-project.io`
-- `TEST_SA_ACCESS_KEY_PATH` - the path to the service account access key exported as a JSON file
+- `TEST_SA_ACCESS_KEY_PATH` - the path to the service account access key exported as a JSON file, e.g. `/Users/user/gcp/service-account.json`
 
 ### Run the tests
 
