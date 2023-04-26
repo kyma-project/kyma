@@ -133,6 +133,7 @@ spec:
         - -routez
         - -subz
         - -varz
+        - -healthz
         - -prefix=nats
         - -use_internal_server_id
         - -jsz=all

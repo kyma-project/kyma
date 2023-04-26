@@ -15,16 +15,16 @@ global:
       version: "1.4.1"
     nats:
       name: nats
-      version: v20230314-2.9.15-alpine3.17
-      directory: external
+      version: v20230418-2.9.16-alpine3.17
+      directory: prod/external
     nats_config_reloader:
       name: natsio/nats-server-config-reloader
       version: 0.10.1
       directory: external
     prometheus_nats_exporter:
       name: natsio/prometheus-nats-exporter
-      version: 0.10.1
-      directory: external
+      version: 0.11.0
+      directory: prod/external
 
   jetstream:
     # Storage type of the stream, memory or file.
