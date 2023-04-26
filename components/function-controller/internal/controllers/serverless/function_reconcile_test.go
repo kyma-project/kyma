@@ -1337,6 +1337,39 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(function.Status.RuntimeImageOverride).To(gomega.Equal(""))
 		g.Expect(function.Status.RuntimeImage).To(gomega.Equal("some_image"))
 	})
+	t.Run("should reconcile function with new runtimeImage from Dockerfile", func(t *testing.T) {
+		//GIVEN
+		g := gomega.NewGomegaWithT(t)
+		inFunction := newFixFunctionWithCustomImage(testNamespace, "custom-runtime-fn-image", "", 1, 2)
+		g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
+		defer deleteFunction(g, resourceClient, inFunction)
+
+		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: inFunction.GetNamespace(), Name: inFunction.GetName()}}
+
+		//WHEN
+		t.Log("should detect runtimeImage change")
+
+		function := &serverlessv1alpha2.Function{}
+		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
+
+		result, err := reconciler.Reconcile(ctx, request)
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(result.Requeue).To(gomega.BeFalse())
+		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
+
+		configMap := changeDockerfileForRuntime(rtm)
+
+		g.Expect((resourceClient.Update(ctx, configMap))).To(gomega.Succeed())
+
+		result, err = reconciler.Reconcile(ctx, request)
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(result.Requeue).To(gomega.BeFalse())
+		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
+
+		function = &serverlessv1alpha2.Function{}
+		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
+		g.Expect(function.Status.RuntimeImage).To(gomega.Equal("other_image"))
+	})
 	t.Run("should reconcile function with SecretMounts", func(t *testing.T) {
 		//GIVEN
 		g := gomega.NewGomegaWithT(t)
