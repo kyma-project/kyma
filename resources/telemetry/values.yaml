@@ -8,7 +8,7 @@ global:
       directory: "prod"
     telemetry_operator:
       name: "telemetry-manager"
-      version: "v20230421-c40cd7f7"
+      version: "v20230426-ccd86c06"
       directory: "prod"
     telemetry_otel_collector:
       name: "otel-collector"
