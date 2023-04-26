@@ -36,7 +36,7 @@ class KEBClient {
   constructor(config) {
     let tokenUrl = `https://oauth2.${config.host}/oauth2/token`;
     if (config.tokenUrl) {
-      tokenUrl = config.tokenUrl
+      tokenUrl = config.tokenUrl;
     }
     this.token = new OAuthToken(tokenUrl, config.credentials);
     this.host = config.host;
