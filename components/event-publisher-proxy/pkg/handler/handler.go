@@ -240,6 +240,7 @@ func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.R
 
 	eventTypeOriginal := event.Type()
 
+	//nolint:nestif // it will be improved when v1alpha1 is deprecated.
 	if !strings.HasPrefix(eventTypeOriginal, h.OldEventTypePrefix) {
 		// build a new cloud event instance as per specifications per backend
 		event, err = h.ceBuilder.Build(*event)
