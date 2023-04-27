@@ -43,16 +43,12 @@ For details, see the [TracePipeline specification file](https://github.com/kyma-
 <!-- The content between "TABLE-START" and "TABLE-END" will be replaced -->
 
 <!-- TABLE-START -->
-<div tabs name="CRD Specification" group="crd-spec">
-<details open>
-<summary label="v1alpha1">
-v1alpha1
-</summary>
-
+### TracePipeline.v1alpha1.telemetry.kyma-project.io
 **Spec:**
+
 <!-- TracePipeline v1alpha1 telemetry.kyma-project.io -->
 | Parameter         | Type | Description                                   |
-| ---------------------------------------- | ---------|
+| ------------------| ---- | --------------------------------------------- |
 | **spec.output** | object | Defines a destination for shipping trace data. Only one can be defined per pipeline. |
 | **spec.output.otlp** | object | Configures the underlying Otel Collector with an [OTLP exporter](https://github.com/open-telemetry/opentelemetry-collector/blob/main/exporter/otlpexporter/README.md). If you switch `protocol`to `http`, an [OTLP HTTP exporter](https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter/otlphttpexporter) is used. |
 | **spec.output.otlp.authentication** | object | Defines authentication options for the OTLP output |
@@ -92,12 +88,11 @@ v1alpha1
 
 <!-- TracePipeline v1alpha1 telemetry.kyma-project.io -->
 | Parameter         | Type | Description                                   |
-| ---------------------------------------- | ---------|
+| ------------------| ---- | --------------------------------------------- |
 | **status.conditions** | An array of conditions describing the status of the pipeline. | conditions |
 | **status.conditions.lastTransitionTime** | string | An array of conditions describing the status of the pipeline. |
 | **status.conditions.reason** | string | An array of conditions describing the status of the pipeline. |
 | **status.conditions.type** | string | The possible transition types are:<br>- `Running`: The instance is ready and usable.<br>- `Pending`: The pipeline is being activated. |
 
-</details>
-</div>
 <!-- TABLE-END -->
+

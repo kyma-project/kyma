@@ -113,23 +113,18 @@ func generateDocFromCRD(elementsToSkip map[string]bool) string {
 	CRDGroup = group.(string)
 
 	versions = sortVersions(versions)
-
-	table := "<div tabs name=\"CRD Specification\" group=\"crd-spec\">\n"
-	open := " open"
+	table := ""
 	for _, version := range versions.([]interface{}) {
 		name := getElement(version, "name")
 		APIVersion = name.(string)
 
-		table += fmt.Sprintf("<details%s>\n<summary label=\"%s\">\n%s\n</summary>\n\n", open, name.(string), name.(string))
-		open = ""
-
-		table += "**Spec:**"
-		table = table + "\n" + strings.Join(generateTable(elementsToSkip, version, "spec"), "\n")
-		table += "\n\n**Status:**\n"
-		table = table + "\n" + strings.Join(generateTable(elementsToSkip, version, "status"), "\n")
-		table += "\n\n</details>\n"
+		table += fmt.Sprintf("### %s.%s.%s\n", CRDKind, APIVersion, CRDGroup)
+		table += "**Spec:**\n\n"
+		table += strings.Join(generateTable(elementsToSkip, version, "spec"), "\n")
+		table += "\n\n**Status:**\n\n"
+		table += strings.Join(generateTable(elementsToSkip, version, "status"), "\n") + "\n"
 	}
-	table += "</div>\n"
+	table += "\n"
 
 	return table
 }
@@ -165,7 +160,7 @@ func generateTable(elementsToSkip map[string]bool, version interface{}, resource
 	doc = append([]string{
 		"<!-- " + CRDKind + " " + APIVersion + " " + CRDGroup + " -->",
 		"| Parameter         | Type | Description                                   |",
-		"| ---------------------------------------- | ---------|",
+		"| ------------------| ---- | --------------------------------------------- |",
 	}, doc...)
 	return doc
 }
