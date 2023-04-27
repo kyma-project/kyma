@@ -114,13 +114,13 @@ func generateDocFromCRD(elementsToSkip map[string]bool) string {
 
 	versions = sortVersions(versions)
 
-	table := `<div tabs name="CRD Specification" group="crd-spec">`
+	table := "<div tabs name=\"CRD Specification\" group=\"crd-spec\">\n"
 	open := " open"
 	for _, version := range versions.([]interface{}) {
 		name := getElement(version, "name")
 		APIVersion = name.(string)
 
-		table += fmt.Sprintf("<details%s>\n<summary label=\"%s\">%s</summary>\n\n", open, name.(string), name.(string))
+		table += fmt.Sprintf("<details%s>\n<summary label=\"%s\">\n%s\n</summary>\n\n", open, name.(string), name.(string))
 		open = ""
 
 		table += "**Spec:**"
@@ -129,7 +129,7 @@ func generateDocFromCRD(elementsToSkip map[string]bool) string {
 		table = table + "\n" + strings.Join(generateTable(elementsToSkip, version, "status"), "\n")
 		table += "\n\n</details>\n"
 	}
-	table += "</div>"
+	table += "</div>\n"
 
 	return table
 }
