@@ -120,14 +120,14 @@ func generateDocFromCRD(elementsToSkip map[string]bool) string {
 		name := getElement(version, "name")
 		APIVersion = name.(string)
 
-		table += fmt.Sprintf("<details%s>\n<summary label=\"%s\">%s</summary>\n", open, name.(string), name.(string))
+		table += fmt.Sprintf("<details%s>\n<summary label=\"%s\">%s</summary>\n\n", open, name.(string), name.(string))
 		open = ""
 
 		table += "**Spec:**"
 		table = table + "\n" + strings.Join(generateTable(elementsToSkip, version, "spec"), "\n")
 		table += "\n\n**Status:**\n"
 		table = table + "\n" + strings.Join(generateTable(elementsToSkip, version, "status"), "\n")
-		table += "\n</details>\n"
+		table += "\n\n</details>\n"
 	}
 	table += "</div>"
 

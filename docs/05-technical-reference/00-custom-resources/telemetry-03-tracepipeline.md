@@ -45,6 +45,7 @@ For details, see the [TracePipeline specification file](https://github.com/kyma-
 <!-- TABLE-START -->
 <div tabs name="CRD Specification" group="crd-spec"><details open>
 <summary label="v1alpha1">v1alpha1</summary>
+
 **Spec:**
 <!-- TracePipeline v1alpha1 telemetry.kyma-project.io -->
 | Parameter         | Type | Description                                   |
@@ -93,5 +94,6 @@ For details, see the [TracePipeline specification file](https://github.com/kyma-
 | **status.conditions.lastTransitionTime** | string | An array of conditions describing the status of the pipeline. |
 | **status.conditions.reason** | string | An array of conditions describing the status of the pipeline. |
 | **status.conditions.type** | string | The possible transition types are:<br>- `Running`: The instance is ready and usable.<br>- `Pending`: The pipeline is being activated. |
+
 </details>
 </div><!-- TABLE-END -->
