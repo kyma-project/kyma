@@ -12,7 +12,7 @@ Additionally, you can extend the default trace context and create your own custo
 Before you start, make sure you have these tools installed:
 
 - [Kyma installed](../../04-operation-guides/operations/02-install-kyma.md) on a cluster
-- Trace backend configured to collect traces from the cluster. Kyma allows bringing an own trace backend or one can deploy jaeger.
+- Trace backend configured to collect traces from the cluster. Kyma allows bringing an own trace backend or one can deploy [jaeger](https://github.com/kyma-project/examples/tree/main/jaeger).
 
 ## Steps
 
