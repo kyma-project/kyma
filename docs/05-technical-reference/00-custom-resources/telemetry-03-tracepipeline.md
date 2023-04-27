@@ -43,44 +43,54 @@ For details, see the [TracePipeline specification file](https://github.com/kyma-
 <!-- The content between "TABLE-START" and "TABLE-END" will be replaced -->
 
 <!-- TABLE-START -->
+<div tabs name="CRD Specification" group="crd-spec"><details>
+<summary label=v1alpha1>v1alpha1</summary>
+**Spec:**
 <!-- TracePipeline v1alpha1 telemetry.kyma-project.io -->
-| Parameter         | Description                                   |
+| Parameter         | Type | Description                                   |
 | ---------------------------------------- | ---------|
-| **spec.output** | Defines a destination for shipping trace data. Only one can be defined per pipeline. |
-| **spec.output.otlp** | Configures the underlying Otel Collector with an [OTLP exporter](https://github.com/open-telemetry/opentelemetry-collector/blob/main/exporter/otlpexporter/README.md). If you switch `protocol`to `http`, an [OTLP HTTP exporter](https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter/otlphttpexporter) is used. |
-| **spec.output.otlp.authentication** | Defines authentication options for the OTLP output |
-| **spec.output.otlp.authentication.basic** | Activates `Basic` authentication for the destination providing relevant Secrets. |
-| **spec.output.otlp.authentication.basic.password** | Contains the basic auth password or a Secret reference. |
-| **spec.output.otlp.authentication.basic.password.value** | Value that can contain references to Secret values. |
-| **spec.output.otlp.authentication.basic.password.valueFrom** |  |
-| **spec.output.otlp.authentication.basic.password.valueFrom.secretKeyRef** | Refers to a key in a Secret. You must provide `name` and `namespace` of the Secret, as well as the name of the `key`. |
-| **spec.output.otlp.authentication.basic.password.valueFrom.secretKeyRef.key** |  |
-| **spec.output.otlp.authentication.basic.password.valueFrom.secretKeyRef.name** |  |
-| **spec.output.otlp.authentication.basic.password.valueFrom.secretKeyRef.namespace** |  |
-| **spec.output.otlp.authentication.basic.user** | Contains the basic auth username or a Secret reference. |
-| **spec.output.otlp.authentication.basic.user.value** | Value that can contain references to Secret values. |
-| **spec.output.otlp.authentication.basic.user.valueFrom** |  |
-| **spec.output.otlp.authentication.basic.user.valueFrom.secretKeyRef** | Refers to a key in a Secret. You must provide `name` and `namespace` of the Secret, as well as the name of the `key`. |
-| **spec.output.otlp.authentication.basic.user.valueFrom.secretKeyRef.key** |  |
-| **spec.output.otlp.authentication.basic.user.valueFrom.secretKeyRef.name** |  |
-| **spec.output.otlp.authentication.basic.user.valueFrom.secretKeyRef.namespace** |  |
-| **spec.output.otlp.endpoint** | Defines the host and port (<host>:<port>) of an OTLP endpoint. |
-| **spec.output.otlp.endpoint.value** | Value that can contain references to Secret values. |
-| **spec.output.otlp.endpoint.valueFrom** |  |
-| **spec.output.otlp.endpoint.valueFrom.secretKeyRef** | Refers to a key in a Secret. You must provide `name` and `namespace` of the Secret, as well as the name of the `key`. |
-| **spec.output.otlp.endpoint.valueFrom.secretKeyRef.key** |  |
-| **spec.output.otlp.endpoint.valueFrom.secretKeyRef.name** |  |
-| **spec.output.otlp.endpoint.valueFrom.secretKeyRef.namespace** |  |
-| **spec.output.otlp.headers** | Defines custom headers to be added to outgoing HTTP or GRPC requests. |
-| **spec.output.otlp.headers.name** | Defines the header name. |
-| **spec.output.otlp.headers.value** | Value that can contain references to Secret values. |
-| **spec.output.otlp.headers.valueFrom** |  |
-| **spec.output.otlp.headers.valueFrom.secretKeyRef** | Refers to a key in a Secret. You must provide `name` and `namespace` of the Secret, as well as the name of the `key`. |
-| **spec.output.otlp.headers.valueFrom.secretKeyRef.key** |  |
-| **spec.output.otlp.headers.valueFrom.secretKeyRef.name** |  |
-| **spec.output.otlp.headers.valueFrom.secretKeyRef.namespace** |  |
-| **spec.output.otlp.protocol** | Defines the OTLP protocol (http or grpc). Default is GRPC. |
-| **status.conditions** | An array of conditions describing the status of the pipeline. |
-| **status.conditions.lastTransitionTime** | An array of conditions describing the status of the pipeline. |
-| **status.conditions.reason** | An array of conditions describing the status of the pipeline. |
-| **status.conditions.type** | The possible transition types are:<br>- `Running`: The instance is ready and usable.<br>- `Pending`: The pipeline is being activated. |<!-- TABLE-END -->
+| **spec.output** | object | Defines a destination for shipping trace data. Only one can be defined per pipeline. |
+| **spec.output.otlp** | object | Configures the underlying Otel Collector with an [OTLP exporter](https://github.com/open-telemetry/opentelemetry-collector/blob/main/exporter/otlpexporter/README.md). If you switch `protocol`to `http`, an [OTLP HTTP exporter](https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter/otlphttpexporter) is used. |
+| **spec.output.otlp.authentication** | object | Defines authentication options for the OTLP output |
+| **spec.output.otlp.authentication.basic** | object | Activates `Basic` authentication for the destination providing relevant Secrets. |
+| **spec.output.otlp.authentication.basic.password** | object | Contains the basic auth password or a Secret reference. |
+| **spec.output.otlp.authentication.basic.password.value** | string | Value that can contain references to Secret values. |
+| **spec.output.otlp.authentication.basic.password.valueFrom** | object |  |
+| **spec.output.otlp.authentication.basic.password.valueFrom.secretKeyRef** | object | Refers to a key in a Secret. You must provide `name` and `namespace` of the Secret, as well as the name of the `key`. |
+| **spec.output.otlp.authentication.basic.password.valueFrom.secretKeyRef.key** | string |  |
+| **spec.output.otlp.authentication.basic.password.valueFrom.secretKeyRef.name** | string |  |
+| **spec.output.otlp.authentication.basic.password.valueFrom.secretKeyRef.namespace** | string |  |
+| **spec.output.otlp.authentication.basic.user** | object | Contains the basic auth username or a Secret reference. |
+| **spec.output.otlp.authentication.basic.user.value** | string | Value that can contain references to Secret values. |
+| **spec.output.otlp.authentication.basic.user.valueFrom** | object |  |
+| **spec.output.otlp.authentication.basic.user.valueFrom.secretKeyRef** | object | Refers to a key in a Secret. You must provide `name` and `namespace` of the Secret, as well as the name of the `key`. |
+| **spec.output.otlp.authentication.basic.user.valueFrom.secretKeyRef.key** | string |  |
+| **spec.output.otlp.authentication.basic.user.valueFrom.secretKeyRef.name** | string |  |
+| **spec.output.otlp.authentication.basic.user.valueFrom.secretKeyRef.namespace** | string |  |
+| **spec.output.otlp.endpoint** | object | Defines the host and port (<host>:<port>) of an OTLP endpoint. |
+| **spec.output.otlp.endpoint.value** | string | Value that can contain references to Secret values. |
+| **spec.output.otlp.endpoint.valueFrom** | object |  |
+| **spec.output.otlp.endpoint.valueFrom.secretKeyRef** | object | Refers to a key in a Secret. You must provide `name` and `namespace` of the Secret, as well as the name of the `key`. |
+| **spec.output.otlp.endpoint.valueFrom.secretKeyRef.key** | string |  |
+| **spec.output.otlp.endpoint.valueFrom.secretKeyRef.name** | string |  |
+| **spec.output.otlp.endpoint.valueFrom.secretKeyRef.namespace** | string |  |
+| **spec.output.otlp.headers** | Defines custom headers to be added to outgoing HTTP or GRPC requests. | headers |
+| **spec.output.otlp.headers.name** | string | Defines the header name. |
+| **spec.output.otlp.headers.value** | string | Value that can contain references to Secret values. |
+| **spec.output.otlp.headers.valueFrom** | object |  |
+| **spec.output.otlp.headers.valueFrom.secretKeyRef** | object | Refers to a key in a Secret. You must provide `name` and `namespace` of the Secret, as well as the name of the `key`. |
+| **spec.output.otlp.headers.valueFrom.secretKeyRef.key** | string |  |
+| **spec.output.otlp.headers.valueFrom.secretKeyRef.name** | string |  |
+| **spec.output.otlp.headers.valueFrom.secretKeyRef.namespace** | string |  |
+| **spec.output.otlp.protocol** | string | Defines the OTLP protocol (http or grpc). Default is GRPC. |
+
+**Status:**
+
+<!-- TracePipeline v1alpha1 telemetry.kyma-project.io -->
+| Parameter         | Type | Description                                   |
+| ---------------------------------------- | ---------|
+| **status.conditions** | An array of conditions describing the status of the pipeline. | conditions |
+| **status.conditions.lastTransitionTime** | string | An array of conditions describing the status of the pipeline. |
+| **status.conditions.reason** | string | An array of conditions describing the status of the pipeline. |
+| **status.conditions.type** | string | The possible transition types are:<br>- `Running`: The instance is ready and usable.<br>- `Pending`: The pipeline is being activated. |</details>
+</div><!-- TABLE-END -->
