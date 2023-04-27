@@ -17,19 +17,11 @@ By default, Kyma does not expose Grafana. However, you can still access them usi
 ### Steps
 
 1. To forward a local port to a port on the service's Pod, run the following command:
+  
+    ```bash
+    kubectl -n kyma-system port-forward svc/monitoring-grafana 3000:80
+    ```
 
-<div tabs>
-  <details>
-  <summary>
-  Grafana
-  </summary>
-
-  ```bash
-  kubectl -n kyma-system port-forward svc/monitoring-grafana 3000:80
-  ```
-
-  </details>
-</div>
 
 >**NOTE:** `kubectl port-forward` does not return. To stop port forwarding, cancel it with `Ctrl`+`C`.
 
@@ -61,39 +53,24 @@ The following example shows how to use an OpenID Connect (OIDC) compliant identi
 
    - The following code works on Linux and macOS. If you are using Windows, replace the `` \ `` character by `` ` `` (PowerShell) or `` ^ `` (CMD) for multi-line commands.
 
-<div tabs>
-  <details>
-  <summary>
-  Grafana
-  </summary>
 
-  ```bash
-  kubectl -n kyma-system create secret generic monitoring-auth-proxy-grafana-user \
-    --from-literal="OAUTH2_PROXY_CLIENT_ID=<my-client-id>" \
-    --from-literal="OAUTH2_PROXY_CLIENT_SECRET=<my-client-secret>" \
-    --from-literal="OAUTH2_PROXY_OIDC_ISSUER_URL=<my-token-issuer>" \
-    --from-literal="OAUTH2_PROXY_PROVIDER=oidc" \
-    --from-literal="OAUTH2_PROXY_SCOPE=openid email" \
-    --from-literal="OAUTH2_PROXY_ALLOWED_GROUPS=<my-groups>" \
-    --from-literal="OAUTH2_PROXY_SKIP_PROVIDER_BUTTON=true"
-  ```
 
-  </details>
-</div>
+      ```bash
+      kubectl -n kyma-system create secret generic monitoring-auth-proxy-grafana-user \
+        --from-literal="OAUTH2_PROXY_CLIENT_ID=<my-client-id>" \
+        --from-literal="OAUTH2_PROXY_CLIENT_SECRET=<my-client-secret>" \
+        --from-literal="OAUTH2_PROXY_OIDC_ISSUER_URL=<my-token-issuer>" \
+        --from-literal="OAUTH2_PROXY_PROVIDER=oidc" \
+        --from-literal="OAUTH2_PROXY_SCOPE=openid email" \
+        --from-literal="OAUTH2_PROXY_ALLOWED_GROUPS=<my-groups>" \
+        --from-literal="OAUTH2_PROXY_SKIP_PROVIDER_BUTTON=true"
+      ```
+
 
 >**NOTE:** By default, you are redirected to the documentation. To go to the service's UI instead, disable the OAuth2 Proxy provider button by setting `OAUTH2_PROXY_SKIP_PROVIDER_BUTTON=true`.
 
 3. Restart the OAuth2 Proxy pod:
 
-<div tabs>
-  <details>
-  <summary>
-  Grafana
-  </summary>
-
-  ```bash
-  kubectl -n kyma-system rollout restart deployment monitoring-auth-proxy-grafana
-  ```
-
-  </details>
-</div>
+      ```bash
+      kubectl -n kyma-system rollout restart deployment monitoring-auth-proxy-grafana
+      ```
