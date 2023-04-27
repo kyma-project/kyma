@@ -14,7 +14,7 @@ global:
       directory: prod
     certHandler:
       name: api-gateway-webhook-certificates
-      version: "1.5.0"
+      version: "1.5.1"
       directory: prod
     nats:
       name: nats
