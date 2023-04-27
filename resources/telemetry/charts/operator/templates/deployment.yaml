@@ -44,6 +44,8 @@ spec:
             - --fluent-bit-exporter-image={{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.directory_size_exporter) }}
             - --validating-webhook-enabled={{ .Values.webhook.enabled }}
             - --enable-telemetry-manager-module=false
+            - --trace-collector-pipelines=1
+            - --metric-gateway-pipelines=1
 {{- if or .Values.priorityClassName .Values.global.highPriorityClassName }}
             - --fluent-bit-priority-class-name={{ coalesce .Values.priorityClassName .Values.global.highPriorityClassName }}
 {{- end }}
