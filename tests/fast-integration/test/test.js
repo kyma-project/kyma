@@ -6,6 +6,7 @@ const {
 const {apiExposureTests} = require('../api-exposure');
 const {monitoringTests, unexposeGrafana} = require('../monitoring');
 const {loggingTests} = require('../logging');
+const {createIstioAccessLogResource} = require('../logging/client.js');
 const {cleanMockTestFixture} = require('./fixtures/commerce-mock');
 const {ensureCommerceMockLocalTestFixture} = require('../test/fixtures/commerce-mock');
 const {tracingTests} = require('../tracing');
@@ -23,6 +24,10 @@ describe('Executing Standard Testsuite:', function() {
       error(err);
       return ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace);
     });
+  });
+
+  before('Istio Accesslog Resource should be deployed', async function() {
+    await createIstioAccessLogResource();
   });
 
   after('Test Cleanup: Test namespaces should be deleted', async function() {
