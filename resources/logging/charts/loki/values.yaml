@@ -304,11 +304,3 @@ chunkCleaner:
     capabilities:
       drop:
         - ALL
-
-grafana:
-  datasource:
-    derivedFields: |
-      - datasourceUid: Jaeger
-        matcherRegex: "traceId=(\\w+)"
-        name: TraceID
-        url: "$${__value.raw}"

@@ -4,7 +4,6 @@ go 1.17
 
 require (
 	github.com/avast/retry-go v3.0.0+incompatible
-	github.com/kyma-project/kyma/common v0.0.0-20220701102146-c96b0380518c
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.8.0 // indirect
 	github.com/tdewolff/minify/v2 v2.11.11 // indirect

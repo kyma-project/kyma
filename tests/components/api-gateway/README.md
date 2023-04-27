@@ -32,21 +32,15 @@ This command creates a k3d cluster on your local machine, installs Kyma on it, a
 
 ## Usage for custom-domain test suite
 
-### Prepare a secret with cloud credentials to manage DNS.
+### Set the custom domain environment variables
 
-Create the secret in the default namespace:
+If you are using Gardener, make sure that your Kubernetes cluster has the `shoot-cert-service` and `shoot-dns-service` extensions enabled. The desired shoot specification is mentioned in the description of this [issue](https://github.com/kyma-project/control-plane/issues/875).
+Obtain a service account access key with permissions to maintain custom domain DNS entries and export it as a JSON file. To learn how to do it, follow this [guide](https://cloud.google.com/iam/docs/keys-create-delete).
 
-```
-kubectl create secret generic google-credentials -n default --from-file=serviceaccount.json=serviceaccount.json
-```
-
-### Set the environment variables with custom domain
-
-- `TEST_CUSTOM_DOMAIN` - set this environment variable with your desired custom domain.
-- `TEST_DOMAIN` - set this environment variable with your installed by default Kyma domain.
-
-After exporting these domains, run `make setup-custom-domain` to finish the default test setup.
-
+Set the following environment variables:
+- `TEST_DOMAIN` - your default Kyma domain, for example, `c1f643b.stage.kyma.ondemand.com`
+- `TEST_CUSTOM_DOMAIN` - your custom domain, for example, `custom.domain.build.kyma-project.io`
+- `TEST_SA_ACCESS_KEY_PATH` - the path to the service account access key exported as a JSON file, for example, `/Users/user/gcp/service-account.json`
 
 ### Run the tests
 
