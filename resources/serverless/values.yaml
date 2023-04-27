@@ -98,14 +98,14 @@ global:
       version: "v20230302-a6a85f47"
     function_runtime_python39:
       name: "function-runtime-python39"
-      version: "v20230329-905b2788"
+      version: "PR-17399"
     kaniko_executor:
       name: "kaniko-executor"
-      version: "1.9.1-ddcfbdf0"
+      version: "1.9.1-ab1cf603"
       directory: "tpi"
     registry:
       name: "registry"
-      version: "2.8.1-ddcfbdf0"
+      version: "2.8.1-ab1cf603"
       directory: "tpi"
     function_registry_gc:
       name: "function-registry-gc"

@@ -7,8 +7,8 @@
 # We use this code to manually use newest alpine and nodejs.
 # Use official build when it will be available.
 
-# image base on alpine:3.17.2
-FROM alpine@sha256:e2e16842c9b54d985bf1ef9242a313f36b856181f188de21313820e177002501
+# image base on alpine:3.17.3
+FROM alpine@sha256:124c7d2707904eea7431fffe91522a01e5a861a624ee31d03372cc1d138a3126
 
 SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 
@@ -51,6 +51,7 @@ RUN set -ex \
 	\
 	&& apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/edge/main \
 		sqlite-dev \
+		ncurses-dev \
 		binutils \
 	&& apk add --no-cache --virtual .build-deps  \
 		bluez-dev \
@@ -67,7 +68,6 @@ RUN set -ex \
 		libtirpc-dev \
 		linux-headers \
 		make \
-		ncurses-dev \
 		openssl-dev \
 		pax-utils \
 		readline-dev \
