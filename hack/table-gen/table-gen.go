@@ -115,17 +115,19 @@ func generateDocFromCRD(elementsToSkip map[string]bool) string {
 	versions = sortVersions(versions)
 
 	table := `<div tabs name="CRD Specification" group="crd-spec">`
+	open := " open"
 	for _, version := range versions.([]interface{}) {
 		name := getElement(version, "name")
 		APIVersion = name.(string)
 
-		table += fmt.Sprintf("<details>\n<summary label=%s>%s</summary>\n", name.(string), name.(string))
+		table += fmt.Sprintf("<details%s>\n<summary label=\"%s\">%s</summary>\n", open, name.(string), name.(string))
+		open = ""
 
 		table += "**Spec:**"
 		table = table + "\n" + strings.Join(generateTable(elementsToSkip, version, "spec"), "\n")
 		table += "\n\n**Status:**\n"
 		table = table + "\n" + strings.Join(generateTable(elementsToSkip, version, "status"), "\n")
-		table += "</details>\n"
+		table += "\n</details>\n"
 	}
 	table += "</div>"
 
