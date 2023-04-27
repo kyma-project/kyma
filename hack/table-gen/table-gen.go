@@ -106,23 +106,54 @@ func generateDocFromCRD(elementsToSkip map[string]bool) string {
 		panic(err)
 	}
 
-	docElements := map[string]string{}
 	versions := getElement(obj, "spec", "versions")
 	kind := getElement(obj, "spec", "names", "kind")
 	group := getElement(obj, "spec", "group")
 	CRDKind = kind.(string)
 	CRDGroup = group.(string)
 
+	versions = sortVersions(versions)
+
+	table := `<div tabs name="CRD Specification" group="crd-spec">`
 	for _, version := range versions.([]interface{}) {
 		name := getElement(version, "name")
 		APIVersion = name.(string)
 
-		spec := getElement(version, "schema", "openAPIV3Schema", "properties", "spec")
-		mergeMaps(docElements, generateElementDoc(elementsToSkip, spec, "spec", ""))
+		table += fmt.Sprintf("<details>\n<summary label=%s>%s</summary>\n", name.(string), name.(string))
 
-		status := getElement(version, "schema", "openAPIV3Schema", "properties", "status")
-		mergeMaps(docElements, generateElementDoc(elementsToSkip, status, "status", ""))
+		table += "**Spec:**"
+		table = table + "\n" + strings.Join(generateTable(elementsToSkip, version, "spec"), "\n")
+		table += "\n\n**Status:**\n"
+		table = table + "\n" + strings.Join(generateTable(elementsToSkip, version, "status"), "\n")
+		table += "</details>\n"
 	}
+	table += "</div>"
+
+	return table
+}
+
+func sortVersions(versions interface{}) interface{} {
+	sortedVersions := []interface{}{}
+	for _, version := range versions.([]interface{}) {
+		stored := getElement(version, "storage")
+		if stored.(bool) {
+			sortedVersions = append(sortedVersions, version)
+		}
+	}
+	for _, version := range versions.([]interface{}) {
+		stored := getElement(version, "storage")
+		if !stored.(bool) {
+			sortedVersions = append(sortedVersions, version)
+		}
+	}
+	return sortedVersions
+
+}
+
+func generateTable(elementsToSkip map[string]bool, version interface{}, resource string) []string {
+	docElements := map[string]string{}
+	spec := getElement(version, "schema", "openAPIV3Schema", "properties", resource)
+	mergeMaps(docElements, generateElementDoc(elementsToSkip, spec, resource, ""))
 
 	var doc []string
 	for _, propName := range sortKeys(docElements) {
@@ -131,11 +162,10 @@ func generateDocFromCRD(elementsToSkip map[string]bool) string {
 
 	doc = append([]string{
 		"<!-- " + CRDKind + " " + APIVersion + " " + CRDGroup + " -->",
-		"| Parameter         | Description                                   |",
+		"| Parameter         | Type | Description                                   |",
 		"| ---------------------------------------- | ---------|",
 	}, doc...)
-
-	return strings.Join(doc, "\n")
+	return doc
 }
 
 // generateElementDoc generates table row out of some CRD element.
@@ -156,7 +186,7 @@ func generateElementDoc(elementsToSkip map[string]bool, obj interface{}, name st
 	}
 
 	if !shouldBeSkipped {
-		result[fullName] = generateTableRow(fullName, description, name)
+		result[fullName] = generateTableRow(fullName, elementType, description)
 	}
 
 	if elementType == "object" {
@@ -225,9 +255,9 @@ func generateArrayDoc(elementsToSkip map[string]bool, element map[string]interfa
 }
 
 // generateTableRow generates a row of the resulting table which we include into our MD file.
-func generateTableRow(fullName string, description string, name string) string {
-	return fmt.Sprintf("| **%s** | %s |",
-		fullName, description)
+func generateTableRow(fullName, fieldType, description string) string {
+	return fmt.Sprintf("| **%s** | %s | %s |",
+		fullName, fieldType, description)
 }
 
 // getElement returns a specific element from obj based on the provided path.
