@@ -2,6 +2,7 @@ package resources
 
 import (
 	"context"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"testing"
 
 	"go.uber.org/zap"
@@ -18,42 +19,12 @@ import (
 
 func Test_resourceReconciler_Reconcile(t *testing.T) {
 	fakeLogger := zap.NewNop().Sugar()
-	t.Run("should update misconfigured mutation webhook config", func(t *testing.T) {
-		ctx := context.Background()
-		client := fake.NewClientBuilder().Build()
-		namespacedName := types.NamespacedName{Namespace: "", Name: DefaultingWebhookName}
-		webhookConfig := WebhookConfig{
-			CABundel:         []byte("certificate content"),
-			ServiceName:      "test-webhook-service",
-			ServiceNamespace: "test-namespace",
-		}
-		r := &resourceReconciler{
-			webhookConfig: webhookConfig,
-			secretName:    "test-secret-name",
-			client:        client,
-			logger:        fakeLogger,
-		}
-
-		oldMc := createMutatingWebhookConfiguration(webhookConfig)
-		oldMc.Webhooks[0].Rules = nil
-		err := client.Create(ctx, oldMc)
-		require.NoError(t, err)
-
-		_, err = r.Reconcile(ctx, reconcile.Request{NamespacedName: namespacedName})
-		require.NoError(t, err)
-
-		reconciledMc := &admissionregistrationv1.MutatingWebhookConfiguration{}
-		err = client.Get(ctx, types.NamespacedName{Namespace: "", Name: DefaultingWebhookName}, reconciledMc)
-		require.NoError(t, err)
-		require.NotNil(t, reconciledMc.Webhooks[0].Rules)
-	})
-
 	t.Run("should not reconcile not owned resources", func(t *testing.T) {
 		ctx := context.Background()
 		client := fake.NewClientBuilder().Build()
 		namespacedName := types.NamespacedName{Namespace: "", Name: DefaultingWebhookName}
 		webhookConfig := WebhookConfig{
-			CABundel:         []byte("certificate content"),
+			CABundle:         []byte("certificate content"),
 			ServiceName:      "test-webhook-service",
 			ServiceNamespace: "test-namespace",
 		}
@@ -67,7 +38,8 @@ func Test_resourceReconciler_Reconcile(t *testing.T) {
 		require.NoError(t, err)
 
 		_, err = r.Reconcile(ctx, reconcile.Request{NamespacedName: namespacedName})
-		require.NoError(t, err)
+		require.Error(t, err)
+		require.True(t, k8serrors.IsNotFound(err))
 
 		for _, res := range getTestResources() {
 			r := res

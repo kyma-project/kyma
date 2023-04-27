@@ -14,7 +14,7 @@ const {
 } = require('../../kcp/client');
 const {
   saveKubeconfig,
-} = require('../../skr-svcat-migration-test/test-helpers');
+} = require('../../skr-test/helpers');
 const {slowTime} = require('../utils');
 
 describe('SKR eventing test', function() {

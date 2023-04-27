@@ -28,6 +28,15 @@ func RunNatsServerOnPort(opts ...NatsServerOpt) *server.Server {
 	return natstestserver.RunServer(serverOpts)
 }
 
+// StartDefaultJetStreamServer will run a server on the given port.
+func StartDefaultJetStreamServer(port int) *server.Server {
+	natsServer := RunNatsServerOnPort(
+		WithPort(port),
+		WithJetStreamEnabled(),
+	)
+	return natsServer
+}
+
 // ShutDownNATSServer shuts down test NATS server and waits until shutdown is complete.
 func ShutDownNATSServer(natsServer *server.Server) {
 	natsServer.Shutdown()

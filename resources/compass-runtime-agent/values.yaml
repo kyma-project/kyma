@@ -1,11 +1,12 @@
 global:
   domainName: kyma.example.com
   containerRegistry:
-    path: eu.gcr.io/kyma-project
+    path: europe-docker.pkg.dev/kyma-project
   images:
     compass_runtime_agent:
       name: "compass-runtime-agent"
-      version: "v20221123-3f11914b"
+      version: "v20230417-5695e88d"
+      directory: "prod"
   istio:
     gateway:
       name: kyma-gateway
@@ -21,7 +22,7 @@ compassRuntimeAgent:
     controllerSyncPeriod: 15s
     minimalConfigSyncTime: 15s
   resources:
-    integrationNamespace: "kyma-integration"
+    systemNamespace: "kyma-system"
     dexSecretNamespace: "kyma-system"
     dexSecretName: "admin-user"
     gatewayPort: 8080
@@ -31,14 +32,20 @@ compassRuntimeAgent:
     skipAppsTLSVerification: false
     secret:
       name: compass-agent-configuration
-      namespace: compass-system
+      namespace: kyma-system
+      migration:
+        namespace: compass-system
+        enabled: true
   certificates:
     renewal:
       validityThreshold: "0.3"
     clientCertificate:
       secret:
         name: cluster-client-certificates
-        namespace: compass-system
+        namespace: kyma-system
+        migration:
+          namespace: compass-system
+          enabled: true
     caCertificate:
       secret:
         name: kyma-gateway-certs-cacert

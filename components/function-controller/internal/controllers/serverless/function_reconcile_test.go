@@ -38,7 +38,7 @@ const (
 
 func TestFunctionReconciler_Reconcile_Scaling(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
-	rtm := serverlessv1alpha2.NodeJs16
+	rtm := serverlessv1alpha2.NodeJs18
 	resourceClient, testEnv := setUpTestEnv(g)
 	defer tearDownTestEnv(g, testEnv)
 	testCfg := setUpControllerConfig(g)
@@ -278,7 +278,7 @@ func TestFunctionReconciler_Reconcile_Scaling(t *testing.T) {
 func TestFunctionReconciler_Reconcile(t *testing.T) {
 	t.Parallel()
 	g := gomega.NewGomegaWithT(t)
-	rtm := serverlessv1alpha2.NodeJs16
+	rtm := serverlessv1alpha2.NodeJs18
 	resourceClient, testEnv := setUpTestEnv(g)
 	defer tearDownTestEnv(g, testEnv)
 	testCfg := setUpControllerConfig(g)
@@ -1228,7 +1228,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 
 		//THEN
 		g.Expect(err).To(gomega.HaveOccurred())
-		g.Expect(err.Error()).To(gomega.ContainSubstring("Docker registry configuration not found"))
+		g.Expect(err.Error()).To(gomega.ContainSubstring("docker registry configuration not found"))
 
 	})
 
@@ -1262,9 +1262,8 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		deployment := &deployments.Items[0]
 		g.Expect(deployment).ToNot(gomega.BeNil())
 
-		g.Expect(deployment.Spec.Template.Annotations).To(gomega.Equal(map[string]string{
-			"proxy.istio.io/config": "{ \"holdApplicationUntilProxyStarts\": true }",
-		}))
+		g.Expect(deployment.Spec.Template.Annotations).To(gomega.HaveKeyWithValue(
+			"proxy.istio.io/config", "{ \"holdApplicationUntilProxyStarts\": true }"))
 		copiedDeploy := deployment.DeepCopy()
 		restartedAtAnnotation := map[string]string{
 			"kubectl.kubernetes.io/restartedAt": "2021-03-10T11:28:01+01:00", // example annotation added by kubectl
@@ -1296,8 +1295,8 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 	t.Run("should reconcile function with RuntimeImageOverride", func(t *testing.T) {
 		//GIVEN
 		g := gomega.NewGomegaWithT(t)
-		runtimeImageOverride := "any-custom-image"
-		inFunction := newFixFunctionWithCustomImage(testNamespace, "custom-runtime-image", "initial-custom-image", 1, 2)
+		runtimeImageOverride := "any-custom-fn-image"
+		inFunction := newFixFunctionWithCustomImage(testNamespace, "custom-runtime-fn-image", "initial-custom-fn-image", 1, 2)
 		g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
 		defer deleteFunction(g, resourceClient, inFunction)
 
@@ -1320,6 +1319,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 		g.Expect(function.Spec.RuntimeImageOverride).To(gomega.Equal(runtimeImageOverride))
 		g.Expect(function.Status.RuntimeImageOverride).To(gomega.Equal(runtimeImageOverride))
+		g.Expect(function.Status.RuntimeImage).To(gomega.Equal(runtimeImageOverride))
 
 		t.Log("should detect runtimeImageOverride rollback")
 
@@ -1332,8 +1332,10 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
 
 		function = &serverlessv1alpha2.Function{}
+		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 		g.Expect(function.Spec.RuntimeImageOverride).To(gomega.Equal(""))
 		g.Expect(function.Status.RuntimeImageOverride).To(gomega.Equal(""))
+		g.Expect(function.Status.RuntimeImage).To(gomega.Equal("some_image"))
 	})
 	t.Run("should reconcile function with SecretMounts", func(t *testing.T) {
 		//GIVEN

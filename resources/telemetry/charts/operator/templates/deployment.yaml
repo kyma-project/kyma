@@ -26,50 +26,65 @@ spec:
       {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
-      initContainers:
-        - command:
-            - /webhook-cert-init
-          args:
-            - --cert-dir={{ .Values.certificateVolumeMount.mountPath }}
-            - --service-name={{ include "operator.fullname" . }}-webhook
-            - --service-namespace=kyma-system
-            - --validating-webhook={{ .Values.webhook.name }}
-          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.telemetry_webhook_cert_init) }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          name: telemetry-webhook-cert-init
-          securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
-          volumeMounts:
-            - mountPath: {{ .Values.certificateVolumeMount.mountPath }}
-              name: {{ .Values.certificateVolumeMount.name }}
       containers:
         - command:
             - /manager
           args:
-            - --leader-elect
-            - --sync-period={{.Values.syncPeriod}}
-            - --cert-dir={{ .Values.certificateVolumeMount.mountPath }}
-            - --telemetry-namespace={{ .Release.Namespace }}
-            - --fluent-bit-cm-name={{ .Release.Name }}-{{ .Values.logProcessor }}
-            - --fluent-bit-sections-cm-name={{ .Release.Name }}-{{ .Values.logProcessor }}-sections
-            - --fluent-bit-parser-cm-name={{ .Release.Name }}-{{ .Values.logProcessor }}-parsers
-            - --fluent-bit-ds-name={{ .Release.Name }}-{{ .Values.logProcessor }}
-            - --fluent-bit-env-secret={{ .Release.Name }}-{{ .Values.logProcessor }}-env
-            - --fluent-bit-files-cm={{ .Release.Name }}-{{ .Values.logProcessor }}-files
+            - --cert-dir=/tmp
+            - --manager-namespace=$(MY_POD_NAMESPACE)
             - --fluent-bit-filesystem-buffer-limit={{ .Values.filesystemBufferLimit }}
+            - --fluent-bit-cpu-limit={{ .Values.fluentbit.resources.limits.cpu }}
+            - --fluent-bit-memory-limit={{ .Values.fluentbit.resources.limits.memory }}
+            - --fluent-bit-cpu-request={{ .Values.fluentbit.resources.requests.cpu }}
+            - --fluent-bit-memory-request={{ .Values.fluentbit.resources.requests.memory }}
             - --fluent-bit-denied-filter-plugins={{ join "," .Values.deniedPlugins.filter}}
             - --fluent-bit-denied-output-plugins={{ join "," .Values.deniedPlugins.output}}
             - --fluent-bit-max-pipelines={{.Values.maxLogPipelines}}
+            - --fluent-bit-image={{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.fluent_bit) }}
+            - --fluent-bit-exporter-image={{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.directory_size_exporter) }}
+            - --validating-webhook-enabled={{ .Values.webhook.enabled }}
+            - --enable-telemetry-manager-module=false
+{{- if or .Values.priorityClassName .Values.global.highPriorityClassName }}
+            - --fluent-bit-priority-class-name={{ coalesce .Values.priorityClassName .Values.global.highPriorityClassName }}
+{{- end }}
 {{- if not .Values.controllers.logging.enabled }}
             - --enable-logging=false
 {{- end }}
 {{- if not .Values.controllers.tracing.enabled }}
             - --enable-tracing=false
+{{- else }}
+            - --enable-tracing=true
+            - --trace-collector-image={{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.telemetry_otel_collector) }}
+{{- if or .Values.priorityClassName .Values.global.priorityClassName }}
+            - --trace-collector-priority-class={{ coalesce .Values.priorityClassName .Values.global.priorityClassName }}
+{{- end }}
+            - --trace-collector-cpu-limit={{ .Values.traceCollector.resources.limits.cpu }}
+            - --trace-collector-memory-limit={{ .Values.traceCollector.resources.limits.memory }}
+            - --trace-collector-cpu-request={{ .Values.traceCollector.resources.requests.cpu }}
+            - --trace-collector-memory-request={{ .Values.traceCollector.resources.requests.memory }}
+{{- end }}
+{{- if not .Values.controllers.metrics.enabled }}
+            - --enable-metrics=false
+{{- else }}
+{{- if or .Values.priorityClassName .Values.global.priorityClassName }}
+            - --metric-gateway-priority-class={{ coalesce .Values.priorityClassName .Values.global.priorityClassName }}
+{{- end }}
+            - --metric-gateway-cpu-limit={{ .Values.metricGateway.resources.limits.cpu }}
+            - --metric-gateway-memory-limit={{ .Values.metricGateway.resources.limits.memory }}
+            - --metric-gateway-cpu-request={{ .Values.metricGateway.resources.requests.cpu }}
+            - --metric-gateway-memory-request={{ .Values.metricGateway.resources.requests.memory }}
 {{- end }}
           name: manager
           ports:
           - containerPort: 9443
             protocol: TCP
+            name: webook
+          - containerPort: 8081
+            protocol: TCP
+            name: health
+          - containerPort: 8080
+            protocol: TCP
+            name: metrics
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.telemetry_operator) }}"
@@ -81,14 +96,9 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
-            - name: APP_LOG_FORMAT
-              value: {{ .Values.global.log.format | quote }}
             - name: APP_LOG_LEVEL
               value: {{ .Values.global.log.level | quote }}
-          volumeMounts:
-          - mountPath: {{ .Values.certificateVolumeMount.mountPath }}
-            name: {{ .Values.certificateVolumeMount.name }}
-            readOnly: true
-      volumes:
-      - name: {{ .Values.certificateVolumeMount.name }}
-        emptyDir: {}
+            - name: MY_POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace

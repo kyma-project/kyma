@@ -4,7 +4,12 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strings"
 	"time"
+
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
+
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy/api"
 
 	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
@@ -15,6 +20,7 @@ import (
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
 	cev2http "github.com/cloudevents/sdk-go/v2/protocol/http"
 
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/builder"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/health"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy"
@@ -54,13 +60,19 @@ type Handler struct {
 	collector metrics.PublishingMetricsCollector
 	// eventTypeCleaner cleans the cloud event type
 	eventTypeCleaner eventtype.Cleaner
-	router           *mux.Router
+	// builds the cloud event according to Subscription v1alpha2 specifications
+	ceBuilder          builder.CloudEventBuilder
+	router             *mux.Router
+	activeBackend      env.ActiveBackend
+	OldEventTypePrefix string
 }
 
 // NewHandler returns a new HTTP Handler instance.
-func NewHandler(receiver *receiver.HTTPMessageReceiver, sender sender.GenericSender, healthChecker health.Checker, requestTimeout time.Duration,
-	legacyTransformer legacy.RequestToCETransformer, opts *options.Options, subscribedProcessor *subscribed.Processor,
-	logger *logger.Logger, collector metrics.PublishingMetricsCollector, eventTypeCleaner eventtype.Cleaner) *Handler {
+func NewHandler(receiver *receiver.HTTPMessageReceiver, sender sender.GenericSender, healthChecker health.Checker,
+	requestTimeout time.Duration, legacyTransformer legacy.RequestToCETransformer, opts *options.Options,
+	subscribedProcessor *subscribed.Processor, logger *logger.Logger, collector metrics.PublishingMetricsCollector,
+	eventTypeCleaner eventtype.Cleaner, ceBuilder builder.CloudEventBuilder, oldEventTypePrefix string,
+	activeBackend env.ActiveBackend) *Handler {
 	return &Handler{
 		Receiver:            receiver,
 		Sender:              sender,
@@ -72,15 +84,27 @@ func NewHandler(receiver *receiver.HTTPMessageReceiver, sender sender.GenericSen
 		Options:             opts,
 		collector:           collector,
 		eventTypeCleaner:    eventTypeCleaner,
+		ceBuilder:           ceBuilder,
+		OldEventTypePrefix:  oldEventTypePrefix,
+		activeBackend:       activeBackend,
 	}
 }
 
 // setupMux configures the request router for all required endpoints.
 func (h *Handler) setupMux() {
 	router := mux.NewRouter()
+	router.Use(h.collector.MetricsMiddleware())
 	router.HandleFunc(PublishEndpoint, h.maxBytes(h.publishCloudEvents)).Methods(http.MethodPost)
 	router.HandleFunc(LegacyEndpointPattern, h.maxBytes(h.publishLegacyEventsAsCE)).Methods(http.MethodPost)
-	router.HandleFunc(SubscribedEndpointPattern, h.maxBytes(h.SubscribedProcessor.ExtractEventsFromSubscriptions)).Methods(http.MethodGet)
+	if h.Options.EnableNewCRDVersion {
+		router.HandleFunc(
+			SubscribedEndpointPattern,
+			h.maxBytes(h.SubscribedProcessor.ExtractEventsFromSubscriptions)).Methods(http.MethodGet)
+	} else {
+		router.HandleFunc(
+			SubscribedEndpointPattern,
+			h.maxBytes(h.SubscribedProcessor.ExtractEventsFromSubscriptionsV1alpha1)).Methods(http.MethodGet)
+	}
 	router.HandleFunc(health.ReadinessURI, h.maxBytes(h.HealthChecker.ReadinessCheck))
 	router.HandleFunc(health.LivenessURI, h.maxBytes(h.HealthChecker.LivenessCheck))
 	h.router = router
@@ -92,7 +116,8 @@ func (h *Handler) Start(ctx context.Context) error {
 	return h.Receiver.StartListen(ctx, h.router, h.Logger)
 }
 
-// maxBytes installs a MaxBytesReader onto the request, so that incoming request larger than a given size will cause an error.
+// maxBytes installs a MaxBytesReader onto the request, so that incoming request that is larger than a given size
+// will cause an error.
 func (h *Handler) maxBytes(f http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		r.Body = http.MaxBytesReader(w, r.Body, h.Options.MaxRequestSize)
@@ -100,32 +125,110 @@ func (h *Handler) maxBytes(f http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-// publishLegacyEventsAsCE converts an incoming request in legacy event format to a cloudevent and dispatches it using
-// the configured GenericSender.
-func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *http.Request) {
-	event, _ := h.LegacyTransformer.TransformLegacyRequestsToCE(writer, request)
-	if event == nil {
-		h.namedLogger().Debug("Failed to transform legacy event to CloudEvent, event is nil")
-		return
-	}
-	ctx := request.Context()
-
-	result, err := h.sendEventAndRecordMetrics(ctx, event, h.Sender.URL(), request.Header)
+// handleSendEventAndRecordMetricsLegacy handles the publishing of metrics.
+// It writes to the user request if any error occurs.
+// Otherwise, returns the result.
+func (h *Handler) handleSendEventAndRecordMetricsLegacy(
+	writer http.ResponseWriter, request *http.Request, event *cev2event.Event) (sender.PublishResult, error) {
+	result, err := h.sendEventAndRecordMetrics(request.Context(), event, h.Sender.URL(), request.Header)
 	if err != nil {
-		h.namedLogger().With().Error(err)
+		h.namedLogger().Error(err)
 		httpStatus := http.StatusInternalServerError
 		if errors.Is(err, sender.ErrInsufficientStorage) {
 			httpStatus = http.StatusInsufficientStorage
 		} else if errors.Is(err, sender.ErrBackendTargetNotFound) {
 			httpStatus = http.StatusBadGateway
 		}
-		h.LegacyTransformer.TransformsCEResponseToLegacyResponse(writer, httpStatus, event, err.Error())
+		h.LegacyTransformer.WriteCEResponseAsLegacyResponse(writer, httpStatus, event, err.Error())
+		return nil, err
+	}
+	h.namedLogger().Debug(result)
+	return result, nil
+}
+
+// handlePublishLegacyEvent handles the publishing of events for Subscription v1alpha2 CRD.
+// It writes to the user request if any error occurs.
+// Otherwise, return the published event.
+func (h *Handler) handlePublishLegacyEvent(writer http.ResponseWriter, publishData *api.PublishRequestData, request *http.Request) (sender.PublishResult, *cev2event.Event) {
+	ceEvent, err := h.LegacyTransformer.TransformPublishRequestToCloudEvent(publishData)
+	if err != nil {
+		legacy.WriteJSONResponse(writer, legacy.ErrorResponse(http.StatusInternalServerError, err))
+		return nil, nil
+	}
+
+	// build a new cloud event instance as per specifications per backend
+	event, err := h.ceBuilder.Build(*ceEvent)
+	if err != nil {
+		legacy.WriteJSONResponse(writer, legacy.ErrorResponseBadRequest(err.Error()))
+		return nil, nil
+	}
+
+	result, err := h.handleSendEventAndRecordMetricsLegacy(writer, request, event)
+	if err != nil {
+		return nil, nil
+	}
+
+	return result, event
+}
+
+// handlePublishLegacyEventV1alpha1 handles the publishing of events for Subscription v1alpha1 CRD.
+// It writes to the user request if any error occurs.
+// Otherwise, return the published event.
+func (h *Handler) handlePublishLegacyEventV1alpha1(writer http.ResponseWriter, publishData *api.PublishRequestData, request *http.Request) (sender.PublishResult, *cev2event.Event) {
+	event, _ := h.LegacyTransformer.WriteLegacyRequestsToCE(writer, publishData)
+	if event == nil {
+		h.namedLogger().Error("Failed to transform legacy event to CloudEvent, event is nil")
+		return nil, nil
+	}
+
+	result, err := h.handleSendEventAndRecordMetricsLegacy(writer, request, event)
+	if err != nil {
+		return nil, nil
+	}
+
+	return result, event
+}
+
+// publishLegacyEventsAsCE converts an incoming request in legacy event format to a cloudevent and dispatches it using
+// the configured GenericSender.
+func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *http.Request) {
+	var publishedEvent *cev2event.Event
+	var successResult sender.PublishResult
+
+	// extract publish data from request
+	publishRequestData, errResp, _ := h.LegacyTransformer.ExtractPublishRequestData(request)
+	if errResp != nil {
+		legacy.WriteJSONResponse(writer, errResp)
 		return
 	}
-	h.namedLogger().With().Debug(result)
 
-	// Change response as per old error codes
-	h.LegacyTransformer.TransformsCEResponseToLegacyResponse(writer, result.HTTPStatus(), event, string(result.ResponseBody()))
+	// publish event for Subscription v1alpha2
+	if h.Options.EnableNewCRDVersion {
+		successResult, publishedEvent = h.handlePublishLegacyEvent(writer, publishRequestData, request)
+		// if publishedEvent is nil, then it means that the publishing failed
+		// and the response is already returned to the user
+		if publishedEvent == nil {
+			return
+		}
+	}
+
+	// publish event for Subscription v1alpha1
+	// In case of EnableNewCRDVersion is true and the active backend is JetStream
+	// then we will publish event on both possible subjects
+	// i.e. with prefix (`sap.kyma.custom`) and without prefix
+	// this behaviour will be deprecated when we remove support for JetStream with Subscription `exact` typeMatching
+	if !h.Options.EnableNewCRDVersion || h.activeBackend == env.JetStreamBackend {
+		successResult, publishedEvent = h.handlePublishLegacyEventV1alpha1(writer, publishRequestData, request)
+		// if publishedEvent is nil, then it means that the publishing failed
+		// and the response is already returned to the user
+		if publishedEvent == nil {
+			return
+		}
+	}
+
+	// return success response to user
+	// change response as per old error codes
+	h.LegacyTransformer.WriteCEResponseAsLegacyResponse(writer, successResult.HTTPStatus(), publishedEvent, string(successResult.ResponseBody()))
 }
 
 // publishCloudEvents validates an incoming cloudevent and dispatches it using
@@ -144,16 +247,29 @@ func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.R
 	}
 
 	eventTypeOriginal := event.Type()
-	eventTypeClean, err := h.eventTypeCleaner.Clean(eventTypeOriginal)
-	if err != nil {
-		h.namedLogger().Error(err)
-		e := writeResponse(writer, http.StatusBadRequest, []byte(err.Error()))
-		if e != nil {
-			h.namedLogger().Error(e)
+
+	if h.Options.EnableNewCRDVersion && !strings.HasPrefix(eventTypeOriginal, h.OldEventTypePrefix) {
+		// build a new cloud event instance as per specifications per backend
+		event, err = h.ceBuilder.Build(*event)
+		if err != nil {
+			e := writeResponse(writer, http.StatusBadRequest, []byte(err.Error()))
+			if e != nil {
+				h.namedLogger().Error(e)
+			}
+			return
 		}
-		return
+	} else {
+		eventTypeClean, err := h.eventTypeCleaner.Clean(eventTypeOriginal)
+		if err != nil {
+			h.namedLogger().Error(err)
+			e := writeResponse(writer, http.StatusBadRequest, []byte(err.Error()))
+			if e != nil {
+				h.namedLogger().Error(e)
+			}
+			return
+		}
+		event.SetType(eventTypeClean)
 	}
-	event.SetType(eventTypeClean)
 
 	result, err := h.sendEventAndRecordMetrics(ctx, event, h.Sender.URL(), request.Header)
 	if err != nil {
@@ -200,12 +316,25 @@ func (h *Handler) sendEventAndRecordMetrics(ctx context.Context, event *cev2even
 	result, err := h.Sender.Send(ctx, event)
 	duration := time.Since(start)
 	if err != nil {
-		h.collector.RecordError()
+		h.collector.RecordBackendError()
 		return nil, err
 	}
-	h.collector.RecordEventType(event.Type(), event.Source(), result.HTTPStatus())
-	h.collector.RecordLatency(duration, result.HTTPStatus(), host)
-	h.collector.RecordRequests(result.HTTPStatus(), host)
+	originalEventType := event.Type()
+	originalTypeHeader, ok := event.Extensions()[builder.OriginalTypeHeaderName]
+	if !ok {
+		h.namedLogger().With().Warnw("event header doesn't exist", "header",
+			builder.OriginalTypeHeaderName)
+	} else {
+		originalEventType, ok = originalTypeHeader.(string)
+		if !ok {
+			h.namedLogger().With().Warnw("failed to convert event original event type extension value to string",
+				builder.OriginalTypeHeaderName, originalTypeHeader)
+			originalEventType = event.Type()
+		}
+	}
+	h.collector.RecordEventType(originalEventType, event.Source(), result.HTTPStatus())
+	h.collector.RecordBackendLatency(duration, result.HTTPStatus(), host)
+	h.collector.RecordBackendRequests(result.HTTPStatus(), host)
 	return result, nil
 }
 

@@ -3,8 +3,6 @@ package v1alpha1_test
 import (
 	"fmt"
 
-	v2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
-
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	eventingtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
@@ -43,7 +41,7 @@ var (
 		}}
 )
 
-func newDefaultSubscription(opts ...eventingtesting.SubscriptionOpt) *v1alpha1.Subscription {
+func newDefaultSubscription(opts ...eventingtesting.SubscriptionV1alpha1Opt) *v1alpha1.Subscription {
 	var defaultConditions []v1alpha1.Condition
 	for _, condition := range v2DefaultConditions {
 		defaultConditions = append(defaultConditions, v1alpha1.ConditionV2ToV1(condition))
@@ -83,7 +81,7 @@ func newDefaultSubscription(opts ...eventingtesting.SubscriptionOpt) *v1alpha1.S
 
 // extend the v1 Subscription helpers with Status fields
 
-func v1WithWebhookAuthForBEB() eventingtesting.SubscriptionOpt {
+func v1WithWebhookAuthForBEB() eventingtesting.SubscriptionV1alpha1Opt {
 	return func(s *v1alpha1.Subscription) {
 		s.Spec.Protocol = "BEB"
 		s.Spec.ProtocolSettings = &v1alpha1.ProtocolSettings{
@@ -92,7 +90,7 @@ func v1WithWebhookAuthForBEB() eventingtesting.SubscriptionOpt {
 				return &contentMode
 			}(),
 			Qos: func() *string {
-				qos := "true"
+				qos := "AT_LEAST_ONCE"
 				return &qos
 			}(),
 			ExemptHandshake: utils.BoolPtr(true),
@@ -108,7 +106,7 @@ func v1WithWebhookAuthForBEB() eventingtesting.SubscriptionOpt {
 	}
 }
 
-func v1WithBEBStatusFields() eventingtesting.SubscriptionOpt {
+func v1WithBEBStatusFields() eventingtesting.SubscriptionV1alpha1Opt {
 	return func(s *v1alpha1.Subscription) {
 		s.Status.Ev2hash = 123
 		s.Status.ExternalSink = "testlink.com"
@@ -124,7 +122,7 @@ func v1WithBEBStatusFields() eventingtesting.SubscriptionOpt {
 	}
 }
 
-func newV2DefaultSubscription(opts ...v2.SubscriptionOpt) *v1alpha2.Subscription {
+func newV2DefaultSubscription(opts ...eventingtesting.SubscriptionOpt) *v1alpha2.Subscription {
 	newSub := &v1alpha2.Subscription{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Subscription",
@@ -156,7 +154,7 @@ func newV2DefaultSubscription(opts ...v2.SubscriptionOpt) *v1alpha2.Subscription
 
 // extend the v2 Subscription helpers with Status fields
 
-func v2WithBEBStatusFields() v2.SubscriptionOpt {
+func v2WithBEBStatusFields() eventingtesting.SubscriptionOpt {
 	return func(s *v1alpha2.Subscription) {
 		s.Status.Backend.Ev2hash = 123
 		s.Status.Backend.ExternalSink = "testlink.com"
@@ -172,7 +170,7 @@ func v2WithBEBStatusFields() v2.SubscriptionOpt {
 	}
 }
 
-func v2WithStatusTypes(statusTypes []v1alpha2.EventType) v2.SubscriptionOpt {
+func v2WithStatusTypes(statusTypes []v1alpha2.EventType) eventingtesting.SubscriptionOpt {
 	return func(sub *v1alpha2.Subscription) {
 		if statusTypes == nil {
 			sub.Status.InitializeEventTypes()
@@ -182,7 +180,7 @@ func v2WithStatusTypes(statusTypes []v1alpha2.EventType) v2.SubscriptionOpt {
 	}
 }
 
-func v2WithStatusJetStreamTypes(types []v1alpha2.JetStreamTypes) v2.SubscriptionOpt {
+func v2WithStatusJetStreamTypes(types []v1alpha2.JetStreamTypes) eventingtesting.SubscriptionOpt {
 	return func(sub *v1alpha2.Subscription) {
 		sub.Status.Backend.Types = types
 	}

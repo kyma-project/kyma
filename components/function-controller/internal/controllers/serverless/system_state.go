@@ -2,9 +2,11 @@ package serverless
 
 import (
 	"fmt"
-	"k8s.io/utils/pointer"
+	"k8s.io/apimachinery/pkg/labels"
 	"path"
 	"strings"
+
+	"k8s.io/utils/pointer"
 
 	fnRuntime "github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
 	"github.com/kyma-project/kyma/components/function-controller/internal/git"
@@ -19,12 +21,15 @@ import (
 
 const DefaultDeploymentReplicas int32 = 1
 
+const istioConfigLabelKey = "proxy.istio.io/config"
+const istioEnableHoldUntilProxyStartLabelValue = "{ \"holdApplicationUntilProxyStarts\": true }"
+
 type SystemState interface{}
 
 // TODO extract interface
 type systemState struct {
 	instance    serverlessv1alpha2.Function
-	image       string               // TODO make sure this is needed
+	fnImage     string               // TODO make sure this is needed
 	configMaps  corev1.ConfigMapList // TODO create issue to refactor this (only 1 config map should be here)
 	deployments appsv1.DeploymentList
 	jobs        batchv1.JobList
@@ -35,20 +40,20 @@ type systemState struct {
 var _ SystemState = systemState{}
 
 func (s *systemState) internalFunctionLabels() map[string]string {
-	labels := make(map[string]string, 3)
+	intLabels := make(map[string]string, 3)
 
-	labels[serverlessv1alpha2.FunctionNameLabel] = s.instance.Name
-	labels[serverlessv1alpha2.FunctionManagedByLabel] = serverlessv1alpha2.FunctionControllerValue
-	labels[serverlessv1alpha2.FunctionUUIDLabel] = string(s.instance.GetUID())
+	intLabels[serverlessv1alpha2.FunctionNameLabel] = s.instance.Name
+	intLabels[serverlessv1alpha2.FunctionManagedByLabel] = serverlessv1alpha2.FunctionControllerValue
+	intLabels[serverlessv1alpha2.FunctionUUIDLabel] = string(s.instance.GetUID())
 
-	return labels
+	return intLabels
 }
 
 func (s *systemState) functionLabels() map[string]string {
 	internalLabels := s.internalFunctionLabels()
 	functionLabels := s.instance.GetLabels()
 
-	return mergeLabels(functionLabels, internalLabels)
+	return labels.Merge(functionLabels, internalLabels)
 }
 
 func (s *systemState) buildImageAddress(registryAddress string) string {
@@ -67,7 +72,7 @@ func (s *systemState) inlineFnSrcChanged(dockerPullAddress string) bool {
 	image := s.buildImageAddress(dockerPullAddress)
 	configurationStatus := getConditionStatus(s.instance.Status.Conditions, serverlessv1alpha2.ConditionConfigurationReady)
 	rtm := fnRuntime.GetRuntime(s.instance.Spec.Runtime)
-	labels := s.functionLabels()
+	fnLabels := s.functionLabels()
 
 	if len(s.deployments.Items) == 1 &&
 		len(s.configMaps.Items) == 1 &&
@@ -75,7 +80,7 @@ func (s *systemState) inlineFnSrcChanged(dockerPullAddress string) bool {
 		s.instance.Spec.Source.Inline.Source == s.configMaps.Items[0].Data[FunctionSourceKey] &&
 		rtm.SanitizeDependencies(s.instance.Spec.Source.Inline.Dependencies) == s.configMaps.Items[0].Data[FunctionDepsKey] &&
 		configurationStatus != corev1.ConditionUnknown &&
-		mapsEqual(s.configMaps.Items[0].Labels, labels) {
+		mapsEqual(s.configMaps.Items[0].Labels, fnLabels) {
 		return false
 	}
 
@@ -83,7 +88,7 @@ func (s *systemState) inlineFnSrcChanged(dockerPullAddress string) bool {
 		s.instance.Spec.Source.Inline.Source == s.configMaps.Items[0].Data[FunctionSourceKey] &&
 		rtm.SanitizeDependencies(s.instance.Spec.Source.Inline.Dependencies) == s.configMaps.Items[0].Data[FunctionDepsKey] &&
 		configurationStatus == corev1.ConditionTrue &&
-		mapsEqual(s.configMaps.Items[0].Labels, labels))
+		mapsEqual(s.configMaps.Items[0].Labels, fnLabels))
 }
 
 func (s *systemState) buildConfigMap() corev1.ConfigMap {
@@ -92,11 +97,11 @@ func (s *systemState) buildConfigMap() corev1.ConfigMap {
 		FunctionSourceKey: s.instance.Spec.Source.Inline.Source,
 		FunctionDepsKey:   rtm.SanitizeDependencies(s.instance.Spec.Source.Inline.Dependencies),
 	}
-	labels := s.functionLabels()
+	fnLabels := s.functionLabels()
 
 	return corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Labels:       labels,
+			Labels:       fnLabels,
 			GenerateName: fmt.Sprintf("%s-", s.instance.GetName()),
 			Namespace:    s.instance.GetNamespace(),
 		},
@@ -111,7 +116,7 @@ func (s *systemState) fnJobChanged(expectedJob batchv1.Job) bool {
 	)
 
 	if len(s.deployments.Items) == 1 &&
-		s.deployments.Items[0].Spec.Template.Spec.Containers[0].Image == s.image &&
+		s.deployments.Items[0].Spec.Template.Spec.Containers[0].Image == s.fnImage &&
 		conditionStatus != corev1.ConditionUnknown &&
 		len(s.jobs.Items) > 0 &&
 		mapsEqual(expectedJob.GetLabels(), s.jobs.Items[0].GetLabels()) {
@@ -121,7 +126,7 @@ func (s *systemState) fnJobChanged(expectedJob batchv1.Job) bool {
 
 	return len(s.jobs.Items) != 1 ||
 		len(s.jobs.Items[0].Spec.Template.Spec.Containers) != 1 ||
-		// Compare image argument
+		// Compare fnImage argument
 		!equalJobs(s.jobs.Items[0], expectedJob) ||
 		!mapsEqual(expectedJob.GetLabels(), s.jobs.Items[0].GetLabels()) ||
 		conditionStatus == corev1.ConditionUnknown ||
@@ -185,12 +190,12 @@ func (s *systemState) buildJob(configMapName string, cfg cfg) batchv1.Job {
 }
 
 func (s *systemState) buildJobJob(templateSpec corev1.PodSpec) batchv1.Job {
-	labels := s.functionLabels()
+	fnLabels := s.functionLabels()
 	return batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: fmt.Sprintf("%s-build-", s.instance.GetName()),
 			Namespace:    s.instance.GetNamespace(),
-			Labels:       labels,
+			Labels:       fnLabels,
 		},
 		Spec: batchv1.JobSpec{
 			Parallelism:           pointer.Int32(1),
@@ -199,7 +204,7 @@ func (s *systemState) buildJobJob(templateSpec corev1.PodSpec) batchv1.Job {
 			BackoffLimit:          pointer.Int32(0),
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels:      labels,
+					Labels:      fnLabels,
 					Annotations: istioSidecarInjectFalse,
 				},
 				Spec: templateSpec,
@@ -322,7 +327,7 @@ func (s *systemState) buildJobRuntimeVolume() corev1.Volume {
 }
 
 func (s *systemState) deploymentSelectorLabels() map[string]string {
-	return mergeLabels(
+	return labels.Merge(
 		map[string]string{
 			serverlessv1alpha2.FunctionResourceLabel: serverlessv1alpha2.FunctionResourceLabelDeploymentValue,
 		},
@@ -341,12 +346,28 @@ func getBuildResourceRequirements(s *systemState) corev1.ResourceRequirements {
 }
 
 func (s *systemState) podLabels() map[string]string {
-	selectorLabels := s.deploymentSelectorLabels()
+	result := s.deploymentSelectorLabels()
 	if s.instance.Spec.Template != nil && s.instance.Spec.Template.Labels != nil {
-		return mergeLabels(s.instance.Spec.Template.Labels, selectorLabels)
-	} else {
-		return selectorLabels
+		result = labels.Merge(s.instance.Spec.Template.Labels, result)
 	}
+	if s.instance.Spec.Labels != nil {
+		result = labels.Merge(s.instance.Spec.Labels, result)
+	}
+	return result
+}
+
+func (s *systemState) defaultAnnotations() map[string]string {
+	return map[string]string{
+		istioConfigLabelKey: istioEnableHoldUntilProxyStartLabelValue,
+	}
+}
+
+func (s *systemState) podAnnotations() map[string]string {
+	result := s.defaultAnnotations()
+	if s.instance.Spec.Annotations != nil {
+		result = labels.Merge(s.instance.Spec.Annotations, result)
+	}
+	return result
 }
 
 type buildDeploymentArgs struct {
@@ -358,10 +379,7 @@ type buildDeploymentArgs struct {
 }
 
 func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment {
-
 	imageName := s.buildImageAddress(cfg.DockerPullAddress)
-	deploymentLabels := s.functionLabels()
-	podLabels := s.podLabels()
 
 	const volumeName = "tmp-dir"
 	emptyDirVolumeSize := resource.MustParse("100Mi")
@@ -468,7 +486,7 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: fmt.Sprintf("%s-", s.instance.GetName()),
 			Namespace:    s.instance.GetNamespace(),
-			Labels:       deploymentLabels,
+			Labels:       s.functionLabels(),
 		},
 		Spec: appsv1.DeploymentSpec{
 			Replicas: s.getReplicas(DefaultDeploymentReplicas),
@@ -478,10 +496,8 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels: podLabels, // podLabels contains InternalFnLabels, so it's ok
-					Annotations: map[string]string{
-						"proxy.istio.io/config": "{ \"holdApplicationUntilProxyStarts\": true }",
-					},
+					Labels:      s.podLabels(), // podLabels contains InternalFnLabels, so it's ok
+					Annotations: s.podAnnotations(),
 				},
 				Spec: templateSpec,
 			},

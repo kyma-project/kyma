@@ -19,7 +19,7 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	appconnv1alpha1 "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	appconnv1alpha1 "github.com/kyma-project/kyma/components/central-application-gateway/pkg/apis/applicationconnector/v1alpha1"
 )
 
 const (
@@ -36,6 +36,15 @@ const (
 
 type event struct {
 	Title string `json:"title"`
+}
+
+type testCase struct {
+	caseDescription string
+	tenant          string
+	group           string
+	certInfoHeader  string
+	expectedStatus  int
+	application     *appconnv1alpha1.Application
 }
 
 var (
@@ -72,45 +81,58 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 
 	log, err := logger.New(logger.TEXT, logger.ERROR)
 	require.NoError(t, err)
-	testCases := []struct {
-		caseDescription string
-		tenant          string
-		group           string
-		certInfoHeader  string
-		expectedStatus  int
-		application     *appconnv1alpha1.Application
-	}{
+	positiveCases := []testCase{
 		{
 			caseDescription: "Application without group and tenant",
 			certInfoHeader: `Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=test-application-id,OU=OrgUnit,O=Organization,L=Waldorf,ST=Waldorf,C=DE";` +
-				`URI=,By=spiffe://cluster.local/ns/kyma-integration/sa/default;` +
+				`URI=,By=spiffe://cluster.local/ns/kyma-system/sa/default;` +
 				`Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject="";` +
 				`URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account`,
 			expectedStatus: http.StatusOK,
 			application:    applicationManagedByCompass,
 		},
 		{
+			caseDescription: "Application with group and tenant",
+			certInfoHeader: `Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=test-application-id,OU=group,O=tenant,L=Waldorf,ST=Waldorf,C=DE";` +
+				`URI=,By=spiffe://cluster.local/ns/kyma-system/sa/default;` +
+				`Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject="";` +
+				`URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account`,
+			expectedStatus: http.StatusOK,
+			application:    applicationManagedByCompass,
+		},
+		{
+			caseDescription: "Application not managed by Compass Runtime Agent without group and tenant",
+			certInfoHeader: `Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=test-application,OU=OrgUnit,O=Organization,L=Waldorf,ST=Waldorf,C=DE";` +
+				`URI=,By=spiffe://cluster.local/ns/kyma-system/sa/default;` +
+				`Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject="";` +
+				`URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account`,
+			expectedStatus: http.StatusOK,
+			application:    applicationNotManagedByCompass,
+		},
+		{
+			caseDescription: "Application not managed by Compass Runtime Agent with group and tenant",
+			certInfoHeader: `Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=test-application,OU=group,O=tenant,L=Waldorf,ST=Waldorf,C=DE";` +
+				`URI=,By=spiffe://cluster.local/ns/kyma-system/sa/default;` +
+				`Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject="";` +
+				`URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account`,
+			expectedStatus: http.StatusOK,
+			application:    applicationNotManagedByCompass,
+		},
+	}
+	negativeCases := []testCase{
+		{
 			caseDescription: "Application without group and tenant and with invalid Common Name",
 			certInfoHeader: `Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=invalid-cn,OU=OrgUnit,O=Organization,L=Waldorf,ST=Waldorf,C=DE";` +
-				`URI=,By=spiffe://cluster.local/ns/kyma-integration/sa/default;` +
+				`URI=,By=spiffe://cluster.local/ns/kyma-system/sa/default;` +
 				`Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject="";` +
 				`URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account`,
 			expectedStatus: http.StatusForbidden,
 			application:    applicationManagedByCompass,
 		},
 		{
-			caseDescription: "Application with group and tenant",
-			certInfoHeader: `Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=test-application-id,OU=group,O=tenant,L=Waldorf,ST=Waldorf,C=DE";` +
-				`URI=,By=spiffe://cluster.local/ns/kyma-integration/sa/default;` +
-				`Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject="";` +
-				`URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account`,
-			expectedStatus: http.StatusOK,
-			application:    applicationManagedByCompass,
-		},
-		{
 			caseDescription: "Application with group, tenant and invalid Common Name",
 			certInfoHeader: `Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=invalid-application,OU=group,O=tenant,L=Waldorf,ST=Waldorf,C=DE";` +
-				`URI=,By=spiffe://cluster.local/ns/kyma-integration/sa/default;` +
+				`URI=,By=spiffe://cluster.local/ns/kyma-system/sa/default;` +
 				`Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject="";` +
 				`URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account`,
 			expectedStatus: http.StatusForbidden,
@@ -122,42 +144,25 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			application:     applicationManagedByCompass,
 		},
 		{
-			caseDescription: "Application not managed by Compass Runtime Agent without group and tenant",
-			certInfoHeader: `Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=test-application,OU=OrgUnit,O=Organization,L=Waldorf,ST=Waldorf,C=DE";` +
-				`URI=,By=spiffe://cluster.local/ns/kyma-integration/sa/default;` +
-				`Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject="";` +
-				`URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account`,
-			expectedStatus: http.StatusOK,
-			application:    applicationNotManagedByCompass,
-		},
-		{
 			caseDescription: "Application not managed by Compass Runtime Agent without group and tenant and with invalid Common Name",
 			certInfoHeader: `Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=invalid-cn,OU=OrgUnit,O=Organization,L=Waldorf,ST=Waldorf,C=DE";` +
-				`URI=,By=spiffe://cluster.local/ns/kyma-integration/sa/default;` +
+				`URI=,By=spiffe://cluster.local/ns/kyma-system/sa/default;` +
 				`Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject="";` +
 				`URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account`,
 			expectedStatus: http.StatusForbidden,
 			application:    applicationNotManagedByCompass,
 		},
 		{
-			caseDescription: "Application not managed by Compass Runtime Agent with group and tenant",
-			certInfoHeader: `Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=test-application,OU=group,O=tenant,L=Waldorf,ST=Waldorf,C=DE";` +
-				`URI=,By=spiffe://cluster.local/ns/kyma-integration/sa/default;` +
-				`Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject="";` +
-				`URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account`,
-			expectedStatus: http.StatusOK,
-			application:    applicationNotManagedByCompass,
-		},
-		{
 			caseDescription: "Application not managed by Compass Runtime Agent with group, tenant and invalid Common Name",
 			certInfoHeader: `Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=invalid-application,OU=group,O=tenant,L=Waldorf,ST=Waldorf,C=DE";` +
-				`URI=,By=spiffe://cluster.local/ns/kyma-integration/sa/default;` +
+				`URI=,By=spiffe://cluster.local/ns/kyma-system/sa/default;` +
 				`Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject="";` +
 				`URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account`,
 			expectedStatus: http.StatusForbidden,
 			application:    applicationNotManagedByCompass,
 		},
 	}
+	testCases := append(positiveCases, negativeCases...)
 
 	t.Run("should proxy requests", func(t *testing.T) {
 		const mockIncomingRequestHost = "fake.istio.gateway"
@@ -278,12 +283,12 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 		}
 	})
 
-	t.Run("should return 500 failed when cache doesn't contain the element", func(t *testing.T) {
+	t.Run("should return 404 failed when cache doesn't contain the element", func(t *testing.T) {
 		eventPublisherProxyHandler := mux.NewRouter()
 		eventPublisherProxyServer := httptest.NewServer(eventPublisherProxyHandler)
 		eventingPublisherHost := strings.TrimPrefix(eventPublisherProxyServer.URL, "http://")
 
-		for _, testCase := range testCases {
+		for _, testCase := range positiveCases {
 			// given
 			idCache := cache.New(time.Minute, time.Minute)
 
@@ -307,7 +312,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			proxyHandler.ProxyAppConnectorRequests(recorder, req)
 
 			// then
-			assert.Equal(t, http.StatusInternalServerError, recorder.Code)
+			assert.Equal(t, http.StatusNotFound, recorder.Code, fmt.Sprintf("%s case has failed", testCase.caseDescription))
 		}
 	})
 
@@ -353,7 +358,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 		// given
 		certInfoHeader :=
 			`Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=test-application-id,OU=OrgUnit,O=Organization,L=Waldorf,ST=Waldorf,C=DE";` +
-				`URI=,By=spiffe://cluster.local/ns/kyma-integration/sa/default;` +
+				`URI=,By=spiffe://cluster.local/ns/kyma-system/sa/default;` +
 				`Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject="";` +
 				`URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account`
 

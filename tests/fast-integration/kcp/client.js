@@ -1,5 +1,6 @@
 const execa = require('execa');
 const fs = require('fs');
+const stream = require('stream');
 const {
   getEnvOrThrow,
   debug,
@@ -37,7 +38,7 @@ class KCPWrapper {
     this.kcpConfigPath = config.kcpConfigPath;
     this.gardenerNamespace = config.gardenerNamespace;
     this.clientID = config.clientID;
-    // this.clientSecret = config.clientSecret;
+    this.clientSecret = config.clientSecret;
     this.oauthClientID = config.oauthClientID;
     this.oauthSecret = config.oauthSecret;
     this.oauthIssuer = config.oauthIssuer;
@@ -54,18 +55,20 @@ class KCPWrapper {
     const stream = fs.createWriteStream(`${this.kcpConfigPath}`);
     stream.once('open', (_) => {
       stream.write(`gardener-namespace: "${this.gardenerNamespace}"\n`);
-      stream.write(`oidc-client-id: "${this.clientID}"\n`);
-      // stream.write(`oidc-client-secret: ${this.clientSecret}\n`);
-
-      stream.write(`oauth2-client-id: "${this.oauthClientID}"\n`);
-      stream.write(`oauth2-client-secret: "${this.oauthSecret}"\n`);
-      stream.write(`oauth2-issuer-url: "${this.oauthIssuer}"\n`);
+      if (process.env.KCP_OIDC_CLIENT_SECRET) {
+        stream.write(`oidc-client-id: "${this.clientID}"\n`);
+        stream.write(`oidc-client-secret: ${this.clientSecret}\n`);
+        stream.write(`username: ${this.username}\n`);
+      } else {
+        stream.write(`oauth2-client-id: "${this.oauthClientID}"\n`);
+        stream.write(`oauth2-client-secret: "${this.oauthSecret}"\n`);
+        stream.write(`oauth2-issuer-url: "${this.oauthIssuer}"\n`);
+      }
 
       stream.write(`keb-api-url: "${this.host}"\n`);
       stream.write(`oidc-issuer-url: "${this.issuerURL}"\n`);
       stream.write(`mothership-api-url: "${this.motherShipApiUrl}"\n`);
       stream.write(`kubeconfig-api-url: "${this.kubeConfigApiUrl}"\n`);
-      // stream.write(`username: ${this.username}\n`);
       stream.end();
     });
   }
@@ -131,8 +134,10 @@ class KCPWrapper {
   async upgradeKyma(instanceID, kymaUpgradeVersion, upgradeTimeoutMin = 30) {
     const args = ['upgrade', 'kyma', `--version=${kymaUpgradeVersion}`, '--target', `instance-id=${instanceID}`];
     try {
-      const res = await this.exec(args);
+      console.log('Executing kcp upgrade');
+      const res = await this.exec(args, true, true);
 
+      console.log('Checking orchestration');
       // output if successful:
       // "Note: Ignore sending slack notification when slackAPIURL is empty\n" +
       // "OrchestrationID: 22f19856-679b-4e68-b533-f1a0a46b1eed"
@@ -144,6 +149,7 @@ class KCPWrapper {
       debug(`OrchestrationID: ${orchestrationID}`);
 
       try {
+        console.log('Ensure execution suceeded');
         const orchestrationStatus = await this.ensureOrchestrationSucceeded(orchestrationID, upgradeTimeoutMin);
         return orchestrationStatus;
       } catch (error) {
@@ -151,6 +157,7 @@ class KCPWrapper {
       }
 
       try {
+        console.log('Check runtime status');
         const runtime = await this.runtimes({instanceID: instanceID});
         debug(`Runtime Status: ${inspect(runtime, false, null, false)}`);
       } catch (error) {
@@ -158,6 +165,7 @@ class KCPWrapper {
       }
 
       try {
+        console.log('Check orchestration');
         const orchestration = await this.getOrchestrationStatus(orchestrationID);
         debug(`Orchestration Status: ${inspect(orchestration, false, null, false)}`);
       } catch (error) {
@@ -165,6 +173,7 @@ class KCPWrapper {
       }
 
       try {
+        console.log('Check operations');
         const operations = await this.getOrchestrationsOperations(orchestrationID);
         debug(`Operations: ${inspect(operations, false, null, false)}`);
       } catch (error) {
@@ -191,6 +200,11 @@ class KCPWrapper {
       schedulingID: schedulingID});
 
     return JSON.stringify(reconciliationsInfo, null, '\t');
+  }
+
+  async getRuntimeEvents(instanceID) {
+    await this.login();
+    return this.exec(['runtimes', '--instance-id', instanceID, '--events']);
   }
 
   async getRuntimeStatusOperations(instanceID) {
@@ -334,14 +348,26 @@ class KCPWrapper {
     }
   }
 
-  async exec(args) {
+  async exec(args, pipeStdout = false, sendYes = false) {
     try {
       const defaultArgs = [
         '--config', `${this.kcpConfigPath}`,
       ];
       // debug([`>  kcp`, defaultArgs.concat(args).join(" ")].join(" "))
-      const output = await execa('kcp', defaultArgs.concat(args));
-      // debug(output);
+      const subprocess = execa('kcp', defaultArgs.concat(args), {stdio: 'pipe'});
+
+      if ( pipeStdout ) {
+        subprocess.stdout.pipe(process.stdout);
+      }
+
+      if ( sendYes ) {
+        const inStream = new stream.Readable();
+        inStream.push('Y');
+        inStream.push(null);
+        inStream.pipe(subprocess.stdin);
+      }
+
+      const output = await subprocess;
       return output.stdout;
     } catch (err) {
       if (err.stderr === undefined) {

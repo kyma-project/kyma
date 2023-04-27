@@ -2,11 +2,14 @@ package backend
 
 import (
 	"context"
+	"crypto/rand"
 	"errors"
 	"fmt"
 	"path/filepath"
 	"testing"
 	"time"
+
+	admissionv1 "k8s.io/api/admissionregistration/v1"
 
 	"github.com/go-logr/zapr"
 	. "github.com/onsi/ginkgo"
@@ -41,7 +44,6 @@ const (
 	beforeSuiteTimeoutInSeconds = testEnvStartAttempts * 60
 	useExistingCluster          = false
 	attachControlPlaneOutput    = false
-	kymaSystemNamespace         = "kyma-system"
 	timeout                     = 15 * time.Second
 	pollingInterval             = 1 * time.Second
 	eventingBackendName         = "eventing-backend"
@@ -72,6 +74,45 @@ func TestAPIs(t *testing.T) {
 var _ = BeforeSuite(func(done Done) {
 	By("bootstrapping test environment")
 	useExistingCluster := useExistingCluster
+
+	dummyCABundle := make([]byte, 20)
+	_, err2 := rand.Read(dummyCABundle)
+	Expect(err2).NotTo(HaveOccurred())
+	newCABundle := make([]byte, 20)
+	_, err2 = rand.Read(newCABundle)
+	Expect(err2).NotTo(HaveOccurred())
+
+	// setup dummy mutating webhook
+	url := "https://eventing-controller.kyma-system.svc.cluster.local"
+	sideEffectClassNone := admissionv1.SideEffectClassNone
+	mwh := getMutatingWebhookConfig([]admissionv1.MutatingWebhook{
+		{
+			Name: "reconciler.eventing.test",
+			ClientConfig: admissionv1.WebhookClientConfig{
+				URL:      &url,
+				CABundle: dummyCABundle,
+			},
+			SideEffects:             &sideEffectClassNone,
+			AdmissionReviewVersions: []string{"v1beta1"},
+		},
+	})
+	mwh.Name = "subscription-mutating-webhook-configuration"
+
+	// setup dummy validating webhook
+	vwh := getValidatingWebhookConfig([]admissionv1.ValidatingWebhook{
+		{
+			Name: "reconciler2.eventing.test",
+			ClientConfig: admissionv1.WebhookClientConfig{
+				URL:      &url,
+				CABundle: dummyCABundle,
+			},
+			SideEffects:             &sideEffectClassNone,
+			AdmissionReviewVersions: []string{"v1beta1"},
+		},
+	})
+	vwh.Name = "subscription-validating-webhook-configuration"
+
+	// define testEnv
 	testEnv = &envtest.Environment{
 		CRDDirectoryPaths: []string{
 			filepath.Join("../../", "config", "crd", "bases"),
@@ -79,6 +120,10 @@ var _ = BeforeSuite(func(done Done) {
 		},
 		AttachControlPlaneOutput: attachControlPlaneOutput,
 		UseExistingCluster:       &useExistingCluster,
+		WebhookInstallOptions: envtest.WebhookInstallOptions{
+			MutatingWebhooks:   []*admissionv1.MutatingWebhookConfiguration{mwh},
+			ValidatingWebhooks: []*admissionv1.ValidatingWebhookConfiguration{vwh},
+		},
 	}
 
 	var err error
@@ -99,6 +144,17 @@ var _ = BeforeSuite(func(done Done) {
 	Expect(err).NotTo(HaveOccurred())
 	Expect(k8sClient).ToNot(BeNil())
 
+	// create kyma-system namespace
+	ensureKymaSystemNamespaceCreated(context.Background())
+
+	// create secret for webhooks
+	caSecret := getSecretWithTLSSecret(newCABundle)
+	caSecret.Name = "eventing-webhook-server-cert"
+	err = k8sClient.Create(context.Background(), caSecret)
+	if !k8serrors.IsAlreadyExists(err) {
+		Expect(err).Should(BeNil())
+	}
+
 	syncPeriod := time.Second * 2
 	shutdownTimeout := time.Duration(0)
 	k8sManager, err := ctrl.NewManager(cfg, ctrl.Options{
@@ -110,7 +166,7 @@ var _ = BeforeSuite(func(done Done) {
 	Expect(err).To(BeNil())
 
 	// populate with required env variables
-	natsConfig := env.NatsConfig{
+	natsConfig := env.NATSConfig{
 		EventTypePrefix: reconcilertesting.EventTypePrefix,
 		JSStreamName:    reconcilertesting.JSStreamName,
 	}
@@ -157,7 +213,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 	When("Creating a controller deployment", func() {
 		It("Should return an non empty owner to be used as a reference in publisher deployment", func() {
 			ctx := context.Background()
-			ensureNamespaceCreated(ctx, kymaSystemNamespace)
+			ensureKymaSystemNamespaceCreated(ctx)
 			ownerReferences = ensureControllerDeploymentCreated(ctx)
 			// Expect
 			// The matcher in the following Eventually assertion will match against the first returned parameter
@@ -170,7 +226,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 	When("Creating a Eventing Backend and no secret labeled for BEB is found", func() {
 		It("Should start with NATS", func() {
 			ctx := context.Background()
-			ensureNamespaceCreated(ctx, kymaSystemNamespace)
+			ensureKymaSystemNamespaceCreated(ctx)
 			ensureEventingBackendCreated(ctx, eventingBackendName, kymaSystemNamespace)
 			// Expect
 			Eventually(publisherProxyDeploymentGetter(ctx), timeout, pollingInterval).
@@ -220,7 +276,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 		It("Should switch from NATS to BEB", func() {
 			ctx := context.Background()
 			// As there is no Hydra operator that creates secrets based on OAuth2Client CRs, we create the secret.
-			ensureNamespaceCreated(ctx, kymaSystemNamespace)
+			ensureKymaSystemNamespaceCreated(ctx)
 			createOAuth2Secret(ctx, []byte("id1"), []byte("secret1"))
 			ensureBEBSecretCreated(ctx, bebSecret1name, kymaSystemNamespace)
 			// Expect
@@ -439,7 +495,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 			ctx := context.Background()
 
 			By("Making sure the Backend reconciler is started", func() {
-				ensureNamespaceCreated(ctx, kymaSystemNamespace)
+				ensureKymaSystemNamespaceCreated(ctx)
 				ensureEventingBackendCreated(ctx, eventingBackendName, kymaSystemNamespace)
 				Eventually(publisherProxyDeploymentGetter(ctx), timeout, pollingInterval).ShouldNot(BeNil())
 			})
@@ -494,9 +550,9 @@ func newMapFrom(ms ...map[string]string) map[string]string {
 	return mr
 }
 
-func ensureNamespaceCreated(ctx context.Context, namespace string) { // nolint:unparam
-	By(fmt.Sprintf("Ensuring the namespace %q is created", namespace))
-	ns := reconcilertesting.NewNamespace(namespace)
+func ensureKymaSystemNamespaceCreated(ctx context.Context) {
+	By(fmt.Sprintf("Ensuring the namespace %q is created", kymaSystemNamespace))
+	ns := reconcilertesting.NewNamespace(kymaSystemNamespace)
 	err := k8sClient.Create(ctx, ns)
 	if !k8serrors.IsAlreadyExists(err) {
 		Expect(err).ShouldNot(HaveOccurred())

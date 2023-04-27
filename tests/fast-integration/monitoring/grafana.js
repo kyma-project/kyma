@@ -3,6 +3,7 @@ module.exports = {
   assertGrafanaRedirectsExist,
   setGrafanaProxy,
   resetGrafanaProxy,
+  restartProxyPod,
 };
 
 const {

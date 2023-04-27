@@ -2,8 +2,9 @@ package scenarios
 
 import (
 	"fmt"
-	"math/rand"
 	"time"
+
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/function"
 
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 
@@ -23,8 +24,8 @@ import (
 )
 
 func GitopsSteps(restConfig *rest.Config, cfg testsuite.Config, logf *logrus.Entry) (step.Step, error) {
-	currentDate := time.Now()
-	cfg.Namespace = fmt.Sprintf("%s-%dh-%dm-%d", "test-serverless-gitops", currentDate.Hour(), currentDate.Minute(), rand.Int())
+	now := time.Now()
+	cfg.Namespace = fmt.Sprintf("%s-%02dh%02dm%02ds", "test-serverless-gitops", now.Hour(), now.Minute(), now.Second())
 
 	dynamicCli, err := dynamic.NewForConfig(restConfig)
 	if err != nil {
@@ -47,25 +48,27 @@ func GitopsSteps(restConfig *rest.Config, cfg testsuite.Config, logf *logrus.Ent
 		Log:         logf,
 	}
 
-	gitCfg, err := gitops.NewGitopsConfig("gitfunc", cfg.GitServerImage, cfg.GitServerRepoName, genericContainer)
+	gitFnName := "gitfunc"
+	gitCfg, err := gitops.NewGitopsConfig(gitFnName, cfg.GitServerImage, cfg.GitServerRepoName, genericContainer)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while creating Git config")
 	}
 
+	gitFn := function.NewFunction(gitFnName, cfg.KubectlProxyEnabled, genericContainer)
 	logf.Infof("Testing Git Function in namespace: %s", cfg.Namespace)
 
 	poll := poller.Poller{
 		MaxPollingTime:     cfg.MaxPollingTime,
 		InsecureSkipVerify: cfg.InsecureSkipVerify,
-		Log:                genericContainer.Log,
+		Log:                logf,
 		DataKey:            testsuite.TestDataKey,
 	}
 	return step.NewSerialTestRunner(logf, "create git func",
 		teststep.NewNamespaceStep("Create test namespace", coreCli, genericContainer),
-		teststep.NewGitServer(gitCfg, "Start in-cluster Git Server", appsCli.Deployments(genericContainer.Namespace), coreCli.Services(genericContainer.Namespace), cfg.IstioEnabled),
-		teststep.CreateFunction(genericContainer.Log, gitCfg.Fn, "Create Git Function", gitops.GitopsFunction(gitCfg.GetGitServerInClusterURL(), "/", "master", serverlessv1alpha2.NodeJs16, nil)),
-		teststep.NewDefaultedFunctionCheck("Check if Git Function has correct default values", gitCfg.Fn),
-		teststep.NewHTTPCheck(genericContainer.Log, "Git Function pre update simple check through gateway", gitCfg.InClusterURL, poll, "GITOPS 1"),
-		teststep.NewCommitChanges(genericContainer.Log, "Commit changes to Git Function", gitCfg.GetGitServerInClusterURL()),
-		teststep.NewHTTPCheck(genericContainer.Log, "Git Function post update simple check through gateway", gitCfg.InClusterURL, poll, "GITOPS 2")), nil
+		teststep.NewGitServer(gitCfg, "Start in-cluster Git Server", appsCli.Deployments(genericContainer.Namespace), coreCli.Services(genericContainer.Namespace), cfg.KubectlProxyEnabled, cfg.IstioEnabled),
+		teststep.CreateFunction(logf, gitFn, "Create Git Function", gitops.GitopsFunction(gitCfg.GetGitServerInClusterURL(), "/", "master", serverlessv1alpha2.NodeJs18, nil)),
+		teststep.NewDefaultedFunctionCheck("Check if Git Function has correct default values", gitFn),
+		teststep.NewHTTPCheck(logf, "Git Function pre update simple check through service", gitFn.FunctionURL, poll, "GITOPS 1"),
+		teststep.NewCommitChanges(logf, "Commit changes to Git Function", gitCfg.GetGitServerURL(cfg.KubectlProxyEnabled)),
+		teststep.NewHTTPCheck(logf, "Git Function post update simple check through service", gitFn.FunctionURL, poll, "GITOPS 2")), nil
 }

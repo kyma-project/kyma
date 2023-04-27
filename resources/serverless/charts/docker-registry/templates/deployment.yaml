@@ -8,7 +8,6 @@ metadata:
     app: {{ template "docker-registry.name" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
 spec:
   selector:
     matchLabels:
@@ -37,9 +36,7 @@ spec:
       imagePullSecrets:
 {{ toYaml .Values.imagePullSecrets | indent 8 }}
       {{- end }}
-{{- if or .Values.priorityClassName .Values.global.highPriorityClassName }}
-      priorityClassName: "{{ coalesce .Values.priorityClassName .Values.global.highPriorityClassName }}"
-{{- end }}
+      priorityClassName: "{{ .Values.global.serverlessPriorityClassName }}"
 {{- if .Values.pod.securityContext }}
       securityContext:
         {{- include "tplValue" ( dict "value" .Values.pod.securityContext "context" . ) | nindent 12 }}
@@ -50,11 +47,15 @@ spec:
       initContainers:
         - name: generate-htpasswd
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.registry) }}"
-{{- if .Values.containers.securityContext }}
+{{- if .Values.initContainers.securityContext }}
           securityContext:
-            {{- include "tplValue" ( dict "value" .Values.containers.securityContext "context" . ) | nindent 12 }}
+            {{- include "tplValue" ( dict "value" .Values.initContainers.securityContext "context" . ) | nindent 12 }}
 {{- end }}
           volumeMounts:
+          {{- if eq .Values.storage "filesystem" }}
+            - name: data
+              mountPath: /var/lib/registry/
+          {{- end }}
             - name: registry-credentials
               mountPath: /regcred
               readOnly: true
@@ -69,6 +70,10 @@ spec:
             - |
               htpasswd -Bbn $(cat /regcred/username.txt) $(cat /regcred/password.txt) > ./data/htpasswd
               echo "Generated htpasswd file for docker-registry..."
+{{- if eq .Values.storage "filesystem" }}
+              chown -R 1000:1000 "/var/lib/registry/"
+{{- end }}
+
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.registry) }}"
@@ -180,7 +185,7 @@ spec:
             - name: REGISTRY_STORAGE_SWIFT_CONTAINER
               value: {{ required ".Values.swift.container is required" .Values.swift.container }}
 {{- end }}
-{{- if .Values.persistence.deleteEnabled }}
+{{- if .Values.garbageCollection.enabled }}
             - name: REGISTRY_STORAGE_DELETE_ENABLED
               value: "true"
 {{- end }}
@@ -199,6 +204,33 @@ spec:
 {{- with .Values.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
 {{- end }}
+
+{{- if ( and ( .Values.garbageCollection.enabled )  ( eq .Values.storage "filesystem" ) )}}
+        - name: garbage-collect
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.registry) }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+{{- if .Values.containers.securityContext }}
+          securityContext:
+            {{- include "tplValue" ( dict "value" .Values.containers.securityContext "context" . ) | nindent 12 }}
+{{- end }}
+          command:
+          - sh
+          - -ec
+          - | 
+              # garbage-collect will fail if the registry storage is not initialized (images are already pused to it), so we check fist before we run the command
+              while true; do test -d /var/lib/registry/docker/registry/v2/ && /bin/registry garbage-collect /etc/docker/registry/config.yml -m || echo "failed to run garbage-collect, retrying"; sleep 1h; done
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/registry/
+            - name: "{{ template "docker-registry.fullname" . }}-config"
+              mountPath: "/etc/docker/registry"
+{{- with .Values.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+{{- end }}
+{{- end }}
+
 {{- if .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml .Values.nodeSelector | indent 8 }}

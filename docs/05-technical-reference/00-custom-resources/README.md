@@ -6,9 +6,11 @@ A custom resource (CR) is an extension to the Kubernetes API which allows you to
 
 | Area | Custom resource |
 | ---- | -------------- |
-| Application Connectivity | Application, TokenRequest, CompassConnection |
-| API Exposure | APIRule |
-| Eventing | EventSubscription |
+| Application Connectivity | Application, CompassConnection |
+| API Gateway | APIRule |
+| Eventing | Subscription, EventingBackend |
+| Istio | Istio |
 | Serverless | Function, GitRepository |
+| Telemetry | LogPipeline, LogParser, TracePipeline |
 
  > **TIP:** For information about third-party custom resources that come together with Kyma, visit the documentation of the respective project.

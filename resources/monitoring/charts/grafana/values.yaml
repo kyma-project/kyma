@@ -36,11 +36,15 @@ autoscaling:
 #   - type: Resource
 #     resource:
 #       name: cpu
-#       targetAverageUtilization: 60
+#       target:
+#          type: Utilization
+#          averageUtilization: 60
 #   - type: Resource
 #     resource:
 #       name: memory
-#       targetAverageUtilization: 60
+#       target:
+#          type: Utilization
+#          averageUtilization: 60
 
 ## See `kubectl explain poddisruptionbudget.spec` for more
 ## ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
@@ -320,6 +324,9 @@ initChownData:
   ## initChownData container image
   ##
   image:
+    repository: busybox
+    tag: "1.31.1"
+    sha: ""
     pullPolicy: IfNotPresent
 
   ## initChownData resource requests and limits
@@ -363,14 +370,12 @@ admin:
 
 ## Extra environment variables that will be pass onto deployment pods
 env:
-  # https://grafana.com/docs/grafana/latest/installation/configuration/#paths
-  GF_PATHS_PROVISIONING: /etc/grafana/provisioning
-  # https://grafana.com/docs/grafana/latest/installation/configuration/#users
+  # https://grafana.com/docs/grafana/v7.5/installation/configuration/#users
   GF_USERS_AUTO_ASSIGN_ORG: "true"
   GF_USERS_AUTO_ASSIGN_ORG_ROLE: Editor
   GF_USERS_DEFAULT_THEME: "dark"
   GF_USERS_VIEWERS_CAN_EDIT: "true"
-  # https://grafana.com/docs/grafana/latest/auth/overview/
+  # https://grafana.com/docs/grafana/v7.5/auth/overview/
   GF_AUTH_ANONYMOUS_ENABLED: "true"
   GF_AUTH_ANONYMOUS_ORG_ROLE: "Editor"
   GF_AUTH_ANONYMOUS_HIDE_VERSION: "true"
@@ -379,9 +384,9 @@ env:
   GF_AUTH_PROXY_ENABLED: "false"
   GF_AUTH_PROXY_HEADER_NAME: X-AUTH-EMAIL
   GF_AUTH_PROXY_HEADER_PROPERTY: "email"
-  # https://grafana.com/docs/grafana/latest/installation/configuration/#server
+  # https://grafana.com/docs/grafana/v7.5/installation/configuration/#server
   GF_SERVER_ROOT_URL: ""
-  # https://grafana.com/docs/grafana/latest/auth/generic-oauth/
+  # https://grafana.com/docs/grafana/v7.5/auth/generic-oauth/
   GF_AUTH_GENERIC_OAUTH_CLIENT_ID: "grafana"
   GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET: "apie4eeX6hiC9ainieli"
   GF_AUTH_GENERIC_OAUTH_ENABLED: "false"
@@ -391,13 +396,15 @@ env:
   GF_AUTH_GENERIC_OAUTH_API_URL: ""
   GF_AUTH_GENERIC_OAUTH_ALLOWED_DOMAINS: ""
   GF_AUTH_GENERIC_OAUTH_ALLOW_SIGN_UP: "true"
-  # https://grafana.com/docs/grafana/latest/installation/configuration/#log
+  # https://grafana.com/docs/grafana/v7.5/installation/configuration/#log
   GF_LOG_MODE: "console"
   GF_LOG_LEVEL: "warn"
-  # https://grafana.com/docs/grafana/latest/administration/configuration/#alerting
+  # https://grafana.com/docs/grafana/v7.5/administration/configuration/#alerting
   GF_ALERTING_ENABLED: "true"
-  # https://grafana.com/docs/grafana/latest/administration/configuration/#dashboards
+  # https://grafana.com/docs/grafana/v7.5/administration/configuration/#dashboards
   GF_DASHBOARDS_MIN_REFRESH_INTERVAL: "10s"
+  # https://grafana.com/docs/grafana/v7.5/administration/configuration/#snapshots
+  GF_SNAPSHOTS_EXTERNAL_ENABLED: "false"
 
 ## "valueFrom" environment variable references that will be added to deployment pods
 ## ref: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.17/#envvarsource-v1-core

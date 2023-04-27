@@ -12,6 +12,7 @@ import (
 var Finalizer = GroupVersion.Group
 
 // WebhookAuth defines the Webhook called by an active subscription in BEB.
+// TODO: Remove it when depreciating code of v1alpha1
 type WebhookAuth struct {
 	// Type defines type of authentication
 	// +optional
@@ -34,6 +35,7 @@ type WebhookAuth struct {
 }
 
 // ProtocolSettings defines the CE protocol setting specification implementation.
+// TODO: Remove it when depreciating code of v1alpha1
 type ProtocolSettings struct {
 	// ContentMode defines content mode for eventing based on BEB.
 	// +optional
@@ -52,6 +54,7 @@ type ProtocolSettings struct {
 	WebhookAuth *WebhookAuth `json:"webhookAuth,omitempty"`
 }
 
+// TODO: Remove it when depreciating code of v1alpha1
 const (
 	ProtocolSettingsContentModeBinary     string = "BINARY"
 	ProtocolSettingsContentModeStructured string = "STRUCTURED"
@@ -220,14 +223,14 @@ type SubscriptionStatus struct {
 	Config *SubscriptionConfig `json:"config,omitempty"`
 }
 
+// Subscription is the Schema for the subscriptions API.
 // +kubebuilder:object:root=true
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Ready",type="string",JSONPath=".status.ready"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 // +kubebuilder:printcolumn:name="Clean Event Types",type="string",JSONPath=".status.cleanEventTypes"
-
-// Subscription is the Schema for the subscriptions API.
+// +kubebuilder:deprecatedversion:warning=v1alpha1 is deprecated as of Kyma 2.12.X.
 type Subscription struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

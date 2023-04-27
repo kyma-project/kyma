@@ -23,12 +23,12 @@ describe('Upgrade test tests', function() {
     initialRestarts = await getContainerRestartsForAllNamespaces();
   });
 
-  it('in-cluster event should be delivered (legacy events, structured and binary cloud events)', async function() {
-    await checkInClusterEventDelivery(testNamespace);
-  });
-
   it('function should be reachable through secured API Rule', async function() {
     await checkFunctionResponse(testNamespace);
+  });
+
+  it('in-cluster event should be delivered (legacy events, structured and binary cloud events)', async function() {
+    await checkInClusterEventDelivery(testNamespace);
   });
 
   it('Should print report of restarted containers, skipped if no crashes happened', async function() {

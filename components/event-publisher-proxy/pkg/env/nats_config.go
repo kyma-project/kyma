@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-// compile time check
+// compile time check.
 var _ fmt.Stringer = &NATSConfig{}
 
 const JetStreamSubjectPrefix = "kyma"
@@ -29,16 +29,16 @@ type NATSConfig struct {
 	JSStreamName string `envconfig:"JS_STREAM_NAME" default:"kyma"`
 }
 
-// ToConfig converts to a default BEB BEBConfig
-func (c *NATSConfig) ToConfig() *BEBConfig {
-	cfg := &BEBConfig{
-		BEBNamespace:    c.LegacyNamespace,
-		EventTypePrefix: c.EventTypePrefix,
+// ToConfig converts to a default BEB BEBConfig.
+func (c *NATSConfig) ToConfig() *EventMeshConfig {
+	cfg := &EventMeshConfig{
+		EventMeshNamespace: c.LegacyNamespace,
+		EventTypePrefix:    c.EventTypePrefix,
 	}
 	return cfg
 }
 
-// String implements the fmt.Stringer interface
+// String implements the fmt.Stringer interface.
 func (c *NATSConfig) String() string {
 	return fmt.Sprintf("%#v", c)
 }

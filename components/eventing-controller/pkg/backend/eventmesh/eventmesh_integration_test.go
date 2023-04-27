@@ -12,23 +12,20 @@ import (
 
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-	backendbebv1 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/beb"
 	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 	PublisherManagerMock "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/client/mocks"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
-	controllertestingv2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
 )
 
 func Test_getProcessedEventTypes(t *testing.T) {
-
 	// given
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	require.NoError(t, err)
 
 	nameMapper := backendutils.NewBEBSubscriptionNameMapper("mydomain.com",
-		maxSubscriptionNameLength)
+		MaxSubscriptionNameLength)
 
 	// cases
 	testCases := []struct {
@@ -48,12 +45,12 @@ func Test_getProcessedEventTypes(t *testing.T) {
 					Source: "test",
 				},
 			},
-			givenEventTypePrefix: controllertestingv2.EventMeshPrefix,
+			givenEventTypePrefix: controllertesting.EventMeshPrefix,
 			wantProcessedEventTypes: []backendutils.EventTypeInfo{
 				{
 					OriginalType:  "order.created.v1",
 					CleanType:     "order.created.v1",
-					ProcessedType: fmt.Sprintf("%s.test.order.created.v1", controllertestingv2.EventMeshPrefix),
+					ProcessedType: fmt.Sprintf("%s.test.order.created.v1", controllertesting.EventMeshPrefix),
 				},
 			},
 			wantError: false,
@@ -68,13 +65,13 @@ func Test_getProcessedEventTypes(t *testing.T) {
 					Source: "test-Ä.Segment2",
 				},
 			},
-			givenEventTypePrefix: controllertestingv2.EventMeshPrefix,
+			givenEventTypePrefix: controllertesting.EventMeshPrefix,
 			wantProcessedEventTypes: []backendutils.EventTypeInfo{
 				{
 					OriginalType: "Segment1.Segment2.Segment3.Segment4-Part1-Part2-Ä.Segment5-Part1-Part2-Ä.v1",
 					CleanType:    "Segment1Segment2Segment3Segment4Part1Part2.Segment5Part1Part2.v1",
 					ProcessedType: fmt.Sprintf("%s.testSegment2.Segment1Segment2Segment3Segment4Part1Part2"+
-						".Segment5Part1Part2.v1", controllertestingv2.EventMeshPrefix),
+						".Segment5Part1Part2.v1", controllertesting.EventMeshPrefix),
 				},
 			},
 			wantError: false,
@@ -90,12 +87,12 @@ func Test_getProcessedEventTypes(t *testing.T) {
 					Source: "test",
 				},
 			},
-			givenEventTypePrefix: controllertestingv2.EventMeshPrefix,
+			givenEventTypePrefix: controllertesting.EventMeshPrefix,
 			wantProcessedEventTypes: []backendutils.EventTypeInfo{
 				{
 					OriginalType:  "order.created.v1",
 					CleanType:     "order.created.v1",
-					ProcessedType: fmt.Sprintf("%s.test.order.created.v1", controllertestingv2.EventMeshPrefix),
+					ProcessedType: fmt.Sprintf("%s.test.order.created.v1", controllertesting.EventMeshPrefix),
 				},
 			},
 			wantError: false,
@@ -111,7 +108,7 @@ func Test_getProcessedEventTypes(t *testing.T) {
 					TypeMatching: eventingv1alpha2.TypeMatchingExact,
 				},
 			},
-			givenEventTypePrefix: controllertestingv2.EventMeshPrefix,
+			givenEventTypePrefix: controllertesting.EventMeshPrefix,
 			wantProcessedEventTypes: []backendutils.EventTypeInfo{
 				{
 					OriginalType:  "test1.test2.test3.order.created.v1",
@@ -132,7 +129,7 @@ func Test_getProcessedEventTypes(t *testing.T) {
 					Source: "test",
 				},
 			},
-			givenEventTypePrefix:    controllertestingv2.InvalidEventMeshPrefix,
+			givenEventTypePrefix:    controllertesting.InvalidEventMeshPrefix,
 			wantProcessedEventTypes: nil,
 			wantError:               true,
 		},
@@ -144,7 +141,7 @@ func Test_getProcessedEventTypes(t *testing.T) {
 			t.Parallel()
 
 			// given
-			eventMesh := NewEventMesh(&backendbebv1.OAuth2ClientCredentials{}, nameMapper, defaultLogger)
+			eventMesh := NewEventMesh(&OAuth2ClientCredentials{}, nameMapper, defaultLogger)
 			emCleaner := cleaner.NewEventMeshCleaner(defaultLogger)
 			err = eventMesh.Initialize(env.Config{EventTypePrefix: tc.givenEventTypePrefix})
 			require.NoError(t, err)
@@ -159,7 +156,6 @@ func Test_getProcessedEventTypes(t *testing.T) {
 			}
 		})
 	}
-
 }
 
 func Test_handleKymaSubModified(t *testing.T) {
@@ -168,7 +164,7 @@ func Test_handleKymaSubModified(t *testing.T) {
 	require.NoError(t, err)
 
 	nameMapper := backendutils.NewBEBSubscriptionNameMapper("mydomain.com",
-		maxSubscriptionNameLength)
+		MaxSubscriptionNameLength)
 
 	// cases
 	testCases := []struct {
@@ -262,7 +258,7 @@ func Test_handleKymaSubModified(t *testing.T) {
 			t.Parallel()
 
 			// given
-			eventMesh := NewEventMesh(&backendbebv1.OAuth2ClientCredentials{}, nameMapper, defaultLogger)
+			eventMesh := NewEventMesh(&OAuth2ClientCredentials{}, nameMapper, defaultLogger)
 			// Set a mock client interface for EventMesh
 			mockClient := new(PublisherManagerMock.PublisherManager)
 			mockClient.On("Delete", tc.givenEventMeshSub.Name).Return(tc.givenClientDeleteResponse, nil)
@@ -286,7 +282,7 @@ func Test_handleEventMeshSubModified(t *testing.T) {
 	require.NoError(t, err)
 
 	nameMapper := backendutils.NewBEBSubscriptionNameMapper("mydomain.com",
-		maxSubscriptionNameLength)
+		MaxSubscriptionNameLength)
 
 	// cases
 	testCases := []struct {
@@ -380,7 +376,7 @@ func Test_handleEventMeshSubModified(t *testing.T) {
 			t.Parallel()
 
 			// given
-			eventMesh := NewEventMesh(&backendbebv1.OAuth2ClientCredentials{}, nameMapper, defaultLogger)
+			eventMesh := NewEventMesh(&OAuth2ClientCredentials{}, nameMapper, defaultLogger)
 			// Set a mock client interface for EventMesh
 			mockClient := new(PublisherManagerMock.PublisherManager)
 			mockClient.On("Delete", tc.givenEventMeshSub.Name).Return(tc.givenClientDeleteResponse, nil)
@@ -404,7 +400,7 @@ func Test_handleCreateEventMeshSub(t *testing.T) {
 	require.NoError(t, err)
 
 	nameMapper := backendutils.NewBEBSubscriptionNameMapper("mydomain.com",
-		maxSubscriptionNameLength)
+		MaxSubscriptionNameLength)
 
 	// cases
 	testCases := []struct {
@@ -476,7 +472,7 @@ func Test_handleCreateEventMeshSub(t *testing.T) {
 			t.Parallel()
 
 			// given
-			eventMesh := NewEventMesh(&backendbebv1.OAuth2ClientCredentials{}, nameMapper, defaultLogger)
+			eventMesh := NewEventMesh(&OAuth2ClientCredentials{}, nameMapper, defaultLogger)
 			// Set a mock client interface for EventMesh
 			mockClient := new(PublisherManagerMock.PublisherManager)
 			mockClient.On("Create", tc.givenEventMeshSub).Return(tc.givenClientCreateResponse, nil)
@@ -580,7 +576,7 @@ func Test_handleKymaSubStatusUpdate(t *testing.T) {
 }
 
 func Test_SyncSubscription(t *testing.T) {
-	credentials := &backendbebv1.OAuth2ClientCredentials{
+	credentials := &OAuth2ClientCredentials{
 		ClientID:     "foo-client-id",
 		ClientSecret: "foo-client-secret",
 	}
@@ -589,7 +585,7 @@ func Test_SyncSubscription(t *testing.T) {
 	require.NoError(t, err)
 
 	nameMapper := backendutils.NewBEBSubscriptionNameMapper("mydomain.com",
-		maxSubscriptionNameLength)
+		MaxSubscriptionNameLength)
 	eventMesh := NewEventMesh(credentials, nameMapper, defaultLogger)
 
 	// start BEB Mock
@@ -602,7 +598,7 @@ func Test_SyncSubscription(t *testing.T) {
 		WebhookActivationTimeout: 0,
 		WebhookTokenEndpoint:     "webhook-token-endpoint",
 		Domain:                   "domain.com",
-		EventTypePrefix:          controllertestingv2.EventTypePrefix,
+		EventTypePrefix:          controllertesting.EventTypePrefix,
 		BEBNamespace:             "/default/ns",
 		Qos:                      string(types.QosAtLeastOnce),
 	}
@@ -614,9 +610,9 @@ func Test_SyncSubscription(t *testing.T) {
 	subscription.Status.Backend.Emshash = 0
 	subscription.Status.Backend.Ev2hash = 0
 
-	apiRule := controllertestingv2.NewAPIRule(subscription,
-		controllertestingv2.WithPath(),
-		controllertestingv2.WithService("foo-svc", "foo-host"),
+	apiRule := controllertesting.NewAPIRule(subscription,
+		controllertesting.WithPath(),
+		controllertesting.WithService("foo-svc", "foo-host"),
 	)
 
 	// cases - reconcile same subscription multiple times
@@ -627,17 +623,17 @@ func Test_SyncSubscription(t *testing.T) {
 	}{
 		{
 			name:           "should be able to sync first time",
-			givenEventType: controllertestingv2.OrderCreatedEventTypeNotClean,
+			givenEventType: controllertesting.OrderCreatedEventTypeNotClean,
 			wantIsChanged:  true,
 		},
 		{
 			name:           "should be able to sync second time with same subscription",
-			givenEventType: controllertestingv2.OrderCreatedEventTypeNotClean,
+			givenEventType: controllertesting.OrderCreatedEventTypeNotClean,
 			wantIsChanged:  false,
 		},
 		{
 			name:           "should be able to sync third time with modified subscription",
-			givenEventType: controllertestingv2.OrderCreatedV2Event,
+			givenEventType: controllertesting.OrderCreatedV2Event,
 			wantIsChanged:  true,
 		},
 	}
@@ -659,12 +655,12 @@ func Test_SyncSubscription(t *testing.T) {
 
 // fixtureValidSubscription returns a valid subscription.
 func fixtureValidSubscription(name, namespace string) *eventingv1alpha2.Subscription {
-	return controllertestingv2.NewSubscription(
+	return controllertesting.NewSubscription(
 		name, namespace,
-		controllertestingv2.WithSinkURL("https://webhook.xxx.com"),
-		controllertestingv2.WithDefaultSource(),
-		controllertestingv2.WithEventType(controllertestingv2.OrderCreatedEventTypeNotClean),
-		controllertestingv2.WithWebhookAuthForBEB(),
+		controllertesting.WithSinkURL("https://webhook.xxx.com"),
+		controllertesting.WithDefaultSource(),
+		controllertesting.WithEventType(controllertesting.OrderCreatedEventTypeNotClean),
+		controllertesting.WithWebhookAuthForBEB(),
 	)
 }
 

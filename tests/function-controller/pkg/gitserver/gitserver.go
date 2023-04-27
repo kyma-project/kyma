@@ -3,7 +3,6 @@ package gitserver
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
 
@@ -39,9 +38,7 @@ type GitServer struct {
 	namespace    string
 	image        string
 	port         int
-	waitTimeout  time.Duration
 	log          *logrus.Entry
-	verbose      bool
 }
 
 func New(c shared.Container, name string, image string, port int, deployments appsclient.DeploymentInterface, services coreclient.ServiceInterface, istioEnabled bool) *GitServer {
@@ -56,9 +53,7 @@ func New(c shared.Container, name string, image string, port int, deployments ap
 		image:        image,
 		port:         port,
 		namespace:    c.Namespace,
-		waitTimeout:  c.WaitTimeout,
 		log:          c.Log,
-		verbose:      c.Verbose,
 		istioEnabled: istioEnabled,
 	}
 }

@@ -2,8 +2,8 @@
 title: Event name cleanup in Subscriptions
 ---
 
-To conform to Cloud Event specifications, sometimes Eventing must modify the event names to filter out non-alphanumeric characters. This tutorial presents one example of event name cleanup.
-You learn how Eventing behaves when you create a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) having alphanumeric characters in the event names. Read more about [Event name format and cleanup](../../05-technical-reference/evnt-01-event-names.md).
+To conform to Cloud Event specifications, sometimes Eventing must modify the event names to filter out prohibited characters. This tutorial presents one example of event name cleanup.
+You learn how Eventing behaves when you create a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) having prohibited characters in the event names. Read more about [Event name format and cleanup](../../05-technical-reference/evnt-01-event-names.md).
 
 ## Prerequisites
 
@@ -36,35 +36,37 @@ You learn how Eventing behaves when you create a [Subscription](../../05-technic
    
    ```bash
    cat <<EOF | kubectl apply -f -
-     apiVersion: serverless.kyma-project.io/v1alpha1
-     kind: Function
-     metadata:
-       labels:
-         serverless.kyma-project.io/build-resources-preset: local-dev
-         serverless.kyma-project.io/function-resources-preset: S
-         serverless.kyma-project.io/replicas-preset: S
-       name: lastorder
-       namespace: default
-     spec:
-       deps: '{ "dependencies": {}}'
-       maxReplicas: 1
-       minReplicas: 1
-       source: |
-         module.exports = {
-           main: async function (event, context) {
-             console.log("Received event: ", event.data, ", Event Type: ", event.extensions.request.headers['ce-type']);
-             return; 
-           } 
-         }
+   apiVersion: serverless.kyma-project.io/v1alpha2
+   kind: Function
+   metadata:
+     name: lastorder
+     namespace: default
+   spec:
+     replicas: 1
+     resourceConfiguration:
+       function:
+         profile: S
+       build:
+         profile: local-dev
+     runtime: nodejs16
+     source:
+       inline:
+         source: |-
+           module.exports = {
+             main: async function (event, context) {
+               console.log("Received event: ", event.data, ", Event Type: ", event.extensions.request.headers['ce-type']);
+               return;
+             }
+           }
    EOF
    ```
-   
+
      </details>
    </div>
 
 ## Create a Subscription with Event type consisting of alphanumeric characters
 
-Create a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) custom resource and subscribe for events of the type: `order.payment-success.v1`. Note that `order.payment-success.v1` contains a non-alphanumeric character, the hyphen `-`.
+Create a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) custom resource and subscribe for events of the type: `order.payment*success.v1`. Note that `order.payment*success.v1` contains a prohibited character, the asterisk `*`.
 
 <div tabs name="Create a Subscription" group="create-subscription">
   <details open>
@@ -72,15 +74,14 @@ Create a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01
   Kyma Dashboard
   </summary>
 
-1. In Kyma Dashboard, go to the view of your Function `lastorder`.
-2. Go to **Configuration** > **Create Subscription+**.
+1. Go to **Namespaces** and select the default Namespace.
+2. Go to **Configuration** > **Subscriptions** and click **Create Subscription+**.
 3. Provide the following parameters:
    - **Subscription name**: `lastorder-payment-sub`
-   - **Application name**: `myapp`
-   - **Event name**: `order.payment-success`
-   - **Event version**: `v1`
-
-   - **Event type** is generated automatically. For this example, it's `sap.kyma.custom.myapp.order.payment-success.v1`.
+   - **Types**: `order.payment*success.v1`
+   - **Service**: `lastorder` (The sink field will be populated automatically.)
+   - **Type matching:**: `standard`
+   - **Source**: `myapp`
 
 4. Click **Create**.
 5. Wait a few seconds for the Subscription to have status `READY`.
@@ -94,23 +95,16 @@ Create a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01
 Run:
 ```bash
 cat <<EOF | kubectl apply -f -
-   apiVersion: eventing.kyma-project.io/v1alpha1
+   apiVersion: eventing.kyma-project.io/v1alpha2
    kind: Subscription
    metadata:
      name: lastorder-payment-sub
      namespace: default
    spec:
      sink: 'http://lastorder.default.svc.cluster.local'
-     filter:
-       filters:
-         - eventSource:
-             property: source
-             type: exact
-             value: ''
-           eventType:
-             property: type
-             type: exact
-             value: sap.kyma.custom.myapp.order.payment-success.v1
+     source: myapp
+     types:
+       - order.payment*success.v1
 EOF
 ```
 
@@ -127,15 +121,15 @@ The operation was successful if the returned status says `true`.
 
 To check the Subscription cleaned Event type, run:
 ```bash
-kubectl get subscriptions lastorder-payment-sub -o=jsonpath="{.status.cleanEventTypes}"
+kubectl get subscriptions lastorder-payment-sub -o=jsonpath="{.status.types}"
 ```
 
-Note that the returned event type `["sap.kyma.custom.myapp.order.paymentsuccess.v1"]` does not contain the hyphen `-` in the `payment-success` part. That's because Kyma Eventing cleans out the non-alphanumeric characters from the event name and uses the cleaned event name in the underlying Eventing backend.
+Note that the returned event type `["order.paymentsuccess.v1"]` does not contain the asterisk `*` in the `payment*success` part. That's because Kyma Eventing cleans out the prohibited characters from the event name and uses the cleaned event name in the underlying Eventing backend.
 
 ## Trigger the workload with an event
 
-You created the `lastorder` Function, and subscribed to the `order.payment-success.v1` events by creating a Subscription CR. 
-Next, you see that you can still publish events with the original Event name (i.e. `order.payment-success.v1`) even though it contains the non-alphanumeric character, and it will trigger the Function.
+You created the `lastorder` Function, and subscribed to the `order.payment*success.v1` events by creating a Subscription CR. 
+Next, you see that you can still publish events with the original Event name (i.e. `order.payment*success.v1`) even though it contains the prohibited character, and it triggers the Function.
 
 1. Port-forward the [Event Publisher Proxy](../../05-technical-reference/00-architecture/evnt-01-architecture.md) Service to localhost, using port `3000`. Run:
    ```bash
@@ -151,7 +145,7 @@ Next, you see that you can still publish events with the original Event name (i.
    
       ```bash
       cloudevents send http://localhost:3000/publish \
-         --type sap.kyma.custom.myapp.order.payment-success.v1 \
+         --type "order.payment*success.v1" \
          --id e4bcc616-c3a9-4840-9321-763aa23851fc \
          --source myapp \
          --datacontenttype application/json \
@@ -168,7 +162,7 @@ Next, you see that you can still publish events with the original Event name (i.
       ```bash
       curl -v -X POST \
            -H "ce-specversion: 1.0" \
-           -H "ce-type: sap.kyma.custom.myapp.order.payment-success.v1" \
+           -H "ce-type: order.payment*success.v1" \
            -H "ce-source: myapp" \
            -H "ce-eventtypeversion: v1" \
            -H "ce-id: e4bcc616-c3a9-4840-9321-763aa23851fc" \
@@ -185,12 +179,12 @@ To verify that the event was properly delivered, check the logs of the Function 
 
 You see the received event in the logs:
 ```
-Received event:  { orderCode: '3211213', orderAmount: '1250' } , Event Type:  sap.kyma.custom.myapp.order.paymentsuccess.v1
+Received event:  { orderCode: '3211213', orderAmount: '1250' } , Event Type:  order.paymentsuccess.v1
 ```
 Note that the `Event Type` of the received event is not the same as defined in the Subscription.
 
 ## Conclusion
 
-You see that Kyma Eventing modifies the event names to filter out non-alphanumeric character to conform to Cloud Event specifications. 
+You see that Kyma Eventing modifies the event names to filter out prohibited characters to conform to Cloud Event specifications. 
 
 > **CAUTION:** This cleanup modification is abstract; you can still publish and subscribe to the original Event names. However, in some cases, it can lead to a naming collision as explained in [Event names](../../05-technical-reference/evnt-01-event-names.md).

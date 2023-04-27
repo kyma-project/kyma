@@ -25,5 +25,6 @@ vendor/
 *.swo
 *~
 
-function-controller
 cover.out
+
+log_config.yaml

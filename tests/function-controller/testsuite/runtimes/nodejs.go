@@ -16,6 +16,14 @@ func BasicNodeJSFunction(msg string, rtm serverlessv1alpha2.Runtime) serverlessv
 				Dependencies: `{ "name": "hellobasic", "version": "0.0.1", "dependencies": {} }`,
 			},
 		},
+		ResourceConfiguration: &serverlessv1alpha2.ResourceConfiguration{
+			Function: &serverlessv1alpha2.ResourceRequirements{
+				Profile: "M",
+			},
+			Build: &serverlessv1alpha2.ResourceRequirements{
+				Profile: "normal",
+			},
+		},
 	}
 }
 
@@ -26,6 +34,14 @@ func BasicNodeJSFunctionWithCustomDependency(msg string, rtm serverlessv1alpha2.
 			Inline: &serverlessv1alpha2.InlineSource{
 				Source:       fmt.Sprintf(`module.exports = { main: function(event, context) { return "%s" } }`, msg),
 				Dependencies: `{ "name": "hellobasic", "version": "0.0.1", "dependencies": { "camelcase": "^7.0.0" } }`,
+			},
+		},
+		ResourceConfiguration: &serverlessv1alpha2.ResourceConfiguration{
+			Function: &serverlessv1alpha2.ResourceRequirements{
+				Profile: "M",
+			},
+			Build: &serverlessv1alpha2.ResourceRequirements{
+				Profile: "normal",
 			},
 		},
 	}
@@ -68,6 +84,14 @@ func NodeJSFunctionWithEnvFromConfigMapAndSecret(configMapName, cmEnvKey, secret
 						Key: secretEnvKey,
 					},
 				},
+			},
+		},
+		ResourceConfiguration: &serverlessv1alpha2.ResourceConfiguration{
+			Function: &serverlessv1alpha2.ResourceRequirements{
+				Profile: "M",
+			},
+			Build: &serverlessv1alpha2.ResourceRequirements{
+				Profile: "normal",
 			},
 		},
 	}

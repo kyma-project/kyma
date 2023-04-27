@@ -11,8 +11,9 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/tracing/propagation/tracecontextb3"
 )
 
-// NewClient returns a new HTTP client which have nested transports for handling oauth2 security, HTTP connection pooling, and tracing.
-func NewClient(ctx context.Context, cfg *env.BEBConfig) *http.Client {
+// NewClient returns a new HTTP client which have nested transports for handling oauth2 security,
+// HTTP connection pooling, and tracing.
+func NewClient(ctx context.Context, cfg *env.EventMeshConfig) *http.Client {
 	// configure auth client
 	config := Config(cfg)
 	client := config.Client(ctx)

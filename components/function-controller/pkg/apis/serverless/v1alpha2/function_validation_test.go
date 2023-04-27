@@ -49,7 +49,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 						MinReplicas: pointer.Int32(1),
 						MaxReplicas: pointer.Int32(1),
 					},
-					Runtime: NodeJs16,
+					Runtime: NodeJs18,
 					ResourceConfiguration: &ResourceConfiguration{
 						Function: &ResourceRequirements{
 							Resources: &corev1.ResourceRequirements{Limits: corev1.ResourceList{
@@ -89,7 +89,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							Dependencies: " { test }     \t\n",
 						},
 					},
-					Runtime: NodeJs16,
+					Runtime: NodeJs18,
 					Env: []corev1.EnvVar{
 						{
 							Name:  "test",
@@ -102,8 +102,8 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 					},
 					Template: &Template{
 						Labels: map[string]string{
-							"shoul-be-ok": "test",
-							"test":        "test",
+							"should-be-ok": "test",
+							"test":         "test",
 						},
 					},
 					ScaleConfig: &ScaleConfig{
@@ -145,6 +145,14 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							SecretName: "secret-name-2",
 							MountPath:  "/mount/path/2",
 						},
+					},
+					Labels: map[string]string{
+						"label-1": "label-1-value",
+						"label-2": "label-2-value",
+					},
+					Annotations: map[string]string{
+						"annotation-1": "annotation-1-value",
+						"annotation-2": "annotation-2-value",
 					},
 				},
 			},
@@ -191,7 +199,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
-					Runtime: NodeJs16,
+					Runtime: NodeJs18,
 					Source: Source{
 						Inline: &InlineSource{
 							Source:       "test-source",
@@ -215,7 +223,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
-					Runtime: NodeJs16,
+					Runtime: NodeJs18,
 					Source:  Source{},
 				},
 			},
@@ -230,7 +238,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
-					Runtime: NodeJs16,
+					Runtime: NodeJs18,
 					Source: Source{
 						Inline: &InlineSource{
 							Source:       "test-source",
@@ -250,7 +258,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
-					Runtime: NodeJs16,
+					Runtime: NodeJs18,
 					Source: Source{
 						Inline: &InlineSource{
 							Source: "test-source",
@@ -275,11 +283,11 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 				),
 			),
 		},
-		"Should return error on labels validation": {
+		"Should return error on spec/template/labels validation": {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
-					Runtime: NodeJs16,
+					Runtime: NodeJs18,
 					Source: Source{
 						Inline: &InlineSource{
 							Source: "test-source",
@@ -287,9 +295,59 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 					},
 					Template: &Template{
 						Labels: map[string]string{
-							"shoul-be-ok":      "test",
+							"should-be-ok":     "test",
 							"should BE not OK": "test",
 						},
+					},
+				},
+			},
+			expectedError: gomega.HaveOccurred(),
+			specifiedExpectedError: gomega.And(
+				gomega.ContainSubstring(
+					"spec.template.labels",
+				),
+			),
+		},
+		"Should return error on spec/template/labels validation when contains 'serverless.kyma-project.io' label": {
+			givenFunc: Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: FunctionSpec{
+					Runtime: NodeJs18,
+					Source: Source{
+						Inline: &InlineSource{
+							Source: "test-source",
+						},
+					},
+					Template: &Template{
+						Labels: map[string]string{
+							"should-be-ok":                 "test",
+							FunctionGroup + "/abrakadabra": "test",
+						},
+					},
+				},
+			},
+			expectedError: gomega.HaveOccurred(),
+			specifiedExpectedError: gomega.And(
+				gomega.ContainSubstring(
+					"spec.template.labels",
+				),
+				gomega.ContainSubstring(
+					"label from domain serverless.kyma-project.io is not allowed"),
+			),
+		},
+		"Should return error on spec/labels validation": {
+			givenFunc: Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: FunctionSpec{
+					Runtime: NodeJs18,
+					Source: Source{
+						Inline: &InlineSource{
+							Source: "test-source",
+						},
+					},
+					Labels: map[string]string{
+						"should-be-ok":     "test",
+						"should BE not OK": "test",
 					},
 				},
 			},
@@ -300,11 +358,118 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 				),
 			),
 		},
+		"Should return error on spec/labels validation when contains 'serverless.kyma-project.io' label": {
+			givenFunc: Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: FunctionSpec{
+					Runtime: NodeJs18,
+					Source: Source{
+						Inline: &InlineSource{
+							Source: "test-source",
+						},
+					},
+					Labels: map[string]string{
+						"should-be-ok":                 "test",
+						FunctionGroup + "/abrakadabra": "test",
+					},
+				},
+			},
+			expectedError: gomega.HaveOccurred(),
+			specifiedExpectedError: gomega.And(
+				gomega.ContainSubstring(
+					"spec.labels",
+				),
+				gomega.ContainSubstring(
+					"label from domain serverless.kyma-project.io is not allowed"),
+			),
+		},
+		"Should return error on validation when conflict between spec/template/labels and spec/labels": {
+			givenFunc: Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: FunctionSpec{
+					Runtime: NodeJs18,
+					Source: Source{
+						Inline: &InlineSource{
+							Source: "test-source",
+						},
+					},
+					Template: &Template{
+						Labels: map[string]string{
+							"value-1":  "test",
+							"the-same": "test-1",
+						},
+					},
+					Labels: map[string]string{
+						"value-2":  "test",
+						"the-same": "test-2",
+					},
+				},
+			},
+			expectedError: gomega.HaveOccurred(),
+			specifiedExpectedError: gomega.And(
+				gomega.ContainSubstring(
+					"spec.template.labels",
+				),
+				gomega.ContainSubstring(
+					"spec.labels",
+				),
+				gomega.ContainSubstring(
+					"conflict between labels",
+				),
+			),
+		},
+		"Should validate identical labels from spec/template/labels and spec/labels without errors": {
+			givenFunc: Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: FunctionSpec{
+					Runtime: NodeJs18,
+					Source: Source{
+						Inline: &InlineSource{
+							Source: "test-source",
+						},
+					},
+					Template: &Template{
+						Labels: map[string]string{
+							"value-1":  "test",
+							"the-same": "the-same-value",
+						},
+					},
+					Labels: map[string]string{
+						"value-2":  "test",
+						"the-same": "the-same-value",
+					},
+				},
+			},
+			expectedError: gomega.BeNil(),
+		},
+		"Should return error on spec/annotations validation": {
+			givenFunc: Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: FunctionSpec{
+					Runtime: NodeJs18,
+					Source: Source{
+						Inline: &InlineSource{
+							Source: "test-source",
+						},
+					},
+					Annotations: map[string]string{
+						"should-be-ok":     "test",
+						"should BE not OK": "test",
+					},
+				},
+			},
+			expectedError: gomega.HaveOccurred(),
+			specifiedExpectedError: gomega.And(
+				gomega.ContainSubstring(
+					"spec.annotations",
+				),
+			),
+		},
 		"Should return error on replicas validation": {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
-					Runtime: NodeJs16,
+					Runtime: NodeJs18,
 					Source: Source{
 						Inline: &InlineSource{
 							Source: "test-source",
@@ -327,7 +492,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
-					Runtime: NodeJs16,
+					Runtime: NodeJs18,
 					Source: Source{
 						Inline: &InlineSource{
 							Source: "test-source",
@@ -350,7 +515,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
-					Runtime: NodeJs16,
+					Runtime: NodeJs18,
 					Source: Source{
 						Inline: &InlineSource{
 							Source: "test-source",
@@ -386,7 +551,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
-					Runtime: NodeJs16,
+					Runtime: NodeJs18,
 					Source: Source{
 						Inline: &InlineSource{
 							Source: "test-source",
@@ -436,7 +601,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 						MinReplicas: pointer.Int32(0),
 						MaxReplicas: pointer.Int32(0),
 					},
-					Runtime: NodeJs16,
+					Runtime: NodeJs18,
 					Source: Source{
 						Inline: &InlineSource{
 							Source: "test-source",
@@ -527,7 +692,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 						MinReplicas: pointer.Int32(1),
 						MaxReplicas: pointer.Int32(1),
 					},
-					Runtime: NodeJs16,
+					Runtime: NodeJs18,
 				},
 			},
 			expectedError: gomega.BeNil(),
@@ -571,7 +736,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 						MinReplicas: pointer.Int32(1),
 						MaxReplicas: pointer.Int32(1),
 					},
-					Runtime: NodeJs16,
+					Runtime: NodeJs18,
 				},
 			},
 			specifiedExpectedError: gomega.And(
@@ -634,7 +799,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							Dependencies: " { test }",
 						},
 					},
-					Runtime: NodeJs16,
+					Runtime: NodeJs18,
 					ResourceConfiguration: &ResourceConfiguration{
 						Function: &ResourceRequirements{
 							Profile: "function-profile",
@@ -671,7 +836,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
-					Runtime: NodeJs16,
+					Runtime: NodeJs18,
 					Source: Source{
 						Inline: &InlineSource{
 							Source: "test-source",
@@ -699,7 +864,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
-					Runtime: NodeJs16,
+					Runtime: NodeJs18,
 					Source: Source{
 						Inline: &InlineSource{
 							Source: "test-source",
@@ -731,7 +896,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
-					Runtime: NodeJs16,
+					Runtime: NodeJs18,
 					Source: Source{
 						Inline: &InlineSource{
 							Source: "test-source",
@@ -762,7 +927,6 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 
 			// when
 			errs := testData.givenFunc.Validate(config)
-			t.Logf("err: %s", errs)
 			// then
 			g.Expect(errs).To(testData.expectedError)
 			if testData.specifiedExpectedError != nil {

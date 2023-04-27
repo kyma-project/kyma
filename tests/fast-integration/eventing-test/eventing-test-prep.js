@@ -1,58 +1,65 @@
 const axios = require('axios');
 const https = require('https');
+const fs = require('fs');
+const path = require('path');
+const k8s = require('@kubernetes/client-node');
+
 const httpsAgent = new https.Agent({
   rejectUnauthorized: false, // curl -k
 });
 axios.defaults.httpsAgent = httpsAgent;
 const {
-  appName,
-  scenarioName,
   testNamespace,
-  mockNamespace,
   kymaVersion,
   isSKR,
-  testCompassFlow,
   skrInstanceId,
   backendK8sSecretName,
   backendK8sSecretNamespace,
   timeoutTime,
   slowTime,
-  gardener,
-  director,
   shootName,
   cleanupTestingResources,
+  eventingSinkName,
+  getClusterHost,
+  checkFunctionReachable,
+  deployEventingSinkFunction,
+  waitForEventingSinkFunction,
+  deployV1Alpha1Subscriptions,
+  deployV1Alpha2Subscriptions,
+  createK8sNamespace,
 } = require('./utils');
-const {eventMeshSecretFilePath} = require('./common/common');
 const {
-  ensureCommerceMockLocalTestFixture,
+  eventMeshSecretFilePath,
+} = require('./common/common');
+const {
   setEventMeshSourceNamespace,
-  ensureCommerceMockWithCompassTestFixture,
 } = require('../test/fixtures/commerce-mock');
 const {
   info,
-  error,
   debug,
   createEventingBackendK8sSecret,
+  deployJaeger,
 } = require('../utils');
-const {
-  addScenarioInCompass,
-  assignRuntimeToScenario,
-  scenarioExistsInCompass,
-  isRuntimeAssignedToScenario,
-} = require('../compass');
+const {expect} = require('chai');
+
+const jaegerYaml = fs.readFileSync(
+    path.join(__dirname, '../test/fixtures/jaeger/jaeger.yaml'),
+    {
+      encoding: 'utf8',
+    },
+);
+
 
 describe('Eventing tests preparation', function() {
   this.timeout(timeoutTime);
   this.slow(slowTime);
 
   it('Print test initial configs', async function() {
-    debug(`Mock namespace: ${mockNamespace}`);
     debug(`Test namespace: ${testNamespace}`);
     debug(`Kyma version: ${kymaVersion}`);
     debug(`Is SKR cluster: ${isSKR}`);
     debug(`SKR instance Id: ${skrInstanceId}`);
     debug(`SKR shoot name: ${shootName}`);
-    debug(`Test Compass flow enabled: ${testCompassFlow}`);
   });
 
   it('Prepare SKR Kubeconfig if needed', async function() {
@@ -93,24 +100,33 @@ describe('Eventing tests preparation', function() {
     setEventMeshSourceNamespace(eventMeshInfo['namespace']);
   });
 
-  it('Prepare assets without Compass flow', async function() {
-    // Skip this step if compass flow is enabled
-    if (testCompassFlow) {
-      this.skip();
-    }
-
-    // Deploy Commerce mock application, function and subscriptions for tests
-    await prepareAssetsWithoutCompassFlow();
+  it('Create test namespace', async function() {
+    await createK8sNamespace(testNamespace);
   });
 
-  it('Prepare assets with Compass flow', async function() {
-    // Skip this step if compass flow is disabled
-    if (!testCompassFlow) {
-      this.skip();
-    }
+  it('Prepare eventing-sink function', async function() {
+    debug('Preparing EventingSinkFunction');
+    await deployEventingSinkFunction(eventingSinkName);
+    await waitForEventingSinkFunction(eventingSinkName);
+  });
 
-    // Deploy Commerce mock application, function and subscriptions for tests (includes compass flow)
-    await prepareAssetsWithCompassFlow();
+  it('Eventing-sink function should be reachable through API Rule', async function() {
+    const host = await getClusterHost(eventingSinkName, testNamespace);
+    expect(host).to.not.empty;
+    debug('host fetched, now checking if eventing-sink function is reachable...');
+    await checkFunctionReachable(eventingSinkName, testNamespace, host);
+  });
+
+  it('Prepare v1alpha1 subscriptions', async function() {
+    await deployV1Alpha1Subscriptions();
+  });
+
+  it('Prepare v1alpha2 subscriptions', async function() {
+    await deployV1Alpha2Subscriptions();
+  });
+
+  it('Should deploy jaeger', async function() {
+    await deployJaeger(k8s.loadAllYaml(jaegerYaml));
   });
 
   afterEach(async function() {
@@ -119,55 +135,4 @@ describe('Eventing tests preparation', function() {
       await cleanupTestingResources();
     }
   });
-
-  // // **** Helper functions ****
-  // prepareAssetsWithoutCompassFlow - Sets up test assets without compass flow
-  async function prepareAssetsWithoutCompassFlow() {
-    debug('Preparing CommerceMock/In-cluster test fixtures on Kyma');
-    await ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace).catch((err) => {
-      error(err); // first error is logged
-      return ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace);
-    });
-  }
-
-  // prepareAssetsWithCompassFlow - Sets up test assets with compass flow
-  async function prepareAssetsWithCompassFlow() {
-    debug('Preparing CommerceMock/In-cluster test fixtures with compass flow on SKR');
-
-    const skrInfo = await gardener.getShoot(shootName);
-
-    debug(
-        `appName: ${appName},
-         scenarioName: ${scenarioName},
-         testNamespace: ${testNamespace},
-         compassID: ${skrInfo.compassID}`,
-    );
-
-    // check if compass scenario setup is needed
-    const compassScenarioAlreadyExist = await scenarioExistsInCompass(director, scenarioName);
-    if (compassScenarioAlreadyExist) {
-      debug(`Compass scenario with the name ${scenarioName} already exist, do not register it again`);
-    } else {
-      debug('Assigning SKR to scenario in Compass');
-      // Create a new scenario (systems/formations) in compass for this test
-      await addScenarioInCompass(director, scenarioName);
-    }
-
-    // check if assigning the runtime to the scenario is needed
-    const runtimeAssignedToScenario = await isRuntimeAssignedToScenario(director, skrInfo.compassID, scenarioName);
-    if (!runtimeAssignedToScenario) {
-      debug('Assigning Runtime to a compass scenario');
-      // map scenario to target SKR
-      await assignRuntimeToScenario(director, skrInfo.compassID, scenarioName);
-    }
-
-    await ensureCommerceMockWithCompassTestFixture(
-        director,
-        appName,
-        scenarioName,
-        mockNamespace,
-        testNamespace,
-        compassScenarioAlreadyExist,
-    );
-  }
 });

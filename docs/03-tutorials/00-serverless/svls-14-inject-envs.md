@@ -45,7 +45,7 @@ kubectl create secret generic  my-secret  --from-literal secret-env="I come from
     ```yaml
     name: my-function
     namespace: default
-    runtime: nodejs14
+    runtime: nodejs16
     source:
         sourceType: inline
     env:
@@ -103,46 +103,47 @@ kubectl create secret generic  my-secret  --from-literal secret-env="I come from
 
 3. Create a Function CR that specifies the Function's logic:
 
-    ```yaml
-    cat <<EOF | kubectl apply -f -
-    apiVersion: serverless.kyma-project.io/v1alpha1
-    kind: Function
-    metadata:
-        name: my-function
-    spec:
-        env:
-            - name: env1
-              value: I come from function definition
-            - name: env2
-              valueFrom:
-                configMapKeyRef:
-                    key: config-env
-                    name: my-config
-            - name: env3
-              valueFrom:
-                secretKeyRef:
-                    key: secret-env
-                    name: my-secret
-        runtime: nodejs14
-        source: |-
-            module.exports = {
-                main: function (event, context) {
-                    envs = ["env1", "env2", "env3"]
-                    envs.forEach(function(key){
-                        console.log(`${key}:${readEnv(key)}`)
-                    });
-                    return 'Hello Serverless'
-                }
-            }
-
-            readEnv=(envKey) => {
-                if(envKey){
-                    return process.env[envKey];
-                }
-                return
-            }
-    EOF
-    ```
+   ```yaml
+   cat <<EOF | kubectl apply -f -
+   apiVersion: serverless.kyma-project.io/v1alpha2
+   kind: Function
+   metadata:
+     name: my-function
+   spec:
+     env:
+       - name: env1
+         value: I come from function definition
+       - name: env2
+         valueFrom:
+           configMapKeyRef:
+             key: config-env
+             name: my-config
+       - name: env3
+         valueFrom:
+           secretKeyRef:
+             key: secret-env
+             name: my-secret
+     runtime: nodejs16
+     source:
+       inline:
+         source: |-
+           module.exports = {
+               main: function (event, context) {
+                   envs = ["env1", "env2", "env3"]
+                   envs.forEach(function(key){
+                       console.log(\`${key}:${readEnv(key)}\`)
+                   });
+                   return 'Hello Serverless'
+               }
+           }
+           readEnv=(envKey) => {
+               if(envKey){
+                   return process.env[envKey];
+               }
+               return
+           }
+   EOF
+   ```
 
 4. Verify whether your Function is running:
 

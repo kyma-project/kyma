@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"testing"
 
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	"go.uber.org/zap"
 
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	"github.com/stretchr/testify/require"
@@ -19,7 +19,6 @@ import (
 
 func TestValidatingWebHook_Handle(t *testing.T) {
 	type fields struct {
-		configV1Alpha1 *serverlessv1alpha1.ValidationConfig
 		configV1Alpha2 *serverlessv1alpha2.ValidationConfig
 		client         ctrlclient.Client
 		decoder        *admission.Decoder
@@ -120,27 +119,7 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 					AdmissionRequest: v1.AdmissionRequest{
 						Kind: metav1.GroupVersionKind{Kind: serverlessv1alpha2.FunctionKind, Version: serverlessv1alpha2.FunctionVersion},
 						Object: runtime.RawExtension{
-							Raw: []byte(ValidV1Alpha2Function(t)),
-						},
-					},
-				},
-			},
-			responseCode: http.StatusOK,
-		},
-		{
-			name: "Accept valid v1alpha1 function",
-			fields: fields{
-				configV1Alpha1: ReadValidationConfigV1Alpha1OrDie(),
-				client:         fake.NewClientBuilder().Build(),
-				decoder:        decoder,
-			},
-			args: args{
-				ctx: context.Background(),
-				req: admission.Request{
-					AdmissionRequest: v1.AdmissionRequest{
-						Kind: metav1.GroupVersionKind{Kind: "Function", Version: serverlessv1alpha1.FunctionVersion},
-						Object: runtime.RawExtension{
-							Raw: []byte(ValidV1Alpha1Function(t)),
+							Raw: []byte(Marshall(t, ValidV1Alpha2Function())),
 						},
 					},
 				},
@@ -231,9 +210,9 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			w := &ValidatingWebHook{
 				configv1alpha2: tt.fields.configV1Alpha2,
-				configv1alpha1: tt.fields.configV1Alpha1,
 				client:         tt.fields.client,
 				decoder:        tt.fields.decoder,
+				log:            zap.NewNop().Sugar(),
 			}
 			got := w.Handle(tt.args.ctx, tt.args.req)
 			require.Equal(t, tt.responseCode, got.Result.Code)

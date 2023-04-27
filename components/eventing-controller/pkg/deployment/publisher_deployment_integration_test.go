@@ -49,11 +49,11 @@ func TestNewDeployment(t *testing.T) {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			var deployment *appsv1.Deployment
-			var natsConfig env.NatsConfig
+			var natsConfig env.NATSConfig
 
 			switch tc.givenBackend {
 			case "NATS":
-				natsConfig = env.NatsConfig{
+				natsConfig = env.NATSConfig{
 					JSStreamName: "kyma",
 					URL:          natsURL,
 				}
@@ -81,11 +81,25 @@ func TestNewDeployment(t *testing.T) {
 	}
 }
 
+func TestNewDeploymentSecurityContext(t *testing.T) {
+	// given
+	config := env.GetBackendConfig()
+	deployment := NewDeployment(config.PublisherConfig, WithContainers(config.PublisherConfig))
+
+	// when
+	podSecurityContext := deployment.Spec.Template.Spec.SecurityContext
+	containerSecurityContext := deployment.Spec.Template.Spec.Containers[0].SecurityContext
+
+	// then
+	assert.Equal(t, getPodSecurityContext(), podSecurityContext)
+	assert.Equal(t, getContainerSecurityContext(), containerSecurityContext)
+}
+
 func Test_GetNATSEnvVars(t *testing.T) {
 	testCases := []struct {
 		name            string
 		givenEnvs       map[string]string
-		givenNatsConfig env.NatsConfig
+		givenNATSConfig env.NATSConfig
 		wantEnvs        map[string]string
 	}{
 		{
@@ -95,7 +109,7 @@ func Test_GetNATSEnvVars(t *testing.T) {
 				"PUBLISHER_REQUESTS_MEMORY": "128Mi",
 				"PUBLISHER_REQUEST_TIMEOUT": "10s",
 			},
-			givenNatsConfig: env.NatsConfig{},
+			givenNATSConfig: env.NATSConfig{},
 			wantEnvs: map[string]string{
 				"REQUEST_TIMEOUT": "10s",
 				"JS_STREAM_NAME":  "",
@@ -106,7 +120,7 @@ func Test_GetNATSEnvVars(t *testing.T) {
 			givenEnvs: map[string]string{
 				"PUBLISHER_REQUEST_TIMEOUT": "10s",
 			},
-			givenNatsConfig: env.NatsConfig{
+			givenNATSConfig: env.NATSConfig{
 				JSStreamName: "kyma",
 			},
 			wantEnvs: map[string]string{
@@ -121,7 +135,7 @@ func Test_GetNATSEnvVars(t *testing.T) {
 				t.Setenv(k, v)
 			}
 			backendConfig := env.GetBackendConfig()
-			envVars := getNATSEnvVars(tc.givenNatsConfig, backendConfig.PublisherConfig)
+			envVars := getNATSEnvVars(tc.givenNATSConfig, backendConfig.PublisherConfig)
 
 			// ensure the right envs were set
 			for index, val := range tc.wantEnvs {

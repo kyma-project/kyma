@@ -4,6 +4,9 @@ import (
 	"net/http"
 	"testing"
 
+	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
+	"github.com/stretchr/testify/require"
+
 	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -364,6 +367,7 @@ func TestEventingBackendStatusEqual(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
+		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			if IsBackendStatusEqual(tc.givenBackendStatus1, tc.givenBackendStatus2) != tc.wantResult {
@@ -376,21 +380,21 @@ func TestEventingBackendStatusEqual(t *testing.T) {
 func Test_isSubscriptionStatusEqual(t *testing.T) {
 	testCases := []struct {
 		name                string
-		subscriptionStatus1 eventingv1alpha1.SubscriptionStatus
-		subscriptionStatus2 eventingv1alpha1.SubscriptionStatus
+		subscriptionStatus1 eventingv1alpha2.SubscriptionStatus
+		subscriptionStatus2 eventingv1alpha2.SubscriptionStatus
 		wantEqualStatus     bool
 	}{
 		{
 			name: "should not be equal if the conditions are not equal",
-			subscriptionStatus1: eventingv1alpha1.SubscriptionStatus{
-				Conditions: []eventingv1alpha1.Condition{
-					{Type: eventingv1alpha1.ConditionSubscribed, Status: corev1.ConditionTrue},
+			subscriptionStatus1: eventingv1alpha2.SubscriptionStatus{
+				Conditions: []eventingv1alpha2.Condition{
+					{Type: eventingv1alpha2.ConditionSubscribed, Status: corev1.ConditionTrue},
 				},
 				Ready: true,
 			},
-			subscriptionStatus2: eventingv1alpha1.SubscriptionStatus{
-				Conditions: []eventingv1alpha1.Condition{
-					{Type: eventingv1alpha1.ConditionSubscribed, Status: corev1.ConditionFalse},
+			subscriptionStatus2: eventingv1alpha2.SubscriptionStatus{
+				Conditions: []eventingv1alpha2.Condition{
+					{Type: eventingv1alpha2.ConditionSubscribed, Status: corev1.ConditionFalse},
 				},
 				Ready: true,
 			},
@@ -398,15 +402,15 @@ func Test_isSubscriptionStatusEqual(t *testing.T) {
 		},
 		{
 			name: "should not be equal if the ready status is not equal",
-			subscriptionStatus1: eventingv1alpha1.SubscriptionStatus{
-				Conditions: []eventingv1alpha1.Condition{
-					{Type: eventingv1alpha1.ConditionSubscribed, Status: corev1.ConditionTrue},
+			subscriptionStatus1: eventingv1alpha2.SubscriptionStatus{
+				Conditions: []eventingv1alpha2.Condition{
+					{Type: eventingv1alpha2.ConditionSubscribed, Status: corev1.ConditionTrue},
 				},
 				Ready: true,
 			},
-			subscriptionStatus2: eventingv1alpha1.SubscriptionStatus{
-				Conditions: []eventingv1alpha1.Condition{
-					{Type: eventingv1alpha1.ConditionSubscribed, Status: corev1.ConditionTrue},
+			subscriptionStatus2: eventingv1alpha2.SubscriptionStatus{
+				Conditions: []eventingv1alpha2.Condition{
+					{Type: eventingv1alpha2.ConditionSubscribed, Status: corev1.ConditionTrue},
 				},
 				Ready: false,
 			},
@@ -414,29 +418,33 @@ func Test_isSubscriptionStatusEqual(t *testing.T) {
 		},
 		{
 			name: "should be equal if all the fields are equal",
-			subscriptionStatus1: eventingv1alpha1.SubscriptionStatus{
-				Conditions: []eventingv1alpha1.Condition{
-					{Type: eventingv1alpha1.ConditionSubscribed, Status: corev1.ConditionTrue},
+			subscriptionStatus1: eventingv1alpha2.SubscriptionStatus{
+				Conditions: []eventingv1alpha2.Condition{
+					{Type: eventingv1alpha2.ConditionSubscribed, Status: corev1.ConditionTrue},
 				},
-				Ready:       true,
-				APIRuleName: "APIRule",
+				Ready: true,
+				Backend: eventingv1alpha2.Backend{
+					APIRuleName: "APIRule",
+				},
 			},
-			subscriptionStatus2: eventingv1alpha1.SubscriptionStatus{
-				Conditions: []eventingv1alpha1.Condition{
-					{Type: eventingv1alpha1.ConditionSubscribed, Status: corev1.ConditionTrue},
+			subscriptionStatus2: eventingv1alpha2.SubscriptionStatus{
+				Conditions: []eventingv1alpha2.Condition{
+					{Type: eventingv1alpha2.ConditionSubscribed, Status: corev1.ConditionTrue},
 				},
-				Ready:       true,
-				APIRuleName: "APIRule",
+				Ready: true,
+				Backend: eventingv1alpha2.Backend{
+					APIRuleName: "APIRule",
+				},
 			},
 			wantEqualStatus: true,
 		},
 	}
 	for _, tc := range testCases {
+		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			if gotEqualStatus := IsSubscriptionStatusEqual(tc.subscriptionStatus1, tc.subscriptionStatus2); tc.wantEqualStatus != gotEqualStatus {
-				t.Errorf("The Subsciption Status are not equal, want: %v but got: %v", tc.wantEqualStatus, gotEqualStatus)
-			}
+			gotEqualStatus := IsSubscriptionStatusEqual(tc.subscriptionStatus1, tc.subscriptionStatus2)
+			require.Equal(t, tc.wantEqualStatus, gotEqualStatus)
 		})
 	}
 }
@@ -453,7 +461,7 @@ func TestPublisherProxyDeploymentEqual(t *testing.T) {
 		LimitsCPU:      "64m",
 		LimitsMemory:   "128Mi",
 	}
-	natsConfig := env.NatsConfig{
+	natsConfig := env.NATSConfig{
 		EventTypePrefix: "prefix",
 		JSStreamName:    "kyma",
 	}

@@ -94,6 +94,15 @@ class KEBClient {
     }
   }
 
+  async getCatalog() {
+    const endpoint = `catalog`;
+    try {
+      return await this.callKEB({}, endpoint, 'get');
+    } catch (err) {
+      throw new Error(`error while getting catalog: ${err.toString()}`);
+    }
+  }
+
   async provisionSKR(name, instanceID, platformCreds, btpOperatorCreds, customParams) {
     const payload = {
       service_id: KYMA_SERVICE_ID,

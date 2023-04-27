@@ -1,25 +1,23 @@
 global:
   containerRegistry:
-    path: eu.gcr.io/kyma-project
+    path: europe-docker.pkg.dev/kyma-project
   images:
     directory_size_exporter:
       name: "directory-size-exporter"
-      version: "v20221020-e314a071"
+      version: "v20230414-3a53c699"
+      directory: "prod"
     telemetry_operator:
-      name: "telemetry-operator"
-      version: "PR-16121"
-    telemetry_webhook_cert_init:
-      name: "webhook-cert-init"
-      version: "v20221122-200937b4"
+      name: "telemetry-manager"
+      version: "v20230426-ccd86c06"
+      directory: "prod"
+    telemetry_otel_collector:
+      name: "otel-collector"
+      version: "0.75.0-6ea7fe7a"
+      directory: "prod/tpi"
     fluent_bit:
       name: "fluent-bit"
-      version: "1.9.9-cf0a130c"
-      directory: "tpi"
-    busybox:
-      name: "busybox"
-      version: "1.34.1"
-      directory: "external"
+      version: "2.0.11-6ea7fe7a"
+      directory: "prod/tpi"
   highPriorityClassName: "kyma-system-priority"
   log:
-    format: "json"
     level: "info"

@@ -1,4 +1,4 @@
-z---
+---
 title: Function's specification
 ---
 
@@ -109,8 +109,9 @@ See the detailed descriptions of these fields:
 | **ce-id** | Unique identifier of the event |
 | **ce-time** | Time at which the event was sent |
 | **data** | Either JSON or a string, depending on the request type. Read more about [Buffer](https://nodejs.org/api/buffer.html) in Node.js and [bytes literals](https://docs.python.org/3/reference/lexical_analysis.html#string-and-bytes-literals) in Python. |
-| **tracer** | Fully configured OpenTelemetry [tracer](https://opentelemetry.io/docs/reference/specification/trace/api/#tracer) object that allows you to communicate with the Jaeger service to share tracing data. For more information on how to use the tracer object see [Use the OpenTelemetry standard](../03-tutorials/00-serverless/svls-12-use-opentelemetry-client.md) |
+| **tracer** | Fully configured OpenTelemetry [tracer](https://opentelemetry.io/docs/reference/specification/trace/api/#tracer) object that allows you to communicate with the user-defined Jaeger service to share tracing data. For more information on how to use the tracer object see [Use the OpenTelemetry standard](../03-tutorials/00-serverless/svls-12-use-opentelemetry-client.md) |
 | **extensions** | JSON object that can contain event payload, a Function's incoming request, or an outgoing response |
+
 
 ### Event object SDK
 
@@ -155,7 +156,7 @@ See sample context details:
 ...
 { "function-name": "main",
   "timeout": 180,
-  "runtime": "nodejs14",
+  "runtime": "nodejs16",
   "memory-limit": 200Mi }
 ```
 
@@ -165,14 +166,20 @@ See the detailed descriptions of these fields:
 |-------|-------------|
 | **function-name** | Name of the invoked Function |
 | **timeout** | Time, in seconds, after which the system cancels the request to invoke the Function |
-| **runtime** | Environment used to run the Function. You can use `nodejs14`, `nodejs16`, or `python39`. |
+| **runtime** | Environment used to run the Function. You can use `nodejs16`, `nodejs16`, or `python39`. |
 | **memory-limit** | Maximum amount of memory assigned to run a Function |
 
 ## HTTP requests
 
 You can use the **event.extensions.request** object to access properties and methods of a given request that vary depending on the runtime. For more information, read the API documentation for [Node.js Express](http://expressjs.com/en/api.html#req) and [Python](https://bottlepy.org/docs/dev/api.html#the-request-object).
 
-## Custom HTTP responses in Node.js
+## Custom HTTP responses
+
+<div tabs name="custom-http-response" group="function-specification">
+<details>
+<summary label="Node.js">
+Node.js
+</summary>
 
 By default, a failing Function simply throws an error to tell the Event Service to reinject the event at a later point. Such an HTTP-based Function returns the HTTP status code `500`. On the contrary, if you manage to invoke a Function successfully, the system returns the default HTTP status code `200`.
 
@@ -195,10 +202,52 @@ module.exports = {
 }
 ```
 
+</details>
+<details>
+<summary label="Python">
+Python
+</summary>
+
+By default, a failing Function simply throws an error to tell the Event Service to reinject the event at a later point. Such an HTTP-based Function returns the HTTP status code `500`. In case you manage to invoke a Function successfully, the system returns the default HTTP status code `200`.
+
+Apart from these two default codes, you can define custom responses in all Python runtimes using the **HTTPResponse** object available in Bottle.
+
+This object will need to be instantiated and can be customized. For more information, read [Bottle API documentation](https://bottlepy.org/docs/dev/api.html#the-response-object).
+
+The following example shows how to set such a custom response in Python for the HTTP status code `400`:
+
+```python
+from bottle import HTTPResponse
+
+SUPPORTED_CONTENT_TYPES = ['application/json']
+
+def main(event, context):
+    request = event['extensions']['request']
+
+    response_content_type = 'application/json'
+    headers = {
+        'Content-Type': response_content_type
+    }
+
+    status = 202
+    response_payload = {'success': 'Message accepted.'}
+
+    if request.headers.get('Content-Type') not in SUPPORTED_CONTENT_TYPES:
+        status = 400
+        response_payload = json.dumps({'error': 'Invalid Content-Type.'})
+
+    return HTTPResponse(body=response_payload, status=status, headers=headers)
+```
+
+</details>
+</div>
+
 ## /metrics endpoint  
 
 You can use the `/metrics` endpoint to return the Function metrics. All the information is gathered using Prometheus and can be displayed using the Grafana dashboard (see [Kyma observability](https://kyma-project.io/docs/kyma/latest/02-get-started/05-observability/) for more information on how to use Grafana dashboard in Kyma). As this endpoint is provided by Kubeless, it cannot be customized.  
 For more information, see [Kubeless monitoring](https://github.com/vmware-archive/kubeless/blob/master/docs/monitoring.md) and [Kubeless runtime variants](https://github.com/vmware-archive/kubeless/blob/master/docs/runtimes.md) pages.
+
+> **NOTE:** Prometheus and Grafana are [deprecated](https://kyma-project.io/blog/2022/12/9/monitoring-deprecation) and are planned to be removed. If you want to install a custom stack, take a look at [Install a custom kube-prometheus-stack in Kyma](https://github.com/kyma-project/examples/tree/main/prometheus).
 
 ## Override runtime image
 

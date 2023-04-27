@@ -9,9 +9,18 @@
 
 ## Overview
 
-**Kyma** `/kee-ma/` is a platform for extending applications with microservices and [serverless](https://kyma-project.io/docs/kyma/latest/01-overview/main-areas/serverless/) Functions. It provides CLI and UI through which you can connect your application to a Kubernetes cluster. You can also expose the application's API or events securely thanks to the built-in [Application Connector](https://kyma-project.io/docs/kyma/latest/01-overview/main-areas/application-connectivity/). You can then implement the business logic you require by creating microservices or serverless Functions. Trigger them to react to particular events or calls to your application's API.
+**Kyma** `/kee-ma/` is an application runtime that provides you a flexible and easy way to connect, extend, and customize your applications in the cloud-native world of Kubernetes. 
 
-To limit the time spent on coding, use the built-in cloud services from [Service Management](https://kyma-project.io/docs/kyma/latest/01-overview/main-areas/service-management/smgt-01-overview/) from such cloud providers as GCP, Azure, and AWS.
+Out of the box, Kyma offers various functionalities, such as:  
+
+- [Serverless](https://kyma-project.io/docs/kyma/latest/01-overview/main-areas/serverless/) development platform to run lightweight Functions in a cost-efficient and scalable way
+- [System connectivity](https://kyma-project.io/docs/kyma/latest/01-overview/main-areas/application-connectivity/) that provides endpoint to securely register Events and APIs of external applications
+- [Eventing](https://kyma-project.io/docs/kyma/latest/01-overview/main-areas/eventing/) that provides messaging channel to receive events, enrich them, and trigger business flows using Functions or services
+- [Service Mesh](https://kyma-project.io/docs/kyma/latest/01-overview/main-areas/service-mesh/) for service-to-service communication and proxying
+- [Service Management](https://kyma-project.io/docs/kyma/latest/01-overview/main-areas/service-management/smgt-01-overview/) to use the built-in cloud services from such cloud providers as GCP, Azure, and AWS
+- Secure API exposure
+- In-cluster observability
+- CLI supported by the intuitive UI through which you can connect your application to a Kubernetes cluster
 
 <p align="center">
 <a href="https://youtu.be/kP7mSELIxXw">
@@ -31,38 +40,13 @@ Install Kyma locally or on a cluster. See the [Installation guides](https://kyma
 
 Kyma comes with the ready-to-use code snippets that you can use to test the extensions and the core functionality. See the list of existing examples in the [`examples`](https://github.com/kyma-project/examples) repository.
 
-## Development
+## Contributing
 
-Develop on your remote repository forked from the original repository in Go.
-Read also the [`CONTRIBUTING.md`](CONTRIBUTING.md) document that includes the contributing rules specific for this repository.
-
-Follow these steps:
-
-> **NOTE:** The example assumes you have the `$GOPATH` already set.
-
-1. Fork the repository in GitHub.
-
-2. Clone the fork to your `$GOPATH` workspace. Use this command to create the folder structure and clone the repository under the correct location:
-
-    ```bash
-    git clone git@github.com:{GitHubUsername}/kyma.git $GOPATH/src/github.com/kyma-project/kyma
-    ```
-
-    Follow the steps described in the [`git-workflow.md`](https://kyma-project.io/community/contributing/03-git-workflow/) document to configure your fork.
-
-3. Build the project.
-
-    Every project runs differently. Follow instructions in the main `README.md` document of the given project to build it.
-
-4. Create a branch and start to develop.
-
-    Do not forget about creating unit and acceptance tests if needed. For the unit tests, follow the instructions specified in the main `README.md` document of the given project. For the details concerning the acceptance tests, go to the corresponding directory inside the `tests` directory.
-
-5. Test your changes.
+Read the [`CONTRIBUTING.md`](CONTRIBUTING.md) document that includes the contributing rules and development steps specific for this repository.
 
 ## Kyma users
 
-[Read](https://kyma-project.io/#used-by) how these companies use Kyma:
+The following companies use Kyma:
 
 <p align="center">
   <img src="https://github.com/kyma-project/website/blob/main/content/adopters/logos/sap.svg" alt="SAP" width="120" height="70" />
@@ -130,7 +114,7 @@ If you would like to join us and work together on the Kyma project, there are so
   - Pushing and managing images in your Docker Hub account
   - Executing `bash` commands inside containers
 
-> **TIP:** Complete the [Docker and Kubernetes fundamentals](https://github.tools.sap/kubernetes/docker-k8s-training) training to get the basic Docker and Kubernetes knowledge.
+> **TIP:** Complete the [Docker and Kubernetes fundamentals](https://github.com/K8sAcademy/Fundamentals-HandsOn) training to get the basic Docker and Kubernetes knowledge.
 
 - Cloud services skillset:
   - Logging in to Google Cloud Platform (GCP)

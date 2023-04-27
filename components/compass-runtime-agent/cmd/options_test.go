@@ -14,8 +14,8 @@ func TestParseNamespacedName(t *testing.T) {
 		name      string
 	}{
 		{
-			value:     "kyma-integration/ca-secret",
-			namespace: "kyma-integration",
+			value:     "kyma-system/ca-secret",
+			namespace: "kyma-system",
 			name:      "ca-secret",
 		},
 		{
@@ -35,6 +35,11 @@ func TestParseNamespacedName(t *testing.T) {
 		},
 		{
 			value:     "/",
+			namespace: defaultNamespace,
+			name:      "",
+		},
+		{
+			value:     "",
 			namespace: defaultNamespace,
 			name:      "",
 		},

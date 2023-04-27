@@ -4,22 +4,22 @@ import (
 	"context"
 	"log"
 
-	"github.com/go-logr/zapr"
-	"k8s.io/apimachinery/pkg/runtime"
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/healthz"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 
+	"github.com/go-logr/zapr"
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/backend"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/options"
 	backendmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager/beb"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager/jetstream"
+	"k8s.io/apimachinery/pkg/runtime"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/healthz"
 )
 
 func main() {
@@ -52,7 +52,8 @@ func main() {
 	metricsCollector.RegisterMetrics()
 
 	var natsSubMgr subscriptionmanager.Manager
-	natsConfig, err := env.GetNatsConfig(opts.MaxReconnects, opts.ReconnectWait)
+
+	natsConfig, err := env.GetNATSConfig(opts.MaxReconnects, opts.ReconnectWait)
 	if err != nil {
 		setupLogger.Fatalw("Failed to load configuration", "error", err)
 	}
@@ -60,20 +61,16 @@ func main() {
 	if err = jetstream.AddToScheme(scheme); err != nil {
 		setupLogger.Fatalw("Failed to start manager", "backend", v1alpha1.NatsBackendType, "error", err)
 	}
-	if opts.EnableNewCRDVersion {
-		if err = jetstream.AddV1Alpha2ToScheme(scheme); err != nil {
-			setupLogger.Fatalw("Failed to start manager", "backend", v1alpha1.NatsBackendType, "error", err)
-		}
+	if err = jetstream.AddV1Alpha2ToScheme(scheme); err != nil {
+		setupLogger.Fatalw("Failed to start manager", "backend", v1alpha1.NatsBackendType, "error", err)
 	}
 
 	bebSubMgr := beb.NewSubscriptionManager(restCfg, opts.MetricsAddr, opts.ReconcilePeriod, ctrLogger)
 	if err = beb.AddToScheme(scheme); err != nil {
 		setupLogger.Fatalw("Failed to start subscription manager", "backend", v1alpha1.BEBBackendType, "error", err)
 	}
-	if opts.EnableNewCRDVersion {
-		if err = beb.AddV1Alpha2ToScheme(scheme); err != nil {
-			setupLogger.Fatalw("Failed to start subscription manager", "backend", v1alpha1.BEBBackendType, "error", err)
-		}
+	if err = beb.AddV1Alpha2ToScheme(scheme); err != nil {
+		setupLogger.Fatalw("Failed to start subscription manager", "backend", v1alpha1.BEBBackendType, "error", err)
 	}
 
 	// Init the manager.
@@ -96,16 +93,14 @@ func main() {
 		setupLogger.Fatalw("Failed to initialize subscription manager", "backend", v1alpha1.BEBBackendType, "error", err)
 	}
 
-	if opts.EnableNewCRDVersion {
-		setupLogger.Infow("Starting the webhook server")
+	setupLogger.Infow("Starting the webhook server")
 
-		if err = (&v1alpha1.Subscription{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLogger.Fatalw("Failed to create webhook", "error", err)
-		}
+	if err = (&v1alpha1.Subscription{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLogger.Fatalw("Failed to create webhook", "error", err)
+	}
 
-		if err = (&v1alpha2.Subscription{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLogger.Fatalw("Failed to create webhook", "error", err)
-		}
+	if err = (&v1alpha2.Subscription{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLogger.Fatalw("Failed to create webhook", "error", err)
 	}
 
 	if err = mgr.AddHealthzCheck(opts.HealthEndpoint, healthz.Ping); err != nil {

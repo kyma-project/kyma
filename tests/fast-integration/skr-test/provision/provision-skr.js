@@ -38,6 +38,7 @@ async function getOrProvisionSKR(options, skipProvisioning, provisioningTimeout)
 
   console.log('Initiating K8s config...');
   await initK8sConfig(shoot);
+  console.log('Initialization of K8s finished...');
 
   return {
     options,
@@ -68,7 +69,8 @@ async function provisionSKRInstance(options, timeout) {
   } finally {
     debug('Fetching runtime status...');
     const runtimeStatus = await kcp.getRuntimeStatusOperations(options.instanceID);
-    console.log(`\nRuntime status after provisioning: ${runtimeStatus}`);
+    const events = await kcp.getRuntimeEvents(options.instanceID);
+    console.log(`\nRuntime status after provisioning: ${runtimeStatus}\nEvents:\n${events}`);
     await kcp.reconcileInformationLog(runtimeStatus);
   }
 }

@@ -36,7 +36,7 @@ func newTestGitFunction(namespace, name string, auth *serverlessv1alpha2.Reposit
 					Auth: auth,
 				},
 			},
-			Runtime: serverlessv1alpha2.NodeJs16,
+			Runtime: serverlessv1alpha2.NodeJs18,
 			Env: []corev1.EnvVar{
 				{
 					Name:  "TEST_1",
@@ -56,12 +56,13 @@ func newTestGitFunction(namespace, name string, auth *serverlessv1alpha2.Reposit
 				MinReplicas: &one,
 				MaxReplicas: &two,
 			},
-			Template: &serverlessv1alpha2.Template{
-				Labels: map[string]string{
-					testBindingLabel1: "foobar",
-					testBindingLabel2: testBindingLabelValue,
-					"foo":             "bar",
-				},
+			Labels: map[string]string{
+				testBindingLabel1: "foobar",
+				testBindingLabel2: testBindingLabelValue,
+				"foo":             "bar",
+			},
+			Annotations: map[string]string{
+				"foo": "bar",
 			},
 			SecretMounts: []serverlessv1alpha2.SecretMount{
 				{
@@ -101,7 +102,7 @@ func newFixFunction(namespace, name string, minReplicas, maxReplicas int) *serve
 					Dependencies: "   ",
 				},
 			},
-			Runtime: serverlessv1alpha2.NodeJs16,
+			Runtime: serverlessv1alpha2.NodeJs18,
 			Env: []corev1.EnvVar{
 				{
 					Name:  "TEST_1",
@@ -121,12 +122,13 @@ func newFixFunction(namespace, name string, minReplicas, maxReplicas int) *serve
 				MinReplicas: &one,
 				MaxReplicas: &two,
 			},
-			Template: &serverlessv1alpha2.Template{
-				Labels: map[string]string{
-					testBindingLabel1: "foobar",
-					testBindingLabel2: testBindingLabelValue,
-					"foo":             "bar",
-				},
+			Labels: map[string]string{
+				testBindingLabel1: "foobar",
+				testBindingLabel2: testBindingLabelValue,
+				"foo":             "bar",
+			},
+			Annotations: map[string]string{
+				"foo": "bar",
 			},
 			SecretMounts: []serverlessv1alpha2.SecretMount{
 				{

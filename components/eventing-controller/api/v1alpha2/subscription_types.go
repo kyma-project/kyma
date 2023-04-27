@@ -3,7 +3,6 @@ package v1alpha2
 import (
 	"encoding/json"
 	"strconv"
-	"strings"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 
@@ -19,43 +18,43 @@ type TypeMatching string
 
 var Finalizer = GroupVersion.Group
 
-// SubscriptionSpec defines the desired state of Subscription
+// SubscriptionSpec defines the desired state of Subscription.
 type SubscriptionSpec struct {
-	// ID is the unique identifier of Subscription, read-only
+	// ID is the unique identifier of Subscription, read-only.
 	// +optional
 	ID string `json:"id,omitempty"`
 
 	// Sink defines endpoint of the subscriber
 	Sink string `json:"sink"`
 
-	// TypeMatching defines the type of matching to be done for the event types
+	// TypeMatching defines the type of matching to be done for the event types.
 	TypeMatching TypeMatching `json:"typeMatching,omitempty"`
 
-	// Source Defines the source of the event originated from
+	// Source Defines the source of the event originated from.
 	Source string `json:"source"`
 
-	// Types defines the list of event names for the topics we need to subscribe for messages
+	// Types defines the list of event names for the topics we need to subscribe for messages.
 	Types []string `json:"types"`
 
-	// Config defines the configurations that can be applied to the eventing backend
+	// Config defines the configurations that can be applied to the eventing backend.
 	// +optional
 	Config map[string]string `json:"config,omitempty"`
 }
 
-// SubscriptionStatus defines the observed state of Subscription
+// SubscriptionStatus defines the observed state of Subscription.
 // +kubebuilder:subresource:status
 type SubscriptionStatus struct {
-	// Conditions defines the status conditions
+	// Conditions defines the status conditions.
 	// +optional
 	Conditions []Condition `json:"conditions,omitempty"`
 
-	// Ready defines the overall readiness status of a subscription
+	// Ready defines the overall readiness status of a Subscription.
 	Ready bool `json:"ready"`
 
-	// Types defines the filter's event types after cleanup for use with the configured backend
+	// Types defines the filter's event types after cleanup for use with the configured backend.
 	Types []EventType `json:"types"`
 
-	// Backend contains backend specific status which are only applicable to the active backend
+	// Backend contains backend specific status which are only applicable to the active backend.
 	Backend Backend `json:"backend,omitempty"`
 }
 
@@ -87,7 +86,7 @@ func (s Subscription) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-// GetMaxInFlightMessages tries to convert the string-type maxInFlight to the integer
+// GetMaxInFlightMessages tries to convert the string-type maxInFlight to the integer.
 func (s *Subscription) GetMaxInFlightMessages(defaults *env.DefaultSubscriptionConfig) int {
 	val, err := strconv.Atoi(s.Spec.Config[MaxInFlightMessages])
 	if err != nil {
@@ -119,52 +118,6 @@ func (s *Subscription) DuplicateWithStatusDefaults() *Subscription {
 	return desiredSub
 }
 
-func (s *Subscription) GetEventMeshProtocol() string {
-	if protocol, ok := s.Spec.Config[Protocol]; ok {
-		return protocol
-	}
-	return ""
-}
-
-func (s *Subscription) GetEventMeshProtocolSettings() *ProtocolSettings {
-	protocolSettings := &ProtocolSettings{}
-
-	if currentMode, ok := s.Spec.Config[ProtocolSettingsContentMode]; ok {
-		protocolSettings.ContentMode = &currentMode
-	}
-	if qos, ok := s.Spec.Config[ProtocolSettingsQos]; ok {
-		protocolSettings.Qos = &qos
-	}
-	if exemptHandshake, ok := s.Spec.Config[ProtocolSettingsExemptHandshake]; ok {
-		handshake, err := strconv.ParseBool(exemptHandshake)
-		if err != nil {
-			handshake = true
-		}
-		protocolSettings.ExemptHandshake = &handshake
-	}
-	if authType, ok := s.Spec.Config[WebhookAuthType]; ok {
-		protocolSettings.WebhookAuth = &WebhookAuth{}
-		protocolSettings.WebhookAuth.Type = authType
-	}
-	if grantType, ok := s.Spec.Config[WebhookAuthGrantType]; ok {
-		protocolSettings.WebhookAuth.GrantType = grantType
-	}
-	if clientID, ok := s.Spec.Config[WebhookAuthClientID]; ok {
-		protocolSettings.WebhookAuth.ClientID = clientID
-	}
-	if secret, ok := s.Spec.Config[WebhookAuthClientSecret]; ok {
-		protocolSettings.WebhookAuth.ClientSecret = secret
-	}
-	if token, ok := s.Spec.Config[WebhookAuthTokenURL]; ok {
-		protocolSettings.WebhookAuth.TokenURL = token
-	}
-	if scope, ok := s.Spec.Config[WebhookAuthScope]; ok {
-		protocolSettings.WebhookAuth.Scope = strings.Split(scope, ",")
-	}
-
-	return protocolSettings
-}
-
 func (s *Subscription) ToUnstructuredSub() (*unstructured.Unstructured, error) {
 	object, err := k8sruntime.DefaultUnstructuredConverter.ToUnstructured(&s)
 	if err != nil {
@@ -175,7 +128,7 @@ func (s *Subscription) ToUnstructuredSub() (*unstructured.Unstructured, error) {
 
 //+kubebuilder:object:root=true
 
-// SubscriptionList contains a list of Subscription
+// SubscriptionList contains a list of Subscription.
 type SubscriptionList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`

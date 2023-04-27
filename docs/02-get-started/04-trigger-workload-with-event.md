@@ -17,8 +17,9 @@ First, create a sample Function that prints out the received event to console:
 
 1. Go to **Namespaces** and select the default Namespace.
 2. Go to **Workloads** > **Functions** and click **Create Function +**.
-3. Name the Function `lastorder` and click **Create**.
-4. In the inline editor for the Function, replace its source with the following code:
+3. Name the Function `lastorder`.
+4. From the **Language** dropdown, choose `nodejs`.
+5. In the **Source** section, replace its source with the following code:
     ```js
     module.exports = {
       main: async function (event, context) {
@@ -27,8 +28,8 @@ First, create a sample Function that prints out the received event to console:
       } 
     }
     ```
-5. Save your changes.
-6. Wait a few seconds for the Function to have status `RUNNING`.
+6. Click **Create**.
+7. Wait a few seconds for the Function to have status `RUNNING`.
 
   </details>
   <details>
@@ -40,26 +41,28 @@ Run:
 
 ```bash
 cat <<EOF | kubectl apply -f -
-  apiVersion: serverless.kyma-project.io/v1alpha1
-  kind: Function
-  metadata:
-    labels:
-      serverless.kyma-project.io/build-resources-preset: local-dev
-      serverless.kyma-project.io/function-resources-preset: S
-      serverless.kyma-project.io/replicas-preset: S
-    name: lastorder
-    namespace: default
-  spec:
-    deps: '{ "dependencies": {}}'
-    maxReplicas: 1
-    minReplicas: 1
-    source: |
-      module.exports = {
-        main: async function (event, context) {
-          console.log("Received event:", event.data);
-          return; 
-        } 
-      }
+apiVersion: serverless.kyma-project.io/v1alpha2
+kind: Function
+metadata:
+  name: lastorder
+  namespace: default
+spec:
+  replicas: 1
+  resourceConfiguration:
+    function:
+      profile: S
+    build:
+        profile: local-dev
+  runtime: nodejs16
+  source:
+    inline:
+      source: |-
+        module.exports = {
+          main: async function (event, context) {
+            console.log("Received event:", event.data);
+            return;
+          } 
+        }
 EOF
 ```
 
@@ -91,17 +94,17 @@ All the published events of this type are then forwarded to an HTTP endpoint cal
   Kyma Dashboard
   </summary>
 
-1. In your Function's view, go to **Configuration** and click **Create Subscription+**.
-2. Provide the following parameters:
+1. Go to **Namespaces** and select the default Namespace.
+2. Go to **Configuration** > **Subscriptions** and click **Create Subscription+**.
+3. Provide the following parameters:
    - **Subscription name**: `lastorder-sub`
-   - **Application name**: `myapp`
-   - **Event name**: `order.received`
-   - **Event version**: `v1`
+   - **Types**: `order.received.v1`
+   - **Service**: `lastorder` (The sink field will be populated automatically.)
+   - **Type matching:**: `standard`
+   - **Source**: `myapp`
 
-   - **Event type** is generated automatically. For this example, it's `sap.kyma.custom.myapp.order.received.v1`.
-
-3. Click **Create**.
-4. Wait a few seconds for the Subscription to have status `READY`.
+4. Click **Create**.
+5. Wait a few seconds for the Subscription to have status `READY`.
 
   </details>
   <details>
@@ -112,22 +115,15 @@ All the published events of this type are then forwarded to an HTTP endpoint cal
 Run:
 ```bash
 cat <<EOF | kubectl apply -f -
-   apiVersion: eventing.kyma-project.io/v1alpha1
+   apiVersion: eventing.kyma-project.io/v1alpha2
    kind: Subscription
    metadata:
      name: lastorder-sub
      namespace: default
    spec:
-     filter:
-       filters:
-       - eventSource:
-           property: source
-           type: exact
-           value: ""
-         eventType:
-           property: type
-           type: exact
-           value: sap.kyma.custom.myapp.order.received.v1
+     source: myapp
+     types:
+       - order.received.v1
      sink: http://lastorder.default.svc.cluster.local
 EOF
 ```
@@ -161,8 +157,8 @@ We created the `lastorder` Function and subscribed to the `order.received.v1` ev
    ```bash
    curl -v -X POST \
         -H "ce-specversion: 1.0" \
-        -H "ce-type: sap.kyma.custom.myapp.order.received.v1" \
-        -H "ce-source: /default/io.kyma-project/custom" \
+        -H "ce-type: order.received.v1" \
+        -H "ce-source: myapp" \
         -H "ce-eventtypeversion: v1" \
         -H "ce-id: 759815c3-b142-48f2-bf18-c6502dc0998f" \
         -H "content-type: application/json" \
@@ -177,7 +173,7 @@ We created the `lastorder` Function and subscribed to the `order.received.v1` ev
 
    ```bash
    cloudevents send http://localhost:3000/publish \
-      --type sap.kyma.custom.myapp.order.received.v1 \
+      --type order.received.v1 \
       --id 759815c3-b142-48f2-bf18-c6502dc0998f \
       --source myapp \
       --datacontenttype application/json \
@@ -199,9 +195,10 @@ To verify that the event was properly delivered, check the logs of the Function:
   </summary>
 
 1. In Kyma Dashboard, return to the view of your `lastorder` Function.
-2. Go to **Code** and find the **Replicas of the Function** section.
-3. Click on **View Logs**.
-4. You see the received event in the logs:
+2. In the **Code** view, find the **Replicas of the Function** section.
+3. Click the name of your replica.
+4. Locate the **Containers** section and click on **View Logs**.
+5. You see the received event in the logs:
    ```
    Received event: { orderCode: '3211213' }
    ```

@@ -6,12 +6,8 @@ import (
 	"github.com/kelseyhightower/envconfig"
 )
 
-const (
-	JetStreamSubjectPrefix = "kyma"
-)
-
-// NatsConfig represents the environment config for the Eventing Controller with Nats.
-type NatsConfig struct {
+// NATSConfig represents the environment config for the Eventing Controller with Nats.
+type NATSConfig struct {
 	// Following details are for eventing-controller to communicate to Nats
 	URL           string `envconfig:"NATS_URL" required:"true"`
 	MaxReconnects int
@@ -30,6 +26,8 @@ type NatsConfig struct {
 	// JetStream-specific configs
 	// Name of the JetStream stream where all events are stored.
 	JSStreamName string `envconfig:"JS_STREAM_NAME" required:"true"`
+	// Prefix for the subjects in the stream.
+	JSSubjectPrefix string `envconfig:"JS_STREAM_SUBJECT_PREFIX" required:"true"`
 	// Storage type of the stream, memory or file.
 	JSStreamStorageType string `envconfig:"JS_STREAM_STORAGE_TYPE" default:"memory"`
 	// Number of replicas for the JetStream stream
@@ -41,7 +39,7 @@ type NatsConfig struct {
 	JSStreamRetentionPolicy string `envconfig:"JS_STREAM_RETENTION_POLICY" default:"interest"`
 	JSStreamMaxMessages     int64  `envconfig:"JS_STREAM_MAX_MSGS" default:"-1"`
 	JSStreamMaxBytes        string `envconfig:"JS_STREAM_MAX_BYTES" default:"-1"`
-	// JSStreamDiscardPolicy specifies wich events to discard from the stream in case limits are reached
+	// JSStreamDiscardPolicy specifies which events to discard from the stream in case limits are reached
 	//  new: reject new messages for the stream
 	//  old: discard old messages from the stream to make room for new messages
 	JSStreamDiscardPolicy string `envconfig:"JS_STREAM_DISCARD_POLICY" default:"new"`
@@ -54,20 +52,15 @@ type NatsConfig struct {
 	// - new: When first consuming messages, the consumer starts receiving messages that were created
 	//   after the consumer was created.
 	JSConsumerDeliverPolicy string `envconfig:"JS_CONSUMER_DELIVER_POLICY" default:"new"`
-
-	// EnableNewCRDVersion changes the Subscription CRD to v1alpha2
-	// Redefining the flag to re-use ENV:ENABLE_NEW_CRD_VERSION instead of updated interfaces to pass the
-	// flag from config.go to NATS instance.
-	EnableNewCRDVersion bool `envconfig:"ENABLE_NEW_CRD_VERSION" default:"false"`
 }
 
-func GetNatsConfig(maxReconnects int, reconnectWait time.Duration) (NatsConfig, error) {
-	cfg := NatsConfig{
+func GetNATSConfig(maxReconnects int, reconnectWait time.Duration) (NATSConfig, error) {
+	cfg := NATSConfig{
 		MaxReconnects: maxReconnects,
 		ReconnectWait: reconnectWait,
 	}
 	if err := envconfig.Process("", &cfg); err != nil {
-		return NatsConfig{}, err
+		return NATSConfig{}, err
 	}
 	return cfg, nil
 }

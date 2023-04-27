@@ -17,7 +17,7 @@ Every runtime provides its own unique environment configuration which can be rea
 | **FUNC_PORT** | `8080` | The right port, a server listens to. |
 | **SERVICE_NAMESPACE** | | The Namespace where the right Function exists on a cluster. |
 | **KUBELESS_INSTALL_VOLUME** | `/kubeless` | Full path to volume mount with users source code. |
-| **FUNC_RUNTIME** | | The name of the actual runtime. Possible values: `python39`, `nodejs14`, `nodejs16`. |
+| **FUNC_RUNTIME** | | The name of the actual runtime. Possible values: `python39`, `nodejs16`, `nodejs16`. |
 | **TRACE_COLLECTOR_ENDPOINT** | `http://tracing-jaeger-collector.kyma-system.svc.cluster.local:4318/v1/traces` | Full address of the Open-Telemetry Trace Collector. |
 | **JAEGER_SERVICE_ENDPOINT** | `http://tracing-jaeger-collector.kyma-system.svc.cluster.local:14268/api/traces` | **Deprecated in 2.8** Full address of the Jaeger service. |
 | **PUBLISHER_PROXY_ADDRESS** | `http://eventing-publisher-proxy.kyma-system.svc.cluster.local/publish` | Full address of the Publisher Proxy service. |
@@ -51,7 +51,7 @@ You can configure environment variables either separately for a given runtime or
 ConfigMaps allow you to define Function's environment variables for any runtime through key-value pairs. After you define the values in a ConfigMap, simply reference it in the Function custom resource (CR) through the **valueFrom** parameter. See an example of such a Function CR that specifies the `my-var` value as a reference to the key stored in the `my-vars-cm` ConfigMap as the `MY_VAR` environment variable.
 
 ```yaml
-apiVersion: serverless.kyma-project.io/v1alpha1
+apiVersion: serverless.kyma-project.io/v1alpha2
 kind: Function
 metadata:
   name: sample-cm-env-values
@@ -61,14 +61,17 @@ spec:
     - name: MY_VAR
       valueFrom:
         configMapKeyRef:
-          name: my-vars-cm
           key: my-var
-  source: |
-    module.exports = {
-      main: function (event, context) {
-        return process.env["MY_VAR"];
-      }
-    }
+          name: my-vars-cm
+  runtime: nodejs16
+  source:
+    inline:
+      source: |
+        module.exports = {
+          main: function (event, context) {
+            return process.env["MY_VAR"];
+          }
+        }
 ```
 
 ### Node.js runtime-specific environment variables
@@ -86,7 +89,7 @@ See [`kubeless.js`](https://github.com/kubeless/runtimes/blob/master/stable/node
 See the example of a Function with these environment variables set:
 
 ```yaml
-apiVersion: serverless.kyma-project.io/v1alpha1
+apiVersion: serverless.kyma-project.io/v1alpha2
 kind: Function
 metadata:
   name: sample-fn-with-envs
@@ -94,15 +97,18 @@ metadata:
 spec:
   env:
     - name: FUNC_TIMEOUT
-      value: "2"
+      value: '2'
     - name: REQ_MB_LIMIT
-      value: "10"
-  source: |
-    module.exports = {
-      main: function (event, context) {
-        return "Hello World!";
-      }
-    }
+      value: '10'
+  runtime: nodejs16
+  source:
+    inline:
+      source: |
+        module.exports = {
+          main: function (event, context) {
+            return "Hello World!";
+          }
+        }
 ```
 
 ### Python runtime-specific environment variables
@@ -118,7 +124,7 @@ To configure a Function with the Python runtime, override the default values of 
 See [`kubeless.py`](https://github.com/kubeless/runtimes/blob/master/stable/python/_kubeless.py) to get a deeper understanding of how the Bottle server, that acts as a runtime, uses these values internally to run Python Functions.
 
 ```yaml
-apiVersion: serverless.kyma-project.io/v1alpha1
+apiVersion: serverless.kyma-project.io/v1alpha2
 kind: Function
 metadata:
   name: sample-fn-with-envs
@@ -126,8 +132,12 @@ metadata:
 spec:
   env:
     - name: FUNC_MEMFILE_MAX
-      value: "1048576" # 1MiB
-  source: |
-    def main(event. context):
-      return "Hello World!"
+      value: '1048576' #1MiB
+  runtime: nodejs16
+  source:
+    inline:
+      source: |
+        def main(event. context):
+          return "Hello World!"
+
 ```

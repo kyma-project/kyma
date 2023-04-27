@@ -15,9 +15,9 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
-type customDomainScenario struct {
+type CustomDomainScenario struct {
 	domain         string
-	loadBalancerIP string
+	loadBalancerIP net.IP
 	testID         string
 	namespace      string
 	url            string
@@ -44,7 +44,7 @@ func InitializeScenarioCustomDomain(ctx *godog.ScenarioContext) {
 	ctx.Step(`^calling the endpoint without a token should result in status beetween (\d+) and (\d+)$`, scenario.callingTheEndpointWithoutATokenShouldResultInStatusBeetween)
 }
 
-func CreateCustomDomainScenario(templateFileNameOne string, templateFileNameTwo string, namePrefix string, deploymentFile ...string) (*customDomainScenario, error) {
+func CreateCustomDomainScenario(templateFileNameOne string, templateFileNameTwo string, namePrefix string, deploymentFile ...string) (*CustomDomainScenario, error) {
 	testID := generateRandomString(testIDLength)
 	deploymentFileName := testingAppFile
 	if len(deploymentFile) > 0 {
@@ -94,10 +94,10 @@ func CreateCustomDomainScenario(templateFileNameOne string, templateFileNameTwo 
 		return nil, fmt.Errorf("failed to process resource manifest files, details %s", err.Error())
 	}
 
-	return &customDomainScenario{domain: conf.CustomDomain, testID: testID, namespace: namespace, url: fmt.Sprintf("https://httpbin-%s.%s.%s", testID, testID, conf.CustomDomain), apiResourceOne: accessRuleOne, apiResourceTwo: accessRuleTwo}, nil
+	return &CustomDomainScenario{domain: conf.CustomDomain, testID: testID, namespace: namespace, url: fmt.Sprintf("https://httpbin-%s.%s.%s", testID, testID, conf.CustomDomain), apiResourceOne: accessRuleOne, apiResourceTwo: accessRuleTwo}, nil
 }
 
-func (c *customDomainScenario) createResources() error {
+func (c *CustomDomainScenario) createResources() error {
 	customDomainResources, err := manifestprocessor.ParseFromFileWithTemplate("resources.yaml", "manifests/custom-domain", resourceSeparator, struct {
 		Namespace      string
 		NamePrefix     string
@@ -105,7 +105,7 @@ func (c *customDomainScenario) createResources() error {
 		Domain         string
 		Subdomain      string
 		LoadBalancerIP string
-	}{Namespace: namespace, NamePrefix: "custom-domain", TestID: c.testID, Domain: c.domain, Subdomain: fmt.Sprintf("%s.%s", c.testID, c.domain), LoadBalancerIP: c.loadBalancerIP})
+	}{Namespace: namespace, NamePrefix: "custom-domain", TestID: c.testID, Domain: c.domain, Subdomain: fmt.Sprintf("%s.%s", c.testID, c.domain), LoadBalancerIP: c.loadBalancerIP.String()})
 	if err != nil {
 		return fmt.Errorf("failed to process common manifest files, details %s", err.Error())
 	}
@@ -118,7 +118,7 @@ func (c *customDomainScenario) createResources() error {
 	return nil
 }
 
-func (c *customDomainScenario) thereIsAnCloudCredentialsSecret(secretName string, secretNamespace string) error {
+func (c *CustomDomainScenario) thereIsAnCloudCredentialsSecret(secretName string, secretNamespace string) error {
 	res := schema.GroupVersionResource{Group: "", Version: "v1", Resource: "secrets"}
 	_, err := k8sClient.Resource(res).Namespace(secretNamespace).Get(context.Background(), secretName, v1.GetOptions{})
 
@@ -129,7 +129,7 @@ func (c *customDomainScenario) thereIsAnCloudCredentialsSecret(secretName string
 	return nil
 }
 
-func (c *customDomainScenario) isDNSReady() error {
+func (c *CustomDomainScenario) isDNSReady() error {
 	err := wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
 		testName := generateRandomString(3)
 		ips, err := net.LookupIP(fmt.Sprintf("%s.%s.%s", testName, c.testID, c.domain))
@@ -138,7 +138,8 @@ func (c *customDomainScenario) isDNSReady() error {
 		}
 		if len(ips) != 0 {
 			for _, ip := range ips {
-				if ip.String() == c.loadBalancerIP {
+
+				if ip.Equal(c.loadBalancerIP) {
 					fmt.Printf("Found %s.%s.%s. IN A %s\n", testName, c.testID, c.domain, ip.String())
 					return true, nil
 				}
@@ -152,7 +153,7 @@ func (c *customDomainScenario) isDNSReady() error {
 	return nil
 }
 
-func (c *customDomainScenario) thereIsAnExposedService(svcName string, svcNamespace string) error {
+func (c *CustomDomainScenario) thereIsAnExposedService(svcName string, svcNamespace string) error {
 	res := schema.GroupVersionResource{Group: "", Version: "v1", Resource: "services"}
 	svc, err := k8sClient.Resource(res).Namespace(svcNamespace).Get(context.Background(), svcName, v1.GetOptions{})
 	if err != nil {
@@ -163,10 +164,10 @@ func (c *customDomainScenario) thereIsAnExposedService(svcName string, svcNamesp
 	if err != nil || found != true {
 		return fmt.Errorf("could not get load balancer status from the service: %s", err)
 	}
-	ingressIp, _ := ingress[0].(map[string]interface{})
+	loadBalancerIngress, _ := ingress[0].(map[string]interface{})
 
-	loadBalancerIP, found, err := unstructured.NestedString(ingressIp, "ip")
-	if err != nil || found != true {
+	loadBalancerIP, err := helpers.GetLoadBalancerIp(loadBalancerIngress)
+	if err != nil {
 		return fmt.Errorf("could not extract load balancer IP from istio service: %s", err)
 	}
 	c.loadBalancerIP = loadBalancerIP
@@ -174,27 +175,27 @@ func (c *customDomainScenario) thereIsAnExposedService(svcName string, svcNamesp
 	return nil
 }
 
-func (c *customDomainScenario) thereIsAnUnsecuredEndpoint() error {
+func (c *CustomDomainScenario) thereIsAnUnsecuredEndpoint() error {
 	return helper.APIRuleWithRetries(batch.CreateResources, batch.UpdateResources, k8sClient, c.apiResourceOne)
 }
 
-func (c *customDomainScenario) callingTheEndpointWithAnyTokenShouldResultInStatusbetween(arg1, arg2 int) error {
+func (c *CustomDomainScenario) callingTheEndpointWithAnyTokenShouldResultInStatusbetween(arg1, arg2 int) error {
 	return helper.CallEndpointWithHeadersWithRetries(anyToken, authorizationHeaderName, c.url, &helpers.StatusPredicate{LowerStatusBound: arg1, UpperStatusBound: arg2})
 }
 
-func (c *customDomainScenario) callingTheEndpointWithoutTokenShouldResultInStatusbetween(arg1, arg2 int) error {
+func (c *CustomDomainScenario) callingTheEndpointWithoutTokenShouldResultInStatusbetween(arg1, arg2 int) error {
 	return helper.CallEndpointWithRetries(c.url, &helpers.StatusPredicate{LowerStatusBound: arg1, UpperStatusBound: arg2})
 }
 
-func (c *customDomainScenario) secureWithOAuth2() error {
+func (c *CustomDomainScenario) secureWithOAuth2() error {
 	return helper.APIRuleWithRetries(batch.UpdateResources, batch.UpdateResources, k8sClient, c.apiResourceTwo)
 }
 
-func (c *customDomainScenario) callingTheEndpointWithAInvalidTokenShouldResultInStatusBeetween(lower int, higher int) error {
+func (c *CustomDomainScenario) callingTheEndpointWithAInvalidTokenShouldResultInStatusBeetween(lower int, higher int) error {
 	return helper.CallEndpointWithHeadersWithRetries(anyToken, authorizationHeaderName, c.url, &helpers.StatusPredicate{LowerStatusBound: lower, UpperStatusBound: higher})
 }
 
-func (c *customDomainScenario) callingTheEndpointWithAValidTokenShouldResultInStatusBeetween(lower int, higher int) error {
+func (c *CustomDomainScenario) callingTheEndpointWithAValidTokenShouldResultInStatusBeetween(lower int, higher int) error {
 	token, err := getOAUTHToken(*oauth2Cfg)
 	if err != nil {
 		return err
@@ -205,6 +206,6 @@ func (c *customDomainScenario) callingTheEndpointWithAValidTokenShouldResultInSt
 	return helper.CallEndpointWithHeadersWithRetries(headerVal, authorizationHeaderName, c.url, &helpers.StatusPredicate{LowerStatusBound: lower, UpperStatusBound: higher})
 }
 
-func (c *customDomainScenario) callingTheEndpointWithoutATokenShouldResultInStatusBeetween(lower int, higher int) error {
+func (c *CustomDomainScenario) callingTheEndpointWithoutATokenShouldResultInStatusBeetween(lower int, higher int) error {
 	return helper.CallEndpointWithRetries(c.url, &helpers.StatusPredicate{LowerStatusBound: lower, UpperStatusBound: higher})
 }

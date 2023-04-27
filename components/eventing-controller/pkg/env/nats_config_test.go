@@ -1,3 +1,5 @@
+//go:build unit
+
 package env
 
 import (
@@ -8,7 +10,7 @@ import (
 	"time"
 )
 
-func TestGetNatsConfig(t *testing.T) {
+func Test_GetNATSConfig(t *testing.T) {
 	type args struct {
 		maxReconnects int
 		reconnectWait time.Duration
@@ -17,7 +19,7 @@ func TestGetNatsConfig(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		want    NatsConfig
+		want    NATSConfig
 		wantErr bool
 	}{
 		{name: "Empty env triggers error",
@@ -26,14 +28,15 @@ func TestGetNatsConfig(t *testing.T) {
 		{name: "Required values only gives valid config",
 			args: args{
 				envs: map[string]string{
-					"NATS_URL":          "natsurl",
-					"EVENT_TYPE_PREFIX": "etp",
-					"JS_STREAM_NAME":    "jsn",
+					"NATS_URL":                 "natsurl",
+					"EVENT_TYPE_PREFIX":        "etp",
+					"JS_STREAM_NAME":           "jsn",
+					"JS_STREAM_SUBJECT_PREFIX": "kma",
 				},
 				maxReconnects: 1,
 				reconnectWait: 1 * time.Second,
 			},
-			want: NatsConfig{
+			want: NATSConfig{
 				URL:                     "natsurl",
 				MaxReconnects:           1,
 				ReconnectWait:           1 * time.Second,
@@ -43,6 +46,7 @@ func TestGetNatsConfig(t *testing.T) {
 				MaxIdleConnsPerHost:     50,
 				IdleConnTimeout:         10 * time.Second,
 				JSStreamName:            "jsn",
+				JSSubjectPrefix:         "kma",
 				JSStreamStorageType:     "memory",
 				JSStreamReplicas:        1,
 				JSStreamRetentionPolicy: "interest",
@@ -50,7 +54,6 @@ func TestGetNatsConfig(t *testing.T) {
 				JSStreamMaxBytes:        "-1",
 				JSConsumerDeliverPolicy: "new",
 				JSStreamDiscardPolicy:   "new",
-				EnableNewCRDVersion:     false,
 			},
 			wantErr: false,
 		},
@@ -59,6 +62,7 @@ func TestGetNatsConfig(t *testing.T) {
 				envs: map[string]string{
 					"EVENT_TYPE_PREFIX":          "etp",
 					"JS_STREAM_NAME":             "jsn",
+					"JS_STREAM_SUBJECT_PREFIX":   "testjsn",
 					"NATS_URL":                   "natsurl",
 					"MAX_IDLE_CONNS":             "1",
 					"MAX_CONNS_PER_HOST":         "2",
@@ -70,13 +74,12 @@ func TestGetNatsConfig(t *testing.T) {
 					"JS_STREAM_MAX_MSGS":         "5",
 					"JS_STREAM_MAX_BYTES":        "6",
 					"JS_CONSUMER_DELIVER_POLICY": "jcdp",
-					"ENABLE_NEW_CRD_VERSION":     "true",
 					"JS_STREAM_DISCARD_POLICY":   "jsdp",
 				},
 				maxReconnects: 1,
 				reconnectWait: 1 * time.Second,
 			},
-			want: NatsConfig{
+			want: NATSConfig{
 				URL:                     "natsurl",
 				MaxReconnects:           1,
 				ReconnectWait:           1 * time.Second,
@@ -86,13 +89,13 @@ func TestGetNatsConfig(t *testing.T) {
 				MaxIdleConnsPerHost:     3,
 				IdleConnTimeout:         1 * time.Second,
 				JSStreamName:            "jsn",
+				JSSubjectPrefix:         "testjsn",
 				JSStreamStorageType:     "jsst",
 				JSStreamReplicas:        4,
 				JSStreamRetentionPolicy: "jsrp",
 				JSStreamMaxMessages:     5,
 				JSStreamMaxBytes:        "6",
 				JSConsumerDeliverPolicy: "jcdp",
-				EnableNewCRDVersion:     true,
 				JSStreamDiscardPolicy:   "jsdp",
 			},
 			wantErr: false,
@@ -106,7 +109,9 @@ func TestGetNatsConfig(t *testing.T) {
 			t.Cleanup(func() {
 				for _, e := range env {
 					s := strings.Split(e, "=")
-					os.Setenv(s[0], s[1])
+					if err := os.Setenv(s[0], s[1]); err != nil {
+						t.Log(err)
+					}
 				}
 			})
 
@@ -116,13 +121,13 @@ func TestGetNatsConfig(t *testing.T) {
 				t.Setenv(k, v)
 			}
 
-			got, err := GetNatsConfig(tt.args.maxReconnects, tt.args.reconnectWait)
+			got, err := GetNATSConfig(tt.args.maxReconnects, tt.args.reconnectWait)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("GetNatsConfig() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("GetNATSConfig() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GetNatsConfig() got = %v, want %v", got, tt.want)
+				t.Errorf("GetNATSConfig() got = %v, want %v", got, tt.want)
 			}
 		})
 	}

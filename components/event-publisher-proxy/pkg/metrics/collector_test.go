@@ -10,25 +10,21 @@ import (
 
 func TestNewCollector(t *testing.T) {
 	// given
-	const bucketsFunc = "Buckets"
 	latency := new(mocks.BucketsProvider)
-	latency.On(bucketsFunc).Return(nil)
-	latency.Test(t)
+	latency.On("Buckets").Return(nil)
 
 	// when
 	collector := NewCollector(latency)
 
 	// then
 	assert.NotNil(t, collector)
-	assert.NotNil(t, collector.errors)
-	assert.NotNil(t, collector.errors.MetricVec)
-	assert.NotNil(t, collector.latency)
-	assert.NotNil(t, collector.latency.MetricVec)
+	assert.NotNil(t, collector.backendErrors)
+	assert.NotNil(t, collector.backendErrors.MetricVec)
+	assert.NotNil(t, collector.backendLatency)
+	assert.NotNil(t, collector.backendLatency.MetricVec)
 	assert.NotNil(t, collector.eventType)
 	assert.NotNil(t, collector.eventType.MetricVec)
-	assert.NotNil(t, collector.requests)
-	assert.NotNil(t, collector.requests.MetricVec)
-	latency.AssertCalled(t, bucketsFunc)
-	latency.AssertNumberOfCalls(t, bucketsFunc, 1)
+	assert.NotNil(t, collector.backendRequests)
+	assert.NotNil(t, collector.backendRequests.MetricVec)
 	latency.AssertExpectations(t)
 }

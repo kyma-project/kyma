@@ -14,7 +14,10 @@ const {
   logsPresentInLoki,
   queryLoki,
 } = require('./client');
-const {info} = require('../utils');
+const {
+  info,
+  debug,
+} = require('../utils');
 
 async function checkCommerceMockLogs(startTimestamp) {
   const labels = '{app="commerce-mock", container="mock", namespace="mocks"}';
@@ -49,26 +52,82 @@ async function checkPersistentVolumeClaimSize() {
   assert.equal(pvc.status.capacity.storage, '30Gi');
 }
 
-function parseJson(str) {
-  try {
-    return JSON.parse(str);
-  } catch (e) {
-    return undefined;
-  }
-}
-
 async function verifyIstioAccessLogFormat(startTimestamp) {
   const query = '{container="istio-proxy",namespace="kyma-system",pod="logging-loki-0"}';
-
   const responseBody = await queryLoki(query, startTimestamp);
-
+  assert.isDefined(responseBody.data.result[0].values, 'Empty response for the query for Istio access logs');
   assert.isTrue(responseBody.data.result[0].values.length > 0, 'No Istio access logs found for loki');
-  const entry = JSON.parse(responseBody.data.result[0].values[0][1]);
-  const log = parseJson(entry.log);
-  assert.isDefined(log, `Istio access log is not in JSON format: ${entry.log}`);
-  assert.isDefined(log['response_code'], `Istio access log does not have 'response_code' field: ${log}`);
-  assert.isDefined(log['bytes_received'], `Istio access log does not have 'bytes_received' field: ${log}`);
-  assert.isDefined(log['bytes_sent'], `Istio access log does not have 'bytes_sent' field: ${log}`);
-  assert.isDefined(log['duration'], `Istio access log does not have 'duration' field: ${log}`);
-  assert.isDefined(log['start_time'], `Istio access log does not have 'start_time' field: ${log}`);
+  const numberOfResults = responseBody.data.result.length;
+  // Iterate over the values
+  for (let i = 0; i <= numberOfResults; i++) {
+    const result = responseBody.data.result[i];
+    if (accessLogVerified(result)) {
+      return;
+    }
+  }
+  assert.fail('Istio access log is not present: ', JSON.stringify(responseBody.data));
+}
+
+function accessLogVerified(result) {
+  const numberOfLogs = result.values.length;
+  for (let i =0; i<= numberOfLogs; i++) {
+    // Some logs dont have values[i][1]. In such a case skip the log line
+    const val = result.values[i];
+    if ( !Array.isArray(val) ) {
+      debug('skipping while its not an array', JSON.stringify(val));
+      continue;
+    }
+    if (val.length < 2) {
+      debug('skipping length not > 1: ', JSON.stringify(val[1]));
+      continue;
+    }
+    if (isJsonString(val[1])) {
+      const log = JSON.parse(val[1]);
+      if (typeof log['method'] === 'undefined') {
+        debug('skipping while method is not present', JSON.stringify(log));
+        continue;
+      }
+      verifyLogAttributeIsPresent('method', log);
+      verifyLogAttributeIsPresent('path', log);
+      verifyLogAttributeIsPresent('protocol', log);
+      verifyLogAttributeIsPresent('response_code', log);
+      verifyLogAttributeIsPresent('response_flags', log);
+      verifyLogAttributeIsPresent('response_code_details', log);
+      verifyLogAttributeIsPresent('connection_termination_details', log);
+      verifyLogAttributeIsPresent('upstream_transport_failure_reason', log);
+      verifyLogAttributeIsPresent('bytes_received', log);
+      verifyLogAttributeIsPresent('bytes_sent', log);
+      verifyLogAttributeIsPresent('duration', log);
+      verifyLogAttributeIsPresent('upstream_service_time', log);
+      verifyLogAttributeIsPresent('x_forwarded_for', log);
+      verifyLogAttributeIsPresent('user_agent', log);
+      verifyLogAttributeIsPresent('request_id', log);
+      verifyLogAttributeIsPresent('authority', log);
+      verifyLogAttributeIsPresent('upstream_host', log);
+      verifyLogAttributeIsPresent('upstream_cluster', log);
+      verifyLogAttributeIsPresent('upstream_local_address', log);
+      verifyLogAttributeIsPresent('downstream_local_address', log);
+      verifyLogAttributeIsPresent('downstream_remote_address', log);
+      verifyLogAttributeIsPresent('requested_server_name', log);
+      verifyLogAttributeIsPresent('route_name', log);
+      verifyLogAttributeIsPresent('traceparent', log);
+      verifyLogAttributeIsPresent('tracestate', log);
+      return true;
+    }
+  }
+  return false;
+}
+
+function verifyLogAttributeIsPresent(attribute, logBody) {
+  assert.isDefined(logBody[attribute],
+      `Istio access log does not have '${attribute}' field: ${JSON.stringify(logBody)}`);
+}
+
+function isJsonString(str) {
+  try {
+    JSON.parse(str);
+  } catch (e) {
+    return false;
+  }
+  return true;
 }

@@ -5,6 +5,9 @@ import (
 	"testing"
 	"time"
 
+	eventingtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
+	"github.com/pkg/errors"
+
 	"github.com/stretchr/testify/require"
 
 	. "github.com/onsi/gomega"
@@ -468,6 +471,83 @@ func Test_CreateMessageForConditionReasonSubscriptionCreated(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			require.Equal(t, tc.wantName, v1alpha2.CreateMessageForConditionReasonSubscriptionCreated(tc.givenName))
+		})
+	}
+}
+
+func Test_SetConditionSubscriptionActive(t *testing.T) {
+	err := errors.New("some error")
+	conditionReady := v1alpha2.MakeCondition(
+		v1alpha2.ConditionSubscriptionActive,
+		v1alpha2.ConditionReasonNATSSubscriptionActive,
+		corev1.ConditionTrue, "")
+	conditionReady.LastTransitionTime = metav1.NewTime(time.Now().AddDate(0, 0, -1))
+	conditionNotReady := v1alpha2.MakeCondition(
+		v1alpha2.ConditionSubscriptionActive,
+		v1alpha2.ConditionReasonNATSSubscriptionNotActive,
+		corev1.ConditionFalse, err.Error())
+	conditionNotReady.LastTransitionTime = metav1.NewTime(time.Now().AddDate(0, 0, -2))
+	sub := eventingtesting.NewSubscription("test", "test")
+
+	testCases := []struct {
+		name                   string
+		givenConditions        []v1alpha2.Condition
+		givenError             error
+		wantConditions         []v1alpha2.Condition
+		wantLastTransitionTime *metav1.Time
+	}{
+		{
+			name:            "no error should set the condition to ready",
+			givenError:      nil,
+			givenConditions: []v1alpha2.Condition{conditionNotReady},
+			wantConditions:  []v1alpha2.Condition{conditionReady},
+		},
+		{
+			name:            "error should set the condition to not ready",
+			givenError:      err,
+			givenConditions: []v1alpha2.Condition{conditionReady},
+			wantConditions:  []v1alpha2.Condition{conditionNotReady},
+		},
+		{
+			name:            "the same condition should not change the lastTransitionTime in case of Sub active",
+			givenError:      nil,
+			givenConditions: []v1alpha2.Condition{conditionReady},
+			wantConditions: []v1alpha2.Condition{{
+				Type:               v1alpha2.ConditionSubscriptionActive,
+				Reason:             v1alpha2.ConditionReasonNATSSubscriptionActive,
+				Status:             corev1.ConditionTrue,
+				LastTransitionTime: metav1.Now(),
+			}},
+			wantLastTransitionTime: &conditionReady.LastTransitionTime,
+		},
+		{
+			name:            "the same condition should not change the lastTransitionTime in case of error",
+			givenError:      err,
+			givenConditions: []v1alpha2.Condition{conditionNotReady},
+			wantConditions: []v1alpha2.Condition{{
+				Type:               v1alpha2.ConditionSubscriptionActive,
+				Reason:             v1alpha2.ConditionReasonNATSSubscriptionNotActive,
+				Status:             corev1.ConditionFalse,
+				Message:            err.Error(),
+				LastTransitionTime: metav1.Now(),
+			}},
+			wantLastTransitionTime: &conditionNotReady.LastTransitionTime,
+		},
+	}
+	for _, testCase := range testCases {
+		tc := testCase
+		t.Run(tc.name, func(t *testing.T) {
+			// given
+			sub.Status.Conditions = tc.givenConditions
+
+			// when
+			conditions := v1alpha2.GetSubscriptionActiveCondition(sub, tc.givenError)
+
+			// then
+			require.True(t, v1alpha2.ConditionsEquals(conditions, tc.wantConditions))
+			if tc.wantLastTransitionTime != nil {
+				require.Equal(t, *tc.wantLastTransitionTime, conditions[0].LastTransitionTime)
+			}
 		})
 	}
 }

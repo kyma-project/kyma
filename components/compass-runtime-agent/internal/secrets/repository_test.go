@@ -20,7 +20,7 @@ import (
 const (
 	dataKey    = "dataKey"
 	secretName = "secret-name"
-	namespace  = "kyma-integration"
+	namespace  = "kyma-system"
 )
 
 var (

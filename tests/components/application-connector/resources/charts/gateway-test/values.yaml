@@ -1,15 +1,17 @@
 global:
   containerRegistry:
-    path: "eu.gcr.io/kyma-project"
+    path: "europe-docker.pkg.dev/kyma-project"
 
   images:
     gatewayTest:
       name: "gateway-test"
-      version: "v20221102-d9651673"
+      version: "v20230222-59da7511"
+      directory: "prod"
 
     mockApplication:
       name: "mock-app"
-      version: "v20221102-d9651673"
+      version: "v20230222-59da7511"
+      directory: "prod"
 
   serviceAccountName: "test-account"
   namespace: "test"

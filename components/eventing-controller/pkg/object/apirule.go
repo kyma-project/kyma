@@ -3,9 +3,8 @@ package object
 import (
 	"net/url"
 
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-
 	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
+	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -69,8 +68,31 @@ func WithGateway(gw string) Option {
 	}
 }
 
+// RemoveDuplicateValues appends the values if the key (values of the slice) is not equal
+// to the already present value in new slice (list).
+func RemoveDuplicateValues(values []string) []string {
+	keys := make(map[string]bool)
+	list := make([]string, 0)
+
+	for _, entry := range values {
+		if _, value := keys[entry]; !value {
+			keys[entry] = true
+			list = append(list, entry)
+		}
+	}
+	return list
+}
+
+// WithLabels sets the labels for an APIRule.
+func WithLabels(labels map[string]string) Option {
+	return func(o metav1.Object) {
+		d := o.(*apigatewayv1beta1.APIRule) //nolint:errcheck // object is APIRule.
+		d.Labels = labels
+	}
+}
+
 // WithOwnerReference sets the OwnerReferences of an APIRule.
-func WithOwnerReference(subs []eventingv1alpha1.Subscription) Option {
+func WithOwnerReference(subs []eventingv1alpha2.Subscription) Option {
 	return func(o metav1.Object) {
 		d := o.(*apigatewayv1beta1.APIRule)
 		ownerRefs := make([]metav1.OwnerReference, 0)
@@ -93,7 +115,7 @@ func WithOwnerReference(subs []eventingv1alpha1.Subscription) Option {
 }
 
 // WithRules sets the rules of an APIRule for all Subscriptions for a subscriber.
-func WithRules(subs []eventingv1alpha1.Subscription, svc apigatewayv1beta1.Service, methods ...string) Option {
+func WithRules(subs []eventingv1alpha2.Subscription, svc apigatewayv1beta1.Service, methods ...string) Option {
 	return func(o metav1.Object) {
 		d := o.(*apigatewayv1beta1.APIRule)
 		handler := apigatewayv1beta1.Handler{
@@ -130,28 +152,5 @@ func WithRules(subs []eventingv1alpha1.Subscription, svc apigatewayv1beta1.Servi
 			rules = append(rules, rule)
 		}
 		d.Spec.Rules = rules
-	}
-}
-
-// RemoveDuplicateValues appends the values if the key (values of the slice) is not equal
-// to the already present value in new slice (list)
-func RemoveDuplicateValues(values []string) []string {
-	keys := make(map[string]bool)
-	list := make([]string, 0)
-
-	for _, entry := range values {
-		if _, value := keys[entry]; !value {
-			keys[entry] = true
-			list = append(list, entry)
-		}
-	}
-	return list
-}
-
-// WithLabels sets the labels for an APIRule.
-func WithLabels(labels map[string]string) Option {
-	return func(o metav1.Object) {
-		d := o.(*apigatewayv1beta1.APIRule)
-		d.Labels = labels
 	}
 }

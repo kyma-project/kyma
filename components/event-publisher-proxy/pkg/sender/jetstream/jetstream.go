@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"go.uber.org/zap"
 
@@ -17,7 +19,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/health"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender/beb"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender/eventmesh"
 
 	"github.com/nats-io/nats.go"
 )
@@ -29,7 +31,7 @@ const (
 	noSpaceLeftErrMessage = "no space left on device"
 )
 
-// compile time check
+// compile time check.
 var _ sender.GenericSender = &Sender{}
 var _ health.Checker = &Sender{}
 
@@ -44,6 +46,7 @@ type Sender struct {
 	logger     *logger.Logger
 	connection *nats.Conn
 	envCfg     *env.NATSConfig
+	opts       *options.Options
 }
 
 func (s *Sender) URL() string {
@@ -51,8 +54,8 @@ func (s *Sender) URL() string {
 }
 
 // NewSender returns a new NewSender instance with the given NATS connection.
-func NewSender(ctx context.Context, connection *nats.Conn, envCfg *env.NATSConfig, logger *logger.Logger) *Sender {
-	return &Sender{ctx: ctx, connection: connection, envCfg: envCfg, logger: logger}
+func NewSender(ctx context.Context, connection *nats.Conn, envCfg *env.NATSConfig, opts *options.Options, logger *logger.Logger) *Sender {
+	return &Sender{ctx: ctx, connection: connection, envCfg: envCfg, opts: opts, logger: logger}
 }
 
 // ConnectionStatus returns nats.Status for the NATS connection used by the Sender.
@@ -96,7 +99,7 @@ func (s *Sender) Send(_ context.Context, event *event.Event) (sender.PublishResu
 		}
 		return nil, fmt.Errorf("%w : %v", sender.ErrInternalBackendError, fmt.Errorf("%w, %v", ErrCannotSendToStream, err))
 	}
-	return beb.HTTPPublishResult{Status: http.StatusNoContent}, nil
+	return eventmesh.HTTPPublishResult{Status: http.StatusNoContent}, nil
 }
 
 // eventToNATSMsg translates cloud event into the NATS Msg.
@@ -122,6 +125,11 @@ func (s *Sender) eventToNATSMsg(event *event.Event) (*nats.Msg, error) {
 
 // getJsSubjectToPublish appends stream name to subject if needed.
 func (s *Sender) getJsSubjectToPublish(subject string) string {
+	// if subscription CRD v1alpha2 is enabled then do not append prefix.
+	if s.opts.EnableNewCRDVersion && !strings.HasPrefix(subject, s.envCfg.EventTypePrefix) {
+		return subject
+	}
+
 	return fmt.Sprintf("%s.%s", env.JetStreamSubjectPrefix, subject)
 }
 

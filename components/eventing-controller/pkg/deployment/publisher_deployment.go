@@ -60,7 +60,7 @@ func NewBEBPublisherDeployment(publisherConfig env.PublisherConfig) *appsv1.Depl
 		WithLogEnvVars(publisherConfig),
 	)
 }
-func NewNATSPublisherDeployment(natsConfig env.NatsConfig, publisherConfig env.PublisherConfig) *appsv1.Deployment {
+func NewNATSPublisherDeployment(natsConfig env.NATSConfig, publisherConfig env.PublisherConfig) *appsv1.Deployment {
 	return NewDeployment(
 		publisherConfig,
 		WithLabels(v1alpha1.NatsBackendType),
@@ -90,6 +90,7 @@ func NewDeployment(publisherConfig env.PublisherConfig, opts ...DeployOpt) *apps
 					ServiceAccountName:            publisherConfig.ServiceAccount,
 					TerminationGracePeriodSeconds: &TerminationGracePeriodSeconds,
 					PriorityClassName:             publisherConfig.PriorityClassName,
+					SecurityContext:               getPodSecurityContext(),
 				},
 			},
 		},
@@ -146,7 +147,7 @@ func WithContainers(publisherConfig env.PublisherConfig) DeployOpt {
 				LivenessProbe:   getLivenessProbe(),
 				ReadinessProbe:  getReadinessProbe(),
 				ImagePullPolicy: getImagePullPolicy(publisherConfig.ImagePullPolicy),
-				SecurityContext: getSecurityContext(),
+				SecurityContext: getContainerSecurityContext(),
 				Resources: getResources(publisherConfig.RequestsCPU,
 					publisherConfig.RequestsMemory,
 					publisherConfig.LimitsCPU,
@@ -166,7 +167,7 @@ func WithLogEnvVars(publisherConfig env.PublisherConfig) DeployOpt {
 	}
 }
 
-func WithNATSEnvVars(natsConfig env.NatsConfig, publisherConfig env.PublisherConfig) DeployOpt {
+func WithNATSEnvVars(natsConfig env.NATSConfig, publisherConfig env.PublisherConfig) DeployOpt {
 	return func(d *appsv1.Deployment) {
 		for i, container := range d.Spec.Template.Spec.Containers {
 			if strings.EqualFold(container.Name, PublisherName) {
@@ -199,10 +200,27 @@ func getImagePullPolicy(imagePullPolicy string) v1.PullPolicy {
 	}
 }
 
-func getSecurityContext() *v1.SecurityContext {
+func getPodSecurityContext() *v1.PodSecurityContext {
+	const id = 10001
+	return &v1.PodSecurityContext{
+		FSGroup:      utils.Int64Ptr(id),
+		RunAsUser:    utils.Int64Ptr(id),
+		RunAsGroup:   utils.Int64Ptr(id),
+		RunAsNonRoot: utils.BoolPtr(true),
+		SeccompProfile: &v1.SeccompProfile{
+			Type: v1.SeccompProfileTypeRuntimeDefault,
+		},
+	}
+}
+
+func getContainerSecurityContext() *v1.SecurityContext {
 	return &v1.SecurityContext{
 		Privileged:               utils.BoolPtr(false),
 		AllowPrivilegeEscalation: utils.BoolPtr(false),
+		RunAsNonRoot:             utils.BoolPtr(true),
+		Capabilities: &v1.Capabilities{
+			Drop: []v1.Capability{"ALL"},
+		},
 	}
 }
 
@@ -316,10 +334,14 @@ func getBEBEnvVars(publisherConfig env.PublisherConfig) []v1.EnvVar {
 			Name:  "BEB_NAMESPACE",
 			Value: fmt.Sprintf("%s$(BEB_NAMESPACE_VALUE)", bebNamespacePrefix),
 		},
+		{
+			Name:  "ENABLE_NEW_CRD_VERSION",
+			Value: strconv.FormatBool(true),
+		},
 	}
 }
 
-func getNATSEnvVars(natsConfig env.NatsConfig, publisherConfig env.PublisherConfig) []v1.EnvVar {
+func getNATSEnvVars(natsConfig env.NATSConfig, publisherConfig env.PublisherConfig) []v1.EnvVar {
 	return []v1.EnvVar{
 		{Name: "BACKEND", Value: "nats"},
 		{Name: "PORT", Value: strconv.Itoa(int(publisherPortNum))},
@@ -339,6 +361,7 @@ func getNATSEnvVars(natsConfig env.NatsConfig, publisherConfig env.PublisherConf
 		},
 		// JetStream-specific config
 		{Name: "JS_STREAM_NAME", Value: natsConfig.JSStreamName},
+		{Name: "ENABLE_NEW_CRD_VERSION", Value: strconv.FormatBool(true)},
 	}
 }
 

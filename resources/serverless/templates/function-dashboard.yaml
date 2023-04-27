@@ -3,6 +3,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: function-dashboard
+  namespace: {{ .Release.Namespace }}
   labels:
     grafana_dashboard: "1"
     app: monitoring-grafana

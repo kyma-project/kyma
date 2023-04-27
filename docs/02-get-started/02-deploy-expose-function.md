@@ -4,7 +4,7 @@ title: Deploy and expose a Function
 
 Now that you've installed Kyma, let's deploy your first Function. We'll call it `hello-world`.
 
-## Create a function
+## Create a Function
 
 First, let's create the Function and apply it.
 
@@ -16,8 +16,9 @@ First, let's create the Function and apply it.
 
 1. In Kyma Dashboard, go to the `default` Namespace.
 2. Go to **Workloads** > **Functions**.
-3. Click on **Create Function +**.
-4. Name the Function `hello-world` and click **Create**.
+3. Click on **Create Function**.
+4. Name the Function `hello-world`.
+5. From the **Language** dropdown, choose `nodejs` and click **Create**.
   </details>
   <details>
   <summary label="kubectl">
@@ -27,8 +28,23 @@ First, let's create the Function and apply it.
 Run:
 
 ```bash
-kyma init function --name hello-world
-kyma apply function
+cat <<EOF | kubectl apply -f -
+apiVersion: serverless.kyma-project.io/v1alpha2
+kind: Function
+metadata:
+  name: hello-world
+  namespace: default
+spec:
+  runtime: nodejs18
+  source:
+    inline:
+      source: |
+        module.exports = {
+          main: function(event, context) {
+            return 'Hello Serverless'
+          }
+        }
+EOF
 ```
 
   </details>
@@ -70,7 +86,7 @@ The operation was successful if the statuses for **CONFIGURED**, **BUILT**, and 
 
 After we've got our `hello-world` Function deployed, we might want to expose it outside our cluster so that it's available for other external services.
 
-> **CAUTION:** Exposing a workload to the outside world is always a potential security vulnerability, so tread carefully. In a production environment, always secure the workload you expose with [OAuth2](../03-tutorials/00-api-exposure/apix-05-expose-and-secure-workload-oauth2.md) or [JWT](../03-tutorials/00-api-exposure/apix-08-expose-and-secure-workload-jwt.md).
+> **CAUTION:** Exposing a workload to the outside world is always a potential security vulnerability, so tread carefully. In a production environment, always secure the workload you expose with [OAuth2](../03-tutorials/00-api-exposure/apix-05-expose-and-secure-a-workload/apix-05-01-expose-and-secure-workload-oauth2.md) or [JWT](../03-tutorials/00-api-exposure/apix-05-expose-and-secure-a-workload/apix-05-03-expose-and-secure-workload-jwt.md).
 
 First, let's create an [APIRule](../05-technical-reference/00-custom-resources/apix-01-apirule.md) for the Function.
 
@@ -80,11 +96,13 @@ First, let's create an [APIRule](../05-technical-reference/00-custom-resources/a
   Kyma Dashboard
   </summary>
 
-1. In your Function's view, go to the **Configuration** tab.
-2. Click on **Create API Rule +**.
-3. Provide the **Name** (`hello-world`) and **Subdomain** (`hello-world`) and click **Create**.
+1. Go to **Discovery and Network** > **API Rules**.
+2. Click on **Create API Rule**.
+3. Provide the **Name** (`hello-world`).
+4. From the **Service Name** dropdown, select `hello-world`.
+5. Provide your Service **Port** (`80`).
+6. Choose your host from the **Host** dropdown and replace the asterisk (*) with the name of your subdomain (`hello-world`).
 
-> **NOTE:** Alternatively, from the left navigation go to **Discovery and Network** > **API Rules**, click on **Create API Rule +**, and continue with step 3, selecting the appropriate **Service** (`hello-world`) from the dropdown menu.
   </details>
   <details>
   <summary label="kubectl">
@@ -139,7 +157,7 @@ This opens the Function's external address as a new page.
 
 > **NOTE:** Alternatively, from the left navigation go to **API Rules**, and click on the **Host** URL there.
 
-The operation was successful if the page says `Hello World!`.
+The operation was successful if the page says `Hello World from the Kyma Function main running on nodejs16!`.
   </details>
   <details>
   <summary label="kubectl">
@@ -156,3 +174,6 @@ The operation was successful if the call returns `Hello Serverless`.
 
   </details>
 </div>
+
+> **NOTE:** Local installation provides the self-signed certificates out of the box, but if you want to access your API through your browser, you must add them to your local trust store. 
+To do this, call the `kyma import certs` command with proper permissions. For more information, read [Kyma import certs](https://github.com/kyma-project/cli/blob/main/docs/gen-docs/kyma_import_certs.md). 

@@ -1,6 +1,6 @@
 package commander
 
-// Commander defines the interface of different implementations
+// Commander defines the interface of different implementations.
 type Commander interface {
 	// Init allows main() to pass flag values to the commander instance.
 	Init() error

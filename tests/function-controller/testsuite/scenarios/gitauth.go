@@ -3,8 +3,6 @@ package scenarios
 import (
 	"encoding/base64"
 	"fmt"
-	"math/rand"
-	"net/url"
 	"time"
 
 	"github.com/vrischmann/envconfig"
@@ -39,8 +37,8 @@ type testRepo struct {
 }
 
 type config struct {
-	Azure  AzureRepo `envconfig:"AZURE"`
-	Github GithubRepo
+	Azure  AzureRepo  `envconfig:"AZURE"`
+	Github GithubRepo `envconfig:"GITHUB"`
 }
 
 type SSHAuth struct {
@@ -52,25 +50,23 @@ type BasicAuth struct {
 	Password string
 }
 
-type RepoConfig struct {
-	URL       string
-	BaseDir   string
-	Reference string
-}
-
 type GithubRepo struct {
-	RepoConfig
+	Reference string `envconfig:"default=main"`
+	URL       string `envconfig:"default=git@github.com:kyma-project/private-fn-for-e2e-serverless-tests.git"`
+	BaseDir   string `envconfig:"default=/"`
 	SSHAuth
 }
 
 type AzureRepo struct {
-	RepoConfig
+	Reference string `envconfig:"default=main"`
+	URL       string `envconfig:"default=https://kyma-wookiee@dev.azure.com/kyma-wookiee/kyma-function/_git/kyma-function"`
+	BaseDir   string `envconfig:"default=/code"`
 	BasicAuth
 }
 
 func GitAuthTestSteps(restConfig *rest.Config, cfg testsuite.Config, logf *logrus.Entry) (step.Step, error) {
 	testCfg := &config{}
-	if err := envconfig.InitWithPrefix(testCfg, "APP"); err != nil {
+	if err := envconfig.InitWithPrefix(testCfg, "APP_TEST"); err != nil {
 		return nil, errors.Wrap(err, "while loading git auth test config")
 	}
 
@@ -101,7 +97,7 @@ func GitAuthTestSteps(restConfig *rest.Config, cfg testsuite.Config, logf *logru
 
 	steps := []step.Step{}
 	for _, testCase := range testCases {
-		testSteps, err := gitAuthFunctionTestSteps(genericContainer, testCase, poll)
+		testSteps, err := gitAuthFunctionTestSteps(genericContainer, testCase, poll, cfg.KubectlProxyEnabled)
 		if err != nil {
 			return nil, errors.Wrapf(err, "while generated test case steps")
 		}
@@ -113,8 +109,8 @@ func GitAuthTestSteps(restConfig *rest.Config, cfg testsuite.Config, logf *logru
 }
 
 func setupSharedContainer(restConfig *rest.Config, cfg testsuite.Config, logf *logrus.Entry) (shared.Container, error) {
-	currentDate := time.Now()
-	cfg.Namespace = fmt.Sprintf("%s-%dh-%dm-%d", "test-serverless-gitauth", currentDate.Hour(), currentDate.Minute(), rand.Int())
+	now := time.Now()
+	cfg.Namespace = fmt.Sprintf("%s-%02dh%02dm%02ds", "test-serverless-gitauth", now.Hour(), now.Minute(), now.Second())
 
 	dynamicCli, err := dynamic.NewForConfig(restConfig)
 	if err != nil {
@@ -130,15 +126,12 @@ func setupSharedContainer(restConfig *rest.Config, cfg testsuite.Config, logf *l
 	}, nil
 }
 
-func gitAuthFunctionTestSteps(genericContainer shared.Container, tr testRepo, poll poller.Poller) (step.Step, error) {
+func gitAuthFunctionTestSteps(genericContainer shared.Container, tr testRepo, poll poller.Poller, useProxy bool) (step.Step, error) {
 	genericContainer.Log.Infof("Testing Git Function in namespace: %s", genericContainer.Namespace)
 
 	secret := secret.NewSecret(tr.auth.SecretName, genericContainer)
 
-	inClusterURL, err := url.Parse(fmt.Sprintf("http://%s.%s.svc.cluster.local", tr.name, genericContainer.Namespace))
-	if err != nil {
-		return nil, errors.Wrapf(err, "while parsing in-cluster URL")
-	}
+	testFn := function.NewFunction(tr.name, useProxy, genericContainer)
 
 	return step.NewSerialTestRunner(genericContainer.Log, fmt.Sprintf("%s Function auth test", tr.provider),
 		teststep.CreateSecret(
@@ -148,7 +141,7 @@ func gitAuthFunctionTestSteps(genericContainer shared.Container, tr testRepo, po
 			tr.secretData),
 		teststep.CreateFunction(
 			genericContainer.Log,
-			function.NewFunction(tr.name, genericContainer),
+			testFn,
 			fmt.Sprintf("Create %s Function", tr.provider),
 			gitops.GitopsFunction(
 				tr.url,
@@ -160,7 +153,7 @@ func gitAuthFunctionTestSteps(genericContainer shared.Container, tr testRepo, po
 		teststep.NewHTTPCheck(
 			genericContainer.Log,
 			"Git Function simple check through gateway",
-			inClusterURL,
+			testFn.FunctionURL,
 			poll, tr.expectedResponse)), nil
 }
 

@@ -5,7 +5,7 @@ APP_NAME = function-controller
 APP_PATH = components/$(APP_NAME)
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
-override VERIFY_IGNORE := /vendor\|/automock\|/pkg/apis/serverless/v1alpha2/zz_generated.deepcopy.go\|/pkg/apis/serverless/v1alpha1/zz_generated.deepcopy.go
+override VERIFY_IGNORE := /vendor\|/automock\|/pkg/apis/serverless/v1alpha2/zz_generated.deepcopy.go\|/pkg/apis/serverless/v1alpha2/zz_generated.deepcopy.go
 
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
@@ -45,6 +45,7 @@ manifests: controller-gen-local generate-local
 		output:webhook:artifacts:config=config/webhook
 	kustomize build config/crd > config/crd/crd-serverless.yaml
 	cp config/crd/crd-serverless.yaml ../../installation/resources/crds/serverless/
+	cp config/crd/crd-serverless.yaml ../../resources/serverless/templates/crds.yaml
 
 # Generate code
 .PHONY: generate-local
@@ -161,3 +162,25 @@ ifeq ($(JOB_TYPE), postsubmit)
 else
 	@echo "Image signing skipped"
 endif
+
+
+######## registry-gc 
+REGISTRY_GC_NAME = registry-gc
+REGISTRY_GC_IMG_NAME = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(REGISTRY_GC_NAME)
+
+
+PHONY: build-image-registry-gc push-registry-gc
+build-image-registry-gc:
+	docker build -t $(REGISTRY_GC_NAME) -f $(ROOT)/deploy/registry-gc/Dockerfile .
+
+push-registry-gc:
+	docker tag $(REGISTRY_GC_NAME) $(REGISTRY_GC_IMG_NAME):$(DOCKER_TAG)
+	docker push $(REGISTRY_GC_IMG_NAME):$(DOCKER_TAG)
+ifeq ($(JOB_TYPE), postsubmit)
+	@echo "Sign image with Cosign"
+	cosign version
+	cosign sign -key ${KMS_KEY_URL} $(REGISTRY_GC_IMG_NAME):$(DOCKER_TAG)
+else
+	@echo "Image signing skipped"
+endif
+

@@ -1,8 +1,9 @@
 package serverless
 
 import (
-	"k8s.io/utils/pointer"
 	"testing"
+
+	"k8s.io/utils/pointer"
 
 	"github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
@@ -294,7 +295,7 @@ func TestFunctionReconciler_equalDeployments(t *testing.T) {
 			want: false,
 		},
 		{
-			name: "different image",
+			name: "different fn-image",
 			args: args{
 				existing: appsv1.Deployment{
 					Spec: appsv1.DeploymentSpec{
@@ -315,7 +316,7 @@ func TestFunctionReconciler_equalDeployments(t *testing.T) {
 							Spec: corev1.PodSpec{
 								Containers: []corev1.Container{
 									{
-										Image: "different-image",
+										Image: "different-fn-image",
 									},
 								},
 							},

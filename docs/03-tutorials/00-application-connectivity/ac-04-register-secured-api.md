@@ -41,7 +41,7 @@ The **credentials** object must contain the following fields:
 | Field                 | Description                                                                 |
 | --------------------- |-----------------------------------------------------------------------------|
 | **secretName**        | Name of a Secret storing credentials                                        |
-| **type**              | Authentication method type. Supported values: `Basic`, `OAuth`, `OAuthWithCert `, `CertGen`.  |
+| **type**              | Authentication method type. Supported values: `Basic`, `OAuth`, `OAuthWithCert `, `CertificateGen`.  |
 | **authenticationUrl** | Optional OAuth token URL, valid only for the `OAuth` and `OAuthWithCert` types. |
 
 ## Register a Basic Authentication-secured API
@@ -69,7 +69,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: {SECRET_NAME}
-  namespace: kyma-integration
+  namespace: kyma-system
 data:
   username: {BASE64_ENCODED_USER_NAME}
   password: {BASE64_ENCODED_PASSWORD}
@@ -78,7 +78,7 @@ data:
 To create such a Secret, run this command:
 
 ```bash
-kubectl create secret generic {SECRET_NAME} --from-literal username={USER_NAME} --from-literal password={PASSWORD} -n kyma-integration
+kubectl create secret generic {SECRET_NAME} --from-literal username={USER_NAME} --from-literal password={PASSWORD} -n kyma-system
 ```
 
 ## Register an OAuth-secured API
@@ -107,7 +107,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: {SECRET_NAME}
-  namespace: kyma-integration
+  namespace: kyma-system
 data:
   clientId: {BASE64_ENCODED_CLIENT_ID}
   clientSecret: {BASE64_ENCODED_CLIENT_SECRET}
@@ -116,7 +116,7 @@ data:
 To create such a Secret, run this command:
 
 ```bash
-kubectl create secret generic {SECRET_NAME} --from-literal clientId={CLIENT_ID} --from-literal clientSecret={CLIENT_SECRET} -n kyma-integration
+kubectl create secret generic {SECRET_NAME} --from-literal clientId={CLIENT_ID} --from-literal clientSecret={CLIENT_SECRET} -n kyma-system
 ```
 ## Register an OAuth 2.0 mTLS-secured API
 
@@ -144,7 +144,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: {SECRET_NAME}
-  namespace: kyma-integration
+  namespace: kyma-system
 data:
   clientId: {BASE64_ENCODED_CLIENT_ID}
   crt: {BASE64_ENCODED_CERTIFICATE}
@@ -154,7 +154,7 @@ data:
 To create such a Secret, run this command:
 
 ```bash
-kubectl create secret generic {SECRET_NAME} --from-literal clientId={CLIENT_ID} --from-literal crt={CERTIFICATE} --from-literal key={PRIVATE_KEY} -n kyma-integration
+kubectl create secret generic {SECRET_NAME} --from-literal clientId={CLIENT_ID} --from-literal crt={CERTIFICATE} --from-literal key={PRIVATE_KEY} -n kyma-system
 ```
 
 ## Register a client certificate-secured API
@@ -182,7 +182,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: {SECRET_NAME}
-  namespace: kyma-integration
+  namespace: kyma-system
 data:
   crt: {BASE64_ENCODED_CERTIFICATE}
   key: {BASE64_ENCODED_PRIVATE_KEY}
@@ -191,7 +191,7 @@ data:
 To create such a Secret, run this command:
 
 ```bash
-kubectl create secret generic {SECRET_NAME} --from-literal crt={CERTIFICATE} --from-literal key={PRIVATE_KEY} -n kyma-integration
+kubectl create secret generic {SECRET_NAME} --from-literal crt={CERTIFICATE} --from-literal key={PRIVATE_KEY} -n kyma-system
 ```
 
 ## Register a CSRF-protected API
@@ -223,7 +223,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: {SECRET_NAME}
-  namespace: kyma-integration
+  namespace: kyma-system
 data:
   username: {BASE64_ENCODED_USER_NAME}
   password: {BASE64_ENCODED_PASSWORD}
@@ -232,7 +232,7 @@ data:
 To create such a Secret, run this command:
 
 ```bash
-kubectl create secret generic {SECRET_NAME} --from-literal username={USER_NAME} --from-literal password={PASSWORD} -n kyma-integration
+kubectl create secret generic {SECRET_NAME} --from-literal username={USER_NAME} --from-literal password={PASSWORD} -n kyma-system
 ```
 
 ## Use headers and query parameters for custom authentication
@@ -263,7 +263,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: {SECRET_NAME}
-  namespace: kyma-integration
+  namespace: kyma-system
 data:
   username: {BASE64_ENCODED_USER_NAME}
   password: {BASE64_ENCODED_PASSWORD}
@@ -272,7 +272,7 @@ data:
 To create such a Secret, run this command:
 
 ```bash
-kubectl create secret generic {SECRET_NAME} --from-literal username={USER_NAME} --from-literal password={PASSWORD} -n kyma-integration
+kubectl create secret generic {SECRET_NAME} --from-literal username={USER_NAME} --from-literal password={PASSWORD} -n kyma-system
 ```
 
 This is an example of the Secret containing headers and request parameters: 
@@ -282,7 +282,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: {SECRET_NAME}
-  namespace: kyma-integration
+  namespace: kyma-system
 data:
   headers: {BASE64_ENCODED_HEADERS_JSON}
   queryParameters: {BASE64_ENCODED_QUERY_PARAMS_JSON}
@@ -291,7 +291,7 @@ data:
 To create such a Secret, run this command:
 
 ```bash
-kubectl create secret generic {SECRET_NAME} --from-literal headers={HEADERS_JSON} --from-literal queryParameters={QUERY_PARAMS_JSON} -n kyma-integration
+kubectl create secret generic {SECRET_NAME} --from-literal headers={HEADERS_JSON} --from-literal queryParameters={QUERY_PARAMS_JSON} -n kyma-system
 ```
 
 Additional headers stored in the Secret must be provided in the form of a valid JSON document. This is an example of a headers JSON containing one entry:

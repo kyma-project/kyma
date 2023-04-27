@@ -1,7 +1,7 @@
 global:
   jetstream:
     storage: file
-    maxBytes: 900Mi
+    maxBytes: 700Mi
     fileStorage:
       size: 1Gi
 
@@ -13,11 +13,11 @@ controller:
     maxMessages: -1
   resources:
     limits:
-      cpu: 500m
-      memory: 1Gi
+      cpu: 1000m
+      memory: 512Mi
     requests:
       cpu: 10m
-      memory: 512Mi
+      memory: 256Mi
   publisherProxy:
     resources:
       limits:

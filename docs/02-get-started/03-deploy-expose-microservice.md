@@ -15,13 +15,13 @@ First, let's create a Deployment that provides the microservice definition and l
   Kyma Dashboard
   </summary>
 
-1. From the left navigation, go to **Deployments**.
-2. Click on **Create Deployment +**.
-3. Provide the following parameters:
+1. From the left navigation, go to **Workloads > Deployments**.
+2. Click on **Create Deployment**.
+3. Go to **Advanced** and provide the following parameters:
     - **Name**: `orders-service`
-    - **Containers**: enter Docker image `eu.gcr.io/kyma-project/develop/orders-service:68a58069`  
+    - **Docker Image**: `eu.gcr.io/kyma-project/develop/orders-service:68a58069`  
   
-    _Optionally_, to save resources, go to the **Advanced** view and modify these parameters:
+    _Optionally_, to save resources, modify these parameters:
     - **Memory requests**: `10Mi`
     - **Memory limits**: `32Mi`
     - **CPU requests (m)**: `16m`
@@ -93,7 +93,7 @@ The operation was successful if the returned number of **readyReplicas** is `1`.
 
 ### Create the Service
 
-Now that we have the Deployment, let's deploy the Kubernetes [Service](https://kubernetes.io/docs/concepts/services-networking/service/) to allow other Kubernetes resources to communicate with your microservice.
+Now that we have the Deployment, let's deploy the [Kubernetes Service](https://kubernetes.io/docs/concepts/services-networking/service/) to allow other Kubernetes resources to communicate with your microservice.
 
 <div tabs name="Create a Service" group="deploy-expose-microservice">
   <details open>
@@ -102,7 +102,7 @@ Now that we have the Deployment, let's deploy the Kubernetes [Service](https://k
   </summary>
 
 1. From the left navigation, go to **Discovery and Network > Services**.
-2. Click on **Create Service +**.
+2. Click on **Create Service**.
 3. In the **Create Service** view, paste the following values to your YAML file:  
 
    ```yaml
@@ -166,7 +166,7 @@ The operation was successful if the command returns the **uid** of your Service.
 
 We have created the Service. Let's now expose it outside the cluster.
 
-> **CAUTION:** Exposing a workload to the outside world is always a potential security vulnerability, so tread carefully. In a production environment, always secure the workload you expose with [OAuth2](../03-tutorials/00-api-exposure/apix-05-expose-and-secure-workload-oauth2.md) or [JWT](../03-tutorials/00-api-exposure/apix-08-expose-and-secure-workload-jwt.md).
+> **CAUTION:** Exposing a workload to the outside world is always a potential security vulnerability, so tread carefully. In a production environment, always secure the workload you expose with [OAuth2](../03-tutorials/00-api-exposure/apix-05-expose-and-secure-a-workload/apix-05-01-expose-and-secure-workload-oauth2.md) or [JWT](../03-tutorials/00-api-exposure/apix-05-expose-and-secure-a-workload/apix-05-03-expose-and-secure-workload-jwt.md).
 
 To expose our microservice, we must create an [APIRule](../05-technical-reference/00-custom-resources/apix-01-apirule.md) CR for it, just like when we [exposed our Function](02-deploy-expose-function.md#expose-the-function).
 
@@ -176,10 +176,13 @@ To expose our microservice, we must create an [APIRule](../05-technical-referenc
   Kyma Dashboard
   </summary>
 
-1. In your Services's view, click on **Create API Rule +**.
-2. Provide the **Name** (`orders-service`) and **Subdomain** (`orders-service`) and click **Create**.
+1. Go to **Discovery and Network** > **API Rules**, and click on **Create API Rule**.
+2. Provide the **Name** (`orders-service`)
+3. Choose `orders-service` from the **Service Name** dropdown.
+4. Provide your Service **Port** (`80`).
+5. Choose your host from the **Host** dropdown and replace the asterisk (*) with the name of your subdomain (`orders-service`).
+6. Click **Create**.
 
-> **NOTE:** Alternatively, from the left navigation go to **Discovery and Network** > **API Rules**, click on **Create API Rule +**, and continue with step 2, selecting the appropriate **Service** from the dropdown menu.
   </details>
   <details>
   <summary label="kubectl">
@@ -226,7 +229,7 @@ Now let's check that the microservice has been exposed successfully.
   Kyma Dashboard
   </summary>
 
-1. From your Services's view, get the APIRule's **Host**.
+1. From your Service's view, get the APIRule's **Host**.
 
    > **NOTE:** Alternatively, from the left navigation go to **API Rules** and get the **Host** URL from there.
 

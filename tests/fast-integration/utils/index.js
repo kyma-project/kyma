@@ -20,19 +20,29 @@ const eventingBackendName = 'eventing-backend';
 function initializeK8sClient(opts) {
   opts = opts || {};
   try {
+    console.log('Trying to initialize a K8S client');
     if (opts.kubeconfigPath) {
+      console.log('Path initialization');
       kc.loadFromFile(opts.kubeconfigPath);
     } else if (opts.kubeconfig) {
+      console.log('Kubeconfig initialization');
       kc.loadFromString(opts.kubeconfig);
     } else {
+      console.log('Default initialization');
       kc.loadFromDefault();
     }
 
+    console.log('Clients creation');
     k8sDynamicApi = kc.makeApiClient(k8s.KubernetesObjectApi);
+    console.log('Making Api client - Apps');
     k8sAppsApi = kc.makeApiClient(k8s.AppsV1Api);
+    console.log('Making Api client - Core');
     k8sCoreV1Api = kc.makeApiClient(k8s.CoreV1Api);
+    console.log('Making Api client - Auth');
     k8sRbacAuthorizationV1Api = kc.makeApiClient(k8s.RbacAuthorizationV1Api);
+    console.log('Making Api client - Logs');
     k8sLog = new k8s.Log(kc);
+    console.log('Making Api client - Watch');
     watch = new k8s.Watch(kc);
     k8sServerUrl = kc.getCurrentCluster() ? kc.getCurrentCluster().server : null;
   } catch (err) {
@@ -236,15 +246,6 @@ async function getSecrets(namespace) {
   return body.items;
 }
 
-async function getPodPresets(namespace) {
-  const path = `/apis/settings.svcat.k8s.io/v1alpha1/namespaces/${namespace}/podpresets/`;
-  const response = await k8sDynamicApi.requestPromise({
-    url: k8sDynamicApi.basePath + path,
-  });
-  const body = JSON.parse(response.body);
-  return body.items;
-}
-
 async function getSecret(name, namespace) {
   const path = `/api/v1/namespaces/${namespace}/secrets/${name}`;
   const response = await k8sDynamicApi.requestPromise({
@@ -254,14 +255,14 @@ async function getSecret(name, namespace) {
 }
 
 async function getFunction(name, namespace) {
-  const path = `/apis/serverless.kyma-project.io/v1alpha1/namespaces/${namespace}/functions/${name}`;
+  const path = `/apis/serverless.kyma-project.io/v1alpha2/namespaces/${namespace}/functions/${name}`;
   const response = await k8sDynamicApi.requestPromise({
     url: k8sDynamicApi.basePath + path,
   });
   return JSON.parse(response.body);
 }
 
-async function getConfigMap(name, namespace) {
+async function getConfigMap(name, namespace='default') {
   const path = `/api/v1/namespaces/${namespace}/configmaps/${name}`;
   const response = await k8sDynamicApi.requestPromise({
     url: k8sDynamicApi.basePath + path,
@@ -304,6 +305,7 @@ async function k8sApply(resources, namespace, patch = true) {
             debug(resource.kind, resource.metadata.name, 'created');
           } catch (createError) {
             debug(resource.kind, resource.metadata.name, 'failed to create');
+            debug(JSON.stringify(createError, null, 4));
             throw createError;
           }
         } else {
@@ -314,12 +316,13 @@ async function k8sApply(resources, namespace, patch = true) {
   }
 }
 
-function waitForK8sObject(path, query, checkFn, timeout, timeoutMsg) {
+// Allows to pass watch with different than global K8S context.
+function waitForK8sObject(path, query, checkFn, timeout, timeoutMsg, watcher = watch) {
   debug('waiting for', path);
   let res;
   let timer;
   return new Promise((resolve, reject) => {
-    watch.watch(
+    watcher.watch(
         path,
         query,
         (type, apiObj, watchObj) => {
@@ -403,7 +406,7 @@ function waitForEndpoint(name, namespace = 'default', timeout = 300_000) {
 
 function waitForFunction(name, namespace = 'default', timeout = 90_000) {
   return waitForK8sObject(
-      `/apis/serverless.kyma-project.io/v1alpha1/namespaces/${namespace}/functions`,
+      `/apis/serverless.kyma-project.io/v1alpha2/namespaces/${namespace}/functions`,
       {},
       (_type, _apiObj, watchObj) => {
         return (
@@ -419,9 +422,28 @@ function waitForFunction(name, namespace = 'default', timeout = 90_000) {
   );
 }
 
-async function getAllSubscriptions(namespace = 'default') {
+async function getSubscription(name, namespace = 'default', crdVersion='v1alpha1') {
   try {
-    const path = `/apis/eventing.kyma-project.io/v1alpha1/namespaces/${namespace}/subscriptions`;
+    const path = `/apis/eventing.kyma-project.io/${crdVersion}/namespaces/${namespace}/subscriptions/${name}`;
+    const response = await k8sDynamicApi.requestPromise({
+      url: k8sDynamicApi.basePath + path,
+      qs: {limit: 500},
+    });
+    const body = JSON.parse(response.body);
+    return body;
+  } catch (e) {
+    if (e.statusCode === 404 || e.statusCode === 405) {
+      // do nothing
+    } else {
+      error(e);
+      throw e;
+    }
+  }
+}
+
+async function getAllSubscriptions(namespace = 'default', crdVersion='v1alpha1') {
+  try {
+    const path = `/apis/eventing.kyma-project.io/${crdVersion}/namespaces/${namespace}/subscriptions`;
     const response = await k8sDynamicApi.requestPromise({
       url: k8sDynamicApi.basePath + path,
       qs: {limit: 500},
@@ -466,9 +488,9 @@ async function getEventingBackend(namespace = 'kyma-system') {
   return '';
 }
 
-function waitForSubscription(name, namespace = 'default', timeout = 180_000) {
+function waitForSubscription(name, namespace = 'default', crdVersion='v1alpha1', timeout = 180_000) {
   return waitForK8sObject(
-      `/apis/eventing.kyma-project.io/v1alpha1/namespaces/${namespace}/subscriptions`,
+      `/apis/eventing.kyma-project.io/${crdVersion}/namespaces/${namespace}/subscriptions`,
       {},
       (_type, _apiObj, watchObj) => {
         return (
@@ -530,6 +552,21 @@ function waitForDeployment(name, namespace = 'default', timeout = 90_000) {
       },
       timeout,
       `Waiting for deployment ${name} timeout (${timeout} ms)`,
+  );
+}
+
+function waitForService(name, namespace = 'default', timeout = 90_000) {
+  return waitForK8sObject(
+      `/api/v1/namespaces/${namespace}/services`,
+      {},
+      (_type, _apiObj, watchObj) => {
+        return (
+          watchObj.object.metadata.name === name &&
+          watchObj.object.spec.clusterIP
+        );
+      },
+      timeout,
+      `Waiting for service ${name} timeout (${timeout} ms)`,
   );
 }
 
@@ -632,6 +669,18 @@ function waitForVirtualService(namespace, apiRuleName, timeout = 30_000) {
 async function getVirtualService(namespace, name) {
   try {
     const path = `/apis/networking.istio.io/v1beta1/namespaces/${namespace}/virtualservices/${name}`;
+    const response = await k8sDynamicApi.requestPromise({
+      url: k8sDynamicApi.basePath + path,
+    });
+    return JSON.parse(response.body);
+  } catch (err) {
+    return JSON.parse(err.response.body);
+  }
+}
+
+async function getGateway(namespace, name) {
+  try {
+    const path = `/apis/networking.istio.io/v1beta1/namespaces/${namespace}/gateways/${name}`;
     const response = await k8sDynamicApi.requestPromise({
       url: k8sDynamicApi.basePath + path,
     });
@@ -1350,11 +1399,25 @@ function eventingSubscription(eventType, sink, name, namespace) {
           },
         ],
       },
-      protocol: 'BEB',
-      protocolsettings: {
-        exemptHandshake: true,
-        qos: 'AT-LEAST-ONCE',
-      },
+      sink: sink /* http://lastorder.test.svc.cluster.local*/,
+    },
+  };
+}
+
+function eventingSubscriptionV1Alpha2(eventType, source, sink, name, namespace, typeMatching='standard') {
+  return {
+    apiVersion: 'eventing.kyma-project.io/v1alpha2',
+    kind: 'Subscription',
+    metadata: {
+      name: `${name}`,
+      namespace: namespace,
+    },
+    spec: {
+      source: source,
+      typeMatching: typeMatching,
+      types: [
+        eventType,
+      ],
       sink: sink /* http://lastorder.test.svc.cluster.local*/,
     },
   };
@@ -1449,6 +1512,106 @@ function deleteEventingBackendK8sSecret(name, namespace='default') {
   };
 
   return k8sDelete([secretJson], namespace);
+}
+
+/**
+ * Creates apirule for the service specified
+ * @param {string} name - name of the configmap
+ * @param {string} namespace - namespace where to create the configmap
+ * @param {string} svcName - service to expose as apirule
+ * @param {int} port - port of the service to expose as apirule
+ */
+async function createApiRuleForService(name, namespace='default', svcName, port) {
+  const apiRuleJson = {
+    apiVersion: 'gateway.kyma-project.io/v1beta1',
+    kind: 'APIRule',
+    metadata: {
+      name,
+      namespace,
+    },
+    spec: {
+      gateway: 'kyma-gateway.kyma-system.svc.cluster.local',
+      host: svcName,
+      service: {
+        name: svcName,
+        port: port,
+      },
+      rules: [{
+        accessStrategies: [{
+          config: {},
+          handler: 'allow',
+        }],
+        methods: ['GET'],
+        path: '/.*',
+      }],
+    },
+  };
+
+  // apply to k8s
+  await k8sApply([apiRuleJson], namespace, true);
+
+  return waitForVirtualService(namespace, name);
+}
+
+/**
+ * Deletes apirule
+ * @param {string} name - name of the apirule
+ * @param {string} namespace - namespace where the apirule exists
+ * @return {Promise<void>}
+ */
+function deleteApiRule(name, namespace='default') {
+  const apiRuleJson = {
+    apiVersion: 'gateway.kyma-project.io/v1beta1',
+    kind: 'APIRule',
+    metadata: {
+      name,
+      namespace,
+    },
+  };
+
+  return k8sDelete([apiRuleJson], namespace);
+}
+
+/**
+ * Creates configmap with the data passed as argument
+ * @param {Object} data - host name of the virtual service exposed to obtain the information
+ * @param {string} name - name of the configmap
+ * @param {string} namespace - namespace where to create the configmap
+ */
+async function createK8sConfigMap(data, name, namespace='default') {
+  const configMapJson = {
+    apiVersion: 'v1',
+    kind: 'ConfigMap',
+    metadata: {
+      name,
+      namespace,
+    },
+    data: data,
+  };
+
+  // apply to k8s
+  await k8sApply([configMapJson], namespace, true);
+
+  return waitForConfigMap(name, namespace);
+}
+
+/**
+ * Deletes configmap
+ * @param {string} name - name of the configmap
+ * @param {string} namespace - namespace where the configmap exists
+ * @return {Promise<void>}
+ */
+function deleteK8sConfigMap(name, namespace='default') {
+  const configMapJson = {
+    apiVersion: 'v1',
+    kind: 'ConfigMap',
+    metadata: {
+      name,
+      namespace,
+    },
+  };
+
+  return k8sDelete([configMapJson], namespace);
 }
 
 /**
@@ -1610,10 +1773,10 @@ async function printEventingPublisherProxyLogs() {
   }
 }
 
-async function printAllSubscriptions(testNamespace) {
+async function printAllSubscriptions(testNamespace, crdVersion='v1alpha1') {
   try {
     debug(`Printing all subscriptions from namespace: ${testNamespace}`);
-    const subs = await getAllSubscriptions(testNamespace);
+    const subs = await getAllSubscriptions(testNamespace, crdVersion);
     debug(JSON.stringify(subs, null, 4));
   } catch (err) {
     error(err);
@@ -1624,7 +1787,16 @@ async function printAllSubscriptions(testNamespace) {
 // getTraceDAG returns a DAG for the provided Jaeger tracing data
 async function getTraceDAG(trace) {
   // Find root spans which are not child of any other span
-  const rootSpans = trace['spans'].filter((s) => !(s['references'].find((r) => r['refType'] === 'CHILD_OF')));
+  const rootSpans = [];
+  for (const span of trace['spans']) {
+    if (span['references'].length === 0) {
+      rootSpans.push(span);
+    }
+
+    if (!trace['spans'].find((s) => s['spanID'] === span['references'][0]['spanID'])) {
+      rootSpans.push(span);
+    }
+  }
 
   // Find and attach child spans for each root span
   for (const root of rootSpans) {
@@ -1648,6 +1820,53 @@ async function attachTraceChildSpans(parentSpan, trace) {
   }
 }
 
+function waitForDeploymentWithLabel(
+    labelKey,
+    labelValue,
+    namespace = 'default',
+    timeout = 90000,
+) {
+  const query = {
+    labelSelector: `${labelKey}=${labelValue}`,
+  };
+  return waitForK8sObject(
+      `/apis/apps/v1/namespaces/${namespace}/deployments`,
+      query,
+      (_type, _apiObj, watchObj) => {
+        return (
+
+          watchObj.object.status.readyReplicas === 1
+        );
+      },
+      timeout,
+      `Waiting for deployment with label ${labelKey}=${labelValue} timeout (${timeout} ms)`,
+  );
+}
+
+function waitForTracePipeline(name, timeout = 90_000) {
+  return waitForK8sObject(
+      `/apis/telemetry.kyma-project.io/v1alpha1/tracepipelines`,
+      {},
+      (_type, _apiObj, watchObj) => {
+        return (
+          watchObj.object.metadata.name === name &&
+        watchObj.object.status.conditions &&
+        watchObj.object.status.conditions.some(
+            (c) => c.type === 'Running',
+        )
+        );
+      },
+      timeout,
+      `Waiting for Tracepipeline ${name} timeout (${timeout} ms)`,
+  );
+}
+
+async function deployJaeger(jaegerObj) {
+  await k8sApply(jaegerObj, 'kyma-system').catch(console.error);
+  await waitForDeployment('tracing-jaeger', 'kyma-system');
+  await waitForTracePipeline('jaeger');
+}
+
 module.exports = {
   initializeK8sClient,
   getShootNameFromK8sServerUrl,
@@ -1668,6 +1887,7 @@ module.exports = {
   waitForClusterAddonsConfiguration,
   waitForVirtualService,
   waitForDeployment,
+  waitForService,
   waitForDaemonSet,
   waitForStatefulSet,
   waitForTokenRequest,
@@ -1689,7 +1909,6 @@ module.exports = {
   getEventingBackend,
   getSecrets,
   getConfigMap,
-  getPodPresets,
   getSecretData,
   listResources,
   listResourceNames,
@@ -1710,7 +1929,9 @@ module.exports = {
   wait,
   patchApplicationGateway,
   eventingSubscription,
+  eventingSubscriptionV1Alpha2,
   getVirtualService,
+  getGateway,
   getPersistentVolumeClaim,
   waitForApplicationCr,
   patchDeployment,
@@ -1730,9 +1951,17 @@ module.exports = {
   printEventingPublisherProxyLogs,
   createEventingBackendK8sSecret,
   deleteEventingBackendK8sSecret,
+  createK8sConfigMap,
+  deleteK8sConfigMap,
+  createApiRuleForService,
+  deleteApiRule,
   getTraceDAG,
   printStatusOfInClusterEventingInfrastructure,
   getFunction,
   waitForEndpoint,
   waitForPodWithLabelAndCondition,
+  waitForDeploymentWithLabel,
+  getSubscription,
+  deployJaeger,
+  waitForTracePipeline,
 };

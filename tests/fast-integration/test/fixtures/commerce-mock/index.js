@@ -1,9 +1,10 @@
 const k8s = require('@kubernetes/client-node');
 const fs = require('fs');
 const path = require('path');
-const {expect} = require('chai');
+const {expect, assert} = require('chai');
 const https = require('https');
 const axios = require('axios').default;
+const crypto = require('crypto');
 const httpsAgent = new https.Agent({
   rejectUnauthorized: false, // curl -k
 });
@@ -28,11 +29,13 @@ const {
   isDebugEnabled,
   toBase64,
   eventingSubscription,
+  eventingSubscriptionV1Alpha2,
   k8sDelete,
   getSecretData,
   namespaceObj,
   getTraceDAG,
   printStatusOfInClusterEventingInfrastructure,
+  deployJaeger,
 } = require('../../../utils');
 
 const {
@@ -74,6 +77,23 @@ const lastorderFunctionYaml = fs.readFileSync(
     },
 );
 
+const jaegerYaml = fs.readFileSync(
+    path.join(__dirname, '../jaeger/jaeger.yaml'),
+    {
+      encoding: 'utf8',
+    },
+);
+
+
+const eventTypeOrderCompleted = 'order.completed.v1';
+const uncleanEventType = 'Order-$.Final.R-e-c-e-i-v-e-d.v1';
+const fullyQualifiedEventType = 'sap.kyma.custom.inapp.order.completed.v2';
+const orderReceivedSubName = 'order-received';
+const eventTypeOrderReceived = 'sap.kyma.custom.inapp.order.received.v1';
+// the following is the consumer name of 'sap.kyma.custom.inapp.order.received.v1'
+const eventTypeOrderReceivedHash = 'f8a4e1486659bb2647b07bb167c9ee95';
+const eventSourceInApp = 'inapp';
+const uncleanSource = 'test-app';
 const applicationObjs = k8s.loadAllYaml(applicationMockYaml);
 const lastorderObjs = k8s.loadAllYaml(lastorderFunctionYaml);
 let eventMeshSourceNamespace = '/default/sap.kyma/tunas-prow';
@@ -251,12 +271,29 @@ async function sendCloudEventBinaryModeAndCheckResponse(backendType = 'nats', mo
   return await sendEventAndCheckResponse('cloud event binary', body, params, mockNamespace);
 }
 
+async function getTraceId(data) {
+  // Extract traceId from response
+  // Second part of traceparent header contains trace-id. See https://www.w3.org/TR/trace-context/#traceparent-header
+  const traceParent = data.event.headers['traceparent'];
+  debug(`Traceparent header is: ${traceParent}`);
+  let traceId;
+  if (traceParent == null) {
+    debug('traceID using traceparent is not present. Trying to fetch traceID using b3');
+    traceId = data.event.headers['x-b3-traceid'];
+    assert.isNotEmpty(traceId, 'neither traceparent or b3 header is present in the response header');
+  } else {
+    traceId = data.event.headers['traceparent'].split('-')[1];
+  }
+  debug(`got the traceId: ${traceId}`);
+  return traceId;
+}
+
 async function checkEventTracing(targetNamespace = 'test', res) {
-  expect(res.data).to.have.nested.property('event.headers.x-b3-traceid');
+  expect(res.data).to.have.nested.property('event.headers.traceparent');
   expect(res.data).to.have.nested.property('podName');
 
   // Extract traceId from response
-  const traceId = res.data.event.headers['x-b3-traceid'];
+  const traceId = getTraceId(res.data);
 
   // Define expected trace data
   const correctTraceProcessSequence = [
@@ -298,11 +335,10 @@ async function sendCloudEventBinaryModeAndCheckTracing(targetNamespace = 'test',
 
 async function checkInClusterEventTracing(targetNamespace) {
   const res = await checkInClusterEventDeliveryHelper(targetNamespace, 'structured');
-  expect(res.data).to.have.nested.property('event.headers.x-b3-traceid');
+  expect(res.data).to.have.nested.property('event.headers.traceparent');
   expect(res.data).to.have.nested.property('podName');
 
-  // Extract traceId from response
-  const traceId = res.data.event.headers['x-b3-traceid'];
+  const traceId = await getTraceId(res.data);
 
   // Define expected trace data
   const correctTraceProcessSequence = [
@@ -314,8 +350,9 @@ async function checkInClusterEventTracing(targetNamespace) {
     `lastorder-${res.data.podName.split('-')[1]}.${targetNamespace}`,
   ];
 
-  // wait sometime for jaeger to complete tracing data
-  await sleep(10_000);
+  // wait sometime for jaeger to complete tracing data.
+  // Arrival of traces might be delayed by otel-collectors batch timeout.
+  await sleep(20_000);
   await checkTrace(traceId, correctTraceProcessSequence);
 }
 
@@ -586,11 +623,11 @@ async function ensureCommerceMockWithCompassTestFixture(
   await waitForApplicationCr(`mp-${appName}`);
 
   await k8sApply([eventingSubscription(
-      `sap.kyma.custom.inapp.order.received.v1`,
+      eventTypeOrderReceived,
       `http://lastorder.${targetNamespace}.svc.cluster.local`,
-      'order-received',
+      orderReceivedSubName,
       targetNamespace)]);
-  await waitForSubscription('order-received', targetNamespace);
+  await waitForSubscription(orderReceivedSubName, targetNamespace);
   await waitForSubscription('order-created', targetNamespace);
   return mockHost;
 }
@@ -622,7 +659,7 @@ async function cleanCompassResourcesSKR(client, appName, scenarioName, runtimeID
   }
 }
 
-async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace) {
+async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace, testSubscriptionV1Alpha2=false) {
   await k8sApply(applicationObjs);
   const mockHost = await provisionCommerceMockResources(
       'commerce',
@@ -634,13 +671,55 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
 
   await waitForFunction('lastorder', targetNamespace);
 
+  const sink = `http://lastorder.${targetNamespace}.svc.cluster.local`;
   await k8sApply([eventingSubscription(
-      `sap.kyma.custom.inapp.order.received.v1`,
-      `http://lastorder.${targetNamespace}.svc.cluster.local`,
-      'order-received',
+      eventTypeOrderReceived,
+      sink,
+      orderReceivedSubName,
       targetNamespace)]);
-  await waitForSubscription('order-received', targetNamespace);
+  await waitForSubscription(orderReceivedSubName, targetNamespace);
   await waitForSubscription('order-created', targetNamespace);
+
+  if (testSubscriptionV1Alpha2) {
+    debug('creating v1alpha2 subscription CR');
+    const orderCompletedV1Alpha2Sub = eventingSubscriptionV1Alpha2(
+        eventTypeOrderCompleted,
+        eventSourceInApp,
+        sink,
+        'order-completed',
+        targetNamespace,
+    );
+    // apply to kyma cluster
+    await k8sApply([orderCompletedV1Alpha2Sub]);
+    await waitForSubscription('order-completed', targetNamespace, 'v1alpha2');
+
+    // create a subscription with unclean event type and source
+    const uncleanSubName = 'unclean-type-and-source';
+    const uncleanTypeAndSourceV1Alpha2Sub = eventingSubscriptionV1Alpha2(
+        uncleanEventType,
+        uncleanSource,
+        sink,
+        uncleanSubName,
+        targetNamespace,
+    );
+    // apply to kyma cluster
+    await k8sApply([uncleanTypeAndSourceV1Alpha2Sub]);
+    await waitForSubscription(uncleanSubName, targetNamespace, 'v1alpha2');
+
+    // create a subscription with unclean event type and source
+    const exactSubName = 'type-matching-exact-sub';
+    const typeMatchingExactV1Alpha2Sub = eventingSubscriptionV1Alpha2(
+        fullyQualifiedEventType,
+        eventMeshSourceNamespace,
+        sink,
+        exactSubName,
+        targetNamespace,
+        'exact',
+    );
+    // apply to kyma cluster
+    await k8sApply([typeMatchingExactV1Alpha2Sub]);
+    await waitForSubscription(exactSubName, targetNamespace, 'v1alpha2');
+  }
 
   return mockHost;
 }
@@ -658,6 +737,7 @@ async function provisionCommerceMockResources(appName, mockNamespace, targetName
         targetNamespace),
   ]);
   await waitForDeployment('commerce-mock', mockNamespace, 120 * 1000);
+  await deployJaeger(k8s.loadAllYaml(jaegerYaml));
   const vs = await waitForVirtualService(mockNamespace, 'commerce-mock');
   const mockHost = vs.spec.hosts[0];
   await retryPromise(
@@ -674,7 +754,7 @@ async function provisionCommerceMockResources(appName, mockNamespace, targetName
 
 function getResourcePaths(namespace) {
   return [
-    `/apis/serverless.kyma-project.io/v1alpha1/namespaces/${namespace}/functions`,
+    `/apis/serverless.kyma-project.io/v1alpha2/namespaces/${namespace}/functions`,
     `/apis/addons.kyma-project.io/v1alpha1/namespaces/${namespace}/addonsconfigurations`,
     `/apis/gateway.kyma-project.io/v1alpha1/namespaces/${namespace}/apirules`,
     `/apis/apps/v1/namespaces/${namespace}/deployments`,
@@ -720,26 +800,63 @@ async function waitForSubscriptions(subscriptions) {
 }
 
 async function waitForSubscriptionsTillReady(targetNamespace) {
-  await waitForSubscription('order-received', targetNamespace);
+  await waitForSubscription(orderReceivedSubName, targetNamespace);
   await waitForSubscription('order-created', targetNamespace);
 }
 
-async function checkInClusterEventDelivery(targetNamespace) {
-  await checkInClusterEventDeliveryHelper(targetNamespace, 'structured');
-  await checkInClusterEventDeliveryHelper(targetNamespace, 'binary');
-  await checkInClusterLegacyEvent(targetNamespace);
+async function checkInClusterEventDelivery(targetNamespace, testSubscriptionV1Alpha2=false) {
+  await checkInClusterEventDeliveryHelper(targetNamespace, 'structured', testSubscriptionV1Alpha2);
+  await checkInClusterEventDeliveryHelper(targetNamespace, 'binary', testSubscriptionV1Alpha2);
+  if (testSubscriptionV1Alpha2) {
+    await checkInClusterEventDeliveryHelper(targetNamespace, 'structured', true,
+        eventTypeOrderCompleted, eventSourceInApp);
+    await checkInClusterEventDeliveryHelper(targetNamespace, 'binary', true,
+        eventTypeOrderCompleted, eventSourceInApp);
+    // test CE with unclean event type
+    await checkInClusterEventDeliveryHelper(targetNamespace, 'structured', true,
+        uncleanEventType, uncleanSource);
+    await checkInClusterLegacyEvent(targetNamespace, true,
+        eventTypeOrderCompleted.replace('.v1', ''), eventSourceInApp);
+    // test legacy event with unclean event type
+    await checkInClusterLegacyEvent(targetNamespace, true,
+        uncleanEventType.replace('.v1', ''), uncleanSource);
+  }
+  await checkInClusterLegacyEvent(targetNamespace, testSubscriptionV1Alpha2);
+}
+
+async function checkFullyQualifiedTypeWithExactSub(targetNamespace, eventType=fullyQualifiedEventType) {
+  await checkInClusterEventDeliveryHelper(targetNamespace, 'structured', true,
+      eventType, eventMeshSourceNamespace);
+}
+
+async function generateTraceParentHeader() {
+  const version = Buffer.alloc(1).toString('hex');
+  const traceId = crypto.randomBytes(16).toString('hex');
+  const id = crypto.randomBytes(8).toString('hex');
+  const flags = '01';
+  const traceParentHeader = `${version}-${traceId}-${id}-${flags}`;
+  return traceParentHeader;
 }
 
 // send event using function query parameter send=true
-async function sendInClusterEventWithRetry(mockHost, eventId, encoding, retriesLeft = 10) {
+async function sendInClusterEventWithRetry(mockHost, eventId, encoding, eventType='',
+    eventSource='', retriesLeft = 10) {
+  const eventData = {id: eventId};
+  if (eventType) {
+    eventData.save = true;
+    eventData.type = eventType;
+    eventData.source = eventSource;
+  }
+
   await retryPromise(async () => {
-    const response = await axios.post(`https://${mockHost}`, {id: eventId}, {
+    const traceParentHeader = await generateTraceParentHeader();
+    const response = await axios.post(`https://${mockHost}`, eventData, {
       params: {
         send: true,
         encoding: encoding,
       },
       headers: {
-        'X-B3-Sampled': 1,
+        'traceparent': traceParentHeader,
       },
     });
 
@@ -759,15 +876,18 @@ async function sendInClusterEventWithRetry(mockHost, eventId, encoding, retriesL
 }
 
 // send legacy event using function query parameter send=true
-async function sendInClusterLegacyEventWithRetry(mockHost, eventData, retriesLeft = 10) {
+async function sendInClusterLegacyEventWithRetry(mockHost, eventData, eventType, eventSource, retriesLeft = 10) {
+  if (eventType) {
+    eventData.save = true;
+    eventData.type = eventType;
+    eventData.source = eventSource;
+  }
+
   await retryPromise(async () => {
     const response = await axios.post(`https://${mockHost}`, eventData, {
       params: {
         send: true,
         isLegacyEvent: true,
-      },
-      headers: {
-        'X-B3-Sampled': 1,
       },
     });
 
@@ -787,7 +907,7 @@ async function sendInClusterLegacyEventWithRetry(mockHost, eventData, retriesLef
 }
 
 // verify if event was received using function query parameter inappevent=eventId
-async function ensureInClusterEventReceivedWithRetry(mockHost, eventId, retriesLeft = 10) {
+async function ensureInClusterEventReceivedWithRetry(mockHost, eventId, eventType='', retriesLeft = 10) {
   return await retryPromise(async () => {
     debug(`Waiting to receive event "${eventId}"`);
 
@@ -801,6 +921,13 @@ async function ensureInClusterEventReceivedWithRetry(mockHost, eventId, retriesL
 
     expect(response.data).to.have.nested.property('event.id', eventId, 'The same event id expected in the result');
     expect(response.data).to.have.nested.property('event.shipped', true, 'Order should have property shipped');
+
+    if (eventType) {
+      debug(`checking if received event type is: ${eventType}`);
+      expect(response.data).to.have.nested.property(
+          'event.type', eventType, 'The same event type expected in the result');
+    }
+
     return response;
   }, retriesLeft, 2 * 1000)
       .catch((err) => {
@@ -809,7 +936,7 @@ async function ensureInClusterEventReceivedWithRetry(mockHost, eventId, retriesL
 }
 
 // verify if legacy event was received using function query parameter inappevent=eventId
-async function ensureInClusterLegacyEventReceivedWithRetry(mockHost, eventId, retriesLeft = 10) {
+async function ensureInClusterLegacyEventReceivedWithRetry(mockHost, eventId, eventType='', retriesLeft = 10) {
   return await retryPromise(async () => {
     debug(`Waiting to receive legacy event "${eventId}"`);
 
@@ -821,14 +948,23 @@ async function ensureInClusterLegacyEventReceivedWithRetry(mockHost, eventId, re
       data: response.data,
     });
 
-    expect(response.data).to.have.nested.property('event.id', eventId, 'The same event id expected in the result');
-    expect(response.data).to.have.nested.property('event.shipped', true, 'Order should have property shipped');
-    expect(response.data).to.have.nested.property('event.ce-type').that.contains('order.received');
+    expect(response.data).to.have.nested.property(
+        'event.id', eventId, 'The same event id expected in the result');
+    expect(response.data).to.have.nested.property(
+        'event.shipped', true, 'Order should have property shipped');
+    expect(response.data).to.have.nested.property('event.ce-type');
     expect(response.data).to.have.nested.property('event.ce-source');
     expect(response.data).to.have.nested.property('event.ce-eventtypeversion', 'v1');
     expect(response.data).to.have.nested.property('event.ce-specversion', '1.0');
     expect(response.data).to.have.nested.property('event.ce-id');
     expect(response.data).to.have.nested.property('event.ce-time');
+
+    if (eventType) {
+      debug(`checking if received event type is: ${eventType}`);
+      expect(response.data).to.have.nested.property('event.type').that.contains(eventType);
+    } else {
+      expect(response.data).to.have.nested.property('event.ce-type').that.contains('order.received');
+    }
 
     return response;
   }, retriesLeft, 2 * 1000)
@@ -846,7 +982,8 @@ async function getVirtualServiceHost(targetNamespace, funcName) {
   return vs.spec.hosts[0];
 }
 
-async function checkInClusterEventDeliveryHelper(targetNamespace, encoding) {
+async function checkInClusterEventDeliveryHelper(targetNamespace, encoding, testSubscriptionV1Alpha2=false,
+    eventType='', eventSource='') {
   const eventId = getRandomEventId(encoding);
   const mockHost = await getVirtualServiceHost(targetNamespace, 'lastorder');
 
@@ -854,11 +991,12 @@ async function checkInClusterEventDeliveryHelper(targetNamespace, encoding) {
     await printStatusOfInClusterEventingInfrastructure(targetNamespace, encoding, 'lastorder');
   }
 
-  await sendInClusterEventWithRetry(mockHost, eventId, encoding);
-  return ensureInClusterEventReceivedWithRetry(mockHost, eventId);
+  await sendInClusterEventWithRetry(mockHost, eventId, encoding, eventType, eventSource);
+  return ensureInClusterEventReceivedWithRetry(mockHost, eventId, eventType);
 }
 
-async function checkInClusterLegacyEvent(targetNamespace) {
+async function checkInClusterLegacyEvent(targetNamespace, testSubscriptionV1Alpha2=false,
+    eventType='', eventSource='') {
   const eventId = getRandomEventId('legacy');
   const mockHost = await getVirtualServiceHost(targetNamespace, 'lastorder');
 
@@ -867,8 +1005,9 @@ async function checkInClusterLegacyEvent(targetNamespace) {
   }
 
   const eventData = {'id': eventId, 'legacyOrder': '987'};
-  await sendInClusterLegacyEventWithRetry(mockHost, eventData);
-  return ensureInClusterLegacyEventReceivedWithRetry(mockHost, eventId);
+
+  await sendInClusterLegacyEventWithRetry(mockHost, eventData, eventType, eventSource);
+  return ensureInClusterLegacyEventReceivedWithRetry(mockHost, eventId, eventType);
 }
 
 module.exports = {
@@ -885,6 +1024,7 @@ module.exports = {
   deleteService,
   checkFunctionResponse,
   checkInClusterEventDelivery,
+  checkFullyQualifiedTypeWithExactSub,
   checkInClusterEventTracing,
   cleanMockTestFixture,
   deleteMockTestFixture,
@@ -897,4 +1037,10 @@ module.exports = {
   getVirtualServiceHost,
   sendInClusterEventWithRetry,
   ensureInClusterEventReceivedWithRetry,
+  prepareFunction,
+  eventTypeOrderReceivedHash,
+  eventTypeOrderReceived,
+  orderReceivedSubName,
+  generateTraceParentHeader,
+  checkTrace,
 };

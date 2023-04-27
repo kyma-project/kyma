@@ -5,10 +5,10 @@ module.exports = {
 };
 
 const loki = require('./loki');
-const {k8sApply, k8sDelete, sleep} = require('../utils');
-const fs = require('fs');
-const path = require('path');
-const k8s = require('@kubernetes/client-node');
+const {
+  k8sDelete,
+} = require('../utils');
+const {loadResourceFromFile} = require('./client');
 
 function loggingTests() {
   const testStartTimestamp = new Date().toISOString();
@@ -28,7 +28,6 @@ function loggingTests() {
     it('Persistent Volume Claim Size should be 30Gi', async () => {
       await loki.checkPersistentVolumeClaimSize();
     });
-
     istioAccessLogsTests(testStartTimestamp);
   });
 }
@@ -42,20 +41,9 @@ function istioAccessLogsTests(startTimestamp) {
       await k8sDelete(istioAccessLogsResource, namespace);
     });
 
-    it('Should create the Istio Access Logs resource for Loki', async () => {
-      await k8sApply(istioAccessLogsResource, namespace);
-      await sleep(20000);
-    });
-
     it('Should query Loki and verify format of Istio Access Logs', async () => {
       await loki.verifyIstioAccessLogFormat(startTimestamp);
     });
   });
 }
 
-function loadResourceFromFile(file) {
-  const yaml = fs.readFileSync(path.join(__dirname, file), {
-    encoding: 'utf8',
-  });
-  return k8s.loadAllYaml(yaml);
-}

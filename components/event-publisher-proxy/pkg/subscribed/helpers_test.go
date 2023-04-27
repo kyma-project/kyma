@@ -4,10 +4,156 @@ import (
 	"reflect"
 	"testing"
 
+	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
+
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 )
 
 func TestFilterEventTypeVersions(t *testing.T) {
+	t.Parallel()
+	testCases := []struct {
+		name           string
+		appName        string
+		subscription   *eventingv1alpha2.Subscription
+		expectedEvents []Event
+	}{
+		{
+			name:           "should return no events when there is no subscription",
+			appName:        "fooapp",
+			subscription:   &eventingv1alpha2.Subscription{},
+			expectedEvents: make([]Event, 0),
+		}, {
+			name:    "should return a slice of events when eventTypes are provided",
+			appName: "foovarkes",
+			subscription: &eventingv1alpha2.Subscription{
+				Spec: eventingv1alpha2.SubscriptionSpec{
+					Source: "foovarkes",
+					Types: []string{
+						"order.created.v1",
+						"order.created.v2",
+					},
+				},
+			},
+			expectedEvents: []Event{
+				NewEvent("order.created", "v1"),
+				NewEvent("order.created", "v2"),
+			},
+		}, {
+			name:    "should return no event if app name is different than subscription source",
+			appName: "foovarkes",
+			subscription: &eventingv1alpha2.Subscription{
+				Spec: eventingv1alpha2.SubscriptionSpec{
+					Source: "diff-source",
+					Types: []string{
+						"order.created.v1",
+						"order.created.v2",
+					},
+				},
+			},
+			expectedEvents: []Event{},
+		}, {
+			name:    "should return event types if event type consists of eventType and appName for typeMaching exact",
+			appName: "foovarkes",
+			subscription: &eventingv1alpha2.Subscription{
+				Spec: eventingv1alpha2.SubscriptionSpec{
+					Source:       "/default/sap.kyma/tunas-develop",
+					TypeMatching: eventingv1alpha2.TypeMatchingExact,
+					Types: []string{
+						"sap.kyma.custom.foovarkes.order.created.v1",
+						"sap.kyma.custom.foovarkes.order.created.v2",
+					},
+				},
+			},
+			expectedEvents: []Event{
+				NewEvent("order.created", "v1"),
+				NewEvent("order.created", "v2"),
+			},
+		}, {
+			name:    "should return no event if app name is not part of external event types",
+			appName: "foovarkes",
+			subscription: &eventingv1alpha2.Subscription{
+				Spec: eventingv1alpha2.SubscriptionSpec{
+					Source:       "/default/sap.kyma/tunas-develop",
+					TypeMatching: eventingv1alpha2.TypeMatchingExact,
+					Types: []string{
+						"sap.kyma.custom.difffoovarkes.order.created.v1",
+						"sap.kyma.custom.difffoovarkes.order.created.v2",
+					},
+				},
+			},
+			expectedEvents: []Event{},
+		}, {
+			name:    "should return event type only with 'sap.kyma.custom' prefix and appname",
+			appName: "foovarkes",
+			subscription: &eventingv1alpha2.Subscription{
+				Spec: eventingv1alpha2.SubscriptionSpec{
+					Source:       "/default/sap.kyma/tunas-develop",
+					TypeMatching: eventingv1alpha2.TypeMatchingExact,
+					Types: []string{
+						"foo.prefix.custom.foovarkes.order.created.v1",
+						"sap.kyma.custom.foovarkes.order.created.v2",
+						"sap.kyma.custom.diffvarkes.order.created.v2",
+					},
+				},
+			},
+			expectedEvents: []Event{
+				NewEvent("order.created", "v2"),
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			gotEvents := FilterEventTypeVersions("sap.kyma.custom", tc.appName, tc.subscription)
+			if !reflect.DeepEqual(tc.expectedEvents, gotEvents) {
+				t.Errorf("Received incorrect events, Wanted: %v, Got: %v", tc.expectedEvents, gotEvents)
+			}
+		})
+	}
+}
+
+func TestBuildEventType(t *testing.T) {
+	t.Parallel()
+	testCases := []struct {
+		name    string
+		appName string
+		want    Event
+	}{
+		{
+			name:    "should return no events when there is no subscription",
+			appName: "order.created.v1",
+			want: Event{
+				Name:    "order.created",
+				Version: "v1",
+			},
+		}, {
+			name:    "should return a slice of events when eventTypes are provided",
+			appName: "product.order.created.v1",
+			want: Event{
+				Name:    "product.order.created",
+				Version: "v1",
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			event := buildEvent(tc.appName)
+			if !reflect.DeepEqual(tc.want, event) {
+				t.Errorf("Received incorrect events, Wanted: %v, Got: %v", tc.want, event)
+			}
+		})
+	}
+}
+
+func TestFilterEventTypeVersionsV1alpha1(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		name            string
 		appName         string
@@ -78,7 +224,7 @@ func TestFilterEventTypeVersions(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			gotEvents := FilterEventTypeVersions(tc.eventTypePrefix, tc.bebNs, tc.appName, tc.filters)
+			gotEvents := FilterEventTypeVersionsV1alpha1(tc.eventTypePrefix, tc.bebNs, tc.appName, tc.filters)
 			if !reflect.DeepEqual(tc.expectedEvents, gotEvents) {
 				t.Errorf("Received incorrect events, Wanted: %v, Got: %v", tc.expectedEvents, gotEvents)
 			}
@@ -87,6 +233,7 @@ func TestFilterEventTypeVersions(t *testing.T) {
 }
 
 func TestConvertEventsMapToSlice(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		name         string
 		inputMap     map[Event]bool
@@ -131,6 +278,7 @@ func TestConvertEventsMapToSlice(t *testing.T) {
 }
 
 func TestAddUniqueEventsToResult(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		name                   string
 		eventsSubSet           []Event
@@ -210,7 +358,6 @@ func WithOneBEBFilter(bebFilters *eventingv1alpha1.BEBFilters) {
 	bebFilters.Filters = []*eventingv1alpha1.BEBFilter{
 		NewBEBFilter(evSource, evType),
 	}
-
 }
 
 func WithMultipleBEBFiltersFromSameSource(bebFilters *eventingv1alpha1.BEBFilters) {

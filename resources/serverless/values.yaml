@@ -66,7 +66,7 @@ global:
     helm.sh/chart: '{{ include "chart" . }}'
   dockerServicePort: 5000
   configuration:
-    configmapName: 'serverless-configuration'
+    configmapName: "serverless-configuration"
     targetDir: "/appdata"
     filename: "config.yaml"
   ingress:
@@ -76,51 +76,49 @@ global:
   images:
     k8s_tools:
       name: "k8s-tools"
-      version: "20221115-1e7ca96f"
+      version: "v20230426-b7682b0e"
       directory: "tpi"
     function_controller:
       name: "function-controller"
-      version: "PR-16108"
+      version: "PR-17255"
     function_webhook:
       name: "function-webhook"
-      version: "PR-16108"
+      version: "PR-17255"
     function_build_init:
       name: "function-build-init"
-      version: "PR-16108"
+      version: "PR-17255"
     function_runtime_nodejs14:
       name: "function-runtime-nodejs14"
-      version: "PR-16116"
+      version: "v20230302-a6a85f47"
     function_runtime_nodejs16:
       name: "function-runtime-nodejs16"
-      version: "PR-16116"
+      version: "v20230302-a6a85f47"
+    function_runtime_nodejs18:
+      name: "function-runtime-nodejs18"
+      version: "v20230302-a6a85f47"
     function_runtime_python39:
       name: "function-runtime-python39"
-      version: "v20221110-f5cb45c7"
+      version: "PR-17399"
     kaniko_executor:
       name: "kaniko-executor"
-      version: "1.9.0-4ced14d5"
+      version: "1.9.1-ab1cf603"
       directory: "tpi"
     registry:
       name: "registry"
-      version: "2.7.1-4ced14d5"
+      version: "2.8.1-ab1cf603"
       directory: "tpi"
+    function_registry_gc:
+      name: "function-registry-gc"
+      version: "v20230407-602e2c0f"
     google_pause:
       name: "pause-amd64"
       version: "3.2"
       directory: "external/gcr.io/google-containers"
-  testImages:
-    function_controller_test:
-      name: "function-controller-test"
-      version: "v20221102-bcd2a2b1"
-    git_server:
-      name: "gitserver"
-      version: "708f6a87"
-  highPriorityClassName: "kyma-system-priority"
-
+  serverlessPriorityClassValue: 2000000
+  serverlessPriorityClassName: "serverless-priority"
 images:
   function_controller:
     pullPolicy: IfNotPresent
-
 
 deployment:
   replicas: 1
@@ -144,6 +142,7 @@ pod:
   labels: {}
   annotations:
     sidecar.istio.io/inject: "false"
+    prometheus.io/scrape: "false"
   extraProperties:
     terminationGracePeriodSeconds: 10
     # the following guidelines should be followed for this https://github.com/kyma-project/community/tree/main/concepts/psp-replacement
@@ -189,6 +188,8 @@ containers:
         logLevel: "info"
         logFormat: "json"
     envs:
+      baseNamespace:
+        value: "{{ .Release.Namespace }}"
       configPath:
         value: "{{ .Values.global.configuration.targetDir }}/{{ .Values.global.configuration.filename }}"
       configMapRequeueDuration:
@@ -198,7 +199,7 @@ containers:
       serviceAccountRequeueDuration:
         value: 5m
       namespaceExcludedNames:
-        value: "istio-system,kube-node-lease,kube-public,kube-system,kyma-installer,kyma-integration,kyma-system,natss,compass-system"
+        value: "istio-system,kube-node-lease,kube-public,kube-system,kyma-installer,kyma-system,natss"
       imageRegistryExternalDockerConfigSecretName:
         value: '{{ template "fullname" . }}-registry-config'
       imageRegistryDefaultDockerConfigSecretName:
@@ -214,7 +215,7 @@ containers:
       functionJaegerServiceEndpoint:
         value: "http://tracing-jaeger-collector.kyma-system.svc.cluster.local:14268/api/traces"
       functionTraceCollectorEndpoint:
-        value: "http://tracing-jaeger-collector.kyma-system.svc.cluster.local:4318/v1/traces"
+        value: "http://telemetry-otlp-traces.kyma-system.svc.cluster.local:4318/v1/traces"
       functionPublisherProxyAddress:
         value: "http://eventing-publisher-proxy.kyma-system.svc.cluster.local/publish"
       functionRequeueDuration:
@@ -230,7 +231,10 @@ services:
   manager:
     type: ClusterIP
     labels: {}
-    annotations: {}
+    annotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/port: "8080"
+      prometheus.io/path: "/metrics"
     https:
       port: 443
       targetPort: 8443
@@ -243,16 +247,9 @@ metrics:
       port: 8080
       targerPort: 8080
       protocol: TCP
-  serviceMonitor:
-    create: true
-    labels: {}
-    annotations: {}
   pod:
     labels: {}
-    annotations:
-      prometheus.io/scrape: "true"
-      prometheus.io/port: "8080"
-      prometheus.io/path: "/metrics"
+    annotations: {}
 
 backendModule:
   enabled: true

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 
+	pkgerrors "github.com/kyma-project/kyma/components/eventing-controller/pkg/errors"
 	"golang.org/x/xerrors"
 
 	"github.com/pkg/errors"
@@ -54,8 +55,12 @@ const (
 
 	reconcilerName = "backend-reconciler"
 
-	certificateSecretNamespace = "kyma-system"
-	tlsCertField               = "tls.crt"
+	kymaSystemNamespace = "kyma-system"
+	tlsCertField        = "tls.crt"
+
+	natsSecretName           = "eventing-nats-secret"
+	natsSecretKey            = "resolver.conf"
+	natsSecretPasswordLength = 60
 )
 
 var (
@@ -73,7 +78,7 @@ type Reconciler struct {
 	client.Client
 	ctx               context.Context
 	natsSubMgr        subscriptionmanager.Manager
-	natsConfig        env.NatsConfig
+	natsConfig        env.NATSConfig
 	natsSubMgrStarted bool
 	bebSubMgr         subscriptionmanager.Manager
 	bebSubMgrStarted  bool
@@ -87,7 +92,9 @@ type Reconciler struct {
 	oauth2ClientSecret []byte
 }
 
-func NewReconciler(ctx context.Context, natsSubMgr subscriptionmanager.Manager, natsConfig env.NatsConfig, bebSubMgr subscriptionmanager.Manager, client client.Client, logger *logger.Logger, recorder record.EventRecorder) *Reconciler {
+func NewReconciler(ctx context.Context, natsSubMgr subscriptionmanager.Manager, natsConfig env.NATSConfig,
+	bebSubMgr subscriptionmanager.Manager, client client.Client, logger *logger.Logger,
+	recorder record.EventRecorder) *Reconciler {
 	cfg := env.GetBackendConfig()
 	return &Reconciler{
 		ctx:        ctx,
@@ -110,10 +117,13 @@ func NewReconciler(ctx context.Context, natsSubMgr subscriptionmanager.Manager, 
 // +kubebuilder:rbac:groups="",resources=pods,verbs=get;list;watch;delete
 
 func (r *Reconciler) Reconcile(ctx context.Context, _ ctrl.Request) (ctrl.Result, error) {
-	if r.natsConfig.EnableNewCRDVersion {
-		if err := r.updateMutatingValidatingWebhookWithCABundle(ctx); err != nil {
-			return ctrl.Result{}, err
-		}
+	if err := r.updateMutatingValidatingWebhookWithCABundle(ctx); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	// Create NATS Secret for the eventing-nats statefulset
+	if createErr := r.createNATSSecret(ctx); createErr != nil {
+		return ctrl.Result{}, createErr
 	}
 
 	var secretList v1.SecretList
@@ -179,7 +189,7 @@ func (r *Reconciler) reconcileNATSBackend(ctx context.Context, backendStatus *ev
 	}
 
 	// Delete secret for publisher proxy if it exists
-	err = r.DeletePublisherProxySecret(ctx)
+	err = r.deletePublisherProxySecret(ctx)
 	if err != nil {
 		backendStatus.SetPublisherReadyCondition(false, eventingv1alpha1.ConditionReasonPublisherProxySecretError, err.Error())
 		if updateErr := r.syncBackendStatus(ctx, backendStatus, nil); updateErr != nil {
@@ -453,11 +463,23 @@ func getDefaultBackendStatus() eventingv1alpha1.EventingBackendStatus {
 	return defaultStatus
 }
 
-func (r *Reconciler) DeletePublisherProxySecret(ctx context.Context) error {
+func (r *Reconciler) deletePublisherProxySecret(ctx context.Context) error {
 	secretNamespacedName := types.NamespacedName{
 		Namespace: deployment.PublisherNamespace,
 		Name:      deployment.PublisherName,
 	}
+	return r.deleteSecret(ctx, secretNamespacedName)
+}
+
+func (r *Reconciler) deleteNATSSecret(ctx context.Context) error {
+	secretNamespacedName := types.NamespacedName{
+		Namespace: kymaSystemNamespace,
+		Name:      natsSecretName,
+	}
+	return r.deleteSecret(ctx, secretNamespacedName)
+}
+
+func (r *Reconciler) deleteSecret(ctx context.Context, secretNamespacedName types.NamespacedName) error {
 	currentSecret := new(v1.Secret)
 	err := r.Get(ctx, secretNamespacedName, currentSecret)
 	if err != nil {
@@ -469,7 +491,7 @@ func (r *Reconciler) DeletePublisherProxySecret(ctx context.Context) error {
 	}
 
 	if err := r.Client.Delete(ctx, currentSecret); err != nil {
-		return errors.Wrapf(err, "failed to delete Event Publisher secret")
+		return errors.Wrapf(err, "failed to delete secret: %s", secretNamespacedName.Name)
 	}
 	return nil
 }
@@ -731,6 +753,24 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
+func (r *Reconciler) createNATSSecret(ctx context.Context) error {
+	secretNamespacedName := types.NamespacedName{
+		Namespace: kymaSystemNamespace,
+		Name:      natsSecretName,
+	}
+	currentSecret := new(v1.Secret)
+	if err := r.Get(ctx, secretNamespacedName, currentSecret); err != nil {
+		if k8serrors.IsNotFound(err) {
+			if createErr := r.Client.Create(ctx, constructNATSSecret()); createErr != nil {
+				return errors.Wrapf(createErr, "failed to create NATS Secret")
+			}
+			return nil
+		}
+		return err
+	}
+	return nil
+}
+
 func (r *Reconciler) startNATSController() error {
 	if !r.natsSubMgrStarted {
 		if err := r.natsSubMgr.Start(r.cfg.DefaultSubscriptionConfig, subscriptionmanager.Params{}); err != nil {
@@ -817,11 +857,11 @@ func (r *Reconciler) updateMutatingValidatingWebhookWithCABundle(ctx context.Con
 	// get the secret containing the certificate
 	var certificateSecret v1.Secret
 	secretKey := client.ObjectKey{
-		Namespace: certificateSecretNamespace,
+		Namespace: kymaSystemNamespace,
 		Name:      r.cfg.WebhookSecretName,
 	}
 	if err := r.Client.Get(ctx, secretKey, &certificateSecret); err != nil {
-		return utils.MakeError(errObjectNotFound, err)
+		return pkgerrors.MakeError(errObjectNotFound, err)
 	}
 
 	// get the mutating and validation WH config
@@ -832,11 +872,11 @@ func (r *Reconciler) updateMutatingValidatingWebhookWithCABundle(ctx context.Con
 
 	// check that the mutating and validation WH config are valid
 	if len(mutatingWH.Webhooks) == 0 {
-		return utils.MakeError(errInvalidObject,
+		return pkgerrors.MakeError(errInvalidObject,
 			errors.Errorf("mutatingWH %s does not have associated webhooks", r.cfg.MutatingWebhookName))
 	}
 	if len(validatingWH.Webhooks) == 0 {
-		return utils.MakeError(errInvalidObject,
+		return pkgerrors.MakeError(errInvalidObject,
 			errors.Errorf("validatingWH %s does not have associated webhooks", r.cfg.ValidatingWebhookName))
 	}
 
@@ -871,14 +911,14 @@ func (r *Reconciler) getMutatingAndValidatingWebHookConfig(ctx context.Context) 
 		Name: r.cfg.MutatingWebhookName,
 	}
 	if err := r.Client.Get(ctx, mutatingWHKey, &mutatingWH); err != nil {
-		return nil, nil, utils.MakeError(errObjectNotFound, err)
+		return nil, nil, pkgerrors.MakeError(errObjectNotFound, err)
 	}
 	var validatingWH admissionv1.ValidatingWebhookConfiguration
 	validatingWHKey := client.ObjectKey{
 		Name: r.cfg.ValidatingWebhookName,
 	}
 	if err := r.Client.Get(ctx, validatingWHKey, &validatingWH); err != nil {
-		return nil, nil, utils.MakeError(errObjectNotFound, err)
+		return nil, nil, pkgerrors.MakeError(errObjectNotFound, err)
 	}
 	return &mutatingWH, &validatingWH, nil
 }
@@ -889,4 +929,29 @@ func (r *Reconciler) namedLogger() *zap.SugaredLogger {
 
 func getOAuth2ClientSecretName() string {
 	return deployment.ControllerName + BEBSecretNameSuffix
+}
+
+func constructNATSSecret() *v1.Secret {
+	secretMap := make(map[string][]byte)
+	password := utils.GetRandString(natsSecretPasswordLength)
+	secretMap[natsSecretKey] = []byte(fmt.Sprintf(
+		`accounts: {
+  "$SYS": {
+    users: [
+      {user: "admin", password: "%v" }
+    ]
+  },
+}
+system_account: "$SYS"`, password))
+	return &v1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      natsSecretName,
+			Namespace: kymaSystemNamespace,
+			Annotations: map[string]string{
+				"eventing.kyma-project.io/managed-by-reconciler-disclaimer": "DO NOT EDIT - " +
+					"This resource is managed by Kyma.\n Any modifications breaks eventing.",
+			},
+		},
+		Data: secretMap,
+	}
 }

@@ -37,7 +37,7 @@ spec:
           - "--proxyPort={{ .Values.deployment.args.proxyPort }}"
           - "--proxyPortCompass={{ .Values.deployment.args.proxyPortCompass }}"
           - "--externalAPIPort={{ .Values.deployment.args.externalAPIPort }}"
-          - "--applicationSecretsNamespace={{ .Values.global.integrationNamespace }}"
+          - "--applicationSecretsNamespace={{ .Values.global.systemNamespace }}"
           - "--requestTimeout={{ .Values.deployment.args.requestTimeout }}"
           - "--proxyTimeout={{ .Values.deployment.args.proxyTimeout }}"
           - "--proxyCacheTTL={{ .Values.deployment.args.proxyCacheTTL }}"

@@ -58,6 +58,8 @@ spec:
             {{- with .Values.config.cors.allowHeaders }}
             - --cors-allow-headers={{ . | join ", " }}
             {{- end }}
+            - --reconciliation-period={{ .Values.config.reconciliation.defaultPeriod }}
+            - --error-reconciliation-period={{ .Values.config.reconciliation.errorPeriod }}
           resources:
             {{- toYaml .Values.deployment.resources | nindent 12 }}
           securityContext:

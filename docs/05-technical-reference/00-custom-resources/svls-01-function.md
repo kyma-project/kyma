@@ -104,7 +104,7 @@ spec:
       auth:
         type: basic
         secretName: secret-name
-  runtime: "nodejs14"
+  runtime: "nodejs16"
 ```
 
 ## Custom resource parameters
@@ -116,7 +116,7 @@ This table lists all the possible parameters of a given resource together with t
 | **metadata.name**              |      Yes       | Specifies the name of the CR.                 |
 | **metadata.namespace**     |       No       | Defines the Namespace in which the CR is available. It is set to `default` unless you specify otherwise.      |
 | **metadata.labels**                          |       No       | Specifies the Function's Pod labels.    |
-| **spec.runtime**                         |      Yes       | Specifies the runtime of the Function. The available values are `nodejs14`, `nodejs16`, and `python39`. |
+| **spec.runtime**                         |      Yes       | Specifies the runtime of the Function. The available values are `nodejs16`, `nodejs16`, and `python39`. |
 | **spec.runtimeImageOverride**                 |       No       | Specifies the runtimes image which must be used instead of the default one. |
 | **spec.source**                               |      Yes       | Contains the Function's specification. Only one specification is allowed. |
 | **spec.source.inline**                        |       No       | Defines Function as the inline Function. |
@@ -129,7 +129,7 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.source.gitRepository.auth**            |       No       | Specifies that you must authenticate to the Git repository. Required for SSH. |
 | **spec.source.gitRepository.auth.type**       |      Yes       | Defines if you must authenticate to the repository with a password or token (`basic`), or an SSH key (`key`). For SSH, this parameter must be set to `key`. |
 | **spec.source.gitRepository.auth.secretName** |      Yes       | Specifies the name of the Secret with credentials used by the Function Controller to authenticate to the Git repository in order to fetch the Function's source code and dependencies. This Secret must be stored in the same Namespace as the Function CR. |
-| **spec.env**                             |       No       | Specifies environment variables you need to export for the Function. You can export them either directly in the Function CR's spec or define them in a [ConfigMap](../00-configuration-parameters/svls-02-environment-variables.md#define-environment-variables-in-a-config-map). |
+| **spec.env**                             |       No       | Specifies an array of key-value pairs to be used as environment variables for the Function. You can define values as static strings or reference values from [ConfigMaps](../00-configuration-parameters/svls-02-environment-variables.md#define-environment-variables-in-a-config-map) or Secrets. |
 | **spec.resourceConfiguration**                |       No       | Specifies resources requested by Function and build Job. |
 | **spec.resourceConfiguration.function**       |       No       | Specifies resources requested by the Function's Pod. |
 | **spec.resourceConfiguration.function.profile**                         |       No       | Defines name of predefined set of values of resource. Can't be used at the same time with **spec.resourceConfiguration.function.resources**. |
@@ -145,13 +145,13 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.resourceConfiguration.build.resources.limits.memory**         |       No       | Defines the maximum amount of memory available for the Job's Pod to use.      |
 | **spec.resourceConfiguration.build.resources.requests.cpu**          |       No       | Specifies the number of CPUs requested by the build Job's Pod to operate.       |
 | **spec.resourceConfiguration.build.resources.requests.memory**       |       No       | Specifies the amount of memory requested by the build Job's Pod to operate.               |
-| **spec.replicas**                             |       No       | Defines exact number of Function's Pods to run at a time. Can't be used at the same time with **spec.scaleConfig**. |
-| **spec.scaleConfig**                          |       No       | Defines minimum and maximum number of Function's Pods to run at a time. Can't be used at the same time with **spec.replicas**. |
+| **spec.replicas**                             |       No       | Defines the exact number of Function's Pods to run at a time. If **spec.scaleConfig** is configured, or if Function is targeted by an external scaler, then the **spec.replicas** field is used by the relevant HorizontalPodAutoscaler to control the number of active replicas. |
+| **spec.scaleConfig**                          |       No       | Defines minimum and maximum number of Function's Pods to run at a time. When it is configured, a HorizontalPodAutoscaler will be deployed and will control the **spec.replicas** field to scale Function based on the CPU utilisation. |
 | **spec.scaleConfig.minReplicas**              |      Yes       | Defines the minimum number of Function's Pods to run at a time. |
 | **spec.scaleConfig.maxReplicas**              |      Yes       | Defines the maximum number of Function's Pods to run at a time. |
-| **spec.secretMounts**                         |       No       | Specifies volumes containing Secrets to mount into the container's filesystem. |
-| **spec.secretMounts.secretName**              |      Yes       | Name of the Secret in the Pod's Namespace to use. |
-| **spec.secretMounts.mountPath**               |      Yes       | Path within the container at which the volume should be mounted. |
+| **spec.secretMounts**                         |       No       | Specifies Secrets to mount into the Function's container filesystem. |
+| **spec.secretMounts.secretName**              |      Yes       | Specifies name of the Secret in the Function's Namespace to use. |
+| **spec.secretMounts.mountPath**               |      Yes       | Specifies path within the container at which the Secret should be mounted. |
 | **status.conditions.lastTransitionTime** | Not applicable | Provides a timestamp for the last time the Function's condition status changed from one to another.    |
 | **status.conditions.message**            | Not applicable | Describes a human-readable message on the CR processing progress, success, or failure.   |
 | **status.conditions.reason**             | Not applicable | Provides information on the Function CR processing success or failure. See the [**Reasons**](#status-reasons) section for the full list of possible status reasons and their descriptions. All status reasons are in camelCase.   |
