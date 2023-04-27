@@ -26,7 +26,7 @@ global:
         # dbName: "db4hydra"
         # dbType: "postgres | mysql | cockroach"
   containerRegistry:
-    path: europe-docker.pkg.dev/kyma-project/prod
+    path: europe-docker.pkg.dev/kyma-project
   images:
     k8s_tools:
       name: "k8s-tools"
@@ -38,39 +38,39 @@ global:
     gce_proxy:
       name: "gce-proxy"
       version: "v1.33.6-1bdccf0a"
-      directory: "tpi/cloudsql-docker"
+      directory: "prod/tpi/cloudsql-docker"
     hydra:
       name: "hydra"
       version: "v1.11.8"
-      directory: "external/oryd"
+      directory: "prod/external/oryd"
     hydra_maester:
       name: "hydra-maester"
       version: "v0.0.25"
-      directory: "external/oryd"
+      directory: "prod/external/oryd"
     busybox:
       name: "busybox"
       version: "1.34.1-v1"
-      directory: "external"
+      directory: "prod/external"
     oathkeeper:
       name: "oathkeeper"
       version: "v0.38.25-beta.1"
-      directory: "external/oryd"
+      directory: "prod/external/oryd"
     oathkeeper_maester:
       name: "oathkeeper-maester"
       version: "v0.1.5"
-      directory: "external/oryd"
+      directory: "prod/external/oryd"
     postgres:
       name: "postgres"
       version: "v20230427-11.19-alpine3.17"
-      directory: "external"
+      directory: "prod/external"
     postgres_exporter:
       name: "postgres-exporter"
       version: "0.11.1-debian-11-r23"
-      directory: "external/bitnami"
+      directory: "prod/external/bitnami"
     alpine:
       name: "alpine"
       version: "3.17.3"
-      directory: "external"
+      directory: "prod/external"
 
 headerRewrite:
   enabled: true
