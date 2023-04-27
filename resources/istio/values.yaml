@@ -171,7 +171,7 @@ components:
 
 global:
   containerRegistry:
-    path: europe-docker.pkg.dev/kyma-project
+    path: europe-docker.pkg.dev/kyma-project/prod
   images:
     # these definitions aren't used by the chart, but they are required by external tool for list generation
     istio_proxyv2:
