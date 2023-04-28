@@ -13,5 +13,9 @@ telemetry-logparser:
 .PHONY: telemetry-docs
 telemetry-docs: telemetry-tracepipeline telemetry-logparser telemetry-logpipeline
 
+.PHONY: application-connector-docs
+application-connector-docs:
+	go run table-gen.go --crd-filename ../../installation/resources/crds/application-connector/applications.applicationconnector.crd.yaml --md-filename ../../docs/05-technical-reference/00-custom-resources/ac-01-application.md
+
 .PHONY: generate
-generate: telemetry-docs
+generate: telemetry-docs application-connector-docs
