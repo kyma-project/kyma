@@ -5,7 +5,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   name: default-operator
 spec:
-  hub: {{ .Values.global.images.istio_pilot.containerRegistryPath }}/{{ .Values.global.images.istio_pilot.directory}}
+  hub: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.images.istio_pilot.directory}}
   tag: {{ .Values.global.images.istio_pilot.version }}
   profile: default
   components:
