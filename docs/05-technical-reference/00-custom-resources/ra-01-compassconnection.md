@@ -47,7 +47,30 @@ This table lists all the possible parameters of the CompassConnection custom res
 <!-- The content between "TABLE-START" and "TABLE-END" will be replaced -->
 
 <!-- TABLE-START -->
-<!-- TABLE-END -->
+<!-- CompassConnection v1alpha1 compass.kyma-project.io -->
+| Parameter         | Description                                   |
+| ---------------------------------------- | ---------|
+| **spec.managementInfo** |  |
+| **spec.managementInfo.connectorUrl** | Connector URL used for maintaining secure connection. |
+| **spec.managementInfo.directorUrl** | Director URL used for fetching Applications |
+| **spec.refreshCredentialsNow** |  |
+| **spec.resyncNow** |  |
+| **status.connectionState** |  |
+| **status.connectionStatus** | ConnectionStatus represents status of a connection to Compass |
+| **status.connectionStatus.certificateStatus** | Provides the dates of when the certificate was issued and when it expires. |
+| **status.connectionStatus.certificateStatus.acquired** |  |
+| **status.connectionStatus.certificateStatus.notAfter** |  |
+| **status.connectionStatus.certificateStatus.notBefore** |  |
+| **status.connectionStatus.error** |  |
+| **status.connectionStatus.established** | Provides the date of when the connection was established |
+| **status.connectionStatus.lastSuccess** | Provides the date of the last successful synchronization with the Connector |
+| **status.connectionStatus.lastSync** | Provides the date of the last synchronization attempt |
+| **status.connectionStatus.renewed** | Provides the date of the last certificate renewal |
+| **status.synchronizationStatus** | Describes the status of the synchronization with the Director |
+| **status.synchronizationStatus.error** |  |
+| **status.synchronizationStatus.lastAttempt** | Provides the date of the last synchronization attempt with the Director |
+| **status.synchronizationStatus.lastSuccessfulApplication** | Provides the date of the last successful application of resources fetched from Compass |
+| **status.synchronizationStatus.lastSuccessfulFetch** | Provides the date of the last successful fetch of resources from the Director |<!-- TABLE-END -->
 
 These components use this CR:
 
