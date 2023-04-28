@@ -24,14 +24,16 @@ test: ## Run the tests of the project
 	$(GOTEST) -run TestApiGateway . -v -race
 
 test-custom-domain:
-	GODEBUG=netdns=cgo CGO_ENABLED=1 $(GOTEST) -run "^TestCustomDomain$$" . -v -race
+	source ./custom_domain_test_env.sh && bash -c "trap 'kubectl delete secret google-credentials -n default' EXIT; \
+             kubectl create secret generic google-credentials -n default --from-file=serviceaccount.json=${TEST_SA_ACCESS_KEY_PATH}; \
+             GODEBUG=netdns=cgo CGO_ENABLED=1 $(GOTEST) -run "^TestCustomDomain$$" . -v -race"
 
 test-k3d: ## Prepare k3d and run tests
 	export KYMA_DOMAIN="local.kyma.dev"
 	export TEST_HYDRA_ADDRESS="https://oauth2.local.kyma.dev"
 	export TEST_REQUEST_TIMEOUT="120"
 	export TEST_REQUEST_DELAY="10"
-	export TEST_DOMAIN="local.kyma.dev" 
+	export TEST_DOMAIN="local.kyma.dev"
 	export TEST_CLIENT_TIMEOUT=30s
 	export TEST_CONCURENCY="8"
 	export EXPORT_RESULT="true"
@@ -43,14 +45,6 @@ test-k3d: ## Prepare k3d and run tests
 ## Prerequisites:
 setup: ## Setup local installation with the same configuration as pipeline
 	./prepare_local.sh
-
-setup-custom-domain: ## Setup local installation with the same configuration as pipeline
-	export TEST_HYDRA_ADDRESS="https://oauth2.$(TEST_DOMAIN)"
-	export TEST_REQUEST_TIMEOUT="180"
-	export TEST_REQUEST_DELAY="2"
-	export TEST_CLIENT_TIMEOUT=30s
-	export TEST_CONCURENCY="1"
-	export EXPORT_RESULT="true"
 
 ## Help:
 help: ## Show this help.
