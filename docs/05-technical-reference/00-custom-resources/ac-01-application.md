@@ -39,7 +39,66 @@ This table lists all the possible parameters of a given resource together with t
 <!-- The table below was generated automatically -->
 <!-- Some special tags (html comments) are at the end of lines due to markdown requirements. -->
 <!-- The content between "TABLE-START" and "TABLE-END" will be replaced -->
-<!-- TABLE-START --><!-- TABLE-END -->
+<!-- TABLE-START -->
+<!-- Application v1alpha1 applicationconnector.kyma-project.io -->
+| Parameter         | Description                                   |
+| ---------------------------------------- | ---------|
+| **spec.accessLabel** |  |
+| **spec.compassMetadata** |  |
+| **spec.compassMetadata.applicationId** |  |
+| **spec.compassMetadata.authentication** |  |
+| **spec.compassMetadata.authentication.clientIds** |  |
+| **spec.description** | Describes the connected Application. |
+| **spec.displayName** |  |
+| **spec.encodeUrl** | Allows for URL encoding. If set to `false`, your URL segments stay intact. |
+| **spec.group** |  |
+| **spec.labels** | Defines the labels of the Application. |
+| **spec.longDescription** |  |
+| **spec.providerDisplayName** |  |
+| **spec.services** | Contains all services that the Application provides. |
+| **spec.services.authCreateParameterSchema** | New fields used by V2 version |
+| **spec.services.description** |  |
+| **spec.services.displayName** |  |
+| **spec.services.entries** | Contains the information about the APIs and events that the service offered by the Application provides. In the [Compass mode](../../01-overview/main-areas/application-connectivity/README.md), it's provided by Runtime Agent. In the [standalone mode](../../01-overview/main-areas/application-connectivity/README.md), you have to provide it yourself.
+ |
+| **spec.services.entries.accessLabel** | Specifies the label used in Istio rules in Application Connector. This field is required for the API entry type.
+ |
+| **spec.services.entries.apiType** |  |
+| **spec.services.entries.centralGatewayUrl** | Specifies the URL of Application Gateway. Internal address resolvable only within the cluster. This field is required for the API entry type. In the [Compass mode](../../01-overview/main-areas/application-connectivity/README.md), it's provided by Runtime Agent. In the [standalone mode](../../01-overview/main-areas/application-connectivity/README.md), you have to provide it yourself.
+ |
+| **spec.services.entries.credentials** |  |
+| **spec.services.entries.credentials.authenticationUrl** |  |
+| **spec.services.entries.credentials.csrfInfo** |  |
+| **spec.services.entries.credentials.csrfInfo.tokenEndpointURL** |  |
+| **spec.services.entries.credentials.secretName** |  |
+| **spec.services.entries.credentials.type** |  |
+| **spec.services.entries.gatewayUrl** |  |
+| **spec.services.entries.id** |  |
+| **spec.services.entries.name** | New fields used by V2 version |
+| **spec.services.entries.requestParametersSecretName** |  |
+| **spec.services.entries.specificationUrl** |  |
+| **spec.services.entries.targetUrl** | Specifies the URL of a given API. This field is required for the API entry type. In the [Compass mode](../../01-overview/main-areas/application-connectivity/README.md), it's provided by Runtime Agent. In the [standalone mode](../../01-overview/main-areas/application-connectivity/README.md), you have to provide it yourself.
+ |
+| **spec.services.entries.type** | Specifies the entry type: `API` or `Events`. In the [Compass mode](../../01-overview/main-areas/application-connectivity/README.md), it's provided by Runtime Agent. In the [standalone mode](../../01-overview/main-areas/application-connectivity/README.md), you have to provide it yourself.
+ |
+| **spec.services.id** | Identifies the service that the Application provides. |
+| **spec.services.identifier** | Represents an additional identifier unique in the Application scope. Allows the external system to provide its own identifier.
+ |
+| **spec.services.labels** | Deprecated |
+| **spec.services.longDescription** |  |
+| **spec.services.name** | Represents a unique name of the service. Used for proxying in Application Gateway.
+ |
+| **spec.services.providerDisplayName** | Specifies a human-readable name of the Application service provider. In the [Compass mode](../../01-overview/main-areas/application-connectivity/README.md), it's provided by Runtime Agent. In the [standalone mode](../../01-overview/main-areas/application-connectivity/README.md), you have to provide it yourself.
+ |
+| **spec.services.tags** | Specifies additional tags used for better documentation of the available APIs. In the [Compass mode](../../01-overview/main-areas/application-connectivity/README.md), it's provided by Runtime Agent. In the [standalone mode](../../01-overview/main-areas/application-connectivity/README.md), you have to provide it yourself.
+ |
+| **spec.skipInstallation** |  |
+| **spec.skipVerify** | Determines whether to skip TLS certificate verification for the Application. |
+| **spec.tags** | New fields used by V2 version. |
+| **spec.tenant** |  |
+| **status.installationStatus** | Represents the status of Application release installation |
+| **status.installationStatus.description** |  |
+| **status.installationStatus.status** |  |<!-- TABLE-END -->
 
 
 ## Related resources and components
