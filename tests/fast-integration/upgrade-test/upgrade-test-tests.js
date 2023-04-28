@@ -12,12 +12,18 @@ const {
   checkInClusterEventDelivery,
   checkFunctionResponse,
 } = require('../test/fixtures/commerce-mock');
+const {createIstioAccessLogResource} = require('../logging/client.js');
+
 
 describe('Upgrade test tests', function() {
   this.timeout(10 * 60 * 1000);
   this.slow(5000);
   let initialRestarts = null;
   const testNamespace = 'test';
+
+  it('Deploys Istio access logs', async function() {
+    await createIstioAccessLogResource();
+  });
 
   it('Listing all pods in cluster', async function() {
     initialRestarts = await getContainerRestartsForAllNamespaces();
