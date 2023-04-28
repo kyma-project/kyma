@@ -65,14 +65,17 @@ spec:
                       description: 'Provides the dates of when the certificate was issued and when it expires.'
                       properties:
                         acquired:
+                          description: 'When the certificate was acquired'
                           format: date-time
                           nullable: true
                           type: string
                         notAfter:
+                          description: 'When the certificate stops being valid'
                           format: date-time
                           nullable: true
                           type: string
                         notBefore:
+                          description: 'When the certificate becomes valid'
                           format: date-time
                           nullable: true
                           type: string
