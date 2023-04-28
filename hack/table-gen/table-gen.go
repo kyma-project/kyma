@@ -150,7 +150,7 @@ func sortVersions(versions interface{}) interface{} {
 func generateTable(elementsToSkip map[string]bool, version interface{}, resource string) []string {
 	docElements := map[string]string{}
 	spec := getElement(version, "schema", "openAPIV3Schema", "properties", resource)
-	mergeMaps(docElements, generateElementDoc(elementsToSkip, spec, resource, ""))
+	mergeMaps(docElements, generateElementDoc(elementsToSkip, spec, "", ""))
 
 	var doc []string
 	for _, propName := range sortKeys(docElements) {
@@ -254,7 +254,7 @@ func generateArrayDoc(elementsToSkip map[string]bool, element map[string]interfa
 // generateTableRow generates a row of the resulting table which we include into our MD file.
 func generateTableRow(fullName, fieldType, description string) string {
 	return fmt.Sprintf("| **%s** | %s | %s |",
-		fullName, fieldType, description)
+		strings.TrimLeft(fullName, "."), fieldType, description)
 }
 
 // getElement returns a specific element from obj based on the provided path.
