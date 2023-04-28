@@ -1,3 +1,6 @@
+const k8s = require('@kubernetes/client-node');
+const fs = require('fs');
+const path = require('path');
 const {
   assert,
   expect,
@@ -12,6 +15,7 @@ const {
   getGateway,
   getVirtualService,
   retryPromise,
+  deployJaeger,
 } = require('../utils');
 const {
   logsPresentInLoki,
@@ -58,6 +62,13 @@ async function prepareEnvironment() {
   await k8sApplyFile('logs-workload.yaml', 'default');
   await k8sApplyFile('logs-workload.yaml', 'kyma-system');
   await k8sApplyFile('secret-trace-endpoint.yaml', 'default');
+  const jaegerYaml = fs.readFileSync(
+      path.join(__dirname, '../test/fixtures/jaeger/jaeger.yaml'),
+      {
+        encoding: 'utf8',
+      },
+  );
+  await deployJaeger(k8s.loadAllYaml(jaegerYaml));
 }
 
 async function cleanEnvironment() {
@@ -523,7 +534,6 @@ describe('Telemetry Operator', function() {
             throw services;
           }, defaultRetryDelayMs, defaultRetries);
           assert.isFalse(services.data.includes('grafana.kyma-system'), 'spans are present for grafana');
-          assert.isFalse(services.data.includes('jaeger.kyma-system'), 'spans are present for jaeger');
           assert.isFalse(services.data.includes('telemetry-fluent-bit.kyma-system'),
               'spans are present for fluent-bit');
           assert.isFalse(services.data.includes('loki.kyma-system'), 'spans are present for loki');
