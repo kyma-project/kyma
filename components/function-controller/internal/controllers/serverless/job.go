@@ -70,6 +70,15 @@ func buildStateFnCheckImageJob(expectedJob batchv1.Job) stateFn {
 
 		s.fnImage = s.buildImageAddress(r.cfg.docker.PullAddress)
 
+		diffRuntimeImage, err := functionRuntimeChanged(ctx, r, s)
+		if err != nil {
+			return nil, errors.Wrap(err, "while checking runtime image change")
+		}
+
+		if diffRuntimeImage {
+			return stateFnInlineDeleteJobs, nil
+		}
+
 		jobChanged := s.fnJobChanged(expectedJob)
 		if !jobChanged {
 			return stateFnCheckDeployments, nil
@@ -87,6 +96,20 @@ func buildStateFnCheckImageJob(expectedJob batchv1.Job) stateFn {
 
 		return stateFnUpdateJobStatus, nil
 	}
+}
+
+func functionRuntimeChanged(ctx context.Context, r *reconciler, s *systemState) (bool, error) {
+	functionRuntimeImage := s.instance.Status.RuntimeImage
+	if functionRuntimeImage == "" {
+		return false, nil
+	}
+
+	latestRuntimeImage, err := getRuntimeImageFromConfigMap(ctx, r, s)
+	if err != nil {
+		return false, errors.Wrap(err, "while fetching runtime image from config map")
+	}
+	result := latestRuntimeImage == functionRuntimeImage
+	return !result, nil
 }
 
 func buildStateFnRunJob(expectedJob batchv1.Job) stateFn {

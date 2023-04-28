@@ -25,6 +25,7 @@ const (
     FROM ${base_image}
     USER root
     ENV KUBELESS_INSTALL_VOLUME=/kubeless`
+	changedFakeDockerfile = `ARG base_image=other_image`
 )
 
 func setUpTestEnv(g *gomega.GomegaWithT) (cl resource.Client, env *envtest.Environment) {
@@ -96,4 +97,19 @@ func createDockerfileForRuntime(g *gomega.GomegaWithT, client resource.Client, r
 		},
 	}
 	g.Expect(client.Create(context.TODO(), &runtimeDockerfileConfigMap)).To(gomega.Succeed())
+}
+
+func changeDockerfileForRuntime(rtm serverlessv1alpha2.Runtime) *corev1.ConfigMap {
+	runtimeDockerfileConfigMap := corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: fmt.Sprintf("dockerfile-%s", string(rtm)),
+			Labels: map[string]string{kubernetes.ConfigLabel: "runtime",
+				kubernetes.RuntimeLabel: string(rtm)},
+			Namespace: testNamespace,
+		},
+		Data: map[string]string{
+			"Dockerfile": changedFakeDockerfile,
+		},
+	}
+	return &runtimeDockerfileConfigMap
 }
