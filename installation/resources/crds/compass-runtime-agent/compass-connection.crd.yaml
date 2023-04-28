@@ -35,8 +35,10 @@ spec:
                 managementInfo:
                   properties:
                     connectorUrl:
+                      description: 'Connector URL used for maintaining secure connection.'
                       type: string
                     directorUrl:
+                      description: 'Director URL used for fetching Applications'
                       type: string
                   required:
                     - connectorUrl
@@ -58,7 +60,7 @@ spec:
                     Compass
                   properties:
                     certificateStatus:
-                      description: CertificateStatus represents the status of the certificate
+                      description: 'Provides the dates of when the certificate was issued and when it expires.'
                       properties:
                         acquired:
                           format: date-time
@@ -76,18 +78,22 @@ spec:
                     error:
                       type: string
                     established:
+                      description: 'Provides the date of when the connection was established'
                       format: date-time
                       nullable: true
                       type: string
                     lastSuccess:
+                      description: 'Provides the date of the last successful synchronization with the Connector'
                       format: date-time
                       nullable: true
                       type: string
                     lastSync:
+                      description: 'Provides the date of the last synchronization attempt'
                       format: date-time
                       nullable: true
                       type: string
                     renewed:
+                      description: 'Provides the date of the last certificate renewal'
                       format: date-time
                       nullable: true
                       type: string
@@ -95,21 +101,23 @@ spec:
                     - certificateStatus
                   type: object
                 synchronizationStatus:
-                  description: SynchronizationStatus represent the status of Applications
-                    synchronization with Compass
+                  description: 'Describes the status of the synchronization with the Director'
                   nullable: true
                   properties:
                     error:
                       type: string
                     lastAttempt:
+                      description: 'Provides the date of the last synchronization attempt with the Director'
                       format: date-time
                       nullable: true
                       type: string
                     lastSuccessfulApplication:
+                      description: 'Provides the date of the last successful application of resources fetched from Compass'
                       format: date-time
                       nullable: true
                       type: string
                     lastSuccessfulFetch:
+                      description: 'Provides the date of the last successful fetch of resources from the Director'
                       format: date-time
                       nullable: true
                       type: string

@@ -42,11 +42,12 @@ status:
 
 This table lists all the possible parameters of the CompassConnection custom resource together with their descriptions:
 
-| **Parameter** | **Required** | **Description** |
-|---------------|:------------:|-----------------|
-| **metadata.name** | Yes | Specifies the name of the CR. |
-| **spec.managementInfo.connectorUrl** | Yes | Connector URL used for maintaining secure connection. |
-| **spec.managementInfo.directorUrl** | Yes | Director URL used for fetching Applications. |
+<!-- The table below was generated automatically -->
+<!-- Some special tags (html comments) are at the end of lines due to markdown requirements. -->
+<!-- The content between "TABLE-START" and "TABLE-END" will be replaced -->
+
+<!-- TABLE-START -->
+<!-- TABLE-END -->
 
 These components use this CR:
 
@@ -54,19 +55,3 @@ These components use this CR:
 |---------------|-----------------|
 | Runtime Agent | Stores the Connector and Director URLs and preserves the status of the connection with Compass in this CR. |
 
-## Additional information
-
-Runtime Agent adds the **status** section which describes the statuses of the connection and synchronization to the created CR periodically. This table lists the fields of the **status** section.
-
-| Field   |  Description |
-|---------|-------------|
-| **status.connectionStatus** | Describes the status of the connection with Compass. |
-| **status.connectionStatus.certificateStatus** | Provides the dates of when the certificate was issued and when it expires. |
-| **status.connectionStatus.established** | Provides the date of when the connection was established. |
-| **status.connectionStatus.lastSuccess** | Provides the date of the last successful synchronization with the Connector. |
-| **status.connectionStatus.lastSync** | Provides the date of the last synchronization attempt. |
-| **status.connectionStatus.renewed** | Provides the date of the last certificate renewal. |
-| **status.synchronizationStatus** | Describes the status of the synchronization with the Director. |
-| **status.synchronizationStatus.lastAttempt** | Provides the date of the last synchronization attempt with the Director. |
-| **status.synchronizationStatus.lastSuccessfulFetch** | Provides the date of the last successful fetch of resources from the Director. |
-| **status.synchronizationStatus.lastSuccessfulApplication** | Provides the date of the last successful application of resources fetched from Compass. |
