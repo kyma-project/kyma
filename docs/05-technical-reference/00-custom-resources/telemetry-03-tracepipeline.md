@@ -44,6 +44,7 @@ For details, see the [TracePipeline specification file](https://github.com/kyma-
 
 <!-- TABLE-START -->
 ### TracePipeline.v1alpha1.telemetry.kyma-project.io
+
 **Spec:**
 
 <!-- TracePipeline v1alpha1 telemetry.kyma-project.io -->
@@ -95,6 +96,7 @@ For details, see the [TracePipeline specification file](https://github.com/kyma-
 | **conditions.lastTransitionTime** | string | An array of conditions describing the status of the pipeline. |
 | **conditions.reason** | string | An array of conditions describing the status of the pipeline. |
 | **conditions.type** | string | The possible transition types are:<br>- `Running`: The instance is ready and usable.<br>- `Pending`: The pipeline is being activated. |
+
 
 <!-- TABLE-END -->
 

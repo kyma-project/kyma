@@ -34,11 +34,26 @@ For details, see the [LogParser specification file](https://github.com/kyma-proj
 <!-- The content between "TABLE-START" and "TABLE-END" will be replaced -->
 
 <!-- TABLE-START -->
+### LogParser.v1alpha1.telemetry.kyma-project.io
+
+**Spec:**
+
 <!-- LogParser v1alpha1 telemetry.kyma-project.io -->
-| Parameter         | Description                                   |
-| ---------------------------------------- | ---------|
-| **spec.parser** | [Fluent Bit Parsers](https://docs.fluentbit.io/manual/pipeline/parsers). The parser specified here has no effect until it is referenced by a [Pod annotation](https://docs.fluentbit.io/manual/pipeline/filters/kubernetes#kubernetes-annotations) on your workload or by a [Parser Filter](https://docs.fluentbit.io/manual/pipeline/filters/parser) defined in a pipeline's filters section. |
-| **status.conditions** | An array of conditions describing the status of the parser. |
-| **status.conditions.lastTransitionTime** | An array of conditions describing the status of the parser. |
-| **status.conditions.reason** | An array of conditions describing the status of the parser. |
-| **status.conditions.type** | The possible transition types are:<br>- `Running`: The parser is ready and usable.<br>- `Pending`: The parser is being activated. |<!-- TABLE-END -->
+| Parameter         | Type | Description                                   |
+| ------------------| ---- | --------------------------------------------- |
+| **** | object | Defines the desired state of LogParser. |
+| **parser** | string | [Fluent Bit Parsers](https://docs.fluentbit.io/manual/pipeline/parsers). The parser specified here has no effect until it is referenced by a [Pod annotation](https://docs.fluentbit.io/manual/pipeline/filters/kubernetes#kubernetes-annotations) on your workload or by a [Parser Filter](https://docs.fluentbit.io/manual/pipeline/filters/parser) defined in a pipeline's filters section. |
+
+**Status:**
+
+<!-- LogParser v1alpha1 telemetry.kyma-project.io -->
+| Parameter         | Type | Description                                   |
+| ------------------| ---- | --------------------------------------------- |
+| **** | object | Shows the observed state of the LogParser. |
+| **conditions** | An array of conditions describing the status of the parser. | conditions |
+| **conditions.lastTransitionTime** | string | An array of conditions describing the status of the parser. |
+| **conditions.reason** | string | An array of conditions describing the status of the parser. |
+| **conditions.type** | string | The possible transition types are:<br>- `Running`: The parser is ready and usable.<br>- `Pending`: The parser is being activated. |
+
+
+<!-- TABLE-END -->
