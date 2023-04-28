@@ -53,8 +53,8 @@ This table lists all the possible parameters of the CompassConnection custom res
 | **spec.managementInfo** |  |
 | **spec.managementInfo.connectorUrl** | Connector URL used for maintaining secure connection. |
 | **spec.managementInfo.directorUrl** | Director URL used for fetching Applications |
-| **spec.refreshCredentialsNow** |  |
-| **spec.resyncNow** |  |
+| **spec.refreshCredentialsNow** | If true - ignore certificate expiration date and refresh next round |
+| **spec.resyncNow** | If true - ignore `APP_MINIMAL_COMPASS_SYNC_TIME` and sync next round |
 | **status.connectionState** |  |
 | **status.connectionStatus** | ConnectionStatus represents status of a connection to Compass |
 | **status.connectionStatus.certificateStatus** | Provides the dates of when the certificate was issued and when it expires. |

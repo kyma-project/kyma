@@ -45,8 +45,10 @@ spec:
                     - directorUrl
                   type: object
                 refreshCredentialsNow:
+                  description: 'If true - ignore certificate expiration date and refresh next round'
                   type: boolean
                 resyncNow:
+                  description: 'If true - ignore `APP_MINIMAL_COMPASS_SYNC_TIME` and sync next round'
                   type: boolean
               required:
                 - managementInfo
