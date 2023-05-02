@@ -22,3 +22,4 @@ kubectl delete -n kyma-system authorizationpolicies.security.istio.io tracing-ja
 kubectl delete -n kyma-system peerauthentications.security.istio.io tracing-jaeger-operator-metrics --ignore-not-found
 kubectl delete -n kyma-system peerauthentications.security.istio.io tracing-jaeger-metrics --ignore-not-found
 kubectl delete -n kyma-system virtualservices.networking.istio.io tracing --ignore-not-found
+kubectl delete crd jaegers.jaegertracing.io --ignore-not-found
