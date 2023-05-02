@@ -138,8 +138,15 @@ async function ensureValidOIDCConfigInCustomerFacingKubeconfig(keb, instanceID, 
 
   const issuerMatchPattern = '\\b' + oidcConfig.issuerURL + '\\b';
   const clientIDMatchPattern = '\\b' + oidcConfig.clientID + '\\b';
-  expect(kubeconfigContent).to.match(new RegExp(issuerMatchPattern, 'g'));
-  expect(kubeconfigContent).to.match(new RegExp(clientIDMatchPattern, 'g'));
+
+  let issuerRegex = new RegExp(issuerMatchPattern, 'g');
+  let issuerMatched = issuerRegex.match(kubeconfigContent);
+  expect(issuerMatched).to.be.true();
+  
+  
+  let clientIdMatcher = new RegExp(clientIDMatchPattern, 'g');
+  let clientMatched = clientIdMatcher.match(kubeconfigContent);
+  expect(clientMatched).to.be.true();
 }
 
 async function saveKubeconfig(kubeconfig) {
