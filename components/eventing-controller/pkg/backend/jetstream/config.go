@@ -20,5 +20,6 @@ func Validate(natsConfig env.NATSConfig) error {
 	if _, err := toJetStreamDiscardPolicy(natsConfig.JSStreamDiscardPolicy); err != nil {
 		return err
 	}
+
 	return nil
 }
