@@ -62,7 +62,7 @@ spec:
                     Compass
                   properties:
                     certificateStatus:
-                      description: 'Provides the dates of when the certificate was issued and when it expires.'
+                      description: 'Provides the certificate issue and expiration dates.'
                       properties:
                         acquired:
                           description: 'When the certificate was acquired'
