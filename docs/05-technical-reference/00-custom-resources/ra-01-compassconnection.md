@@ -63,7 +63,7 @@ This table lists all the possible parameters of the CompassConnection custom res
 | **spec.resyncNow** | If true - ignore `APP_MINIMAL_COMPASS_SYNC_TIME` and sync next round |
 | **status.connectionState** |  |
 | **status.connectionStatus** | ConnectionStatus represents status of a connection to Compass |
-| **status.connectionStatus.certificateStatus** | Provides the dates of when the certificate was issued and when it expires. |
+| **status.connectionStatus.certificateStatus** | Provides the certificate issue and expiration dates. |
 | **status.connectionStatus.certificateStatus.acquired** | When the certificate was acquired |
 | **status.connectionStatus.certificateStatus.notAfter** | When the certificate stops being valid |
 | **status.connectionStatus.certificateStatus.notBefore** | When the certificate becomes valid |
