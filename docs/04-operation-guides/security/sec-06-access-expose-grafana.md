@@ -25,7 +25,7 @@ By default, Kyma does not expose Grafana. However, you can still access them usi
 
 >**NOTE:** `kubectl port-forward` does not return. To stop port forwarding, cancel it with `Ctrl`+`C`.
 
-2. To access the Grafana service's UI, open `http://localhost:3000` in your browser.
+2. To access the Grafana UI, open `http://localhost:3000` in your browser.
 
 ## Expose Grafana securely
 
@@ -69,7 +69,7 @@ The following example shows how to use an OpenID Connect (OIDC) compliant identi
 
 >**NOTE:** By default, you are redirected to the documentation. To go to the service's UI instead, disable the OAuth2 Proxy provider button by setting `OAUTH2_PROXY_SKIP_PROVIDER_BUTTON=true`.
 
-3. Restart the OAuth2 Proxy pod:
+3. Restart the OAuth2 Proxy Pod:
 
       ```bash
       kubectl -n kyma-system rollout restart deployment monitoring-auth-proxy-grafana
