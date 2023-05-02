@@ -127,8 +127,8 @@ global:
       sha: ""
     alertmanager:
       name: "alertmanager"
-      version: "v0.24.0"
-      directory: "prod/external/quay.io/prometheus"
+      version: "PR-333"
+      directory: "dev/tpi"
       sha: ""
     prometheus:
       name: "prometheus"
