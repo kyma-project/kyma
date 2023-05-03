@@ -111,4 +111,4 @@ The following code samples illustrate how to enrich the default trace with custo
 
 2. [Expose your Function](./svls-03-expose-function.md).
 
-3. Find the traces for the function in the trace backend.
+3. Find the traces for the Function in the trace backend.
