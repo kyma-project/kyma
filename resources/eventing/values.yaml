@@ -13,8 +13,8 @@ global:
       version: PR-17395
       directory: dev
     certHandler:
-      name: api-gateway-webhook-certificates
-      version: "1.5.1"
+      name: eventing-webhook-certificates
+      version: v20230502-386f07fc
       directory: prod
     nats:
       name: nats
