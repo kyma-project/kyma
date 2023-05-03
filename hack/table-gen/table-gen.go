@@ -140,7 +140,7 @@ func generateSnippet(versions []crdversion) string {
 | Path | Type | Description |
 | ---- | ----------- | ---- |
 {{- range $prop := $version.Spec }}
-| {{range $i, $v := $prop.Path}}{{if $i}}.{{end}}{{$v}}{{end}} | {{ $prop.ElemType }} | {{ $prop.Description }} |
+| **{{range $i, $v := $prop.Path}}{{if $i}}.{{end}}{{$v}}{{end}}** | {{ $prop.ElemType }} | {{ $prop.Description }} |
 {{- end }}
 
 **Status:**
@@ -148,7 +148,7 @@ func generateSnippet(versions []crdversion) string {
 | Path | Type | Description |
 | ---- | ----------- | ---- |
 {{- range $prop := $version.Status }}
-| {{range $i, $v := $prop.Path}}{{if $i}}.{{end}}{{$v}}{{end}} | {{ $prop.ElemType }} | {{ $prop.Description }} |
+| **{{range $i, $v := $prop.Path}}{{if $i}}.{{end}}{{$v}}{{end}}** | {{ $prop.ElemType }} | {{ $prop.Description }} |
 {{- end }}
 {{- end }}
 
