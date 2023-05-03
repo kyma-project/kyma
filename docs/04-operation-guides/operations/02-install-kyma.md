@@ -123,7 +123,6 @@ prerequisites:
     namespace: "istio-system"
 components:
   - name: "logging"
-  - name: "tracing"
   - name: "monitoring"
   - name: "eventing"
   ```
