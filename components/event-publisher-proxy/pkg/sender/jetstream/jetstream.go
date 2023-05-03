@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/nats-io/nats.go"
+
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
@@ -20,8 +22,6 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/health"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender/eventmesh"
-
-	"github.com/nats-io/nats.go"
 )
 
 const (
@@ -125,11 +125,12 @@ func (s *Sender) eventToNATSMsg(event *event.Event) (*nats.Msg, error) {
 
 // getJsSubjectToPublish appends stream name to subject if needed.
 func (s *Sender) getJsSubjectToPublish(subject string) string {
-	// if subscription CRD v1alpha2 is enabled then do not append prefix.
-	if s.opts.EnableNewCRDVersion && !strings.HasPrefix(subject, s.envCfg.EventTypePrefix) {
+	// do not append prefix, if event type prefix is not present.
+	if !strings.HasPrefix(subject, s.envCfg.EventTypePrefix) {
 		return subject
 	}
 
+	// append prefix, for v1alpha1 subscriptions.
 	return fmt.Sprintf("%s.%s", env.JetStreamSubjectPrefix, subject)
 }
 

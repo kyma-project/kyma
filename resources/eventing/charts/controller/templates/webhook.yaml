@@ -1,5 +1,3 @@
-{{ if .Values.enableNewCRDVersion }}
----
 apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
@@ -53,4 +51,3 @@ webhooks:
         resources:
           - subscriptions
     sideEffects: None
-{{- end }}
