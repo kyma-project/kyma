@@ -188,6 +188,8 @@ func filter(elements []flatElement, pathElement string) []flatElement {
 	return elems
 }
 
+// flatten converts the recursive datastructure of the element into a list of flatElement.
+// The names of the elements and their position gets converted into a flat list of path segments
 func flatten(e *element) []flatElement {
 	if e == nil {
 		return nil
@@ -211,6 +213,11 @@ func flatten(e *element) []flatElement {
 	if e.elemtype == "array" {
 		items := flatten(e.items)
 		if e.items != nil && e.items.elemtype == "object" {
+			// if it is an object we can use the description of the anonymous object to fill gaps in the description of the list
+			if elem.Description == "" {
+				elem.Description = items[0].Description
+			}
+			// the child object is stored in "items" we need to clean this as it would otherwise show up in the path list
 			items = filter(items, "items")
 			for _, item := range items {
 				item.Path = append([]string{e.name}, item.Path...)
@@ -239,6 +246,7 @@ func getElement(obj interface{}, path ...string) interface{} {
 	return elem
 }
 
+// toElem is a rather simple converter from interface to a tree structure of elements
 func toElem(obj interface{}, name string, required bool) *element {
 	e := element{}
 	if m, ok := obj.(map[string]interface{}); ok {
@@ -264,6 +272,7 @@ func toElem(obj interface{}, name string, required bool) *element {
 			}
 		}
 		if e.elemtype == "array" {
+			// store the allowed child type of the list in "items"
 			if p, ok := m["items"].(map[string]interface{}); ok {
 				e.items = toElem(p, "items", false)
 			}

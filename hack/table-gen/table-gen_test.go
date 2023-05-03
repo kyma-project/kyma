@@ -110,8 +110,9 @@ func Test_flatten(t *testing.T) {
 					items: func() *element {
 						var items *element
 						items = &element{
-							name:     "items",
-							elemtype: "object",
+							name:        "items",
+							description: "itemsdesc",
+							elemtype:    "object",
 							properties: func() []*element {
 								var props []*element
 								props = append(props,
@@ -133,7 +134,7 @@ func Test_flatten(t *testing.T) {
 			want: []flatElement{
 				{
 					Path:        []string{"name"},
-					Description: "desc",
+					Description: "itemsdesc",
 					ElemType:    "array",
 				},
 				{

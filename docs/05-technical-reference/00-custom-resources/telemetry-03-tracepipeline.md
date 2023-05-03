@@ -89,7 +89,7 @@ For details, see the [TracePipeline specification file](https://github.com/kyma-
 
 | Path | Type | Description |
 | ---- | ----------- | ---- |
-| conditions | array |  |
+| conditions | array | An array of conditions describing the status of the pipeline. |
 | conditions.lastTransitionTime | string | An array of conditions describing the status of the pipeline. |
 | conditions.reason | string | An array of conditions describing the status of the pipeline. |
 | conditions.type | string | The possible transition types are:<br>- `Running`: The instance is ready and usable.<br>- `Pending`: The pipeline is being activated. |
