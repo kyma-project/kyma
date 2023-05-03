@@ -48,7 +48,7 @@ For details, see the [TracePipeline specification file](https://github.com/kyma-
 
 **Spec:**
 
-| Path | Type | Description |
+| Parameter | Type | Description |
 | ---- | ----------- | ---- |
 | **output** | object **required** | Defines a destination for shipping trace data. Only one can be defined per pipeline. |
 | **output.otlp** | object **required** | Configures the underlying Otel Collector with an [OTLP exporter](https://github.com/open-telemetry/opentelemetry-collector/blob/main/exporter/otlpexporter/README.md). If you switch `protocol`to `http`, an [OTLP HTTP exporter](https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter/otlphttpexporter) is used. |
@@ -87,7 +87,7 @@ For details, see the [TracePipeline specification file](https://github.com/kyma-
 
 **Status:**
 
-| Path | Type | Description |
+| Parameter | Type | Description |
 | ---- | ----------- | ---- |
 | **conditions** | array | An array of conditions describing the status of the pipeline. |
 | **conditions.lastTransitionTime** | string | An array of conditions describing the status of the pipeline. |

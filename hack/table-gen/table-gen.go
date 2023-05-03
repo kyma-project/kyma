@@ -42,9 +42,9 @@ type flatElement struct {
 }
 
 type crdversion struct {
-	GKV    string
-	Spec   []flatElement
-	Status []flatElement
+	GKV            string
+	Spec, Status   []flatElement
+	Stored, Served bool
 }
 
 func (e *element) String() string {
@@ -116,17 +116,35 @@ func generateDocFromCRD() string {
 
 	var crdVersions []crdversion
 	for _, version := range versions.([]interface{}) {
-		v := crdversion{}
-		name := getElement(version, "name")
-		APIVersion = name.(string)
-		v.GKV = fmt.Sprintf("%v.%v/%v", CRDKind, CRDGroup, APIVersion)
-		resource := "spec"
-		pathList(version, resource)
-		v.Spec = pathList(version, "spec")
-		v.Status = pathList(version, "status")
-		crdVersions = append(crdVersions, v)
+		if v, ok := version.(map[string]interface{}); ok {
+			crd := crdversion{}
+			crd.Stored = v["storage"].(bool)
+			crd.Served = v["served"].(bool)
+			name := getElement(version, "name")
+			APIVersion = name.(string)
+			crd.GKV = fmt.Sprintf("%v.%v/%v", CRDKind, CRDGroup, APIVersion)
+			resource := "spec"
+			pathList(version, resource)
+			crd.Spec = pathList(version, "spec")
+			crd.Status = pathList(version, "status")
+			crdVersions = append(crdVersions, crd)
+		}
 	}
 
+	// sort in reverse order
+	sort.Slice(crdVersions, func(i, j int) bool {
+		// both are stored or not stored. Falling back to GKV comparison
+		if crdVersions[i].Stored == crdVersions[j].Stored {
+			return crdVersions[i].GKV > crdVersions[j].GKV
+		}
+		if crdVersions[i].Stored && !crdVersions[j].Stored {
+			return true // stored is more than not stored
+		}
+		if crdVersions[i].Served && !crdVersions[j].Served {
+			return true // served is more than not served
+		}
+		return false
+	})
 	return generateSnippet(crdVersions)
 }
 
@@ -137,7 +155,7 @@ func generateSnippet(versions []crdversion) string {
 
 **Spec:**
 
-| Path | Type | Description |
+| Parameter | Type | Description |
 | ---- | ----------- | ---- |
 {{- range $prop := $version.Spec }}
 | **{{range $i, $v := $prop.Path}}{{if $i}}.{{end}}{{$v}}{{end}}** | {{ $prop.ElemType }} | {{ $prop.Description }} |
@@ -145,7 +163,7 @@ func generateSnippet(versions []crdversion) string {
 
 **Status:**
 
-| Path | Type | Description |
+| Parameter | Type | Description |
 | ---- | ----------- | ---- |
 {{- range $prop := $version.Status }}
 | **{{range $i, $v := $prop.Path}}{{if $i}}.{{end}}{{$v}}{{end}}** | {{ $prop.ElemType }} | {{ $prop.Description }} |
