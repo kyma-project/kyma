@@ -150,8 +150,8 @@ func generateSnippet(versions []crdversion) string {
 {{- range $prop := $version.Status }}
 | {{range $i, $v := $prop.Path}}{{if $i}}.{{end}}{{$v}}{{end}} | {{ $prop.ElemType }} | {{ $prop.Description }} |
 {{- end }}
-
 {{- end }}
+
 `)
 	if err != nil {
 		log.Fatal(err)
