@@ -3,7 +3,7 @@ package git
 import (
 	"errors"
 
-	git2go "github.com/libgit2/git2go/v31"
+	git2go "github.com/libgit2/git2go/v34"
 )
 
 // Unrecoverable means that something is wrong with configuration of git function CR

@@ -1,7 +1,7 @@
 package git
 
 import (
-	git2go "github.com/libgit2/git2go/v31"
+	git2go "github.com/libgit2/git2go/v34"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )

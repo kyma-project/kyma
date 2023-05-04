@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	git2go "github.com/libgit2/git2go/v31"
+	git2go "github.com/libgit2/git2go/v34"
 	"github.com/stretchr/testify/assert"
 	ctrl "sigs.k8s.io/controller-runtime"
 

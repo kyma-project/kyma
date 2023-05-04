@@ -10,7 +10,7 @@ import (
 
 	"github.com/stretchr/testify/mock"
 
-	git2go "github.com/libgit2/git2go/v31"
+	git2go "github.com/libgit2/git2go/v34"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/automock"
 	"github.com/kyma-project/kyma/components/function-controller/internal/git"
