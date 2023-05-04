@@ -5,10 +5,10 @@ ENV BASE_APP_DIR=/workspace/go/src/github.com/kyma-project/kyma/components/funct
     CGO_ENABLED=1 \
     GOOS=linux \
     GOARCH=amd64 \
-    LIBGIT2_VERSION=1.1.0-r2
+    LIBGIT2_VERSION=1.5.2-r0
 
 RUN apk add --no-cache gcc libc-dev
-RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/v3.14/community libgit2-dev=${LIBGIT2_VERSION}
+RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/v3.17/community libgit2-dev=${LIBGIT2_VERSION}
 
 WORKDIR ${BASE_APP_DIR}
 
@@ -29,11 +29,11 @@ RUN apk add --no-cache ca-certificates
 # result container base on alpine:3.17.3
 FROM europe-docker.pkg.dev/kyma-project/prod/external/alpine@sha256:b6ca290b6b4cdcca5b3db3ffa338ee0285c11744b4a6abaa9627746ee3291d8d
 
-ENV LIBGIT2_VERSION=1.1.0-r2
+ENV LIBGIT2_VERSION=1.5.2-r0
 
 RUN apk update --no-cache && apk upgrade --no-cache
 RUN apk add --no-cache --update --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main openssl
-RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/v3.14/community libgit2=${LIBGIT2_VERSION}
+RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/v3.17/community libgit2=${LIBGIT2_VERSION}
 
 LABEL source = git@github.com:kyma-project/kyma.git
 
