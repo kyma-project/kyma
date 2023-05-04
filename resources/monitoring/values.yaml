@@ -122,8 +122,8 @@ global:
       sha: ""
     configmap_reload:
       name: "configmap-reload"
-      version: "v0.8.0"
-      directory: "prod/external/jimmidyson"
+      version: "PR-336"
+      directory: "dev/tpi"
       sha: ""
     alertmanager:
       name: "alertmanager"
