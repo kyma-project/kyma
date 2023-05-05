@@ -15,7 +15,28 @@ import (
 
 const (
 	// Regular expression pattern for reading everything between TABLE-START and TABLE-END tags
-	REPattern = `(?s)<!--\s*TABLE-START\s* -->.*<!--\s*TABLE-END\s*-->`
+	REPattern             = `(?s)<!--\s*TABLE-START\s* -->.*<!--\s*TABLE-END\s*-->`
+	documentationTemplate = `
+{{- range $version := . -}}
+### {{ $version.GKV }}
+
+**Spec:**
+
+| Parameter | Type | Description |
+| ---- | ----------- | ---- |
+{{- range $prop := $version.Spec }}
+| **{{range $i, $v := $prop.Path}}{{if $i}}.{{end}}{{$v}}{{end}}** | {{ $prop.ElemType }} | {{ $prop.Description }} |
+{{- end }}
+
+**Status:**
+
+| Parameter | Type | Description |
+| ---- | ----------- | ---- |
+{{- range $prop := $version.Status }}
+| **{{range $i, $v := $prop.Path}}{{if $i}}.{{end}}{{$v}}{{end}}** | {{ $prop.ElemType }} | {{ $prop.Description }} |
+{{- end }}
+
+{{ end -}}`
 )
 
 var (
@@ -149,28 +170,7 @@ func generateDocFromCRD() string {
 }
 
 func generateSnippet(versions []crdversion) string {
-	t, err := template.New("").Parse(`
-{{- range $version := . }}
-### {{ $version.GKV }}
-
-**Spec:**
-
-| Parameter | Type | Description |
-| ---- | ----------- | ---- |
-{{- range $prop := $version.Spec }}
-| **{{range $i, $v := $prop.Path}}{{if $i}}.{{end}}{{$v}}{{end}}** | {{ $prop.ElemType }} | {{ $prop.Description }} |
-{{- end }}
-
-**Status:**
-
-| Parameter | Type | Description |
-| ---- | ----------- | ---- |
-{{- range $prop := $version.Status }}
-| **{{range $i, $v := $prop.Path}}{{if $i}}.{{end}}{{$v}}{{end}}** | {{ $prop.ElemType }} | {{ $prop.Description }} |
-{{- end }}
-{{- end }}
-
-`)
+	t, err := template.New("").Parse(documentationTemplate)
 	if err != nil {
 		log.Fatal(err)
 	}
