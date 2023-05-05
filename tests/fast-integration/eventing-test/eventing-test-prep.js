@@ -126,6 +126,9 @@ describe('Eventing tests preparation', function() {
   });
 
   it('Should deploy jaeger', async function() {
+    if (isSKR) {
+      this.skip();
+    }
     await deployJaeger(k8s.loadAllYaml(jaegerYaml));
   });
 
