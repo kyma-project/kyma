@@ -114,7 +114,7 @@ const subscriptionsExactTypeMatching = [
 let gardener = null;
 let director = null;
 let shootName = null;
-if (isSKR) {
+if (isSKR && skrInstanceId && skrInstanceId !== '') {
   gardener = new GardenerClient(GardenerConfig.fromEnv()); // create gardener client
   shootName = getShootNameFromK8sServerUrl();
 
