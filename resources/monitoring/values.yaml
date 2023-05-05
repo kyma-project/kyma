@@ -132,7 +132,7 @@ global:
       sha: ""
     prometheus:
       name: "prometheus"
-      version: "v2.43.0"
+      version: "v2.43.1"
       directory: "prod/external/quay.io/prometheus"
       sha: ""
     pushgateway:
