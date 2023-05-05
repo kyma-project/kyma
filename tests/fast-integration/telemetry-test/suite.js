@@ -15,7 +15,8 @@ const {
   getGateway,
   getVirtualService,
   retryPromise,
-  deployJaeger, waitForConfigMap,
+  deployJaeger,
+  waitForConfigMap,
 } = require('../utils');
 const {
   logsPresentInLoki,
