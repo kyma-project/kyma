@@ -94,7 +94,7 @@ describe('Eventing tests', function() {
 
   before('Ensure tracing is ready', async function() {
     if (isSKR) {
-      this.skip();
+      return;
     }
     await waitForPodWithLabelAndCondition(jaegerLabel.key, jaegerLabel.value, kymaSystem, conditionReady.condition,
         conditionReady.status);
