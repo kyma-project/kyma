@@ -91,7 +91,7 @@ Build and install the libgit2 binary required by the Function Controller on macO
    You should get a result similar to this example:
 
    ```bash
-   github.com/libgit2/git2go/v31 v31.4.14
+   github.com/libgit2/git2go/v33 v31.4.14
    ```
 2. Go to the [git2go page](https://github.com/libgit2/git2go#git2go) to check which version of libgit2 you must use. For example, for git2go v31, use libigit2 in version 1.1.
    

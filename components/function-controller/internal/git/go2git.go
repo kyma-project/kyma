@@ -8,7 +8,7 @@ import (
 	"path"
 	"strings"
 
-	git2go "github.com/libgit2/git2go/v31"
+	git2go "github.com/libgit2/git2go/v33"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )

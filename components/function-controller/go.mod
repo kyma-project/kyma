@@ -20,7 +20,6 @@ require (
 	github.com/fsnotify/fsnotify v1.5.1
 	github.com/go-logr/zapr v1.2.0
 	github.com/kyma-project/kyma/common/logging v0.0.0-20221208072023-1c1502074930
-	github.com/libgit2/git2go/v31 v31.7.9
 	github.com/onsi/gomega v1.17.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.11.1
@@ -44,6 +43,7 @@ require (
 	github.com/docker/distribution v2.8.1+incompatible
 	github.com/docker/docker v20.10.21+incompatible
 	github.com/go-logr/logr v1.2.3
+	github.com/libgit2/git2go/v33 v33.0.9
 	github.com/opencontainers/go-digest v1.0.0-rc1
 )
 
