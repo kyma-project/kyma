@@ -7,7 +7,7 @@ ENV BASE_APP_DIR=/workspace/go/src/github.com/kyma-project/kyma/components/funct
     GOARCH=amd64 
     # LIBGIT2_VERSION=1.4.3-r0
 
-RUN apk add --no-cache gcc libc-dev libgit2-dev
+RUN apk add --no-cache gcc libc-dev libgit2 libgit2-dev
 # RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/v3.16/community libgit2-dev=${LIBGIT2_VERSION}
 
 
@@ -29,7 +29,7 @@ FROM europe-docker.pkg.dev/kyma-project/prod/external/alpine@sha256:b6ca290b6b4c
 LABEL source = git@github.com:kyma-project/kyma.git
 
 RUN apk update --no-cache && apk upgrade --no-cache
-RUN apk add --no-cache ca-certificates libgit2-dev
+RUN apk add --no-cache ca-certificates libgit2 libgit2-dev
 RUN apk add --no-cache --update --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main openssh-client openssl
 # RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/v3.16/community libgit2=${LIBGIT2_VERSION}
 
