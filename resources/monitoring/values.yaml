@@ -122,13 +122,13 @@ global:
       sha: ""
     configmap_reload:
       name: "configmap-reload"
-      version: "PR-336"
-      directory: "dev/tpi"
+      version: "v0.8.0-34ee9954"
+      directory: "prod/tpi"
       sha: ""
     alertmanager:
       name: "alertmanager"
-      version: "PR-333"
-      directory: "dev/tpi"
+      version: "v0.25.0-34ee9954"
+      directory: "prod/tpi"
       sha: ""
     prometheus:
       name: "prometheus"
