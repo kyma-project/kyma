@@ -43,7 +43,7 @@ require (
 	github.com/docker/distribution v2.8.1+incompatible
 	github.com/docker/docker v20.10.21+incompatible
 	github.com/go-logr/logr v1.2.3
-	github.com/libgit2/git2go/v33 v33.0.9
+	github.com/libgit2/git2go/v34 v34.0.0
 	github.com/opencontainers/go-digest v1.0.0-rc1
 )
 
