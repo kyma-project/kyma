@@ -22,11 +22,14 @@ const (
 var allSubscriptionConditions = MakeSubscriptionConditions()
 
 type Condition struct {
-	Type               ConditionType          `json:"type,omitempty"`
-	Status             corev1.ConditionStatus `json:"status" description:"status of the condition, one of True, False, Unknown"`
-	LastTransitionTime metav1.Time            `json:"lastTransitionTime,omitempty"`
-	Reason             ConditionReason        `json:"reason,omitempty"`
-	Message            string                 `json:"message,omitempty"`
+	Type ConditionType `json:"type,omitempty"`
+
+	// Status of the condition, one of True, False, Unknown
+	Status corev1.ConditionStatus `json:"status" description:"status of the condition, one of True, False, Unknown"`
+
+	LastTransitionTime metav1.Time     `json:"lastTransitionTime,omitempty"`
+	Reason             ConditionReason `json:"reason,omitempty"`
+	Message            string          `json:"message,omitempty"`
 }
 
 type ConditionReason string

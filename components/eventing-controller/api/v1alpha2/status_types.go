@@ -1,8 +1,10 @@
 package v1alpha2
 
 type EventType struct {
+	// OriginalType is the event type specified in the subscription spec
 	OriginalType string `json:"originalType"`
-	CleanType    string `json:"cleanType"`
+	// CleanType is the event type after it was cleaned up from backend compatible characters
+	CleanType string `json:"cleanType"`
 }
 
 // Backend contains Backend-specific fields.
@@ -33,11 +35,11 @@ type Backend struct {
 	// +optional
 	EmsSubscriptionStatus *EmsSubscriptionStatus `json:"emsSubscriptionStatus,omitempty"`
 
-	// NATS-specific fields.
-
+	// Types is a list of event type to consumer name mappings for the Nats backend
 	// +optional
 	Types []JetStreamTypes `json:"types,omitempty"`
 
+	// EmsTypes is a list of mappings between event type and EventMesh compatible types. Only used with EventMesh as backend
 	// +optional
 	EmsTypes []EventMeshTypes `json:"emsTypes,omitempty"`
 }
@@ -65,11 +67,15 @@ type EmsSubscriptionStatus struct {
 }
 
 type JetStreamTypes struct {
+	// OriginalType is the event type originally used to subscribe
 	OriginalType string `json:"originalType"`
+	// ConsumerName is the name of the Jetstream consumer
 	ConsumerName string `json:"consumerName,omitempty"`
 }
 
 type EventMeshTypes struct {
-	OriginalType  string `json:"originalType"`
+	// OriginalType is the event type originally used to subscribe
+	OriginalType string `json:"originalType"`
+	// EventMeshType is the event type that is used on the event mesh backend
 	EventMeshType string `json:"eventMeshType"`
 }

@@ -294,18 +294,21 @@ spec:
                 description: ID is the unique identifier of Subscription, read-only.
                 type: string
               sink:
-                description: Sink defines endpoint of the subscriber
+                description: The service that should be used as a target for the events
+                  that match the subscription.
                 type: string
               source:
-                description: Source Defines the source of the event originated from.
+                description: Source defines the origin of the event.
                 type: string
               typeMatching:
-                description: TypeMatching defines the type of matching to be done
-                  for the event types.
+                description: 'Configurable TypeMatching defines how types should be
+                  handled.<br /> `standard`: backend specific logic will be applied
+                  to the configured source and types.<br /> `exact`: no further processing
+                  will be applied to the configured source and types.'
                 type: string
               types:
-                description: Types defines the list of event names for the topics
-                  we need to subscribe for messages.
+                description: A list of event names. These names will be used for subscribing
+                  on the backend.
                 items:
                   type: string
                 type: array
@@ -318,8 +321,8 @@ spec:
             description: SubscriptionStatus defines the observed state of Subscription.
             properties:
               backend:
-                description: Backend contains backend specific status which are only
-                  applicable to the active backend.
+                description: Backend specific status which are only applicable to
+                  the active backend.
                 properties:
                   apiRuleName:
                     description: APIRuleName defines the name of the APIRule which
@@ -349,11 +352,18 @@ spec:
                         type: string
                     type: object
                   emsTypes:
+                    description: EmsTypes is a list of mappings between event type
+                      and EventMesh compatible types. Only used with EventMesh as
+                      backend
                     items:
                       properties:
                         eventMeshType:
+                          description: EventMeshType is the event type that is used
+                            on the event mesh backend
                           type: string
                         originalType:
+                          description: OriginalType is the event type originally used
+                            to subscribe
                           type: string
                       required:
                       - eventMeshType
@@ -379,11 +389,16 @@ spec:
                       had failed activation in EventMesh.
                     type: string
                   types:
+                    description: Types is a list of event type to consumer name mappings
+                      for the Nats backend
                     items:
                       properties:
                         consumerName:
+                          description: ConsumerName is the name of the Jetstream consumer
                           type: string
                         originalType:
+                          description: OriginalType is the event type originally used
+                            to subscribe
                           type: string
                       required:
                       - originalType
@@ -391,7 +406,7 @@ spec:
                     type: array
                 type: object
               conditions:
-                description: Conditions defines the status conditions.
+                description: Current state of the Subscription
                 items:
                   properties:
                     lastTransitionTime:
@@ -402,6 +417,7 @@ spec:
                     reason:
                       type: string
                     status:
+                      description: Status of the condition, one of True, False, Unknown
                       type: string
                     type:
                       type: string
@@ -410,7 +426,7 @@ spec:
                   type: object
                 type: array
               ready:
-                description: Ready defines the overall readiness status of a Subscription.
+                description: Overall readiness of the Subscription
                 type: boolean
               types:
                 description: Types defines the filter's event types after cleanup
@@ -418,8 +434,12 @@ spec:
                 items:
                   properties:
                     cleanType:
+                      description: CleanType is the event type after it was cleaned
+                        up from backend compatible characters
                       type: string
                     originalType:
+                      description: OriginalType is the event type specified in the
+                        subscription spec
                       type: string
                   required:
                   - cleanType

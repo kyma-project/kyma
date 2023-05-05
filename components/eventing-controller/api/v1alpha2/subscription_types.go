@@ -24,16 +24,18 @@ type SubscriptionSpec struct {
 	// +optional
 	ID string `json:"id,omitempty"`
 
-	// Sink defines endpoint of the subscriber
+	// The service that should be used as a target for the events that match the subscription.
 	Sink string `json:"sink"`
 
-	// TypeMatching defines the type of matching to be done for the event types.
+	// Configurable TypeMatching defines how types should be handled.<br />
+	// `standard`: backend specific logic will be applied to the configured source and types.<br />
+	// `exact`: no further processing will be applied to the configured source and types.
 	TypeMatching TypeMatching `json:"typeMatching,omitempty"`
 
-	// Source Defines the source of the event originated from.
+	// Source defines the origin of the event.
 	Source string `json:"source"`
 
-	// Types defines the list of event names for the topics we need to subscribe for messages.
+	// A list of event names. These names will be used for subscribing on the backend.
 	Types []string `json:"types"`
 
 	// Config defines the configurations that can be applied to the eventing backend.
@@ -44,25 +46,25 @@ type SubscriptionSpec struct {
 // SubscriptionStatus defines the observed state of Subscription.
 // +kubebuilder:subresource:status
 type SubscriptionStatus struct {
-	// Conditions defines the status conditions.
+	// Current state of the Subscription
 	// +optional
 	Conditions []Condition `json:"conditions,omitempty"`
 
-	// Ready defines the overall readiness status of a Subscription.
+	// Overall readiness of the Subscription
 	Ready bool `json:"ready"`
 
 	// Types defines the filter's event types after cleanup for use with the configured backend.
 	Types []EventType `json:"types"`
 
-	// Backend contains backend specific status which are only applicable to the active backend.
+	// Backend specific status which are only applicable to the active backend.
 	Backend Backend `json:"backend,omitempty"`
 }
 
-//+kubebuilder:storageversion
-//+kubebuilder:object:root=true
-//+kubebuilder:subresource:status
-//+kubebuilder:printcolumn:name="Ready",type="string",JSONPath=".status.ready"
-//+kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
+// +kubebuilder:storageversion
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Ready",type="string",JSONPath=".status.ready"
+// +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 
 // Subscription is the Schema for the subscriptions API.
 type Subscription struct {
@@ -126,7 +128,7 @@ func (s *Subscription) ToUnstructuredSub() (*unstructured.Unstructured, error) {
 	return &unstructured.Unstructured{Object: object}, nil
 }
 
-//+kubebuilder:object:root=true
+// +kubebuilder:object:root=true
 
 // SubscriptionList contains a list of Subscription.
 type SubscriptionList struct {
