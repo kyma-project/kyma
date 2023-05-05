@@ -38,15 +38,19 @@ spec:
                   maxLength: 63
                   pattern: '^([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9]$'
                 description:
+                  description: 'Describes the connected Application.'
                   type: string
                 skipInstallation:
                   type: boolean
                 skipVerify:
+                  description: 'Determines whether to skip TLS certificate verification for the Application.'
                   type: boolean
                 encodeUrl:
+                  description: 'Allows for URL encoding. If set to `false`, your URL segments stay intact.'
                   type: boolean
                   default: true
                 labels:
+                  description: 'Defines the labels of the Application.'
                   nullable: true
                   additionalProperties:
                     type: string
@@ -57,7 +61,7 @@ spec:
                   type: string
                 tags:
                   nullable: true
-                  description: New fields used by V2 version
+                  description: New fields used by V2 version.
                   items:
                     type: string
                   type: array
@@ -68,6 +72,7 @@ spec:
                 longDescription:
                   type: string
                 services:
+                  description: 'Contains all services that the Application provides.'
                   type: array
                   items:
                     type: object
@@ -80,12 +85,23 @@ spec:
                     - "entries"
                     properties:
                       id:
+                        description: 'Identifies the service that the Application provides.'
                         type: string
                       name:
+                        description: >
+                          Represents a unique name of the service.
+                          Used for proxying in Application Gateway.
                         type: string
                       identifier:
+                        description: >
+                          Represents an additional identifier unique in the Application scope.
+                          Allows the external system to provide its own identifier.
                         type: string
                       labels:
+                        description: >
+                          Specifies additional labels for the service offered by the Application.
+                          In the [Compass mode](../../01-overview/main-areas/application-connectivity/README.md), it's provided by Runtime Agent.
+                          In the [standalone mode](../../01-overview/main-areas/application-connectivity/README.md), you have to provide it yourself.
                         nullable: true
                         additionalProperties:
                           type: string
@@ -98,11 +114,19 @@ spec:
                       longDescription:
                         type: string
                       providerDisplayName:
+                        description: >
+                          Specifies a human-readable name of the Application service provider.
+                          In the [Compass mode](../../01-overview/main-areas/application-connectivity/README.md), it's provided by Runtime Agent.
+                          In the [standalone mode](../../01-overview/main-areas/application-connectivity/README.md), you have to provide it yourself.
                         type: string
                       authCreateParameterSchema:
                         description: New fields used by V2 version
                         type: string
                       entries:
+                        description: >
+                          Contains the information about the APIs and events that the service offered by the Application provides.
+                          In the [Compass mode](../../01-overview/main-areas/application-connectivity/README.md), it's provided by Runtime Agent.
+                          In the [standalone mode](../../01-overview/main-areas/application-connectivity/README.md), you have to provide it yourself.
                         type: array
                         items:
                           type: object
@@ -112,6 +136,10 @@ spec:
                             apiType:
                               type: string
                             type:
+                              description: >
+                                Specifies the entry type: `API` or `Events`.
+                                In the [Compass mode](../../01-overview/main-areas/application-connectivity/README.md), it's provided by Runtime Agent.
+                                In the [standalone mode](../../01-overview/main-areas/application-connectivity/README.md), you have to provide it yourself.
                               type: string
                               enum:
                               - "API"
@@ -119,12 +147,26 @@ spec:
                             gatewayUrl:
                               type: string
                             centralGatewayUrl:
+                              description: >
+                                Specifies the URL of Application Gateway.
+                                Internal address resolvable only within the cluster.
+                                This field is required for the API entry type.
+                                In the [Compass mode](../../01-overview/main-areas/application-connectivity/README.md), it's provided by Runtime Agent.
+                                In the [standalone mode](../../01-overview/main-areas/application-connectivity/README.md), you have to provide it yourself.
                               type: string
                             accessLabel:
+                              description: >
+                                Specifies the label used in Istio rules in Application Connector.
+                                This field is required for the API entry type.
                               type: string
                               maxLength: 63
                               pattern: '^([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9]$'
                             targetUrl:
+                              description: >
+                                Specifies the URL of a given API.
+                                This field is required for the API entry type.
+                                In the [Compass mode](../../01-overview/main-areas/application-connectivity/README.md), it's provided by Runtime Agent.
+                                In the [standalone mode](../../01-overview/main-areas/application-connectivity/README.md), you have to provide it yourself.
                               type: string
                             id:
                               type: string
@@ -155,6 +197,11 @@ spec:
                                     tokenEndpointURL:
                                       type: string
                       tags:
+                        description: >
+                          Specifies additional tags used for better documentation of the available APIs.
+                          In the [Compass mode](../../01-overview/main-areas/application-connectivity/README.md),
+                          it's provided by Runtime Agent. In the [standalone mode](../../01-overview/main-areas/application-connectivity/README.md),
+                          you have to provide it yourself.
                         type: array
                         items:
                           type: string
