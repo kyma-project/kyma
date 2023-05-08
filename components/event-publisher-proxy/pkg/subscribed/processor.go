@@ -24,7 +24,6 @@ type Processor struct {
 func (p Processor) extractEventsFromSubscriptions(
 	writer http.ResponseWriter,
 	request *http.Request,
-	enableNewCRDVersion bool,
 ) {
 	eventsMap := make(map[Event]bool)
 	subsList, err := (*p.SubscriptionLister).List(labels.Everything())
@@ -36,28 +35,15 @@ func (p Processor) extractEventsFromSubscriptions(
 
 	appName := legacy.ParseApplicationNameFromPath(request.URL.Path)
 	for _, sObj := range subsList {
-		if enableNewCRDVersion {
-			sub, err := ConvertRuntimeObjToSubscription(sObj)
+		sub, err := ConvertRuntimeObjToSubscription(sObj)
 
-			if err != nil {
-				p.namedLogger().Errorw("Failed to convert a runtime obj to a Subscription", "error", err)
-				continue
-			}
-			if sub.Spec.Types != nil {
-				eventsForSub := FilterEventTypeVersions(p.Prefix, appName, sub)
-				eventsMap = AddUniqueEventsToResult(eventsForSub, eventsMap)
-			}
-		} else {
-			sub, err := ConvertRuntimeObjToSubscriptionV1alpha1(sObj)
-
-			if err != nil {
-				p.namedLogger().Errorw("Failed to convert a runtime obj to a Subscription", "error", err)
-				continue
-			}
-			if sub.Spec.Filter != nil {
-				eventsForSub := FilterEventTypeVersionsV1alpha1(p.Prefix, p.Namespace, appName, sub.Spec.Filter)
-				eventsMap = AddUniqueEventsToResult(eventsForSub, eventsMap)
-			}
+		if err != nil {
+			p.namedLogger().Errorw("Failed to convert a runtime obj to a Subscription", "error", err)
+			continue
+		}
+		if sub.Spec.Types != nil {
+			eventsForSub := FilterEventTypeVersions(p.Prefix, appName, sub)
+			eventsMap = AddUniqueEventsToResult(eventsForSub, eventsMap)
 		}
 	}
 	events := ConvertEventsMapToSlice(eventsMap)
@@ -67,11 +53,11 @@ func (p Processor) extractEventsFromSubscriptions(
 }
 
 func (p Processor) ExtractEventsFromSubscriptions(writer http.ResponseWriter, request *http.Request) {
-	p.extractEventsFromSubscriptions(writer, request, true)
+	p.extractEventsFromSubscriptions(writer, request)
 }
 
 func (p Processor) ExtractEventsFromSubscriptionsV1alpha1(writer http.ResponseWriter, request *http.Request) {
-	p.extractEventsFromSubscriptions(writer, request, false)
+	p.extractEventsFromSubscriptions(writer, request)
 }
 
 func (p Processor) namedLogger() *zap.SugaredLogger {

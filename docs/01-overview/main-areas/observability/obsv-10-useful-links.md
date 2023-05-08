@@ -17,10 +17,10 @@ If you're interested in learning more about the Observability area, check out th
 
 - Troubleshoot Observability-related issues:
   - [Prometheus Istio Server keeps crashing](../../../04-operation-guides/troubleshooting/observability/obsv-01-troubleshoot-prometheus-istio-server-crash-oom.md)
-  - [Jaeger shows fewer traces than expected](../../../04-operation-guides/troubleshooting/observability/obsv-02-troubleshoot-jaeger-shows-few-traces.md)
+  - [Trace backend shows fewer traces than expected](../../../04-operation-guides/troubleshooting/observability/obsv-02-troubleshoot-trace-backend-shows-few-traces.md)
   - [Loki shows fewer logs than expected](../../../04-operation-guides/troubleshooting/observability/obsv-03-troubleshoot-loki-logging.md)
 
-- Understand the architecture of Kyma's [monitoring](../../../05-technical-reference/00-architecture/obsv-01-architecture-monitoring.md), [logging](../../../05-technical-reference/00-architecture/obsv-02-architecture-logging.md), and [tracing](../../../05-technical-reference/00-architecture/obsv-03-architecture-tracing.md) components.
+- Understand the architecture of Kyma's [monitoring](../../../05-technical-reference/00-architecture/obsv-01-architecture-monitoring.md), [logging](../../../05-technical-reference/00-architecture/obsv-02-architecture-logging.md), and [tracing](../../../01-overview/main-areas/telemetry/telemetry-03-traces.md) components.
 
 - Find the [configuration parameters for Monitoring, Logging, Tracing, and Kiali](../../../05-technical-reference/00-configuration-parameters/obsv-01-configpara-observability.md).
 

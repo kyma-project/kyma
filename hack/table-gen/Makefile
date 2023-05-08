@@ -17,8 +17,12 @@ eventing-subscription:
 .PHONY: telemetry-docs
 telemetry-docs: telemetry-tracepipeline telemetry-logparser telemetry-logpipeline
 
+.PHONY: cra-docs
+cra-docs:
+	go run table-gen.go --crd-filename ../../installation/resources/crds/compass-runtime-agent/compass-connection.crd.yaml --md-filename ../../docs/05-technical-reference/00-custom-resources/ra-01-compassconnection.md
+
 .PHONY: eventing-docs
 eventing-docs: eventing-subscription
 
 .PHONY: generate
-generate: telemetry-docs eventing-docs
+generate: cra-docs telemetry-docs eventing-docs	

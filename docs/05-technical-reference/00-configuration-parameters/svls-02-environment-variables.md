@@ -18,12 +18,8 @@ Every runtime provides its own unique environment configuration which can be rea
 | **SERVICE_NAMESPACE** | | The Namespace where the right Function exists on a cluster. |
 | **KUBELESS_INSTALL_VOLUME** | `/kubeless` | Full path to volume mount with users source code. |
 | **FUNC_RUNTIME** | | The name of the actual runtime. Possible values: `python39`, `nodejs16`, `nodejs16`. |
-| **TRACE_COLLECTOR_ENDPOINT** | `http://tracing-jaeger-collector.kyma-system.svc.cluster.local:4318/v1/traces` | Full address of the Open-Telemetry Trace Collector. |
-| **JAEGER_SERVICE_ENDPOINT** | `http://tracing-jaeger-collector.kyma-system.svc.cluster.local:14268/api/traces` | **Deprecated in 2.8** Full address of the Jaeger service. |
+| **TRACE_COLLECTOR_ENDPOINT** | | Full address of the OpenTelemetry Trace Collector is exported if trace collector endpoint is present |
 | **PUBLISHER_PROXY_ADDRESS** | `http://eventing-publisher-proxy.kyma-system.svc.cluster.local/publish` | Full address of the Publisher Proxy service. |
-
-> **NOTE:** TRACE_COLLECTOR_ENDPOINT replaced JAEGER_SERVICE_ENDPOINT in Kyma 2.8. Functions built (or re-built) after 2.8 use OpenTelemetry protocol-compliant endpoint, as defined by TRACE_COLLECTOR_ENDPOINT. JAEGER_SERVICE_ENDPOINT will be removed in Kyma 2.10.
-
 
 ### Specific environments
 
@@ -115,9 +111,9 @@ spec:
 
 To configure a Function with the Python runtime, override the default values of these environment variables:
 
-| Environment variable             | Description                                                                                                                  | Unit    | Default value   |
-| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------- | --------------- | ------------------------------------------------------------------------------ |
-| **FUNC_MEMFILE_MAX**             | Specifies the maximum size of the memory buffer for the HTTP request body in bytes.                                                            | Number  | `100*1024*1024` | <!-- https://bottlepy.org/docs/dev/api.html#bottle.BaseRequest.MEMFILE_MAX --> |
+| Environment variable             |            Description                                                                                                     | Unit    | Default value   |
+| -------------------------------- |---------------------------------------------------------------------------------------------------------------------------- | ------- | --------------- |
+ FUNC_MEMFILE_MAX|for the HTTP request body in bytes.                                                            | Number  | `100*1024*1024` | <!-- https://bottlepy.org/docs/dev/api.html#bottle.BaseRequest.MEMFILE_MAX --> |
 | **CHERRYPY_NUMTHREADS**          | Specifies the number of requests that can be handled in parallel                                                                           | Number  | `50`              |
 | **KYMA_INTERNAL_LOGGER_ENABLED** | Enables the default HTTP request logger which uses the standard Apache combined log output. To enable it, set its value to `true`. | Boolean | `false`         |
 

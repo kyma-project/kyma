@@ -1,5 +1,3 @@
-{{ if .Values.enableNewCRDVersion }}
----
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -91,4 +89,3 @@ spec:
                 - name: SECRET_NAME
                   value: {{ .Values.webhook.secretName }}
           serviceAccountName: {{ include "controller.fullname" . }}-cert-handler
-{{- end }}
