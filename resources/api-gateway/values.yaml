@@ -118,5 +118,5 @@ global:
       directory: "prod"
     api_gateway_webhook_certificates:
       name: "api-gateway-webhook-certificates"
-      version: "1.6.0
+      version: "1.6.0"
       directory: "prod"
