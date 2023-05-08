@@ -31,7 +31,7 @@ Kyma consists of these main areas and components:
 
 ![areas](./assets/kyma-areas.svg)
 
-Read about [Kyma main areas](./main-areas) to learn more.
+Go to the respective sections to learn more about specific Kyma areas and functionalities.
 
 ## Advantages
 

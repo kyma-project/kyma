@@ -21,7 +21,7 @@ Kyma consists of these main areas and components:
 
 ![areas](./assets/kyma-areas.svg)
 
-Read about [Kyma main areas](./main-areas) to learn more.
+Go to the respective sections to learn more about specific Kyma areas and functionalities.
 
 Kyma is built upon leading cloud-native, open-source projects, such as Istio, NATS, Serverless, and Prometheus. The features developed by Kyma are the unique “glue” that holds them together, so you can connect and extend your applications easily and intuitively. To learn how to do that, head over to the [Get Started](./02-get-started) section where you can find step-by-step instructions to get your environment up and running.
 
