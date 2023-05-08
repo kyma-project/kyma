@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func Test_flatten(t *testing.T) {
+func TestFlatten(t *testing.T) {
 	type args struct {
 		e *element
 	}

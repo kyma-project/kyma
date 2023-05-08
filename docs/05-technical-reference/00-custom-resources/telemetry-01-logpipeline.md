@@ -68,7 +68,6 @@ For details, see the [LogPipeline specification file](https://github.com/kyma-pr
 <!-- The content between "TABLE-START" and "TABLE-END" will be replaced -->
 
 <!-- TABLE-START -->
-
 ### LogPipeline.telemetry.kyma-project.io/v1alpha1
 
 **Spec:**

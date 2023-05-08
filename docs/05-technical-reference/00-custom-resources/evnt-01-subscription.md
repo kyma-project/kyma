@@ -36,7 +36,6 @@ spec:
 This table lists all the possible parameters of a given resource together with their descriptions:
 
 <!-- TABLE-START -->
-
 ### Subscription.eventing.kyma-project.io/v1alpha2
 
 **Spec:**
@@ -82,6 +81,7 @@ This table lists all the possible parameters of a given resource together with t
 | **types** | array **required** | Types defines the filter's event types after cleanup for use with the configured backend. |
 | **types.cleanType** | string **required** |  |
 | **types.originalType** | string **required** |  |
+
 ### Subscription.eventing.kyma-project.io/v1alpha1
 
 **Spec:**

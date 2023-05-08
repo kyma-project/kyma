@@ -34,7 +34,6 @@ For details, see the [LogParser specification file](https://github.com/kyma-proj
 <!-- The content between "TABLE-START" and "TABLE-END" will be replaced -->
 
 <!-- TABLE-START -->
-
 ### LogParser.telemetry.kyma-project.io/v1alpha1
 
 **Spec:**

@@ -43,7 +43,6 @@ For details, see the [TracePipeline specification file](https://github.com/kyma-
 <!-- The content between "TABLE-START" and "TABLE-END" will be replaced -->
 
 <!-- TABLE-START -->
-
 ### TracePipeline.telemetry.kyma-project.io/v1alpha1
 
 **Spec:**

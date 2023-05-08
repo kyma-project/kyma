@@ -15,7 +15,14 @@ import (
 
 const (
 	// Regular expression pattern for reading everything between TABLE-START and TABLE-END tags
-	REPattern             = `(?s)<!--\s*TABLE-START\s* -->.*<!--\s*TABLE-END\s*-->`
+	REPattern = `(?s)<!--\s*TABLE-START\s* -->.*<!--\s*TABLE-END\s*-->`
+
+	// template to be used for rendering the crd documentation. Has to iterate over all versions and spec and status.
+	// The versions will be sorted:
+	// 1. stored version
+	// 2. served version
+	// within those version alphanumeric ordering applies
+
 	documentationTemplate = `
 {{- range $version := . -}}
 ### {{ $version.GKV }}
@@ -47,6 +54,7 @@ var (
 	CRDGroup    string
 )
 
+// element contains one tree element. can be a simple type (string,
 type element struct {
 	name        string
 	description string
@@ -62,8 +70,8 @@ type flatElement struct {
 	ElemType    string
 }
 
-type crdversion struct {
-	GKV            string
+type crdVersion struct {
+	GKV            string // API-GroupKindVersion
 	Spec, Status   []flatElement
 	Stored, Served bool
 }
@@ -135,10 +143,10 @@ func generateDocFromCRD() string {
 	CRDKind = kind.(string)
 	CRDGroup = group.(string)
 
-	var crdVersions []crdversion
+	var crdVersions []crdVersion
 	for _, version := range versions.([]interface{}) {
 		if v, ok := version.(map[string]interface{}); ok {
-			crd := crdversion{}
+			crd := crdVersion{}
 			crd.Stored = v["storage"].(bool)
 			crd.Served = v["served"].(bool)
 			name := getElement(version, "name")
@@ -169,13 +177,13 @@ func generateDocFromCRD() string {
 	return generateSnippet(crdVersions)
 }
 
-func generateSnippet(versions []crdversion) string {
-	t, err := template.New("").Parse(documentationTemplate)
+func generateSnippet(versions []crdVersion) string {
+	tmpl, err := template.New("").Parse(documentationTemplate)
 	if err != nil {
 		log.Fatal(err)
 	}
 	var b strings.Builder
-	err = t.Execute(&b, versions)
+	err = tmpl.Execute(&b, versions)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -185,7 +193,7 @@ func generateSnippet(versions []crdversion) string {
 
 func pathList(version interface{}, resource string) []flatElement {
 	elem := getElement(version, "schema", "openAPIV3Schema", "properties", resource)
-	e := toElem(elem, resource, true)
+	e := convertUnstructuredToElementTree(elem, resource, true)
 	fe := flatten(e)
 	fe = filter(fe, resource)
 	return fe
@@ -221,6 +229,8 @@ func flatten(e *element) []flatElement {
 	if e.required {
 		elem.ElemType += " **required**"
 	}
+
+	// recurse into child properties
 	for _, p := range e.properties {
 		fes := flatten(p)
 		for _, fe := range fes {
@@ -229,30 +239,38 @@ func flatten(e *element) []flatElement {
 		}
 	}
 	if e.elemtype == "array" {
-		items := flatten(e.items)
-		if e.items != nil && e.items.elemtype == "object" {
-			// if it is an object we can use the description of the anonymous object to fill gaps in the description of the list
-			if elem.Description == "" {
-				elem.Description = items[0].Description
-			}
-			// the child object is stored in "items" we need to clean this as it would otherwise show up in the path list
-			items = filter(items, "items")
-			for _, item := range items {
-				item.Path = append([]string{e.name}, item.Path...)
-				elems = append(elems, item)
-			}
-		} else {
-			for _, item := range items {
-				elem.ElemType = fmt.Sprintf("[]%v", item.ElemType)
-			}
-		}
+		elems = flattenArray(e, &elem, &elems)
 	}
 
+	// sort the list by path
 	elems = append(elems, elem)
 	sort.Slice(elems, func(i, j int) bool {
 		return strings.Join(elems[i].Path, "") < strings.Join(elems[j].Path, "")
 	})
 	return elems
+}
+
+func flattenArray(e *element, flatElem *flatElement, flatElems *[]flatElement) []flatElement {
+	items := flatten(e.items)
+	fes := *flatElems
+	// handle an array of objects
+	if e.items != nil && e.items.elemtype == "object" {
+		// if it is an object we can use the description of the anonymous object to fill gaps in the description of the list
+		if flatElem.Description == "" {
+			flatElem.Description = items[0].Description
+		}
+		// the child object is stored in "items" we need to clean this as it would otherwise show up in the path list
+		items = filter(items, "items")
+		for _, item := range items {
+			item.Path = append([]string{e.name}, item.Path...)
+			fes = append(fes, item)
+		}
+	} else { // handle array of simple type
+		for _, item := range items {
+			flatElem.ElemType = fmt.Sprintf("[]%v", item.ElemType)
+		}
+	}
+	return fes
 }
 
 // getElement returns a specific element from obj based on the provided Path.
@@ -264,39 +282,54 @@ func getElement(obj interface{}, path ...string) interface{} {
 	return elem
 }
 
-// toElem is a rather simple converter from interface to a tree structure of elements
-func toElem(obj interface{}, name string, required bool) *element {
+// convertUnstructuredToElementTree is a rather simple converter from interface to a tree structure of elements
+func convertUnstructuredToElementTree(obj interface{}, name string, required bool) *element {
 	e := element{}
-	if m, ok := obj.(map[string]interface{}); ok {
-		e.name = name
-		e.required = required
-		if d, ok := m["description"].(string); ok {
-			e.description = d
-		}
-		e.elemtype = m["type"].(string)
-		if e.elemtype == "object" {
-			e.properties = []*element{}
-			req := []interface{}{}
-			if r, ok := m["required"].([]interface{}); ok {
-				req = r
-			}
-			if p, ok := m["properties"].(map[string]interface{}); ok {
-				for n, ce := range p {
-					e.properties = append(e.properties, toElem(ce, n, contains(req, n)))
-				}
-			}
-			if p, ok := m["additionalProperties"].(map[string]interface{}); ok {
-				e.elemtype = fmt.Sprintf("%v%v", "map[string]", p["type"].(string))
-			}
-		}
-		if e.elemtype == "array" {
-			// store the allowed child type of the list in "items"
-			if p, ok := m["items"].(map[string]interface{}); ok {
-				e.items = toElem(p, "items", false)
-			}
+	m, ok := obj.(map[string]interface{})
+	if !ok {
+		return &e
+	}
+
+	e.name = name
+	e.required = required
+	if d, ok := m["description"].(string); ok {
+		e.description = d
+	}
+	e.elemtype = m["type"].(string)
+
+	if e.elemtype == "object" {
+		handleObjectType(&e, m)
+	}
+
+	if e.elemtype == "array" {
+		// store the allowed child type of the list in "items"
+		if p, ok := m["items"].(map[string]interface{}); ok {
+			e.items = convertUnstructuredToElementTree(p, "items", false)
 		}
 	}
 	return &e
+}
+
+func handleObjectType(e *element, m map[string]interface{}) {
+	e.properties = []*element{}
+
+	// find required properties
+	req := []interface{}{}
+	if r, ok := m["required"].([]interface{}); ok {
+		req = r
+	}
+
+	// recurse into child properties
+	if p, ok := m["properties"].(map[string]interface{}); ok {
+		for n, ce := range p {
+			e.properties = append(e.properties, convertUnstructuredToElementTree(ce, n, contains(req, n)))
+		}
+	}
+
+	// additionalProperties is an unstructed map of string to type
+	if p, ok := m["additionalProperties"].(map[string]interface{}); ok {
+		e.elemtype = fmt.Sprintf("%v%v", "map[string]", p["type"].(string))
+	}
 }
 
 func contains(list []interface{}, value string) bool {
