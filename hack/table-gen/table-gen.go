@@ -32,7 +32,7 @@ const (
 | Parameter | Type | Description |
 | ---- | ----------- | ---- |
 {{- range $prop := $version.Spec }}
-| **{{range $i, $v := $prop.Path}}{{if $i}}.{{end}}{{$v}}{{end}}** | {{ $prop.ElemType }} | {{ $prop.Description }} |
+| **{{range $i, $v := $prop.Path}}{{if $i}}.{{end}}{{$v}}{{end}}** {{ if $prop.Required}}(required){{ end }} | {{ markdownEscape $prop.ElemType }} | {{ markdownEscape $prop.Description }} |
 {{- end }}
 
 **Status:**
@@ -40,7 +40,7 @@ const (
 | Parameter | Type | Description |
 | ---- | ----------- | ---- |
 {{- range $prop := $version.Status }}
-| **{{range $i, $v := $prop.Path}}{{if $i}}.{{end}}{{$v}}{{end}}** | {{ $prop.ElemType }} | {{ $prop.Description }} |
+| **{{range $i, $v := $prop.Path}}{{if $i}}.{{end}}{{$v}}{{end}}** {{ if $prop.Required}}(required){{ end }} | {{ markdownEscape $prop.ElemType }} | {{ markdownEscape $prop.Description }} |
 {{- end }}
 
 {{ end -}}`
@@ -68,6 +68,7 @@ type flatElement struct {
 	Path        []string
 	Description string
 	ElemType    string
+	Required    bool
 }
 
 type crdVersion struct {
@@ -178,7 +179,7 @@ func generateDocFromCRD() string {
 }
 
 func generateSnippet(versions []crdVersion) string {
-	tmpl, err := template.New("").Parse(documentationTemplate)
+	tmpl, err := template.New("").Funcs(template.FuncMap{"markdownEscape": markdownEscape}).Parse(documentationTemplate)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -225,9 +226,7 @@ func flatten(e *element) []flatElement {
 		Path:        []string{e.name},
 		Description: e.description,
 		ElemType:    e.elemtype,
-	}
-	if e.required {
-		elem.ElemType += " **required**"
+		Required:    e.required,
 	}
 
 	// recurse into child properties
@@ -239,7 +238,7 @@ func flatten(e *element) []flatElement {
 		}
 	}
 	if e.elemtype == "array" {
-		elems = flattenArray(e, &elem, &elems)
+		elems = flattenArray(e, &elem, elems)
 	}
 
 	// sort the list by path
@@ -250,9 +249,15 @@ func flatten(e *element) []flatElement {
 	return elems
 }
 
-func flattenArray(e *element, flatElem *flatElement, flatElems *[]flatElement) []flatElement {
+func markdownEscape(elemtype string) string {
+	for _, char := range []string{`\`, "`", `*`, `_`, `{`, `}`, `[`, `]`, `<`, `>`, `(`, `)`, `#`, `+`, `-`, `.`, `!`, `|`} {
+		elemtype = strings.ReplaceAll(elemtype, char, fmt.Sprintf("\\%v", char))
+	}
+	return elemtype
+}
+
+func flattenArray(e *element, flatElem *flatElement, flatElems []flatElement) []flatElement {
 	items := flatten(e.items)
-	fes := *flatElems
 	// handle an array of objects
 	if e.items != nil && e.items.elemtype == "object" {
 		// if it is an object we can use the description of the anonymous object to fill gaps in the description of the list
@@ -263,14 +268,14 @@ func flattenArray(e *element, flatElem *flatElement, flatElems *[]flatElement) [
 		items = filter(items, "items")
 		for _, item := range items {
 			item.Path = append([]string{e.name}, item.Path...)
-			fes = append(fes, item)
+			flatElems = append(flatElems, item)
 		}
 	} else { // handle array of simple type
 		for _, item := range items {
 			flatElem.ElemType = fmt.Sprintf("[]%v", item.ElemType)
 		}
 	}
-	return fes
+	return flatElems
 }
 
 // getElement returns a specific element from obj based on the provided Path.

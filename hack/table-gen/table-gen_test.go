@@ -104,7 +104,7 @@ func TestFlatten(t *testing.T) {
 			args: args{
 				e: &element{
 					name:        "name",
-					description: "desc",
+					description: "",
 					elemtype:    "array",
 					required:    false,
 					items: func() *element {
