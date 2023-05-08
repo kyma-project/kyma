@@ -150,7 +150,7 @@ global:
       sha: ""
     grafana:
       name: "grafana"
-      version: "7.5.17-6ea7fe7a"
+      version: "7.5.17-419b7e46"
       directory: "prod/tpi"
       sha: ""
     k8s_sidecar:
@@ -160,7 +160,7 @@ global:
       sha: ""
     oauth2_proxy:
       name: "oauth2-proxy"
-      version: "7.4.0-6ea7fe7a"
+      version: "7.4.0-406f70a1"
       directory: "prod/tpi"
       sha: ""
 
