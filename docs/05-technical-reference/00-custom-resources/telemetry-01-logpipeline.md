@@ -74,10 +74,10 @@ For details, see the [LogPipeline specification file](https://github.com/kyma-pr
 
 | Parameter | Type | Description |
 | ---- | ----------- | ---- |
-| **files**  | array | Provides file content to be consumed by a LogPipeline configuration |
+| **files**  | \[\]object | Provides file content to be consumed by a LogPipeline configuration |
 | **files.content**  | string |  |
 | **files.name**  | string |  |
-| **filters**  | array | Describes a filtering option on the logs of the pipeline. |
+| **filters**  | \[\]object | Describes a filtering option on the logs of the pipeline. |
 | **filters.custom**  | string | Custom filter definition in the Fluent Bit syntax. Note: If you use a `custom` filter, you put the LogPipeline in unsupported mode. |
 | **input**  | object | Defines where to collect logs, including selector mechanisms. |
 | **input.application**  | object | Configures in more detail from which containers application logs are enabled as input. |
@@ -132,7 +132,7 @@ For details, see the [LogPipeline specification file](https://github.com/kyma-pr
 | **output.http.user.valueFrom.secretKeyRef.key**  | string |  |
 | **output.http.user.valueFrom.secretKeyRef.name**  | string |  |
 | **output.http.user.valueFrom.secretKeyRef.namespace**  | string |  |
-| **variables**  | array | A list of mappings from Kubernetes Secret keys to environment variables. Mapped keys are mounted as environment variables, so that they are available as [Variables](https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/classic-mode/variables) in the sections. |
+| **variables**  | \[\]object | A list of mappings from Kubernetes Secret keys to environment variables. Mapped keys are mounted as environment variables, so that they are available as [Variables](https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/classic-mode/variables) in the sections. |
 | **variables.name**  | string | Name of the variable to map. |
 | **variables.valueFrom**  | object |  |
 | **variables.valueFrom.secretKeyRef**  | object | Refers to a key in a Secret. You must provide `name` and `namespace` of the Secret, as well as the name of the `key`. |
@@ -144,7 +144,7 @@ For details, see the [LogPipeline specification file](https://github.com/kyma-pr
 
 | Parameter | Type | Description |
 | ---- | ----------- | ---- |
-| **conditions**  | array | An array of conditions describing the status of the pipeline. |
+| **conditions**  | \[\]object | An array of conditions describing the status of the pipeline. |
 | **conditions.lastTransitionTime**  | string | An array of conditions describing the status of the pipeline. |
 | **conditions.reason**  | string | An array of conditions describing the status of the pipeline. |
 | **conditions.type**  | string | The possible transition types are:<br>- `Running`: The instance is ready and usable.<br>- `Pending`: The pipeline is being activated. |

@@ -256,23 +256,24 @@ func markdownEscape(elemtype string) string {
 	return elemtype
 }
 
-func flattenArray(e *element, flatElem *flatElement, flatElems []flatElement) []flatElement {
-	items := flatten(e.items)
+func flattenArray(from *element, to *flatElement, flatElems []flatElement) []flatElement {
+	items := flatten(from.items)
 	// handle an array of objects
-	if e.items != nil && e.items.elemtype == "object" {
+	if from.items != nil && from.items.elemtype == "object" {
+		to.ElemType = fmt.Sprintf("[]%v", from.items.elemtype)
 		// if it is an object we can use the description of the anonymous object to fill gaps in the description of the list
-		if flatElem.Description == "" {
-			flatElem.Description = items[0].Description
+		if to.Description == "" {
+			to.Description = items[0].Description
 		}
 		// the child object is stored in "items" we need to clean this as it would otherwise show up in the path list
 		items = filter(items, "items")
 		for _, item := range items {
-			item.Path = append([]string{e.name}, item.Path...)
+			item.Path = append([]string{from.name}, item.Path...)
 			flatElems = append(flatElems, item)
 		}
 	} else { // handle array of simple type
 		for _, item := range items {
-			flatElem.ElemType = fmt.Sprintf("[]%v", item.ElemType)
+			to.ElemType = fmt.Sprintf("[]%v", item.ElemType)
 		}
 	}
 	return flatElems

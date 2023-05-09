@@ -74,7 +74,7 @@ For details, see the [TracePipeline specification file](https://github.com/kyma-
 | **output.otlp.endpoint.valueFrom.secretKeyRef.key**  | string |  |
 | **output.otlp.endpoint.valueFrom.secretKeyRef.name**  | string |  |
 | **output.otlp.endpoint.valueFrom.secretKeyRef.namespace**  | string |  |
-| **output.otlp.headers**  | array | Defines custom headers to be added to outgoing HTTP or GRPC requests. |
+| **output.otlp.headers**  | \[\]object | Defines custom headers to be added to outgoing HTTP or GRPC requests. |
 | **output.otlp.headers.name** (required) | string | Defines the header name. |
 | **output.otlp.headers.value**  | string | Value that can contain references to Secret values. |
 | **output.otlp.headers.valueFrom**  | object |  |
@@ -88,7 +88,7 @@ For details, see the [TracePipeline specification file](https://github.com/kyma-
 
 | Parameter | Type | Description |
 | ---- | ----------- | ---- |
-| **conditions**  | array | An array of conditions describing the status of the pipeline. |
+| **conditions**  | \[\]object | An array of conditions describing the status of the pipeline. |
 | **conditions.lastTransitionTime**  | string | An array of conditions describing the status of the pipeline. |
 | **conditions.reason**  | string | An array of conditions describing the status of the pipeline. |
 | **conditions.type**  | string | The possible transition types are:<br>- `Running`: The instance is ready and usable.<br>- `Pending`: The pipeline is being activated. |
