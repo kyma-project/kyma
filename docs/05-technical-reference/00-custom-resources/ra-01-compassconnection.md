@@ -60,10 +60,10 @@ This table lists all the possible parameters of the CompassConnection custom res
 | Parameter | Type | Description |
 | ---- | ----------- | ---- |
 | **managementInfo** (required) | object |  |
-| **managementInfo.connectorUrl** (required) | string | Connector URL used for maintaining secure connection\. |
+| **managementInfo.connectorUrl** (required) | string | Connector URL used for maintaining secure connection. |
 | **managementInfo.directorUrl** (required) | string | Director URL used for fetching Applications |
-| **refreshCredentialsNow**  | boolean | If true \- ignore certificate expiration date and refresh next round |
-| **resyncNow**  | boolean | If true \- ignore \`APP\_MINIMAL\_COMPASS\_SYNC\_TIME\` and sync next round |
+| **refreshCredentialsNow**  | boolean | If true - ignore certificate expiration date and refresh next round |
+| **resyncNow**  | boolean | If true - ignore `APP_MINIMAL_COMPASS_SYNC_TIME` and sync next round |
 
 **Status:**
 
@@ -71,7 +71,7 @@ This table lists all the possible parameters of the CompassConnection custom res
 | ---- | ----------- | ---- |
 | **connectionState** (required) | string |  |
 | **connectionStatus** (required) | object | ConnectionStatus represents status of a connection to Compass |
-| **connectionStatus.certificateStatus** (required) | object | Provides the certificate issue and expiration dates\. |
+| **connectionStatus.certificateStatus** (required) | object | Provides the certificate issue and expiration dates. |
 | **connectionStatus.certificateStatus.acquired**  | string | When the certificate was acquired |
 | **connectionStatus.certificateStatus.notAfter**  | string | When the certificate stops being valid |
 | **connectionStatus.certificateStatus.notBefore**  | string | When the certificate becomes valid |
