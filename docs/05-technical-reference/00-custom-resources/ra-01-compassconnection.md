@@ -53,30 +53,40 @@ This table lists all the possible parameters of the CompassConnection custom res
 <!-- The content between "TABLE-START" and "TABLE-END" will be replaced -->
 
 <!-- TABLE-START -->
-<!-- CompassConnection v1alpha1 compass.kyma-project.io -->
-| Parameter         | Description                                   |
-| ---------------------------------------- | ---------|
-| **spec.managementInfo** |  |
-| **spec.managementInfo.connectorUrl** | Connector URL used for maintaining secure connection. |
-| **spec.managementInfo.directorUrl** | Director URL used for fetching Applications |
-| **spec.refreshCredentialsNow** | If true - ignore certificate expiration date and refresh next round |
-| **spec.resyncNow** | If true - ignore `APP_MINIMAL_COMPASS_SYNC_TIME` and sync next round |
-| **status.connectionState** |  |
-| **status.connectionStatus** | ConnectionStatus represents status of a connection to Compass |
-| **status.connectionStatus.certificateStatus** | Provides the certificate issue and expiration dates. |
-| **status.connectionStatus.certificateStatus.acquired** | When the certificate was acquired |
-| **status.connectionStatus.certificateStatus.notAfter** | When the certificate stops being valid |
-| **status.connectionStatus.certificateStatus.notBefore** | When the certificate becomes valid |
-| **status.connectionStatus.error** |  |
-| **status.connectionStatus.established** | Provides the date of when the connection was established |
-| **status.connectionStatus.lastSuccess** | Provides the date of the last successful synchronization with the Connector |
-| **status.connectionStatus.lastSync** | Provides the date of the last synchronization attempt |
-| **status.connectionStatus.renewed** | Provides the date of the last certificate renewal |
-| **status.synchronizationStatus** | Describes the status of the synchronization with the Director |
-| **status.synchronizationStatus.error** |  |
-| **status.synchronizationStatus.lastAttempt** | Provides the date of the last synchronization attempt with the Director |
-| **status.synchronizationStatus.lastSuccessfulApplication** | Provides the date of the last successful application of resources fetched from Compass |
-| **status.synchronizationStatus.lastSuccessfulFetch** | Provides the date of the last successful fetch of resources from the Director |<!-- TABLE-END -->
+### CompassConnection.compass.kyma-project.io/v1alpha1
+
+**Spec:**
+
+| Parameter | Type | Description |
+| ---- | ----------- | ---- |
+| **managementInfo** (required) | object |  |
+| **managementInfo.connectorUrl** (required) | string | Connector URL used for maintaining secure connection. |
+| **managementInfo.directorUrl** (required) | string | Director URL used for fetching Applications |
+| **refreshCredentialsNow**  | boolean | If true - ignore certificate expiration date and refresh next round |
+| **resyncNow**  | boolean | If true - ignore `APP_MINIMAL_COMPASS_SYNC_TIME` and sync next round |
+
+**Status:**
+
+| Parameter | Type | Description |
+| ---- | ----------- | ---- |
+| **connectionState** (required) | string |  |
+| **connectionStatus** (required) | object | ConnectionStatus represents status of a connection to Compass |
+| **connectionStatus.certificateStatus** (required) | object | Provides the certificate issue and expiration dates. |
+| **connectionStatus.certificateStatus.acquired**  | string | When the certificate was acquired |
+| **connectionStatus.certificateStatus.notAfter**  | string | When the certificate stops being valid |
+| **connectionStatus.certificateStatus.notBefore**  | string | When the certificate becomes valid |
+| **connectionStatus.error**  | string |  |
+| **connectionStatus.established**  | string | Provides the date of when the connection was established |
+| **connectionStatus.lastSuccess**  | string | Provides the date of the last successful synchronization with the Connector |
+| **connectionStatus.lastSync**  | string | Provides the date of the last synchronization attempt |
+| **connectionStatus.renewed**  | string | Provides the date of the last certificate renewal |
+| **synchronizationStatus**  | object | Describes the status of the synchronization with the Director |
+| **synchronizationStatus.error**  | string |  |
+| **synchronizationStatus.lastAttempt**  | string | Provides the date of the last synchronization attempt with the Director |
+| **synchronizationStatus.lastSuccessfulApplication**  | string | Provides the date of the last successful application of resources fetched from Compass |
+| **synchronizationStatus.lastSuccessfulFetch**  | string | Provides the date of the last successful fetch of resources from the Director |
+
+<!-- TABLE-END -->
 
 ## Dependents
 
