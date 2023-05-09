@@ -1,3 +1,6 @@
+.PHONY: generate
+generate: telemetry-docs cra-docs
+
 .PHONY: telemetry-tracepipeline
 telemetry-tracepipeline:
 	go run table-gen.go --crd-filename ../../installation/resources/crds/telemetry/tracepipelines.crd.yaml --md-filename ../../docs/05-technical-reference/00-custom-resources/telemetry-03-tracepipeline.md
@@ -13,5 +16,6 @@ telemetry-logparser:
 .PHONY: telemetry-docs
 telemetry-docs: telemetry-tracepipeline telemetry-logparser telemetry-logpipeline
 
-.PHONY: generate
-generate: telemetry-docs
+.PHONY: cra-docs
+cra-docs:
+	go run table-gen.go --crd-filename ../../installation/resources/crds/compass-runtime-agent/compass-connection.crd.yaml --md-filename ../../docs/05-technical-reference/00-custom-resources/ra-01-compassconnection.md

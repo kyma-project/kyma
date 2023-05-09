@@ -45,27 +45,25 @@ import (
 )
 
 const (
-	testIDLength                   = 8
-	OauthClientSecretLength        = 8
-	OauthClientIDLength            = 8
-	manifestsDirectory             = "manifests/"
-	testingAppFile                 = "testing-app.yaml"
-	twoServicesDeploymentFile      = "two-services-deployment.yaml"
-	globalCommonResourcesFile      = "global-commons.yaml"
-	hydraClientFile                = "hydra-client.yaml"
-	noAccessStrategyApiruleFile    = "no_access_strategy.yaml"
-	twoServicesApiruleFile         = "two-services.yaml"
-	oauthStrategyApiruleFile       = "oauth-strategy.yaml"
-	jwtAndOauthStrategyApiruleFile = "jwt-oauth-strategy.yaml"
-	jwtAndOauthOnePathApiruleFile  = "jwt-oauth-one-path-strategy.yaml"
-	resourceSeparator              = "---"
-	defaultHeaderName              = "Authorization"
-	customDomainEnv                = "TEST_CUSTOM_DOMAIN"
-	exportResultVar                = "EXPORT_RESULT"
-	junitFileName                  = "junit-report.xml"
-	cucumberFileName               = "cucumber-report.json"
-	anyToken                       = "any"
-	authorizationHeaderName        = "Authorization"
+	testIDLength                     = 8
+	OauthClientSecretLength          = 8
+	OauthClientIDLength              = 8
+	manifestsDirectory               = "manifests/"
+	testingAppFile                   = "testing-app.yaml"
+	twoServicesDeploymentFile        = "two-services-deployment.yaml"
+	globalCommonResourcesFile        = "global-commons.yaml"
+	hydraClientFile                  = "hydra-client.yaml"
+	noAccessStrategyApiruleFile      = "no_access_strategy.yaml"
+	twoServicesApiruleFile           = "two-services.yaml"
+	oauthStrategyApiruleFile         = "oauth-strategy.yaml"
+	oauth2SecuredEndpointApiruleFile = "oauth2-secured-endpoint.yaml"
+	jwtAndOauthStrategyApiruleFile   = "jwt-oauth-strategy.yaml"
+	jwtAndOauthOnePathApiruleFile    = "jwt-oauth-one-path-strategy.yaml"
+	resourceSeparator                = "---"
+	exportResultVar                  = "EXPORT_RESULT"
+	cucumberFileName                 = "cucumber-report.json"
+	anyToken                         = "any"
+	authorizationHeaderName          = "Authorization"
 )
 
 var (

@@ -122,17 +122,17 @@ global:
       sha: ""
     configmap_reload:
       name: "configmap-reload"
-      version: "v0.8.0"
-      directory: "prod/external/jimmidyson"
+      version: "v0.8.0-34ee9954"
+      directory: "prod/tpi"
       sha: ""
     alertmanager:
       name: "alertmanager"
-      version: "v0.24.0"
-      directory: "prod/external/quay.io/prometheus"
+      version: "v0.25.0-34ee9954"
+      directory: "prod/tpi"
       sha: ""
     prometheus:
       name: "prometheus"
-      version: "v2.43.0"
+      version: "v2.43.1"
       directory: "prod/external/quay.io/prometheus"
       sha: ""
     pushgateway:
@@ -141,7 +141,7 @@ global:
       directory: "prod/external/prom"
     node_exporter:
       name: "node-exporter"
-      version: "1.5.0-6ea7fe7a"
+      version: "1.5.0-45277816"
       directory: "prod/tpi"
     kube_state_metrics:
       name: "kube-state-metrics"
@@ -150,7 +150,7 @@ global:
       sha: ""
     grafana:
       name: "grafana"
-      version: "7.5.17-6ea7fe7a"
+      version: "7.5.17-419b7e46"
       directory: "prod/tpi"
       sha: ""
     k8s_sidecar:
@@ -160,7 +160,7 @@ global:
       sha: ""
     oauth2_proxy:
       name: "oauth2-proxy"
-      version: "7.4.0-6ea7fe7a"
+      version: "7.4.0-406f70a1"
       directory: "prod/tpi"
       sha: ""
 

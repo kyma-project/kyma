@@ -5,7 +5,6 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.4.1
-  creationTimestamp: null
   name: subscriptions.eventing.kyma-project.io
 spec:
   group: eventing.kyma-project.io
