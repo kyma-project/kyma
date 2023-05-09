@@ -25,30 +25,28 @@ spec: {}
 
 When you fetch an existing EventingBackend CR, the Eventing Controller adds the **status** section, which shows the current status of Kyma Eventing. The following table lists the fields of the **status** section.
 
-<!-- TABLE-START -->
-### EventingBackend.eventing.kyma-project.io/v1alpha1
+| Field   |  Description |
+|:---|:---|
+| **status.backendType** | Specifies the backend type used. |
+| **status.conditions.code** | Conditions defines the ready status of the Eventing Controller and the Eventing Publisher Proxy. |
+| **status.eventingReady** | Current ready status of the EventingBackend. |
 
-**Spec:**
+The `status` field of this CR looks like this:
 
-| Parameter | Type | Description |
-| ---- | ----------- | ---- |
-
-**Status:**
-
-| Parameter | Type | Description |
-| ---- | ----------- | ---- |
-| **backendType**  | string | Specifies the backend type used. Allowed values are "BEB" and "NATS" |
-| **bebSecretName**  | string | The name of the secret containing BEB access tokens, required only for BEB |
-| **bebSecretNamespace**  | string | The namespace of the secret containing BEB access tokens, required only for BEB |
-| **conditions**  | \[\]object | Conditions defines the status of the Controller and the EPP |
-| **conditions.lastTransitionTime**  | string |  |
-| **conditions.message**  | string |  |
-| **conditions.reason**  | string |  |
-| **conditions.status** (required) | string |  |
-| **conditions.type**  | string |  |
-| **eventingReady**  | boolean |  |
-
-<!-- TABLE-END -->
+```shell
+status:
+  backendType: NATS
+  conditions:
+  - lastTransitionTime: "2022-07-05T06:07:57Z"
+    reason: Publisher proxy deployment ready
+    status: "True"
+    type: Publisher Proxy Ready
+  - lastTransitionTime: "2022-07-05T06:07:57Z"
+    reason: Subscription controller started
+    status: "True"
+    type: Subscription Controller Ready
+  eventingReady: true
+```
 
 ## Related resources and components
 
