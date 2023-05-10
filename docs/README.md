@@ -4,7 +4,7 @@ Kyma is an application runtime that provides you a flexible and easy way to conn
 
 Classic Kyma offered a fixed set of preconfigured components whose development rhythm is synchronized and determined by the release schedule. With the modular approach, Kyma components become modules, each providing one functionality developed independently of the other ones. With each successive release, fewer components will be available within the preconfigured Kyma, but more and more will be offered as independent modules.
 
-The modular approach boosts Kyma's extensibility and scalability, making it even more cost-effective. With fully modularized Kyma, you can choose from many of its modules to facilitate your business needs best.  You can enable modules on demand and configure them. By disabling the modules you don't need to use, you considerably reduce the attack surface area, as well as upgrade time and risk.
+The modular approach boosts Kyma's extensibility and scalability, making it even more cost-effective. With fully modularized Kyma, you can choose from many of its modules to facilitate your business needs best.  You can enable modules on demand and configure them. By disabling the modules you don't need to use, you considerably reduce the attack surface area, as well as the upgrade time and risk.
 
 Kyma offers various functionalities, such as:  
 
