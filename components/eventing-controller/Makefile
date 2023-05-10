@@ -145,6 +145,6 @@ update_metrics_docs:
 	@promlinter list -ojson ../eventing-controller/ > metrics_ec.json
 	@gomplate -d ec=metrics_ec.json -d epp=metrics_epp.json -f hack/metrics.doc.tpl  | prettier --parser markdown > ../../docs/04-operation-guides/operations/evnt-02-eventing-metrics.md
 
-update_docs:
+update_docs: copy-crds
 	go run ../../hack/table-gen/table-gen.go --crd-filename ../../installation/resources/crds/eventing/subscriptions.eventing.kyma-project.io.crd.yaml --md-filename ../../docs/05-technical-reference/00-custom-resources/evnt-01-subscription.md
 	go run ../../hack/table-gen/table-gen.go --crd-filename ../../installation/resources/crds/eventing/eventingbackends.eventing.kyma-project.io.crd.yaml --md-filename ../../docs/05-technical-reference/00-custom-resources/evnt-02-eventingbackend.md

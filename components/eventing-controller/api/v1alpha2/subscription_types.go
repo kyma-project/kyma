@@ -20,11 +20,11 @@ var Finalizer = GroupVersion.Group
 
 // Desired state of Subscription.
 type SubscriptionSpec struct {
-	//  is the unique identifier of Subscription, read-only.
+	// Unique identifier of Subscription, read-only.
 	// +optional
 	ID string `json:"id,omitempty"`
 
-	// Service that should be used as a target for the events that match the Subscription. Must exist in the same namespace as the Subscription.
+	// Kubernetes Service that should be used as a target for the events that match the Subscription. Must exist in the same namespace as the Subscription.
 	Sink string `json:"sink"`
 
 	// Defines how types should be handled.<br />

@@ -43,8 +43,8 @@ This table lists all the possible parameters of a given resource together with t
 | Parameter | Type | Description |
 | ---- | ----------- | ---- |
 | **config**  | map\[string\]string | Map of configuration options that will be applied on the backend. |
-| **id**  | string |  is the unique identifier of Subscription, read-only. |
-| **sink** (required) | string | Service that should be used as a target for the events that match the Subscription. Must exist in the same namespace as the Subscription. |
+| **id**  | string | Unique identifier of Subscription, read-only. |
+| **sink** (required) | string | Kubernetes Service that should be used as a target for the events that match the Subscription. Must exist in the same namespace as the Subscription. |
 | **source** (required) | string | Defines the origin of the event. |
 | **typeMatching**  | string | Defines how types should be handled.<br /> - `standard`: backend specific logic will be applied to the configured source and types.<br /> - `exact`: no further processing will be applied to the configured source and types. |
 | **types** (required) | \[\]string | List of event types that will be used for subscribing on the backend. |
@@ -72,9 +72,9 @@ This table lists all the possible parameters of a given resource together with t
 | **backend.types.consumerName**  | string | Name of the Jetstream consumer created for the Event type. |
 | **backend.types.originalType** (required) | string | Event type that was originally used to subscribe. |
 | **conditions**  | \[\]object | Current state of the Subscription |
-| **conditions.lastTransitionTime**  | string |  |
-| **conditions.message**  | string |  |
-| **conditions.reason**  | string |  |
+| **conditions.lastTransitionTime**  | string | Defines when the condition status was changes last |
+| **conditions.message**  | string | Provides more detail about the condition status change |
+| **conditions.reason**  | string | Defines why the condition status changed |
 | **conditions.status** (required) | string | Status of the condition, one of True, False, Unknown |
 | **conditions.type**  | string |  |
 | **ready** (required) | boolean | Overall readiness of the Subscription |
@@ -123,9 +123,9 @@ This table lists all the possible parameters of a given resource together with t
 | **apiRuleName**  | string | APIRuleName defines the name of the APIRule which is used by the Subscription |
 | **cleanEventTypes** (required) | \[\]string | CleanEventTypes defines the filter's event types after cleanup for use with the configured backend |
 | **conditions**  | \[\]object | Conditions defines the status conditions |
-| **conditions.lastTransitionTime**  | string |  |
-| **conditions.message**  | string |  |
-| **conditions.reason**  | string |  |
+| **conditions.lastTransitionTime**  | string | Defines when the condition status was changes last |
+| **conditions.message**  | string | Provides more detail about the condition status change |
+| **conditions.reason**  | string | Defines why the condition status changed |
 | **conditions.status** (required) | string |  |
 | **conditions.type**  | string |  |
 | **config**  | object | Config defines the configurations that have been applied to the eventing backend when creating this subscription |

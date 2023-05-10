@@ -40,10 +40,10 @@ When you fetch an existing EventingBackend CR, the Eventing Controller adds the 
 | **backendType**  | string | Specifies the backend type used. Allowed values are "BEB" and "NATS" |
 | **bebSecretName**  | string | The name of the secret containing BEB access tokens, required only for BEB |
 | **bebSecretNamespace**  | string | The namespace of the secret containing BEB access tokens, required only for BEB |
-| **conditions**  | \[\]object | Conditions defines the status of the Controller and the EPP |
-| **conditions.lastTransitionTime**  | string |  |
-| **conditions.message**  | string |  |
-| **conditions.reason**  | string |  |
+| **conditions**  | \[\]object | Defines the status of the Controller and the EPP |
+| **conditions.lastTransitionTime**  | string | Defines when the condition status was changes last |
+| **conditions.message**  | string | Provides more detail about the condition status change |
+| **conditions.reason**  | string | Defines why the condition status changed |
 | **conditions.status** (required) | string |  |
 | **conditions.type**  | string |  |
 | **eventingReady**  | boolean |  |

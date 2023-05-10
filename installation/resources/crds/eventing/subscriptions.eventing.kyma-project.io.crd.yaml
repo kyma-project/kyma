@@ -189,11 +189,15 @@ spec:
                 items:
                   properties:
                     lastTransitionTime:
+                      description: Defines when the condition status was changes last
                       format: date-time
                       type: string
                     message:
+                      description: Provides more detail about the condition status
+                        change
                       type: string
                     reason:
+                      description: Defines why the condition status changed
                       type: string
                     status:
                       type: string
@@ -298,12 +302,12 @@ spec:
                   the backend.
                 type: object
               id:
-                description: ' is the unique identifier of Subscription, read-only.'
+                description: Unique identifier of Subscription, read-only.
                 type: string
               sink:
-                description: Service that should be used as a target for the events
-                  that match the Subscription. Must exist in the same namespace as
-                  the Subscription.
+                description: Kubernetes Service that should be used as a target for
+                  the events that match the Subscription. Must exist in the same namespace
+                  as the Subscription.
                 type: string
               source:
                 description: Defines the origin of the event.
@@ -408,11 +412,15 @@ spec:
                 items:
                   properties:
                     lastTransitionTime:
+                      description: Defines when the condition status was changes last
                       format: date-time
                       type: string
                     message:
+                      description: Provides more detail about the condition status
+                        change
                       type: string
                     reason:
+                      description: Defines why the condition status changed
                       type: string
                     status:
                       description: Status of the condition, one of True, False, Unknown
