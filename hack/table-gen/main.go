@@ -26,8 +26,8 @@ const (
 	documentationTemplate = `
 {{- range $version := . -}}
 ### {{ $version.GKV }}
+{{- if $version.Deprecated }}
 
-{{ if $version.Deprecated }}
 >**CAUTION**: {{ $version.DeprecationWarning }}
 {{- end }}
 
