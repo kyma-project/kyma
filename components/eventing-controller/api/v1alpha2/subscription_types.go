@@ -18,27 +18,27 @@ type TypeMatching string
 
 var Finalizer = GroupVersion.Group
 
-// SubscriptionSpec defines the desired state of Subscription.
+// Desired state of Subscription.
 type SubscriptionSpec struct {
-	// ID is the unique identifier of Subscription, read-only.
+	//  is the unique identifier of Subscription, read-only.
 	// +optional
 	ID string `json:"id,omitempty"`
 
-	// The service that should be used as a target for the events that match the subscription.
+	// Service that should be used as a target for the events that match the Subscription. Must exist in the same namespace as the Subscription.
 	Sink string `json:"sink"`
 
-	// Configurable TypeMatching defines how types should be handled.<br />
-	// `standard`: backend specific logic will be applied to the configured source and types.<br />
-	// `exact`: no further processing will be applied to the configured source and types.
+	// Defines how types should be handled.<br />
+	// - `standard`: backend specific logic will be applied to the configured source and types.<br />
+	// - `exact`: no further processing will be applied to the configured source and types.
 	TypeMatching TypeMatching `json:"typeMatching,omitempty"`
 
-	// Source defines the origin of the event.
+	// Defines the origin of the event.
 	Source string `json:"source"`
 
-	// A list of event names. These names will be used for subscribing on the backend.
+	// List of event types that will be used for subscribing on the backend.
 	Types []string `json:"types"`
 
-	// Config defines the configurations that can be applied to the eventing backend.
+	// Map of configuration options that will be applied on the backend.
 	// +optional
 	Config map[string]string `json:"config,omitempty"`
 }
@@ -53,10 +53,10 @@ type SubscriptionStatus struct {
 	// Overall readiness of the Subscription
 	Ready bool `json:"ready"`
 
-	// Types defines the filter's event types after cleanup for use with the configured backend.
+	// List of event types after cleanup for use with the configured backend.
 	Types []EventType `json:"types"`
 
-	// Backend specific status which are only applicable to the active backend.
+	// Backend-specific status which are only applicable to the active backend.
 	Backend Backend `json:"backend,omitempty"`
 }
 

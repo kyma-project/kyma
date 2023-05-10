@@ -14,42 +14,44 @@ var Finalizer = GroupVersion.Group
 // WebhookAuth defines the Webhook called by an active subscription in BEB.
 // TODO: Remove it when depreciating code of v1alpha1
 type WebhookAuth struct {
-	// Type defines type of authentication
+	// Defines type of authentication
 	// +optional
 	Type string `json:"type,omitempty"`
 
-	// GrantType defines grant type for OAuth2
+	// Defines grant type for OAuth2
 	GrantType string `json:"grantType"`
 
-	// ClientID defines clientID for OAuth2
+	// Defines clientID for OAuth2
 	ClientID string `json:"clientId"`
 
-	// ClientSecret defines client secret for OAuth2
+	// Defines client secret for OAuth2
 	ClientSecret string `json:"clientSecret"`
 
-	// TokenURL defines token URL for OAuth2
+	// Defines token URL for OAuth2
 	TokenURL string `json:"tokenUrl"`
 
-	// Scope defines scope for OAuth2
+	// Defines scope for OAuth2
 	Scope []string `json:"scope,omitempty"`
 }
 
 // ProtocolSettings defines the CE protocol setting specification implementation.
 // TODO: Remove it when depreciating code of v1alpha1
 type ProtocolSettings struct {
-	// ContentMode defines content mode for eventing based on BEB.
+	// Defines the content mode for eventing based on BEB.
+	// Must be one of "BINARY", "STRUCTURED".
+	// Default:
 	// +optional
 	ContentMode *string `json:"contentMode,omitempty"`
 
-	// ExemptHandshake defines whether exempt handshake for eventing based on BEB.
+	// Defines whether exempt handshake for eventing based on BEB.
 	// +optional
 	ExemptHandshake *bool `json:"exemptHandshake,omitempty"`
 
-	// Qos defines quality of service for eventing based on BEB.
+	// Defines quality of service for eventing based on BEB.
 	// +optional
 	Qos *string `json:"qos,omitempty"`
 
-	// WebhookAuth defines the Webhook called by an active subscription in BEB.
+	// Defines the Webhook called by an active subscription in BEB.
 	// +optional
 	WebhookAuth *WebhookAuth `json:"webhookAuth,omitempty"`
 }
@@ -182,7 +184,6 @@ type EmsSubscriptionStatus struct {
 }
 
 // SubscriptionStatus defines the observed state of Subscription
-// +kubebuilder:subresource:status
 type SubscriptionStatus struct {
 	// Conditions defines the status conditions
 	// +optional
@@ -225,12 +226,11 @@ type SubscriptionStatus struct {
 
 // Subscription is the Schema for the subscriptions API.
 // +kubebuilder:object:root=true
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +kubebuilder:subresource:status
+// +kubebuilder:deprecatedversion:warning=v1alpha1 is deprecated as of Kyma 2.12.X.
 // +kubebuilder:printcolumn:name="Ready",type="string",JSONPath=".status.ready"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 // +kubebuilder:printcolumn:name="Clean Event Types",type="string",JSONPath=".status.cleanEventTypes"
-// +kubebuilder:deprecatedversion:warning=v1alpha1 is deprecated as of Kyma 2.12.X.
 type Subscription struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -252,9 +252,8 @@ func (s Subscription) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-// +kubebuilder:object:root=true
-
 // SubscriptionList contains a list of Subscription.
+// +kubebuilder:object:root=true
 type SubscriptionList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
