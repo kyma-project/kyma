@@ -48,12 +48,6 @@ func stateFnCheckDeployments(ctx context.Context, r *reconciler, s *systemState)
 	}
 
 	expectedDeployment := s.buildDeployment(args)
-	deploymentChanged := !s.deploymentEqual(expectedDeployment)
-
-	if !deploymentChanged {
-		return stateFnCheckService, nil
-	}
-
 	if len(s.deployments.Items) == 0 {
 		return buildStateFnCreateDeployment(expectedDeployment), nil
 	}
@@ -65,8 +59,7 @@ func stateFnCheckDeployments(ctx context.Context, r *reconciler, s *systemState)
 	if !equalDeployments(s.deployments.Items[0], expectedDeployment) {
 		return buildStateFnUpdateDeployment(expectedDeployment.Spec, expectedDeployment.Labels), nil
 	}
-
-	return stateFnUpdateDeploymentStatus, nil
+	return stateFnCheckService, nil
 }
 
 func buildStateFnCreateDeployment(d appsv1.Deployment) stateFn {
