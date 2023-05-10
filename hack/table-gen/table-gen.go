@@ -28,7 +28,7 @@ const (
 ### {{ $version.GKV }}
 
 {{ if $version.Deprecated }}
->**: {{ $version.DeprecationWarning }}
+>**CAUTION**: {{ $version.DeprecationWarning }}
 {{- end }}
 
 **Spec:**
