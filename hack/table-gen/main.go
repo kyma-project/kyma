@@ -36,7 +36,7 @@ const (
 | Parameter | Type | Description |
 | ---- | ----------- | ---- |
 {{- range $prop := $version.Spec }}
-| **{{range $i, $v := $prop.Path}}{{if $i}}.{{end}}{{$v}}{{end}}** {{ if $prop.Required}}(required){{ end }} | {{ markdownEscape $prop.ElemType }} | {{ $prop.Description }} |
+| **{{range $i, $v := $prop.Path}}{{if $i}}.&#x200b;{{end}}{{$v}}{{end}}** {{ if $prop.Required}}(required){{ end }} | {{ markdownEscape $prop.ElemType }} | {{ $prop.Description }} |
 {{- end }}
 
 **Status:**
@@ -44,7 +44,7 @@ const (
 | Parameter | Type | Description |
 | ---- | ----------- | ---- |
 {{- range $prop := $version.Status }}
-| **{{range $i, $v := $prop.Path}}{{if $i}}.{{end}}{{$v}}{{end}}** {{ if $prop.Required}}(required){{ end }} | {{ markdownEscape $prop.ElemType }} | {{ $prop.Description }} |
+| **{{range $i, $v := $prop.Path}}{{if $i}}.&#x200b;{{end}}{{$v}}{{end}}** {{ if $prop.Required}}(required){{ end }} | {{ markdownEscape $prop.ElemType }} | {{ $prop.Description }} |
 {{- end }}
 
 {{ end -}}`
