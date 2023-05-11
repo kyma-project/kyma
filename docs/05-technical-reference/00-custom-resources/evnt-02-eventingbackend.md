@@ -46,7 +46,7 @@ When you fetch an existing EventingBackend CR, the Eventing Controller adds the 
 | **conditions.&#x200b;reason**  | string | Defines why the condition status changed |
 | **conditions.&#x200b;status** (required) | string |  |
 | **conditions.&#x200b;type**  | string |  |
-| **eventingReady**  | boolean |  |
+| **eventingReady**  | boolean | Defines the overall status of the Backend. |
 
 <!-- TABLE-END -->
 

@@ -91,6 +91,7 @@ spec:
                   type: object
                 type: array
               eventingReady:
+                description: Defines the overall status of the Backend.
                 type: boolean
             type: object
         type: object

@@ -89,15 +89,15 @@ This table lists all the possible parameters of a given resource together with t
 | Parameter | Type | Description |
 | ---- | ----------- | ---- |
 | **config**  | object | Defines additional configuration for the active backend |
-| **config.&#x200b;maxInFlightMessages**  | integer |  |
+| **config.&#x200b;maxInFlightMessages**  | integer | Defines how many not-ACKed messages can be be in flight simultaneously. |
 | **filter** (required) | object | Defines the which events will be sent to the sink. |
 | **filter.&#x200b;dialect**  | string |  |
 | **filter.&#x200b;filters** (required) | \[\]object | BEBFilter defines the BEB filter element as a combination of two CE filter elements. |
-| **filter.&#x200b;filters.&#x200b;eventSource** (required) | object | EventSource defines the source of CE filter |
+| **filter.&#x200b;filters.&#x200b;eventSource** (required) | object | Defines the source for the CE filter. |
 | **filter.&#x200b;filters.&#x200b;eventSource.&#x200b;property** (required) | string | Property defines the property of the filter |
 | **filter.&#x200b;filters.&#x200b;eventSource.&#x200b;type**  | string | Type defines the type of the filter |
 | **filter.&#x200b;filters.&#x200b;eventSource.&#x200b;value** (required) | string | Value defines the value of the filter |
-| **filter.&#x200b;filters.&#x200b;eventType** (required) | object | EventType defines the type of CE filter |
+| **filter.&#x200b;filters.&#x200b;eventType** (required) | object | Defines the type of the CE filter. |
 | **filter.&#x200b;filters.&#x200b;eventType.&#x200b;property** (required) | string | Property defines the property of the filter |
 | **filter.&#x200b;filters.&#x200b;eventType.&#x200b;type**  | string | Type defines the type of the filter |
 | **filter.&#x200b;filters.&#x200b;eventType.&#x200b;value** (required) | string | Value defines the value of the filter |
@@ -129,7 +129,7 @@ This table lists all the possible parameters of a given resource together with t
 | **conditions.&#x200b;status** (required) | string |  |
 | **conditions.&#x200b;type**  | string |  |
 | **config**  | object | Defines the configurations that have been applied to the eventing backend when creating this Subscription. |
-| **config.&#x200b;maxInFlightMessages**  | integer |  |
+| **config.&#x200b;maxInFlightMessages**  | integer | Defines how many not-ACKed messages can be be in flight simultaneously. |
 | **emsSubscriptionStatus**  | object | Defines the status of Subscription in EventMesh. |
 | **emsSubscriptionStatus.&#x200b;lastFailedDelivery**  | string | Timestamp of the last failed delivery. |
 | **emsSubscriptionStatus.&#x200b;lastFailedDeliveryReason**  | string | Reason of the last failed delivery. |

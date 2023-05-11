@@ -50,6 +50,8 @@ spec:
                 description: Defines additional configuration for the active backend
                 properties:
                   maxInFlightMessages:
+                    description: Defines how many not-ACKed messages can be be in
+                      flight simultaneously.
                     minimum: 1
                     type: integer
                 type: object
@@ -64,7 +66,7 @@ spec:
                         of two CE filter elements.
                       properties:
                         eventSource:
-                          description: EventSource defines the source of CE filter
+                          description: Defines the source for the CE filter.
                           properties:
                             property:
                               description: Property defines the property of the filter
@@ -80,7 +82,7 @@ spec:
                           - value
                           type: object
                         eventType:
-                          description: EventType defines the type of CE filter
+                          description: Defines the type of the CE filter.
                           properties:
                             property:
                               description: Property defines the property of the filter
@@ -205,6 +207,8 @@ spec:
                   the eventing backend when creating this Subscription.
                 properties:
                   maxInFlightMessages:
+                    description: Defines how many not-ACKed messages can be be in
+                      flight simultaneously.
                     minimum: 1
                     type: integer
                 type: object
