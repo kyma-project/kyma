@@ -60,8 +60,8 @@ This table lists all the possible parameters of the CompassConnection custom res
 | Parameter | Type | Description |
 | ---- | ----------- | ---- |
 | **managementInfo** (required) | object |  |
-| **managementInfo.connectorUrl** (required) | string | Connector URL used for maintaining secure connection. |
-| **managementInfo.directorUrl** (required) | string | Director URL used for fetching Applications |
+| **managementInfo.&#x200b;connectorUrl** (required) | string | Connector URL used for maintaining secure connection. |
+| **managementInfo.&#x200b;directorUrl** (required) | string | Director URL used for fetching Applications |
 | **refreshCredentialsNow**  | boolean | If true - ignore certificate expiration date and refresh next round |
 | **resyncNow**  | boolean | If true - ignore `APP_MINIMAL_COMPASS_SYNC_TIME` and sync next round |
 
@@ -71,20 +71,20 @@ This table lists all the possible parameters of the CompassConnection custom res
 | ---- | ----------- | ---- |
 | **connectionState** (required) | string |  |
 | **connectionStatus** (required) | object | ConnectionStatus represents status of a connection to Compass |
-| **connectionStatus.certificateStatus** (required) | object | Provides the certificate issue and expiration dates. |
-| **connectionStatus.certificateStatus.acquired**  | string | When the certificate was acquired |
-| **connectionStatus.certificateStatus.notAfter**  | string | When the certificate stops being valid |
-| **connectionStatus.certificateStatus.notBefore**  | string | When the certificate becomes valid |
-| **connectionStatus.error**  | string |  |
-| **connectionStatus.established**  | string | Provides the date of when the connection was established |
-| **connectionStatus.lastSuccess**  | string | Provides the date of the last successful synchronization with the Connector |
-| **connectionStatus.lastSync**  | string | Provides the date of the last synchronization attempt |
-| **connectionStatus.renewed**  | string | Provides the date of the last certificate renewal |
+| **connectionStatus.&#x200b;certificateStatus** (required) | object | Provides the certificate issue and expiration dates. |
+| **connectionStatus.&#x200b;certificateStatus.&#x200b;acquired**  | string | When the certificate was acquired |
+| **connectionStatus.&#x200b;certificateStatus.&#x200b;notAfter**  | string | When the certificate stops being valid |
+| **connectionStatus.&#x200b;certificateStatus.&#x200b;notBefore**  | string | When the certificate becomes valid |
+| **connectionStatus.&#x200b;error**  | string |  |
+| **connectionStatus.&#x200b;established**  | string | Provides the date of when the connection was established |
+| **connectionStatus.&#x200b;lastSuccess**  | string | Provides the date of the last successful synchronization with the Connector |
+| **connectionStatus.&#x200b;lastSync**  | string | Provides the date of the last synchronization attempt |
+| **connectionStatus.&#x200b;renewed**  | string | Provides the date of the last certificate renewal |
 | **synchronizationStatus**  | object | Describes the status of the synchronization with the Director |
-| **synchronizationStatus.error**  | string |  |
-| **synchronizationStatus.lastAttempt**  | string | Provides the date of the last synchronization attempt with the Director |
-| **synchronizationStatus.lastSuccessfulApplication**  | string | Provides the date of the last successful application of resources fetched from Compass |
-| **synchronizationStatus.lastSuccessfulFetch**  | string | Provides the date of the last successful fetch of resources from the Director |
+| **synchronizationStatus.&#x200b;error**  | string |  |
+| **synchronizationStatus.&#x200b;lastAttempt**  | string | Provides the date of the last synchronization attempt with the Director |
+| **synchronizationStatus.&#x200b;lastSuccessfulApplication**  | string | Provides the date of the last successful application of resources fetched from Compass |
+| **synchronizationStatus.&#x200b;lastSuccessfulFetch**  | string | Provides the date of the last successful fetch of resources from the Director |
 
 <!-- TABLE-END -->
 

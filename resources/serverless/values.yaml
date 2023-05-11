@@ -80,14 +80,18 @@ global:
       directory: "prod"
     function_controller:
       name: "function-controller"
-      version: "v20230509-142454e6"
-      directory: "prod"
+      version: "PR-17393"
+      directory: "dev"
     function_webhook:
       name: "function-webhook"
-      version: "v20230509-142454e6"
-      directory: "prod"
+      version: "PR-17393"
+      directory: "dev"
     function_build_init:
       name: "function-build-init"
+      version: "PR-17393"
+      directory: "dev"
+    function_registry_gc:
+      name: "function-registry-gc"
       version: "v20230509-142454e6"
       directory: "prod"
     function_runtime_nodejs14:
@@ -113,10 +117,6 @@ global:
     registry:
       name: "tpi/registry"
       version: "2.8.1-ab1cf603"
-      directory: "prod"
-    function_registry_gc:
-      name: "function-registry-gc"
-      version: "v20230505-9d02d7cf"
       directory: "prod"
     google_pause:
       name: "external/gcr.io/google-containers/pause"

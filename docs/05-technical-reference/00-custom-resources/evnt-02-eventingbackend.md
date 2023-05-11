@@ -41,11 +41,11 @@ When you fetch an existing EventingBackend CR, the Eventing Controller adds the 
 | **bebSecretName**  | string | The name of the secret containing BEB access tokens, required only for BEB |
 | **bebSecretNamespace**  | string | The namespace of the secret containing BEB access tokens, required only for BEB |
 | **conditions**  | \[\]object | Defines the status of the Controller and the EPP |
-| **conditions.lastTransitionTime**  | string | Defines when the condition status was changes last |
-| **conditions.message**  | string | Provides more detail about the condition status change |
-| **conditions.reason**  | string | Defines why the condition status changed |
-| **conditions.status** (required) | string |  |
-| **conditions.type**  | string |  |
+| **conditions.&#x200b;lastTransitionTime**  | string | Defines when the condition status was changes last |
+| **conditions.&#x200b;message**  | string | Provides more detail about the condition status change |
+| **conditions.&#x200b;reason**  | string | Defines why the condition status changed |
+| **conditions.&#x200b;status** (required) | string |  |
+| **conditions.&#x200b;type**  | string |  |
 | **eventingReady**  | boolean |  |
 
 <!-- TABLE-END -->

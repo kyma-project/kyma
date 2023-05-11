@@ -16,6 +16,7 @@ const {
   getVirtualService,
   retryPromise,
   deployJaeger,
+  waitForConfigMap,
 } = require('../utils');
 const {
   logsPresentInLoki,
@@ -386,7 +387,7 @@ describe('Telemetry Operator', function() {
 
         it('Should have created telemetry-trace-collector secret', async () => {
           const secret = await getSecret('telemetry-trace-collector', 'kyma-system');
-          assert.equal(secret.data.OTLP_ENDPOINT, 'aHR0cDovL25vLWVuZHBvaW50');
+          assert.equal(secret.data.OTLP_ENDPOINT_OTLP_OUTPUT_ENDPOINT_SECRET_REF_1, 'aHR0cDovL25vLWVuZHBvaW50');
         });
 
         it(`Should reflect secret ref change in telemetry-trace-collector secret and pod restart`, async function() {
@@ -403,7 +404,7 @@ describe('Telemetry Operator', function() {
           await k8sApply(loadTestData('secret-patched-trace-endpoint.yaml'), 'default');
           await sleep(5*1000);
           const secret = await getSecret('telemetry-trace-collector', 'kyma-system');
-          assert.equal(secret.data.OTLP_ENDPOINT, 'aHR0cDovL2Fub3RoZXItZW5kcG9pbnQ=');
+          assert.equal(secret.data.OTLP_ENDPOINT_OTLP_OUTPUT_ENDPOINT_SECRET_REF_1, 'aHR0cDovL2Fub3RoZXItZW5kcG9pbnQ=');
 
           const newPodRes = await k8sCoreV1Api.listNamespacedPod(
               'kyma-system',
@@ -458,11 +459,12 @@ describe('Telemetry Operator', function() {
 
         it('Should have created telemetry-trace-collector secret', async () => {
           const secret = await getSecret('telemetry-trace-collector', 'kyma-system');
-          assert.equal(fromBase64(secret.data.OTLP_ENDPOINT), 'http://foo-bar');
+          assert.equal(fromBase64(secret.data.OTLP_ENDPOINT_TEST_TRACE), 'http://foo-bar');
         });
 
         it(`Should create override configmap with paused flag`, async function() {
           await k8sApply(overrideConfig);
+          await waitForConfigMap('telemetry-override-config', 'kyma-system');
         });
 
         it(`Tries to change the otlp endpoint`, async function() {
@@ -473,7 +475,7 @@ describe('Telemetry Operator', function() {
         it(`Should not change the OTLP endpoint in the telemetry-trace-collector secret in paused state`, async () => {
           await sleep(5*1000);
           const secret = await getSecret('telemetry-trace-collector', 'kyma-system');
-          assert.equal(fromBase64(secret.data.OTLP_ENDPOINT), 'http://foo-bar');
+          assert.equal(fromBase64(secret.data.OTLP_ENDPOINT_TEST_TRACE), 'http://foo-bar');
         });
 
         it(`Deletes the override configmap`, async function() {
@@ -491,7 +493,7 @@ describe('Telemetry Operator', function() {
         it(`Should now change the OTLP endpoint in the telemetry-trace-collector secret`, async function() {
           await sleep(5*1000);
           const secret = await getSecret('telemetry-trace-collector', 'kyma-system');
-          assert.equal(fromBase64(secret.data.OTLP_ENDPOINT), 'http://another-foo-bar');
+          assert.equal(fromBase64(secret.data.OTLP_ENDPOINT_TEST_TRACE), 'http://another-foo-bar');
         });
 
         it(`Should delete TracePipeline`, async function() {
