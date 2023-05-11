@@ -151,7 +151,8 @@ type SubscriptionSpec struct {
 	// +optional
 	ProtocolSettings *ProtocolSettings `json:"protocolsettings,omitempty"`
 
-	// Kubernetes Service that should be used as a target for the events that match the Subscription. Must exist in the same namespace as the Subscription.
+	// Kubernetes Service that should be used as a target for the events that match the Subscription.
+	// Must exist in the same namespace as the Subscription.
 	Sink string `json:"sink"`
 
 	// Defines the which events will be sent to the sink.
