@@ -135,7 +135,7 @@ func TestFlatten(t *testing.T) {
 				{
 					Path:        []string{"name"},
 					Description: "itemsdesc",
-					ElemType:    "array",
+					ElemType:    "[]object",
 				},
 				{
 					Path:        []string{"name", "propname"},

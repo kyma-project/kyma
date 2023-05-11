@@ -26,6 +26,10 @@ const (
 	documentationTemplate = `
 {{- range $version := . -}}
 ### {{ $version.GKV }}
+{{- if $version.Deprecated }}
+
+>**CAUTION**: {{ $version.DeprecationWarning }}
+{{- end }}
 
 **Spec:**
 
@@ -72,9 +76,10 @@ type flatElement struct {
 }
 
 type crdVersion struct {
-	GKV            string // API-GroupKindVersion
-	Spec, Status   []flatElement
-	Stored, Served bool
+	GKV                        string // API-GroupKindVersion
+	Spec, Status               []flatElement
+	Stored, Served, Deprecated bool
+	DeprecationWarning         string
 }
 
 func (e *element) String() string {
@@ -150,6 +155,12 @@ func generateDocFromCRD() string {
 			crd := crdVersion{}
 			crd.Stored = v["storage"].(bool)
 			crd.Served = v["served"].(bool)
+			if v["deprecated"] != nil {
+				crd.Deprecated = v["deprecated"].(bool)
+			}
+			if v["deprecationWarning"] != nil {
+				crd.DeprecationWarning = v["deprecationWarning"].(string)
+			}
 			name := getElement(version, "name")
 			APIVersion = name.(string)
 			crd.GKV = fmt.Sprintf("%v.%v/%v", CRDKind, CRDGroup, APIVersion)
