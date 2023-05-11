@@ -46,11 +46,11 @@ type SubscriptionSpec struct {
 // SubscriptionStatus defines the observed state of Subscription.
 // +kubebuilder:subresource:status
 type SubscriptionStatus struct {
-	// Current state of the Subscription
+	// Current state of the Subscription.
 	// +optional
 	Conditions []Condition `json:"conditions,omitempty"`
 
-	// Overall readiness of the Subscription
+	// Overall readiness of the Subscription.
 	Ready bool `json:"ready"`
 
 	// List of event types after cleanup for use with the configured backend.

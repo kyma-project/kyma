@@ -77,10 +77,10 @@ type Filter struct {
 
 // BEBFilter defines the BEB filter element as a combination of two CE filter elements.
 type BEBFilter struct {
-	// EventSource defines the source of CE filter
+	// Defines the source for the CE filter.
 	EventSource *Filter `json:"eventSource"`
 
-	// EventType defines the type of CE filter
+	// Defines the type of the CE filter.
 	EventType *Filter `json:"eventType"`
 }
 
@@ -116,6 +116,7 @@ func (bf *BEBFilters) Deduplicate() (*BEBFilters, error) {
 }
 
 type SubscriptionConfig struct {
+	// Defines how many not-ACKed messages can be be in flight simultaneously.
 	// +optional
 	// +kubebuilder:validation:Minimum=1
 	MaxInFlightMessages int `json:"maxInFlightMessages,omitempty"`
@@ -138,88 +139,88 @@ func MergeSubsConfigs(config *SubscriptionConfig, defaults *env.DefaultSubscript
 
 // SubscriptionSpec defines the desired state of Subscription.
 type SubscriptionSpec struct {
-	// ID is the unique identifier of Subscription, read-only.
+	// Unique identifier of Subscription, read-only.
 	// +optional
 	ID string `json:"id,omitempty"`
 
-	// Protocol defines the CE protocol specification implementation
+	// Defines the CE protocol specification implementation
 	// +optional
 	Protocol string `json:"protocol,omitempty"`
 
-	// ProtocolSettings defines the CE protocol setting specification implementation
+	// Defines the CE protocol settings specification implementation.
 	// +optional
 	ProtocolSettings *ProtocolSettings `json:"protocolsettings,omitempty"`
 
-	// Sink defines endpoint of the subscriber
+	// Kubernetes Service that should be used as a target for the events that match the Subscription. Must exist in the same namespace as the Subscription.
 	Sink string `json:"sink"`
 
-	// Filter defines the list of filters
+	// Defines the which events will be sent to the sink.
 	Filter *BEBFilters `json:"filter"`
 
-	// Config defines the configurations that can be applied to the eventing backend when creating this subscription
+	// Defines additional configuration for the active backend
 	// +optional
 	Config *SubscriptionConfig `json:"config,omitempty"`
 }
 
 type EmsSubscriptionStatus struct {
-	// SubscriptionStatus defines the status of the Subscription
+	// Status of Subscription as reported by EventMesh.
 	// +optional
 	SubscriptionStatus string `json:"subscriptionStatus,omitempty"`
 
-	// SubscriptionStatusReason defines the reason of the status
+	// Reason for the current status.
 	// +optional
 	SubscriptionStatusReason string `json:"subscriptionStatusReason,omitempty"`
 
-	// LastSuccessfulDelivery defines the timestamp of the last successful delivery
+	// Timestamp of the last successful delivery.
 	// +optional
 	LastSuccessfulDelivery string `json:"lastSuccessfulDelivery,omitempty"`
 
-	// LastFailedDelivery defines the timestamp of the last failed delivery
+	// Timestamp of the last failed delivery.
 	// +optional
 	LastFailedDelivery string `json:"lastFailedDelivery,omitempty"`
 
-	// LastFailedDeliveryReason defines the reason of failed delivery
+	// Reason of the last failed delivery.
 	// +optional
 	LastFailedDeliveryReason string `json:"lastFailedDeliveryReason,omitempty"`
 }
 
-// SubscriptionStatus defines the observed state of Subscription
+// SubscriptionStatus defines the observed state of Subscription.
 type SubscriptionStatus struct {
-	// Conditions defines the status conditions
+	// Current state of the Subscription.
 	// +optional
 	Conditions []Condition `json:"conditions,omitempty"`
 
-	// Ready defines the overall readiness status of a subscription
+	// Overall readiness of the Subscription.
 	Ready bool `json:"ready"`
 
 	// CleanEventTypes defines the filter's event types after cleanup for use with the configured backend
 	CleanEventTypes []string `json:"cleanEventTypes"`
 
-	// Ev2hash defines the hash for the Subscription custom resource
+	// Defines a checksum for the Subscription custom resource.
 	// +optional
 	Ev2hash int64 `json:"ev2hash,omitempty"`
 
-	// Emshash defines the hash for the Subscription in BEB
+	// Defines the checksum for the Subscription in EventMesh.
 	// +optional
 	Emshash int64 `json:"emshash,omitempty"`
 
-	// ExternalSink defines the webhook URL which is used by BEB to trigger subscribers
+	// Defines the webhook URL which is used by EventMesh to trigger subscribers.
 	// +optional
 	ExternalSink string `json:"externalSink,omitempty"`
 
-	// FailedActivation defines the reason if a Subscription had failed activation in BEB
+	// Defines the reason if a Subscription had failed activation in EventMesh.
 	// +optional
 	FailedActivation string `json:"failedActivation,omitempty"`
 
-	// APIRuleName defines the name of the APIRule which is used by the Subscription
+	// Defines the name of the APIRule which is used by the Subscription.
 	// +optional
 	APIRuleName string `json:"apiRuleName,omitempty"`
 
-	// EmsSubscriptionStatus defines the status of Subscription in BEB
+	// Defines the status of Subscription in EventMesh.
 	// +optional
 	EmsSubscriptionStatus *EmsSubscriptionStatus `json:"emsSubscriptionStatus,omitempty"`
 
-	// Config defines the configurations that have been applied to the eventing backend when creating this subscription
+	// Defines the configurations that have been applied to the eventing backend when creating this Subscription.
 	// +optional
 	Config *SubscriptionConfig `json:"config,omitempty"`
 }
