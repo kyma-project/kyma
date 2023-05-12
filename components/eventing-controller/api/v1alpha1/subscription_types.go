@@ -230,7 +230,7 @@ type SubscriptionStatus struct {
 // +kubebuilder:printcolumn:name="Ready",type="string",JSONPath=".status.ready"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 // +kubebuilder:printcolumn:name="Clean Event Types",type="string",JSONPath=".status.cleanEventTypes"
-// +kubebuilder:deprecatedversion:warning=v1alpha1 is deprecated as of Kyma 2.12.X.
+// +kubebuilder:deprecatedversion:warning=v1alpha1 is deprecated as of Kyma 2.14.X
 type Subscription struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
