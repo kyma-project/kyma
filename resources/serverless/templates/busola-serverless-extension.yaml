@@ -157,6 +157,7 @@ data:
               - widget: ResourceList
                 source: $subscriptions()
                 name: configuration.subscriptions
+                disableCreate: true
           - name: tabs.resources
             children:
               - widget: Panel
