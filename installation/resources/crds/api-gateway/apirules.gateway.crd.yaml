@@ -28,11 +28,11 @@ spec:
   preserveUnknownFields: false
   versions:
   - deprecated: true
-    deprecationWarning: Since Kyma 2.5.X, v1alpha1 has been deprecated.
+    deprecationWarning: Since Kyma 2.5.X, APIRule in version v1alpha1 has been deprecated. Consider using v1beta1.
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: APIRule is the Schema for the ApiRule APIs.
+        description: APIRule is the Schema for ApiRule APIs.
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -47,10 +47,10 @@ spec:
           metadata:
             type: object
           spec:
-            description: Defines the desired state of the ApiRule.
+            description: Defines the desired state of ApiRule.
             properties:
               gateway:
-                description: 	Specifies the Istio Gateway to be used.
+                description: Specifies the Istio Gateway to be used.
                 pattern: ^[0-9a-z-_]+(\/[0-9a-z-_]+|(\.[0-9a-z-_]+)*)$
                 type: string
               rules:
@@ -116,7 +116,7 @@ spec:
                         type: object
                       type: array
                     path:
-                      description: 	Specifies the path of the exposed service.
+                      description: Specifies the path of the exposed service.
                       pattern: ^([0-9a-zA-Z./*()?!\\_-]+)
                       type: string
                   required:
@@ -162,19 +162,19 @@ spec:
             description: Describes the observed state of ApiRule.
             properties:
               APIRuleStatus:
-                description: APIRuleResourceStatus . 
+                description: Describes the status of APIRule.
                 properties:
                   code:
-                    description: StatusCode . 
+                    description: Status code describing APIRule.
                     type: string
                   desc:
                     type: string
                 type: object
               accessRuleStatus:
-                description: APIRuleResourceStatus . 
+                description: Describes the status of ORY Oathkeeper Rule.
                 properties:
                   code:
-                    description: StatusCode . 
+                    description: Status code describing ORY Oathkeeper Rule.
                     type: string
                   desc:
                     type: string
@@ -186,10 +186,10 @@ spec:
                 format: int64
                 type: integer
               virtualServiceStatus:
-                description: APIRuleResourceStatus . 
+                description: Describes the status of Istio VirtualService.
                 properties:
                   code:
-                    description: StatusCode . 
+                    description: Status code describing Istio VirtualService.
                     type: string
                   desc:
                     type: string
@@ -210,7 +210,7 @@ spec:
     name: v1beta1
     schema:
       openAPIV3Schema:
-        description: APIRule is the Schema for the ApiRule APIs.
+        description: APIRule is the Schema for ApiRule APIs.
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -225,7 +225,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: Defines the desired state of the APIRule.
+            description: Defines the desired state of APIRule.
             properties:
               gateway:
                 description: Specifies the Istio Gateway to be used.
@@ -370,19 +370,19 @@ spec:
             description: Defines the observed state of ApiRule.
             properties:
               APIRuleStatus:
-                description: APIRuleResourceStatus . 
+                description: Describes the status of APIRule.
                 properties:
                   code:
-                    description: StatusCode . 
+                    description: Status code describing APIRule.
                     type: string
                   desc:
                     type: string
                 type: object
               accessRuleStatus:
-                description: APIRuleResourceStatus . 
+                description: Describes the status of ORY Oathkeeper Rule.
                 properties:
                   code:
-                    description: StatusCode . 
+                    description: Status code describing ORY Oathkeeper Rule.
                     type: string
                   desc:
                     type: string
@@ -412,10 +412,10 @@ spec:
                 format: int64
                 type: integer
               virtualServiceStatus:
-                description: APIRuleResourceStatus . 
+                description: Describes the status of Istio VirtualService.
                 properties:
                   code:
-                    description: StatusCode . 
+                    description: Status code describing Istio VirtualService. 
                     type: string
                   desc:
                     type: string
