@@ -72,7 +72,7 @@ spec:
                 items:
                   properties:
                     lastTransitionTime:
-                      description: Defines when the condition status was changes last
+                      description: Defines when the condition status was last changed
                       format: date-time
                       type: string
                     message:
