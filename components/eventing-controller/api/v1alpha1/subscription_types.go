@@ -229,7 +229,7 @@ type SubscriptionStatus struct {
 // Subscription is the Schema for the subscriptions API.
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:deprecatedversion:warning=v1alpha1 is deprecated as of Kyma 2.12.X.
+// +kubebuilder:deprecatedversion:warning=v1alpha1 is deprecated as of Kyma 2.14.X
 // +kubebuilder:printcolumn:name="Ready",type="string",JSONPath=".status.ready"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 // +kubebuilder:printcolumn:name="Clean Event Types",type="string",JSONPath=".status.cleanEventTypes"
