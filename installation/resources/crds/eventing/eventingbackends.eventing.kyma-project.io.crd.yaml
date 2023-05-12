@@ -67,30 +67,33 @@ spec:
                   required only for BEB
                 type: string
               conditions:
-                description: Defines the status of the Controller and the EPP
+                description: Defines the status of the Controller and the EPP.
                 items:
                   properties:
                     lastTransitionTime:
-                      description: Defines when the condition status was changes last
+                      description: Defines the date of the last condition status change.
                       format: date-time
                       type: string
                     message:
-                      description: Provides more detail about the condition status
-                        change
+                      description: Provides more details about the condition status
+                        change.
                       type: string
                     reason:
-                      description: Defines why the condition status changed
+                      description: Defines the reason for the condition status change.
                       type: string
                     status:
+                      description: Status of the condition. The value is either `True`,
+                        `False`, or `Unknown`."`
                       type: string
                     type:
+                      description: Short description of the condition
                       type: string
                   required:
                   - status
                   type: object
                 type: array
               eventingReady:
-                description: Defines the overall status of the Backend.
+                description: Defines the overall Backend status.
                 type: boolean
             type: object
         type: object

@@ -56,7 +56,7 @@ spec:
             description: SubscriptionSpec defines the desired state of Subscription.
             properties:
               config:
-                description: Defines additional configuration for the active backend
+                description: Defines additional configuration for the active backend.
                 properties:
                   maxInFlightMessages:
                     description: Defines how many not-ACKed messages can be be in
@@ -65,7 +65,7 @@ spec:
                     type: integer
                 type: object
               filter:
-                description: Defines the which events will be sent to the sink.
+                description: Defines which events will be sent to the sink.
                 properties:
                   dialect:
                     type: string
@@ -118,7 +118,7 @@ spec:
                 description: Unique identifier of Subscription, read-only.
                 type: string
               protocol:
-                description: Defines the CE protocol specification implementation
+                description: Defines the CE protocol specification implementation.
                 type: string
               protocolsettings:
                 description: Defines the CE protocol settings specification implementation.
@@ -128,36 +128,36 @@ spec:
                       Must be one of "BINARY", "STRUCTURED". Default:'
                     type: string
                   exemptHandshake:
-                    description: Defines whether exempt handshake for eventing based
+                    description: Defines if the exempt handshake for eventing is based
                       on BEB.
                     type: boolean
                   qos:
-                    description: Defines quality of service for eventing based on
-                      BEB.
+                    description: Defines the quality of service for eventing based
+                      on BEB.
                     type: string
                   webhookAuth:
                     description: Defines the Webhook called by an active subscription
-                      in BEB.
+                      on BEB.
                     properties:
                       clientId:
-                        description: Defines clientID for OAuth2
+                        description: Defines the clientID for OAuth2.
                         type: string
                       clientSecret:
-                        description: Defines client secret for OAuth2
+                        description: Defines the Client Secret for OAuth2.
                         type: string
                       grantType:
-                        description: Defines grant type for OAuth2
+                        description: Defines the grant type for OAuth2.
                         type: string
                       scope:
-                        description: Defines scope for OAuth2
+                        description: Defines the scope for OAuth2.
                         items:
                           type: string
                         type: array
                       tokenUrl:
-                        description: Defines token URL for OAuth2
+                        description: Defines the token URL for OAuth2.
                         type: string
                       type:
-                        description: Defines type of authentication
+                        description: Defines the authentication type.
                         type: string
                     required:
                     - clientId
@@ -176,7 +176,7 @@ spec:
             - sink
             type: object
           status:
-            description: SubscriptionStatus defines the observed state of Subscription.
+            description: SubscriptionStatus defines the observed state of the Subscription.
             properties:
               apiRuleName:
                 description: Defines the name of the APIRule which is used by the
@@ -184,7 +184,7 @@ spec:
                 type: string
               cleanEventTypes:
                 description: CleanEventTypes defines the filter's event types after
-                  cleanup for use with the configured backend
+                  cleanup to use it with the configured backend.
                 items:
                   type: string
                 type: array
@@ -193,19 +193,22 @@ spec:
                 items:
                   properties:
                     lastTransitionTime:
-                      description: Defines when the condition status was changes last
+                      description: Defines the date of the last condition status change.
                       format: date-time
                       type: string
                     message:
-                      description: Provides more detail about the condition status
-                        change
+                      description: Provides more details about the condition status
+                        change.
                       type: string
                     reason:
-                      description: Defines why the condition status changed
+                      description: Defines the reason for the condition status change.
                       type: string
                     status:
+                      description: Status of the condition. The value is either `True`,
+                        `False`, or `Unknown`."`
                       type: string
                     type:
+                      description: Short description of the condition
                       type: string
                   required:
                   - status
@@ -222,7 +225,7 @@ spec:
                     type: integer
                 type: object
               emsSubscriptionStatus:
-                description: Defines the status of Subscription in EventMesh.
+                description: Defines the status of the Subscription in EventMesh.
                 properties:
                   lastFailedDelivery:
                     description: Timestamp of the last failed delivery.
@@ -234,7 +237,7 @@ spec:
                     description: Timestamp of the last successful delivery.
                     type: string
                   subscriptionStatus:
-                    description: Status of Subscription as reported by EventMesh.
+                    description: Status of the Subscription as reported by EventMesh.
                     type: string
                   subscriptionStatusReason:
                     description: Reason for the current status.
@@ -245,7 +248,7 @@ spec:
                 format: int64
                 type: integer
               ev2hash:
-                description: Defines a checksum for the Subscription custom resource.
+                description: Defines the checksum for the Subscription custom resource.
                 format: int64
                 type: integer
               externalSink:
@@ -293,7 +296,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: Desired state of Subscription.
+            description: Defines the desired state of the Subscription.
             properties:
               config:
                 additionalProperties:
@@ -302,11 +305,11 @@ spec:
                   the backend.
                 type: object
               id:
-                description: Unique identifier of Subscription, read-only.
+                description: Unique identifier of the Subscription, read-only.
                 type: string
               sink:
                 description: Kubernetes Service that should be used as a target for
-                  the events that match the Subscription. Must exist in the same namespace
+                  the events that match the Subscription. Must exist in the same Namespace
                   as the Subscription.
                 type: string
               source:
@@ -314,7 +317,7 @@ spec:
                 type: string
               typeMatching:
                 description: 'Defines how types should be handled.<br /> - `standard`:
-                  backend specific logic will be applied to the configured source
+                  backend-specific logic will be applied to the configured source
                   and types.<br /> - `exact`: no further processing will be applied
                   to the configured source and types.'
                 type: string
@@ -333,8 +336,8 @@ spec:
             description: SubscriptionStatus defines the observed state of Subscription.
             properties:
               backend:
-                description: Backend-specific status which are only applicable to
-                  the active backend.
+                description: Backend-specific status which is only applicable to the
+                  active backend.
                 properties:
                   apiRuleName:
                     description: Name of the APIRule which is used by the Subscription.
@@ -346,7 +349,7 @@ spec:
                         description: Timestamp of the last failed delivery.
                         type: string
                       lastFailedDeliveryReason:
-                        description: Reason of the last failed delivery.
+                        description: Reason for the last failed delivery.
                         type: string
                       lastSuccessfulDelivery:
                         description: Timestamp of the last successful delivery.
@@ -361,7 +364,7 @@ spec:
                     type: object
                   emsTypes:
                     description: List of mappings from event type to EventMesh compatible
-                      types. Only used with EventMesh as backend.
+                      types. Used only with EventMesh as the backend.
                     items:
                       properties:
                         eventMeshType:
@@ -376,7 +379,7 @@ spec:
                       type: object
                     type: array
                   emshash:
-                    description: Hash that is used on EventMesh to identify this Subscription.
+                    description: Hash that is used in EventMesh to identify this Subscription.
                     format: int64
                     type: integer
                   ev2hash:
@@ -387,16 +390,16 @@ spec:
                     description: Webhook URL used by EventMesh to trigger subscribers.
                     type: string
                   failedActivation:
-                    description: Reason if a Subscription had failed activation in
-                      EventMesh.
+                    description: Provides the reason if a Subscription had failed
+                      activation in EventMesh.
                     type: string
                   types:
                     description: List of event type to consumer name mappings for
-                      the Nats backend.
+                      the NATS backend.
                     items:
                       properties:
                         consumerName:
-                          description: Name of the Jetstream consumer created for
+                          description: Name of the JetStream consumer created for
                             the Event type.
                           type: string
                         originalType:
@@ -412,20 +415,22 @@ spec:
                 items:
                   properties:
                     lastTransitionTime:
-                      description: Defines when the condition status was changes last
+                      description: Defines the date of the last condition status change.
                       format: date-time
                       type: string
                     message:
-                      description: Provides more detail about the condition status
-                        change
+                      description: Provides more details about the condition status
+                        change.
                       type: string
                     reason:
-                      description: Defines why the condition status changed
+                      description: Defines the reason for the condition status change.
                       type: string
                     status:
-                      description: Status of the condition, one of True, False, Unknown
+                      description: Status of the condition. The value is either `True`,
+                        `False`, or `Unknown`.
                       type: string
                     type:
+                      description: Short description of the condition
                       type: string
                   required:
                   - status

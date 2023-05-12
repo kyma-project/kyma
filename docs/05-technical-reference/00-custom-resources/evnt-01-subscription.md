@@ -43,40 +43,40 @@ This table lists all the possible parameters of a given resource together with t
 | Parameter | Type | Description |
 | ---- | ----------- | ---- |
 | **config**  | map\[string\]string | Map of configuration options that will be applied on the backend. |
-| **id**  | string | Unique identifier of Subscription, read-only. |
-| **sink** (required) | string | Kubernetes Service that should be used as a target for the events that match the Subscription. Must exist in the same namespace as the Subscription. |
+| **id**  | string | Unique identifier of the Subscription, read-only. |
+| **sink** (required) | string | Kubernetes Service that should be used as a target for the events that match the Subscription. Must exist in the same Namespace as the Subscription. |
 | **source** (required) | string | Defines the origin of the event. |
-| **typeMatching**  | string | Defines how types should be handled.<br /> - `standard`: backend specific logic will be applied to the configured source and types.<br /> - `exact`: no further processing will be applied to the configured source and types. |
+| **typeMatching**  | string | Defines how types should be handled.<br /> - `standard`: backend-specific logic will be applied to the configured source and types.<br /> - `exact`: no further processing will be applied to the configured source and types. |
 | **types** (required) | \[\]string | List of event types that will be used for subscribing on the backend. |
 
 **Status:**
 
 | Parameter | Type | Description |
 | ---- | ----------- | ---- |
-| **backend**  | object | Backend-specific status which are only applicable to the active backend. |
+| **backend**  | object | Backend-specific status which is only applicable to the active backend. |
 | **backend.&#x200b;apiRuleName**  | string | Name of the APIRule which is used by the Subscription. |
 | **backend.&#x200b;emsSubscriptionStatus**  | object | Status of Subscription as reported by EventMesh. |
 | **backend.&#x200b;emsSubscriptionStatus.&#x200b;lastFailedDelivery**  | string | Timestamp of the last failed delivery. |
-| **backend.&#x200b;emsSubscriptionStatus.&#x200b;lastFailedDeliveryReason**  | string | Reason of the last failed delivery. |
+| **backend.&#x200b;emsSubscriptionStatus.&#x200b;lastFailedDeliveryReason**  | string | Reason for the last failed delivery. |
 | **backend.&#x200b;emsSubscriptionStatus.&#x200b;lastSuccessfulDelivery**  | string | Timestamp of the last successful delivery. |
 | **backend.&#x200b;emsSubscriptionStatus.&#x200b;status**  | string | Status of the Subscription as reported by the backend. |
 | **backend.&#x200b;emsSubscriptionStatus.&#x200b;statusReason**  | string | Reason for the current status. |
-| **backend.&#x200b;emsTypes**  | \[\]object | List of mappings from event type to EventMesh compatible types. Only used with EventMesh as backend. |
+| **backend.&#x200b;emsTypes**  | \[\]object | List of mappings from event type to EventMesh compatible types. Used only with EventMesh as the backend. |
 | **backend.&#x200b;emsTypes.&#x200b;eventMeshType** (required) | string | Event type that is used on the EventMesh backend. |
 | **backend.&#x200b;emsTypes.&#x200b;originalType** (required) | string | Event type that was originally used to subscribe. |
-| **backend.&#x200b;emshash**  | integer | Hash that is used on EventMesh to identify this Subscription. |
+| **backend.&#x200b;emshash**  | integer | Hash that is used in EventMesh to identify this Subscription. |
 | **backend.&#x200b;ev2hash**  | integer | Checksum for the Subscription custom resource. |
 | **backend.&#x200b;externalSink**  | string | Webhook URL used by EventMesh to trigger subscribers. |
-| **backend.&#x200b;failedActivation**  | string | Reason if a Subscription had failed activation in EventMesh. |
-| **backend.&#x200b;types**  | \[\]object | List of event type to consumer name mappings for the Nats backend. |
-| **backend.&#x200b;types.&#x200b;consumerName**  | string | Name of the Jetstream consumer created for the Event type. |
+| **backend.&#x200b;failedActivation**  | string | Provides the reason if a Subscription had failed activation in EventMesh. |
+| **backend.&#x200b;types**  | \[\]object | List of event type to consumer name mappings for the NATS backend. |
+| **backend.&#x200b;types.&#x200b;consumerName**  | string | Name of the JetStream consumer created for the Event type. |
 | **backend.&#x200b;types.&#x200b;originalType** (required) | string | Event type that was originally used to subscribe. |
 | **conditions**  | \[\]object | Current state of the Subscription. |
-| **conditions.&#x200b;lastTransitionTime**  | string | Defines when the condition status was changes last |
-| **conditions.&#x200b;message**  | string | Provides more detail about the condition status change |
-| **conditions.&#x200b;reason**  | string | Defines why the condition status changed |
-| **conditions.&#x200b;status** (required) | string | Status of the condition, one of True, False, Unknown |
-| **conditions.&#x200b;type**  | string |  |
+| **conditions.&#x200b;lastTransitionTime**  | string | Defines the date of the last condition status change. |
+| **conditions.&#x200b;message**  | string | Provides more details about the condition status change. |
+| **conditions.&#x200b;reason**  | string | Defines the reason for the condition status change. |
+| **conditions.&#x200b;status** (required) | string | Status of the condition. The value is either `True`, `False`, or `Unknown`. |
+| **conditions.&#x200b;type**  | string | Short description of the condition |
 | **ready** (required) | boolean | Overall readiness of the Subscription. |
 | **types** (required) | \[\]object | List of event types after cleanup for use with the configured backend. |
 | **types.&#x200b;cleanType** (required) | string | Event type after it was cleaned up from backend compatible characters. |
@@ -90,9 +90,9 @@ This table lists all the possible parameters of a given resource together with t
 
 | Parameter | Type | Description |
 | ---- | ----------- | ---- |
-| **config**  | object | Defines additional configuration for the active backend |
+| **config**  | object | Defines additional configuration for the active backend. |
 | **config.&#x200b;maxInFlightMessages**  | integer | Defines how many not-ACKed messages can be be in flight simultaneously. |
-| **filter** (required) | object | Defines the which events will be sent to the sink. |
+| **filter** (required) | object | Defines which events will be sent to the sink. |
 | **filter.&#x200b;dialect**  | string |  |
 | **filter.&#x200b;filters** (required) | \[\]object | BEBFilter defines the BEB filter element as a combination of two CE filter elements. |
 | **filter.&#x200b;filters.&#x200b;eventSource** (required) | object | Defines the source for the CE filter. |
@@ -104,18 +104,18 @@ This table lists all the possible parameters of a given resource together with t
 | **filter.&#x200b;filters.&#x200b;eventType.&#x200b;type**  | string | Type defines the type of the filter |
 | **filter.&#x200b;filters.&#x200b;eventType.&#x200b;value** (required) | string | Value defines the value of the filter |
 | **id**  | string | Unique identifier of Subscription, read-only. |
-| **protocol**  | string | Defines the CE protocol specification implementation |
+| **protocol**  | string | Defines the CE protocol specification implementation. |
 | **protocolsettings**  | object | Defines the CE protocol settings specification implementation. |
 | **protocolsettings.&#x200b;contentMode**  | string | Defines the content mode for eventing based on BEB. Must be one of "BINARY", "STRUCTURED". Default: |
-| **protocolsettings.&#x200b;exemptHandshake**  | boolean | Defines whether exempt handshake for eventing based on BEB. |
-| **protocolsettings.&#x200b;qos**  | string | Defines quality of service for eventing based on BEB. |
-| **protocolsettings.&#x200b;webhookAuth**  | object | Defines the Webhook called by an active subscription in BEB. |
-| **protocolsettings.&#x200b;webhookAuth.&#x200b;clientId** (required) | string | Defines clientID for OAuth2 |
-| **protocolsettings.&#x200b;webhookAuth.&#x200b;clientSecret** (required) | string | Defines client secret for OAuth2 |
-| **protocolsettings.&#x200b;webhookAuth.&#x200b;grantType** (required) | string | Defines grant type for OAuth2 |
-| **protocolsettings.&#x200b;webhookAuth.&#x200b;scope**  | \[\]string | Defines scope for OAuth2 |
-| **protocolsettings.&#x200b;webhookAuth.&#x200b;tokenUrl** (required) | string | Defines token URL for OAuth2 |
-| **protocolsettings.&#x200b;webhookAuth.&#x200b;type**  | string | Defines type of authentication |
+| **protocolsettings.&#x200b;exemptHandshake**  | boolean | Defines if the exempt handshake for eventing is based on BEB. |
+| **protocolsettings.&#x200b;qos**  | string | Defines the quality of service for eventing based on BEB. |
+| **protocolsettings.&#x200b;webhookAuth**  | object | Defines the Webhook called by an active subscription on BEB. |
+| **protocolsettings.&#x200b;webhookAuth.&#x200b;clientId** (required) | string | Defines the clientID for OAuth2. |
+| **protocolsettings.&#x200b;webhookAuth.&#x200b;clientSecret** (required) | string | Defines the Client Secret for OAuth2. |
+| **protocolsettings.&#x200b;webhookAuth.&#x200b;grantType** (required) | string | Defines the grant type for OAuth2. |
+| **protocolsettings.&#x200b;webhookAuth.&#x200b;scope**  | \[\]string | Defines the scope for OAuth2. |
+| **protocolsettings.&#x200b;webhookAuth.&#x200b;tokenUrl** (required) | string | Defines the token URL for OAuth2. |
+| **protocolsettings.&#x200b;webhookAuth.&#x200b;type**  | string | Defines the authentication type. |
 | **sink** (required) | string | Kubernetes Service that should be used as a target for the events that match the Subscription. Must exist in the same namespace as the Subscription. |
 
 **Status:**
@@ -123,23 +123,23 @@ This table lists all the possible parameters of a given resource together with t
 | Parameter | Type | Description |
 | ---- | ----------- | ---- |
 | **apiRuleName**  | string | Defines the name of the APIRule which is used by the Subscription. |
-| **cleanEventTypes** (required) | \[\]string | CleanEventTypes defines the filter's event types after cleanup for use with the configured backend |
+| **cleanEventTypes** (required) | \[\]string | CleanEventTypes defines the filter's event types after cleanup to use it with the configured backend. |
 | **conditions**  | \[\]object | Current state of the Subscription. |
-| **conditions.&#x200b;lastTransitionTime**  | string | Defines when the condition status was changes last |
-| **conditions.&#x200b;message**  | string | Provides more detail about the condition status change |
-| **conditions.&#x200b;reason**  | string | Defines why the condition status changed |
-| **conditions.&#x200b;status** (required) | string |  |
-| **conditions.&#x200b;type**  | string |  |
+| **conditions.&#x200b;lastTransitionTime**  | string | Defines the date of the last condition status change. |
+| **conditions.&#x200b;message**  | string | Provides more details about the condition status change. |
+| **conditions.&#x200b;reason**  | string | Defines the reason for the condition status change. |
+| **conditions.&#x200b;status** (required) | string | Status of the condition. The value is either `True`, `False`, or `Unknown`."` |
+| **conditions.&#x200b;type**  | string | Short description of the condition |
 | **config**  | object | Defines the configurations that have been applied to the eventing backend when creating this Subscription. |
 | **config.&#x200b;maxInFlightMessages**  | integer | Defines how many not-ACKed messages can be be in flight simultaneously. |
-| **emsSubscriptionStatus**  | object | Defines the status of Subscription in EventMesh. |
+| **emsSubscriptionStatus**  | object | Defines the status of the Subscription in EventMesh. |
 | **emsSubscriptionStatus.&#x200b;lastFailedDelivery**  | string | Timestamp of the last failed delivery. |
 | **emsSubscriptionStatus.&#x200b;lastFailedDeliveryReason**  | string | Reason of the last failed delivery. |
 | **emsSubscriptionStatus.&#x200b;lastSuccessfulDelivery**  | string | Timestamp of the last successful delivery. |
-| **emsSubscriptionStatus.&#x200b;subscriptionStatus**  | string | Status of Subscription as reported by EventMesh. |
+| **emsSubscriptionStatus.&#x200b;subscriptionStatus**  | string | Status of the Subscription as reported by EventMesh. |
 | **emsSubscriptionStatus.&#x200b;subscriptionStatusReason**  | string | Reason for the current status. |
 | **emshash**  | integer | Defines the checksum for the Subscription in EventMesh. |
-| **ev2hash**  | integer | Defines a checksum for the Subscription custom resource. |
+| **ev2hash**  | integer | Defines the checksum for the Subscription custom resource. |
 | **externalSink**  | string | Defines the webhook URL which is used by EventMesh to trigger subscribers. |
 | **failedActivation**  | string | Defines the reason if a Subscription had failed activation in EventMesh. |
 | **ready** (required) | boolean | Overall readiness of the Subscription. |
