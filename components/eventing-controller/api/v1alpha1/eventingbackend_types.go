@@ -25,11 +25,11 @@ type EventingBackendStatus struct {
 	// +optional
 	Backend BackendType `json:"backendType"`
 
-	// Defines the overall status of the Backend.
+	// Defines the overall Backend status.
 	// +optional
 	EventingReady *bool `json:"eventingReady"`
 
-	// Defines the status of the Controller and the EPP
+	// Defines the status of the Controller and the EPP.
 	// +optional
 	Conditions []Condition `json:"conditions,omitempty"`
 

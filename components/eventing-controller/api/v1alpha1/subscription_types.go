@@ -14,23 +14,23 @@ var Finalizer = GroupVersion.Group
 // WebhookAuth defines the Webhook called by an active subscription in BEB.
 // TODO: Remove it when depreciating code of v1alpha1
 type WebhookAuth struct {
-	// Defines type of authentication
+	// Defines the authentication type.
 	// +optional
 	Type string `json:"type,omitempty"`
 
-	// Defines grant type for OAuth2
+	// Defines the grant type for OAuth2.
 	GrantType string `json:"grantType"`
 
-	// Defines clientID for OAuth2
+	// Defines the clientID for OAuth2.
 	ClientID string `json:"clientId"`
 
-	// Defines client secret for OAuth2
+	// Defines the Client Secret for OAuth2.
 	ClientSecret string `json:"clientSecret"`
 
-	// Defines token URL for OAuth2
+	// Defines the token URL for OAuth2.
 	TokenURL string `json:"tokenUrl"`
 
-	// Defines scope for OAuth2
+	// Defines the scope for OAuth2.
 	Scope []string `json:"scope,omitempty"`
 }
 
@@ -43,15 +43,15 @@ type ProtocolSettings struct {
 	// +optional
 	ContentMode *string `json:"contentMode,omitempty"`
 
-	// Defines whether exempt handshake for eventing based on BEB.
+	// Defines if the exempt handshake for eventing is based on BEB.
 	// +optional
 	ExemptHandshake *bool `json:"exemptHandshake,omitempty"`
 
-	// Defines quality of service for eventing based on BEB.
+	// Defines the quality of service for eventing based on BEB.
 	// +optional
 	Qos *string `json:"qos,omitempty"`
 
-	// Defines the Webhook called by an active subscription in BEB.
+	// Defines the Webhook called by an active subscription on BEB.
 	// +optional
 	WebhookAuth *WebhookAuth `json:"webhookAuth,omitempty"`
 }
@@ -143,7 +143,7 @@ type SubscriptionSpec struct {
 	// +optional
 	ID string `json:"id,omitempty"`
 
-	// Defines the CE protocol specification implementation
+	// Defines the CE protocol specification implementation.
 	// +optional
 	Protocol string `json:"protocol,omitempty"`
 
@@ -155,16 +155,16 @@ type SubscriptionSpec struct {
 	// Must exist in the same namespace as the Subscription.
 	Sink string `json:"sink"`
 
-	// Defines the which events will be sent to the sink.
+	// Defines which events will be sent to the sink.
 	Filter *BEBFilters `json:"filter"`
 
-	// Defines additional configuration for the active backend
+	// Defines additional configuration for the active backend.
 	// +optional
 	Config *SubscriptionConfig `json:"config,omitempty"`
 }
 
 type EmsSubscriptionStatus struct {
-	// Status of Subscription as reported by EventMesh.
+	// Status of the Subscription as reported by EventMesh.
 	// +optional
 	SubscriptionStatus string `json:"subscriptionStatus,omitempty"`
 
@@ -185,7 +185,7 @@ type EmsSubscriptionStatus struct {
 	LastFailedDeliveryReason string `json:"lastFailedDeliveryReason,omitempty"`
 }
 
-// SubscriptionStatus defines the observed state of Subscription.
+// SubscriptionStatus defines the observed state of the Subscription.
 type SubscriptionStatus struct {
 	// Current state of the Subscription.
 	// +optional
@@ -194,7 +194,7 @@ type SubscriptionStatus struct {
 	// Overall readiness of the Subscription.
 	Ready bool `json:"ready"`
 
-	// CleanEventTypes defines the filter's event types after cleanup for use with the configured backend
+	// CleanEventTypes defines the filter's event types after cleanup to use it with the configured backend.
 	CleanEventTypes []string `json:"cleanEventTypes"`
 
 	// Defines a checksum for the Subscription custom resource.
