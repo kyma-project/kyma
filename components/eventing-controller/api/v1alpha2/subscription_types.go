@@ -18,18 +18,18 @@ type TypeMatching string
 
 var Finalizer = GroupVersion.Group
 
-// Desired state of Subscription.
+// Defines the desired state of the Subscription.
 type SubscriptionSpec struct {
-	// Unique identifier of Subscription, read-only.
+	// Unique identifier of the Subscription, read-only.
 	// +optional
 	ID string `json:"id,omitempty"`
 
 	// Kubernetes Service that should be used as a target for the events that match the Subscription.
-	// Must exist in the same namespace as the Subscription.
+	// Must exist in the same Namespace as the Subscription.
 	Sink string `json:"sink"`
 
 	// Defines how types should be handled.<br />
-	// - `standard`: backend specific logic will be applied to the configured source and types.<br />
+	// - `standard`: backend-specific logic will be applied to the configured source and types.<br />
 	// - `exact`: no further processing will be applied to the configured source and types.
 	TypeMatching TypeMatching `json:"typeMatching,omitempty"`
 
@@ -57,7 +57,7 @@ type SubscriptionStatus struct {
 	// List of event types after cleanup for use with the configured backend.
 	Types []EventType `json:"types"`
 
-	// Backend-specific status which are only applicable to the active backend.
+	// Backend-specific status which is only applicable to the active backend.
 	Backend Backend `json:"backend,omitempty"`
 }
 

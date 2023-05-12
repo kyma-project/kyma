@@ -24,14 +24,14 @@ var allSubscriptionConditions = MakeSubscriptionConditions()
 type Condition struct {
 	Type ConditionType `json:"type,omitempty" description:"Short description of the condition"`
 
-	// Status of the condition, one of True, False, Unknown
-	Status corev1.ConditionStatus `json:"status" description:"status of the condition, one of True, False, Unknown"`
+	// Status of the condition. The value is either `True`, `False`, or `Unknown`.
+	Status corev1.ConditionStatus `json:"status" description:"Status of the condition. The value is either `True`, `False`, or `Unknown`"`
 
-	// Defines when the condition status was changes last
+	// Defines the date of the last condition status change.
 	LastTransitionTime metav1.Time `json:"lastTransitionTime,omitempty"`
-	// Defines why the condition status changed
+	// Defines the reason for the condition status change.
 	Reason ConditionReason `json:"reason,omitempty"`
-	// Provides more detail about the condition status change
+	// Provides more details about the condition status change.
 	Message string `json:"message,omitempty"`
 }
 

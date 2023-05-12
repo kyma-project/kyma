@@ -15,7 +15,7 @@ type Backend struct {
 	// +optional
 	Ev2hash int64 `json:"ev2hash,omitempty"`
 
-	// Hash that is used on EventMesh to identify this Subscription.
+	// Hash that is used in EventMesh to identify this Subscription.
 	// +optional
 	Emshash int64 `json:"emshash,omitempty"`
 
@@ -23,7 +23,7 @@ type Backend struct {
 	// +optional
 	ExternalSink string `json:"externalSink,omitempty"`
 
-	// Reason if a Subscription had failed activation in EventMesh.
+	// Provides the reason if a Subscription had failed activation in EventMesh.
 	// +optional
 	FailedActivation string `json:"failedActivation,omitempty"`
 
@@ -35,11 +35,11 @@ type Backend struct {
 	// +optional
 	EmsSubscriptionStatus *EmsSubscriptionStatus `json:"emsSubscriptionStatus,omitempty"`
 
-	// List of event type to consumer name mappings for the Nats backend.
+	// List of event type to consumer name mappings for the NATS backend.
 	// +optional
 	Types []JetStreamTypes `json:"types,omitempty"`
 
-	// List of mappings from event type to EventMesh compatible types. Only used with EventMesh as backend.
+	// List of mappings from event type to EventMesh compatible types. Used only with EventMesh as the backend.
 	// +optional
 	EmsTypes []EventMeshTypes `json:"emsTypes,omitempty"`
 }
@@ -61,7 +61,7 @@ type EmsSubscriptionStatus struct {
 	// +optional
 	LastFailedDelivery string `json:"lastFailedDelivery,omitempty"`
 
-	// Reason of the last failed delivery.
+	// Reason for the last failed delivery.
 	// +optional
 	LastFailedDeliveryReason string `json:"lastFailedDeliveryReason,omitempty"`
 }
@@ -69,7 +69,7 @@ type EmsSubscriptionStatus struct {
 type JetStreamTypes struct {
 	// Event type that was originally used to subscribe.
 	OriginalType string `json:"originalType"`
-	// Name of the Jetstream consumer created for the Event type.
+	// Name of the JetStream consumer created for the Event type.
 	ConsumerName string `json:"consumerName,omitempty"`
 }
 

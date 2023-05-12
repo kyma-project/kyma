@@ -197,7 +197,7 @@ type SubscriptionStatus struct {
 	// CleanEventTypes defines the filter's event types after cleanup to use it with the configured backend.
 	CleanEventTypes []string `json:"cleanEventTypes"`
 
-	// Defines a checksum for the Subscription custom resource.
+	// Defines the checksum for the Subscription custom resource.
 	// +optional
 	Ev2hash int64 `json:"ev2hash,omitempty"`
 
@@ -217,7 +217,7 @@ type SubscriptionStatus struct {
 	// +optional
 	APIRuleName string `json:"apiRuleName,omitempty"`
 
-	// Defines the status of Subscription in EventMesh.
+	// Defines the status of the Subscription in EventMesh.
 	// +optional
 	EmsSubscriptionStatus *EmsSubscriptionStatus `json:"emsSubscriptionStatus,omitempty"`
 
