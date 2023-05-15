@@ -485,7 +485,7 @@ data:
       "category": "Observability",
       "urlPath": "logpipelines",
       "scope": "cluster",
-      "description": "Configure log selection, filters, and outputs",
+      "description": "{{[LogPipeline](https://kyma-project.io/docs/kyma/latest/05-technical-reference/00-custom-resources/telemetry-01-logpipeline)}} configures log selection, filters, and outputs",
     }
   list: |-
     [
