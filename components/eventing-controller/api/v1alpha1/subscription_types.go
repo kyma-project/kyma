@@ -89,7 +89,8 @@ func (bf *BEBFilter) hash() (uint64, error) {
 
 // BEBFilters defines the list of BEB filters.
 type BEBFilters struct {
-	// Contains a URI-reference to CloudEvent filter dialect. See [here](https://github.com/cloudevents/spec/blob/main/subscriptions/spec.md#3241-filter-dialects) for more details.
+	// Contains a URI-reference to CloudEvent filter dialect. See
+	// [here](https://github.com/cloudevents/spec/blob/main/subscriptions/spec.md#3241-filter-dialects) for more details.
 	// +optional
 	Dialect string `json:"dialect,omitempty"`
 
