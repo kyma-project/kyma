@@ -230,11 +230,16 @@ const (
 )
 
 type Condition struct {
-	Type               ConditionType      `json:"type,omitempty"`
-	Status             v1.ConditionStatus `json:"status" description:"status of the condition, one of True, False, Unknown"`
-	LastTransitionTime metav1.Time        `json:"lastTransitionTime,omitempty"`
-	Reason             ConditionReason    `json:"reason,omitempty"`
-	Message            string             `json:"message,omitempty"`
+	// Type of function condition.
+	Type ConditionType `json:"type,omitempty"`
+	// Status of the condition, one of True, False, Unknown.
+	Status v1.ConditionStatus `json:"status"`
+	// Last time the condition transitioned from one status to another.
+	LastTransitionTime metav1.Time `json:"lastTransitionTime,omitempty"`
+	// The reason for the condition's last transition.
+	Reason ConditionReason `json:"reason,omitempty"`
+	// A human-readable message indicating details about the transition.
+	Message string `json:"message,omitempty"`
 }
 
 type Repository struct {
@@ -249,12 +254,19 @@ type Repository struct {
 
 // FunctionStatus defines the observed state of Function
 type FunctionStatus struct {
-	Runtime      Runtime     `json:"runtime,omitempty"`
-	Conditions   []Condition `json:"conditions,omitempty"`
-	Repository   `json:",inline,omitempty"`
-	Replicas     int32  `json:"replicas,omitempty"`
-	PodSelector  string `json:"podSelector,omitempty"`
-	Commit       string `json:"commit,omitempty"`
+	// Runtime type of function
+	Runtime Runtime `json:"runtime,omitempty"`
+	// An array of conditions describing the status of the parser
+	Conditions []Condition `json:"conditions,omitempty"`
+	// The repository which was used to build the function
+	Repository `json:",inline,omitempty"`
+	// Total number of non-terminated pods targeted by this function
+	Replicas int32 `json:"replicas,omitempty"`
+	// Pod selector used to match function pods in final deployment
+	PodSelector string `json:"podSelector,omitempty"`
+	// Commit hash used to build function
+	Commit string `json:"commit,omitempty"`
+	// Runtime Image version of function
 	RuntimeImage string `json:"runtimeImage,omitempty"`
 	// Deprecated: RuntimeImageOverride exists for historical compatibility
 	// and should be removed with v1alpha3 version. RuntimeImage has the

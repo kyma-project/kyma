@@ -176,18 +176,18 @@ spec:
 | Parameter | Type | Description |
 | ---- | ----------- | ---- |
 | **baseDir**  | string | BaseDir specifies the relative path to the Git directory that contains the source code from which the Function is built. |
-| **commit**  | string |  |
-| **conditions**  | \[\]object |  |
-| **conditions.&#x200b;lastTransitionTime**  | string |  |
-| **conditions.&#x200b;message**  | string |  |
-| **conditions.&#x200b;reason**  | string |  |
-| **conditions.&#x200b;status** (required) | string |  |
-| **conditions.&#x200b;type**  | string | TODO: Status related things needs to be developed. |
-| **podSelector**  | string |  |
+| **commit**  | string | Commit hash used to build function |
+| **conditions**  | \[\]object | An array of conditions describing the status of the parser |
+| **conditions.&#x200b;lastTransitionTime**  | string | Last time the condition transitioned from one status to another. |
+| **conditions.&#x200b;message**  | string | A human-readable message indicating details about the transition. |
+| **conditions.&#x200b;reason**  | string | The reason for the condition's last transition. |
+| **conditions.&#x200b;status** (required) | string | Status of the condition, one of True, False, Unknown. |
+| **conditions.&#x200b;type**  | string | Type of function condition. |
+| **podSelector**  | string | Pod selector used to match function pods in final deployment |
 | **reference**  | string | Reference specifies either the branch name, tag or the commit revision from which the Function Controller automatically fetches the changes in the Function's code and dependencies. |
-| **replicas**  | integer |  |
-| **runtime**  | string | Runtime specifies the name of the Function's runtime. |
-| **runtimeImage**  | string |  |
+| **replicas**  | integer | Total number of non-terminated pods targeted by this function |
+| **runtime**  | string | Runtime type of function |
+| **runtimeImage**  | string | Runtime Image version of function |
 | **runtimeImageOverride**  | string | Deprecated: RuntimeImageOverride exists for historical compatibility and should be removed with v1alpha3 version. RuntimeImage has the override image if it isn't empty. |
 
 <!-- TABLE-END -->
