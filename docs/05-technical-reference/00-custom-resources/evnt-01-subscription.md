@@ -94,7 +94,7 @@ This table lists all the possible parameters of a given resource together with t
 | **config.&#x200b;maxInFlightMessages**  | integer | Defines how many not-ACKed messages can be in flight simultaneously. |
 | **filter** (required) | object | Defines which events will be sent to the sink. |
 | **filter.&#x200b;dialect**  | string | Contains a URI-reference to CloudEvent filter dialect. See [here](https://github.com/cloudevents/spec/blob/main/subscriptions/spec.md#3241-filter-dialects) for more details. |
-| **filter.&#x200b;filters** (required) | \[\]object | BEBFilter defines the BEB filter element as a combination of two CE filter elements. |
+| **filter.&#x200b;filters** (required) | \[\]object | Defines the BEB filter element as a combination of two CE filter elements. |
 | **filter.&#x200b;filters.&#x200b;eventSource** (required) | object | Defines the source of the CE filter. |
 | **filter.&#x200b;filters.&#x200b;eventSource.&#x200b;property** (required) | string | Defines the property of the filter. |
 | **filter.&#x200b;filters.&#x200b;eventSource.&#x200b;type**  | string | Defines the type of the filter. |

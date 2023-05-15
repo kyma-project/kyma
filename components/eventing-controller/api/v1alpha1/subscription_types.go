@@ -74,7 +74,7 @@ type Filter struct {
 	Value string `json:"value"`
 }
 
-// BEBFilter defines the BEB filter element as a combination of two CE filter elements.
+// Defines the BEB filter element as a combination of two CE filter elements.
 type BEBFilter struct {
 	// Defines the source of the CE filter.
 	EventSource *Filter `json:"eventSource"`
