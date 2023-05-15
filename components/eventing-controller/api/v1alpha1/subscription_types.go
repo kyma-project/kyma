@@ -39,7 +39,6 @@ type WebhookAuth struct {
 type ProtocolSettings struct {
 	// Defines the content mode for eventing based on BEB.
 	//  The value is either `BINARY`, or `STRUCTURED`.
-	// Default:
 	// +optional
 	ContentMode *string `json:"contentMode,omitempty"`
 
