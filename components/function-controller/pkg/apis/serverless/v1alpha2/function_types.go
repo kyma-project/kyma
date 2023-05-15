@@ -264,11 +264,11 @@ type FunctionStatus struct {
 	Repository `json:",inline,omitempty"`
 	// Total number of non-terminated pods targeted by this function
 	Replicas int32 `json:"replicas,omitempty"`
-	// Pod selector used to match function pods in final deployment
+	// Pod selector used to match pods in function deployment
 	PodSelector string `json:"podSelector,omitempty"`
 	// Commit hash used to build function
 	Commit string `json:"commit,omitempty"`
-	// Runtime Image version of function
+	// Runtime image version used to build and run function pods
 	RuntimeImage string `json:"runtimeImage,omitempty"`
 	// Deprecated: RuntimeImageOverride exists for historical compatibility
 	// and should be removed with v1alpha3 version. RuntimeImage has the

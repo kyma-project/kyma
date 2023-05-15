@@ -183,11 +183,11 @@ spec:
 | **conditions.&#x200b;reason**  | string | The reason for the condition's last transition. |
 | **conditions.&#x200b;status** (required) | string | Status of the condition, one of True, False, Unknown. |
 | **conditions.&#x200b;type**  | string | Type of function condition. |
-| **podSelector**  | string | Pod selector used to match function pods in final deployment |
+| **podSelector**  | string | Pod selector used to match pods in function deployment |
 | **reference**  | string | Reference specifies either the branch name, tag or the commit revision from which the Function Controller automatically fetches the changes in the Function's code and dependencies. |
 | **replicas**  | integer | Total number of non-terminated pods targeted by this function |
 | **runtime**  | string | Runtime type of function |
-| **runtimeImage**  | string | Runtime Image version of function |
+| **runtimeImage**  | string | Runtime image version used to build and run function pods |
 | **runtimeImageOverride**  | string | Deprecated: RuntimeImageOverride exists for historical compatibility and should be removed with v1alpha3 version. RuntimeImage has the override image if it isn't empty. |
 
 <!-- TABLE-END -->

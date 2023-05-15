@@ -441,7 +441,7 @@ spec:
                   type: object
                 type: array
               podSelector:
-                description: Pod selector used to match function pods in final deployment
+                description: Pod selector used to match pods in function deployment
                 type: string
               reference:
                 description: Reference specifies either the branch name, tag or the
@@ -457,7 +457,8 @@ spec:
                 description: Runtime type of function
                 type: string
               runtimeImage:
-                description: Runtime Image version of function
+                description: Runtime image version used to build and run function
+                  pods
                 type: string
               runtimeImageOverride:
                 description: 'Deprecated: RuntimeImageOverride exists for historical
