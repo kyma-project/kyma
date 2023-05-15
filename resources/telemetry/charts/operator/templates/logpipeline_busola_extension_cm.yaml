@@ -6,7 +6,7 @@ metadata:
     busola.io/extension: resource
     busola.io/extension-version: "0.5"
   name: logpipelines.telemetry.kyma-project.io
-  namespace: kube-public
+  namespace: kyma-system
 data:
   details: |-
     {
