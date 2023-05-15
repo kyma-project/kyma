@@ -3,10 +3,10 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   labels:
-    app.kubernetes.io/name: tracepipelines.telemetry.kyma-project.io
+    app.kubernetes.io/name: telemetry-tracepipelines
     busola.io/extension: resource
     busola.io/extension-version: "0.5"
-  name: tracepipelines.telemetry.kyma-project.io
+  name: telemetry-tracepipelines
   namespace: kyma-system
 data:
   details: |-
