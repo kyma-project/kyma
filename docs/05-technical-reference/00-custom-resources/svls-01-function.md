@@ -129,7 +129,7 @@ spec:
 | **env.&#x200b;valueFrom.&#x200b;fieldRef.&#x200b;fieldPath** (required) | string | Path of the field to select in the specified API version. |
 | **env.&#x200b;valueFrom.&#x200b;resourceFieldRef**  | object | Selects a resource of the container: only resources limits and requests (limits.cpu, limits.memory, limits.ephemeral-storage, requests.cpu, requests.memory and requests.ephemeral-storage) are currently supported. |
 | **env.&#x200b;valueFrom.&#x200b;resourceFieldRef.&#x200b;containerName**  | string | Container name: required for volumes, optional for env vars |
-| **env.&#x200b;valueFrom.&#x200b;resourceFieldRef.&#x200b;divisor**  | UNKNOW TYPE | Specifies the output format of the exposed resources, defaults to "1" |
+| **env.&#x200b;valueFrom.&#x200b;resourceFieldRef.&#x200b;divisor**  | \{integer or string\} | Specifies the output format of the exposed resources, defaults to "1" |
 | **env.&#x200b;valueFrom.&#x200b;resourceFieldRef.&#x200b;resource** (required) | string | Required: resource to select |
 | **env.&#x200b;valueFrom.&#x200b;secretKeyRef**  | object | Selects a key of a secret in the pod's namespace |
 | **env.&#x200b;valueFrom.&#x200b;secretKeyRef.&#x200b;key** (required) | string | The key of the secret to select from.  Must be a valid secret key. |
@@ -141,13 +141,13 @@ spec:
 | **resourceConfiguration.&#x200b;build**  | object | Build specifies resources requested by the build Job's Pod. |
 | **resourceConfiguration.&#x200b;build.&#x200b;profile**  | string | Profile defines name of predefined set of values of resource. Can't be used at the same time with Resources. |
 | **resourceConfiguration.&#x200b;build.&#x200b;resources**  | object | Resources defines amount of resources available for the Pod to use. Can't be used at the same time with Profile. |
-| **resourceConfiguration.&#x200b;build.&#x200b;resources.&#x200b;limits**  | map\[string\]UNKNOW TYPE | Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
-| **resourceConfiguration.&#x200b;build.&#x200b;resources.&#x200b;requests**  | map\[string\]UNKNOW TYPE | Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
+| **resourceConfiguration.&#x200b;build.&#x200b;resources.&#x200b;limits**  | map\[string\]\{integer or string\} | Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
+| **resourceConfiguration.&#x200b;build.&#x200b;resources.&#x200b;requests**  | map\[string\]\{integer or string\} | Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
 | **resourceConfiguration.&#x200b;function**  | object | Function specifies resources requested by the Function's Pod. |
 | **resourceConfiguration.&#x200b;function.&#x200b;profile**  | string | Profile defines name of predefined set of values of resource. Can't be used at the same time with Resources. |
 | **resourceConfiguration.&#x200b;function.&#x200b;resources**  | object | Resources defines amount of resources available for the Pod to use. Can't be used at the same time with Profile. |
-| **resourceConfiguration.&#x200b;function.&#x200b;resources.&#x200b;limits**  | map\[string\]UNKNOW TYPE | Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
-| **resourceConfiguration.&#x200b;function.&#x200b;resources.&#x200b;requests**  | map\[string\]UNKNOW TYPE | Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
+| **resourceConfiguration.&#x200b;function.&#x200b;resources.&#x200b;limits**  | map\[string\]\{integer or string\} | Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
+| **resourceConfiguration.&#x200b;function.&#x200b;resources.&#x200b;requests**  | map\[string\]\{integer or string\} | Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
 | **runtime** (required) | string | Runtime specifies the runtime of the Function. The available values are `nodejs16`, `nodejs18`, and `python39`. |
 | **runtimeImageOverride**  | string | RuntimeImageOverride specifies the runtimes image which must be used instead of the default one. |
 | **scaleConfig**  | object | ScaleConfig defines minimum and maximum number of Function's Pods to run at a time. When it is configured, a HorizontalPodAutoscaler will be deployed and will control the Replicas field to scale Function based on the CPU utilisation. |
@@ -168,8 +168,8 @@ spec:
 | **source.&#x200b;inline.&#x200b;dependencies**  | string | Dependencies specifies the Function's dependencies. |
 | **source.&#x200b;inline.&#x200b;source** (required) | string | Source provides the Function's full source code. |
 | **template**  | object | Deprecated: `.spec.Labels` and `.spec.Annotations` should be used to annotate/label function's pods. |
-| **template.&#x200b;annotations**  | map\[string\]string |  |
-| **template.&#x200b;labels**  | map\[string\]string |  |
+| **template.&#x200b;annotations**  | map\[string\]string | Deprecated: `.spec.Annotations` should be used to annotate function's pods. |
+| **template.&#x200b;labels**  | map\[string\]string | Deprecated: `.spec.Labels` should be used to label function's pods. |
 
 **Status:**
 

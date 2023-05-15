@@ -356,11 +356,21 @@ func getType(p map[string]interface{}) string {
 	if typeVal, ok := p["type"].(string); ok {
 		return typeVal
 	}
-	if anyOfVal, ok := p["anyOf"].([]string); ok {
-		return strings.Join(anyOfVal, ", ")
+	if anyOfVal, ok := p["anyOf"].([]interface{}); ok {
+		var anyOfStringVal []string
+		for _, v := range anyOfVal {
+			var typeValue = "UNKNOWN TYPE"
+			castedValue, ok := v.(map[string]interface{})
+			if ok {
+				typeValue = getType(castedValue)
+			}
+
+			anyOfStringVal = append(anyOfStringVal, typeValue)
+		}
+		return fmt.Sprintf("{%s}", strings.Join(anyOfStringVal, " or "))
 	}
 
-	return "UNKNOW TYPE"
+	return "UNKNOWN TYPE"
 }
 
 func contains(list []interface{}, value string) bool {

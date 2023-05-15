@@ -96,8 +96,10 @@ const (
 )
 
 type Template struct {
+	// Deprecated: `.spec.Labels` should be used to label function's pods.
 	// +optional
 	Labels map[string]string `json:"labels,omitempty"`
+	// Deprecated: `.spec.Annotations` should be used to annotate function's pods.
 	// +optional
 	Annotations map[string]string `json:"annotations,omitempty"`
 }

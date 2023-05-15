@@ -390,10 +390,14 @@ spec:
                   annotations:
                     additionalProperties:
                       type: string
+                    description: 'Deprecated: `.spec.Annotations` should be used to
+                      annotate function''s pods.'
                     type: object
                   labels:
                     additionalProperties:
                       type: string
+                    description: 'Deprecated: `.spec.Labels` should be used to label
+                      function''s pods.'
                     type: object
                 type: object
             required:
