@@ -23,7 +23,7 @@ type Backend struct {
 	// +optional
 	ExternalSink string `json:"externalSink,omitempty"`
 
-	// Provides the reason if a Subscription had failed activation in EventMesh.
+	// Provides the reason if a Subscription failed activation in EventMesh.
 	// +optional
 	FailedActivation string `json:"failedActivation,omitempty"`
 
@@ -31,7 +31,7 @@ type Backend struct {
 	// +optional
 	APIRuleName string `json:"apiRuleName,omitempty"`
 
-	// Status of Subscription as reported by EventMesh.
+	// Status of the Subscription as reported by EventMesh.
 	// +optional
 	EmsSubscriptionStatus *EmsSubscriptionStatus `json:"emsSubscriptionStatus,omitempty"`
 
@@ -69,7 +69,7 @@ type EmsSubscriptionStatus struct {
 type JetStreamTypes struct {
 	// Event type that was originally used to subscribe.
 	OriginalType string `json:"originalType"`
-	// Name of the JetStream consumer created for the Event type.
+	// Name of the JetStream consumer created for the event type.
 	ConsumerName string `json:"consumerName,omitempty"`
 }
 

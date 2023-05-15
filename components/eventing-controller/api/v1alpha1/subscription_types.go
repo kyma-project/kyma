@@ -38,7 +38,7 @@ type WebhookAuth struct {
 // TODO: Remove it when depreciating code of v1alpha1
 type ProtocolSettings struct {
 	// Defines the content mode for eventing based on BEB.
-	// Must be one of "BINARY", "STRUCTURED".
+	//  The value is either `BINARY`, or `STRUCTURED`.
 	// Default:
 	// +optional
 	ContentMode *string `json:"contentMode,omitempty"`
@@ -77,7 +77,7 @@ type Filter struct {
 
 // BEBFilter defines the BEB filter element as a combination of two CE filter elements.
 type BEBFilter struct {
-	// Defines the source for the CE filter.
+	// Defines the source of the CE filter.
 	EventSource *Filter `json:"eventSource"`
 
 	// Defines the type of the CE filter.
@@ -180,7 +180,7 @@ type EmsSubscriptionStatus struct {
 	// +optional
 	LastFailedDelivery string `json:"lastFailedDelivery,omitempty"`
 
-	// Reason of the last failed delivery.
+	// Reason for the last failed delivery.
 	// +optional
 	LastFailedDeliveryReason string `json:"lastFailedDeliveryReason,omitempty"`
 }
@@ -209,7 +209,7 @@ type SubscriptionStatus struct {
 	// +optional
 	ExternalSink string `json:"externalSink,omitempty"`
 
-	// Defines the reason if a Subscription had failed activation in EventMesh.
+	// Defines the reason if a Subscription failed activation in EventMesh.
 	// +optional
 	FailedActivation string `json:"failedActivation,omitempty"`
 

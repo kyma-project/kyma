@@ -57,7 +57,7 @@ type SubscriptionStatus struct {
 	// List of event types after cleanup for use with the configured backend.
 	Types []EventType `json:"types"`
 
-	// Backend-specific status which is only applicable to the active backend.
+	// Backend-specific status which is applicable to the active backend only.
 	Backend Backend `json:"backend,omitempty"`
 }
 
