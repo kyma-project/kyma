@@ -63,14 +63,14 @@ const (
 
 // Filter defines the CE filter element.
 type Filter struct {
-	// Type defines the type of the filter
+	// Defines the type of the filter.
 	// +optional
 	Type string `json:"type,omitempty"`
 
-	// Property defines the property of the filter
+	// Defines the property of the filter.
 	Property string `json:"property"`
 
-	// Value defines the value of the filter
+	// Defines the value of the filter.
 	Value string `json:"value"`
 }
 
@@ -89,6 +89,7 @@ func (bf *BEBFilter) hash() (uint64, error) {
 
 // BEBFilters defines the list of BEB filters.
 type BEBFilters struct {
+	// Contains a URI-reference to CloudEvent filter dialect. See [here](https://github.com/cloudevents/spec/blob/main/subscriptions/spec.md#3241-filter-dialects) for more details.
 	// +optional
 	Dialect string `json:"dialect,omitempty"`
 
@@ -115,7 +116,7 @@ func (bf *BEBFilters) Deduplicate() (*BEBFilters, error) {
 }
 
 type SubscriptionConfig struct {
-	// Defines how many not-ACKed messages can be be in flight simultaneously.
+	// Defines how many not-ACKed messages can be in flight simultaneously.
 	// +optional
 	// +kubebuilder:validation:Minimum=1
 	MaxInFlightMessages int `json:"maxInFlightMessages,omitempty"`

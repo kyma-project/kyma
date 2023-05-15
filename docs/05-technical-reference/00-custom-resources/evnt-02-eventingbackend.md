@@ -37,15 +37,15 @@ When you fetch an existing EventingBackend CR, the Eventing Controller adds the 
 
 | Parameter | Type | Description |
 | ---- | ----------- | ---- |
-| **backendType**  | string | Specifies the backend type used. Allowed values are "BEB" and "NATS" |
-| **bebSecretName**  | string | The name of the secret containing BEB access tokens, required only for BEB |
-| **bebSecretNamespace**  | string | The namespace of the secret containing BEB access tokens, required only for BEB |
+| **backendType**  | string | Specifies the backend type used. The value is either BEB, or NATS. |
+| **bebSecretName**  | string | Name of the Secret containing BEB access tokens, required for BEB only. |
+| **bebSecretNamespace**  | string | Namespace of the Secret containing BEB access tokens, required for BEB only. |
 | **conditions**  | \[\]object | Defines the status of the Controller and the EPP. |
 | **conditions.&#x200b;lastTransitionTime**  | string | Defines the date of the last condition status change. |
 | **conditions.&#x200b;message**  | string | Provides more details about the condition status change. |
 | **conditions.&#x200b;reason**  | string | Defines the reason for the condition status change. |
-| **conditions.&#x200b;status** (required) | string | Status of the condition. The value is either `True`, `False`, or `Unknown`."` |
-| **conditions.&#x200b;type**  | string | Short description of the condition |
+| **conditions.&#x200b;status** (required) | string | Status of the condition. The value is either `True`, `False`, or `Unknown`. |
+| **conditions.&#x200b;type**  | string | Short description of the condition. |
 | **eventingReady**  | boolean | Defines the overall Backend status. |
 
 <!-- TABLE-END -->

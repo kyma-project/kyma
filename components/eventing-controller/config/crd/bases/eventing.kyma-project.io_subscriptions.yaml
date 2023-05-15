@@ -51,8 +51,8 @@ spec:
                 description: Defines additional configuration for the active backend.
                 properties:
                   maxInFlightMessages:
-                    description: Defines how many not-ACKed messages can be be in
-                      flight simultaneously.
+                    description: Defines how many not-ACKed messages can be in flight
+                      simultaneously.
                     minimum: 1
                     type: integer
                 type: object
@@ -60,6 +60,9 @@ spec:
                 description: Defines which events will be sent to the sink.
                 properties:
                   dialect:
+                    description: Contains a URI-reference to CloudEvent filter dialect.
+                      See [here](https://github.com/cloudevents/spec/blob/main/subscriptions/spec.md#3241-filter-dialects)
+                      for more details.
                     type: string
                   filters:
                     items:
@@ -67,16 +70,16 @@ spec:
                         of two CE filter elements.
                       properties:
                         eventSource:
-                          description: Defines the source for the CE filter.
+                          description: Defines the source of the CE filter.
                           properties:
                             property:
-                              description: Property defines the property of the filter
+                              description: Defines the property of the filter.
                               type: string
                             type:
-                              description: Type defines the type of the filter
+                              description: Defines the type of the filter.
                               type: string
                             value:
-                              description: Value defines the value of the filter
+                              description: Defines the value of the filter.
                               type: string
                           required:
                           - property
@@ -86,13 +89,13 @@ spec:
                           description: Defines the type of the CE filter.
                           properties:
                             property:
-                              description: Property defines the property of the filter
+                              description: Defines the property of the filter.
                               type: string
                             type:
-                              description: Type defines the type of the filter
+                              description: Defines the type of the filter.
                               type: string
                             value:
-                              description: Value defines the value of the filter
+                              description: Defines the value of the filter.
                               type: string
                           required:
                           - property
@@ -116,8 +119,8 @@ spec:
                 description: Defines the CE protocol settings specification implementation.
                 properties:
                   contentMode:
-                    description: 'Defines the content mode for eventing based on BEB.
-                      Must be one of "BINARY", "STRUCTURED". Default:'
+                    description: Defines the content mode for eventing based on BEB.
+                      The value is either `BINARY`, or `STRUCTURED`.
                     type: string
                   exemptHandshake:
                     description: Defines if the exempt handshake for eventing is based
@@ -197,10 +200,10 @@ spec:
                       type: string
                     status:
                       description: Status of the condition. The value is either `True`,
-                        `False`, or `Unknown`."`
+                        `False`, or `Unknown`.
                       type: string
                     type:
-                      description: Short description of the condition
+                      description: Short description of the condition.
                       type: string
                   required:
                   - status
@@ -211,8 +214,8 @@ spec:
                   the eventing backend when creating this Subscription.
                 properties:
                   maxInFlightMessages:
-                    description: Defines how many not-ACKed messages can be be in
-                      flight simultaneously.
+                    description: Defines how many not-ACKed messages can be in flight
+                      simultaneously.
                     minimum: 1
                     type: integer
                 type: object
@@ -223,7 +226,7 @@ spec:
                     description: Timestamp of the last failed delivery.
                     type: string
                   lastFailedDeliveryReason:
-                    description: Reason of the last failed delivery.
+                    description: Reason for the last failed delivery.
                     type: string
                   lastSuccessfulDelivery:
                     description: Timestamp of the last successful delivery.
@@ -248,7 +251,7 @@ spec:
                   trigger subscribers.
                 type: string
               failedActivation:
-                description: Defines the reason if a Subscription had failed activation
+                description: Defines the reason if a Subscription failed activation
                   in EventMesh.
                 type: string
               ready:
@@ -328,14 +331,14 @@ spec:
             description: SubscriptionStatus defines the observed state of Subscription.
             properties:
               backend:
-                description: Backend-specific status which is only applicable to the
-                  active backend.
+                description: Backend-specific status which is applicable to the active
+                  backend only.
                 properties:
                   apiRuleName:
                     description: Name of the APIRule which is used by the Subscription.
                     type: string
                   emsSubscriptionStatus:
-                    description: Status of Subscription as reported by EventMesh.
+                    description: Status of the Subscription as reported by EventMesh.
                     properties:
                       lastFailedDelivery:
                         description: Timestamp of the last failed delivery.
@@ -382,8 +385,8 @@ spec:
                     description: Webhook URL used by EventMesh to trigger subscribers.
                     type: string
                   failedActivation:
-                    description: Provides the reason if a Subscription had failed
-                      activation in EventMesh.
+                    description: Provides the reason if a Subscription failed activation
+                      in EventMesh.
                     type: string
                   types:
                     description: List of event type to consumer name mappings for
@@ -392,7 +395,7 @@ spec:
                       properties:
                         consumerName:
                           description: Name of the JetStream consumer created for
-                            the Event type.
+                            the event type.
                           type: string
                         originalType:
                           description: Event type that was originally used to subscribe.
@@ -422,7 +425,7 @@ spec:
                         `False`, or `Unknown`.
                       type: string
                     type:
-                      description: Short description of the condition
+                      description: Short description of the condition.
                       type: string
                   required:
                   - status

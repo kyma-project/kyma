@@ -22,7 +22,7 @@ const (
 var allSubscriptionConditions = MakeSubscriptionConditions()
 
 type Condition struct {
-	// Short description of the condition
+	// Short description of the condition.
 	Type ConditionType `json:"type,omitempty"`
 
 	// Status of the condition. The value is either `True`, `False`, or `Unknown`.

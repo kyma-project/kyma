@@ -52,19 +52,19 @@ spec:
             description: EventingBackendStatus defines the observed state of EventingBackend.
             properties:
               backendType:
-                description: Specifies the backend type used. Allowed values are "BEB"
-                  and "NATS"
+                description: Specifies the backend type used. The value is either
+                  BEB, or NATS.
                 enum:
                 - BEB
                 - NATS
                 type: string
               bebSecretName:
-                description: The name of the secret containing BEB access tokens,
-                  required only for BEB
+                description: Name of the Secret containing BEB access tokens, required
+                  for BEB only.
                 type: string
               bebSecretNamespace:
-                description: The namespace of the secret containing BEB access tokens,
-                  required only for BEB
+                description: Namespace of the Secret containing BEB access tokens,
+                  required for BEB only.
                 type: string
               conditions:
                 description: Defines the status of the Controller and the EPP.
@@ -83,10 +83,10 @@ spec:
                       type: string
                     status:
                       description: Status of the condition. The value is either `True`,
-                        `False`, or `Unknown`."`
+                        `False`, or `Unknown`.
                       type: string
                     type:
-                      description: Short description of the condition
+                      description: Short description of the condition.
                       type: string
                   required:
                   - status

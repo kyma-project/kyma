@@ -21,7 +21,7 @@ type EventingBackendSpec struct {
 
 // EventingBackendStatus defines the observed state of EventingBackend.
 type EventingBackendStatus struct {
-	// Specifies the backend type used. Allowed values are "BEB" and "NATS"
+	// Specifies the backend type used. The value is either BEB, or NATS.
 	// +optional
 	Backend BackendType `json:"backendType"`
 
@@ -33,11 +33,11 @@ type EventingBackendStatus struct {
 	// +optional
 	Conditions []Condition `json:"conditions,omitempty"`
 
-	// The name of the secret containing BEB access tokens, required only for BEB
+	// Name of the Secret containing BEB access tokens, required for BEB only.
 	// +optional
 	BEBSecretName string `json:"bebSecretName,omitempty"`
 
-	// The namespace of the secret containing BEB access tokens, required only for BEB
+	// Namespace of the Secret containing BEB access tokens, required for BEB only.
 	// +optional
 	BEBSecretNamespace string `json:"bebSecretNamespace,omitempty"`
 }
