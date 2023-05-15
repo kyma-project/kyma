@@ -312,7 +312,8 @@ func convertUnstructuredToElementTree(obj interface{}, name string, required boo
 	if d, ok := m["description"].(string); ok {
 		e.description = d
 	}
-	e.elemtype = m["type"].(string)
+
+	e.elemtype = getType(m)
 
 	if e.elemtype == "object" {
 		handleObjectType(&e, m)
@@ -345,8 +346,21 @@ func handleObjectType(e *element, m map[string]interface{}) {
 
 	// additionalProperties is an unstructed map of string to type
 	if p, ok := m["additionalProperties"].(map[string]interface{}); ok {
-		e.elemtype = fmt.Sprintf("%v%v", "map[string]", p["type"].(string))
+		ObjType := getType(p)
+
+		e.elemtype = fmt.Sprintf("%v%v", "map[string]", ObjType)
 	}
+}
+
+func getType(p map[string]interface{}) string {
+	if typeVal, ok := p["type"].(string); ok {
+		return typeVal
+	}
+	if anyOfVal, ok := p["anyOf"].([]string); ok {
+		return strings.Join(anyOfVal, ", ")
+	}
+
+	return "UNKNOW TYPE"
 }
 
 func contains(list []interface{}, value string) bool {
