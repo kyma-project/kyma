@@ -1865,7 +1865,7 @@ async function deployJaeger(jaegerObj) {
   await k8sApply(jaegerObj, 'kyma-system').catch(console.error);
   await waitForDeployment('tracing-jaeger', 'kyma-system');
   await waitForTracePipeline('jaeger');
-  await sleep(20 * 1000); // give istio some time to propagate the changes to the proxies
+  await sleep(40_000); // give istio some time to propagate the changes to the proxies
 }
 
 module.exports = {
