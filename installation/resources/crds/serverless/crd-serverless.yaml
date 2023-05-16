@@ -58,7 +58,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: FunctionSpec defines the desired state of Function
+            description: Spec defines the desired state of Function
             properties:
               annotations:
                 additionalProperties:
@@ -336,10 +336,10 @@ spec:
                               CR.
                             type: string
                           type:
-                            description: RepositoryAuthType defines if you must authenticate
-                              to the repository with a password or token (`basic`),
-                              or an SSH key (`key`). For SSH, this parameter must
-                              be set to `key`.
+                            description: Type defines if you must authenticate to
+                              the repository with a password or token (`basic`), or
+                              an SSH key (`key`). For SSH, this parameter must be
+                              set to `key`.
                             enum:
                             - basic
                             - key
