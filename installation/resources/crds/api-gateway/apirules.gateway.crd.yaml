@@ -28,11 +28,11 @@ spec:
   preserveUnknownFields: false
   versions:
   - deprecated: true
-    deprecationWarning: 'Since Kyma 2.5.X, APIRule in version v1alpha1 has been deprecated. Consider using v1beta1.'
+    deprecationWarning: Since Kyma 2.5.X, APIRule in version v1alpha1 has been deprecated. Consider using v1beta1.
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: 'APIRule is the Schema for ApiRule APIs.'
+        description: APIRule is the Schema for ApiRule APIs.
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -47,29 +47,29 @@ spec:
           metadata:
             type: object
           spec:
-            description: 'Defines the desired state of ApiRule.'
+            description: Defines the desired state of ApiRule.
             properties:
               gateway:
-                description: 'Specifies the Istio Gateway to be used.'
+                description: Specifies the Istio Gateway to be used.
                 pattern: ^[0-9a-z-_]+(\/[0-9a-z-_]+|(\.[0-9a-z-_]+)*)$
                 type: string
               rules:
-                description: 'Represents the array of Oathkeeper access rules to be applied.'
+                description: Represents the array of Oathkeeper access rules to be applied.
                 items:
                   description: Rule . 
                   properties:
                     accessStrategies:
-                      description: 'Specifies the list of access strategies.
+                      description: Specifies the list of access strategies.
                         The supported access strategies are [Oathkeeper](https://www.ory.sh/docs/oathkeeper/pipeline/authn) 
-                        `oauth2_introspection`, `jwt`, `noop`, and `allow`.'
+                        `oauth2_introspection`, `jwt`, `noop`, and `allow`.
                       items:
-                        description: 'Represents a handler that authenticates
+                        description: Represents a handler that authenticates
                           provided credentials. See the corresponding type in the
-                          oathkeeper-maester project.'
+                          oathkeeper-maester project.
                         properties:
                           config:
-                            description: 'Configures the handler. Configuration
-                              keys vary per handler.'
+                            description: Configures the handler. Configuration
+                              keys vary per handler.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
                             properties:
@@ -86,7 +86,7 @@ spec:
                                   type: string
                                   pattern: ^(https://|file://).*$
                           handler:
-                            description: 'Specifies the name of the handler.'
+                            description: Specifies the name of the handler.
                             type: string
                         required:
                         - handler
@@ -94,15 +94,15 @@ spec:
                       minItems: 1
                       type: array
                     methods:
-                      description: 'Represents the list of allowed HTTP request methods available for the **spec.rules.path**.'
+                      description: Represents the list of allowed HTTP request methods available for the **spec.rules.path**.
                       items:
                         type: string
                       minItems: 1
                       type: array
                     mutators:
-                      description: 'Specifies the list of [Oathkeeper mutators](https://www.ory.sh/docs/oathkeeper/pipeline/mutator).'
+                      description: Specifies the list of [Oathkeeper mutators](https://www.ory.sh/docs/oathkeeper/pipeline/mutator).
                       items:
-                        description: 'Mutator represents a handler that transforms
+                        description: Mutator represents a handler that transforms
                           the HTTP request before forwarding it. See the corresponding
                           in the oathkeeper-maester project.'
                         properties:
@@ -119,7 +119,7 @@ spec:
                         type: object
                       type: array
                     path:
-                      description: 'Specifies the path of the exposed service.'
+                      description: Specifies the path of the exposed service.
                       pattern: ^([0-9a-zA-Z./*()?!\\_-]+)
                       type: string
                   required:
@@ -130,22 +130,22 @@ spec:
                 minItems: 1
                 type: array
               service:
-                description: 'Describes the service to expose.'
+                description: Describes the service to expose.
                 properties:
                   external:
-                    description: 'Defines if the service is internal (in cluster) or external.'
+                    description: Defines if the service is internal (in cluster) or external.
                     type: boolean
                   host:
-                    description: 'Specifies the URL of the exposed service.'
+                    description: Specifies the URL of the exposed service.
                     maxLength: 256
                     minLength: 3
                     pattern: ^([a-zA-Z0-9][a-zA-Z0-9-_]*\.)*[a-zA-Z0-9]*[a-zA-Z0-9-_]*[[a-zA-Z0-9]+$
                     type: string
                   name:
-                    description: 'Specifies the name of the exposed service.'
+                    description: Specifies the name of the exposed service.
                     type: string
                   port:
-                    description: 'Specifies the communication port of the exposed service.'
+                    description: Specifies the communication port of the exposed service.
                     format: int32
                     maximum: 65535
                     minimum: 1
@@ -161,26 +161,26 @@ spec:
             - service
             type: object
           status:
-            description: 'Describes the observed state of ApiRule.'
+            description: Describes the observed state of ApiRule.
             properties:
               APIRuleStatus:
-                description: 'Describes the status of APIRule.'
+                description: Describes the status of APIRule.
                 properties:
                   code:
-                    description: 'Status code describing APIRule.'
+                    description: Status code describing APIRule.
                     type: string
                   desc:
                     description: .
                     type: string
                 type: object
               accessRuleStatus:
-                description: 'Describes the status of ORY Oathkeeper Rule.'
+                description: Describes the status of ORY Oathkeeper Rule.
                 properties:
                   code:
-                    description: 'Status code describing ORY Oathkeeper Rule.'
+                    description: Status code describing ORY Oathkeeper Rule.
                     type: string
                   desc:
-                  description: .
+                    description: .
                     type: string
                 type: object
               lastProcessedTime:
@@ -192,10 +192,10 @@ spec:
                 format: int64
                 type: integer
               virtualServiceStatus:
-                description: 'Describes the status of Istio VirtualService.'
+                description: Describes the status of Istio VirtualService.
                 properties:
                   code:
-                    description: 'Status code describing Istio VirtualService.'
+                    description: Status code describing Istio VirtualService.
                     type: string
                   desc:
                     description: .
@@ -217,7 +217,7 @@ spec:
     name: v1beta1
     schema:
       openAPIV3Schema:
-        description: 'APIRule is the Schema for ApiRule APIs.'
+        description: APIRule is the Schema for ApiRule APIs.
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -232,35 +232,35 @@ spec:
           metadata:
             type: object
           spec:
-            description: 'Defines the desired state of APIRule.'
+            description: Defines the desired state of APIRule.
             properties:
               gateway:
-                description: 'Specifies the Istio Gateway to be used.'
+                description: Specifies the Istio Gateway to be used.
                 pattern: ^[0-9a-z-_]+(\/[0-9a-z-_]+|(\.[0-9a-z-_]+)*)$
                 type: string
               host:
-                description: 'Specifies the URL of the exposed service.'
+                description: Specifies the URL of the exposed service.
                 maxLength: 256
                 minLength: 3
                 pattern: ^([a-zA-Z0-9][a-zA-Z0-9-_]*\.)*[a-zA-Z0-9]*[a-zA-Z0-9-_]*[[a-zA-Z0-9]+$
                 type: string
               rules:
-                description: 'Represents the the array of Oathkeeper access rules to be applied.'
+                description: Represents the the array of Oathkeeper access rules to be applied.
                 items:
                   description: Rule . 
                   properties:
                     accessStrategies:
-                      description: 'Specifies the list of access strategies. 
+                      description: Specifies the list of access strategies. 
                         The supported access strategies are [Oathkeeper](https://www.ory.sh/docs/oathkeeper/pipeline/authn) 
-                        `oauth2_introspection`, `jwt`, `noop`, and `allow`.'
+                        `oauth2_introspection`, `jwt`, `noop`, and `allow`.
                       items:
-                        description: 'Represents a handler that authenticates
+                        description: Represents a handler that authenticates
                           provided credentials. See the corresponding type in the
-                          oathkeeper-maester project.'
+                          oathkeeper-maester project.
                         properties:
                           config:
-                            description: 'Configures the handler. Configuration
-                              keys vary per handler.'
+                            description: Configures the handler. Configuration
+                              keys vary per handler.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
                             properties:
@@ -277,7 +277,7 @@ spec:
                                   type: string
                                   pattern: ^(https://|file://).*$
                           handler:
-                            description: 'Specifies the name of the handler.'
+                            description: Specifies the name of the handler.
                             type: string
                         required:
                         - handler
@@ -285,51 +285,51 @@ spec:
                       minItems: 1
                       type: array
                     methods:
-                      description: 'Represents the list of allowed HTTP request methods available for the **spec.rules.path**.'
+                      description: Represents the list of allowed HTTP request methods available for the **spec.rules.path**.
                       items:
                         type: string
                       minItems: 1
                       type: array
                     mutators:
-                      description: 'Specifies the list of [Ory Oathkeeper](https://www.ory.sh/docs/oathkeeper/pipeline/mutator) mutators.'
+                      description: Specifies the list of [Ory Oathkeeper](https://www.ory.sh/docs/oathkeeper/pipeline/mutator) mutators.
                       items:
-                        description: 'Mutator represents a handler that transforms
+                        description: Mutator represents a handler that transforms
                           the HTTP request before forwarding it. See the corresponding
-                          in the oathkeeper-maester project.'
+                          in the oathkeeper-maester project.
                         properties:
                           config:
-                            description: 'Configures the handler. Configuration
-                              keys vary per handler.'
+                            description: Configures the handler. Configuration
+                              keys vary per handler.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
                           handler:
-                            description: 'Specifies the name of the handler.'
+                            description: Specifies the name of the handler.
                             type: string
                         required:
                         - handler
                         type: object
                       type: array
                     path:
-                      description: 'Specifies the path of the exposed service.'
+                      description: Specifies the path of the exposed service.
                       pattern: ^([0-9a-zA-Z./*()?!\\_-]+)
                       type: string
                     service:
-                      description: 'Describes the service to expose. Overwrites
-                        **spec** level service, if defined.'
+                      description: Describes the service to expose. Overwrites
+                        the **spec** level service, if defined.
                       properties:
                         external:
-                          description: 'Specifies if the service is internal (in cluster) or external.'
+                          description: Specifies if the service is internal (in cluster) or external.
                           type: boolean
                         name:
-                          description: 'Specifies the name of the exposed service.'
+                          description: Specifies the name of the exposed service.
                           type: string
                         namespace:
-                          description: 'Specifies the Namespace of the exposed service. If not defined, it defaults
-                            to the APIRule Namespace.'
+                          description: Specifies the Namespace of the exposed service. If not defined, it defaults
+                            to the APIRule Namespace.
                           pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
                           type: string
                         port:
-                          description: 'Specifies the communication port of the exposed service.'
+                          description: Specifies the communication port of the exposed service.
                           format: int32
                           maximum: 65535
                           minimum: 1
@@ -346,22 +346,22 @@ spec:
                 minItems: 1
                 type: array
               service:
-                description: 'Describes the service to expose.'
+                description: Describes the service to expose.
                 properties:
                   external:
-                    description: 'Specifies if the service is internal (in cluster) or
-                      external.'
+                    description: Specifies if the service is internal (in cluster) or
+                      external.
                     type: boolean
                   name:
-                    description: 'Specifies the name of the exposed service.'
+                    description: Specifies the name of the exposed service.
                     type: string
                   namespace:
-                    description: 'Specifies the Namespace of the exposed service. If not defined, it defaults
-                      to the APIRule Namespace.'
+                    description: Specifies the Namespace of the exposed service. If not defined, it defaults
+                      to the APIRule Namespace.
                     pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
                     type: string
                   port:
-                    description: 'Specifies the port of the exposed service.'
+                    description: Specifies the port of the exposed service.
                     format: int32
                     maximum: 65535
                     minimum: 1
@@ -376,23 +376,23 @@ spec:
             - rules
             type: object
           status:
-            description: 'Describes the observed state of ApiRule.'
+            description: Describes the observed state of ApiRule.
             properties:
               APIRuleStatus:
-                description: 'Describes the status of APIRule.'
+                description: Describes the status of APIRule.
                 properties:
                   code:
-                    description: 'Status code describing APIRule.'
+                    description: Status code describing APIRule.
                     type: string
                   desc:
                     description: .
                     type: string
                 type: object
               accessRuleStatus:
-                description: 'Describes the status of ORY Oathkeeper Rule.'
+                description: Describes the status of ORY Oathkeeper Rule.
                 properties:
                   code:
-                    description: 'Status code describing ORY Oathkeeper Rule.'
+                    description: Status code describing ORY Oathkeeper Rule.
                     type: string
                   desc:
                     description: .
@@ -405,7 +405,7 @@ spec:
                     description: StatusCode . 
                     type: string
                   desc:
-                  description: .
+                    description: .
                     type: string
                 type: object
               requestAuthenticationStatus:
@@ -427,10 +427,10 @@ spec:
                 format: int64
                 type: integer
               virtualServiceStatus:
-                description: 'Describes the status of Istio VirtualService.'
+                description: Describes the status of Istio VirtualService.
                 properties:
                   code:
-                    description: 'Status code describing Istio VirtualService.' 
+                    description: Status code describing Istio VirtualService.
                     type: string
                   desc:
                     description: .

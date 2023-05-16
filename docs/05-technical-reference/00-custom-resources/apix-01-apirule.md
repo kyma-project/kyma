@@ -96,7 +96,7 @@ This following tables list all the possible parameters of a given resource toget
 | **rules.&#x200b;mutators.&#x200b;config**  | object | Configures the handler. Configuration keys vary per handler. |
 | **rules.&#x200b;mutators.&#x200b;handler** (required) | string | Specifies the name of the handler. |
 | **rules.&#x200b;path** (required) | string | Specifies the path of the exposed service. |
-| **rules.&#x200b;service**  | object | Describes the service to expose. Overwrites **spec** level service, if defined. |
+| **rules.&#x200b;service**  | object | Describes the service to expose. Overwrites the **spec** level service, if defined. |
 | **rules.&#x200b;service.&#x200b;external**  | boolean | Specifies if the service is internal (in cluster) or external. |
 | **rules.&#x200b;service.&#x200b;name** (required) | string | Specifies the name of the exposed service. |
 | **rules.&#x200b;service.&#x200b;namespace**  | string | Specifies the Namespace of the exposed service. If not defined, it defaults to the APIRule Namespace. |
@@ -116,10 +116,10 @@ This following tables list all the possible parameters of a given resource toget
 | **APIRuleStatus.&#x200b;desc**  | string | . |
 | **accessRuleStatus**  | object | Describes the status of ORY Oathkeeper Rule. |
 | **accessRuleStatus.&#x200b;code**  | string | Status code describing ORY Oathkeeper Rule. |
-| **accessRuleStatus.&#x200b;desc**  | string |  |
+| **accessRuleStatus.&#x200b;desc**  | string | . |
 | **authorizationPolicyStatus**  | object | APIRuleResourceStatus . |
 | **authorizationPolicyStatus.&#x200b;code**  | string | StatusCode . |
-| **authorizationPolicyStatus.&#x200b;desc**  | string |  |
+| **authorizationPolicyStatus.&#x200b;desc**  | string | . |
 | **lastProcessedTime**  | string | . |
 | **observedGeneration**  | integer | . |
 | **requestAuthenticationStatus**  | object | APIRuleResourceStatus . |
@@ -164,7 +164,7 @@ This following tables list all the possible parameters of a given resource toget
 | **APIRuleStatus.&#x200b;desc**  | string | . |
 | **accessRuleStatus**  | object | Describes the status of ORY Oathkeeper Rule. |
 | **accessRuleStatus.&#x200b;code**  | string | Status code describing ORY Oathkeeper Rule. |
-| **accessRuleStatus.&#x200b;desc**  | string |  |
+| **accessRuleStatus.&#x200b;desc**  | string | . |
 | **lastProcessedTime**  | string | . |
 | **observedGeneration**  | integer | . |
 | **virtualServiceStatus**  | object | Describes the status of Istio VirtualService. |
