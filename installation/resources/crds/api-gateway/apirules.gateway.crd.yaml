@@ -74,11 +74,13 @@ spec:
                             x-kubernetes-preserve-unknown-fields: true
                             properties:
                               jwks_urls:
+                                description: .
                                 type: array
                                 items:
                                   type: string
                                   pattern: ^(https://|file://).*$
                               trusted_issuers:
+                                description: .
                                 type: array
                                 items:
                                   type: string
@@ -168,6 +170,7 @@ spec:
                     description: 'Status code describing APIRule.'
                     type: string
                   desc:
+                    description: .
                     type: string
                 type: object
               accessRuleStatus:
@@ -180,9 +183,11 @@ spec:
                     type: string
                 type: object
               lastProcessedTime:
+                description: .
                 format: date-time
                 type: string
               observedGeneration:
+                description: .
                 format: int64
                 type: integer
               virtualServiceStatus:
@@ -192,6 +197,7 @@ spec:
                     description: 'Status code describing Istio VirtualService.'
                     type: string
                   desc:
+                    description: .
                     type: string
                 type: object
             type: object
@@ -258,11 +264,13 @@ spec:
                             x-kubernetes-preserve-unknown-fields: true
                             properties:
                               jwks_urls:
+                                description: .
                                 type: array
                                 items:
                                   type: string
                                   pattern: ^(https://|file://).*$
                               trusted_issuers:
+                                description: .
                                 type: array
                                 items:
                                   type: string
@@ -282,7 +290,7 @@ spec:
                       minItems: 1
                       type: array
                     mutators:
-                      description: 'Specifies the list of mutators.'
+                      description: 'Specifies the list of [Ory Oathkeeper](https://www.ory.sh/docs/oathkeeper/pipeline/mutator) mutators.'
                       items:
                         description: 'Mutator represents a handler that transforms
                           the HTTP request before forwarding it. See the corresponding
@@ -306,16 +314,16 @@ spec:
                       type: string
                     service:
                       description: 'Describes the service to expose. Overwrites
-                        spec level service, if defined.'
+                        **spec** level service, if defined.'
                       properties:
                         external:
-                          description: 'Defines if the service is internal (in cluster) or external.'
+                          description: 'Specifies if the service is internal (in cluster) or external.'
                           type: boolean
                         name:
                           description: 'Specifies the name of the exposed service.'
                           type: string
                         namespace:
-                          description: 'Namespace of the exposed service. If not defined, it defaults
+                          description: 'Specifies the Namespace of the exposed service. If not defined, it defaults
                             to the APIRule Namespace.'
                           pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
                           type: string
@@ -340,14 +348,14 @@ spec:
                 description: 'Describes the service to expose.'
                 properties:
                   external:
-                    description: 'Defines if the service is internal (in cluster) or
+                    description: 'Specifies if the service is internal (in cluster) or
                       external.'
                     type: boolean
                   name:
                     description: 'Specifies the name of the exposed service.'
                     type: string
                   namespace:
-                    description: 'Specifies the Namespace of the exposed service. If not defined, it will default
+                    description: 'Specifies the Namespace of the exposed service. If not defined, it defaults
                       to the APIRule Namespace.'
                     pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
                     type: string
@@ -376,6 +384,7 @@ spec:
                     description: 'Status code describing APIRule.'
                     type: string
                   desc:
+                    description: .
                     type: string
                 type: object
               accessRuleStatus:
@@ -403,12 +412,15 @@ spec:
                     description: StatusCode . 
                     type: string
                   desc:
+                    description: .
                     type: string
                 type: object
               lastProcessedTime:
+                description: .
                 format: date-time
                 type: string
               observedGeneration:
+                description: .
                 format: int64
                 type: integer
               virtualServiceStatus:
@@ -418,6 +430,7 @@ spec:
                     description: 'Status code describing Istio VirtualService.' 
                     type: string
                   desc:
+                    description: .
                     type: string
                 type: object
             type: object
