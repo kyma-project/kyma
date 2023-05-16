@@ -180,6 +180,7 @@ spec:
                     description: 'Status code describing ORY Oathkeeper Rule.'
                     type: string
                   desc:
+                  description: .
                     type: string
                 type: object
               lastProcessedTime:
@@ -394,6 +395,7 @@ spec:
                     description: 'Status code describing ORY Oathkeeper Rule.'
                     type: string
                   desc:
+                    description: .
                     type: string
                 type: object
               authorizationPolicyStatus:
@@ -403,6 +405,7 @@ spec:
                     description: StatusCode . 
                     type: string
                   desc:
+                  description: .
                     type: string
                 type: object
               requestAuthenticationStatus:
