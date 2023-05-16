@@ -245,7 +245,7 @@ spec:
                     accessStrategies:
                       description: 'Specifies the list of access strategies. 
                         The supported access strategies are [Oathkeeper](https://www.ory.sh/docs/oathkeeper/pipeline/authn) 
-                        'oauth2_introspection', 'jwt', 'noop', and 'allow'.'
+                        `oauth2_introspection`, `jwt`, `noop`, and `allow`.'
                       items:
                         description: 'Represents a handler that authenticates
                           provided credentials. See the corresponding type in the

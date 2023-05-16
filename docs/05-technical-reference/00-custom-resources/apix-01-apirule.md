@@ -74,39 +74,106 @@ spec:
 </div>
 
 
-This table lists all the possible parameters of a given resource together with their descriptions:
+This following tables list all the possible parameters of a given resource together with their descriptions:
 
-| Field   |      Mandatory      |  Description |
-|---|:---:|---|
-| **metadata.name** | **YES** | Specifies the name of the exposed API. |
-| **spec.gateway** | **YES** | Specifies the Istio Gateway. |
-| **spec.host** | **YES** | Specifies the service's communication address for inbound external traffic. If only the leftmost label is provided, the default domain name will be used. |
-| **spec.service.name** | **NO** | Specifies the name of the exposed service. |
-| **spec.service.namespace** | **NO** | Specifies the Namespace of the exposed service. |
-| **spec.service.port** | **NO** | Specifies the communication port of the exposed service. |
-| **spec.rules** | **YES** | Specifies the array of Oathkeeper access rules. |
-| **spec.rules.service** | **NO** | Services definitions at this level have higher precedence than the service definition at the **spec.service** level.|
-| **spec.rules.service.name** | **NO** | Specifies the name of the exposed service. |
-| **spec.rules.service.namespace** | **NO** | Specifies the Namespace of the exposed service. |
-| **spec.rules.service.port** | **NO** | Specifies the communication port of the exposed service. |
-| **spec.rules.path** | **YES** | Specifies the path of the exposed service. |
-| **spec.rules.methods** | **NO** | Specifies the list of HTTP request methods available for **spec.rules.path**. |
-| **spec.rules.mutators** | **NO** | Specifies the array of [Oathkeeper mutators](https://www.ory.sh/docs/next/oathkeeper/pipeline/mutator). |
-| **spec.rules.accessStrategies** | **YES** | Specifies the array of [Oathkeeper authenticators](https://www.ory.sh/docs/next/oathkeeper/pipeline/authn). The supported authenticators are `oauth2_introspection`, `jwt`, `noop`, `allow`. |
+<!-- TABLE-START -->
+### APIRule.gateway.kyma-project.io/v1beta1
+
+**Spec:**
+
+| Parameter | Type | Description |
+| ---- | ----------- | ---- |
+| **gateway** (required) | string | Specifies the Istio Gateway to be used. |
+| **host** (required) | string | Specifies the URL of the exposed service. |
+| **rules** (required) | \[\]object | Represents the the array of Oathkeeper access rules to be applied. |
+| **rules.&#x200b;accessStrategies** (required) | \[\]object | Specifies the list of access strategies. The supported access strategies are [Oathkeeper](https://www.ory.sh/docs/oathkeeper/pipeline/authn) `oauth2_introspection`, `jwt`, `noop`, and `allow`. |
+| **rules.&#x200b;accessStrategies.&#x200b;config**  | object | Configures the handler. Configuration keys vary per handler. |
+| **rules.&#x200b;accessStrategies.&#x200b;config.&#x200b;jwks_urls**  | \[\]string |  |
+| **rules.&#x200b;accessStrategies.&#x200b;config.&#x200b;trusted_issuers**  | \[\]string |  |
+| **rules.&#x200b;accessStrategies.&#x200b;handler** (required) | string | Specifies the name of the handler. |
+| **rules.&#x200b;methods** (required) | \[\]string | Represents the list of allowed HTTP request methods available for the **spec.rules.path**. |
+| **rules.&#x200b;mutators**  | \[\]object | Specifies the list of mutators. |
+| **rules.&#x200b;mutators.&#x200b;config**  | object | Configures the handler. Configuration keys vary per handler. |
+| **rules.&#x200b;mutators.&#x200b;handler** (required) | string | Specifies the name of the handler. |
+| **rules.&#x200b;path** (required) | string | Specifies the path of the exposed service. |
+| **rules.&#x200b;service**  | object | Describes the service to expose. Overwrites spec level service, if defined. |
+| **rules.&#x200b;service.&#x200b;external**  | boolean | Defines if the service is internal (in cluster) or external. |
+| **rules.&#x200b;service.&#x200b;name** (required) | string | Specifies the name of the exposed service. |
+| **rules.&#x200b;service.&#x200b;namespace**  | string | Namespace of the exposed service. If not defined, it defaults to the APIRule Namespace. |
+| **rules.&#x200b;service.&#x200b;port** (required) | integer | Specifies the communication port of the exposed service. |
+| **service**  | object | Describes the service to expose. |
+| **service.&#x200b;external**  | boolean | Defines if the service is internal (in cluster) or external. |
+| **service.&#x200b;name** (required) | string | Specifies the name of the exposed service. |
+| **service.&#x200b;namespace**  | string | Specifies the Namespace of the exposed service. If not defined, it will default to the APIRule Namespace. |
+| **service.&#x200b;port** (required) | integer | Specifies the port of the exposed service. |
+
+**Status:**
+
+| Parameter | Type | Description |
+| ---- | ----------- | ---- |
+| **APIRuleStatus**  | object | Describes the status of APIRule. |
+| **APIRuleStatus.&#x200b;code**  | string | Status code describing APIRule. |
+| **APIRuleStatus.&#x200b;desc**  | string |  |
+| **accessRuleStatus**  | object | Describes the status of ORY Oathkeeper Rule. |
+| **accessRuleStatus.&#x200b;code**  | string | Status code describing ORY Oathkeeper Rule. |
+| **accessRuleStatus.&#x200b;desc**  | string |  |
+| **authorizationPolicyStatus**  | object | APIRuleResourceStatus . |
+| **authorizationPolicyStatus.&#x200b;code**  | string | StatusCode . |
+| **authorizationPolicyStatus.&#x200b;desc**  | string |  |
+| **lastProcessedTime**  | string |  |
+| **observedGeneration**  | integer |  |
+| **requestAuthenticationStatus**  | object | APIRuleResourceStatus . |
+| **requestAuthenticationStatus.&#x200b;code**  | string | StatusCode . |
+| **requestAuthenticationStatus.&#x200b;desc**  | string |  |
+| **virtualServiceStatus**  | object | Describes the status of Istio VirtualService. |
+| **virtualServiceStatus.&#x200b;code**  | string | Status code describing Istio VirtualService. |
+| **virtualServiceStatus.&#x200b;desc**  | string |  |
+
+### APIRule.gateway.kyma-project.io/v1alpha1
+
+>**CAUTION**: Since Kyma 2.5.X, APIRule in version v1alpha1 has been deprecated. Consider using v1beta1.
+
+**Spec:**
+
+| Parameter | Type | Description |
+| ---- | ----------- | ---- |
+| **gateway** (required) | string | Specifies the Istio Gateway to be used. |
+| **rules** (required) | \[\]object | Represents the array of Oathkeeper access rules to be applied. |
+| **rules.&#x200b;accessStrategies** (required) | \[\]object | Specifies the list of access strategies. The supported access strategies are [Oathkeeper](https://www.ory.sh/docs/oathkeeper/pipeline/authn) `oauth2_introspection`, `jwt`, `noop`, and `allow`. |
+| **rules.&#x200b;accessStrategies.&#x200b;config**  | object | Configures the handler. Configuration keys vary per handler. |
+| **rules.&#x200b;accessStrategies.&#x200b;config.&#x200b;jwks_urls**  | \[\]string |  |
+| **rules.&#x200b;accessStrategies.&#x200b;config.&#x200b;trusted_issuers**  | \[\]string |  |
+| **rules.&#x200b;accessStrategies.&#x200b;handler** (required) | string | Specifies the name of the handler. |
+| **rules.&#x200b;methods** (required) | \[\]string | Represents the list of allowed HTTP request methods available for the **spec.rules.path**. |
+| **rules.&#x200b;mutators**  | \[\]object | Specifies the list of [Oathkeeper mutators](https://www.ory.sh/docs/oathkeeper/pipeline/mutator). |
+| **rules.&#x200b;mutators.&#x200b;config**  | object | Configures the handler. Configuration keys vary per handler. |
+| **rules.&#x200b;mutators.&#x200b;handler** (required) | string | Specifies the name of the handler. |
+| **rules.&#x200b;path** (required) | string | Specifies the path of the exposed service. |
+| **service** (required) | object | Describes the service to expose. |
+| **service.&#x200b;external**  | boolean | Defines if the service is internal (in cluster) or external. |
+| **service.&#x200b;host** (required) | string | Specifies the URL of the exposed service. |
+| **service.&#x200b;name** (required) | string | Specifies the name of the exposed service. |
+| **service.&#x200b;port** (required) | integer | Specifies the communication port of the exposed service. |
+
+**Status:**
+
+| Parameter | Type | Description |
+| ---- | ----------- | ---- |
+| **APIRuleStatus**  | object | Describes the status of APIRule. |
+| **APIRuleStatus.&#x200b;code**  | string | Status code describing APIRule. |
+| **APIRuleStatus.&#x200b;desc**  | string |  |
+| **accessRuleStatus**  | object | Describes the status of ORY Oathkeeper Rule. |
+| **accessRuleStatus.&#x200b;code**  | string | Status code describing ORY Oathkeeper Rule. |
+| **accessRuleStatus.&#x200b;desc**  | string |  |
+| **lastProcessedTime**  | string |  |
+| **observedGeneration**  | integer |  |
+| **virtualServiceStatus**  | object | Describes the status of Istio VirtualService. |
+| **virtualServiceStatus.&#x200b;code**  | string | Status code describing Istio VirtualService. |
+| **virtualServiceStatus.&#x200b;desc**  | string |  |
+
+<!-- TABLE-END -->
 
 >**CAUTION:** If `service` is not defined at **spec.service** level, all defined rules must have `service` defined at **spec.rules.service** level, otherwise the validation fails.
-
-## Additional information
-
-When you fetch an existing APIRule CR, the system adds the **status** section which describes the status of the VirtualService and the Oathkeeper Access Rule created for this CR. This table lists the fields of the **status** section.
-
-| Field   |  Description |
-|:---|:---|
-| **status.apiRuleStatus** | Status code describing the APIRule CR. |
-| **status.virtualServiceStatus.code** | Status code describing the VirtualService. |
-| **status.virtualService.desc** | Current state of the VirtualService. |
-| **status.accessRuleStatus.code** | Status code describing the Oathkeeper Rule. |
-| **status.accessRuleStatus.desc** | Current state of the Oathkeeper Rule. |
 
 ### Status codes
 
