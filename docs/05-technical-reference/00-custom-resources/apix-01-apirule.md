@@ -115,10 +115,10 @@ This following tables list all the possible parameters of a given resource toget
 | ---- | ----------- | ---- |
 | **APIRuleStatus**  | object | Describes the status of APIRule. |
 | **APIRuleStatus.&#x200b;code**  | string | Status code describing APIRule. |
-| **APIRuleStatus.&#x200b;desc**  | string | . |
+| **APIRuleStatus.&#x200b;desc**  | string | Explains the status of APIRule. |
 | **accessRuleStatus**  | object | Describes the status of ORY Oathkeeper Rule. |
 | **accessRuleStatus.&#x200b;code**  | string | Status code describing ORY Oathkeeper Rule. |
-| **accessRuleStatus.&#x200b;desc**  | string | . |
+| **accessRuleStatus.&#x200b;desc**  | string | Explains the status of ORY Oathkeeper Rule. |
 | **authorizationPolicyStatus**  | object | APIRuleResourceStatus . |
 | **authorizationPolicyStatus.&#x200b;code**  | string | StatusCode . |
 | **authorizationPolicyStatus.&#x200b;desc**  | string | . |
@@ -129,7 +129,7 @@ This following tables list all the possible parameters of a given resource toget
 | **requestAuthenticationStatus.&#x200b;desc**  | string | . |
 | **virtualServiceStatus**  | object | Describes the status of Istio VirtualService. |
 | **virtualServiceStatus.&#x200b;code**  | string | Status code describing Istio VirtualService. |
-| **virtualServiceStatus.&#x200b;desc**  | string | . |
+| **virtualServiceStatus.&#x200b;desc**  | string | Explains the status of Istio VirtualService. |
 
 ### APIRule.gateway.kyma-project.io/v1alpha1
 
@@ -163,15 +163,15 @@ This following tables list all the possible parameters of a given resource toget
 | ---- | ----------- | ---- |
 | **APIRuleStatus**  | object | Describes the status of APIRule. |
 | **APIRuleStatus.&#x200b;code**  | string | Status code describing APIRule. |
-| **APIRuleStatus.&#x200b;desc**  | string | . |
+| **APIRuleStatus.&#x200b;desc**  | string | Explains the status of APIRule. |
 | **accessRuleStatus**  | object | Describes the status of ORY Oathkeeper Rule. |
 | **accessRuleStatus.&#x200b;code**  | string | Status code describing ORY Oathkeeper Rule. |
-| **accessRuleStatus.&#x200b;desc**  | string | . |
+| **accessRuleStatus.&#x200b;desc**  | string | Explains the status of ORY Oathkeeper Rule. |
 | **lastProcessedTime**  | string | . |
 | **observedGeneration**  | integer | . |
 | **virtualServiceStatus**  | object | Describes the status of Istio VirtualService. |
 | **virtualServiceStatus.&#x200b;code**  | string | Status code describing Istio VirtualService. |
-| **virtualServiceStatus.&#x200b;desc**  | string | . |
+| **virtualServiceStatus.&#x200b;desc**  | string | Explains the status of Istio VirtualService. |
 
 <!-- TABLE-END -->
 
