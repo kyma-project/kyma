@@ -163,7 +163,7 @@ spec:
                 type: object
               sink:
                 description: Kubernetes Service that should be used as a target for
-                  the events that match the Subscription. Must exist in the same namespace
+                  the events that match the Subscription. Must exist in the same Namespace
                   as the Subscription.
                 type: string
             required:
