@@ -153,7 +153,7 @@ type SubscriptionSpec struct {
 	ProtocolSettings *ProtocolSettings `json:"protocolsettings,omitempty"`
 
 	// Kubernetes Service that should be used as a target for the events that match the Subscription.
-	// Must exist in the same namespace as the Subscription.
+	// Must exist in the same Namespace as the Subscription.
 	Sink string `json:"sink"`
 
 	// Defines which events will be sent to the sink.
@@ -230,7 +230,7 @@ type SubscriptionStatus struct {
 // Subscription is the Schema for the subscriptions API.
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:deprecatedversion:warning=v1alpha1 is deprecated as of Kyma 2.14.X
+// +kubebuilder:deprecatedversion:warning=The v1alpha1 API version is deprecated as of Kyma 2.14.X.
 // +kubebuilder:printcolumn:name="Ready",type="string",JSONPath=".status.ready"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 // +kubebuilder:printcolumn:name="Clean Event Types",type="string",JSONPath=".status.cleanEventTypes"

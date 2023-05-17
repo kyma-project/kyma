@@ -32,7 +32,7 @@ When you fetch an existing EventingBackend CR, the Eventing Controller adds the 
 
 | Parameter | Type | Description |
 | ---- | ----------- | ---- |
-| **backendType**  | string | Specifies the backend type used. The value is either BEB, or NATS. |
+| **backendType**  | string | Specifies the backend type used. The value is either `BEB`, or `NATS`. |
 | **bebSecretName**  | string | Name of the Secret containing BEB access tokens, required for BEB only. |
 | **bebSecretNamespace**  | string | Namespace of the Secret containing BEB access tokens, required for BEB only. |
 | **conditions**  | \[\]object | Defines the status of the Controller and the EPP. |

@@ -84,7 +84,7 @@ This table lists all the possible parameters of a given resource together with t
 
 ### Subscription.eventing.kyma-project.io/v1alpha1
 
->**CAUTION**: v1alpha1 is deprecated as of Kyma 2.14.X
+>**CAUTION**: The v1alpha1 API version is deprecated as of Kyma 2.14.X.
 
 **Spec:**
 
@@ -93,7 +93,7 @@ This table lists all the possible parameters of a given resource together with t
 | **config**  | object | Defines additional configuration for the active backend. |
 | **config.&#x200b;maxInFlightMessages**  | integer | Defines how many not-ACKed messages can be in flight simultaneously. |
 | **filter** (required) | object | Defines which events will be sent to the sink. |
-| **filter.&#x200b;dialect**  | string | Contains a URI-reference to CloudEvent filter dialect. See [here](https://github.com/cloudevents/spec/blob/main/subscriptions/spec.md#3241-filter-dialects) for more details. |
+| **filter.&#x200b;dialect**  | string | Contains a `URI-reference` to the CloudEvent filter dialect. See [here](https://github.com/cloudevents/spec/blob/main/subscriptions/spec.md#3241-filter-dialects) for more details. |
 | **filter.&#x200b;filters** (required) | \[\]object | Defines the BEB filter element as a combination of two CE filter elements. |
 | **filter.&#x200b;filters.&#x200b;eventSource** (required) | object | Defines the source of the CE filter. |
 | **filter.&#x200b;filters.&#x200b;eventSource.&#x200b;property** (required) | string | Defines the property of the filter. |
@@ -103,7 +103,7 @@ This table lists all the possible parameters of a given resource together with t
 | **filter.&#x200b;filters.&#x200b;eventType.&#x200b;property** (required) | string | Defines the property of the filter. |
 | **filter.&#x200b;filters.&#x200b;eventType.&#x200b;type**  | string | Defines the type of the filter. |
 | **filter.&#x200b;filters.&#x200b;eventType.&#x200b;value** (required) | string | Defines the value of the filter. |
-| **id**  | string | Unique identifier of Subscription, read-only. |
+| **id**  | string | Unique identifier of the Subscription, read-only. |
 | **protocol**  | string | Defines the CE protocol specification implementation. |
 | **protocolsettings**  | object | Defines the CE protocol settings specification implementation. |
 | **protocolsettings.&#x200b;contentMode**  | string | Defines the content mode for eventing based on BEB. The value is either `BINARY`, or `STRUCTURED`. |
@@ -116,7 +116,7 @@ This table lists all the possible parameters of a given resource together with t
 | **protocolsettings.&#x200b;webhookAuth.&#x200b;scope**  | \[\]string | Defines the scope for OAuth2. |
 | **protocolsettings.&#x200b;webhookAuth.&#x200b;tokenUrl** (required) | string | Defines the token URL for OAuth2. |
 | **protocolsettings.&#x200b;webhookAuth.&#x200b;type**  | string | Defines the authentication type. |
-| **sink** (required) | string | Kubernetes Service that should be used as a target for the events that match the Subscription. Must exist in the same namespace as the Subscription. |
+| **sink** (required) | string | Kubernetes Service that should be used as a target for the events that match the Subscription. Must exist in the same Namespace as the Subscription. |
 
 **Status:**
 
