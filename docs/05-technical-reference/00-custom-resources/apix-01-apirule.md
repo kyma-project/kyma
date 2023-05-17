@@ -76,6 +76,8 @@ spec:
 
 This following tables list all the possible parameters of a given resource together with their descriptions:
 
+>**CAUTION:** If `service` is not defined at **spec.service** level, all defined rules must have `service` defined at **spec.rules.service** level, otherwise the validation fails.
+
 <!-- TABLE-START -->
 ### APIRule.gateway.kyma-project.io/v1beta1
 
@@ -172,8 +174,6 @@ This following tables list all the possible parameters of a given resource toget
 | **virtualServiceStatus.&#x200b;desc**  | string | . |
 
 <!-- TABLE-END -->
-
->**CAUTION:** If `service` is not defined at **spec.service** level, all defined rules must have `service` defined at **spec.rules.service** level, otherwise the validation fails.
 
 ### Status codes
 
