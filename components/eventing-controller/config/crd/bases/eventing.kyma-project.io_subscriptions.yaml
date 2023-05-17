@@ -110,7 +110,7 @@ spec:
                 - filters
                 type: object
               id:
-                description: Unique identifier of Subscription, read-only.
+                description: Unique identifier of the Subscription, read-only.
                 type: string
               protocol:
                 description: Defines the CE protocol specification implementation.
