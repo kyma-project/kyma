@@ -170,7 +170,7 @@ spec:
                     description: Status code describing APIRule.
                     type: string
                   desc:
-                    description: .
+                    description: Explains the status of APIRule.
                     type: string
                 type: object
               accessRuleStatus:
@@ -180,7 +180,7 @@ spec:
                     description: Status code describing ORY Oathkeeper Rule.
                     type: string
                   desc:
-                    description: .
+                    description: Explains the status of ORY Oathkeeper Rule.
                     type: string
                 type: object
               lastProcessedTime:
@@ -198,7 +198,7 @@ spec:
                     description: Status code describing Istio VirtualService.
                     type: string
                   desc:
-                    description: .
+                    description: Explains the status of Istio VirtualService.
                     type: string
                 type: object
             type: object
@@ -385,7 +385,7 @@ spec:
                     description: Status code describing APIRule.
                     type: string
                   desc:
-                    description: .
+                    description: Explains the status of APIRule.
                     type: string
                 type: object
               accessRuleStatus:
@@ -395,7 +395,7 @@ spec:
                     description: Status code describing ORY Oathkeeper Rule.
                     type: string
                   desc:
-                    description: .
+                    description: Explains the status of ORY Oathkeeper Rule.
                     type: string
                 type: object
               authorizationPolicyStatus:
@@ -433,7 +433,7 @@ spec:
                     description: Status code describing Istio VirtualService.
                     type: string
                   desc:
-                    description: .
+                    description: Explains the status of Istio VirtualService.
                     type: string
                 type: object
             type: object
