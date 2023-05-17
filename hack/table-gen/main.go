@@ -29,7 +29,8 @@ const (
 {{- if $version.Deprecated }}
 
 >**CAUTION**: {{ $version.DeprecationWarning }}
-{{- end }}
+{{- end -}}
+{{ if $version.Spec }}
 
 **Spec:**
 
@@ -38,13 +39,15 @@ const (
 {{- range $prop := $version.Spec }}
 | **{{range $i, $v := $prop.Path}}{{if $i}}.&#x200b;{{end}}{{$v}}{{end}}** {{ if $prop.Required}}(required){{ end }} | {{ markdownEscape $prop.ElemType }} | {{ $prop.Description }} |
 {{- end }}
-
+{{- end }}
+{{ if $version.Status }}
 **Status:**
 
 | Parameter | Type | Description |
 | ---- | ----------- | ---- |
 {{- range $prop := $version.Status }}
 | **{{range $i, $v := $prop.Path}}{{if $i}}.&#x200b;{{end}}{{$v}}{{end}}** {{ if $prop.Required}}(required){{ end }} | {{ markdownEscape $prop.ElemType }} | {{ $prop.Description }} |
+{{- end }}
 {{- end }}
 
 {{ end -}}`
