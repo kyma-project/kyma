@@ -28,11 +28,6 @@ When you fetch an existing EventingBackend CR, the Eventing Controller adds the 
 <!-- TABLE-START -->
 ### EventingBackend.eventing.kyma-project.io/v1alpha1
 
-**Spec:**
-
-| Parameter | Type | Description |
-| ---- | ----------- | ---- |
-
 **Status:**
 
 | Parameter | Type | Description |

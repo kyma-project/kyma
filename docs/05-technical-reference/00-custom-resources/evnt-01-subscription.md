@@ -84,7 +84,7 @@ This table lists all the possible parameters of a given resource together with t
 
 ### Subscription.eventing.kyma-project.io/v1alpha1
 
->**CAUTION**: The v1alpha1 API version is deprecated as of Kyma 2.14.X.
+>**CAUTION**: v1alpha1 is deprecated as of Kyma 2.14.X
 
 **Spec:**
 
