@@ -89,7 +89,7 @@ func (bf *BEBFilter) hash() (uint64, error) {
 
 // BEBFilters defines the list of BEB filters.
 type BEBFilters struct {
-	// Contains a URI-reference to CloudEvent filter dialect. See
+	// Contains a `URI-reference` to the CloudEvent filter dialect. See
 	// [here](https://github.com/cloudevents/spec/blob/main/subscriptions/spec.md#3241-filter-dialects) for more details.
 	// +optional
 	Dialect string `json:"dialect,omitempty"`
@@ -140,7 +140,7 @@ func MergeSubsConfigs(config *SubscriptionConfig, defaults *env.DefaultSubscript
 
 // SubscriptionSpec defines the desired state of Subscription.
 type SubscriptionSpec struct {
-	// Unique identifier of Subscription, read-only.
+	// Unique identifier of the Subscription, read-only.
 	// +optional
 	ID string `json:"id,omitempty"`
 

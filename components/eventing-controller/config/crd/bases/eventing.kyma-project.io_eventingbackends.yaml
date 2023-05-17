@@ -53,7 +53,7 @@ spec:
             properties:
               backendType:
                 description: Specifies the backend type used. The value is either
-                  BEB, or NATS.
+                  `BEB`, or `NATS`.
                 enum:
                 - BEB
                 - NATS
