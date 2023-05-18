@@ -88,10 +88,10 @@ This following tables list all the possible parameters of a given resource toget
 | **gateway** (required) | string | Specifies the Istio Gateway to be used. |
 | **host** (required) | string | Specifies the URL of the exposed service. |
 | **rules** (required) | \[\]object | Represents the the array of Oathkeeper access rules to be applied. |
-| **rules.&#x200b;accessStrategies** (required) | \[\]object | Specifies the list of access strategies. The supported access strategies are [Oathkeeper](https://www.ory.sh/docs/oathkeeper/pipeline/authn) `oauth2_introspection`, `jwt`, `noop`, and `allow`. |
+| **rules.&#x200b;accessStrategies** (required) | \[\]object | Specifies the list of access strategies. All strategies listed in [Oathkeeper documentation](https://www.ory.sh/docs/oathkeeper/pipeline/authn) are supported. |
 | **rules.&#x200b;accessStrategies.&#x200b;config**  | object | Configures the handler. Configuration keys vary per handler. |
-| **rules.&#x200b;accessStrategies.&#x200b;config.&#x200b;jwks_urls**  | \[\]string | Array of URLs from which Ory Oathkeeper can retrieve JSON Web Keys for validating JSON Web Token. |
-| **rules.&#x200b;accessStrategies.&#x200b;config.&#x200b;trusted_issuers**  | \[\]string | If `trusted_issuers` is set, the JWT must contain a value for claim `iss` that matches exactly (case-sensitive) one of the values of `trusted_issuers` |
+| **rules.&#x200b;accessStrategies.&#x200b;config.&#x200b;jwks_urls**  | \[\]string | Specifies the array of URLs from which Ory Oathkeeper can retrieve JSON Web Keys for validating JSON Web Token. |
+| **rules.&#x200b;accessStrategies.&#x200b;config.&#x200b;trusted_issuers**  | \[\]string | If the **trusted_issuers** field is set, the JWT must contain a value for the claim `iss` that matches exactly (case-sensitive) one of the values of **trusted_issuers**. |
 | **rules.&#x200b;accessStrategies.&#x200b;handler** (required) | string | Specifies the name of the handler. |
 | **rules.&#x200b;methods** (required) | \[\]string | Represents the list of allowed HTTP request methods available for the **spec.rules.path**. |
 | **rules.&#x200b;mutators**  | \[\]object | Specifies the list of [Ory Oathkeeper](https://www.ory.sh/docs/oathkeeper/pipeline/mutator) mutators. |
@@ -119,14 +119,14 @@ This following tables list all the possible parameters of a given resource toget
 | **accessRuleStatus**  | object | Describes the status of ORY Oathkeeper Rule. |
 | **accessRuleStatus.&#x200b;code**  | string | Status code describing ORY Oathkeeper Rule. |
 | **accessRuleStatus.&#x200b;desc**  | string | Explains the status of ORY Oathkeeper Rule. |
-| **authorizationPolicyStatus**  | object | Describes the status of Istio Authorization Policy sub resource. |
-| **authorizationPolicyStatus.&#x200b;code**  | string | Status code describing Istio Authorization Policy sub resource. |
-| **authorizationPolicyStatus.&#x200b;desc**  | string | Explains the status of Istio Authorization Policy sub resource. |
-| **lastProcessedTime**  | string | Timestamp for when the APIRule was last processed by API Gateway controller. |
-| **observedGeneration**  | integer | The generation of the resource that was observed by API Gateway controller. |
-| **requestAuthenticationStatus**  | object | Describes the status of Istio Request Authentication sub resource. |
-| **requestAuthenticationStatus.&#x200b;code**  | string | Status code describing the state of Istio Authorization Policy sub resource . |
-| **requestAuthenticationStatus.&#x200b;desc**  | string | Explains the status of Istio Request Authentication sub resource. |
+| **authorizationPolicyStatus**  | object | Describes the status of the Istio Authorization Policy subresource. |
+| **authorizationPolicyStatus.&#x200b;code**  | string | Status code describing the Istio Authorization Policy subresource. |
+| **authorizationPolicyStatus.&#x200b;desc**  | string | Explains the status of the Istio Authorization Policy subresource. |
+| **lastProcessedTime**  | string | Indicates the timestamp when the API Gateway controller last processed APIRule. |
+| **observedGeneration**  | integer | Specifies the generation of the resource that was observed by the API Gateway controller. |
+| **requestAuthenticationStatus**  | object | Describes the status of the Istio Request Authentication subresource. |
+| **requestAuthenticationStatus.&#x200b;code**  | string | Status code describing the state of the Istio Authorization Policy subresource. |
+| **requestAuthenticationStatus.&#x200b;desc**  | string | Explains the status of the Istio Request Authentication subresource. |
 | **virtualServiceStatus**  | object | Describes the status of Istio VirtualService. |
 | **virtualServiceStatus.&#x200b;code**  | string | Status code describing Istio VirtualService. |
 | **virtualServiceStatus.&#x200b;desc**  | string | Explains the status of Istio VirtualService. |
@@ -141,10 +141,10 @@ This following tables list all the possible parameters of a given resource toget
 | ---- | ----------- | ---- |
 | **gateway** (required) | string | Specifies the Istio Gateway to be used. |
 | **rules** (required) | \[\]object | Represents the array of Oathkeeper access rules to be applied. |
-| **rules.&#x200b;accessStrategies** (required) | \[\]object | Specifies the list of access strategies. The supported access strategies are [Oathkeeper](https://www.ory.sh/docs/oathkeeper/pipeline/authn) `oauth2_introspection`, `jwt`, `noop`, and `allow`. |
+| **rules.&#x200b;accessStrategies** (required) | \[\]object | Specifies the list of access strategies. All strategies listed in [Oathkeeper documentation](https://www.ory.sh/docs/oathkeeper/pipeline/authn) are supported. |
 | **rules.&#x200b;accessStrategies.&#x200b;config**  | object | Configures the handler. Configuration keys vary per handler. |
-| **rules.&#x200b;accessStrategies.&#x200b;config.&#x200b;jwks_urls**  | \[\]string | Array of URLs from which Ory Oathkeeper can retrieve JSON Web Keys for validating JSON Web Token. |
-| **rules.&#x200b;accessStrategies.&#x200b;config.&#x200b;trusted_issuers**  | \[\]string | If `trusted_issuers` is set, the JWT must contain a value for claim `iss` that matches exactly (case-sensitive) one of the values of `trusted_issuers`. |
+| **rules.&#x200b;accessStrategies.&#x200b;config.&#x200b;jwks_urls**  | \[\]string | Specifies the array of URLs from which Ory Oathkeeper can retrieve JSON Web Keys for validating JSON Web Token. |
+| **rules.&#x200b;accessStrategies.&#x200b;config.&#x200b;trusted_issuers**  | \[\]string | If the **trusted_issuers** field is set, the JWT must contain a value for the claim `iss` that matches exactly (case-sensitive) one of the values of **trusted_issuers**. |
 | **rules.&#x200b;accessStrategies.&#x200b;handler** (required) | string | Specifies the name of the handler. |
 | **rules.&#x200b;methods** (required) | \[\]string | Represents the list of allowed HTTP request methods available for the **spec.rules.path**. |
 | **rules.&#x200b;mutators**  | \[\]object | Specifies the list of [Oathkeeper mutators](https://www.ory.sh/docs/oathkeeper/pipeline/mutator). |
@@ -167,8 +167,8 @@ This following tables list all the possible parameters of a given resource toget
 | **accessRuleStatus**  | object | Describes the status of ORY Oathkeeper Rule. |
 | **accessRuleStatus.&#x200b;code**  | string | Status code describing ORY Oathkeeper Rule. |
 | **accessRuleStatus.&#x200b;desc**  | string | Explains the status of ORY Oathkeeper Rule. |
-| **lastProcessedTime**  | string | Timestamp for when the APIRule was last processed by API Gateway controller. |
-| **observedGeneration**  | integer | The generation of the resource that was observed by API Gateway controller. |
+| **lastProcessedTime**  | string | Indicates the timestamp when the API Gateway controller last processed APIRule. |
+| **observedGeneration**  | integer | Specifies the generation of the resource that was observed by the API Gateway controller. |
 | **virtualServiceStatus**  | object | Describes the status of Istio VirtualService. |
 | **virtualServiceStatus.&#x200b;code**  | string | Status code describing Istio VirtualService. |
 | **virtualServiceStatus.&#x200b;desc**  | string | Explains the status of Istio VirtualService. |

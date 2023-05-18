@@ -74,14 +74,14 @@ spec:
                             properties:
                               jwks_urls:
                                 description: Specifies the array of URLs from which Ory Oathkeeper can retrieve 
-                                JSON Web Keys for validating JSON Web Token.
+                                  JSON Web Keys for validating JSON Web Token.
                                 type: array
                                 items:
                                   type: string
                                   pattern: ^(https://|file://).*$
                               trusted_issuers:
-                                description: If the `trusted_issuers` field is set, the JWT must contain a value for the claim `iss` 
-                                that matches exactly (case-sensitive) one of the values of `trusted_issuers`.
+                                description: If the **trusted_issuers** field is set, the JWT must contain a value for the claim `iss` 
+                                  that matches exactly (case-sensitive) one of the values of **trusted_issuers**.
                                 type: array
                                 items:
                                   type: string
@@ -271,8 +271,8 @@ spec:
                                   type: string
                                   pattern: ^(https://|file://).*$
                               trusted_issuers:
-                                description: If the `trusted_issuers` field is set, the JWT must contain a value for the claim `iss` 
-                                that matches exactly (case-sensitive) one of the values of `trusted_issuers`.
+                                description: If the **trusted_issuers** field is set, the JWT must contain a value for the claim `iss` 
+                                  that matches exactly (case-sensitive) one of the values of **trusted_issuers**.
                                 type: array
                                 items:
                                   type: string

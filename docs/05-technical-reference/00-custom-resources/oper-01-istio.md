@@ -46,8 +46,8 @@ The following table lists all the possible parameters of the given resource toge
 | **conditions.&#x200b;message** (required) | string | Displays a human readable message indicating the details about the transition. It can be an empty string. |
 | **conditions.&#x200b;observedGeneration**  | integer | Represents the **.metadata.generation** that the condition was based upon. For example, if **.metadata.generation** is currently 12, but the **.status.conditions[x].observedGeneration** is 9, the condition is out of date with respect to the current state of the instance. |
 | **conditions.&#x200b;reason** (required) | string | Contains a programmatic identifier indicating the reason for the condition's last transition. Producers of specific condition types may define expected values and meanings for this field, and whether the values are considered a guaranteed API. The value must be a CamelCase string. This field is required. |
-| **conditions.&#x200b;status** (required) | string | Describes the status of the condition. The supported values are `True`, `False`, and `Unknown`. |
+| **conditions.&#x200b;status** (required) | string | Describes the status of the condition. The value is either `True`, `False`, or `Unknown`. |
 | **conditions.&#x200b;type** (required) | string | Describes the type of the condition in CamelCase or in `foo.example.com/CamelCase`. Many **.condition.type** values are consistent across all resources, for example `Available`, but because arbitrary conditions can be useful (see **.node.status.conditions**), the ability to deconflict is important. It matches the following regex:/ (dns1123SubdomainFmt/)?(qualifiedNameFmt). |
-| **state** (required) | string | Signifies the current state of CustomObject. The available values are `Ready`, `Processing`, `Error`, `Deleting`. |
+| **state** (required) | string | Signifies the current state of CustomObject. The value is either `Ready`, `Processing`, `Error`, or `Deleting`. |
 
 <!-- TABLE-END -->
