@@ -115,8 +115,8 @@ spec:
 
 | Parameter | Type | Description |
 | ---- | ----------- | ---- |
-| **annotations**  | map\[string\]string | Annotations will be used in Deployment's PodTemplate and will be applied on the function's runtime Pod. |
-| **env**  | \[\]object | Env specifies an array of key-value pairs to be used as environment variables for the Function. You can define values as static strings or reference values from ConfigMaps or Secrets. |
+| **annotations**  | map\[string\]string | Defines annotations used in Deployment's PodTemplate and applied on the Function's runtime Pod. |
+| **env**  | \[\]object | Specifies an array of key-value pairs to be used as environment variables for the Function. You can define values as static strings or reference values from ConfigMaps or Secrets. |
 | **env.&#x200b;name** (required) | string | Name of the environment variable. Must be a C_IDENTIFIER. |
 | **env.&#x200b;value**  | string | Variable references $(VAR_NAME) are expanded using the previously defined environment variables in the container and any service environment variables. If a variable cannot be resolved, the reference in the input string will be unchanged. Double $ are reduced to a single $, which allows for escaping the $(VAR_NAME) syntax: i.e. "$(VAR_NAME)" will produce the string literal "$(VAR_NAME)". Escaped references will never be expanded, regardless of whether the variable exists or not. Defaults to "". |
 | **env.&#x200b;valueFrom**  | object | Source for the environment variable's value. Cannot be used if value is not empty. |
@@ -135,47 +135,47 @@ spec:
 | **env.&#x200b;valueFrom.&#x200b;secretKeyRef.&#x200b;key** (required) | string | The key of the secret to select from.  Must be a valid secret key. |
 | **env.&#x200b;valueFrom.&#x200b;secretKeyRef.&#x200b;name**  | string | Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid? |
 | **env.&#x200b;valueFrom.&#x200b;secretKeyRef.&#x200b;optional**  | boolean | Specify whether the Secret or its key must be defined |
-| **labels**  | map\[string\]string | Labels will be used in Deployment's PodTemplate and will be applied on the function's runtime Pod. |
-| **replicas**  | integer | Replicas defines the exact number of Function's Pods to run at a time. If ScaleConfig is configured, or if Function is targeted by an external scaler, then the Replicas field is used by the relevant HorizontalPodAutoscaler to control the number of active replicas. |
-| **resourceConfiguration**  | object | ResourceConfiguration specifies resources requested by Function and build Job. |
-| **resourceConfiguration.&#x200b;build**  | object | Build specifies resources requested by the build Job's Pod. |
-| **resourceConfiguration.&#x200b;build.&#x200b;profile**  | string | Profile defines name of predefined set of values of resource. Can't be used at the same time with Resources. |
-| **resourceConfiguration.&#x200b;build.&#x200b;resources**  | object | Resources defines amount of resources available for the Pod to use. Can't be used at the same time with Profile. |
+| **labels**  | map\[string\]string | Defines labels used in Deployment's PodTemplate and applied on the Function's runtime Pod. |
+| **replicas**  | integer | Defines the exact number of Function's Pods to run at a time. If **ScaleConfig** is configured, or if Function is targeted by an external scaler, then the **Replicas** field is used by the relevant HorizontalPodAutoscaler to control the number of active replicas. |
+| **resourceConfiguration**  | object | Specifies resources requested by the Function and the build Job. |
+| **resourceConfiguration.&#x200b;build**  | object | Specifies resources requested by the build Job's Pod. |
+| **resourceConfiguration.&#x200b;build.&#x200b;profile**  | string | Defines the name of the predefined set of values of resource. Can't be used together with **Resources**. |
+| **resourceConfiguration.&#x200b;build.&#x200b;resources**  | object | Defines amount of resources available for the Pod to use. Can't be used together with Profile. |
 | **resourceConfiguration.&#x200b;build.&#x200b;resources.&#x200b;limits**  | map\[string\]\{integer or string\} | Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
 | **resourceConfiguration.&#x200b;build.&#x200b;resources.&#x200b;requests**  | map\[string\]\{integer or string\} | Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
-| **resourceConfiguration.&#x200b;function**  | object | Function specifies resources requested by the Function's Pod. |
-| **resourceConfiguration.&#x200b;function.&#x200b;profile**  | string | Profile defines name of predefined set of values of resource. Can't be used at the same time with Resources. |
-| **resourceConfiguration.&#x200b;function.&#x200b;resources**  | object | Resources defines amount of resources available for the Pod to use. Can't be used at the same time with Profile. |
+| **resourceConfiguration.&#x200b;function**  | object | Specifies resources requested by the Function's Pod. |
+| **resourceConfiguration.&#x200b;function.&#x200b;profile**  | string | Defines the name of the predefined set of values of resource. Can't be used together with **Resources**. |
+| **resourceConfiguration.&#x200b;function.&#x200b;resources**  | object | Defines amount of resources available for the Pod to use. Can't be used together with Profile. |
 | **resourceConfiguration.&#x200b;function.&#x200b;resources.&#x200b;limits**  | map\[string\]\{integer or string\} | Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
 | **resourceConfiguration.&#x200b;function.&#x200b;resources.&#x200b;requests**  | map\[string\]\{integer or string\} | Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
-| **runtime** (required) | string | Runtime specifies the runtime of the Function. The available values are `nodejs16`, `nodejs18`, and `python39`. |
-| **runtimeImageOverride**  | string | RuntimeImageOverride specifies the runtimes image which must be used instead of the default one. |
-| **scaleConfig**  | object | ScaleConfig defines minimum and maximum number of Function's Pods to run at a time. When it is configured, a HorizontalPodAutoscaler will be deployed and will control the Replicas field to scale Function based on the CPU utilisation. |
-| **scaleConfig.&#x200b;maxReplicas** (required) | integer | MaxReplicas defines the maximum number of Function's Pods to run at a time. |
-| **scaleConfig.&#x200b;minReplicas** (required) | integer | MinReplicas defines the minimum number of Function's Pods to run at a time. |
-| **secretMounts**  | \[\]object | SecretMounts specifies Secrets to mount into the Function's container filesystem. |
-| **secretMounts.&#x200b;mountPath** (required) | string | MountPath specifies path within the container at which the Secret should be mounted. |
-| **secretMounts.&#x200b;secretName** (required) | string | SecretName specifies name of the Secret in the Function's Namespace to use. |
-| **source** (required) | object | Source contains the Function's specification. |
-| **source.&#x200b;gitRepository**  | object | GitRepository defines Function as git-sourced. Can't be used at the same time with Inline. |
-| **source.&#x200b;gitRepository.&#x200b;auth**  | object | Auth specifies that you must authenticate to the Git repository. Required for SSH. |
-| **source.&#x200b;gitRepository.&#x200b;auth.&#x200b;secretName** (required) | string | SecretName specifies the name of the Secret with credentials used by the Function Controller to authenticate to the Git repository in order to fetch the Function's source code and dependencies. This Secret must be stored in the same Namespace as the Function CR. |
-| **source.&#x200b;gitRepository.&#x200b;auth.&#x200b;type** (required) | string | Type defines if you must authenticate to the repository with a password or token (`basic`), or an SSH key (`key`). For SSH, this parameter must be set to `key`. |
-| **source.&#x200b;gitRepository.&#x200b;baseDir**  | string | BaseDir specifies the relative path to the Git directory that contains the source code from which the Function is built. |
-| **source.&#x200b;gitRepository.&#x200b;reference**  | string | Reference specifies either the branch name, tag or the commit revision from which the Function Controller automatically fetches the changes in the Function's code and dependencies. |
-| **source.&#x200b;gitRepository.&#x200b;url** (required) | string | URL provides the address to the Git repository with the Function's code and dependencies. Depending on whether the repository is public or private and what authentication method is used to access it, the URL must start with the `http(s)`, `git`, or `ssh` prefix. |
-| **source.&#x200b;inline**  | object | Inline defines Function as the inline Function. Can't be used at the same time with GitRepository. |
-| **source.&#x200b;inline.&#x200b;dependencies**  | string | Dependencies specifies the Function's dependencies. |
-| **source.&#x200b;inline.&#x200b;source** (required) | string | Source provides the Function's full source code. |
-| **template**  | object | Deprecated: `.spec.Labels` and `.spec.Annotations` should be used to annotate/label function's pods. |
-| **template.&#x200b;annotations**  | map\[string\]string | Deprecated: `.spec.Annotations` should be used to annotate function's pods. |
-| **template.&#x200b;labels**  | map\[string\]string | Deprecated: `.spec.Labels` should be used to label function's pods. |
+| **runtime** (required) | string | Specifies the runtime of the Function. The available values are `nodejs16`, `nodejs18`, and `python39`. |
+| **runtimeImageOverride**  | string | Specifies the runtime image used instead of the default one. |
+| **scaleConfig**  | object | Defines the minimum and maximum number of Function's Pods to run at a time. When it is configured, a HorizontalPodAutoscaler will be deployed and will control the **Replicas** field to scale the Function based on the CPU utilisation. |
+| **scaleConfig.&#x200b;maxReplicas** (required) | integer | Defines the maximum number of Function's Pods to run at a time. |
+| **scaleConfig.&#x200b;minReplicas** (required) | integer | Defines the minimum number of Function's Pods to run at a time. |
+| **secretMounts**  | \[\]object | Specifies Secrets to mount into the Function's container filesystem. |
+| **secretMounts.&#x200b;mountPath** (required) | string | Specifies the path within the container where the Secret should be mounted. |
+| **secretMounts.&#x200b;secretName** (required) | string | Specifies the name of the Secret in the Function's Namespace to use. |
+| **source** (required) | object | Contains the Function's source code configuration. |
+| **source.&#x200b;gitRepository**  | object | Defines the Function as git-sourced. Can't be used together with **Inline**. |
+| **source.&#x200b;gitRepository.&#x200b;auth**  | object | Specifies the authentication method. Required for SSH. |
+| **source.&#x200b;gitRepository.&#x200b;auth.&#x200b;secretName** (required) | string | Specifies the name of the Secret with credentials used by the Function Controller to authenticate to the Git repository in order to fetch the Function's source code and dependencies. This Secret must be stored in the same Namespace as the Function CR. |
+| **source.&#x200b;gitRepository.&#x200b;auth.&#x200b;type** (required) | string | Defines the repository authentication method. The value is either `basic` if you use a password or token, or `key` if you use an SSH key. |
+| **source.&#x200b;gitRepository.&#x200b;baseDir**  | string | Specifies the relative path to the Git directory that contains the source code from which the Function is built. |
+| **source.&#x200b;gitRepository.&#x200b;reference**  | string | Specifies either the branch name, tag or the commit revision from which the Function Controller automatically fetches the changes in the Function's code and dependencies. |
+| **source.&#x200b;gitRepository.&#x200b;url** (required) | string | URL of the Git repository with the Function's code and dependencies. Depending on whether the repository is public or private and what authentication method is used to access it, the URL must start with the `http(s)`, `git`, or `ssh` prefix. |
+| **source.&#x200b;inline**  | object | Defines the Function as the inline Function. Can't be used together with **GitRepository**. |
+| **source.&#x200b;inline.&#x200b;dependencies**  | string | Specifies the Function's dependencies. |
+| **source.&#x200b;inline.&#x200b;source** (required) | string | Specifies the Function's full source code. |
+| **template**  | object | Deprecated: **Labels** and **Annotations** should be used to annotate/label function's pods. |
+| **template.&#x200b;annotations**  | map\[string\]string | Deprecated: Use **FunctionSpec.Annotations** to annotate Function's Pods. |
+| **template.&#x200b;labels**  | map\[string\]string | Deprecated: Use **FunctionSpec.Labels**  to label Function's Pods. |
 
 **Status:**
 
 | Parameter | Type | Description |
 | ---- | ----------- | ---- |
-| **baseDir**  | string | BaseDir specifies the relative path to the Git directory that contains the source code from which the Function is built. |
+| **baseDir**  | string | Specifies the relative path to the Git directory that contains the source code from which the Function is built. |
 | **commit**  | string | Commit hash used to build function |
 | **conditions**  | \[\]object | An array of conditions describing the status of the parser |
 | **conditions.&#x200b;lastTransitionTime**  | string | Last time the condition transitioned from one status to another. |
@@ -184,7 +184,7 @@ spec:
 | **conditions.&#x200b;status** (required) | string | Status of the condition, one of True, False, Unknown. |
 | **conditions.&#x200b;type**  | string | Type of function condition. |
 | **podSelector**  | string | Pod selector used to match pods in function deployment |
-| **reference**  | string | Reference specifies either the branch name, tag or the commit revision from which the Function Controller automatically fetches the changes in the Function's code and dependencies. |
+| **reference**  | string | Specifies either the branch name, tag or the commit revision from which the Function Controller automatically fetches the changes in the Function's code and dependencies. |
 | **replicas**  | integer | Total number of non-terminated pods targeted by this function |
 | **runtime**  | string | Runtime type of function |
 | **runtimeImage**  | string | Runtime image version used to build and run function pods |

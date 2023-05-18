@@ -39,20 +39,20 @@ const (
 )
 
 type Source struct {
-	// GitRepository defines Function as git-sourced. Can't be used at the same time with Inline.
+	// Defines the Function as git-sourced. Can't be used together with **Inline**.
 	// +optional
 	GitRepository *GitRepositorySource `json:"gitRepository,omitempty"`
 
-	// Inline defines Function as the inline Function. Can't be used at the same time with GitRepository.
+	// Defines the Function as the inline Function. Can't be used together with **GitRepository**.
 	// +optional
 	Inline *InlineSource `json:"inline,omitempty"`
 }
 
 type InlineSource struct {
-	// Source provides the Function's full source code.
+	// Specifies the Function's full source code.
 	Source string `json:"source"`
 
-	// Dependencies specifies the Function's dependencies.
+	// Specifies the Function's dependencies.
 	//+optional
 	Dependencies string `json:"dependencies,omitempty"`
 }
@@ -60,12 +60,12 @@ type InlineSource struct {
 type GitRepositorySource struct {
 	// +kubebuilder:validation:Required
 
-	// URL provides the address to the Git repository with the Function's code and dependencies.
+	// URL of the Git repository with the Function's code and dependencies.
 	// Depending on whether the repository is public or private and what authentication method is used to access it,
 	// the URL must start with the `http(s)`, `git`, or `ssh` prefix.
 	URL string `json:"url"`
 
-	// Auth specifies that you must authenticate to the Git repository. Required for SSH.
+	// Specifies the authentication method. Required for SSH.
 	// +optional
 	Auth *RepositoryAuth `json:"auth,omitempty"`
 
@@ -74,13 +74,13 @@ type GitRepositorySource struct {
 
 // RepositoryAuth defines authentication method used for repository operations
 type RepositoryAuth struct {
-	// Type defines if you must authenticate to the repository with a password or token (`basic`),
-	// or an SSH key (`key`). For SSH, this parameter must be set to `key`.
+	// Defines the repository authentication method. The value is either `basic` if you use a password or token,
+	// or `key` if you use an SSH key.
 	Type RepositoryAuthType `json:"type"`
 
 	// +kubebuilder:validation:Required
 
-	// SecretName specifies the name of the Secret with credentials used by the Function Controller
+	// Specifies the name of the Secret with credentials used by the Function Controller
 	// to authenticate to the Git repository in order to fetch the Function's source code and dependencies.
 	// This Secret must be stored in the same Namespace as the Function CR.
 	SecretName string `json:"secretName"`
@@ -96,50 +96,52 @@ const (
 )
 
 type Template struct {
-	// Deprecated: `.spec.Labels` should be used to label function's pods.
+	// Deprecated: Use **FunctionSpec.Labels**  to label Function's Pods.
 	// +optional
 	Labels map[string]string `json:"labels,omitempty"`
-	// Deprecated: `.spec.Annotations` should be used to annotate function's pods.
+	// Deprecated: Use **FunctionSpec.Annotations** to annotate Function's Pods.
 	// +optional
 	Annotations map[string]string `json:"annotations,omitempty"`
 }
 
 type ResourceRequirements struct {
-	// Profile defines name of predefined set of values of resource. Can't be used at the same time with Resources.
+	// Defines the name of the predefined set of values of resource.
+	// Can't be used together with **Resources**.
 	// +optional
 	Profile string `json:"profile,omitempty"`
 
-	// Resources defines amount of resources available for the Pod to use. Can't be used at the same time with Profile.
+	// Defines amount of resources available for the Pod to use.
+	// Can't be used together with Profile.
 	// +optional
 	Resources *v1.ResourceRequirements `json:"resources,omitempty"`
 }
 
 type ScaleConfig struct {
-	// MinReplicas defines the minimum number of Function's Pods to run at a time.
+	// Defines the minimum number of Function's Pods to run at a time.
 	// +kubebuilder:validation:Minimum:=1
 	MinReplicas *int32 `json:"minReplicas"`
 
-	// MaxReplicas defines the maximum number of Function's Pods to run at a time.
+	// Defines the maximum number of Function's Pods to run at a time.
 	// +kubebuilder:validation:Minimum:=1
 	MaxReplicas *int32 `json:"maxReplicas"`
 }
 
 type ResourceConfiguration struct {
-	// Build specifies resources requested by the build Job's Pod.
+	// Specifies resources requested by the build Job's Pod.
 	// +optional
 	Build *ResourceRequirements `json:"build,omitempty"`
 
-	// Function specifies resources requested by the Function's Pod.
+	// Specifies resources requested by the Function's Pod.
 	// +optional
 	Function *ResourceRequirements `json:"function,omitempty"`
 }
 
 type SecretMount struct {
-	// SecretName specifies name of the Secret in the Function's Namespace to use.
+	// Specifies the name of the Secret in the Function's Namespace to use.
 	// +kubebuilder:validation:Required
 	SecretName string `json:"secretName"`
 
-	// MountPath specifies path within the container at which the Secret should be mounted.
+	// Specifies the path within the container where the Secret should be mounted.
 	// +kubebuilder:validation:Required
 	MountPath string `json:"mountPath"`
 }
@@ -149,50 +151,50 @@ const (
 	BuildResourcesPresetLabel    = "serverless.kyma-project.io/build-resources-preset"
 )
 
-// Spec defines the desired state of Function
+// Defines the desired state of Function
 type FunctionSpec struct {
-	// Runtime specifies the runtime of the Function. The available values are `nodejs16`, `nodejs18`, and `python39`.
+	// Specifies the runtime of the Function. The available values are `nodejs16`, `nodejs18`, and `python39`.
 	Runtime Runtime `json:"runtime"`
 
-	// RuntimeImageOverride specifies the runtimes image which must be used instead of the default one.
+	// Specifies the runtime image used instead of the default one.
 	// +optional
 	RuntimeImageOverride string `json:"runtimeImageOverride,omitempty"`
 
-	// Source contains the Function's specification.
+	// Contains the Function's source code configuration.
 	Source Source `json:"source"`
 
-	// Env specifies an array of key-value pairs to be used as environment variables for the Function.
+	// Specifies an array of key-value pairs to be used as environment variables for the Function.
 	// You can define values as static strings or reference values from ConfigMaps or Secrets.
 	Env []v1.EnvVar `json:"env,omitempty"`
 
-	// ResourceConfiguration specifies resources requested by Function and build Job.
+	// Specifies resources requested by the Function and the build Job.
 	// +optional
 	ResourceConfiguration *ResourceConfiguration `json:"resourceConfiguration,omitempty"`
 
-	// ScaleConfig defines minimum and maximum number of Function's Pods to run at a time.
-	// When it is configured, a HorizontalPodAutoscaler will be deployed and will control the Replicas field
-	// to scale Function based on the CPU utilisation.
+	// Defines the minimum and maximum number of Function's Pods to run at a time.
+	// When it is configured, a HorizontalPodAutoscaler will be deployed and will control the **Replicas** field
+	// to scale the Function based on the CPU utilisation.
 	// +optional
 	ScaleConfig *ScaleConfig `json:"scaleConfig,omitempty"`
 
-	// Replicas defines the exact number of Function's Pods to run at a time.
-	// If ScaleConfig is configured, or if Function is targeted by an external scaler,
-	// then the Replicas field is used by the relevant HorizontalPodAutoscaler to control the number of active replicas.
+	// Defines the exact number of Function's Pods to run at a time.
+	// If **ScaleConfig** is configured, or if Function is targeted by an external scaler,
+	// then the **Replicas** field is used by the relevant HorizontalPodAutoscaler to control the number of active replicas.
 	// +optional
 	Replicas *int32 `json:"replicas,omitempty"`
 
 	// +optional
-	// Deprecated: `.spec.Labels` and `.spec.Annotations` should be used to annotate/label function's pods.
+	// Deprecated: **Labels** and **Annotations** should be used to annotate/label function's pods.
 	Template *Template `json:"template,omitempty"`
 
-	// SecretMounts specifies Secrets to mount into the Function's container filesystem.
+	// Specifies Secrets to mount into the Function's container filesystem.
 	SecretMounts []SecretMount `json:"secretMounts,omitempty"`
 
-	// Labels will be used in Deployment's PodTemplate and will be applied on the function's runtime Pod.
+	// Defines labels used in Deployment's PodTemplate and applied on the Function's runtime Pod.
 	// +optional
 	Labels map[string]string `json:"labels,omitempty"`
 
-	// Annotations will be used in Deployment's PodTemplate and will be applied on the function's runtime Pod.
+	// Defines annotations used in Deployment's PodTemplate and applied on the Function's runtime Pod.
 	// +optional
 	Annotations map[string]string `json:"annotations,omitempty"`
 }
@@ -245,11 +247,11 @@ type Condition struct {
 }
 
 type Repository struct {
-	// BaseDir specifies the relative path to the Git directory that contains the source code
+	// Specifies the relative path to the Git directory that contains the source code
 	// from which the Function is built.
 	BaseDir string `json:"baseDir,omitempty"`
 
-	// Reference specifies either the branch name, tag or the commit revision from which the Function Controller
+	// Specifies either the branch name, tag or the commit revision from which the Function Controller
 	// automatically fetches the changes in the Function's code and dependencies.
 	Reference string `json:"reference,omitempty"`
 }
