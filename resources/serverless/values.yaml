@@ -80,15 +80,15 @@ global:
       directory: "prod"
     function_controller:
       name: "function-controller"
-      version: "v20230509-142454e6"
+      version: "v20230518-48b28f8c"
       directory: "prod"
     function_webhook:
       name: "function-webhook"
-      version: "v20230509-142454e6"
+      version: "v20230518-48b28f8c"
       directory: "prod"
     function_build_init:
       name: "function-build-init"
-      version: "v20230509-142454e6"
+      version: "v20230518-48b28f8c"
       directory: "prod"
     function_runtime_nodejs14:
       name: "function-runtime-nodejs14"
