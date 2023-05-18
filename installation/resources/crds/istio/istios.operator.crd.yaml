@@ -92,7 +92,7 @@ spec:
                       pattern: ^[A-Za-z]([A-Za-z0-9_,:]*[A-Za-z0-9_])?$
                       type: string
                     status:
-                      description: Describes the status of the condition. The supported values are `True`, `False`, and `Unknown`.
+                      description: Describes the status of the condition. The value is either `True`, `False`, or `Unknown`.
                       enum:
                       - "True"
                       - "False"
@@ -117,7 +117,7 @@ spec:
                 type: array
               state:
                 description: Signifies the current state of CustomObject. 
-                  The available values are `Ready`, `Processing`, `Error`, `Deleting`.
+                  The value is either `Ready`, `Processing`, `Error`, or `Deleting`.
                 enum:
                 - Processing
                 - Deleting

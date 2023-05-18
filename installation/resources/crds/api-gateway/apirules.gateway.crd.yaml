@@ -56,12 +56,11 @@ spec:
               rules:
                 description: Represents the array of Oathkeeper access rules to be applied.
                 items:
-                  description: Rule . 
                   properties:
                     accessStrategies:
                       description: Specifies the list of access strategies.
-                        The supported access strategies are [Oathkeeper](https://www.ory.sh/docs/oathkeeper/pipeline/authn) 
-                        `oauth2_introspection`, `jwt`, `noop`, and `allow`.
+                        All strategies listed in [Oathkeeper documentation](https://www.ory.sh/docs/oathkeeper/pipeline/authn) 
+                        are supported.
                       items:
                         description: Represents a handler that authenticates
                           provided credentials. See the corresponding type in the
@@ -74,13 +73,15 @@ spec:
                             x-kubernetes-preserve-unknown-fields: true
                             properties:
                               jwks_urls:
-                                description: .
+                                description: Specifies the array of URLs from which Ory Oathkeeper can retrieve 
+                                JSON Web Keys for validating JSON Web Token.
                                 type: array
                                 items:
                                   type: string
                                   pattern: ^(https://|file://).*$
                               trusted_issuers:
-                                description: .
+                                description: If the `trusted_issuers` field is set, the JWT must contain a value for the claim `iss` 
+                                that matches exactly (case-sensitive) one of the values of `trusted_issuers`.
                                 type: array
                                 items:
                                   type: string
@@ -184,11 +185,11 @@ spec:
                     type: string
                 type: object
               lastProcessedTime:
-                description: .
+                description: Indicates the timestamp when the API Gateway controller last processed APIRule.
                 format: date-time
                 type: string
               observedGeneration:
-                description: .
+                description: Specifies the generation of the resource that was observed by the API Gateway controller.
                 format: int64
                 type: integer
               virtualServiceStatus:
@@ -247,12 +248,11 @@ spec:
               rules:
                 description: Represents the the array of Oathkeeper access rules to be applied.
                 items:
-                  description: Rule . 
                   properties:
                     accessStrategies:
                       description: Specifies the list of access strategies. 
-                        The supported access strategies are [Oathkeeper](https://www.ory.sh/docs/oathkeeper/pipeline/authn) 
-                        `oauth2_introspection`, `jwt`, `noop`, and `allow`.
+                        All strategies listed in [Oathkeeper documentation](https://www.ory.sh/docs/oathkeeper/pipeline/authn) 
+                        are supported.
                       items:
                         description: Represents a handler that authenticates
                           provided credentials. See the corresponding type in the
@@ -265,13 +265,14 @@ spec:
                             x-kubernetes-preserve-unknown-fields: true
                             properties:
                               jwks_urls:
-                                description: .
+                                description: Specifies the array of URLs from which Ory Oathkeeper can retrieve JSON Web Keys for validating JSON Web Token.
                                 type: array
                                 items:
                                   type: string
                                   pattern: ^(https://|file://).*$
                               trusted_issuers:
-                                description: .
+                                description: If the `trusted_issuers` field is set, the JWT must contain a value for the claim `iss` 
+                                that matches exactly (case-sensitive) one of the values of `trusted_issuers`.
                                 type: array
                                 items:
                                   type: string
@@ -399,31 +400,31 @@ spec:
                     type: string
                 type: object
               authorizationPolicyStatus:
-                description: APIRuleResourceStatus . 
+                description: Describes the status of the Istio Authorization Policy subresource.
                 properties:
                   code:
-                    description: StatusCode . 
+                    description: Status code describing the Istio Authorization Policy subresource.
                     type: string
                   desc:
-                    description: .
+                    description: Explains the status of the Istio Authorization Policy subresource.
                     type: string
                 type: object
               requestAuthenticationStatus:
-                description: APIRuleResourceStatus . 
+                description: Describes the status of the Istio Request Authentication subresource.
                 properties:
                   code:
-                    description: StatusCode . 
+                    description: Status code describing the state of the Istio Authorization Policy subresource.
                     type: string
                   desc:
-                    description: .
+                    description: Explains the status of the Istio Request Authentication subresource.
                     type: string
                 type: object
               lastProcessedTime:
-                description: .
+                description: Indicates the timestamp when the API Gateway controller last processed APIRule.
                 format: date-time
                 type: string
               observedGeneration:
-                description: .
+                description: Specifies the generation of the resource that was observed by the API Gateway controller.
                 format: int64
                 type: integer
               virtualServiceStatus:
