@@ -1,5 +1,5 @@
 .PHONY: generate
-generate: telemetry-docs cra-docs apix-docs istio-docs
+generate: telemetry-docs cra-docs eventing-docs apix-docs istio-docs
 
 .PHONY: telemetry-tracepipeline
 telemetry-tracepipeline:
@@ -19,6 +19,17 @@ telemetry-docs: telemetry-tracepipeline telemetry-logparser telemetry-logpipelin
 .PHONY: cra-docs
 cra-docs:
 	go run main.go --crd-filename ../../installation/resources/crds/compass-runtime-agent/compass-connection.crd.yaml --md-filename ../../docs/05-technical-reference/00-custom-resources/ra-01-compassconnection.md
+
+.PHONY: eventing-subscription
+eventing-subscription:
+	go run main.go --crd-filename ../../installation/resources/crds/eventing/subscriptions.eventing.kyma-project.io.crd.yaml --md-filename ../../docs/05-technical-reference/00-custom-resources/evnt-01-subscription.md
+
+.PHONY: eventing-backend
+eventing-backend:
+	go run main.go --crd-filename ../../installation/resources/crds/eventing/eventingbackends.eventing.kyma-project.io.crd.yaml --md-filename ../../docs/05-technical-reference/00-custom-resources/evnt-02-eventingbackend.md
+
+.PHONY: eventing-docs
+eventing-docs: eventing-subscription eventing-backend
 
 .PHONY: apix-docs
 apix-docs:

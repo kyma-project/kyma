@@ -1,10 +1,9 @@
-
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.4.1
+    controller-gen.kubebuilder.io/version: v0.11.1
   creationTimestamp: null
   name: eventingbackends.eventing.kyma-project.io
 spec:
@@ -53,41 +52,48 @@ spec:
             description: EventingBackendStatus defines the observed state of EventingBackend.
             properties:
               backendType:
-                description: Specifies the backend type used. Allowed values are "BEB"
-                  and "NATS"
+                description: Specifies the backend type used. The value is either
+                  `BEB`, or `NATS`.
                 enum:
                 - BEB
                 - NATS
                 type: string
               bebSecretName:
-                description: The name of the secret containing BEB access tokens,
-                  required only for BEB
+                description: Name of the Secret containing BEB access tokens, required
+                  for BEB only.
                 type: string
               bebSecretNamespace:
-                description: The namespace of the secret containing BEB access tokens,
-                  required only for BEB
+                description: Namespace of the Secret containing BEB access tokens,
+                  required for BEB only.
                 type: string
               conditions:
-                description: Conditions defines the status of the Controller and the
-                  EPP
+                description: Defines the status of the Controller and the EPP.
                 items:
                   properties:
                     lastTransitionTime:
+                      description: Defines the date of the last condition status change.
                       format: date-time
                       type: string
                     message:
+                      description: Provides more details about the condition status
+                        change.
                       type: string
                     reason:
+                      description: Defines the reason for the condition status change.
                       type: string
                     status:
+                      description: Status of the condition. The value is either `True`,
+                        `False`, or `Unknown`.
                       type: string
                     type:
+                      description: Short description of the condition.
                       type: string
                   required:
                   - status
                   type: object
                 type: array
               eventingReady:
+                description: Defines the overall Backend status.
                 type: boolean
             type: object
         type: object
@@ -95,9 +101,3 @@ spec:
     storage: true
     subresources:
       status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
