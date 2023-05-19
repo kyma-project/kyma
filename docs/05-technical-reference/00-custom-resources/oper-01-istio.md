@@ -25,7 +25,7 @@ spec:
     numTrustedProxies: 1
 ```
 
-The following table lists all the possible parameters of the given resource together with their descriptions:
+The following table lists all the possible parameters of a given resource together with their descriptions:
 
 <!-- TABLE-START -->
 ### Istio.operator.kyma-project.io/v1alpha1
@@ -42,7 +42,7 @@ The following table lists all the possible parameters of the given resource toge
 | Parameter | Type | Description |
 | ---- | ----------- | ---- |
 | **conditions**  | \[\]object | Contains conditions associated with CustomStatus. |
-| **conditions.&#x200b;lastTransitionTime** (required) | string | Specifies the last time when the condition transitioned from one status to another. That is, when the underlying condition changed. If not known, using the lats time when the API field changed is also acceptable. |
+| **conditions.&#x200b;lastTransitionTime** (required) | string | Specifies the last time when the condition transitioned from one status to another. That is, when the underlying condition changed. If not known, using the last time when the API field changed is also acceptable. |
 | **conditions.&#x200b;message** (required) | string | Displays a human readable message indicating the details about the transition. It can be an empty string. |
 | **conditions.&#x200b;observedGeneration**  | integer | Represents the **.metadata.generation** that the condition was based upon. For example, if **.metadata.generation** is currently 12, but the **.status.conditions[x].observedGeneration** is 9, the condition is out of date with respect to the current state of the instance. |
 | **conditions.&#x200b;reason** (required) | string | Contains a programmatic identifier indicating the reason for the condition's last transition. Producers of specific condition types may define expected values and meanings for this field, and whether the values are considered a guaranteed API. The value must be a CamelCase string. This field is required. |
