@@ -14,9 +14,9 @@ require (
 	github.com/sirupsen/logrus v1.9.2
 	github.com/stretchr/testify v1.8.2
 	github.com/vrischmann/envconfig v1.3.0
-	k8s.io/api v0.26.3
+	k8s.io/api v0.27.2
 	k8s.io/apimachinery v0.27.2
-	k8s.io/client-go v0.26.3
+	k8s.io/client-go v0.27.2
 	k8s.io/metrics v0.26.3
 	sigs.k8s.io/controller-runtime v0.14.6
 )
@@ -60,7 +60,6 @@ require (
 	github.com/prometheus/client_model v0.3.0 // indirect
 	github.com/prometheus/common v0.37.0 // indirect
 	github.com/prometheus/procfs v0.8.0 // indirect
-	github.com/rogpeppe/go-internal v1.10.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/stretchr/objx v0.5.0 // indirect
 	github.com/vektah/gqlparser/v2 v2.1.0 // indirect
