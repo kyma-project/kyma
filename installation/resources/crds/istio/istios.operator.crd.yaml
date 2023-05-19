@@ -63,7 +63,7 @@ spec:
                       description: Specifies the last time when the condition
                         transitioned from one status to another. That is, when
                         the underlying condition changed. If not known, using
-                        the last time when the API field changed is also acceptable.
+                        the lats time when the API field changed is also acceptable.
                       format: date-time
                       type: string
                     message:

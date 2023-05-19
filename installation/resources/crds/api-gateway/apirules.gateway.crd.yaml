@@ -105,15 +105,15 @@ spec:
                       items:
                         description: Mutator represents a handler that transforms
                           the HTTP request before forwarding it. See the corresponding
-                          in the oathkeeper-maester project.
+                          in the oathkeeper-maester project.'
                         properties:
                           config:
-                            description: Configures the handler. Configuration
-                              keys vary per handler.
+                            description: 'Configures the handler. Configuration
+                              keys vary per handler.'
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
                           handler:
-                            description: Specifies the name of the handler.
+                            description: 'Specifies the name of the handler.'
                             type: string
                         required:
                         - handler
@@ -246,7 +246,7 @@ spec:
                 pattern: ^([a-zA-Z0-9][a-zA-Z0-9-_]*\.)*[a-zA-Z0-9]*[a-zA-Z0-9-_]*[[a-zA-Z0-9]+$
                 type: string
               rules:
-                description: Represents the array of Oathkeeper access rules to be applied.
+                description: Represents the the array of Oathkeeper access rules to be applied.
                 items:
                   properties:
                     accessStrategies:
@@ -316,7 +316,7 @@ spec:
                       type: string
                     service:
                       description: Describes the service to expose. Overwrites
-                        the **spec** level service if defined.
+                        the **spec** level service, if defined.
                       properties:
                         external:
                           description: Specifies if the service is internal (in cluster) or external.

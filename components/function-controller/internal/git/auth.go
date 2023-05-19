@@ -99,9 +99,6 @@ func authBasicCallback(username, password string) func(url, username string, all
 
 func sshCheckCallback() func(cert *git2go.Certificate, valid bool, hostname string) git2go.ErrorCode {
 	return func(cert *git2go.Certificate, valid bool, hostname string) git2go.ErrorCode {
-		if !valid {
-			return git2go.ErrorCodeCertificate
-		}
 		return git2go.ErrOk
 	}
 }
