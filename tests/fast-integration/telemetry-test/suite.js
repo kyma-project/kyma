@@ -463,13 +463,13 @@ describe('Telemetry Operator', function() {
         });
 
         it(`Should create override configmap with paused flag`, async function() {
-          await k8sApply(overrideConfig);
+          await retryWithDelay( (r) => k8sApply(overrideConfig), defaultRetryDelayMs, defaultRetries);
           await waitForConfigMap('telemetry-override-config', 'kyma-system');
         });
 
         it(`Tries to change the otlp endpoint`, async function() {
           pipeline[0].spec.output.otlp.endpoint.value = 'http://another-foo';
-          await k8sApply(pipeline);
+          await retryWithDelay( (r) => k8sApply(pipeline), defaultRetryDelayMs, defaultRetries);
         });
 
         it(`Should not change the OTLP endpoint in the telemetry-trace-collector secret in paused state`, async () => {
