@@ -1,5 +1,5 @@
 .PHONY: generate
-generate: telemetry-docs cra-docs eventing-docs
+generate: telemetry-docs cra-docs eventing-docs apix-docs istio-docs
 
 .PHONY: telemetry-tracepipeline
 telemetry-tracepipeline:
@@ -30,3 +30,11 @@ eventing-backend:
 
 .PHONY: eventing-docs
 eventing-docs: eventing-subscription eventing-backend
+
+.PHONY: apix-docs
+apix-docs:
+	go run main.go --crd-filename ../../installation/resources/crds/api-gateway/apirules.gateway.crd.yaml --md-filename ../../docs/05-technical-reference/00-custom-resources/apix-01-apirule.md
+
+.PHONY: istio-docs
+istio-docs:
+	go run main.go --crd-filename ../../installation/resources/crds/istio/istios.operator.crd.yaml --md-filename ../../docs/05-technical-reference/00-custom-resources/oper-01-istio.md
