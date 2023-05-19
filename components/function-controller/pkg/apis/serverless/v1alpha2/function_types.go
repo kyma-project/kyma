@@ -258,19 +258,19 @@ type Repository struct {
 
 // FunctionStatus defines the observed state of Function
 type FunctionStatus struct {
-	// Runtime type of function
+	// Specify the **Runtime** type of function
 	Runtime Runtime `json:"runtime,omitempty"`
 	// An array of conditions describing the status of the parser
 	Conditions []Condition `json:"conditions,omitempty"`
-	// The repository which was used to build the function
+	// Specify the repository which was used to build the function
 	Repository `json:",inline,omitempty"`
 	// Total number of non-terminated pods targeted by this function
 	Replicas int32 `json:"replicas,omitempty"`
 	// Pod selector used to match pods in function deployment
 	PodSelector string `json:"podSelector,omitempty"`
-	// Commit hash used to build function
+	// Specify the commit hash used to build function
 	Commit string `json:"commit,omitempty"`
-	// Runtime image version used to build and run function pods
+	// Specifies the image version used to build and run function pods
 	RuntimeImage string `json:"runtimeImage,omitempty"`
 	// Deprecated: RuntimeImageOverride exists for historical compatibility
 	// and should be removed with v1alpha3 version. RuntimeImage has the

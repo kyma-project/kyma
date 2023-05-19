@@ -176,7 +176,7 @@ spec:
 | Parameter | Type | Description |
 | ---- | ----------- | ---- |
 | **baseDir**  | string | Specifies the relative path to the Git directory that contains the source code from which the Function is built. |
-| **commit**  | string | Commit hash used to build function |
+| **commit**  | string | Specify the commit hash used to build function |
 | **conditions**  | \[\]object | An array of conditions describing the status of the parser |
 | **conditions.&#x200b;lastTransitionTime**  | string | Last time the condition transitioned from one status to another. |
 | **conditions.&#x200b;message**  | string | A human-readable message indicating details about the transition. |
@@ -186,8 +186,8 @@ spec:
 | **podSelector**  | string | Pod selector used to match pods in function deployment |
 | **reference**  | string | Specifies either the branch name, tag or the commit revision from which the Function Controller automatically fetches the changes in the Function's code and dependencies. |
 | **replicas**  | integer | Total number of non-terminated pods targeted by this function |
-| **runtime**  | string | Runtime type of function |
-| **runtimeImage**  | string | Runtime image version used to build and run function pods |
+| **runtime**  | string | Specify the **Runtime** type of function |
+| **runtimeImage**  | string | Specifies the image version used to build and run function pods |
 | **runtimeImageOverride**  | string | Deprecated: RuntimeImageOverride exists for historical compatibility and should be removed with v1alpha3 version. RuntimeImage has the override image if it isn't empty. |
 
 <!-- TABLE-END -->

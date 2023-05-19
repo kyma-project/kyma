@@ -406,7 +406,7 @@ spec:
                   contains the source code from which the Function is built.
                 type: string
               commit:
-                description: Commit hash used to build function
+                description: Specify the commit hash used to build function
                 type: string
               conditions:
                 description: An array of conditions describing the status of the parser
@@ -448,10 +448,10 @@ spec:
                 format: int32
                 type: integer
               runtime:
-                description: Runtime type of function
+                description: Specify the **Runtime** type of function
                 type: string
               runtimeImage:
-                description: Runtime image version used to build and run function
+                description: Specifies the image version used to build and run function
                   pods
                 type: string
               runtimeImageOverride:
