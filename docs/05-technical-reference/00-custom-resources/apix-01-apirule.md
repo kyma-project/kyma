@@ -74,7 +74,7 @@ spec:
 </div>
 
 
-This following tables list all the possible parameters of a given resource together with their descriptions:
+The following tables list all the possible parameters of a given resource together with their descriptions:
 
 >**CAUTION:** If `service` is not defined at **spec.service** level, all defined rules must have `service` defined at **spec.rules.service** level, otherwise the validation fails.
 
@@ -87,7 +87,7 @@ This following tables list all the possible parameters of a given resource toget
 | ---- | ----------- | ---- |
 | **gateway** (required) | string | Specifies the Istio Gateway to be used. |
 | **host** (required) | string | Specifies the URL of the exposed service. |
-| **rules** (required) | \[\]object | Represents the the array of Oathkeeper access rules to be applied. |
+| **rules** (required) | \[\]object | Represents the array of Oathkeeper access rules to be applied. |
 | **rules.&#x200b;accessStrategies** (required) | \[\]object | Specifies the list of access strategies. All strategies listed in [Oathkeeper documentation](https://www.ory.sh/docs/oathkeeper/pipeline/authn) are supported. |
 | **rules.&#x200b;accessStrategies.&#x200b;config**  | object | Configures the handler. Configuration keys vary per handler. |
 | **rules.&#x200b;accessStrategies.&#x200b;config.&#x200b;jwks_urls**  | \[\]string | Specifies the array of URLs from which Ory Oathkeeper can retrieve JSON Web Keys for validating JSON Web Token. |
@@ -98,7 +98,7 @@ This following tables list all the possible parameters of a given resource toget
 | **rules.&#x200b;mutators.&#x200b;config**  | object | Configures the handler. Configuration keys vary per handler. |
 | **rules.&#x200b;mutators.&#x200b;handler** (required) | string | Specifies the name of the handler. |
 | **rules.&#x200b;path** (required) | string | Specifies the path of the exposed service. |
-| **rules.&#x200b;service**  | object | Describes the service to expose. Overwrites the **spec** level service, if defined. |
+| **rules.&#x200b;service**  | object | Describes the service to expose. Overwrites the **spec** level service if defined. |
 | **rules.&#x200b;service.&#x200b;external**  | boolean | Specifies if the service is internal (in cluster) or external. |
 | **rules.&#x200b;service.&#x200b;name** (required) | string | Specifies the name of the exposed service. |
 | **rules.&#x200b;service.&#x200b;namespace**  | string | Specifies the Namespace of the exposed service. If not defined, it defaults to the APIRule Namespace. |
