@@ -468,6 +468,7 @@ describe('Telemetry Operator', function() {
         });
 
         it(`Tries to change the otlp endpoint`, async function() {
+          await sleep(5*1000);
           pipeline[0].spec.output.otlp.endpoint.value = 'http://another-foo';
           await retryWithDelay( (r) => k8sApply(pipeline), defaultRetryDelayMs, defaultRetries);
         });
