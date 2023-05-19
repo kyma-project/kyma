@@ -2,7 +2,13 @@
 title: Internal Docker Registry
 ---
 
-Internal docker registry is used for serverless to push built function images which can be used to deploy function without using 3rd party service.
+Kyma serverless module by default comes with internal docker registry deployment that is used to store function container images w/o necessity to  use 3rd party registry
+
+Internal docker  is not recommended for production, as
+
+is not deployed in HA setup
+has limited storage space and no garbage collection of orphaned images
+Still, it is very convenient for development and getting first time experience of kyma serverless.
 
 The following diagram illustrates how it works.
 
@@ -15,3 +21,4 @@ The following diagram illustrates how it works.
 5. K8s DNS service resolve the name and provide the IP of `internal docker registry`
 
 **NOTE:** Kubelet cannot resolve in-cluster URL that's why serverless uses NodePort service.
+**NOTE:** NodePort service routing assure that pull request reaches the internal docker registry regardless of whether it is from different node.
