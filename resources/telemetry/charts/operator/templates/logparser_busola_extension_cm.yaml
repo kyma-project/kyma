@@ -37,4 +37,3 @@ data:
     - source: status.conditions[-1].type
       name: Status
       widget: Badge
-      
