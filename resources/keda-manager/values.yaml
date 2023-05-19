@@ -9,12 +9,12 @@ global:
     keda:
       name: "keda"
       version: "2.10.1"
-      directory: "prod/external"
+      directory: "prod/external/ghcr.io/kedacore"
     keda_admission_webhooks:
       name: "keda-admission-webhooks"
       version: "2.10.1"
-      directory: "prod/external"
+      directory: "prod/external/ghcr.io/kedacore"
     keda_metrics_apiserver:
       name: "keda-metrics-apiserver"
       version: "2.10.1"
-      directory: "prod/external"
+      directory: "prod/external/ghcr.io/kedacore"
