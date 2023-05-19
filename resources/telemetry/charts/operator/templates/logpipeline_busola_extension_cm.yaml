@@ -2,11 +2,11 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   labels:
-    app.kubernetes.io/name: logpipelines.telemetry.kyma-project.io
+    app.kubernetes.io/name: telemetry-logpipelines
     busola.io/extension: resource
     busola.io/extension-version: "0.5"
-  name: logpipelines.telemetry.kyma-project.io
-  namespace: kube-public
+  name: telemetry-logpipelines
+  namespace: kyma-system
 data:
   details: |-
     {
@@ -485,7 +485,7 @@ data:
       "category": "Observability",
       "urlPath": "logpipelines",
       "scope": "cluster",
-      "description": "Configure log selection, filters, and outputs",
+      "description": "{{"{{[LogPipeline](https://kyma-project.io/docs/kyma/latest/05-technical-reference/00-custom-resources/telemetry-01-logpipeline)}}"}} configures log selection, filters, and outputs",
     }
   list: |-
     [

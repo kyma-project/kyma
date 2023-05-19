@@ -2,11 +2,11 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   labels:
-    app.kubernetes.io/name: logparsers.telemetry.kyma-project.io
+    app.kubernetes.io/name: telemetry-logparsers
     busola.io/extension: resource
     busola.io/extension-version: "0.5"
-  name: logparsers.telemetry.kyma-project.io
-  namespace: kube-public
+  name: telemetry-logparsers
+  namespace: kyma-system
 data:
   details: |-
     {
@@ -45,7 +45,7 @@ data:
       "category": "Observability",
       "urlPath": "logparsers",
       "scope": "cluster",
-      "description": "Configure custom Log Parsers",
+      "description": "{{"{{[LogParser](https://kyma-project.io/docs/kyma/latest/05-technical-reference/00-custom-resources/telemetry-02-logparser)}}"}} configures a custom Log Parser",
     }
   list: |-
     [
