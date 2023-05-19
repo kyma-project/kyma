@@ -58,7 +58,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: FunctionSpec defines the desired state of Function
+            description: Spec defines the desired state of Function
             properties:
               annotations:
                 additionalProperties:
@@ -336,10 +336,10 @@ spec:
                               CR.
                             type: string
                           type:
-                            description: RepositoryAuthType defines if you must authenticate
-                              to the repository with a password or token (`basic`),
-                              or an SSH key (`key`). For SSH, this parameter must
-                              be set to `key`.
+                            description: Type defines if you must authenticate to
+                              the repository with a password or token (`basic`), or
+                              an SSH key (`key`). For SSH, this parameter must be
+                              set to `key`.
                             enum:
                             - basic
                             - key
@@ -390,10 +390,14 @@ spec:
                   annotations:
                     additionalProperties:
                       type: string
+                    description: 'Deprecated: `.spec.Annotations` should be used to
+                      annotate function''s pods.'
                     type: object
                   labels:
                     additionalProperties:
                       type: string
+                    description: 'Deprecated: `.spec.Labels` should be used to label
+                      function''s pods.'
                     type: object
                 type: object
             required:
@@ -408,27 +412,36 @@ spec:
                   that contains the source code from which the Function is built.
                 type: string
               commit:
+                description: Commit hash used to build function
                 type: string
               conditions:
+                description: An array of conditions describing the status of the parser
                 items:
                   properties:
                     lastTransitionTime:
+                      description: Last time the condition transitioned from one status
+                        to another.
                       format: date-time
                       type: string
                     message:
+                      description: A human-readable message indicating details about
+                        the transition.
                       type: string
                     reason:
+                      description: The reason for the condition's last transition.
                       type: string
                     status:
+                      description: Status of the condition, one of True, False, Unknown.
                       type: string
                     type:
-                      description: 'TODO: Status related things needs to be developed.'
+                      description: Type of function condition.
                       type: string
                   required:
                   - status
                   type: object
                 type: array
               podSelector:
+                description: Pod selector used to match pods in function deployment
                 type: string
               reference:
                 description: Reference specifies either the branch name, tag or the
@@ -436,12 +449,16 @@ spec:
                   fetches the changes in the Function's code and dependencies.
                 type: string
               replicas:
+                description: Total number of non-terminated pods targeted by this
+                  function
                 format: int32
                 type: integer
               runtime:
-                description: Runtime specifies the name of the Function's runtime.
+                description: Runtime type of function
                 type: string
               runtimeImage:
+                description: Runtime image version used to build and run function
+                  pods
                 type: string
               runtimeImageOverride:
                 description: 'Deprecated: RuntimeImageOverride exists for historical
