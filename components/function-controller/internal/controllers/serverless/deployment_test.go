@@ -48,6 +48,9 @@ func TestFunctionReconciler_equalDeployments(t *testing.T) {
 								Labels: map[string]string{
 									"some-template-label-key": "some-template-label-val",
 								},
+								Annotations: map[string]string{
+									"some-template-annotation-key": "some-template-annotation-val",
+								},
 							},
 							Spec: corev1.PodSpec{
 								Containers: []corev1.Container{
@@ -85,6 +88,9 @@ func TestFunctionReconciler_equalDeployments(t *testing.T) {
 							ObjectMeta: metav1.ObjectMeta{
 								Labels: map[string]string{
 									"some-template-label-key": "some-template-label-val",
+								},
+								Annotations: map[string]string{
+									"some-template-annotation-key": "some-template-annotation-val",
 								},
 							},
 							Spec: corev1.PodSpec{
@@ -199,7 +205,7 @@ func TestFunctionReconciler_equalDeployments(t *testing.T) {
 			want: false,
 		},
 		{
-			name: "different pod annotations - spec.template.metadata.annotations is ignored so that kubectl rollout restart works properly",
+			name: "different pod annotations",
 			args: args{
 				existing: appsv1.Deployment{
 					ObjectMeta: metav1.ObjectMeta{
@@ -236,7 +242,7 @@ func TestFunctionReconciler_equalDeployments(t *testing.T) {
 				},
 				scalingEnabled: true,
 			},
-			want: true,
+			want: false,
 		},
 		{
 			name: "different resources",
