@@ -8,17 +8,15 @@ This tutorial shows how to expose service endpoints in multiple Namespaces using
 
 ##  Prerequisites
 
-1. Create two Namespaces. Export their names as `NAMESPACE_HTTPBIN` and `NAMESPACE_FUNCTION` environment variables. Deploy an instance of the HttpBin service in the former Namespace and a sample Function in the latter. To learn how to do it, follow the [Create a workload](../apix-01-create-workload.md) tutorial. 
-
-2. Create a Namespace for the APIRule CR and export its value as an environment variable. Run:
+1. Create three Namespaces: one for an instance of HttpBin service, one for a sample function and one for APIRule CR. Deploy an instance of the HttpBin service and a sample Function in their respective Namespaces. To learn how to do it, follow the [Create a workload](../apix-01-create-workload.md) tutorial. Remember to enable the Istio sidecar proxy injection. Export the following environment variables:
 
   ```bash
-  export NAMESPACE={NAMESPACE}
-  kubectl create ns $NAMESPACE
-  kubectl label namespace $NAMESPACE istio-injection=enabled --overwrite
+  export NAMESPACE_HTTPBIN={NAMESPACE_NAME}
+  export NAMESPACE_FUNCTION={NAMESPACE_NAME}
+  export NAMESPACE_APIRULE={NAMESPACE_NAME}
   ```
 
-3. Depending on whether you use your custom domain or a Kyma domain, export the necessary values as environment variables:
+2. Depending on whether you use your custom domain or a Kyma domain, export the necessary values as environment variables:
   
 <div tabs name="export-values">
 
@@ -29,7 +27,7 @@ This tutorial shows how to expose service endpoints in multiple Namespaces using
     
   ```bash
   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
-  export GATEWAY=$NAMESPACE/httpbin-gateway
+  export GATEWAY=$NAMESPACE_APIRULE/httpbin-gateway
   ```
   </details>
 
@@ -55,7 +53,7 @@ This tutorial shows how to expose service endpoints in multiple Namespaces using
    kind: APIRule
    metadata:
      name: httpbin-and-function
-     namespace: $NAMESPACE
+     namespace: $NAMESPACE_APIRULE
    spec:
      host: httpbin-and-function.$DOMAIN_TO_EXPOSE_WORKLOADS
      gateway: $GATEWAY
