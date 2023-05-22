@@ -17,7 +17,7 @@ require (
 	k8s.io/api v0.26.5
 	k8s.io/apimachinery v0.27.2
 	k8s.io/client-go v0.26.5
-	k8s.io/metrics v0.26.3
+	k8s.io/metrics v0.26.5
 	sigs.k8s.io/controller-runtime v0.14.6
 )
 
