@@ -117,24 +117,6 @@ spec:
 | ---- | ----------- | ---- |
 | **annotations**  | map\[string\]string | Defines annotations used in Deployment's PodTemplate and applied on the Function's runtime Pod. |
 | **env**  | \[\]object | Specifies an array of key-value pairs to be used as environment variables for the Function. You can define values as static strings or reference values from ConfigMaps or Secrets. |
-| **env.&#x200b;name** (required) | string | Name of the environment variable. Must be a C_IDENTIFIER. |
-| **env.&#x200b;value**  | string | Variable references $(VAR_NAME) are expanded using the previously defined environment variables in the container and any service environment variables. If a variable cannot be resolved, the reference in the input string will be unchanged. Double $ are reduced to a single $, which allows for escaping the $(VAR_NAME) syntax: i.e. "$(VAR_NAME)" will produce the string literal "$(VAR_NAME)". Escaped references will never be expanded, regardless of whether the variable exists or not. Defaults to "". |
-| **env.&#x200b;valueFrom**  | object | Source for the environment variable's value. Cannot be used if value is not empty. |
-| **env.&#x200b;valueFrom.&#x200b;configMapKeyRef**  | object | Selects a key of a ConfigMap. |
-| **env.&#x200b;valueFrom.&#x200b;configMapKeyRef.&#x200b;key** (required) | string | The key to select. |
-| **env.&#x200b;valueFrom.&#x200b;configMapKeyRef.&#x200b;name**  | string | Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid? |
-| **env.&#x200b;valueFrom.&#x200b;configMapKeyRef.&#x200b;optional**  | boolean | Specify whether the ConfigMap or its key must be defined |
-| **env.&#x200b;valueFrom.&#x200b;fieldRef**  | object | Selects a field of the pod: supports metadata.name, metadata.namespace, `metadata.labels['<KEY>']`, `metadata.annotations['<KEY>']`, spec.nodeName, spec.serviceAccountName, status.hostIP, status.podIP, status.podIPs. |
-| **env.&#x200b;valueFrom.&#x200b;fieldRef.&#x200b;apiVersion**  | string | Version of the schema the FieldPath is written in terms of, defaults to "v1". |
-| **env.&#x200b;valueFrom.&#x200b;fieldRef.&#x200b;fieldPath** (required) | string | Path of the field to select in the specified API version. |
-| **env.&#x200b;valueFrom.&#x200b;resourceFieldRef**  | object | Selects a resource of the container: only resources limits and requests (limits.cpu, limits.memory, limits.ephemeral-storage, requests.cpu, requests.memory and requests.ephemeral-storage) are currently supported. |
-| **env.&#x200b;valueFrom.&#x200b;resourceFieldRef.&#x200b;containerName**  | string | Container name: required for volumes, optional for env vars |
-| **env.&#x200b;valueFrom.&#x200b;resourceFieldRef.&#x200b;divisor**  | \{integer or string\} | Specifies the output format of the exposed resources, defaults to "1" |
-| **env.&#x200b;valueFrom.&#x200b;resourceFieldRef.&#x200b;resource** (required) | string | Required: resource to select |
-| **env.&#x200b;valueFrom.&#x200b;secretKeyRef**  | object | Selects a key of a secret in the pod's namespace |
-| **env.&#x200b;valueFrom.&#x200b;secretKeyRef.&#x200b;key** (required) | string | The key of the secret to select from.  Must be a valid secret key. |
-| **env.&#x200b;valueFrom.&#x200b;secretKeyRef.&#x200b;name**  | string | Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid? |
-| **env.&#x200b;valueFrom.&#x200b;secretKeyRef.&#x200b;optional**  | boolean | Specify whether the Secret or its key must be defined |
 | **labels**  | map\[string\]string | Defines labels used in Deployment's PodTemplate and applied on the Function's runtime Pod. |
 | **replicas**  | integer | Defines the exact number of Function's Pods to run at a time. If **ScaleConfig** is configured, or if Function is targeted by an external scaler, then the **Replicas** field is used by the relevant HorizontalPodAutoscaler to control the number of active replicas. |
 | **resourceConfiguration**  | object | Specifies resources requested by the Function and the build Job. |
