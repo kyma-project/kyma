@@ -8,37 +8,9 @@ This tutorial shows how to expose service endpoints in multiple Namespaces using
 
 ##  Prerequisites
 
-1. Create a sample HttpBin service deployment and a sample Function in the separate Namespaces:
+1. Create two Namespaces. Export their names as `NAMESPACE_HTTPBIN` and `NAMESPACE_FUNCTION` environment variables. Deploy an instance of the HttpBin service in the former Namespace and a sample Function in the latter. To learn how to do it, follow the [Create a workload](../apix-01-create-workload.md) tutorial. 
 
-   * Create a Namespace for the HttpBin service and export its value as an environment variable. Run:
-
-     ```bash
-     export NAMESPACE_HTTPBIN={NAMESPACE_HTTPBIN}
-     kubectl create ns $NAMESPACE_HTTPBIN
-     kubectl label namespace $NAMESPACE_HTTPBIN istio-injection=enabled --overwrite
-     ```
-
-   * Create a different Namespace for the Function service and export its value as an environment variable. Run:
-
-     ```bash
-     export NAMESPACE_FUNCTION={NAMESPACE_FUNCTION}
-     kubectl create ns $NAMESPACE_FUNCTION
-     kubectl label namespace $NAMESPACE_FUNCTION istio-injection=enabled --overwrite
-     ```
-
-   * Deploy an instance of the HttpBin service in its Namespace using the [sample code](https://raw.githubusercontent.com/istio/istio/master/samples/httpbin/httpbin.yaml):
-
-     ```bash
-     kubectl -n $NAMESPACE_HTTPBIN create -f https://raw.githubusercontent.com/istio/istio/master/samples/httpbin/httpbin.yaml
-     ```
-
-   * Create a Function in its Namespace using the [sample code](../assets/function.yaml):
-
-     ```bash
-     kubectl -n $NAMESPACE_FUNCTION apply -f https://raw.githubusercontent.com/kyma-project/kyma/main/docs/03-tutorials/assets/function.yaml
-     ```
-
-2. Create a Namespace for the Gateway and APIRule CRs and export its value as the environment variable. Run:
+2. Create a Namespace for the APIRule CR and export its value as an environment variable. Run:
 
   ```bash
   export NAMESPACE={NAMESPACE}
