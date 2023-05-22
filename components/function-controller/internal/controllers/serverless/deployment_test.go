@@ -205,7 +205,7 @@ func TestFunctionReconciler_equalDeployments(t *testing.T) {
 			want: false,
 		},
 		{
-			name: "different pod annotations", //TODO: remove this? - spec.template.metadata.annotations is ignored so that kubectl rollout restart works properly",
+			name: "different pod annotations",
 			args: args{
 				existing: appsv1.Deployment{
 					ObjectMeta: metav1.ObjectMeta{
