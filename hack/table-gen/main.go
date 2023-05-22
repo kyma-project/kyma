@@ -94,9 +94,24 @@ func (e *element) String() string {
 	return s
 }
 
+type arrayFlags []string
+
+func (af *arrayFlags) String() string {
+	return strings.Join(*af, ", ")
+}
+
+func (af *arrayFlags) Set(value string) error {
+	*af = append(*af, value)
+	return nil
+}
+
+var ignoreSpec, ignoreStatus arrayFlags
+
 func main() {
 	flag.StringVar(&CRDFilename, "crd-filename", "", "Full or relative Path to the .yaml file containing crd")
 	flag.StringVar(&MDFilename, "md-filename", "", "Full or relative Path to the .md file containing the file where we should insert table rows")
+	flag.Var(&ignoreSpec, "ignore-spec", "Spec property path to ignore during table generation. Can appear multiple times. Eg. `-ignore-spec 'foo.bar' -ignore-spec 'foo.baz'")
+	flag.Var(&ignoreStatus, "ignore-status", "Status property path to ignore during table generation. Can appear multiple times. Eg. `-ignore-status 'foo.bar' -ignore-status 'foo.baz'")
 	flag.Parse()
 
 	if CRDFilename == "" {
@@ -167,10 +182,8 @@ func generateDocFromCRD() string {
 			name := getElement(version, "name")
 			APIVersion = name.(string)
 			crd.GKV = fmt.Sprintf("%v.%v/%v", CRDKind, CRDGroup, APIVersion)
-			resource := "spec"
-			pathList(version, resource)
-			crd.Spec = pathList(version, "spec")
-			crd.Status = pathList(version, "status")
+			crd.Spec = filterIgnored(pathList(version, "spec"), ignoreSpec)
+			crd.Status = filterIgnored(pathList(version, "status"), ignoreStatus)
 			crdVersions = append(crdVersions, crd)
 		}
 	}
@@ -212,6 +225,20 @@ func pathList(version interface{}, resource string) []flatElement {
 	fe := flatten(e)
 	fe = filter(fe, resource)
 	return fe
+}
+
+func filterIgnored(fe []flatElement, ignoredProperties arrayFlags) []flatElement {
+	filteredElems := fe
+	for _, ig := range ignoredProperties {
+		var nfe []flatElement
+		for _, elem := range filteredElems {
+			if !strings.HasPrefix(strings.Join(elem.Path, "."), ig) {
+				nfe = append(nfe, elem)
+			}
+		}
+		filteredElems = nfe
+	}
+	return filteredElems
 }
 
 func filter(elements []flatElement, pathElement string) []flatElement {
