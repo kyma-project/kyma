@@ -1265,8 +1265,10 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(deployment.Spec.Template.Annotations).To(gomega.HaveKeyWithValue(
 			"proxy.istio.io/config", "{ \"holdApplicationUntilProxyStarts\": true }"))
 		copiedDeploy := deployment.DeepCopy()
+		const restartedAtAnnotationKey = "kubectl.kubernetes.io/restartedAt"
+		const restartedAtAnnotationValue = "2021-03-10T11:28:01+01:00"
 		restartedAtAnnotation := map[string]string{
-			"kubectl.kubernetes.io/restartedAt": "2021-03-10T11:28:01+01:00", // example annotation added by kubectl
+			restartedAtAnnotationKey: restartedAtAnnotationValue, // example annotation added by kubectl
 		}
 		copiedDeploy.Spec.Template.Annotations = restartedAtAnnotation
 		g.Expect(resourceClient.Update(context.Background(), copiedDeploy))
@@ -1274,8 +1276,19 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
-		t.Log("making sure function is ready")
 		function := &serverlessv1alpha2.Function{}
+		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
+		g.Expect(function.Status.Conditions).To(gomega.HaveLen(conditionLen))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionRunning)).To(gomega.Equal(corev1.ConditionUnknown))
+		g.Expect(getConditionReason(function.Status.Conditions, serverlessv1alpha2.ConditionRunning)).To(gomega.Equal(serverlessv1alpha2.ConditionReasonDeploymentUpdated))
+
+		_, err = reconciler.Reconcile(ctx, request)
+		g.Expect(err).To(gomega.BeNil())
+
+		t.Log("making sure function is ready")
+		function = &serverlessv1alpha2.Function{}
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 		g.Expect(function.Status.Conditions).To(gomega.HaveLen(conditionLen))
 		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
@@ -1290,7 +1303,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		deployment = &deployments.Items[0]
 		g.Expect(deployment).ToNot(gomega.BeNil())
 
-		g.Expect(deployment.Spec.Template.Annotations).To(gomega.Equal(restartedAtAnnotation))
+		g.Expect(deployment.Spec.Template.Annotations).To(gomega.HaveKeyWithValue(restartedAtAnnotationKey, restartedAtAnnotationValue))
 	})
 	t.Run("should reconcile function with RuntimeImageOverride", func(t *testing.T) {
 		//GIVEN
