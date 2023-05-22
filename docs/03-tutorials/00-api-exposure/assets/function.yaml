@@ -1,8 +1,7 @@
 apiVersion: serverless.kyma-project.io/v1alpha2
 kind: Function
 metadata:
-  name: $NAME
-  namespace: $NAMESPACE
+  name: function
 spec:
   runtime: nodejs16
   source:
