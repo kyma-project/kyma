@@ -8,7 +8,7 @@ require (
 	github.com/kyma-project/kyma/components/central-application-gateway v0.0.0-20230130154909-4c81ab2cee61
 	github.com/oklog/run v1.1.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
-	github.com/stretchr/testify v1.8.2
+	github.com/stretchr/testify v1.8.3
 	github.com/vrischmann/envconfig v1.3.0
 	go.uber.org/zap v1.24.0
 	k8s.io/apimachinery v0.27.2
