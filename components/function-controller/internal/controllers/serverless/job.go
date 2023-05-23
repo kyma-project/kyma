@@ -103,6 +103,10 @@ func functionRuntimeChanged(ctx context.Context, r *reconciler, s *systemState) 
 	if functionRuntimeImage == "" {
 		return false, nil
 	}
+	if s.instance.Spec.RuntimeImageOverride != "" {
+		result := functionRuntimeImage == s.instance.Spec.RuntimeImageOverride
+		return !result, nil
+	}
 
 	latestRuntimeImage, err := getRuntimeImageFromConfigMap(ctx, r, s)
 	if err != nil {
