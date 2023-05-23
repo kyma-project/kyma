@@ -27,6 +27,7 @@ const (
 	healthCheckTimeout  = time.Second
 	registryPullAddrKey = "pullRegAddr"
 	registryPushAddrKey = "pushRegAddr"
+	registryAddress     = "registryAddress"
 )
 
 //go:generate mockery --name=GitClient --output=automock --outpkg=automock --case=underscore
@@ -177,8 +178,8 @@ func (r *FunctionReconciler) readDockerConfig(ctx context.Context, instance *ser
 		data := readSecretData(secret.Data)
 		return DockerConfig{
 			ActiveRegistryConfigSecretName: r.config.ImageRegistryExternalDockerConfigSecretName,
-			PushAddress:                    data[registryPushAddrKey],
-			PullAddress:                    data[registryPullAddrKey],
+			PushAddress:                    data[registryAddress],
+			PullAddress:                    data[registryAddress],
 		}, nil
 	}
 
