@@ -278,10 +278,6 @@ dockerRegistry:
   username: "{{ randAlphaNum 20 | b64enc }}" # for gcr "_json_key"
   password: "{{ randAlphaNum 40 | b64enc }}" # for gcr data from json key
   registryAddr: ""
-#  TODO: remove them after check if can be removed
-  internalServerAddress: ""
-  registryAddress: ""
-  serverAddress:
 
 docker-registry:
   fullnameOverride: "serverless-docker-registry"
