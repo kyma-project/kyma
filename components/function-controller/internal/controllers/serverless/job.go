@@ -28,7 +28,7 @@ var backoffLimitExceeded = func(reason string) bool {
 // if a job is not running start one
 func buildStateFnCheckImageJob(expectedJob batchv1.Job) stateFn {
 	return func(ctx context.Context, r *reconciler, s *systemState) (stateFn, error) {
-		labels := s.internalFunctionLabels()
+		labels := internalFunctionLabels(s.instance)
 
 		err := r.client.ListByLabel(ctx, s.instance.GetNamespace(), labels, &s.jobs)
 		if err != nil {
@@ -103,6 +103,10 @@ func functionRuntimeChanged(ctx context.Context, r *reconciler, s *systemState) 
 	if functionRuntimeImage == "" {
 		return false, nil
 	}
+	if s.instance.Spec.RuntimeImageOverride != "" {
+		result := functionRuntimeImage == s.instance.Spec.RuntimeImageOverride
+		return !result, nil
+	}
 
 	latestRuntimeImage, err := getRuntimeImageFromConfigMap(ctx, r, s)
 	if err != nil {
@@ -175,7 +179,7 @@ func getRuntimeImageFromConfigMap(ctx context.Context, r *reconciler, s *systemS
 func stateFnInlineDeleteJobs(ctx context.Context, r *reconciler, s *systemState) (stateFn, error) {
 	r.log.Info("delete Jobs")
 
-	labels := s.internalFunctionLabels()
+	labels := internalFunctionLabels(s.instance)
 	selector := apilabels.SelectorFromSet(labels)
 
 	err := r.client.DeleteAllBySelector(ctx, &batchv1.Job{}, s.instance.GetNamespace(), selector)

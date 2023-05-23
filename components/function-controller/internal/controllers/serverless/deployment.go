@@ -28,7 +28,7 @@ const (
 )
 
 func stateFnCheckDeployments(ctx context.Context, r *reconciler, s *systemState) (stateFn, error) {
-	labels := s.internalFunctionLabels()
+	labels := internalFunctionLabels(s.instance)
 
 	err := r.client.ListByLabel(ctx, s.instance.GetNamespace(), labels, &s.deployments)
 	if err != nil {
@@ -84,7 +84,7 @@ func buildStateFnCreateDeployment(d appsv1.Deployment) stateFn {
 func stateFnDeleteDeployments(ctx context.Context, r *reconciler, s *systemState) (stateFn, error) {
 	r.log.Info("deleting function")
 
-	labels := s.internalFunctionLabels()
+	labels := internalFunctionLabels(s.instance)
 	selector := apilabels.SelectorFromSet(labels)
 
 	err := r.client.DeleteAllBySelector(ctx, &appsv1.Deployment{}, s.instance.GetNamespace(), selector)
