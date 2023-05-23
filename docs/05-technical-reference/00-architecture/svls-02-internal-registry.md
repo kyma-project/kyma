@@ -19,4 +19,5 @@ See the following diagram to learn how it works:
 5. The Kubernetes DNS service resolves the name and provides the IP of the internal Docker registry.
 
 **NOTE:** kubelet cannot resolve the in-cluster URL. That's why Serverless uses the NodePort service.
+
 **NOTE:** The NodePort service routing assures that the pull request reaches the internal Docker registry regardless of whether it is from a different node.
