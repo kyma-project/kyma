@@ -1,3 +1,4 @@
+{{/*TODO remove it*/}}
 {{- if .Values.dockerRegistry.enableInternal }}
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
@@ -34,5 +35,5 @@ spec:
         - destination:
             host: {{ template "registry-fullname" . }}
             port:
-              number: {{ .Values.global.dockerServicePort }}
+              number: {{ .Values.global.registryServicePort }}
 {{- end }}
