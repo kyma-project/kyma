@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: application-gateway-perf-test
+  namespace: {{ .Values.global.namespace }}
+spec:
+  template:
+    spec:
+      containers:
+        - name: application-gateway-test
+          image: ddosify/ddosify
+          imagePullPolicy: Always
+          command:
+            - sh
+            - -c
+            - |
+              until wget -q --spider http://127.0.0.1:15021/healthz/ready 2>/dev/null; do echo "Waiting for Istio sidecar..."; sleep 3; done;
+              echo \"Sidecar available. Running...\";
+              echo "Starting performance tests"
+              sleep 15
+              echo "Running performance tests 5 requests per sec, duration 120 sec"
+              ddosify -t http://central-application-gateway.kyma-system:8080/positive-authorisation/unsecure-always-ok -n 5000 -d 500
+              sleep 2
+              echo "Performance tests completed"
+              x=$(echo $?); wget -q --post-data='' -S -O /dev/null http://127.0.0.1:15020/quitquitquit && exit $x
+      restartPolicy: Never
+      serviceAccountName: {{ .Values.global.serviceAccountName }}
+  backoffLimit: 0

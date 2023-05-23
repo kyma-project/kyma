@@ -1,0 +1,45 @@
+apiVersion: applicationconnector.kyma-project.io/v1alpha1
+kind: Application
+metadata:
+  name: positive-authorisation
+  namespace: {{ .Values.global.namespace }}
+spec:
+  description: Authorisation
+  skipVerify: true
+  labels:
+    app: positive-authorisation
+  services:
+    - displayName: unsecure-always-ok
+      name: unsecure-always-ok
+      providerDisplayName: AlwaysOK
+      description: Should return 200 when calling unprotected endpoint
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/unsecure-always-ok"
+    - displayName: basic-auth-ok
+      name: basic-auth-ok
+      providerDisplayName: Basic
+      description: Should return 200 when calling endpoint protected with Basic Auth
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/basic/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/basic-auth-ok"
+          credentials:
+            secretName: basic-test
+            type: Basic
+    - displayName: oauth
+      name: oauth
+      providerDisplayName: OAuth
+      description: Should return 200 when calling endpoint protected with OAuth
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/oauth/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/oauth"
+          credentials:
+            secretName: oauth-test
+            authenticationUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/oauth/token"
+            type: OAuth

@@ -37,6 +37,11 @@ test-validator-debug: patch-for-validator-test validator-create-resources
 	echo "Results:"; \
 	./scripts/check-pod-logs.sh application-connectivity-validator-test; \
 
+perf-test-validator-debug: patch-for-validator-test validator-create-perf-tests-resources
+	kubectl wait --for=condition=complete --timeout=$(TEST_TIMEOUT) -n $(NAMESPACE) job/application-connectivity-validator-perf-test; \
+	echo "Results:"; \
+	./scripts/check-pod-logs.sh application-connectivity-validator-perf-test; \
+
 validator-create-resources:
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
 	kubectl label namespace $(NAMESPACE) istio-injection=enabled --overwrite
@@ -47,6 +52,20 @@ validator-create-resources:
 	kubectl rollout status deployment echoserver -n test --timeout=90s
 
 	@helm template resources/charts/application-connectivity-validator-test/charts/test \
+    		--set namespace=$(NAMESPACE) \
+    		--values resources/charts/application-connectivity-validator-test/values.yaml \
+	| kubectl apply -f -
+
+validator-create-perf-tests-resources:
+	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
+	kubectl label namespace $(NAMESPACE) istio-injection=enabled --overwrite
+
+	helm template resources/charts/application-connectivity-validator-test/charts/echoserver \
+		--set global.namespace=$(NAMESPACE) \
+	| kubectl apply -f -
+	kubectl rollout status deployment echoserver -n test --timeout=90s
+
+	@helm template resources/charts/application-connectivity-validator-test/charts/perf-test \
     		--set namespace=$(NAMESPACE) \
     		--values resources/charts/application-connectivity-validator-test/values.yaml \
 	| kubectl apply -f -

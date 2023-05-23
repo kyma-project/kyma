@@ -29,6 +29,12 @@ test-gateway-debug: disable-sidecar-for-mtls-test generate-certs create-resource
 	echo "Results:"; \
 	./scripts/check-pod-logs.sh application-gateway-test; \
 
+
+perf-test-gateway-debug: disable-sidecar-for-mtls-test generate-certs create-perf-tests-resources
+	kubectl wait --for=condition=complete --timeout=$(TEST_TIMEOUT) -n $(NAMESPACE) job/application-gateway-perf-test; \
+	echo "Results:"; \
+	./scripts/check-pod-logs.sh application-gateway-perf-test; \
+
 create-resources:
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
 	kubectl label namespace $(NAMESPACE) istio-injection=enabled --overwrite
@@ -41,6 +47,23 @@ create-resources:
 	kubectl rollout status deployment mock-application -n test --timeout=90s
 
 	helm template resources/charts/gateway-test/charts/test \
+		--set namespace=$(NAMESPACE) \
+		--set mockServiceName=$(MOCK_SERVICE_NAME) \
+		--values resources/charts/gateway-test/values.yaml \
+    | kubectl apply -f -
+
+create-perf-tests-resources:
+	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
+	kubectl label namespace $(NAMESPACE) istio-injection=enabled --overwrite
+
+	@helm template resources/charts/gateway-test/charts/mock-app \
+        --set global.namespace=$(NAMESPACE) \
+        --set mockServiceName=$(MOCK_SERVICE_NAME) \
+        --values resources/charts/gateway-test/values.yaml \
+    | kubectl apply -f -
+	kubectl rollout status deployment mock-application -n test --timeout=90s
+
+	helm template resources/charts/gateway-test/charts/perf-test \
 		--set namespace=$(NAMESPACE) \
 		--set mockServiceName=$(MOCK_SERVICE_NAME) \
 		--values resources/charts/gateway-test/values.yaml \

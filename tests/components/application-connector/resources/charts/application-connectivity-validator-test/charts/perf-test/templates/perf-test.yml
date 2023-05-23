@@ -1,0 +1,34 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: application-connectivity-validator-perf-test
+  namespace: {{ .Values.global.namespace }}
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      annotations:
+        traffic.sidecar.istio.io/excludeOutboundPorts: "8080"
+    spec:
+      containers:
+        - name: application-connectivity-validator-test
+          image: ddosify/ddosify
+          imagePullPolicy: Always
+          command:
+            - sh
+            - -c
+            - |
+              until wget -q --spider http://127.0.0.1:15021/healthz/ready 2>/dev/null; do echo "Waiting for Istio sidecar..."; sleep 3; done;
+              echo \"Sidecar available. Running...\";
+              echo "Starting performance tests"
+              XForwardedClientCertHeader='Hash=hash1;Cert=\"cert\";Subject=\"O=client organization,CN=clientId1\"'
+              JSON_PAYLOAD='{    "specversion" : "1.0",    "type" : "com.github.pull_request.opened",    "source" : "https://github.com/cloudevents/spec/pull",    "subject" : "123",    "id" : "A234-1234-1234",    "time" : "2018-04-05T17:31:00Z",    "comexampleextension1" : "value",    "comexampleothervalue" : 5,    "datacontenttype" : "text/xml",    "data" : "<much wow=\"xml\"/>"}'
+              sleep 10
+              echo "Running performance tests 1 requests per sec, duration 10 sec"
+              ddosify -m POST -t http://central-application-connectivity-validator.kyma-system:8080/event-test-compass/v1/events -h X-Forwarded-Client-Cert:$XForwardedClientCertHeader -n 10 -d 10 -b $JSON_PAYLOAD
+              sleep 2
+              echo "Performance tests completed"
+              x=$(echo $?); wget -q --post-data='' -S -O /dev/null http://127.0.0.1:15020/quitquitquit && exit $x
+      restartPolicy: Never
+
+
