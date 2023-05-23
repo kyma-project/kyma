@@ -20,7 +20,7 @@ This tutorial shows how to expose service endpoints in multiple Namespaces using
   export NAMESPACE_APIRULE={NAMESPACE_NAME}
   ```
   
-2. Depending on whether you use your custom domain or a Kyma domain, export the necessary values as environment variables:
+3. Depending on whether you use your custom domain or a Kyma domain, export the necessary values as environment variables:
   
 <div tabs name="export-values">
 
