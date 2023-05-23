@@ -1292,7 +1292,62 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 
 		g.Expect(deployment.Spec.Template.Annotations).To(gomega.Equal(restartedAtAnnotation))
 	})
+
 	t.Run("should reconcile function with RuntimeImageOverride", func(t *testing.T) {
+		//GIVEN
+		g := gomega.NewGomegaWithT(t)
+		runtimeImageOverride := "any-custom-fn-image"
+		inFunction := newFixFunctionWithCustomImage(testNamespace, "custom-runtime-fn-image", runtimeImageOverride, 1, 2)
+		g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
+		defer deleteFunction(g, resourceClient, inFunction)
+
+		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: inFunction.GetNamespace(), Name: inFunction.GetName()}}
+
+		//WHEN
+		t.Log("should configure function")
+
+		result, err := reconciler.Reconcile(ctx, request)
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(result.Requeue).To(gomega.BeFalse())
+		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
+
+		t.Log("should create build job with custom runtime image")
+		result, err = reconciler.Reconcile(ctx, request)
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(result.Requeue).To(gomega.BeFalse())
+		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
+
+		function := serverlessv1alpha2.Function{}
+		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, &function)).To(gomega.Succeed())
+		g.Expect(function.Spec.RuntimeImageOverride).To(gomega.Equal(runtimeImageOverride))
+		g.Expect(function.Status.RuntimeImageOverride).To(gomega.Equal(runtimeImageOverride))
+		g.Expect(function.Status.RuntimeImage).To(gomega.Equal(runtimeImageOverride))
+
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionUnknown))
+		g.Expect(getConditionReason(function.Status.Conditions, serverlessv1alpha2.ConditionBuildReady)).To(gomega.Equal(serverlessv1alpha2.ConditionReasonJobCreated))
+
+		jobs := &batchv1.JobList{}
+		g.Expect(resourceClient.ListByLabel(context.TODO(), inFunction.GetNamespace(), internalFunctionLabels(*inFunction), jobs))
+		g.Expect(jobs.Items).To(gomega.HaveLen(1))
+		buildContainers := jobs.Items[0].Spec.Template.Spec.Containers
+		g.Expect(buildContainers).To(gomega.HaveLen(1))
+		buildArgs := buildContainers[0].Args
+		g.Expect(buildArgs).To(gomega.ContainElement(fmt.Sprintf("--build-arg=base_image=%s", runtimeImageOverride)))
+
+		//https://github.com/kyma-project/kyma/issues/17552
+		t.Log("should wait for function's build and don't change anything related to job")
+		result, err = reconciler.Reconcile(ctx, request)
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(result.Requeue).To(gomega.BeFalse())
+		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
+
+		function = serverlessv1alpha2.Function{}
+		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, &function)).To(gomega.Succeed())
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionUnknown))
+		g.Expect(getConditionReason(function.Status.Conditions, serverlessv1alpha2.ConditionBuildReady)).To(gomega.Equal(serverlessv1alpha2.ConditionReasonJobRunning))
+	})
+
+	t.Run("should reconcile function with added RuntimeImageOverride removed", func(t *testing.T) {
 		//GIVEN
 		g := gomega.NewGomegaWithT(t)
 		runtimeImageOverride := "any-custom-fn-image"
