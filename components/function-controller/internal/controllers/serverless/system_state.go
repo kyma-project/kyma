@@ -39,18 +39,18 @@ type systemState struct {
 
 var _ SystemState = systemState{}
 
-func (s *systemState) internalFunctionLabels() map[string]string {
+func internalFunctionLabels(fn serverlessv1alpha2.Function) map[string]string {
 	intLabels := make(map[string]string, 3)
 
-	intLabels[serverlessv1alpha2.FunctionNameLabel] = s.instance.Name
+	intLabels[serverlessv1alpha2.FunctionNameLabel] = fn.Name
 	intLabels[serverlessv1alpha2.FunctionManagedByLabel] = serverlessv1alpha2.FunctionControllerValue
-	intLabels[serverlessv1alpha2.FunctionUUIDLabel] = string(s.instance.GetUID())
+	intLabels[serverlessv1alpha2.FunctionUUIDLabel] = string(fn.GetUID())
 
 	return intLabels
 }
 
 func (s *systemState) functionLabels() map[string]string {
-	internalLabels := s.internalFunctionLabels()
+	internalLabels := internalFunctionLabels(s.instance)
 	functionLabels := s.instance.GetLabels()
 
 	return labels.Merge(functionLabels, internalLabels)
@@ -331,7 +331,7 @@ func (s *systemState) deploymentSelectorLabels() map[string]string {
 		map[string]string{
 			serverlessv1alpha2.FunctionResourceLabel: serverlessv1alpha2.FunctionResourceLabelDeploymentValue,
 		},
-		s.internalFunctionLabels(),
+		internalFunctionLabels(s.instance),
 	)
 }
 
