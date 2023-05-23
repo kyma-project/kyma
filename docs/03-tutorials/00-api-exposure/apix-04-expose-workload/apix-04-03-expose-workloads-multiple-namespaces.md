@@ -8,14 +8,17 @@ This tutorial shows how to expose service endpoints in multiple Namespaces using
 
 ##  Prerequisites
 
-1. Create three Namespaces: one for an instance of the HttpBin service, one for a sample Function, and one for an APIRule custom resource (CR). Deploy an instance of the HttpBin service and a sample Function in their respective Namespaces. To learn how to do it, follow the [Create a workload](../apix-01-create-workload.md) tutorial. Export the Namespaces' names as environment variables:
+1. Create three Namespaces: one for an instance of the HttpBin service, one for a sample Function, and one for an APIRule custom resource (CR). Deploy an instance of the HttpBin service and a sample Function in their respective Namespaces. To learn how to do it, follow the [Create a workload](../apix-01-create-workload.md) tutorial. 
+
+  >**NOTE:** Remember to enable the Istio sidecar proxy injection.
+
+2. Export the Namespaces' names as environment variables:
 
   ```bash
   export NAMESPACE_HTTPBIN={NAMESPACE_NAME}
   export NAMESPACE_FUNCTION={NAMESPACE_NAME}
   export NAMESPACE_APIRULE={NAMESPACE_NAME}
   ```
-  >**NOTE** Remember to enable the Istio sidecar proxy injection.
   
 2. Depending on whether you use your custom domain or a Kyma domain, export the necessary values as environment variables:
   
