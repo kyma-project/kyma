@@ -766,7 +766,7 @@ func (r *Reconciler) checkStatusActive(subscription *eventingv1alpha2.Subscripti
 func (r *Reconciler) checkLastFailedDelivery(subscription *eventingv1alpha2.Subscription) (bool, error) {
 	// Check if LastFailedDelivery exists.
 	lastFailed := subscription.Status.Backend.EventMeshSubscriptionStatus.LastFailedDelivery
-	if len(lastFailed) <= 0 {
+	if len(lastFailed) == 0 {
 		return false, nil
 	}
 
@@ -779,7 +779,7 @@ func (r *Reconciler) checkLastFailedDelivery(subscription *eventingv1alpha2.Subs
 
 	// Check if LastSuccessfulDelivery exists. If not, LastFailedDelivery happened last.
 	lastSuccessful := subscription.Status.Backend.EventMeshSubscriptionStatus.LastSuccessfulDelivery
-	if len(lastSuccessful) <= 0 {
+	if len(lastSuccessful) == 0 {
 		return true, nil
 	}
 

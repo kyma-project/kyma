@@ -57,6 +57,7 @@ var (
 	testEnv       *envtest.Environment
 	k8sCancelFn   context.CancelFunc
 
+	//nolint:gochecknoglobals
 	natsSubMgr      = &SubMgrMock{}
 	eventMeshSubMgr = &SubMgrMock{}
 )
