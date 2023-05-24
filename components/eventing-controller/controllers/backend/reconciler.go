@@ -222,8 +222,7 @@ func (r *Reconciler) reconcileEventMeshBackend(ctx context.Context, bebSecret *v
 	backendStatus.Backend, backendStatus.EventMeshSecretName, backendStatus.EventMeshSecretNamespace = r.backendType, bebSecret.Name, bebSecret.Namespace
 
 	// CreateOrUpdate CR with EventMesh.
-	err := r.CreateOrUpdateBackendCR(ctx)
-	if err != nil {
+	if err := r.CreateOrUpdateBackendCR(ctx); err != nil {
 		backendStatus.SetSubscriptionControllerReadyCondition(false, eventingv1alpha1.ConditionReasonBackendCRSyncFailed, err.Error())
 		if updateErr := r.syncBackendStatus(ctx, backendStatus, nil); updateErr != nil {
 			return ctrl.Result{}, errors.Wrapf(err, "failed to update status while creating/updating EventingBackend")
@@ -240,9 +239,8 @@ func (r *Reconciler) reconcileEventMeshBackend(ctx context.Context, bebSecret *v
 		return ctrl.Result{}, err
 	}
 
-	// gets oauth2ClientID and secret and stops the EventMesh controller if changed.
-	err = r.syncOauth2ClientIDAndSecret(ctx, backendStatus)
-	if err != nil {
+	// Get oauth2ClientID and secret and stops the EventMesh controller if changed.
+	if err := r.syncOauth2ClientIDAndSecret(ctx, backendStatus); err != nil {
 		backendStatus.SetPublisherReadyCondition(false, eventingv1alpha1.ConditionReasonOauth2ClientSyncFailed, err.Error())
 		if updateErr := r.syncBackendStatus(ctx, backendStatus, nil); updateErr != nil {
 			return ctrl.Result{}, errors.Wrapf(err, "failed to update status while syncing oauth2Client")
@@ -271,7 +269,8 @@ func (r *Reconciler) reconcileEventMeshBackend(ctx context.Context, bebSecret *v
 	}
 
 	// Start the EventMesh subscription controller
-	if err := r.startEventMeshController(r.oauth2ClientID, r.oauth2ClientSecret); err != nil {
+	err = r.startEventMeshController(r.oauth2ClientID, r.oauth2ClientSecret)
+	if err != nil {
 		backendStatus.SetSubscriptionControllerReadyCondition(false, eventingv1alpha1.ConditionReasonControllerStartFailed, err.Error())
 		if updateErr := r.syncBackendStatus(ctx, backendStatus, nil); updateErr != nil {
 			return ctrl.Result{}, errors.Wrapf(err, "failed to update status while starting BEB controller")
