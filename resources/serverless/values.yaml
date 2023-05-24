@@ -277,7 +277,7 @@ dockerRegistry:
   gatewayCert: "kyma-gateway-certs"
   username: "{{ randAlphaNum 20 | b64enc }}" # for gcr "_json_key"
   password: "{{ randAlphaNum 40 | b64enc }}" # for gcr data from json key
-  registryAddr: ""
+  registryAddress: ""
 
 docker-registry:
   fullnameOverride: "serverless-docker-registry"
@@ -306,6 +306,3 @@ docker-registry:
 webhook:
   enabled: true
   fullnameOverride: "serverless-webhook"
-
-k3s-tests:
-  enabled: false # this chart is installed manually, do not flip this value
