@@ -33,7 +33,7 @@ type Backend struct {
 
 	// Status of the Subscription as reported by EventMesh.
 	// +optional
-	EventMeshSubscriptionStatus *EmsSubscriptionStatus `json:"emsSubscriptionStatus,omitempty"`
+	EventMeshSubscriptionStatus *EventMeshSubscriptionStatus `json:"emsSubscriptionStatus,omitempty"`
 
 	// List of event type to consumer name mappings for the NATS backend.
 	// +optional
@@ -44,7 +44,7 @@ type Backend struct {
 	EventMeshTypes []EventMeshTypes `json:"emsTypes,omitempty"`
 }
 
-type EmsSubscriptionStatus struct {
+type EventMeshSubscriptionStatus struct {
 	// Status of the Subscription as reported by the backend.
 	// +optional
 	Status string `json:"status,omitempty"`

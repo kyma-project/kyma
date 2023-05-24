@@ -87,7 +87,7 @@ func setEmsSubscriptionStatus(subscription *eventingv1alpha2.Subscription,
 	eventMeshSubscription *types.Subscription) bool {
 	var statusChanged = false
 	if subscription.Status.Backend.EventMeshSubscriptionStatus == nil {
-		subscription.Status.Backend.EventMeshSubscriptionStatus = &eventingv1alpha2.EmsSubscriptionStatus{}
+		subscription.Status.Backend.EventMeshSubscriptionStatus = &eventingv1alpha2.EventMeshSubscriptionStatus{}
 	}
 	if subscription.Status.Backend.EventMeshSubscriptionStatus.Status != string(eventMeshSubscription.SubscriptionStatus) {
 		subscription.Status.Backend.EventMeshSubscriptionStatus.Status = string(eventMeshSubscription.SubscriptionStatus)

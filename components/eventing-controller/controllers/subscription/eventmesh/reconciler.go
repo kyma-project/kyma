@@ -737,7 +737,7 @@ func (r *Reconciler) checkStatusActive(subscription *eventingv1alpha2.Subscripti
 		return false, nil
 	}
 
-	// check if the EMS subscription status is active
+	// Check if the EventMesh subscription status is active.
 	if subscription.Status.Backend.EventMeshSubscriptionStatus.Status == string(types.SubscriptionStatusActive) {
 		if len(subscription.Status.Backend.FailedActivation) > 0 {
 			subscription.Status.Backend.FailedActivation = ""

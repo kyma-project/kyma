@@ -37,7 +37,7 @@ type Condition struct {
 type ConditionReason string
 
 const (
-	// BEB Conditions.
+	// EventMesh Conditions.
 	ConditionReasonSubscriptionCreated        ConditionReason = "BEB Subscription created"
 	ConditionReasonSubscriptionCreationFailed ConditionReason = "BEB Subscription creation failed"
 	ConditionReasonSubscriptionActive         ConditionReason = "BEB Subscription active"
