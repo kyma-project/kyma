@@ -57,11 +57,11 @@ func TestBEBFilters_Deduplicate(t *testing.T) {
 		{
 			caseName: "Only one filter",
 			input: &v1alpha1.EventMeshFilters{
-				Dialect: "beb",
+				Dialect: "eventmesh",
 				Filters: []*v1alpha1.EventMeshFilter{filter1},
 			},
 			expected: &v1alpha1.EventMeshFilters{
-				Dialect: "beb",
+				Dialect: "eventmesh",
 				Filters: []*v1alpha1.EventMeshFilter{filter1},
 			},
 			expectErr: false,

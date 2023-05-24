@@ -41,7 +41,7 @@ const (
 	PublisherSecretClientSecretKey  = "client-secret"
 	PublisherSecretTokenEndpointKey = "token-endpoint"
 	PublisherSecretEMSURLKey        = "ems-publish-url"
-	PublisherSecretBEBNamespaceKey  = "beb-namespace"
+	PublisherSecretBEBNamespaceKey  = "eventmesh-namespace"
 
 	configMapName               = "eventing"
 	configMapKeyEventTypePrefix = "eventTypePrefix"
@@ -276,7 +276,7 @@ func getLogEnvVars(publisherConfig env.PublisherConfig) []v1.EnvVar {
 
 func getBEBEnvVars(publisherConfig env.PublisherConfig) []v1.EnvVar {
 	return []v1.EnvVar{
-		{Name: "BACKEND", Value: "beb"},
+		{Name: "BACKEND", Value: "eventmesh"},
 		{Name: "PORT", Value: strconv.Itoa(int(publisherPortNum))},
 		{
 			Name: "EVENT_TYPE_PREFIX",

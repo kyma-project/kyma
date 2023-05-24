@@ -6,7 +6,7 @@ const (
 	// ControllerServiceLabelKey controller service label.
 	ControllerServiceLabelKey = "service"
 	// ControllerIdentityLabelKey controller identity label key.
-	ControllerIdentityLabelKey = "beb"
+	ControllerIdentityLabelKey = "eventmesh"
 	// ControllerIdentityLabelValue controller identity label value.
 	ControllerIdentityLabelValue = "webhook"
 )

@@ -14,7 +14,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/options"
 	backendmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager/beb"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager/eventmesh"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager/jetstream"
 	"k8s.io/apimachinery/pkg/runtime"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -65,11 +65,11 @@ func main() {
 		setupLogger.Fatalw("Failed to start manager", "backend", v1alpha1.NatsBackendType, "error", err)
 	}
 
-	bebSubMgr := beb.NewSubscriptionManager(restCfg, opts.MetricsAddr, opts.ReconcilePeriod, ctrLogger)
-	if err = beb.AddToScheme(scheme); err != nil {
+	bebSubMgr := eventmesh.NewSubscriptionManager(restCfg, opts.MetricsAddr, opts.ReconcilePeriod, ctrLogger)
+	if err = eventmesh.AddToScheme(scheme); err != nil {
 		setupLogger.Fatalw("Failed to start subscription manager", "backend", v1alpha1.BEBBackendType, "error", err)
 	}
-	if err = beb.AddV1Alpha2ToScheme(scheme); err != nil {
+	if err = eventmesh.AddV1Alpha2ToScheme(scheme); err != nil {
 		setupLogger.Fatalw("Failed to start subscription manager", "backend", v1alpha1.BEBBackendType, "error", err)
 	}
 

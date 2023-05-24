@@ -38,9 +38,9 @@ import (
 //nolint:gosec
 const (
 	BEBBackendSecretLabelKey   = "kyma-project.io/eventing-backend"
-	BEBBackendSecretLabelValue = "beb"
+	BEBBackendSecretLabelValue = "eventmesh"
 
-	BEBSecretNameSuffix = "-beb-oauth2"
+	BEBSecretNameSuffix = "-eventmesh-oauth2"
 
 	BackendCRLabelKey   = "kyma-project.io/eventing"
 	BackendCRLabelValue = "backend"

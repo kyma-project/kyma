@@ -50,7 +50,7 @@ type BEBMockResponseOverride struct {
 }
 
 func NewBEBMock() *BEBMock {
-	logger := logf.Log.WithName("beb mock")
+	logger := logf.Log.WithName("eventmesh mock")
 	return &BEBMock{
 		Requests:          NewSafeRequests(),
 		Subscriptions:     NewSafeSubscriptions(),

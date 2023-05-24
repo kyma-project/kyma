@@ -1,4 +1,4 @@
-package beb
+package eventmesh
 
 import (
 	"context"
@@ -35,7 +35,7 @@ import (
 )
 
 const (
-	subscriptionManagerName = "beb-subscription-manager"
+	subscriptionManagerName = "eventmesh-subscription-manager"
 )
 
 // AddToScheme adds the own schemes to the runtime scheme.
@@ -112,7 +112,7 @@ func (c *SubscriptionManager) Start(_ env.DefaultSubscriptionConfig, params subs
 		"maxNameLength", backendeventmesh.MaxSubscriptionNameLength)
 
 	client := c.mgr.GetClient()
-	recorder := c.mgr.GetEventRecorderFor("eventing-controller-beb")
+	recorder := c.mgr.GetEventRecorderFor("eventing-controller-eventmesh")
 
 	// Initialize v1alpha1 event type cleaner for conversion webhook
 	simpleCleaner := eventtype.NewSimpleCleaner(c.envCfg.EventTypePrefix, c.logger)
