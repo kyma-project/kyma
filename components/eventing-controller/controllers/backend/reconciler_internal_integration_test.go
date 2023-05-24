@@ -286,8 +286,8 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 				reconcilertesting.HaveValidClientID(deployment.PublisherSecretClientIDKey, "rest-clientid"),
 				reconcilertesting.HaveValidClientSecret(deployment.PublisherSecretClientSecretKey, "rest-client-secret"),
 				reconcilertesting.HaveValidTokenEndpoint(deployment.PublisherSecretTokenEndpointKey, "https://rest-token?grant_type=client_credentials&response_type=token"),
-				reconcilertesting.HaveValidEMSPublishURL(PublisherSecretEMSHostKey, "https://rest-messaging"),
-				reconcilertesting.HaveValidEMSPublishURL(deployment.PublisherSecretEventMeshURLKey, "https://rest-messaging/sap/ems/v1/events"),
+				reconcilertesting.HaveValidEventMeshPublishURL(PublisherSecretEMSHostKey, "https://rest-messaging"),
+				reconcilertesting.HaveValidEventMeshPublishURL(deployment.PublisherSecretEventMeshURLKey, "https://rest-messaging/sap/ems/v1/events"),
 				reconcilertesting.HaveValidEventMeshNamespace(deployment.PublisherSecretEventMeshNamespaceKey, "test/ns"),
 			))
 			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).

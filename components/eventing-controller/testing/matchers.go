@@ -128,19 +128,19 @@ func HaveValidTokenEndpoint(tokenEndpointKey, tokenEndpoint string) gomegatypes.
 	}, BeTrue())
 }
 
-func HaveValidEMSPublishURL(emsPublishURLKey, emsPublishURL string) gomegatypes.GomegaMatcher {
+func HaveValidEventMeshPublishURL(eventMeshPublishURLKey, eventMeshPublishURL string) gomegatypes.GomegaMatcher {
 	return WithTransform(func(secret *corev1.Secret) bool {
 		if secret != nil {
-			return string(secret.Data[emsPublishURLKey]) == emsPublishURL
+			return string(secret.Data[eventMeshPublishURLKey]) == eventMeshPublishURL
 		}
 		return false
 	}, BeTrue())
 }
 
-func HaveValidEventMeshNamespace(bebNamespaceKey, namespace string) gomegatypes.GomegaMatcher {
+func HaveValidEventMeshNamespace(eventMeshNamespaceKey, namespace string) gomegatypes.GomegaMatcher {
 	return WithTransform(func(secret *corev1.Secret) bool {
 		if secret != nil {
-			return string(secret.Data[bebNamespaceKey]) == namespace
+			return string(secret.Data[eventMeshNamespaceKey]) == namespace
 		}
 		return false
 	}, BeTrue())
@@ -152,9 +152,9 @@ func HaveNoEventMeshSecretNameAndNamespace() gomegatypes.GomegaMatcher {
 	}, BeTrue())
 }
 
-func HaveEventMeshSecretNameAndNamespace(bebSecretName, namespace string) gomegatypes.GomegaMatcher {
+func HaveEventMeshSecretNameAndNamespace(eventMeshSecretName, namespace string) gomegatypes.GomegaMatcher {
 	return WithTransform(func(s *eventingv1alpha1.EventingBackendStatus) bool {
-		return s.EventMeshSecretName == bebSecretName && s.EventMeshSecretNamespace == namespace
+		return s.EventMeshSecretName == eventMeshSecretName && s.EventMeshSecretNamespace == namespace
 	}, BeTrue())
 }
 
