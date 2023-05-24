@@ -539,7 +539,7 @@ func WithStatusJSBackendTypes(types []eventingv1alpha2.JetStreamTypes) Subscript
 	}
 }
 
-func WithEmsSubscriptionStatus(status string) SubscriptionOpt {
+func WithEventMeshSubscriptionStatus(status string) SubscriptionOpt {
 	return func(sub *eventingv1alpha2.Subscription) {
 		sub.Status.Backend.EventMeshSubscriptionStatus = &eventingv1alpha2.EventMeshSubscriptionStatus{
 			Status: status,

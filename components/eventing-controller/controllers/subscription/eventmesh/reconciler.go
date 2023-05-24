@@ -64,7 +64,7 @@ const (
 	externalSinkScheme          = "https"
 	apiRuleNamePrefix           = "webhook-"
 	reconcilerName              = "eventMesh-subscription-reconciler"
-	timeoutRetryActiveEmsStatus = time.Second * 30
+	timeoutRetryActiveEventMeshsStatus = time.Second * 30
 	requeueAfterDuration        = time.Second * 2
 )
 
@@ -755,7 +755,7 @@ func (r *Reconciler) checkStatusActive(subscription *eventingv1alpha2.Subscripti
 	// check the timeout
 	if t0, er := time.Parse(time.RFC3339, subscription.Status.Backend.FailedActivation); er != nil {
 		err = er
-	} else if t1.Sub(t0) > timeoutRetryActiveEmsStatus {
+	} else if t1.Sub(t0) > timeoutRetryActiveEventMeshsStatus {
 		err = xerrors.Errorf("timeout waiting for the subscription to be active: %s", subscription.Name)
 	}
 

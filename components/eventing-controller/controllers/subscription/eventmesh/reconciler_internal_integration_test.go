@@ -53,7 +53,7 @@ func TestReconciler_Reconcile(t *testing.T) {
 		reconcilertesting.WithDefaultSource(),
 		reconcilertesting.WithEventType(reconcilertesting.OrderCreatedEventType),
 		reconcilertesting.WithValidSink("test", "test-svc"),
-		reconcilertesting.WithEmsSubscriptionStatus(string(types.SubscriptionStatusActive)),
+		reconcilertesting.WithEventMeshSubscriptionStatus(string(types.SubscriptionStatusActive)),
 	)
 	// A subscription marked for deletion.
 	testSubUnderDeletion := reconcilertesting.NewSubscription("sub2", "test",
@@ -70,7 +70,7 @@ func TestReconciler_Reconcile(t *testing.T) {
 		reconcilertesting.WithDefaultSource(),
 		reconcilertesting.WithEventType(reconcilertesting.OrderCreatedEventType),
 		reconcilertesting.WithValidSink("test", "test-svc"),
-		reconcilertesting.WithEmsSubscriptionStatus(string(types.SubscriptionStatusPaused)),
+		reconcilertesting.WithEventMeshSubscriptionStatus(string(types.SubscriptionStatusPaused)),
 	)
 
 	backendSyncErr := errors.New("backend sync error")

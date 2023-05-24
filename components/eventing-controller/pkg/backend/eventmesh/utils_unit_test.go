@@ -160,7 +160,7 @@ func Test_updateHashesInStatus(t *testing.T) {
 	require.Equal(t, kymaSubscription.Status.Backend.EventMeshHash, wantHash)
 }
 
-func Test_setEmsSubscriptionStatus(t *testing.T) {
+func Test_setEventMeshSubscriptionStatus(t *testing.T) {
 	t.Parallel()
 
 	// given
