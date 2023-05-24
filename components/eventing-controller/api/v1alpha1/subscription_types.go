@@ -87,7 +87,7 @@ func (bf *EventMeshFilter) hash() (uint64, error) {
 	return hashstructure.Hash(bf, hashstructure.FormatV2, nil)
 }
 
-// EventMeshFilters defines the list of BEB filters.
+// EventMeshFilters defines the list of EventMesh filters.
 type EventMeshFilters struct {
 	// Contains a `URI-reference` to the CloudEvent filter dialect. See
 	// [here](https://github.com/cloudevents/spec/blob/main/subscriptions/spec.md#3241-filter-dialects) for more details.
