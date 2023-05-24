@@ -223,7 +223,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 		})
 	})
 
-	When("Creating a Eventing Backend and no secret labeled for BEB is found", func() {
+	When("Creating a Eventing Backend and no secret labeled for EventMesh is found", func() {
 		It("Should start with NATS", func() {
 			ctx := context.Background()
 			ensureKymaSystemNamespaceCreated(ctx)
@@ -236,7 +236,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 					reconcilertesting.HaveBackendType(eventingv1alpha1.NatsBackendType),
 					reconcilertesting.HaveBackendCondition(reconcilertesting.PublisherProxyDefaultNotReadyCondition()),
 					reconcilertesting.HaveBackendCondition(reconcilertesting.SubscriptionControllerDefaultReadyCondition()),
-					reconcilertesting.HaveNoBEBSecretNameAndNamespace(),
+					reconcilertesting.HaveNoEventMeshSecretNameAndNamespace(),
 					reconcilertesting.HaveEventingBackendNotReady(),
 				))
 			k8sEventsGetter().Should(And(
@@ -253,7 +253,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 					reconcilertesting.HaveBackendType(eventingv1alpha1.NatsBackendType),
 					reconcilertesting.HaveBackendCondition(reconcilertesting.PublisherProxyDefaultReadyCondition()),
 					reconcilertesting.HaveBackendCondition(reconcilertesting.SubscriptionControllerDefaultReadyCondition()),
-					reconcilertesting.HaveNoBEBSecretNameAndNamespace(),
+					reconcilertesting.HaveNoEventMeshSecretNameAndNamespace(),
 					reconcilertesting.HaveEventingBackendReady(),
 				))
 			k8sEventsGetter().Should(And(
@@ -272,13 +272,13 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 		})
 	})
 
-	When("A secret labeled for BEB is found", func() {
-		It("Should switch from NATS to BEB", func() {
+	When("A secret labeled for EventMesh is found", func() {
+		It("Should switch from NATS to EventMesh", func() {
 			ctx := context.Background()
 			// As there is no Hydra operator that creates secrets based on OAuth2Client CRs, we create the secret.
 			ensureKymaSystemNamespaceCreated(ctx)
 			createOAuth2Secret(ctx, []byte("id1"), []byte("secret1"))
-			ensureBEBSecretCreated(ctx, bebSecret1name, kymaSystemNamespace)
+			ensureEventMeshSecretCreated(ctx, bebSecret1name, kymaSystemNamespace)
 			// Expect
 			Eventually(publisherProxyDeploymentGetter(ctx), timeout, pollingInterval).
 				ShouldNot(BeNil())
@@ -288,14 +288,14 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 				reconcilertesting.HaveValidTokenEndpoint(deployment.PublisherSecretTokenEndpointKey, "https://rest-token?grant_type=client_credentials&response_type=token"),
 				reconcilertesting.HaveValidEMSPublishURL(PublisherSecretEMSHostKey, "https://rest-messaging"),
 				reconcilertesting.HaveValidEMSPublishURL(deployment.PublisherSecretEventMeshURLKey, "https://rest-messaging/sap/ems/v1/events"),
-				reconcilertesting.HaveValidBEBNamespace(deployment.PublisherSecretEventMeshNamespaceKey, "test/ns"),
+				reconcilertesting.HaveValidEventMeshNamespace(deployment.PublisherSecretEventMeshNamespaceKey, "test/ns"),
 			))
 			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
 				Should(And(
 					reconcilertesting.HaveBackendType(eventingv1alpha1.EventMeshBackendType),
 					reconcilertesting.HaveBackendCondition(reconcilertesting.PublisherProxyDefaultNotReadyCondition()),
 					reconcilertesting.HaveBackendCondition(reconcilertesting.SubscriptionControllerDefaultReadyCondition()),
-					reconcilertesting.HaveBEBSecretNameAndNamespace(bebSecret1name, kymaSystemNamespace),
+					reconcilertesting.HaveEventMeshSecretNameAndNamespace(bebSecret1name, kymaSystemNamespace),
 					reconcilertesting.HaveEventingBackendNotReady(),
 				))
 		})
@@ -307,7 +307,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 					reconcilertesting.HaveBackendType(eventingv1alpha1.EventMeshBackendType),
 					reconcilertesting.HaveBackendCondition(reconcilertesting.PublisherProxyDefaultReadyCondition()),
 					reconcilertesting.HaveBackendCondition(reconcilertesting.SubscriptionControllerDefaultReadyCondition()),
-					reconcilertesting.HaveBEBSecretNameAndNamespace(bebSecret1name, kymaSystemNamespace),
+					reconcilertesting.HaveEventMeshSecretNameAndNamespace(bebSecret1name, kymaSystemNamespace),
 					reconcilertesting.HaveEventingBackendReady(),
 				))
 		})
@@ -321,7 +321,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 	})
 
 	When("The OAuth2 secret is missing", func() {
-		It("Should mark eventing as not ready and stop the BEB subscription reconciler", func() {
+		It("Should mark eventing as not ready and stop the EventMesh subscription reconciler", func() {
 			ctx := context.Background()
 			bebSubMgr.resetState()
 			removeOAuth2Secret(ctx)
@@ -331,7 +331,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 					reconcilertesting.HaveBackendCondition(reconcilertesting.PublisherProxyDefaultNotReadyCondition()),
 					reconcilertesting.HaveBackendCondition(reconcilertesting.SubscriptionControllerReadyConditionWith(corev1.ConditionFalse,
 						eventingv1alpha1.ConditionReasonSubscriptionControllerNotReady)),
-					reconcilertesting.HaveBEBSecretNameAndNamespace(bebSecret1name, kymaSystemNamespace),
+					reconcilertesting.HaveEventMeshSecretNameAndNamespace(bebSecret1name, kymaSystemNamespace),
 					reconcilertesting.HaveEventingBackendNotReady(),
 				))
 			k8sEventsGetter().Should(reconcilertesting.HaveEvent(corev1.Event{
@@ -345,7 +345,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 	})
 
 	When("The OAuth2 secret is recreated", func() {
-		It("Should mark eventing as ready and start the BEB subscription reconciler", func() {
+		It("Should mark eventing as ready and start the EventMesh subscription reconciler", func() {
 			ctx := context.Background()
 			bebSubMgr.resetState()
 			createOAuth2Secret(ctx, []byte("id2"), []byte("secret2"))
@@ -354,17 +354,17 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 					reconcilertesting.HaveBackendType(eventingv1alpha1.EventMeshBackendType),
 					reconcilertesting.HaveBackendCondition(reconcilertesting.PublisherProxyDefaultReadyCondition()),
 					reconcilertesting.HaveBackendCondition(reconcilertesting.SubscriptionControllerDefaultReadyCondition()),
-					reconcilertesting.HaveBEBSecretNameAndNamespace(bebSecret1name, kymaSystemNamespace),
+					reconcilertesting.HaveEventMeshSecretNameAndNamespace(bebSecret1name, kymaSystemNamespace),
 					reconcilertesting.HaveEventingBackendReady(),
 				))
 			Eventually(bebSubMgr.StartCalled, timeout, pollingInterval).Should(BeTrue())
 		})
 	})
 
-	When("More than one secret is found label for BEB usage", func() {
+	When("More than one secret is found label for EventMesh usage", func() {
 		It("Should take down eventing", func() {
 			ctx := context.Background()
-			ensureBEBSecretCreated(ctx, bebSecret2name, kymaSystemNamespace)
+			ensureEventMeshSecretCreated(ctx, bebSecret2name, kymaSystemNamespace)
 			By("Checking EventingReady status is set to false")
 			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
 				Should(And(
@@ -372,17 +372,17 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 					reconcilertesting.HaveBackendCondition(reconcilertesting.PublisherProxyDefaultNotReadyCondition()),
 					reconcilertesting.HaveBackendCondition(reconcilertesting.SubscriptionControllerReadyConditionWith(corev1.ConditionFalse,
 						eventingv1alpha1.ConditionDuplicateSecrets)),
-					reconcilertesting.HaveNoBEBSecretNameAndNamespace(),
+					reconcilertesting.HaveNoEventMeshSecretNameAndNamespace(),
 					reconcilertesting.HaveEventingBackendNotReady(),
 				))
 		})
 	})
 
-	When("Two BEB secrets take down eventing and one secret is removed", func() {
+	When("Two EventMesh secrets take down eventing and one secret is removed", func() {
 		It("Should restore eventing status", func() {
 			ctx := context.Background()
-			By("Deleting the second secret with the BEB label")
-			bebSecret2 := reconcilertesting.NewBEBMessagingSecret(bebSecret2name, kymaSystemNamespace)
+			By("Deleting the second secret with the EventMesh label")
+			bebSecret2 := reconcilertesting.NewEventMeshMessagingSecret(bebSecret2name, kymaSystemNamespace)
 			Expect(k8sClient.Delete(ctx, bebSecret2)).Should(BeNil())
 			By("Checking EventingReady status is set to true")
 			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
@@ -390,7 +390,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 					reconcilertesting.HaveBackendType(eventingv1alpha1.EventMeshBackendType),
 					reconcilertesting.HaveBackendCondition(reconcilertesting.PublisherProxyDefaultReadyCondition()),
 					reconcilertesting.HaveBackendCondition(reconcilertesting.SubscriptionControllerDefaultReadyCondition()),
-					reconcilertesting.HaveBEBSecretNameAndNamespace(bebSecret1name, kymaSystemNamespace),
+					reconcilertesting.HaveEventMeshSecretNameAndNamespace(bebSecret1name, kymaSystemNamespace),
 					reconcilertesting.HaveEventingBackendReady(),
 				))
 		})
@@ -400,8 +400,8 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 		It("Should mark Eventing Backend CR to not ready", func() {
 			ctx := context.Background()
 			natsSubMgr.startErr = errors.New("I don't want to start")
-			By("Un-label the BEB secret to switch to NATS")
-			bebSecret := reconcilertesting.NewBEBMessagingSecret(bebSecret1name, kymaSystemNamespace)
+			By("Un-label the EventMesh secret to switch to NATS")
+			bebSecret := reconcilertesting.NewEventMeshMessagingSecret(bebSecret1name, kymaSystemNamespace)
 			bebSecret.Labels = map[string]string{}
 			Expect(k8sClient.Update(ctx, bebSecret)).Should(BeNil())
 			By("Checking EventingReady status is set to false")
@@ -411,7 +411,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 					reconcilertesting.HaveBackendCondition(reconcilertesting.PublisherProxyDefaultNotReadyCondition()),
 					reconcilertesting.HaveBackendCondition(reconcilertesting.SubscriptionControllerReadyConditionWith(corev1.ConditionFalse,
 						eventingv1alpha1.ConditionReasonControllerStartFailed)),
-					reconcilertesting.HaveNoBEBSecretNameAndNamespace(),
+					reconcilertesting.HaveNoEventMeshSecretNameAndNamespace(),
 					reconcilertesting.HaveEventingBackendNotReady(),
 				))
 		})
@@ -428,7 +428,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 					reconcilertesting.HaveBackendType(eventingv1alpha1.NatsBackendType),
 					reconcilertesting.HaveBackendCondition(reconcilertesting.PublisherProxyDefaultNotReadyCondition()),
 					reconcilertesting.HaveBackendCondition(reconcilertesting.SubscriptionControllerDefaultReadyCondition()),
-					reconcilertesting.HaveNoBEBSecretNameAndNamespace(),
+					reconcilertesting.HaveNoEventMeshSecretNameAndNamespace(),
 					reconcilertesting.HaveEventingBackendNotReady(),
 				))
 			By("Ensure publisher proxy secret is removed")
@@ -442,18 +442,18 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 					reconcilertesting.HaveBackendType(eventingv1alpha1.NatsBackendType),
 					reconcilertesting.HaveBackendCondition(reconcilertesting.PublisherProxyDefaultReadyCondition()),
 					reconcilertesting.HaveBackendCondition(reconcilertesting.SubscriptionControllerDefaultReadyCondition()),
-					reconcilertesting.HaveNoBEBSecretNameAndNamespace(),
+					reconcilertesting.HaveNoEventMeshSecretNameAndNamespace(),
 					reconcilertesting.HaveEventingBackendReady(),
 				))
 		})
 	})
 
-	When("Switching to BEB and then stopping NATS controller fails", func() {
+	When("Switching to EventMesh and then stopping NATS controller fails", func() {
 		It("Should mark Eventing Backend CR to not ready", func() {
 			ctx := context.Background()
 			natsSubMgr.stopErr = errors.New("I can't stop")
-			By("Label the secret to switch to BEB")
-			bebSecret := reconcilertesting.NewBEBMessagingSecret(bebSecret1name, kymaSystemNamespace)
+			By("Label the secret to switch to EventMesh")
+			bebSecret := reconcilertesting.NewEventMeshMessagingSecret(bebSecret1name, kymaSystemNamespace)
 			bebSecret.Labels = map[string]string{
 				EventMeshBackendSecretLabelKey: EventMeshBackendSecretLabelValue,
 			}
@@ -465,10 +465,10 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 					reconcilertesting.HaveBackendCondition(reconcilertesting.PublisherProxyDefaultNotReadyCondition()),
 					reconcilertesting.HaveBackendCondition(reconcilertesting.SubscriptionControllerReadyConditionWith(corev1.ConditionFalse,
 						eventingv1alpha1.ConditionReasonControllerStopFailed)),
-					reconcilertesting.HaveBEBSecretNameAndNamespace(bebSecret1name, kymaSystemNamespace),
+					reconcilertesting.HaveEventMeshSecretNameAndNamespace(bebSecret1name, kymaSystemNamespace),
 					reconcilertesting.HaveEventingBackendNotReady(),
 				))
-			By("Checking that no BEB secret is created for publisher")
+			By("Checking that no EventMesh secret is created for publisher")
 			eventuallyPublisherProxySecret(ctx).Should(BeNil())
 		})
 	})
@@ -484,7 +484,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 					reconcilertesting.HaveBackendType(eventingv1alpha1.EventMeshBackendType),
 					reconcilertesting.HaveBackendCondition(reconcilertesting.PublisherProxyDefaultReadyCondition()),
 					reconcilertesting.HaveBackendCondition(reconcilertesting.SubscriptionControllerDefaultReadyCondition()),
-					reconcilertesting.HaveBEBSecretNameAndNamespace(bebSecret1name, kymaSystemNamespace),
+					reconcilertesting.HaveEventMeshSecretNameAndNamespace(bebSecret1name, kymaSystemNamespace),
 					reconcilertesting.HaveEventingBackendReady(),
 				))
 		})
@@ -686,13 +686,13 @@ func removeOAuth2Secret(ctx context.Context) {
 	Expect(k8sClient.Delete(ctx, sec)).Should(BeNil())
 }
 
-func ensureBEBSecretCreated(ctx context.Context, name, ns string) {
-	bebSecret := reconcilertesting.NewBEBMessagingSecret(name, ns)
-	bebSecret.Labels = map[string]string{
+func ensureEventMeshSecretCreated(ctx context.Context, name, ns string) {
+	eventMeshSecret := reconcilertesting.NewEventMeshMessagingSecret(name, ns)
+	eventMeshSecret.Labels = map[string]string{
 		EventMeshBackendSecretLabelKey: EventMeshBackendSecretLabelValue,
 	}
-	By(fmt.Sprintf("Ensuring an BEB Secret %q/%q is created", name, ns))
-	err := k8sClient.Create(ctx, bebSecret)
+	By(fmt.Sprintf("Ensuring an EventMesh Secret %q/%q is created", name, ns))
+	err := k8sClient.Create(ctx, eventMeshSecret)
 	Expect(err).Should(BeNil())
 }
 
@@ -809,7 +809,7 @@ func eventingOwnerReferencesGetter(ctx context.Context, name, namespace string) 
 	}
 }
 
-// SubMgrMock is a subscription manager mock implementation for BEB and NATS.
+// SubMgrMock is a subscription manager mock implementation for EventMesh and NATS.
 type SubMgrMock struct {
 	// These state variables are used to validate the mock state. Ideally, we'd use a proper mocking framework!
 	startErr, stopErr                                            error

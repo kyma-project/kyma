@@ -137,7 +137,7 @@ func HaveValidEMSPublishURL(emsPublishURLKey, emsPublishURL string) gomegatypes.
 	}, BeTrue())
 }
 
-func HaveValidBEBNamespace(bebNamespaceKey, namespace string) gomegatypes.GomegaMatcher {
+func HaveValidEventMeshNamespace(bebNamespaceKey, namespace string) gomegatypes.GomegaMatcher {
 	return WithTransform(func(secret *corev1.Secret) bool {
 		if secret != nil {
 			return string(secret.Data[bebNamespaceKey]) == namespace
@@ -146,13 +146,13 @@ func HaveValidBEBNamespace(bebNamespaceKey, namespace string) gomegatypes.Gomega
 	}, BeTrue())
 }
 
-func HaveNoBEBSecretNameAndNamespace() gomegatypes.GomegaMatcher {
+func HaveNoEventMeshSecretNameAndNamespace() gomegatypes.GomegaMatcher {
 	return WithTransform(func(s *eventingv1alpha1.EventingBackendStatus) bool {
 		return s.EventMeshSecretName == "" && s.EventMeshSecretNamespace == ""
 	}, BeTrue())
 }
 
-func HaveBEBSecretNameAndNamespace(bebSecretName, namespace string) gomegatypes.GomegaMatcher {
+func HaveEventMeshSecretNameAndNamespace(bebSecretName, namespace string) gomegatypes.GomegaMatcher {
 	return WithTransform(func(s *eventingv1alpha1.EventingBackendStatus) bool {
 		return s.EventMeshSecretName == bebSecretName && s.EventMeshSecretNamespace == namespace
 	}, BeTrue())

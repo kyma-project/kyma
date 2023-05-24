@@ -194,7 +194,7 @@ func WithV1alpha1EmptyConfig() SubscriptionV1alpha1Opt {
 	}
 }
 
-func NewBEBMessagingSecret(name, namespace string) *corev1.Secret {
+func NewEventMeshMessagingSecret(name, namespace string) *corev1.Secret {
 	messagingValue := `
 				[{
 					"broker": {
