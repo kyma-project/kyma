@@ -75,7 +75,7 @@ type Filter struct {
 }
 
 // Defines the BEB filter element as a combination of two CE filter elements.
-type BEBFilter struct {
+type EventMeshFilter struct {
 	// Defines the source of the CE filter.
 	EventSource *Filter `json:"eventSource"`
 
@@ -83,24 +83,24 @@ type BEBFilter struct {
 	EventType *Filter `json:"eventType"`
 }
 
-func (bf *BEBFilter) hash() (uint64, error) {
+func (bf *EventMeshFilter) hash() (uint64, error) {
 	return hashstructure.Hash(bf, hashstructure.FormatV2, nil)
 }
 
-// BEBFilters defines the list of BEB filters.
-type BEBFilters struct {
+// EventMeshFilters defines the list of BEB filters.
+type EventMeshFilters struct {
 	// Contains a `URI-reference` to the CloudEvent filter dialect. See
 	// [here](https://github.com/cloudevents/spec/blob/main/subscriptions/spec.md#3241-filter-dialects) for more details.
 	// +optional
 	Dialect string `json:"dialect,omitempty"`
 
-	Filters []*BEBFilter `json:"filters"`
+	Filters []*EventMeshFilter `json:"filters"`
 }
 
 // Deduplicate returns a deduplicated copy of BEBFilters.
-func (bf *BEBFilters) Deduplicate() (*BEBFilters, error) {
+func (bf *EventMeshFilters) Deduplicate() (*EventMeshFilters, error) {
 	seen := map[uint64]struct{}{}
-	result := &BEBFilters{
+	result := &EventMeshFilters{
 		Dialect: bf.Dialect,
 	}
 	for _, f := range bf.Filters {
@@ -157,7 +157,7 @@ type SubscriptionSpec struct {
 	Sink string `json:"sink"`
 
 	// Defines which events will be sent to the sink.
-	Filter *BEBFilters `json:"filter"`
+	Filter *EventMeshFilters `json:"filter"`
 
 	// Defines additional configuration for the active backend.
 	// +optional
