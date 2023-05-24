@@ -82,7 +82,7 @@ func statusFinalEventTypes(typeInfos []backendutils.EventTypeInfo) []eventingv1a
 	return finalEventTypes
 }
 
-// setEmsSubscriptionStatus sets the status of EventMesh Subscription in ev2Subscription.
+// setEventMeshSubscriptionStatus sets the status of EventMesh Subscription in ev2Subscription.
 func setEmsSubscriptionStatus(subscription *eventingv1alpha2.Subscription,
 	eventMeshSubscription *types.Subscription) bool {
 	var statusChanged = false
