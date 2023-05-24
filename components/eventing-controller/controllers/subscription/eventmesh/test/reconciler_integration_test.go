@@ -157,7 +157,7 @@ func Test_CreateSubscription(t *testing.T) {
 						fmt.Sprintf("%s0", reconcilertesting.OrderCreatedV1EventNotClean),
 						fmt.Sprintf("%s1", reconcilertesting.OrderCreatedV1EventNotClean),
 					}),
-					reconcilertesting.WithWebhookAuthForBEB(),
+					reconcilertesting.WithWebhookAuthForEventMesh(),
 					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, "invalid")),
 				)
 			},
@@ -178,7 +178,7 @@ func Test_CreateSubscription(t *testing.T) {
 						fmt.Sprintf("%s0", reconcilertesting.OrderCreatedV1EventNotClean),
 						fmt.Sprintf("%s1", reconcilertesting.OrderCreatedV1EventNotClean),
 					}),
-					reconcilertesting.WithWebhookAuthForBEB(),
+					reconcilertesting.WithWebhookAuthForEventMesh(),
 					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, testName)),
 				)
 			},
@@ -278,7 +278,7 @@ func Test_CreateSubscription(t *testing.T) {
 				return reconcilertesting.NewSubscription(testName, namespace,
 					reconcilertesting.WithNotCleanSource(),
 					reconcilertesting.WithNotCleanType(),
-					reconcilertesting.WithWebhookAuthForBEB(),
+					reconcilertesting.WithWebhookAuthForEventMesh(),
 					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, testName)),
 				)
 			},
@@ -381,7 +381,7 @@ func Test_UpdateSubscription(t *testing.T) {
 					reconcilertesting.WithTypes([]string{
 						fmt.Sprintf("%s0", reconcilertesting.OrderCreatedV1EventNotClean),
 					}),
-					reconcilertesting.WithWebhookAuthForBEB(),
+					reconcilertesting.WithWebhookAuthForEventMesh(),
 					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, testName)),
 				)
 			},
@@ -401,7 +401,7 @@ func Test_UpdateSubscription(t *testing.T) {
 						fmt.Sprintf("%s0", reconcilertesting.OrderCreatedV1EventNotClean),
 						fmt.Sprintf("%s1", reconcilertesting.OrderCreatedV1EventNotClean),
 					}),
-					reconcilertesting.WithWebhookAuthForBEB(),
+					reconcilertesting.WithWebhookAuthForEventMesh(),
 					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, testName)),
 				)
 			},
@@ -427,7 +427,7 @@ func Test_UpdateSubscription(t *testing.T) {
 						fmt.Sprintf("%s0", reconcilertesting.OrderCreatedV1EventNotClean),
 						fmt.Sprintf("%s1", reconcilertesting.OrderCreatedV1EventNotClean),
 					}),
-					reconcilertesting.WithWebhookAuthForBEB(),
+					reconcilertesting.WithWebhookAuthForEventMesh(),
 					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, testName)),
 				)
 			},
@@ -450,7 +450,7 @@ func Test_UpdateSubscription(t *testing.T) {
 						fmt.Sprintf("%s0alpha", reconcilertesting.OrderCreatedV1EventNotClean),
 						fmt.Sprintf("%s1alpha", reconcilertesting.OrderCreatedV1EventNotClean),
 					}),
-					reconcilertesting.WithWebhookAuthForBEB(),
+					reconcilertesting.WithWebhookAuthForEventMesh(),
 					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, testName)),
 				)
 			},
@@ -476,7 +476,7 @@ func Test_UpdateSubscription(t *testing.T) {
 						fmt.Sprintf("%s0", reconcilertesting.OrderCreatedV1EventNotClean),
 						fmt.Sprintf("%s1", reconcilertesting.OrderCreatedV1EventNotClean),
 					}),
-					reconcilertesting.WithWebhookAuthForBEB(),
+					reconcilertesting.WithWebhookAuthForEventMesh(),
 					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, testName)),
 				)
 			},
@@ -498,7 +498,7 @@ func Test_UpdateSubscription(t *testing.T) {
 					reconcilertesting.WithTypes([]string{
 						fmt.Sprintf("%s0", reconcilertesting.OrderCreatedV1EventNotClean),
 					}),
-					reconcilertesting.WithWebhookAuthForBEB(),
+					reconcilertesting.WithWebhookAuthForEventMesh(),
 					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, testName)),
 				)
 			},
@@ -617,7 +617,7 @@ func Test_FixingSinkAndApiRule(t *testing.T) {
 		return reconcilertesting.NewSubscription(name, namespace,
 			reconcilertesting.WithDefaultSource(),
 			reconcilertesting.WithOrderCreatedV1Event(),
-			reconcilertesting.WithWebhookAuthForBEB(),
+			reconcilertesting.WithWebhookAuthForEventMesh(),
 			// The following sink is invalid because it has an invalid svc name
 			reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, "invalid")),
 		)
@@ -636,7 +636,7 @@ func Test_FixingSinkAndApiRule(t *testing.T) {
 		return reconcilertesting.NewSubscription(name, namespace,
 			reconcilertesting.WithDefaultSource(),
 			reconcilertesting.WithOrderCreatedV1Event(),
-			reconcilertesting.WithWebhookAuthForBEB(),
+			reconcilertesting.WithWebhookAuthForEventMesh(),
 			reconcilertesting.WithSink(fmt.Sprintf(sinkFormat, name, namespace, path)),
 		)
 	}

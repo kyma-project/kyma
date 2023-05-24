@@ -77,7 +77,7 @@ func TestConvertKymaSubToEventMeshSub(t *testing.T) {
 				eventingtesting.WithDefaultSource(),
 				eventingtesting.WithOrderCreatedFilter(),
 				eventingtesting.WithValidSink("ns", svcName),
-				eventingtesting.WithWebhookAuthForBEB(),
+				eventingtesting.WithWebhookAuthForEventMesh(),
 			),
 			givenAPIRuleFunc: func(subscription *eventingv1alpha2.Subscription) *apigatewayv1beta1.APIRule {
 				return eventingtesting.NewAPIRule(subscription,

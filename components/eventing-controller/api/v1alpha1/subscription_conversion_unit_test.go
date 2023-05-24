@@ -138,7 +138,7 @@ func Test_Conversion(t *testing.T) {
 					orderDeletedEventTypeNonClean,
 				}),
 				eventingtesting.WithProtocolBEB(),
-				eventingtesting.WithWebhookAuthForBEB(),
+				eventingtesting.WithWebhookAuthForEventMesh(),
 				v2WithStatusTypes([]v1alpha2.EventType{
 					{
 						OriginalType: orderCreatedEventType,

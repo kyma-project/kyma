@@ -547,7 +547,7 @@ func WithEmsSubscriptionStatus(status string) SubscriptionOpt {
 	}
 }
 
-func WithWebhookAuthForBEB() SubscriptionOpt {
+func WithWebhookAuthForEventMesh() SubscriptionOpt {
 	return func(s *eventingv1alpha2.Subscription) {
 		s.Spec.Config = map[string]string{
 			eventingv1alpha2.Protocol:                        "BEB",

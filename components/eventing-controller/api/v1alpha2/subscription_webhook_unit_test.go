@@ -92,7 +92,7 @@ func Test_validateSubscription(t *testing.T) {
 			givenSub: eventingtesting.NewSubscription(subName, subNamespace,
 				eventingtesting.WithSource(eventingtesting.EventSourceClean),
 				eventingtesting.WithEventType(eventingtesting.OrderCreatedV1Event),
-				eventingtesting.WithWebhookAuthForBEB(),
+				eventingtesting.WithWebhookAuthForEventMesh(),
 				eventingtesting.WithMaxInFlightMessages(v1alpha2.DefaultMaxInFlightMessages),
 				eventingtesting.WithSink(sink),
 			),
