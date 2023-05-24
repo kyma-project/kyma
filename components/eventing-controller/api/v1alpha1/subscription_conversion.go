@@ -270,7 +270,7 @@ func (src *Subscription) natsSpecConfigToV2(dst *v1alpha2.Subscription) {
 	}
 }
 
-// setBEBBackendStatus moves the EventMesh-related to Backend fields of the Status in the v1alpha2.
+// eventMeshBackendStatusToV1 moves the EventMesh-related to Backend fields of the Status in the v1alpha2.
 func (src *Subscription) eventMeshBackendStatusToV1(dst *v1alpha2.Subscription) {
 	src.Status.Ev2hash = dst.Status.Backend.Ev2hash
 	src.Status.EventMeshHash = dst.Status.Backend.Emshash
