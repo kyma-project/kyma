@@ -35,16 +35,16 @@ This tutorial explains how to create a sample HttpBin service deployment and a s
   Function
   </summary>
 
-  To create a Function in your Namespace using the [sample code](./assets/function.yaml), run:
+  To create a Function in your Namespace using the [sample code](https://raw.githubusercontent.com/kyma-project/kyma/main/docs/03-tutorials/00-api-exposure/assets/function.yaml), run:
 
    ```shell
-   kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/kyma-project/kyma/main/docs/03-tutorials/assets/function.yaml
+   kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/kyma-project/kyma/main/docs/03-tutorials/00-api-exposure/assets/function.yaml
    ```
 
   </details>
 </div>
 
-3. Verify if an instance of the HttpBin service or a sample Function is successfully created.
+1. Verify if an instance of the HttpBin service or a sample Function is successfully created.
    
 <div tabs name="verify">
 
