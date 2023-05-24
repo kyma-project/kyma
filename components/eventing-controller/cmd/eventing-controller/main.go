@@ -65,7 +65,7 @@ func main() {
 		setupLogger.Fatalw("Failed to start manager", "backend", v1alpha1.NatsBackendType, "error", err)
 	}
 
-	bebSubMgr := eventmesh.NewSubscriptionManager(restCfg, opts.MetricsAddr, opts.ReconcilePeriod, ctrLogger)
+	eventMeshSubMgr := eventmesh.NewSubscriptionManager(restCfg, opts.MetricsAddr, opts.ReconcilePeriod, ctrLogger)
 	if err = eventmesh.AddToScheme(scheme); err != nil {
 		setupLogger.Fatalw("Failed to start subscription manager", "backend", v1alpha1.EventMeshBackendType, "error", err)
 	}
@@ -79,7 +79,7 @@ func main() {
 		MetricsBindAddress:     opts.MetricsAddr,
 		HealthProbeBindAddress: opts.ProbeAddr,
 		Port:                   9443,
-		SyncPeriod:             &opts.ReconcilePeriod, // CHECK Only used in BEB so far.
+		SyncPeriod:             &opts.ReconcilePeriod, // CHECK Only used in EventMesh so far.
 	})
 	if err != nil {
 		setupLogger.Fatalw("Failed to start manager", "error", err)
@@ -89,7 +89,7 @@ func main() {
 		setupLogger.Fatalw("Failed to initialize subscription manager", "backend", v1alpha1.NatsBackendType, "error", err)
 	}
 
-	if err = bebSubMgr.Init(mgr); err != nil {
+	if err = eventMeshSubMgr.Init(mgr); err != nil {
 		setupLogger.Fatalw("Failed to initialize subscription manager", "backend", v1alpha1.EventMeshBackendType, "error", err)
 	}
 
@@ -113,7 +113,7 @@ func main() {
 	// Start the backend manager.
 	ctx := context.Background()
 	recorder := mgr.GetEventRecorderFor("backend-controller")
-	backendReconciler := backend.NewReconciler(ctx, natsSubMgr, natsConfig, bebSubMgr, mgr.GetClient(), ctrLogger, recorder)
+	backendReconciler := backend.NewReconciler(ctx, natsSubMgr, natsConfig, eventMeshSubMgr, mgr.GetClient(), ctrLogger, recorder)
 	if err = backendReconciler.SetupWithManager(mgr); err != nil {
 		setupLogger.Fatalw("Failed to start backend controller", "error", err)
 	}

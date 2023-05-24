@@ -28,7 +28,7 @@ const (
 	MessagingURLPath = "/messaging"
 )
 
-// EventMeshMock implements a programmable mock for BEB.
+// EventMeshMock implements a programmable mock for EventMesh.
 type EventMeshMock struct {
 	Requests          *SafeRequests
 	Subscriptions     *SafeSubscriptions

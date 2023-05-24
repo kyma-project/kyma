@@ -624,10 +624,10 @@ func Test_getEventMeshEvents(t *testing.T) {
 		}
 
 		// when
-		gotBEBEvents := getEventMeshEvents(eventTypeInfos, typeMatching, defaultNamespace, source)
+		gotEventMeshEvents := getEventMeshEvents(eventTypeInfos, typeMatching, defaultNamespace, source)
 
 		// then
-		g.Expect(gotBEBEvents).To(Equal(expectedEventMeshEvents))
+		g.Expect(gotEventMeshEvents).To(Equal(expectedEventMeshEvents))
 	})
 
 	t.Run("with exact type matching with non-empty source", func(t *testing.T) {
@@ -653,9 +653,9 @@ func Test_getEventMeshEvents(t *testing.T) {
 		}
 
 		// when
-		gotBEBEvents := getEventMeshEvents(eventTypeInfos, typeMatching, defaultNamespace, source)
+		gotEventMeshEvents := getEventMeshEvents(eventTypeInfos, typeMatching, defaultNamespace, source)
 
 		// then
-		g.Expect(gotBEBEvents).To(Equal(expectedEventMeshEvents))
+		g.Expect(gotEventMeshEvents).To(Equal(expectedEventMeshEvents))
 	})
 }
