@@ -148,13 +148,13 @@ func HaveValidBEBNamespace(bebNamespaceKey, namespace string) gomegatypes.Gomega
 
 func HaveNoBEBSecretNameAndNamespace() gomegatypes.GomegaMatcher {
 	return WithTransform(func(s *eventingv1alpha1.EventingBackendStatus) bool {
-		return s.BEBSecretName == "" && s.BEBSecretNamespace == ""
+		return s.EventMeshSecretName == "" && s.EventMeshSecretNamespace == ""
 	}, BeTrue())
 }
 
 func HaveBEBSecretNameAndNamespace(bebSecretName, namespace string) gomegatypes.GomegaMatcher {
 	return WithTransform(func(s *eventingv1alpha1.EventingBackendStatus) bool {
-		return s.BEBSecretName == bebSecretName && s.BEBSecretNamespace == namespace
+		return s.EventMeshSecretName == bebSecretName && s.EventMeshSecretNamespace == namespace
 	}, BeTrue())
 }
 

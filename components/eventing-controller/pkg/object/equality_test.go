@@ -250,9 +250,9 @@ func TestEventingBackendStatusEqual(t *testing.T) {
 		{
 			name: "should be unequal if missing secret",
 			givenBackendStatus1: eventingv1alpha1.EventingBackendStatus{
-				EventingReady:      utils.BoolPtr(false),
-				BEBSecretName:      "secret",
-				BEBSecretNamespace: "default",
+				EventingReady:            utils.BoolPtr(false),
+				EventMeshSecretName:      "secret",
+				EventMeshSecretNamespace: "default",
 			},
 			givenBackendStatus2: eventingv1alpha1.EventingBackendStatus{
 				EventingReady: utils.BoolPtr(false),
@@ -262,28 +262,28 @@ func TestEventingBackendStatusEqual(t *testing.T) {
 		{
 			name: "should be unequal if different secretName",
 			givenBackendStatus1: eventingv1alpha1.EventingBackendStatus{
-				EventingReady:      utils.BoolPtr(false),
-				BEBSecretName:      "secret",
-				BEBSecretNamespace: "default",
+				EventingReady:            utils.BoolPtr(false),
+				EventMeshSecretName:      "secret",
+				EventMeshSecretNamespace: "default",
 			},
 			givenBackendStatus2: eventingv1alpha1.EventingBackendStatus{
-				EventingReady:      utils.BoolPtr(false),
-				BEBSecretName:      "secretnew",
-				BEBSecretNamespace: "default",
+				EventingReady:            utils.BoolPtr(false),
+				EventMeshSecretName:      "secretnew",
+				EventMeshSecretNamespace: "default",
 			},
 			wantResult: false,
 		},
 		{
 			name: "should be unequal if different secretNamespace",
 			givenBackendStatus1: eventingv1alpha1.EventingBackendStatus{
-				EventingReady:      utils.BoolPtr(false),
-				BEBSecretName:      "secret",
-				BEBSecretNamespace: "default",
+				EventingReady:            utils.BoolPtr(false),
+				EventMeshSecretName:      "secret",
+				EventMeshSecretNamespace: "default",
 			},
 			givenBackendStatus2: eventingv1alpha1.EventingBackendStatus{
-				EventingReady:      utils.BoolPtr(false),
-				BEBSecretName:      "secret",
-				BEBSecretNamespace: "kyma-system",
+				EventingReady:            utils.BoolPtr(false),
+				EventMeshSecretName:      "secret",
+				EventMeshSecretNamespace: "kyma-system",
 			},
 			wantResult: false,
 		},
@@ -301,7 +301,7 @@ func TestEventingBackendStatusEqual(t *testing.T) {
 				Backend: eventingv1alpha1.NatsBackendType,
 			},
 			givenBackendStatus2: eventingv1alpha1.EventingBackendStatus{
-				Backend: eventingv1alpha1.BEBBackendType,
+				Backend: eventingv1alpha1.EventMeshBackendType,
 			},
 			wantResult: false,
 		},
@@ -466,7 +466,7 @@ func TestPublisherProxyDeploymentEqual(t *testing.T) {
 		JSStreamName:    "kyma",
 	}
 	defaultNATSPublisher := deployment.NewNATSPublisherDeployment(natsConfig, publisherCfg)
-	defaultBEBPublisher := deployment.NewBEBPublisherDeployment(publisherCfg)
+	defaultBEBPublisher := deployment.NewEventMeshPublisherDeployment(publisherCfg)
 
 	testCases := map[string]struct {
 		getPublisher1  func() *appsv1.Deployment

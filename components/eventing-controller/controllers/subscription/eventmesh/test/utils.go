@@ -242,7 +242,7 @@ func startTestEnv() (*rest.Config, error) {
 
 func getEnvConfig() env.Config {
 	return env.Config{
-		BEBAPIURL:                emTestEnsemble.eventMeshMock.MessagingURL,
+		EventMeshAPIURL:          emTestEnsemble.eventMeshMock.MessagingURL,
 		ClientID:                 "foo-id",
 		ClientSecret:             "foo-secret",
 		TokenEndpoint:            emTestEnsemble.eventMeshMock.TokenURL,
@@ -250,7 +250,7 @@ func getEnvConfig() env.Config {
 		WebhookTokenEndpoint:     "foo-token-endpoint",
 		Domain:                   domain,
 		EventTypePrefix:          reconcilertesting.EventMeshPrefix,
-		BEBNamespace:             reconcilertesting.EventMeshNamespaceNS,
+		EventMeshNamespace:       reconcilertesting.EventMeshNamespaceNS,
 		Qos:                      string(eventMeshtypes.QosAtLeastOnce),
 	}
 }

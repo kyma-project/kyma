@@ -59,7 +59,7 @@ func TestNewDeployment(t *testing.T) {
 				}
 				deployment = NewNATSPublisherDeployment(natsConfig, publisherConfig)
 			case "BEB":
-				deployment = NewBEBPublisherDeployment(publisherConfig)
+				deployment = NewEventMeshPublisherDeployment(publisherConfig)
 			default:
 				t.Errorf("Invalid backend!")
 			}
@@ -270,7 +270,7 @@ func natsBackendAssertions(t *testing.T, deployment appsv1.Deployment) {
 	}
 }
 
-// bebBackendAssertions checks that the eventmesh-specific data was set in the NewBEBPublisherDeployment.
+// bebBackendAssertions checks that the eventmesh-specific data was set in the NewEventMeshPublisherDeployment.
 func bebBackendAssertions(t *testing.T, deployment appsv1.Deployment) {
 	container := findPublisherContainer(deployment)
 	assert.NotNil(t, container)

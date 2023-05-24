@@ -34,14 +34,14 @@ const (
 	publisherMetricsPortName = "http-metrics"
 	publisherMetricsPortNum  = int32(9090)
 
-	PublisherNamespace              = "kyma-system"
-	PublisherName                   = "eventing-publisher-proxy"
-	AppLabelKey                     = "app.kubernetes.io/name"
-	PublisherSecretClientIDKey      = "client-id"
-	PublisherSecretClientSecretKey  = "client-secret"
-	PublisherSecretTokenEndpointKey = "token-endpoint"
-	PublisherSecretEMSURLKey        = "ems-publish-url"
-	PublisherSecretBEBNamespaceKey  = "eventmesh-namespace"
+	PublisherNamespace                   = "kyma-system"
+	PublisherName                        = "eventing-publisher-proxy"
+	AppLabelKey                          = "app.kubernetes.io/name"
+	PublisherSecretClientIDKey           = "client-id"
+	PublisherSecretClientSecretKey       = "client-secret"
+	PublisherSecretTokenEndpointKey      = "token-endpoint"
+	PublisherSecretEventMeshURLKey       = "ems-publish-url"
+	PublisherSecretEventMeshNamespaceKey = "eventmesh-namespace"
 
 	configMapName               = "eventing"
 	configMapKeyEventTypePrefix = "eventTypePrefix"
@@ -51,10 +51,10 @@ var (
 	TerminationGracePeriodSeconds = int64(30)
 )
 
-func NewBEBPublisherDeployment(publisherConfig env.PublisherConfig) *appsv1.Deployment {
+func NewEventMeshPublisherDeployment(publisherConfig env.PublisherConfig) *appsv1.Deployment {
 	return NewDeployment(
 		publisherConfig,
-		WithLabels(v1alpha1.BEBBackendType),
+		WithLabels(v1alpha1.EventMeshBackendType),
 		WithContainers(publisherConfig),
 		WithBEBEnvVars(publisherConfig),
 		WithLogEnvVars(publisherConfig),
@@ -319,7 +319,7 @@ func getBEBEnvVars(publisherConfig env.PublisherConfig) []v1.EnvVar {
 			ValueFrom: &v1.EnvVarSource{
 				SecretKeyRef: &v1.SecretKeySelector{
 					LocalObjectReference: v1.LocalObjectReference{Name: PublisherName},
-					Key:                  PublisherSecretEMSURLKey,
+					Key:                  PublisherSecretEventMeshURLKey,
 				}},
 		},
 		{
@@ -327,7 +327,7 @@ func getBEBEnvVars(publisherConfig env.PublisherConfig) []v1.EnvVar {
 			ValueFrom: &v1.EnvVarSource{
 				SecretKeyRef: &v1.SecretKeySelector{
 					LocalObjectReference: v1.LocalObjectReference{Name: PublisherName},
-					Key:                  PublisherSecretBEBNamespaceKey,
+					Key:                  PublisherSecretEventMeshNamespaceKey,
 				}},
 		},
 		{

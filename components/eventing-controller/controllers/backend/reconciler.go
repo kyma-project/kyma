@@ -48,10 +48,10 @@ const (
 	AppLabelValue             = deployment.PublisherName
 	PublisherSecretEMSHostKey = "ems-publish-host"
 
-	TokenEndpointFormat             = "%s?grant_type=%s&response_type=token"
-	NamespacePrefix                 = "/"
-	BEBPublishEndpointForSubscriber = "/sap/ems/v1"
-	BEBPublishEndpointForPublisher  = "/sap/ems/v1/events"
+	TokenEndpointFormat                   = "%s?grant_type=%s&response_type=token"
+	NamespacePrefix                       = "/"
+	EventMeshPublishEndpointForSubscriber = "/sap/ems/v1"
+	EventMeshPublishEndpointForPublisher  = "/sap/ems/v1/events"
 
 	reconcilerName = "backend-reconciler"
 
@@ -140,7 +140,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, _ ctrl.Request) (ctrl.Result
 	if len(secretList.Items) > 1 {
 		// This is not allowed!
 		r.namedLogger().Debugw("More than one secret with the EventingBackend label exist", "key", BEBBackendSecretLabelKey, "value", BEBBackendSecretLabelValue, "count", len(secretList.Items))
-		defaultStatus.Backend = eventingv1alpha1.BEBBackendType
+		defaultStatus.Backend = eventingv1alpha1.EventMeshBackendType
 		defaultStatus.SetSubscriptionControllerReadyCondition(false, eventingv1alpha1.ConditionDuplicateSecrets, "")
 		if updateErr := r.syncBackendStatus(ctx, &defaultStatus, nil); updateErr != nil {
 			return ctrl.Result{}, errors.Wrapf(updateErr, "update EventingBackend status failed")
@@ -218,8 +218,8 @@ func (r *Reconciler) reconcileNATSBackend(ctx context.Context, backendStatus *ev
 }
 
 func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secret, backendStatus *eventingv1alpha1.EventingBackendStatus) (ctrl.Result, error) {
-	r.backendType = eventingv1alpha1.BEBBackendType
-	backendStatus.Backend, backendStatus.BEBSecretName, backendStatus.BEBSecretNamespace = r.backendType, bebSecret.Name, bebSecret.Namespace
+	r.backendType = eventingv1alpha1.EventMeshBackendType
+	backendStatus.Backend, backendStatus.EventMeshSecretName, backendStatus.EventMeshSecretNamespace = r.backendType, bebSecret.Name, bebSecret.Namespace
 
 	// CreateOrUpdate CR with BEB
 	err := r.CreateOrUpdateBackendCR(ctx)
@@ -228,7 +228,7 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 		if updateErr := r.syncBackendStatus(ctx, backendStatus, nil); updateErr != nil {
 			return ctrl.Result{}, errors.Wrapf(err, "failed to update status while creating/updating EventingBackend")
 		}
-		return ctrl.Result{}, errors.Wrapf(err, "create/update EventingBackend failed, type: %s", eventingv1alpha1.BEBBackendType)
+		return ctrl.Result{}, errors.Wrapf(err, "create/update EventingBackend failed, type: %s", eventingv1alpha1.EventMeshBackendType)
 	}
 
 	// Stop the NATS subscription controller
@@ -261,7 +261,7 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 	}
 
 	// Set environment with secrets for BEB subscription controller
-	err = setUpEnvironmentForBEBController(secretForPublisher)
+	err = setUpEnvironmentForEventMeshController(secretForPublisher)
 	if err != nil {
 		backendStatus.SetSubscriptionControllerReadyCondition(false, eventingv1alpha1.ConditionReasonControllerStartFailed, err.Error())
 		if updateErr := r.syncBackendStatus(ctx, backendStatus, nil); updateErr != nil {
@@ -270,8 +270,8 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 		return ctrl.Result{}, errors.Wrapf(err, "failed to setup environment variables for BEB controller")
 	}
 
-	// Start the BEB subscription controller
-	if err := r.startBEBController(r.oauth2ClientID, r.oauth2ClientSecret); err != nil {
+	// Start the EventMesh subscription controller
+	if err := r.startEventMeshController(r.oauth2ClientID, r.oauth2ClientSecret); err != nil {
 		backendStatus.SetSubscriptionControllerReadyCondition(false, eventingv1alpha1.ConditionReasonControllerStartFailed, err.Error())
 		if updateErr := r.syncBackendStatus(ctx, backendStatus, nil); updateErr != nil {
 			return ctrl.Result{}, errors.Wrapf(err, "failed to update status while starting BEB controller")
@@ -338,8 +338,8 @@ func (r *Reconciler) syncOauth2ClientIDAndSecret(ctx context.Context, backendSta
 	return nil
 }
 
-func setUpEnvironmentForBEBController(secret *v1.Secret) error {
-	err := os.Setenv("BEB_API_URL", fmt.Sprintf("%s%s", string(secret.Data[PublisherSecretEMSHostKey]), BEBPublishEndpointForSubscriber))
+func setUpEnvironmentForEventMeshController(secret *v1.Secret) error {
+	err := os.Setenv("BEB_API_URL", fmt.Sprintf("%s%s", string(secret.Data[PublisherSecretEMSHostKey]), EventMeshPublishEndpointForSubscriber))
 	if err != nil {
 		return errors.Wrapf(err, "set BEB_API_URL env var failed")
 	}
@@ -359,7 +359,7 @@ func setUpEnvironmentForBEBController(secret *v1.Secret) error {
 		return errors.Wrapf(err, "set TOKEN_ENDPOINT env var failed")
 	}
 
-	err = os.Setenv("BEB_NAMESPACE", fmt.Sprintf("%s%s", NamespacePrefix, string(secret.Data[deployment.PublisherSecretBEBNamespaceKey])))
+	err = os.Setenv("BEB_NAMESPACE", fmt.Sprintf("%s%s", NamespacePrefix, string(secret.Data[deployment.PublisherSecretEventMeshNamespaceKey])))
 	if err != nil {
 		return errors.Wrapf(err, "set BEB_NAMESPACE env var failed")
 	}
@@ -457,8 +457,8 @@ func hasBackendTypeChanged(currentBackendStatus, desiredBackendStatus eventingv1
 func getDefaultBackendStatus() eventingv1alpha1.EventingBackendStatus {
 	defaultStatus := eventingv1alpha1.EventingBackendStatus{}
 	defaultStatus.InitializeConditions()
-	defaultStatus.BEBSecretName = ""
-	defaultStatus.BEBSecretNamespace = ""
+	defaultStatus.EventMeshSecretName = ""
+	defaultStatus.EventMeshSecretNamespace = ""
 	defaultStatus.EventingReady = utils.BoolPtr(true)
 	return defaultStatus
 }
@@ -595,12 +595,12 @@ func getSecretForPublisher(bebSecret *v1.Secret) (*v1.Secret, error) {
 
 func getSecretStringData(clientID, clientSecret, tokenEndpoint, grantType, publishURL, namespace string) map[string]string {
 	return map[string]string{
-		deployment.PublisherSecretClientIDKey:      clientID,
-		deployment.PublisherSecretClientSecretKey:  clientSecret,
-		deployment.PublisherSecretTokenEndpointKey: fmt.Sprintf(TokenEndpointFormat, tokenEndpoint, grantType),
-		deployment.PublisherSecretEMSURLKey:        fmt.Sprintf("%s%s", publishURL, BEBPublishEndpointForPublisher),
-		PublisherSecretEMSHostKey:                  publishURL,
-		deployment.PublisherSecretBEBNamespaceKey:  namespace,
+		deployment.PublisherSecretClientIDKey:           clientID,
+		deployment.PublisherSecretClientSecretKey:       clientSecret,
+		deployment.PublisherSecretTokenEndpointKey:      fmt.Sprintf(TokenEndpointFormat, tokenEndpoint, grantType),
+		deployment.PublisherSecretEventMeshURLKey:       fmt.Sprintf("%s%s", publishURL, EventMeshPublishEndpointForPublisher),
+		PublisherSecretEMSHostKey:                       publishURL,
+		deployment.PublisherSecretEventMeshNamespaceKey: namespace,
 	}
 }
 
@@ -610,8 +610,8 @@ func (r *Reconciler) CreateOrUpdatePublisherProxy(ctx context.Context, backend e
 	switch backend {
 	case eventingv1alpha1.NatsBackendType:
 		desiredPublisher = deployment.NewNATSPublisherDeployment(r.natsConfig, r.cfg.PublisherConfig)
-	case eventingv1alpha1.BEBBackendType:
-		desiredPublisher = deployment.NewBEBPublisherDeployment(r.cfg.PublisherConfig)
+	case eventingv1alpha1.EventMeshBackendType:
+		desiredPublisher = deployment.NewEventMeshPublisherDeployment(r.cfg.PublisherConfig)
 	default:
 		return nil, fmt.Errorf("unknown EventingBackend type %q", backend)
 	}
@@ -793,7 +793,7 @@ func (r *Reconciler) stopNATSController() error {
 	return nil
 }
 
-func (r *Reconciler) startBEBController(clientID, clientSecret []byte) error {
+func (r *Reconciler) startEventMeshController(clientID, clientSecret []byte) error {
 	if !r.bebSubMgrStarted {
 		bebSubMgrParams := subscriptionmanager.Params{"client_id": clientID, "client_secret": clientSecret}
 		if err := r.bebSubMgr.Start(r.cfg.DefaultSubscriptionConfig, bebSubMgrParams); err != nil {

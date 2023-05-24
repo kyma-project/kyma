@@ -591,7 +591,7 @@ func Test_SyncSubscription(t *testing.T) {
 	// start BEB Mock
 	eventMeshMock := startEventMeshMock()
 	envConf := env.Config{
-		BEBAPIURL:                eventMeshMock.MessagingURL,
+		EventMeshAPIURL:          eventMeshMock.MessagingURL,
 		ClientID:                 "client-id",
 		ClientSecret:             "client-secret",
 		TokenEndpoint:            eventMeshMock.TokenURL,
@@ -599,7 +599,7 @@ func Test_SyncSubscription(t *testing.T) {
 		WebhookTokenEndpoint:     "webhook-token-endpoint",
 		Domain:                   "domain.com",
 		EventTypePrefix:          controllertesting.EventTypePrefix,
-		BEBNamespace:             "/default/ns",
+		EventMeshNamespace:       "/default/ns",
 		Qos:                      string(types.QosAtLeastOnce),
 	}
 
