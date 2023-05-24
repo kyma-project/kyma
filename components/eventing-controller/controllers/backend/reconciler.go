@@ -161,8 +161,8 @@ func (r *Reconciler) reconcileNATSBackend(ctx context.Context, backendStatus *ev
 	r.backendType = eventingv1alpha1.NatsBackendType
 	backendStatus.Backend = r.backendType
 	// CreateOrUpdate CR with NATS
-	err := r.CreateOrUpdateBackendCR(ctx)
-	if err != nil {
+
+	if err := r.CreateOrUpdateBackendCR(ctx); err != nil {
 		backendStatus.SetSubscriptionControllerReadyCondition(false, eventingv1alpha1.ConditionReasonBackendCRSyncFailed, err.Error())
 		if updateErr := r.syncBackendStatus(ctx, backendStatus, nil); updateErr != nil {
 			return ctrl.Result{}, errors.Wrapf(err, "failed to update status while creating/updating of EventingBackend")
@@ -189,8 +189,8 @@ func (r *Reconciler) reconcileNATSBackend(ctx context.Context, backendStatus *ev
 	}
 
 	// Delete secret for publisher proxy if it exists
-	err = r.deletePublisherProxySecret(ctx)
-	if err != nil {
+
+	if err := r.deletePublisherProxySecret(ctx); err != nil {
 		backendStatus.SetPublisherReadyCondition(false, eventingv1alpha1.ConditionReasonPublisherProxySecretError, err.Error())
 		if updateErr := r.syncBackendStatus(ctx, backendStatus, nil); updateErr != nil {
 			return ctrl.Result{}, errors.Wrapf(err, "failed to update status while deleting Event Publisher secret")
