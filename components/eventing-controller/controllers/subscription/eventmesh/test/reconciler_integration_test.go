@@ -1139,7 +1139,7 @@ func TestWithEventMeshServerErrors(t *testing.T) {
 				sub.SubscriptionStatus = eventMeshtypes.SubscriptionStatusPaused
 				subKey := getEventMeshKeyForMock(sub.Name)
 				emTestEnsemble.eventMeshMock.Subscriptions.PutSubscription(subKey, &sub)
-				reconcilertesting.BEBCreateSuccess(w)
+				reconcilertesting.EventMeshCreateSuccess(w)
 			},
 			wantSubscriptionMatchers: gomega.And(
 				reconcilertesting.HaveSubscriptionNotReady(),
@@ -1164,7 +1164,7 @@ func TestWithEventMeshServerErrors(t *testing.T) {
 
 				subKey := getEventMeshKeyForMock(sub.Name)
 				emTestEnsemble.eventMeshMock.Subscriptions.PutSubscription(subKey, &sub)
-				reconcilertesting.BEBCreateSuccess(w)
+				reconcilertesting.EventMeshCreateSuccess(w)
 			},
 			wantSubscriptionMatchers: gomega.And(
 				reconcilertesting.HaveSubscriptionNotReady(),
