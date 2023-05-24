@@ -461,7 +461,7 @@ data:
     subscriptions:
       resource:
         kind: Subscription
-        version: v1alpha1
+        version: v1alpha2
         group: eventing.kyma-project.io
       filter: $contains($item.spec.sink, $root.metadata.name)
   translations: |
