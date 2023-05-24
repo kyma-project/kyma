@@ -19,7 +19,7 @@ type eventMeshSubscriptionNameMapper struct {
 	maxLength  int
 }
 
-func NewBEBSubscriptionNameMapper(domainName string, maxNameLength int) NameMapper {
+func NewEventMeshSubscriptionNameMapper(domainName string, maxNameLength int) NameMapper {
 	return &eventMeshSubscriptionNameMapper{
 		domainName: domainName,
 		maxLength:  maxNameLength,

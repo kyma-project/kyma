@@ -23,7 +23,7 @@ const (
 	livenessInitialDelaySecs = int32(5)
 	livenessTimeoutSecs      = int32(1)
 	livenessPeriodSecs       = int32(2)
-	bebNamespacePrefix       = "/"
+	eventMeshNamespacePrefix = "/"
 	InstanceLabelKey         = "app.kubernetes.io/instance"
 	InstanceLabelValue       = "eventing"
 	DashboardLabelKey        = "kyma-project.io/dashboard"
@@ -56,7 +56,7 @@ func NewEventMeshPublisherDeployment(publisherConfig env.PublisherConfig) *appsv
 		publisherConfig,
 		WithLabels(v1alpha1.EventMeshBackendType),
 		WithContainers(publisherConfig),
-		WithBEBEnvVars(publisherConfig),
+		WithEventMeshEnvVars(publisherConfig),
 		WithLogEnvVars(publisherConfig),
 	)
 }
@@ -177,11 +177,11 @@ func WithNATSEnvVars(natsConfig env.NATSConfig, publisherConfig env.PublisherCon
 	}
 }
 
-func WithBEBEnvVars(publisherConfig env.PublisherConfig) DeployOpt {
+func WithEventMeshEnvVars(publisherConfig env.PublisherConfig) DeployOpt {
 	return func(d *appsv1.Deployment) {
 		for i, container := range d.Spec.Template.Spec.Containers {
 			if strings.EqualFold(container.Name, PublisherName) {
-				d.Spec.Template.Spec.Containers[i].Env = getBEBEnvVars(publisherConfig)
+				d.Spec.Template.Spec.Containers[i].Env = getEventMeshEnvVars(publisherConfig)
 			}
 		}
 	}
@@ -274,7 +274,7 @@ func getLogEnvVars(publisherConfig env.PublisherConfig) []v1.EnvVar {
 	}
 }
 
-func getBEBEnvVars(publisherConfig env.PublisherConfig) []v1.EnvVar {
+func getEventMeshEnvVars(publisherConfig env.PublisherConfig) []v1.EnvVar {
 	return []v1.EnvVar{
 		{Name: "BACKEND", Value: "eventmesh"},
 		{Name: "PORT", Value: strconv.Itoa(int(publisherPortNum))},
@@ -332,7 +332,7 @@ func getBEBEnvVars(publisherConfig env.PublisherConfig) []v1.EnvVar {
 		},
 		{
 			Name:  "BEB_NAMESPACE",
-			Value: fmt.Sprintf("%s$(BEB_NAMESPACE_VALUE)", bebNamespacePrefix),
+			Value: fmt.Sprintf("%s$(BEB_NAMESPACE_VALUE)", eventMeshNamespacePrefix),
 		},
 	}
 }

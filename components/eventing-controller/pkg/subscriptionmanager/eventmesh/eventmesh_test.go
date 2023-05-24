@@ -91,7 +91,7 @@ func Test_cleanupEventMesh(t *testing.T) {
 	require.NoError(t, err)
 
 	// create a EventMesh handler to connect to BEB Mock
-	nameMapper := utils.NewBEBSubscriptionNameMapper("mydomain.com",
+	nameMapper := utils.NewEventMeshSubscriptionNameMapper("mydomain.com",
 		backendeventmesh.MaxSubscriptionNameLength)
 	eventMeshHandler := backendeventmesh.NewEventMesh(credentials, nameMapper, defaultLogger)
 	err = eventMeshHandler.Initialize(envConf)

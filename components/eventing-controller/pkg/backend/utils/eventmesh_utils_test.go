@@ -41,7 +41,7 @@ func TestConvertKymaSubToEventMeshSub(t *testing.T) {
 		ClientSecret: "clientSecret",
 		TokenURL:     "tokenURL",
 	}
-	defaultNameMapper := NewBEBSubscriptionNameMapper("my-shoot", 50)
+	defaultNameMapper := NewEventMeshSubscriptionNameMapper("my-shoot", 50)
 
 	bebSubEvents := types.Events{types.Event{
 		Source: eventingtesting.EventMeshNamespace,
@@ -94,7 +94,7 @@ func TestConvertKymaSubToEventMeshSub(t *testing.T) {
 					TokenURL:     subscription.Spec.Config[eventingv1alpha2.WebhookAuthTokenURL],
 				}
 
-				return eventingtesting.NewBEBSubscription(
+				return eventingtesting.NewEventMeshSubscription(
 					defaultNameMapper.MapSubscriptionName(subscription.Name, subscription.Namespace),
 					subscription.Spec.Config[eventingv1alpha2.ProtocolSettingsContentMode],
 					expectedWebhookURL,
@@ -116,7 +116,7 @@ func TestConvertKymaSubToEventMeshSub(t *testing.T) {
 				)
 			},
 			wantEventMeshSubscriptionFunc: func(subscription *eventingv1alpha2.Subscription) *types.Subscription {
-				return eventingtesting.NewBEBSubscription(
+				return eventingtesting.NewEventMeshSubscription(
 					defaultNameMapper.MapSubscriptionName(subscription.Name, subscription.Namespace),
 					*defaultProtocolSettings.ContentMode,
 					expectedWebhookURL,
@@ -412,7 +412,7 @@ func TestEventMeshSubscriptionNameMapper(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		mapper := NewBEBSubscriptionNameMapper(test.domainName, test.maxLen)
+		mapper := NewEventMeshSubscriptionNameMapper(test.domainName, test.maxLen)
 		s := mapper.MapSubscriptionName(test.inputSub.Name, test.inputSub.Namespace)
 		g.Expect(len(s)).To(BeNumerically("<=", test.maxLen))
 		// the mapped name should always end with the SHA1
@@ -423,7 +423,7 @@ func TestEventMeshSubscriptionNameMapper(t *testing.T) {
 	}
 
 	// Same domain and subscription name/namespace should map to the same name
-	mapper := NewBEBSubscriptionNameMapper(domain1, 50)
+	mapper := NewEventMeshSubscriptionNameMapper(domain1, 50)
 	g.Expect(mapper.MapSubscriptionName(s3.Name, s3.Namespace)).To(
 		Equal(mapper.MapSubscriptionName(s4.Name, s4.Namespace)))
 

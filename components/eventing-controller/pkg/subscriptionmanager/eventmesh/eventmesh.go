@@ -105,7 +105,7 @@ func (c *SubscriptionManager) Start(_ env.DefaultSubscriptionConfig, params subs
 
 	// Need to read env to read BEB related secrets
 	c.envCfg = env.GetConfig()
-	nameMapper := backendutils.NewBEBSubscriptionNameMapper(strings.TrimSpace(c.envCfg.Domain),
+	nameMapper := backendutils.NewEventMeshSubscriptionNameMapper(strings.TrimSpace(c.envCfg.Domain),
 		backendeventmesh.MaxSubscriptionNameLength)
 	ctrl.Log.WithName("BEB-subscription-manager").Info("using BEB name mapper",
 		"domainName", c.envCfg.Domain,

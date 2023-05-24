@@ -76,15 +76,15 @@ var (
 
 type Reconciler struct {
 	client.Client
-	ctx               context.Context
-	natsSubMgr        subscriptionmanager.Manager
-	natsConfig        env.NATSConfig
-	natsSubMgrStarted bool
-	bebSubMgr         subscriptionmanager.Manager
-	bebSubMgrStarted  bool
-	logger            *logger.Logger
-	record            record.EventRecorder
-	cfg               env.BackendConfig
+	ctx                    context.Context
+	natsSubMgr             subscriptionmanager.Manager
+	natsConfig             env.NATSConfig
+	natsSubMgrStarted      bool
+	eventMeshSubMgr        subscriptionmanager.Manager
+	eventMeshSubMgrStarted bool
+	logger                 *logger.Logger
+	record                 record.EventRecorder
+	cfg                    env.BackendConfig
 	// backendType is the type of the backend which the reconciler detects at runtime.
 	backendType eventingv1alpha1.BackendType
 	// The OAuth2 credentials that are passed to the EventMesh subscription reconciler.
@@ -97,14 +97,14 @@ func NewReconciler(ctx context.Context, natsSubMgr subscriptionmanager.Manager, 
 	recorder record.EventRecorder) *Reconciler {
 	cfg := env.GetBackendConfig()
 	return &Reconciler{
-		ctx:        ctx,
-		natsSubMgr: natsSubMgr,
-		natsConfig: natsConfig,
-		bebSubMgr:  bebSubMgr,
-		Client:     client,
-		logger:     logger,
-		record:     recorder,
-		cfg:        cfg,
+		ctx:             ctx,
+		natsSubMgr:      natsSubMgr,
+		natsConfig:      natsConfig,
+		eventMeshSubMgr: bebSubMgr,
+		Client:          client,
+		logger:          logger,
+		record:          recorder,
+		cfg:             cfg,
 	}
 }
 
@@ -289,7 +289,7 @@ func (r *Reconciler) reconcileEventMeshBackend(ctx context.Context, bebSecret *v
 		return ctrl.Result{}, err
 	}
 
-	if r.bebSubMgrStarted && !backendStatus.IsSubscriptionControllerStatusReady() {
+	if r.eventMeshSubMgrStarted && !backendStatus.IsSubscriptionControllerStatusReady() {
 		backendStatus.SetSubscriptionControllerReadyCondition(true, eventingv1alpha1.ConditionReasonSubscriptionControllerReady, "")
 	}
 
@@ -318,10 +318,10 @@ func (r *Reconciler) syncOauth2ClientIDAndSecret(ctx context.Context, backendSta
 		// Stop the controller and mark all subs as not ready
 		message := "Stopping the BEB subscription manager due to change in OAuth2 credentials"
 		r.namedLogger().Info(message)
-		if err := r.bebSubMgr.Stop(false); err != nil {
+		if err := r.eventMeshSubMgr.Stop(false); err != nil {
 			return err
 		}
-		r.bebSubMgrStarted = false
+		r.eventMeshSubMgrStarted = false
 		// update eventing backend status to reflect that the controller is not ready
 		backendStatus.SetSubscriptionControllerReadyCondition(false, eventingv1alpha1.ConditionReasonSubscriptionControllerNotReady, message)
 		if updateErr := r.syncBackendStatus(ctx, backendStatus, nil); updateErr != nil {
@@ -794,23 +794,23 @@ func (r *Reconciler) stopNATSController() error {
 }
 
 func (r *Reconciler) startEventMeshController(clientID, clientSecret []byte) error {
-	if !r.bebSubMgrStarted {
+	if !r.eventMeshSubMgrStarted {
 		bebSubMgrParams := subscriptionmanager.Params{"client_id": clientID, "client_secret": clientSecret}
-		if err := r.bebSubMgr.Start(r.cfg.DefaultSubscriptionConfig, bebSubMgrParams); err != nil {
+		if err := r.eventMeshSubMgr.Start(r.cfg.DefaultSubscriptionConfig, bebSubMgrParams); err != nil {
 			return xerrors.Errorf("failed to start BEB subscription manager: %v", err)
 		}
-		r.bebSubMgrStarted = true
+		r.eventMeshSubMgrStarted = true
 		r.namedLogger().Info("BEB subscription manager was started")
 	}
 	return nil
 }
 
 func (r *Reconciler) stopEventMeshController() error {
-	if r.bebSubMgrStarted {
-		if err := r.bebSubMgr.Stop(true); err != nil {
+	if r.eventMeshSubMgrStarted {
+		if err := r.eventMeshSubMgr.Stop(true); err != nil {
 			return xerrors.Errorf("failed to stop BEB subscription manager: %v", err)
 		}
-		r.bebSubMgrStarted = false
+		r.eventMeshSubMgrStarted = false
 		r.namedLogger().Info("BEB subscription manager was stopped")
 	}
 	return nil

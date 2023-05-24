@@ -118,8 +118,8 @@ func Test_Conversion(t *testing.T) {
 		{
 			name: "Converting BEB Subscription",
 			alpha1Sub: newDefaultSubscription(
-				eventingtesting.WithV1alpha1ProtocolBEB(),
-				v1WithWebhookAuthForBEB(),
+				eventingtesting.WithV1alpha1ProtocolEventMesh(),
+				v1WithWebhookAuthForEventMesh(),
 				eventingtesting.WithV1alpha1Filter(eventSource, orderCreatedEventType),
 				eventingtesting.WithV1alpha1Filter(eventSource, orderUpdatedEventType),
 				eventingtesting.WithV1alpha1Filter(eventSource, orderDeletedEventTypeNonClean),
@@ -128,7 +128,7 @@ func Test_Conversion(t *testing.T) {
 					orderUpdatedEventType,
 					orderDeletedEventType,
 				}),
-				v1WithBEBStatusFields(),
+				v1WithEventMeshStatusFields(),
 			),
 			alpha2Sub: newV2DefaultSubscription(
 				eventingtesting.WithEventSource(eventSource),
@@ -137,7 +137,7 @@ func Test_Conversion(t *testing.T) {
 					orderUpdatedEventType,
 					orderDeletedEventTypeNonClean,
 				}),
-				eventingtesting.WithProtocolBEB(),
+				eventingtesting.WithProtocolEventMesh(),
 				eventingtesting.WithWebhookAuthForEventMesh(),
 				v2WithStatusTypes([]v1alpha2.EventType{
 					{
@@ -153,13 +153,13 @@ func Test_Conversion(t *testing.T) {
 						CleanType:    orderDeletedEventType,
 					},
 				}),
-				v2WithBEBStatusFields(),
+				v2WithEventMeshStatusFields(),
 			),
 		},
 		{
 			name: "Converting Subscription with Protocol, ProtocolSettings and WebhookAuth",
 			alpha1Sub: newDefaultSubscription(
-				eventingtesting.WithV1alpha1ProtocolBEB(),
+				eventingtesting.WithV1alpha1ProtocolEventMesh(),
 				eventingtesting.WithV1alpha1ProtocolSettings(
 					eventingtesting.NewProtocolSettings(
 						eventingtesting.WithAtLeastOnceQOS(),
@@ -174,7 +174,7 @@ func Test_Conversion(t *testing.T) {
 				eventingtesting.WithTypes([]string{
 					orderCreatedEventType,
 				}),
-				eventingtesting.WithProtocolBEB(),
+				eventingtesting.WithProtocolEventMesh(),
 				eventingtesting.WithConfigValue(v1alpha2.ProtocolSettingsQos,
 					string(types.QosAtLeastOnce)),
 				eventingtesting.WithConfigValue(v1alpha2.WebhookAuthGrantType,

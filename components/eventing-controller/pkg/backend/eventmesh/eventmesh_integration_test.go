@@ -24,7 +24,7 @@ func Test_getProcessedEventTypes(t *testing.T) {
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	require.NoError(t, err)
 
-	nameMapper := backendutils.NewBEBSubscriptionNameMapper("mydomain.com",
+	nameMapper := backendutils.NewEventMeshSubscriptionNameMapper("mydomain.com",
 		MaxSubscriptionNameLength)
 
 	// cases
@@ -163,7 +163,7 @@ func Test_handleKymaSubModified(t *testing.T) {
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	require.NoError(t, err)
 
-	nameMapper := backendutils.NewBEBSubscriptionNameMapper("mydomain.com",
+	nameMapper := backendutils.NewEventMeshSubscriptionNameMapper("mydomain.com",
 		MaxSubscriptionNameLength)
 
 	// cases
@@ -281,7 +281,7 @@ func Test_handleEventMeshSubModified(t *testing.T) {
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	require.NoError(t, err)
 
-	nameMapper := backendutils.NewBEBSubscriptionNameMapper("mydomain.com",
+	nameMapper := backendutils.NewEventMeshSubscriptionNameMapper("mydomain.com",
 		MaxSubscriptionNameLength)
 
 	// cases
@@ -399,7 +399,7 @@ func Test_handleCreateEventMeshSub(t *testing.T) {
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	require.NoError(t, err)
 
-	nameMapper := backendutils.NewBEBSubscriptionNameMapper("mydomain.com",
+	nameMapper := backendutils.NewEventMeshSubscriptionNameMapper("mydomain.com",
 		MaxSubscriptionNameLength)
 
 	// cases
@@ -584,7 +584,7 @@ func Test_SyncSubscription(t *testing.T) {
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	require.NoError(t, err)
 
-	nameMapper := backendutils.NewBEBSubscriptionNameMapper("mydomain.com",
+	nameMapper := backendutils.NewEventMeshSubscriptionNameMapper("mydomain.com",
 		MaxSubscriptionNameLength)
 	eventMesh := NewEventMesh(credentials, nameMapper, defaultLogger)
 

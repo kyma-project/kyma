@@ -113,7 +113,7 @@ func V2ToV1(dst *Subscription, src *v1alpha2.Subscription) error {
 	dst.Status.Ready = src.Status.Ready
 
 	dst.setV1CleanEvenTypes(src)
-	dst.bebBackendStatusToV1(src)
+	dst.eventMeshBackendStatusToV1(src)
 	dst.natsBackendStatusToV1(src)
 
 	return nil
@@ -270,8 +270,8 @@ func (src *Subscription) natsSpecConfigToV2(dst *v1alpha2.Subscription) {
 	}
 }
 
-// setBEBBackendStatus moves the BEB-related to Backend fields of the Status in the v1alpha2.
-func (src *Subscription) bebBackendStatusToV1(dst *v1alpha2.Subscription) {
+// setBEBBackendStatus moves the EventMesh-related to Backend fields of the Status in the v1alpha2.
+func (src *Subscription) eventMeshBackendStatusToV1(dst *v1alpha2.Subscription) {
 	src.Status.Ev2hash = dst.Status.Backend.Ev2hash
 	src.Status.Emshash = dst.Status.Backend.Emshash
 	src.Status.ExternalSink = dst.Status.Backend.ExternalSink

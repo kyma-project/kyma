@@ -137,7 +137,7 @@ func setupSuite() error {
 	}
 
 	// setup nameMapper for EventMesh
-	emTestEnsemble.nameMapper = backendutils.NewBEBSubscriptionNameMapper(domain,
+	emTestEnsemble.nameMapper = backendutils.NewEventMeshSubscriptionNameMapper(domain,
 		backendeventmesh.MaxSubscriptionNameLength)
 
 	// setup eventMesh reconciler

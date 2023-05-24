@@ -81,7 +81,7 @@ func newDefaultSubscription(opts ...eventingtesting.SubscriptionV1alpha1Opt) *v1
 
 // extend the v1 Subscription helpers with Status fields
 
-func v1WithWebhookAuthForBEB() eventingtesting.SubscriptionV1alpha1Opt {
+func v1WithWebhookAuthForEventMesh() eventingtesting.SubscriptionV1alpha1Opt {
 	return func(s *v1alpha1.Subscription) {
 		s.Spec.Protocol = "BEB"
 		s.Spec.ProtocolSettings = &v1alpha1.ProtocolSettings{
@@ -106,7 +106,7 @@ func v1WithWebhookAuthForBEB() eventingtesting.SubscriptionV1alpha1Opt {
 	}
 }
 
-func v1WithBEBStatusFields() eventingtesting.SubscriptionV1alpha1Opt {
+func v1WithEventMeshStatusFields() eventingtesting.SubscriptionV1alpha1Opt {
 	return func(s *v1alpha1.Subscription) {
 		s.Status.Ev2hash = 123
 		s.Status.ExternalSink = "testlink.com"
@@ -154,7 +154,7 @@ func newV2DefaultSubscription(opts ...eventingtesting.SubscriptionOpt) *v1alpha2
 
 // extend the v2 Subscription helpers with Status fields
 
-func v2WithBEBStatusFields() eventingtesting.SubscriptionOpt {
+func v2WithEventMeshStatusFields() eventingtesting.SubscriptionOpt {
 	return func(s *v1alpha2.Subscription) {
 		s.Status.Backend.Ev2hash = 123
 		s.Status.Backend.ExternalSink = "testlink.com"

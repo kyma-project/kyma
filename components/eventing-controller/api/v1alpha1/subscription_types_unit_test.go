@@ -11,7 +11,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 )
 
-func TestBEBFilters_Deduplicate(t *testing.T) {
+func TestEventMeshFilters_Deduplicate(t *testing.T) {
 	filter1 := &v1alpha1.EventMeshFilter{
 		EventSource: &v1alpha1.Filter{
 			Type:     "exact",

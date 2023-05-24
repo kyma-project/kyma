@@ -126,7 +126,7 @@ func WithStatusCleanEventTypes(cleanEventTypes []string) SubscriptionV1alpha1Opt
 	}
 }
 
-func WithV1alpha1ProtocolBEB() SubscriptionV1alpha1Opt {
+func WithV1alpha1ProtocolEventMesh() SubscriptionV1alpha1Opt {
 	return func(s *eventingv1alpha1.Subscription) {
 		s.Spec.Protocol = "BEB"
 	}
@@ -452,7 +452,7 @@ func NewSubscription(name, namespace string, opts ...SubscriptionOpt) *eventingv
 	return newSub
 }
 
-func NewBEBSubscription(name, contentMode string, webhookURL string, events types.Events,
+func NewEventMeshSubscription(name, contentMode string, webhookURL string, events types.Events,
 	webhookAuth *types.WebhookAuth) *types.Subscription {
 	return &types.Subscription{
 		Name:            name,
@@ -473,7 +473,7 @@ func NewSampleEventMeshSubscription() *types.Subscription {
 		},
 	}
 
-	return NewBEBSubscription("ev2subs1", types.ContentModeStructured, "https://webhook.xxx.com",
+	return NewEventMeshSubscription("ev2subs1", types.ContentModeStructured, "https://webhook.xxx.com",
 		eventType, nil)
 }
 
@@ -591,7 +591,7 @@ func WithInvalidWebhookAuthGrantType() SubscriptionOpt {
 	}
 }
 
-func WithProtocolBEB() SubscriptionOpt {
+func WithProtocolEventMesh() SubscriptionOpt {
 	return func(s *eventingv1alpha2.Subscription) {
 		if s.Spec.Config == nil {
 			s.Spec.Config = map[string]string{}

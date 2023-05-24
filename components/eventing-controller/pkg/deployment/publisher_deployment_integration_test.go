@@ -41,7 +41,7 @@ func TestNewDeployment(t *testing.T) {
 		{
 			name:                  "BEB should be set properly after calling the constructor",
 			givenBackend:          "BEB",
-			wantBackendAssertions: bebBackendAssertions,
+			wantBackendAssertions: eventMeshBackendAssertions,
 		},
 	}
 
@@ -210,7 +210,7 @@ func Test_GetLogEnvVars(t *testing.T) {
 	}
 }
 
-func Test_GetBEBEnvVars(t *testing.T) {
+func Test_GetEventMeshEnvVars(t *testing.T) {
 	testCases := []struct {
 		name      string
 		givenEnvs map[string]string
@@ -241,7 +241,7 @@ func Test_GetBEBEnvVars(t *testing.T) {
 				t.Setenv(k, v)
 			}
 			backendConfig := env.GetBackendConfig()
-			envVars := getBEBEnvVars(backendConfig.PublisherConfig)
+			envVars := getEventMeshEnvVars(backendConfig.PublisherConfig)
 
 			// ensure the right envs were set
 			for index, val := range tc.wantEnvs {
@@ -270,14 +270,14 @@ func natsBackendAssertions(t *testing.T, deployment appsv1.Deployment) {
 	}
 }
 
-// bebBackendAssertions checks that the eventmesh-specific data was set in the NewEventMeshPublisherDeployment.
-func bebBackendAssertions(t *testing.T, deployment appsv1.Deployment) {
+// eventMeshBackendAssertions checks that the eventmesh-specific data was set in the NewEventMeshPublisherDeployment.
+func eventMeshBackendAssertions(t *testing.T, deployment appsv1.Deployment) {
 	container := findPublisherContainer(deployment)
 	assert.NotNil(t, container)
 
 	// check eventmesh-specific env variables
 	bebNamespace := findEnvVar(container.Env, "BEB_NAMESPACE")
-	assert.Equal(t, bebNamespace.Value, fmt.Sprintf("%s$(BEB_NAMESPACE_VALUE)", bebNamespacePrefix))
+	assert.Equal(t, bebNamespace.Value, fmt.Sprintf("%s$(BEB_NAMESPACE_VALUE)", eventMeshNamespacePrefix))
 
 	// check the affinity is empty
 	assert.Empty(t, deployment.Spec.Template.Spec.Affinity)

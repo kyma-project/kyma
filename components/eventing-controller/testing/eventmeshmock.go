@@ -20,7 +20,7 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/client"
-	bebtypes "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
+	eventmeshtypes "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 )
 
 const (
@@ -66,7 +66,7 @@ func NewEventMeshMockResponseOverride() *EventMeshMockResponseOverride {
 	}
 }
 
-type ResponseWithSub func(w http.ResponseWriter, subscription bebtypes.Subscription)
+type ResponseWithSub func(w http.ResponseWriter, subscription eventmeshtypes.Subscription)
 type ResponseWithName func(w http.ResponseWriter, subscriptionName string)
 type Response func(w http.ResponseWriter)
 
@@ -122,7 +122,7 @@ func (m *EventMeshMock) Start() string {
 			m.Subscriptions.DeleteSubscription(key)
 			m.DeleteResponse(w)
 		case http.MethodPost:
-			var subscription bebtypes.Subscription
+			var subscription eventmeshtypes.Subscription
 			_ = json.NewDecoder(r.Body).Decode(&subscription)
 			key := r.URL.Path + "/" + subscription.Name
 			// check if any response override defined for this subscription
@@ -191,7 +191,7 @@ func GetSubscriptionResponse(m *EventMeshMock) ResponseWithName {
 		subscriptionSaved := m.Subscriptions.GetSubscription(key)
 		if subscriptionSaved != nil {
 			if subscriptionSaved.SubscriptionStatus == "" {
-				subscriptionSaved.SubscriptionStatus = bebtypes.SubscriptionStatusActive
+				subscriptionSaved.SubscriptionStatus = eventmeshtypes.SubscriptionStatusActive
 			}
 			w.WriteHeader(http.StatusOK)
 			err := json.NewEncoder(w).Encode(*subscriptionSaved)
@@ -217,8 +217,8 @@ func EventMeshAuthResponseSuccess(w http.ResponseWriter) {
 // EventMeshCreateSuccess writes a Response to the writer for the happy-path of creating a BEB subscription.
 func EventMeshCreateSuccess(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusAccepted)
-	response := bebtypes.CreateResponse{
-		Response: bebtypes.Response{
+	response := eventmeshtypes.CreateResponse{
+		Response: eventmeshtypes.Response{
 			StatusCode: http.StatusAccepted,
 			Message:    "",
 		},
@@ -231,9 +231,9 @@ func EventMeshCreateSuccess(w http.ResponseWriter) {
 // EventMeshGetSuccess writes a Response to the writer for the happy-path of getting a BEB subscription.
 func EventMeshGetSuccess(w http.ResponseWriter, name string) {
 	w.WriteHeader(http.StatusOK)
-	s := bebtypes.Subscription{
+	s := eventmeshtypes.Subscription{
 		Name:               name,
-		SubscriptionStatus: bebtypes.SubscriptionStatusActive,
+		SubscriptionStatus: eventmeshtypes.SubscriptionStatusActive,
 	}
 	err := json.NewEncoder(w).Encode(s)
 	Expect(err).ShouldNot(HaveOccurred())
@@ -242,7 +242,7 @@ func EventMeshGetSuccess(w http.ResponseWriter, name string) {
 // EventMeshListSuccess writes a Response to the writer for the happy-path of listing a BEB subscription.
 func EventMeshListSuccess(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusAccepted)
-	response := bebtypes.Response{
+	response := eventmeshtypes.Response{
 		StatusCode: http.StatusOK,
 		Message:    "",
 	}
