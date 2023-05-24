@@ -5,6 +5,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -28,6 +29,7 @@ const (
 	DefaultCertDir  = "/tmp/k8s-webhook-server/serving-certs"
 	FunctionCRDName = "functions.serverless.kyma-project.io"
 )
+const TimeToExpire = 10 * 24 * time.Hour
 
 func SetupCertificates(ctx context.Context, secretName, secretNamespace, serviceName string, logger *zap.SugaredLogger) error {
 	// We are going to talk to the API server _before_ we start the manager.
@@ -97,6 +99,9 @@ func updateSecret(ctx context.Context, client ctrlclient.Client, log *zap.Sugare
 	if err := client.Update(ctx, secret); err != nil {
 		return errors.Wrap(err, "failed to update secret")
 	}
+	log.Info("certificate updated successfully, restarting")
+	//This is not an elegant solution, but the webhook need to reconfigure itself to use updated certificate.
+	os.Exit(0)
 	return nil
 }
 
@@ -125,7 +130,7 @@ func verifyCertificate(c []byte) error {
 		return errors.Wrap(err, "failed to parse root certificate data")
 	}
 	// make sure the certificate is valid for the next 10 days. Otherwise it will be recreated.
-	_, err = certificate[0].Verify(x509.VerifyOptions{CurrentTime: time.Now().Add(10 * 24 * time.Hour), Roots: root})
+	_, err = certificate[0].Verify(x509.VerifyOptions{CurrentTime: time.Now().Add(TimeToExpire), Roots: root})
 	if err != nil {
 		return errors.Wrap(err, "certificate verification failed")
 	}
