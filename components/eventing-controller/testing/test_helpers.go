@@ -28,6 +28,8 @@ const (
 	ApplicationName         = "testapp1023"
 	ApplicationNameNotClean = "test-app_1-0+2=3"
 
+    EventMeshProtocol = "BEB"
+
 	OrderCreatedUncleanEvent = "order.cre-ä+t*ed.v2"
 	OrderCreatedCleanEvent   = "order.cre-ä+ted.v2"
 	EventSourceUnclean       = "s>o>*u*r>c.e"
@@ -128,7 +130,7 @@ func WithStatusCleanEventTypes(cleanEventTypes []string) SubscriptionV1alpha1Opt
 
 func WithV1alpha1ProtocolEventMesh() SubscriptionV1alpha1Opt {
 	return func(s *eventingv1alpha1.Subscription) {
-		s.Spec.Protocol = "BEB"
+		s.Spec.Protocol = EventMeshProtocol
 	}
 }
 
@@ -550,7 +552,7 @@ func WithEventMeshSubscriptionStatus(status string) SubscriptionOpt {
 func WithWebhookAuthForEventMesh() SubscriptionOpt {
 	return func(s *eventingv1alpha2.Subscription) {
 		s.Spec.Config = map[string]string{
-			eventingv1alpha2.Protocol:                        "BEB",
+			eventingv1alpha2.Protocol:                        EventMeshProtocol,
 			eventingv1alpha2.ProtocolSettingsContentMode:     "BINARY",
 			eventingv1alpha2.ProtocolSettingsExemptHandshake: "true",
 			eventingv1alpha2.ProtocolSettingsQos:             "AT_LEAST_ONCE",
@@ -596,7 +598,7 @@ func WithProtocolEventMesh() SubscriptionOpt {
 		if s.Spec.Config == nil {
 			s.Spec.Config = map[string]string{}
 		}
-		s.Spec.Config[eventingv1alpha2.Protocol] = "BEB"
+		s.Spec.Config[eventingv1alpha2.Protocol] = EventMeshProtocol
 	}
 }
 

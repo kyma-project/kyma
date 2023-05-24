@@ -248,8 +248,8 @@ func (s *SubscriptionStatus) SetConditionAPIRuleStatus(err error) {
 	s.Conditions = newConditions
 }
 
-func CreateMessageForConditionReasonSubscriptionCreated(bebName string) string {
-	return fmt.Sprintf("BEB-subscription-name=%s", bebName)
+func CreateMessageForConditionReasonSubscriptionCreated(eventMeshName string) string {
+	return fmt.Sprintf("BEB-subscription-name=%s", eventMeshName)
 }
 
 // makeBackendConditions creates a map of all conditions which the Backend should have.

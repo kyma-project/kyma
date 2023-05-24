@@ -174,7 +174,7 @@ func Test_setEventMeshSubscriptionStatus(t *testing.T) {
 	kymaSubscription := eventingtesting.NewSubscription("test", "test")
 
 	// when
-	isChanged := setEmsSubscriptionStatus(kymaSubscription, eventMeshSubscription)
+	isChanged := setEventMeshSubscriptionStatus(kymaSubscription, eventMeshSubscription)
 
 	// then
 	require.True(t, isChanged)

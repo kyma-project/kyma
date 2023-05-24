@@ -286,7 +286,7 @@ func (em *EventMesh) handleKymaSubStatusUpdate(eventMeshServerSub *types.Subscri
 	}
 
 	// update EventMesh sub status in kyma sub status
-	statusChanged := setEmsSubscriptionStatus(kymaSub, eventMeshServerSub)
+	statusChanged := setEventMeshSubscriptionStatus(kymaSub, eventMeshServerSub)
 
 	return statusChanged, nil
 }
