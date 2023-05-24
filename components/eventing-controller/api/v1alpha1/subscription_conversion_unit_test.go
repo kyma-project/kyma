@@ -396,13 +396,13 @@ func v2ToV1Assertions(t *testing.T, wantSub, convertedSub *v1alpha1.Subscription
 	assert.Equal(t, wantSub.Status.Conditions, convertedSub.Status.Conditions)
 	assert.Equal(t, wantSub.Status.CleanEventTypes, convertedSub.Status.CleanEventTypes)
 
-	// BEB fields
+	// EventMesh fields
 	assert.Equal(t, wantSub.Status.Ev2hash, convertedSub.Status.Ev2hash)
-	assert.Equal(t, wantSub.Status.Emshash, convertedSub.Status.Emshash)
+	assert.Equal(t, wantSub.Status.EventMeshHash, convertedSub.Status.EventMeshHash)
 	assert.Equal(t, wantSub.Status.ExternalSink, convertedSub.Status.ExternalSink)
 	assert.Equal(t, wantSub.Status.FailedActivation, convertedSub.Status.FailedActivation)
 	assert.Equal(t, wantSub.Status.APIRuleName, convertedSub.Status.APIRuleName)
-	assert.Equal(t, wantSub.Status.EmsSubscriptionStatus, convertedSub.Status.EmsSubscriptionStatus)
+	assert.Equal(t, wantSub.Status.EventMeshSubscriptionStatus, convertedSub.Status.EventMeshSubscriptionStatus)
 
 	assert.Equal(t, wantSub.Status.Config, convertedSub.Status.Config)
 }

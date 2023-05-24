@@ -204,7 +204,7 @@ type SubscriptionStatus struct {
 
 	// Defines the checksum for the Subscription in EventMesh.
 	// +optional
-	Emshash int64 `json:"emshash,omitempty"`
+	EventMeshHash int64 `json:"emshash,omitempty"`
 
 	// Defines the webhook URL which is used by EventMesh to trigger subscribers.
 	// +optional
@@ -220,7 +220,7 @@ type SubscriptionStatus struct {
 
 	// Defines the status of the Subscription in EventMesh.
 	// +optional
-	EmsSubscriptionStatus *EmsSubscriptionStatus `json:"emsSubscriptionStatus,omitempty"`
+	EventMeshSubscriptionStatus *EmsSubscriptionStatus `json:"emsSubscriptionStatus,omitempty"`
 
 	// Defines the configurations that have been applied to the eventing backend when creating this Subscription.
 	// +optional

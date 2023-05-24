@@ -466,7 +466,7 @@ func TestPublisherProxyDeploymentEqual(t *testing.T) {
 		JSStreamName:    "kyma",
 	}
 	defaultNATSPublisher := deployment.NewNATSPublisherDeployment(natsConfig, publisherCfg)
-	defaultBEBPublisher := deployment.NewEventMeshPublisherDeployment(publisherCfg)
+	defaultEventMeshPublisher := deployment.NewEventMeshPublisherDeployment(publisherCfg)
 
 	testCases := map[string]struct {
 		getPublisher1  func() *appsv1.Deployment
@@ -488,12 +488,12 @@ func TestPublisherProxyDeploymentEqual(t *testing.T) {
 		},
 		"should be equal if same default BEB publisher": {
 			getPublisher1: func() *appsv1.Deployment {
-				p := defaultBEBPublisher.DeepCopy()
+				p := defaultEventMeshPublisher.DeepCopy()
 				p.Name = "publisher1"
 				return p
 			},
 			getPublisher2: func() *appsv1.Deployment {
-				p := defaultBEBPublisher.DeepCopy()
+				p := defaultEventMeshPublisher.DeepCopy()
 				p.Name = "publisher2"
 				return p
 			},
@@ -501,7 +501,7 @@ func TestPublisherProxyDeploymentEqual(t *testing.T) {
 		},
 		"should be unequal if publisher types are different": {
 			getPublisher1: func() *appsv1.Deployment {
-				return defaultBEBPublisher.DeepCopy()
+				return defaultEventMeshPublisher.DeepCopy()
 			},
 			getPublisher2: func() *appsv1.Deployment {
 				return defaultNATSPublisher.DeepCopy()

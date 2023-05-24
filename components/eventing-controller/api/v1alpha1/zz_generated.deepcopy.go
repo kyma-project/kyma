@@ -361,8 +361,8 @@ func (in *SubscriptionStatus) DeepCopyInto(out *SubscriptionStatus) {
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
-	if in.EmsSubscriptionStatus != nil {
-		in, out := &in.EmsSubscriptionStatus, &out.EmsSubscriptionStatus
+	if in.EventMeshSubscriptionStatus != nil {
+		in, out := &in.EventMeshSubscriptionStatus, &out.EventMeshSubscriptionStatus
 		*out = new(EmsSubscriptionStatus)
 		**out = **in
 	}

@@ -273,12 +273,12 @@ func (src *Subscription) natsSpecConfigToV2(dst *v1alpha2.Subscription) {
 // setBEBBackendStatus moves the EventMesh-related to Backend fields of the Status in the v1alpha2.
 func (src *Subscription) eventMeshBackendStatusToV1(dst *v1alpha2.Subscription) {
 	src.Status.Ev2hash = dst.Status.Backend.Ev2hash
-	src.Status.Emshash = dst.Status.Backend.Emshash
+	src.Status.EventMeshHash = dst.Status.Backend.Emshash
 	src.Status.ExternalSink = dst.Status.Backend.ExternalSink
 	src.Status.FailedActivation = dst.Status.Backend.FailedActivation
 	src.Status.APIRuleName = dst.Status.Backend.APIRuleName
 	if dst.Status.Backend.EmsSubscriptionStatus != nil {
-		src.Status.EmsSubscriptionStatus = &EmsSubscriptionStatus{
+		src.Status.EventMeshSubscriptionStatus = &EmsSubscriptionStatus{
 			SubscriptionStatus:       dst.Status.Backend.EmsSubscriptionStatus.Status,
 			SubscriptionStatusReason: dst.Status.Backend.EmsSubscriptionStatus.StatusReason,
 			LastSuccessfulDelivery:   dst.Status.Backend.EmsSubscriptionStatus.LastSuccessfulDelivery,
