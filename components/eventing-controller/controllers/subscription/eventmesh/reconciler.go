@@ -312,7 +312,7 @@ func (r *Reconciler) syncConditionSubscribed(subscription *eventingv1alpha2.Subs
 func (r *Reconciler) syncConditionSubscriptionActive(subscription *eventingv1alpha2.Subscription, isActive bool, logger *zap.SugaredLogger) {
 	condition := eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionSubscriptionActive, eventingv1alpha2.ConditionReasonSubscriptionActive, corev1.ConditionTrue, "")
 	if !isActive {
-		logger.Debugw("Waiting for subscription to be active", "name", subscription.Name, "status", subscription.Status.Backend.EmsSubscriptionStatus.Status)
+		logger.Debugw("Waiting for subscription to be active", "name", subscription.Name, "status", subscription.Status.Backend.EventMeshSubscriptionStatus.Status)
 		message := "Waiting for subscription to be active"
 		condition = eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionSubscriptionActive, eventingv1alpha2.ConditionReasonSubscriptionNotActive, corev1.ConditionFalse, message)
 	}
@@ -326,7 +326,7 @@ func (r *Reconciler) syncConditionWebhookCallStatus(subscription *eventingv1alph
 	if isWebhookCallError, err := r.checkLastFailedDelivery(subscription); err != nil {
 		condition.Message = err.Error()
 	} else if isWebhookCallError {
-		condition.Message = subscription.Status.Backend.EmsSubscriptionStatus.LastFailedDeliveryReason
+		condition.Message = subscription.Status.Backend.EventMeshSubscriptionStatus.LastFailedDeliveryReason
 	} else {
 		condition.Status = corev1.ConditionTrue
 	}
@@ -733,12 +733,12 @@ func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
 
 // checkStatusActive checks if the subscription is active and if not, sets a timer for retry.
 func (r *Reconciler) checkStatusActive(subscription *eventingv1alpha2.Subscription) (active bool, err error) {
-	if subscription.Status.Backend.EmsSubscriptionStatus == nil {
+	if subscription.Status.Backend.EventMeshSubscriptionStatus == nil {
 		return false, nil
 	}
 
 	// check if the EMS subscription status is active
-	if subscription.Status.Backend.EmsSubscriptionStatus.Status == string(types.SubscriptionStatusActive) {
+	if subscription.Status.Backend.EventMeshSubscriptionStatus.Status == string(types.SubscriptionStatusActive) {
 		if len(subscription.Status.Backend.FailedActivation) > 0 {
 			subscription.Status.Backend.FailedActivation = ""
 		}
@@ -764,14 +764,14 @@ func (r *Reconciler) checkStatusActive(subscription *eventingv1alpha2.Subscripti
 
 // checkLastFailedDelivery checks if LastFailedDelivery exists and if it happened after LastSuccessfulDelivery.
 func (r *Reconciler) checkLastFailedDelivery(subscription *eventingv1alpha2.Subscription) (bool, error) {
-	if len(subscription.Status.Backend.EmsSubscriptionStatus.LastFailedDelivery) > 0 {
+	if len(subscription.Status.Backend.EventMeshSubscriptionStatus.LastFailedDelivery) > 0 {
 		var lastFailedDeliveryTime, LastSuccessfulDeliveryTime time.Time
 		var err error
-		if lastFailedDeliveryTime, err = time.Parse(time.RFC3339, subscription.Status.Backend.EmsSubscriptionStatus.LastFailedDelivery); err != nil {
+		if lastFailedDeliveryTime, err = time.Parse(time.RFC3339, subscription.Status.Backend.EventMeshSubscriptionStatus.LastFailedDelivery); err != nil {
 			return true, xerrors.Errorf("failed to parse LastFailedDelivery: %v", err)
 		}
-		if len(subscription.Status.Backend.EmsSubscriptionStatus.LastSuccessfulDelivery) > 0 {
-			if LastSuccessfulDeliveryTime, err = time.Parse(time.RFC3339, subscription.Status.Backend.EmsSubscriptionStatus.LastSuccessfulDelivery); err != nil {
+		if len(subscription.Status.Backend.EventMeshSubscriptionStatus.LastSuccessfulDelivery) > 0 {
+			if LastSuccessfulDeliveryTime, err = time.Parse(time.RFC3339, subscription.Status.Backend.EventMeshSubscriptionStatus.LastSuccessfulDelivery); err != nil {
 				return true, xerrors.Errorf("failed to parse LastSuccessfulDelivery: %v", err)
 			}
 		}

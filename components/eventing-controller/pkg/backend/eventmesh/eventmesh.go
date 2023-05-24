@@ -237,10 +237,10 @@ func (em *EventMesh) handleKymaSubModified(eventMeshSub *types.Subscription, kym
 // handleEventMeshSubModified checks if the EventMesh subscription is modified.
 // If modified, then it deletes the subscription on EventMesh and returns true.
 func (em *EventMesh) handleEventMeshSubModified(eventMeshSub *types.Subscription, kymaSub *eventingv1alpha2.Subscription) (bool, error) {
-	// get the cleaned EMS subscription for comparing the hash (Emshash)
+	// get the cleaned EMS subscription for comparing the hash (EventMeshHash)
 	cleanedEventMeshServerSub := backendutils.GetCleanedEventMeshSubscription(eventMeshSub)
 	isEventMeshServerSubModified, err := backendutils.IsEventMeshSubModified(cleanedEventMeshServerSub,
-		kymaSub.Status.Backend.Emshash)
+		kymaSub.Status.Backend.EventMeshHash)
 	if err != nil {
 		return false, err
 	}
@@ -278,7 +278,7 @@ func (em *EventMesh) handleKymaSubStatusUpdate(eventMeshServerSub *types.Subscri
 	kymaSub.Status.Types = statusCleanEventTypes(typesInfo)
 
 	// Update status.backend.emsTypes
-	kymaSub.Status.Backend.EmsTypes = statusFinalEventTypes(typesInfo)
+	kymaSub.Status.Backend.EventMeshTypes = statusFinalEventTypes(typesInfo)
 
 	// Update hashes in status
 	if err := updateHashesInStatus(kymaSub, eventMeshSub, eventMeshServerSub); err != nil {

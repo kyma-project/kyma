@@ -273,17 +273,17 @@ func (src *Subscription) natsSpecConfigToV2(dst *v1alpha2.Subscription) {
 // eventMeshBackendStatusToV1 moves the EventMesh-related to Backend fields of the Status in the v1alpha2.
 func (src *Subscription) eventMeshBackendStatusToV1(dst *v1alpha2.Subscription) {
 	src.Status.Ev2hash = dst.Status.Backend.Ev2hash
-	src.Status.EventMeshHash = dst.Status.Backend.Emshash
+	src.Status.EventMeshHash = dst.Status.Backend.EventMeshHash
 	src.Status.ExternalSink = dst.Status.Backend.ExternalSink
 	src.Status.FailedActivation = dst.Status.Backend.FailedActivation
 	src.Status.APIRuleName = dst.Status.Backend.APIRuleName
-	if dst.Status.Backend.EmsSubscriptionStatus != nil {
+	if dst.Status.Backend.EventMeshSubscriptionStatus != nil {
 		src.Status.EventMeshSubscriptionStatus = &EmsSubscriptionStatus{
-			SubscriptionStatus:       dst.Status.Backend.EmsSubscriptionStatus.Status,
-			SubscriptionStatusReason: dst.Status.Backend.EmsSubscriptionStatus.StatusReason,
-			LastSuccessfulDelivery:   dst.Status.Backend.EmsSubscriptionStatus.LastSuccessfulDelivery,
-			LastFailedDelivery:       dst.Status.Backend.EmsSubscriptionStatus.LastFailedDelivery,
-			LastFailedDeliveryReason: dst.Status.Backend.EmsSubscriptionStatus.LastFailedDeliveryReason,
+			SubscriptionStatus:       dst.Status.Backend.EventMeshSubscriptionStatus.Status,
+			SubscriptionStatusReason: dst.Status.Backend.EventMeshSubscriptionStatus.StatusReason,
+			LastSuccessfulDelivery:   dst.Status.Backend.EventMeshSubscriptionStatus.LastSuccessfulDelivery,
+			LastFailedDelivery:       dst.Status.Backend.EventMeshSubscriptionStatus.LastFailedDelivery,
+			LastFailedDeliveryReason: dst.Status.Backend.EventMeshSubscriptionStatus.LastFailedDeliveryReason,
 		}
 	}
 }

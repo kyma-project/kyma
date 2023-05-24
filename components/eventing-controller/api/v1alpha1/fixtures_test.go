@@ -160,7 +160,7 @@ func v2WithEventMeshStatusFields() eventingtesting.SubscriptionOpt {
 		s.Status.Backend.ExternalSink = "testlink.com"
 		s.Status.Backend.FailedActivation = "123156464672"
 		s.Status.Backend.APIRuleName = "APIRule"
-		s.Status.Backend.EmsSubscriptionStatus = &v1alpha2.EmsSubscriptionStatus{
+		s.Status.Backend.EventMeshSubscriptionStatus = &v1alpha2.EmsSubscriptionStatus{
 			Status:                   "not active",
 			StatusReason:             "reason",
 			LastSuccessfulDelivery:   "",
