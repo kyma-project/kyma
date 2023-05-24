@@ -455,7 +455,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 			By("Label the secret to switch to BEB")
 			bebSecret := reconcilertesting.NewBEBMessagingSecret(bebSecret1name, kymaSystemNamespace)
 			bebSecret.Labels = map[string]string{
-				BEBBackendSecretLabelKey: BEBBackendSecretLabelValue,
+				EventMeshBackendSecretLabelKey: EventMeshBackendSecretLabelValue,
 			}
 			Expect(k8sClient.Update(ctx, bebSecret)).Should(BeNil())
 			By("Checking EventingReady status is set to false")
@@ -651,7 +651,7 @@ func ensurePublisherProxyHasRightBackendTypeLabel(ctx context.Context, deploy *a
 func bebSecretExists(ctx context.Context) bool {
 	var secretList corev1.SecretList
 	if err := k8sClient.List(ctx, &secretList, client.MatchingLabels{
-		BEBBackendSecretLabelKey: BEBBackendSecretLabelValue,
+		EventMeshBackendSecretLabelKey: EventMeshBackendSecretLabelValue,
 	}); err != nil {
 		return false
 	}
@@ -689,7 +689,7 @@ func removeOAuth2Secret(ctx context.Context) {
 func ensureBEBSecretCreated(ctx context.Context, name, ns string) {
 	bebSecret := reconcilertesting.NewBEBMessagingSecret(name, ns)
 	bebSecret.Labels = map[string]string{
-		BEBBackendSecretLabelKey: BEBBackendSecretLabelValue,
+		EventMeshBackendSecretLabelKey: EventMeshBackendSecretLabelValue,
 	}
 	By(fmt.Sprintf("Ensuring an BEB Secret %q/%q is created", name, ns))
 	err := k8sClient.Create(ctx, bebSecret)

@@ -37,10 +37,10 @@ import (
 
 //nolint:gosec
 const (
-	BEBBackendSecretLabelKey   = "kyma-project.io/eventing-backend"
-	BEBBackendSecretLabelValue = "eventmesh"
+	EventMeshBackendSecretLabelKey   = "kyma-project.io/eventing-backend"
+	EventMeshBackendSecretLabelValue = "eventmesh"
 
-	BEBSecretNameSuffix = "-eventmesh-oauth2"
+	EventMeshSecretNameSuffix = "-eventmesh-oauth2"
 
 	BackendCRLabelKey   = "kyma-project.io/eventing"
 	BackendCRLabelValue = "backend"
@@ -85,9 +85,9 @@ type Reconciler struct {
 	logger            *logger.Logger
 	record            record.EventRecorder
 	cfg               env.BackendConfig
-	// backendType is the type of the backend which the reconciler detects at runtime
+	// backendType is the type of the backend which the reconciler detects at runtime.
 	backendType eventingv1alpha1.BackendType
-	// The OAuth2 credentials that are passed to the BEB subscription reconciler
+	// The OAuth2 credentials that are passed to the EventMesh subscription reconciler.
 	oauth2ClientID     []byte
 	oauth2ClientSecret []byte
 }
@@ -132,14 +132,14 @@ func (r *Reconciler) Reconcile(ctx context.Context, _ ctrl.Request) (ctrl.Result
 	defaultStatus := getDefaultBackendStatus()
 
 	if err := r.List(ctx, &secretList, client.MatchingLabels{
-		BEBBackendSecretLabelKey: BEBBackendSecretLabelValue,
+		EventMeshBackendSecretLabelKey: EventMeshBackendSecretLabelValue,
 	}); err != nil {
 		return ctrl.Result{}, err
 	}
 
 	if len(secretList.Items) > 1 {
 		// This is not allowed!
-		r.namedLogger().Debugw("More than one secret with the EventingBackend label exist", "key", BEBBackendSecretLabelKey, "value", BEBBackendSecretLabelValue, "count", len(secretList.Items))
+		r.namedLogger().Debugw("More than one secret with the EventingBackend label exist", "key", EventMeshBackendSecretLabelKey, "value", EventMeshBackendSecretLabelValue, "count", len(secretList.Items))
 		defaultStatus.Backend = eventingv1alpha1.EventMeshBackendType
 		defaultStatus.SetSubscriptionControllerReadyCondition(false, eventingv1alpha1.ConditionDuplicateSecrets, "")
 		if updateErr := r.syncBackendStatus(ctx, &defaultStatus, nil); updateErr != nil {
@@ -148,12 +148,12 @@ func (r *Reconciler) Reconcile(ctx context.Context, _ ctrl.Request) (ctrl.Result
 		return ctrl.Result{}, nil
 	}
 
-	// If secret with label then BEB flow
+	// If secret with label then EventMesh flow.
 	if len(secretList.Items) == 1 {
-		return r.reconcileBEBBackend(ctx, &secretList.Items[0], &defaultStatus)
+		return r.reconcileEventMeshBackend(ctx, &secretList.Items[0], &defaultStatus)
 	}
 
-	// Default: NATS flow
+	// Default: NATS flow.
 	return r.reconcileNATSBackend(ctx, &defaultStatus)
 }
 
@@ -170,8 +170,8 @@ func (r *Reconciler) reconcileNATSBackend(ctx context.Context, backendStatus *ev
 		return ctrl.Result{}, errors.Wrapf(err, "create or update EventingBackend failed, type: %s", eventingv1alpha1.NatsBackendType)
 	}
 
-	// Stop the BEB subscription controller
-	if err := r.stopBEBController(); err != nil {
+	// Stop the EventMesh subscription controller
+	if err := r.stopEventMeshController(); err != nil {
 		backendStatus.SetSubscriptionControllerReadyCondition(false, eventingv1alpha1.ConditionReasonControllerStopFailed, err.Error())
 		if updateErr := r.syncBackendStatus(ctx, backendStatus, nil); updateErr != nil {
 			return ctrl.Result{}, errors.Wrapf(err, "failed to update status while stopping BEB controller")
@@ -198,7 +198,7 @@ func (r *Reconciler) reconcileNATSBackend(ctx context.Context, backendStatus *ev
 		return ctrl.Result{}, errors.Wrapf(err, "delete eventing Event Publisher secret failed")
 	}
 
-	// CreateOrUpdate deployment for publisher proxy
+	// CreateOrUpdate deployment for publisher proxy.
 	publisher, err := r.CreateOrUpdatePublisherProxy(ctx, r.backendType)
 	if err != nil {
 		backendStatus.SetPublisherReadyCondition(false, eventingv1alpha1.ConditionReasonPublisherProxySyncFailed, err.Error())
@@ -211,17 +211,17 @@ func (r *Reconciler) reconcileNATSBackend(ctx context.Context, backendStatus *ev
 	if r.natsSubMgrStarted && !backendStatus.IsSubscriptionControllerStatusReady() {
 		backendStatus.SetSubscriptionControllerReadyCondition(true, eventingv1alpha1.ConditionReasonSubscriptionControllerReady, "")
 	}
-	// CreateOrUpdate status of the CR
-	// Get publisher proxy ready status
+	// CreateOrUpdate status of the CR.
+	// Get publisher proxy ready status.
 	err = r.syncBackendStatus(ctx, backendStatus, publisher)
 	return ctrl.Result{}, err
 }
 
-func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secret, backendStatus *eventingv1alpha1.EventingBackendStatus) (ctrl.Result, error) {
+func (r *Reconciler) reconcileEventMeshBackend(ctx context.Context, bebSecret *v1.Secret, backendStatus *eventingv1alpha1.EventingBackendStatus) (ctrl.Result, error) {
 	r.backendType = eventingv1alpha1.EventMeshBackendType
 	backendStatus.Backend, backendStatus.EventMeshSecretName, backendStatus.EventMeshSecretNamespace = r.backendType, bebSecret.Name, bebSecret.Namespace
 
-	// CreateOrUpdate CR with BEB
+	// CreateOrUpdate CR with EventMesh.
 	err := r.CreateOrUpdateBackendCR(ctx)
 	if err != nil {
 		backendStatus.SetSubscriptionControllerReadyCondition(false, eventingv1alpha1.ConditionReasonBackendCRSyncFailed, err.Error())
@@ -231,7 +231,7 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 		return ctrl.Result{}, errors.Wrapf(err, "create/update EventingBackend failed, type: %s", eventingv1alpha1.EventMeshBackendType)
 	}
 
-	// Stop the NATS subscription controller
+	// Stop the NATS subscription controller.
 	if err := r.stopNATSController(); err != nil {
 		backendStatus.SetSubscriptionControllerReadyCondition(false, eventingv1alpha1.ConditionReasonControllerStopFailed, err.Error())
 		if updateErr := r.syncBackendStatus(ctx, backendStatus, nil); updateErr != nil {
@@ -240,7 +240,7 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 		return ctrl.Result{}, err
 	}
 
-	// gets oauth2ClientID and secret and stops the BEB controller if changed
+	// gets oauth2ClientID and secret and stops the EventMesh controller if changed.
 	err = r.syncOauth2ClientIDAndSecret(ctx, backendStatus)
 	if err != nil {
 		backendStatus.SetPublisherReadyCondition(false, eventingv1alpha1.ConditionReasonOauth2ClientSyncFailed, err.Error())
@@ -250,7 +250,7 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 		return ctrl.Result{}, err
 	}
 
-	// CreateOrUpdate deployment for publisher proxy secret
+	// CreateOrUpdate deployment for publisher proxy secret.
 	secretForPublisher, err := r.SyncPublisherProxySecret(ctx, bebSecret)
 	if err != nil {
 		backendStatus.SetPublisherReadyCondition(false, eventingv1alpha1.ConditionReasonPublisherProxySecretError, err.Error())
@@ -260,7 +260,7 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 		return ctrl.Result{}, err
 	}
 
-	// Set environment with secrets for BEB subscription controller
+	// Set environment with secrets for EventMesh subscription controller.
 	err = setUpEnvironmentForEventMeshController(secretForPublisher)
 	if err != nil {
 		backendStatus.SetSubscriptionControllerReadyCondition(false, eventingv1alpha1.ConditionReasonControllerStartFailed, err.Error())
@@ -805,7 +805,7 @@ func (r *Reconciler) startEventMeshController(clientID, clientSecret []byte) err
 	return nil
 }
 
-func (r *Reconciler) stopBEBController() error {
+func (r *Reconciler) stopEventMeshController() error {
 	if r.bebSubMgrStarted {
 		if err := r.bebSubMgr.Stop(true); err != nil {
 			return xerrors.Errorf("failed to stop BEB subscription manager: %v", err)
@@ -928,7 +928,7 @@ func (r *Reconciler) namedLogger() *zap.SugaredLogger {
 }
 
 func getOAuth2ClientSecretName() string {
-	return deployment.ControllerName + BEBSecretNameSuffix
+	return deployment.ControllerName + EventMeshSecretNameSuffix
 }
 
 func constructNATSSecret() *v1.Secret {
