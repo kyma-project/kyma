@@ -2,7 +2,7 @@ package resources
 
 import (
 	"context"
-	"io/ioutil"
+	"os"
 	"path"
 	"time"
 
@@ -23,7 +23,7 @@ import (
 func SetupResourcesController(ctx context.Context, mgr ctrl.Manager, serviceName, serviceNamespace, secretName string, log *zap.SugaredLogger) error {
 	logger := log.Named("resource-ctrl")
 	certPath := path.Join(DefaultCertDir, CertFile)
-	certBytes, err := ioutil.ReadFile(certPath)
+	certBytes, err := os.ReadFile(certPath)
 	if err != nil {
 		return errors.Wrapf(err, "failed to read caBundle file: %s", certPath)
 	}
