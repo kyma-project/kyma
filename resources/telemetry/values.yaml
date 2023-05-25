@@ -18,7 +18,5 @@ global:
       name: "fluent-bit"
       version: "2.1.2-95ba1b02"
       directory: "prod/tpi"
-  highPriorityClassName: "telemetry-priority-class-high"
-  PriorityClassName: "telemetry-priority-class"
   log:
     level: "info"
