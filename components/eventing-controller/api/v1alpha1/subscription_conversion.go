@@ -81,11 +81,11 @@ func V2ToV1(dst *Subscription, src *v1alpha2.Subscription) error {
 	dst.setV1ProtocolFields(src)
 
 	dst.Spec.Filter = &BEBFilters{
-		Filters: []*BEBFilter{},
+		Filters: []*EventMeshFilter{},
 	}
 
 	for _, eventType := range src.Spec.Types {
-		filter := &BEBFilter{
+		filter := &EventMeshFilter{
 			EventSource: &Filter{
 				Property: "source",
 				Type:     fmt.Sprint(v1alpha2.TypeMatchingExact),

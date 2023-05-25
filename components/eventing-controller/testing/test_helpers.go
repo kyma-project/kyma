@@ -144,11 +144,11 @@ func WithV1alpha1ProtocolSettings(p *eventingv1alpha1.ProtocolSettings) Subscrip
 func AddV1alpha1Filter(eventSource, eventType string, subscription *eventingv1alpha1.Subscription) {
 	if subscription.Spec.Filter == nil {
 		subscription.Spec.Filter = &eventingv1alpha1.BEBFilters{
-			Filters: []*eventingv1alpha1.BEBFilter{},
+			Filters: []*eventingv1alpha1.EventMeshFilter{},
 		}
 	}
 
-	filter := &eventingv1alpha1.BEBFilter{
+	filter := &eventingv1alpha1.EventMeshFilter{
 		EventSource: &eventingv1alpha1.Filter{
 			Type:     "exact",
 			Property: "source",
@@ -177,7 +177,7 @@ func WithV1alpha1Filter(eventSource, eventType string) SubscriptionV1alpha1Opt {
 func WithV1alpha1EmptyFilter() SubscriptionV1alpha1Opt {
 	return func(subscription *eventingv1alpha1.Subscription) {
 		subscription.Spec.Filter = &eventingv1alpha1.BEBFilters{
-			Filters: []*eventingv1alpha1.BEBFilter{},
+			Filters: []*eventingv1alpha1.EventMeshFilter{},
 		}
 	}
 }
