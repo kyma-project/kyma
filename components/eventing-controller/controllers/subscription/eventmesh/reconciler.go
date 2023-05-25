@@ -310,11 +310,22 @@ func (r *Reconciler) syncConditionSubscribed(subscription *eventingv1alpha2.Subs
 
 // syncConditionSubscriptionActive syncs the condition ConditionSubscribed.
 func (r *Reconciler) syncConditionSubscriptionActive(subscription *eventingv1alpha2.Subscription, isActive bool, logger *zap.SugaredLogger) {
-	condition := eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionSubscriptionActive, eventingv1alpha2.ConditionReasonSubscriptionActive, corev1.ConditionTrue, "")
+	condition := eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionSubscriptionActive, 
+    eventingv1alpha2.ConditionReasonSubscriptionActive, 
+    corev1.ConditionTrue, 
+    "",)
 	if !isActive {
-		logger.Debugw("Waiting for subscription to be active", "name", subscription.Name, "status", subscription.Status.Backend.EventMeshSubscriptionStatus.Status)
-		message := "Waiting for subscription to be active"
-		condition = eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionSubscriptionActive, eventingv1alpha2.ConditionReasonSubscriptionNotActive, corev1.ConditionFalse, message)
+		logger.Debugw("Waiting for subscription to be active",
+        "name", 
+        subscription.Name, 
+        "status", 
+        subscription.Status.Backend.EventMeshSubscriptionStatus.Status)
+		
+        message := "Waiting for subscription to be active"
+		condition = eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionSubscriptionActive, 
+        eventingv1alpha2.ConditionReasonSubscriptionNotActive, 
+        corev1.ConditionFalse, 
+        message)
 	}
 	r.replaceStatusCondition(subscription, condition)
 }

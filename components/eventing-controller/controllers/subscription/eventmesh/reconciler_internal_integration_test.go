@@ -706,7 +706,8 @@ func Test_checkStatusActive(t *testing.T) {
 			wantError:  nil,
 		},
 		{
-			name: "should return not active if the EventMeshSubscriptionStatus is inactive and the the FailedActivation time is set",
+			name: `should return not active if the EventMeshSubscriptionStatus is inactive and the
+            the the FailedActivation time is set`,
 			subscription: func() *eventingv1alpha2.Subscription {
 				sub := reconcilertesting.NewSubscription("some-name", "some-namespace")
 				sub.Status.InitializeConditions()
