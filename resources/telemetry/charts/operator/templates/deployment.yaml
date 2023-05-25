@@ -46,8 +46,8 @@ spec:
             - --enable-telemetry-manager-module=false
             - --trace-collector-pipelines=1
             - --metric-gateway-pipelines=1
-{{- if or .Values.priorityClassName .Values.global.highPriorityClassName }}
-            - --fluent-bit-priority-class-name={{ coalesce .Values.priorityClassName .Values.global.highPriorityClassName }}
+{{- if or .Values.highPriorityClassName .Values.global.highPriorityClassName }}
+            - --fluent-bit-priority-class-name={{ coalesce .Values.highPriorityClassName .Values.global.highPriorityClassName }}
 {{- end }}
 {{- if not .Values.controllers.logging.enabled }}
             - --enable-logging=false
