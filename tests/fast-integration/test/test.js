@@ -10,21 +10,7 @@ const {createIstioAccessLogResource} = require('../logging/client.js');
 const {cleanMockTestFixture} = require('./fixtures/commerce-mock');
 const {ensureCommerceMockLocalTestFixture} = require('../test/fixtures/commerce-mock');
 const {tracingTests} = require('../tracing');
-const defaultRetryDelayMs = 1000;
-const defaultRetries = 5;
-const retryWithDelay = (operation, delay, retries) => new Promise((resolve, reject) => {
-  return operation()
-      .then(resolve)
-      .catch((reason) => {
-        if (retries > 0) {
-          return wait(delay)
-              .then(retryWithDelay.bind(null, operation, delay, retries - 1))
-              .then(resolve)
-              .catch(reject);
-        }
-        return reject(reason);
-      });
-});
+const {error} = require('../utils');
 
 describe('Executing Standard Testsuite:', function() {
   this.timeout(10 * 60 * 1000);
@@ -34,8 +20,10 @@ describe('Executing Standard Testsuite:', function() {
   const testNamespace = 'test';
 
   before('CommerceMock test fixture should be ready', async function() {
-    await retryWithDelay( (r) => ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace),
-        defaultRetryDelayMs, defaultRetries);
+    await ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace).catch((err) => {
+      error(err);
+      return ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace);
+    });
   });
 
   before('Istio Accesslog Resource should be deployed', async function() {
