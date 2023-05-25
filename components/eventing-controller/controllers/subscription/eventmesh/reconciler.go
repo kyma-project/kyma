@@ -764,22 +764,32 @@ func (r *Reconciler) checkStatusActive(subscription *eventingv1alpha2.Subscripti
 
 // checkLastFailedDelivery checks if LastFailedDelivery exists and if it happened after LastSuccessfulDelivery.
 func (r *Reconciler) checkLastFailedDelivery(subscription *eventingv1alpha2.Subscription) (bool, error) {
-	if len(subscription.Status.Backend.EventMeshSubscriptionStatus.LastFailedDelivery) > 0 {
-		var lastFailedDeliveryTime, LastSuccessfulDeliveryTime time.Time
-		var err error
-		if lastFailedDeliveryTime, err = time.Parse(time.RFC3339, subscription.Status.Backend.EventMeshSubscriptionStatus.LastFailedDelivery); err != nil {
-			return true, xerrors.Errorf("failed to parse LastFailedDelivery: %v", err)
-		}
-		if len(subscription.Status.Backend.EventMeshSubscriptionStatus.LastSuccessfulDelivery) > 0 {
-			if LastSuccessfulDeliveryTime, err = time.Parse(time.RFC3339, subscription.Status.Backend.EventMeshSubscriptionStatus.LastSuccessfulDelivery); err != nil {
-				return true, xerrors.Errorf("failed to parse LastSuccessfulDelivery: %v", err)
-			}
-		}
-		if lastFailedDeliveryTime.After(LastSuccessfulDeliveryTime) {
-			return true, nil
-		}
+	// Check if LastFailedDelivery exists.
+	lastFailed := subscription.Status.Backend.EventMeshSubscriptionStatus.LastFailedDelivery
+	if len(lastFailed) == 0 {
+		return false, nil
 	}
-	return false, nil
+
+	// Try to parse LastFailedDelivery.
+	var err error
+	var lastFailedDeliveryTime time.Time
+	if lastFailedDeliveryTime, err = time.Parse(time.RFC3339, lastFailed); err != nil {
+		return true, xerrors.Errorf("failed to parse LastFailedDelivery: %v", err)
+	}
+
+	// Check if LastSuccessfulDelivery exists. If not, LastFailedDelivery happened last.
+	lastSuccessful := subscription.Status.Backend.EventMeshSubscriptionStatus.LastSuccessfulDelivery
+	if len(lastSuccessful) == 0 {
+		return true, nil
+	}
+
+	// Try to parse LastSuccessfulDelivery.
+	var lastSuccessfulDeliveryTime time.Time
+	if lastSuccessfulDeliveryTime, err = time.Parse(time.RFC3339, lastSuccessful); err != nil {
+		return true, xerrors.Errorf("failed to parse LastSuccessfulDelivery: %v", err)
+	}
+
+	return lastFailedDeliveryTime.After(lastSuccessfulDeliveryTime), nil
 }
 
 func (r *Reconciler) namedLogger() *zap.SugaredLogger {
