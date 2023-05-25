@@ -1,7 +1,5 @@
 package testing
 
-//nolint:unused
-
 import (
 	"encoding/json"
 	"net/http"
