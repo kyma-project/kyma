@@ -6,9 +6,10 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
-	"github.com/stretchr/testify/require"
 
 	"k8s.io/client-go/dynamic"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -205,7 +206,7 @@ func Test_markAllV1Alpha2SubscriptionsAsNotReady(t *testing.T) {
 	require.Equal(t, false, gotSub.Status.Ready)
 }
 
-func startBEBMock() *controllertesting.BEBMock {
+func startBEBMock() *controllertesting.EventMeshMock {
 	// TODO(k15r): FIX THIS HACK
 	// this is a very evil hack for the time being, until we refactored the config properly
 	// it sets the URLs to relative paths, that can easily be used in the mux.

@@ -56,7 +56,7 @@ import (
 type eventMeshTestEnsemble struct {
 	k8sClient     client.Client
 	testEnv       *envtest.Environment
-	eventMeshMock *reconcilertesting.BEBMock
+	eventMeshMock *reconcilertesting.EventMeshMock
 	nameMapper    backendutils.NameMapper
 	envConfig     env.Config
 }
@@ -264,7 +264,7 @@ func tearDownSuite() error {
 	return err
 }
 
-func startNewEventMeshMock() *reconcilertesting.BEBMock {
+func startNewEventMeshMock() *reconcilertesting.EventMeshMock {
 	emMock := reconcilertesting.NewBEBMock()
 	emMock.Start()
 	return emMock

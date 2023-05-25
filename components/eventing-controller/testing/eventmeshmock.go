@@ -28,8 +28,8 @@ const (
 	MessagingURLPath = "/messaging"
 )
 
-// BEBMock implements a programmable mock for BEB.
-type BEBMock struct {
+// EventMeshMock implements a programmable mock for EventMesh.
+type EventMeshMock struct {
 	Requests          *SafeRequests
 	Subscriptions     *SafeSubscriptions
 	TokenURL          string
@@ -49,9 +49,9 @@ type BEBMockResponseOverride struct {
 	GetResponse    map[string]ResponseWithName
 }
 
-func NewBEBMock() *BEBMock {
+func NewBEBMock() *EventMeshMock {
 	logger := logf.Log.WithName("beb mock")
-	return &BEBMock{
+	return &EventMeshMock{
 		Requests:          NewSafeRequests(),
 		Subscriptions:     NewSafeSubscriptions(),
 		log:               logger,
@@ -70,7 +70,7 @@ type ResponseWithSub func(w http.ResponseWriter, subscription bebtypes.Subscript
 type ResponseWithName func(w http.ResponseWriter, subscriptionName string)
 type Response func(w http.ResponseWriter)
 
-func (m *BEBMock) Reset() {
+func (m *EventMeshMock) Reset() {
 	m.log.Info("Initializing requests")
 	m.Requests = NewSafeRequests()
 	m.Subscriptions = NewSafeSubscriptions()
@@ -82,20 +82,20 @@ func (m *BEBMock) Reset() {
 	m.ResponseOverrides = NewBEBMockResponseOverride()
 }
 
-func (m *BEBMock) ResetResponseOverrides() {
+func (m *EventMeshMock) ResetResponseOverrides() {
 	m.log.Info("Resetting response overrides")
 	m.ResponseOverrides = NewBEBMockResponseOverride()
 }
 
-func (m *BEBMock) AddCreateResponseOverride(key string, responseFunc ResponseWithSub) {
+func (m *EventMeshMock) AddCreateResponseOverride(key string, responseFunc ResponseWithSub) {
 	m.ResponseOverrides.CreateResponse[key] = responseFunc
 }
 
-func (m *BEBMock) AddGetResponseOverride(key string, responseFunc ResponseWithName) {
+func (m *EventMeshMock) AddGetResponseOverride(key string, responseFunc ResponseWithName) {
 	m.ResponseOverrides.GetResponse[key] = responseFunc
 }
 
-func (m *BEBMock) Start() string {
+func (m *EventMeshMock) Start() string {
 	m.Reset()
 
 	// implementation based on https://pages.github.tools.sap/KernelServices/APIDefinitions/?urls.primaryName=Business%20Event%20Bus%20-%20CloudEvents
@@ -181,12 +181,12 @@ func (m *BEBMock) Start() string {
 	return uri
 }
 
-func (m *BEBMock) Stop() {
+func (m *EventMeshMock) Stop() {
 	m.server.Close()
 }
 
 // GetSubscriptionResponse checks if a subscription exists in the mock.
-func GetSubscriptionResponse(m *BEBMock) ResponseWithName {
+func GetSubscriptionResponse(m *EventMeshMock) ResponseWithName {
 	return func(w http.ResponseWriter, key string) {
 		subscriptionSaved := m.Subscriptions.GetSubscription(key)
 		if subscriptionSaved != nil {
