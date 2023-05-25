@@ -71,7 +71,7 @@ func newDefaultSubscription(opts ...eventingtesting.SubscriptionV1alpha1Opt) *v1
 		o(newSub)
 	}
 
-	// remove nats specific field in beb case
+	// remove nats specific field in eventmesh case
 	if newSub.Status.EmsSubscriptionStatus != nil {
 		newSub.Spec.Config = nil
 		newSub.Status.Config = nil
