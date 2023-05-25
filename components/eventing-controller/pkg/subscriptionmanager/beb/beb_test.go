@@ -56,7 +56,7 @@ func Test_cleanupEventMesh(t *testing.T) {
 
 	// create a Kyma subscription
 	subscription := controllertesting.NewSubscription("test", "test",
-		controllertesting.WithWebhookAuthForBEB(),
+		controllertesting.WithWebhookAuthForEventMesh(),
 		controllertesting.WithFakeSubscriptionStatus(),
 		controllertesting.WithOrderCreatedFilter(),
 	)

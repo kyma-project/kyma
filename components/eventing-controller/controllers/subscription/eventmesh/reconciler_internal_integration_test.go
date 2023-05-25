@@ -205,7 +205,7 @@ func Test_replaceStatusCondition(t *testing.T) {
 				sub := reconcilertesting.NewSubscription("some-name", "some-namespace",
 					reconcilertesting.WithNotCleanSource(),
 					reconcilertesting.WithNotCleanType(),
-					reconcilertesting.WithWebhookAuthForBEB())
+					reconcilertesting.WithWebhookAuthForEventMesh())
 				sub.Status.InitializeConditions()
 				sub.Status.Ready = false
 

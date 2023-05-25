@@ -35,6 +35,8 @@ const (
 	EventSourceUnclean       = "s>o>*u*r>c.e"
 	EventSourceClean         = "source"
 
+	EventMeshProtocl = "BEB"
+
 	EventMeshNamespaceNS        = "/default/ns"
 	EventMeshNamespace          = "/default/kyma/id"
 	EventSource                 = "/default/kyma/id"
@@ -128,9 +130,9 @@ func WithStatusCleanEventTypes(cleanEventTypes []string) SubscriptionV1alpha1Opt
 	}
 }
 
-func WithV1alpha1ProtocolBEB() SubscriptionV1alpha1Opt {
+func WithV1alpha1ProtocolEventMesh() SubscriptionV1alpha1Opt {
 	return func(s *eventingv1alpha1.Subscription) {
-		s.Spec.Protocol = "BEB"
+		s.Spec.Protocol = EventMeshProtocl
 	}
 }
 
@@ -454,7 +456,7 @@ func NewSubscription(name, namespace string, opts ...SubscriptionOpt) *eventingv
 	return newSub
 }
 
-func NewBEBSubscription(name, contentMode string, webhookURL string, events types.Events,
+func NewEventMeshSubscription(name, contentMode string, webhookURL string, events types.Events,
 	webhookAuth *types.WebhookAuth) *types.Subscription {
 	return &types.Subscription{
 		Name:            name,
@@ -475,7 +477,7 @@ func NewSampleEventMeshSubscription() *types.Subscription {
 		},
 	}
 
-	return NewBEBSubscription("ev2subs1", types.ContentModeStructured, "https://webhook.xxx.com",
+	return NewEventMeshSubscription("ev2subs1", types.ContentModeStructured, "https://webhook.xxx.com",
 		eventType, nil)
 }
 
@@ -549,10 +551,10 @@ func WithEmsSubscriptionStatus(status string) SubscriptionOpt {
 	}
 }
 
-func WithWebhookAuthForBEB() SubscriptionOpt {
+func WithWebhookAuthForEventMesh() SubscriptionOpt {
 	return func(s *eventingv1alpha2.Subscription) {
 		s.Spec.Config = map[string]string{
-			eventingv1alpha2.Protocol:                        "BEB",
+			eventingv1alpha2.Protocol:                        EventMeshProtocl,
 			eventingv1alpha2.ProtocolSettingsContentMode:     "BINARY",
 			eventingv1alpha2.ProtocolSettingsExemptHandshake: "true",
 			eventingv1alpha2.ProtocolSettingsQos:             "AT_LEAST_ONCE",
@@ -593,12 +595,12 @@ func WithInvalidWebhookAuthGrantType() SubscriptionOpt {
 	}
 }
 
-func WithProtocolBEB() SubscriptionOpt {
+func WithProtocolEventMesh() SubscriptionOpt {
 	return func(s *eventingv1alpha2.Subscription) {
 		if s.Spec.Config == nil {
 			s.Spec.Config = map[string]string{}
 		}
-		s.Spec.Config[eventingv1alpha2.Protocol] = "BEB"
+		s.Spec.Config[eventingv1alpha2.Protocol] = EventMeshProtocl
 	}
 }
 
@@ -623,7 +625,7 @@ func WithExactTypeMatching() SubscriptionOpt {
 	return WithTypeMatching(eventingv1alpha2.TypeMatchingExact)
 }
 
-// WithStandardTypeMatching is a SubscriptionOpt for creating a Subscription with an standard type matching.
+// WithStandardTypeMatching is a SubscriptionOpt for creating a Subscription with a standard type matching.
 func WithStandardTypeMatching() SubscriptionOpt {
 	return WithTypeMatching(eventingv1alpha2.TypeMatchingStandard)
 }

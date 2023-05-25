@@ -661,7 +661,7 @@ func fixtureValidSubscription(name, namespace string) *eventingv1alpha2.Subscrip
 		controllertesting.WithSinkURL("https://webhook.xxx.com"),
 		controllertesting.WithDefaultSource(),
 		controllertesting.WithEventType(controllertesting.OrderCreatedEventTypeNotClean),
-		controllertesting.WithWebhookAuthForBEB(),
+		controllertesting.WithWebhookAuthForEventMesh(),
 	)
 }
 
