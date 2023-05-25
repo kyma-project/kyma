@@ -58,7 +58,7 @@ func setEventMeshServerSubHashInStatus(kymaSubscription *eventingv1alpha2.Subscr
 	}
 
 	// set hash in status
-	kymaSubscription.Status.Backend.Emshash = newHash
+	kymaSubscription.Status.Backend.EventMeshHash = newHash
 	return nil
 }
 

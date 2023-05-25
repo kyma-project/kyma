@@ -7,9 +7,10 @@ import (
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/pkg/errors"
 	"sigs.k8s.io/controller-runtime/pkg/conversion"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 )
 
 const (
@@ -273,7 +274,7 @@ func (src *Subscription) natsSpecConfigToV2(dst *v1alpha2.Subscription) {
 // setBEBBackendStatus moves the BEB-related to Backend fields of the Status in the v1alpha2.
 func (src *Subscription) bebBackendStatusToV1(dst *v1alpha2.Subscription) {
 	src.Status.Ev2hash = dst.Status.Backend.Ev2hash
-	src.Status.Emshash = dst.Status.Backend.Emshash
+	src.Status.Emshash = dst.Status.Backend.EventMeshHash
 	src.Status.ExternalSink = dst.Status.Backend.ExternalSink
 	src.Status.FailedActivation = dst.Status.Backend.FailedActivation
 	src.Status.APIRuleName = dst.Status.Backend.APIRuleName

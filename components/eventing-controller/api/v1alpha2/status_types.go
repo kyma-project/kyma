@@ -17,7 +17,7 @@ type Backend struct {
 
 	// Hash that is used in EventMesh to identify this Subscription.
 	// +optional
-	Emshash int64 `json:"emshash,omitempty"`
+	EventMeshHash int64 `json:"emshash,omitempty"`
 
 	// Webhook URL used by EventMesh to trigger subscribers.
 	// +optional

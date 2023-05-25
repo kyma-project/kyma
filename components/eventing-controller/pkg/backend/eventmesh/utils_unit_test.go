@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 	eventingtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
-	"github.com/stretchr/testify/require"
 )
 
 func Test_IsEventTypeSegmentsOverLimit(t *testing.T) {
@@ -122,7 +123,7 @@ func Test_setEventMeshServerSubHashInStatus(t *testing.T) {
 
 	// then
 	require.NoError(t, err)
-	require.Equal(t, kymaSubscription.Status.Backend.Emshash, wantHash)
+	require.Equal(t, kymaSubscription.Status.Backend.EventMeshHash, wantHash)
 }
 
 func Test_setEventMeshLocalSubHashInStatus(t *testing.T) {
@@ -157,7 +158,7 @@ func Test_updateHashesInStatus(t *testing.T) {
 	// then
 	require.NoError(t, err)
 	require.Equal(t, kymaSubscription.Status.Backend.Ev2hash, wantHash)
-	require.Equal(t, kymaSubscription.Status.Backend.Emshash, wantHash)
+	require.Equal(t, kymaSubscription.Status.Backend.EventMeshHash, wantHash)
 }
 
 func Test_setEmsSubscriptionStatus(t *testing.T) {

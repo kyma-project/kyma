@@ -5,8 +5,9 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 	"github.com/stretchr/testify/require"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 
@@ -298,7 +299,7 @@ func Test_handleEventMeshSubModified(t *testing.T) {
 			givenKymaSub: &eventingv1alpha2.Subscription{
 				Status: eventingv1alpha2.SubscriptionStatus{
 					Backend: eventingv1alpha2.Backend{
-						Emshash: int64(-9219276050977208880),
+						EventMeshHash: int64(-9219276050977208880),
 					},
 				},
 			},
@@ -323,7 +324,7 @@ func Test_handleEventMeshSubModified(t *testing.T) {
 			givenKymaSub: &eventingv1alpha2.Subscription{
 				Status: eventingv1alpha2.SubscriptionStatus{
 					Backend: eventingv1alpha2.Backend{
-						Emshash: int64(-9219276050977208880),
+						EventMeshHash: int64(-9219276050977208880),
 					},
 				},
 			},
@@ -348,7 +349,7 @@ func Test_handleEventMeshSubModified(t *testing.T) {
 			givenKymaSub: &eventingv1alpha2.Subscription{
 				Status: eventingv1alpha2.SubscriptionStatus{
 					Backend: eventingv1alpha2.Backend{
-						Emshash: int64(-9219276050977208880),
+						EventMeshHash: int64(-9219276050977208880),
 					},
 				},
 			},
@@ -607,7 +608,7 @@ func Test_SyncSubscription(t *testing.T) {
 	require.NoError(t, err)
 
 	subscription := fixtureValidSubscription("some-name", "some-namespace")
-	subscription.Status.Backend.Emshash = 0
+	subscription.Status.Backend.EventMeshHash = 0
 	subscription.Status.Backend.Ev2hash = 0
 
 	apiRule := controllertesting.NewAPIRule(subscription,
