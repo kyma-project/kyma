@@ -658,9 +658,25 @@ async function cleanCompassResourcesSKR(client, appName, scenarioName, runtimeID
     console.log(err);
   }
 }
+const defaultRetryDelayMs = 1000;
+const defaultRetries = 5;
+
+const retryWithDelay = (operation, delay, retries) => new Promise((resolve, reject) => {
+  return operation()
+      .then(resolve)
+      .catch((reason) => {
+        if (retries > 0) {
+          return wait(delay)
+              .then(retryWithDelay.bind(null, operation, delay, retries - 1))
+              .then(resolve)
+              .catch(reject);
+        }
+        return reject(reason);
+      });
+});
 
 async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace, testSubscriptionV1Alpha2=false) {
-  await k8sApply(applicationObjs);
+  await retryWithDelay( (r)=> k8sApply(applicationObjs), defaultRetryDelayMs, defaultRetries);
   const mockHost = await provisionCommerceMockResources(
       'commerce',
       mockNamespace,
@@ -672,11 +688,11 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
   await waitForFunction('lastorder', targetNamespace);
 
   const sink = `http://lastorder.${targetNamespace}.svc.cluster.local`;
-  await k8sApply([eventingSubscription(
+  await retryWithDelay( (r)=> k8sApply([eventingSubscription(
       eventTypeOrderReceived,
       sink,
       orderReceivedSubName,
-      targetNamespace)]);
+      targetNamespace)]), defaultRetryDelayMs, defaultRetries);
   await waitForSubscription(orderReceivedSubName, targetNamespace);
   await waitForSubscription('order-created', targetNamespace);
 
