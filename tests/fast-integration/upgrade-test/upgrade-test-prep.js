@@ -1,5 +1,4 @@
 const {ensureCommerceMockLocalTestFixture} = require('../test/fixtures/commerce-mock');
-const {error} = require('../utils');
 const defaultRetryDelayMs = 1000;
 const defaultRetries = 5;
 const retryWithDelay = (operation, delay, retries) => new Promise((resolve, reject) => {
