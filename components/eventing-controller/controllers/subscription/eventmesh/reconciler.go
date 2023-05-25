@@ -8,12 +8,6 @@ import (
 	"reflect"
 	"time"
 
-	recerrors "github.com/kyma-project/kyma/components/eventing-controller/controllers/errors"
-	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
-	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -21,15 +15,22 @@ import (
 	k8slabels "k8s.io/apimachinery/pkg/labels"
 	k8stypes "k8s.io/apimachinery/pkg/types"
 
+	recerrors "github.com/kyma-project/kyma/components/eventing-controller/controllers/errors"
+	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 
 	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
-	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventmesh"
 	"golang.org/x/xerrors"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/source"
+
+	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventmesh"
 
 	"go.uber.org/zap"
 
@@ -310,22 +311,22 @@ func (r *Reconciler) syncConditionSubscribed(subscription *eventingv1alpha2.Subs
 
 // syncConditionSubscriptionActive syncs the condition ConditionSubscribed.
 func (r *Reconciler) syncConditionSubscriptionActive(subscription *eventingv1alpha2.Subscription, isActive bool, logger *zap.SugaredLogger) {
-	condition := eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionSubscriptionActive, 
-    eventingv1alpha2.ConditionReasonSubscriptionActive, 
-    corev1.ConditionTrue, 
-    "",)
+	condition := eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionSubscriptionActive,
+		eventingv1alpha2.ConditionReasonSubscriptionActive,
+		corev1.ConditionTrue,
+		"")
 	if !isActive {
 		logger.Debugw("Waiting for subscription to be active",
-        "name", 
-        subscription.Name, 
-        "status", 
-        subscription.Status.Backend.EventMeshSubscriptionStatus.Status)
-		
-        message := "Waiting for subscription to be active"
-		condition = eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionSubscriptionActive, 
-        eventingv1alpha2.ConditionReasonSubscriptionNotActive, 
-        corev1.ConditionFalse, 
-        message)
+			"name",
+			subscription.Name,
+			"status",
+			subscription.Status.Backend.EventMeshSubscriptionStatus.Status)
+
+		message := "Waiting for subscription to be active"
+		condition = eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionSubscriptionActive,
+			eventingv1alpha2.ConditionReasonSubscriptionNotActive,
+			corev1.ConditionFalse,
+			message)
 	}
 	r.replaceStatusCondition(subscription, condition)
 }
