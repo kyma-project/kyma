@@ -44,7 +44,7 @@ This tutorial explains how to create a sample HttpBin service deployment and a s
   </details>
 </div>
 
-1. Verify if an instance of the HttpBin service or a sample Function is successfully created.
+3. Verify if an instance of the HttpBin service or a sample Function is successfully created.
    
 <div tabs name="verify">
 
