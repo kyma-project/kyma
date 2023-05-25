@@ -666,7 +666,7 @@ func fixtureValidSubscription(name, namespace string) *eventingv1alpha2.Subscrip
 }
 
 func startEventMeshMock() *controllertesting.EventMeshMock {
-	eventMesh := controllertesting.NewBEBMock()
+	eventMesh := controllertesting.NewEventMeshMock()
 	eventMesh.Start()
 	return eventMesh
 }

@@ -265,7 +265,7 @@ func tearDownSuite() error {
 }
 
 func startNewEventMeshMock() *reconcilertesting.EventMeshMock {
-	emMock := reconcilertesting.NewBEBMock()
+	emMock := reconcilertesting.NewEventMeshMock()
 	emMock.Start()
 	return emMock
 }

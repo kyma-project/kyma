@@ -23,9 +23,10 @@ import (
 	"github.com/onsi/gomega"
 	gomegatypes "github.com/onsi/gomega/types"
 
+	corev1 "k8s.io/api/core/v1"
+
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
-	corev1 "k8s.io/api/core/v1"
 )
 
 const (
@@ -1139,7 +1140,7 @@ func TestWithEventMeshServerErrors(t *testing.T) {
 				sub.SubscriptionStatus = eventMeshtypes.SubscriptionStatusPaused
 				subKey := getEventMeshKeyForMock(sub.Name)
 				emTestEnsemble.eventMeshMock.Subscriptions.PutSubscription(subKey, &sub)
-				reconcilertesting.BEBCreateSuccess(w)
+				reconcilertesting.EventMeshCreateSuccess(w)
 			},
 			wantSubscriptionMatchers: gomega.And(
 				reconcilertesting.HaveSubscriptionNotReady(),
@@ -1164,7 +1165,7 @@ func TestWithEventMeshServerErrors(t *testing.T) {
 
 				subKey := getEventMeshKeyForMock(sub.Name)
 				emTestEnsemble.eventMeshMock.Subscriptions.PutSubscription(subKey, &sub)
-				reconcilertesting.BEBCreateSuccess(w)
+				reconcilertesting.EventMeshCreateSuccess(w)
 			},
 			wantSubscriptionMatchers: gomega.And(
 				reconcilertesting.HaveSubscriptionNotReady(),

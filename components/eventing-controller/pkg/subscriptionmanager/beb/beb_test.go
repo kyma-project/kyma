@@ -210,7 +210,7 @@ func startBEBMock() *controllertesting.EventMeshMock {
 	// TODO(k15r): FIX THIS HACK
 	// this is a very evil hack for the time being, until we refactored the config properly
 	// it sets the URLs to relative paths, that can easily be used in the mux.
-	b := controllertesting.NewBEBMock()
+	b := controllertesting.NewEventMeshMock()
 	b.Start()
 	return b
 }
