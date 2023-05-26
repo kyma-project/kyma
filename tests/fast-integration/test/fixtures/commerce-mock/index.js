@@ -676,7 +676,7 @@ const retryWithDelay = (operation, delay, retries) => new Promise((resolve, reje
 });
 
 async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace, testSubscriptionV1Alpha2=false) {
-  await retryWithDelay( (r)=> k8sApply(applicationObjs), defaultRetryDelayMs, defaultRetries);
+  await retryWithDelay( (r)=> k8sApply(applicationObjs), defaultRetryDelayMs, 10);
   const mockHost = await provisionCommerceMockResources(
       'commerce',
       mockNamespace,
@@ -692,7 +692,7 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
       eventTypeOrderReceived,
       sink,
       orderReceivedSubName,
-      targetNamespace)]), defaultRetryDelayMs, defaultRetries);
+      targetNamespace)]), defaultRetryDelayMs, 10);
   await waitForSubscription(orderReceivedSubName, targetNamespace);
   await waitForSubscription('order-created', targetNamespace);
 
@@ -706,7 +706,7 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
         targetNamespace,
     );
     // apply to kyma cluster
-    await retryWithDelay( (r)=> k8sApply([orderCompletedV1Alpha2Sub]), defaultRetryDelayMs, defaultRetries);
+    await retryWithDelay( (r)=> k8sApply([orderCompletedV1Alpha2Sub]), defaultRetryDelayMs, 10);
     await waitForSubscription('order-completed', targetNamespace, 'v1alpha2');
 
     // create a subscription with unclean event type and source
@@ -719,7 +719,7 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
         targetNamespace,
     );
     // apply to kyma cluster
-    await retryWithDelay( (r)=> k8sApply([uncleanTypeAndSourceV1Alpha2Sub]), defaultRetryDelayMs, defaultRetries);
+    await retryWithDelay( (r)=> k8sApply([uncleanTypeAndSourceV1Alpha2Sub]), defaultRetryDelayMs, 10);
     await waitForSubscription(uncleanSubName, targetNamespace, 'v1alpha2');
 
     // create a subscription with unclean event type and source
@@ -733,7 +733,7 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
         'exact',
     );
     // apply to kyma cluster
-    await retryWithDelay( (r)=> k8sApply([typeMatchingExactV1Alpha2Sub]), defaultRetryDelayMs, defaultRetries);
+    await retryWithDelay( (r)=> k8sApply([typeMatchingExactV1Alpha2Sub]), defaultRetryDelayMs, 10);
     await waitForSubscription(exactSubName, targetNamespace, 'v1alpha2');
   }
 
@@ -741,17 +741,17 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
 }
 
 async function provisionCommerceMockResources(appName, mockNamespace, targetNamespace, functionObjs = lastorderObjs) {
-  await k8sApply([namespaceObj(mockNamespace), namespaceObj(targetNamespace)]);
-  await k8sApply(prepareCommerceObjs(mockNamespace));
-  await k8sApply(functionObjs, targetNamespace, true);
+  await retryWithDelay( (r)=> k8sApply([namespaceObj(mockNamespace), namespaceObj(targetNamespace)]), defaultRetryDelayMs, 10);
+  await retryWithDelay( (r)=> k8sApply(prepareCommerceObjs(mockNamespace)), defaultRetryDelayMs, 10);
+  await retryWithDelay( (r)=> k8sApply(functionObjs, targetNamespace, true), defaultRetryDelayMs, 10);
   await waitForFunction('lastorder', targetNamespace);
-  await k8sApply([
+  await retryWithDelay( (r)=> k8sApply([
     eventingSubscription(
         `sap.kyma.custom.${appName}.order.created.v1`,
         `http://lastorder.${targetNamespace}.svc.cluster.local`,
         'order-created',
         targetNamespace),
-  ]);
+  ]), defaultRetryDelayMs, 10);
   await waitForDeployment('commerce-mock', mockNamespace, 120 * 1000);
   await deployJaeger(k8s.loadAllYaml(jaegerYaml));
   const vs = await waitForVirtualService(mockNamespace, 'commerce-mock');
