@@ -706,7 +706,7 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
         targetNamespace,
     );
     // apply to kyma cluster
-    await k8sApply([orderCompletedV1Alpha2Sub]);
+    await retryWithDelay( (r)=> k8sApply([orderCompletedV1Alpha2Sub]), defaultRetryDelayMs, defaultRetries);
     await waitForSubscription('order-completed', targetNamespace, 'v1alpha2');
 
     // create a subscription with unclean event type and source
@@ -719,7 +719,7 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
         targetNamespace,
     );
     // apply to kyma cluster
-    await k8sApply([uncleanTypeAndSourceV1Alpha2Sub]);
+    await retryWithDelay( (r)=> k8sApply([uncleanTypeAndSourceV1Alpha2Sub]), defaultRetryDelayMs, defaultRetries);
     await waitForSubscription(uncleanSubName, targetNamespace, 'v1alpha2');
 
     // create a subscription with unclean event type and source
@@ -733,7 +733,7 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
         'exact',
     );
     // apply to kyma cluster
-    await k8sApply([typeMatchingExactV1Alpha2Sub]);
+    await retryWithDelay( (r)=> k8sApply([typeMatchingExactV1Alpha2Sub]), defaultRetryDelayMs, defaultRetries);
     await waitForSubscription(exactSubName, targetNamespace, 'v1alpha2');
   }
 
