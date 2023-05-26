@@ -659,7 +659,7 @@ async function cleanCompassResourcesSKR(client, appName, scenarioName, runtimeID
   }
 }
 const defaultRetryDelayMs = 1000;
-const defaultRetries = 5;
+
 
 const retryWithDelay = (operation, delay, retries) => new Promise((resolve, reject) => {
   return operation()
@@ -741,7 +741,8 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
 }
 
 async function provisionCommerceMockResources(appName, mockNamespace, targetNamespace, functionObjs = lastorderObjs) {
-  await retryWithDelay( (r)=> k8sApply([namespaceObj(mockNamespace), namespaceObj(targetNamespace)]), defaultRetryDelayMs, 10);
+  await retryWithDelay( (r)=> k8sApply([namespaceObj(mockNamespace), namespaceObj(targetNamespace)]),
+      defaultRetryDelayMs, 10);
   await retryWithDelay( (r)=> k8sApply(prepareCommerceObjs(mockNamespace)), defaultRetryDelayMs, 10);
   await retryWithDelay( (r)=> k8sApply(functionObjs, targetNamespace, true), defaultRetryDelayMs, 10);
   await waitForFunction('lastorder', targetNamespace);
