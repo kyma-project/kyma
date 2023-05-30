@@ -105,13 +105,13 @@ type Template struct {
 }
 
 type ResourceRequirements struct {
-	// Defines the name of the predefined set of values of resource.
+	// Defines the name of the predefined set of values of the resource.
 	// Can't be used together with **Resources**.
 	// +optional
 	Profile string `json:"profile,omitempty"`
 
-	// Defines amount of resources available for the Pod to use.
-	// Can't be used together with Profile.
+	// Defines the amount of resources available for the Pod.
+	// Can't be used together with **Profile**.
 	// +optional
 	Resources *v1.ResourceRequirements `json:"resources,omitempty"`
 }
@@ -137,7 +137,7 @@ type ResourceConfiguration struct {
 }
 
 type SecretMount struct {
-	// Specifies the name of the Secret in the Function's Namespace to use.
+	// Specifies the name of the Secret in the Function's Namespace.
 	// +kubebuilder:validation:Required
 	SecretName string `json:"secretName"`
 
@@ -151,7 +151,7 @@ const (
 	BuildResourcesPresetLabel    = "serverless.kyma-project.io/build-resources-preset"
 )
 
-// Defines the desired state of Function
+// Defines the desired state of the Function
 type FunctionSpec struct {
 	// Specifies the runtime of the Function. The available values are `nodejs16`, `nodejs18`, and `python39`.
 	Runtime Runtime `json:"runtime"`
@@ -178,7 +178,7 @@ type FunctionSpec struct {
 	ScaleConfig *ScaleConfig `json:"scaleConfig,omitempty"`
 
 	// Defines the exact number of Function's Pods to run at a time.
-	// If **ScaleConfig** is configured, or if Function is targeted by an external scaler,
+	// If **ScaleConfig** is configured, or if the Function is targeted by an external scaler,
 	// then the **Replicas** field is used by the relevant HorizontalPodAutoscaler to control the number of active replicas.
 	// +optional
 	Replicas *int32 `json:"replicas,omitempty"`
@@ -251,7 +251,7 @@ type Repository struct {
 	// from which the Function is built.
 	BaseDir string `json:"baseDir,omitempty"`
 
-	// Specifies either the branch name, tag or the commit revision from which the Function Controller
+	// Specifies either the branch name, tag or commit revision from which the Function Controller
 	// automatically fetches the changes in the Function's code and dependencies.
 	Reference string `json:"reference,omitempty"`
 }
@@ -268,7 +268,7 @@ type FunctionStatus struct {
 	Replicas int32 `json:"replicas,omitempty"`
 	// Pod selector used to match pods in function deployment
 	PodSelector string `json:"podSelector,omitempty"`
-	// Specify the commit hash used to build function
+	// Specifies the commit hash used to build the Function
 	Commit string `json:"commit,omitempty"`
 	// Specifies the image version used to build and run function pods
 	RuntimeImage string `json:"runtimeImage,omitempty"`

@@ -58,7 +58,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: Defines the desired state of Function
+            description: Defines the desired state of the Function
             properties:
               annotations:
                 additionalProperties:
@@ -181,10 +181,10 @@ spec:
                 type: object
               replicas:
                 description: Defines the exact number of Function's Pods to run at
-                  a time. If **ScaleConfig** is configured, or if Function is targeted
-                  by an external scaler, then the **Replicas** field is used by the
-                  relevant HorizontalPodAutoscaler to control the number of active
-                  replicas.
+                  a time. If **ScaleConfig** is configured, or if the Function is
+                  targeted by an external scaler, then the **Replicas** field is used
+                  by the relevant HorizontalPodAutoscaler to control the number of
+                  active replicas.
                 format: int32
                 type: integer
               resourceConfiguration:
@@ -197,11 +197,11 @@ spec:
                     properties:
                       profile:
                         description: Defines the name of the predefined set of values
-                          of resource. Can't be used together with **Resources**.
+                          of the resource. Can't be used together with **Resources**.
                         type: string
                       resources:
-                        description: Defines amount of resources available for the
-                          Pod to use. Can't be used together with Profile.
+                        description: Defines the amount of resources available for
+                          the Pod. Can't be used together with **Profile**.
                         properties:
                           limits:
                             additionalProperties:
@@ -233,11 +233,11 @@ spec:
                     properties:
                       profile:
                         description: Defines the name of the predefined set of values
-                          of resource. Can't be used together with **Resources**.
+                          of the resource. Can't be used together with **Resources**.
                         type: string
                       resources:
-                        description: Defines amount of resources available for the
-                          Pod to use. Can't be used together with Profile.
+                        description: Defines the amount of resources available for
+                          the Pod. Can't be used together with **Profile**.
                         properties:
                           limits:
                             additionalProperties:
@@ -306,7 +306,7 @@ spec:
                       type: string
                     secretName:
                       description: Specifies the name of the Secret in the Function's
-                        Namespace to use.
+                        Namespace.
                       type: string
                   required:
                   - mountPath
@@ -349,8 +349,8 @@ spec:
                           built.
                         type: string
                       reference:
-                        description: Specifies either the branch name, tag or the
-                          commit revision from which the Function Controller automatically
+                        description: Specifies either the branch name, tag or commit
+                          revision from which the Function Controller automatically
                           fetches the changes in the Function's code and dependencies.
                         type: string
                       url:
@@ -406,7 +406,7 @@ spec:
                   contains the source code from which the Function is built.
                 type: string
               commit:
-                description: Specify the commit hash used to build function
+                description: Specifies the commit hash used to build the Function
                 type: string
               conditions:
                 description: An array of conditions describing the status of the parser
@@ -438,7 +438,7 @@ spec:
                 description: Pod selector used to match pods in function deployment
                 type: string
               reference:
-                description: Specifies either the branch name, tag or the commit revision
+                description: Specifies either the branch name, tag or commit revision
                   from which the Function Controller automatically fetches the changes
                   in the Function's code and dependencies.
                 type: string
