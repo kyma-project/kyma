@@ -116,7 +116,7 @@ spec:
 | Parameter | Type | Description |
 | ---- | ----------- | ---- |
 | **annotations**  | map\[string\]string | Defines annotations used in Deployment's PodTemplate and applied on the Function's runtime Pod. |
-| **env**  | \[\]object | Specifies an array of key-value pairs to be used as environment variables for the Function. You can define values as static strings or reference values from ConfigMaps or Secrets. |
+| **env**  | \[\]object | Specifies an array of key-value pairs to be used as environment variables for the Function. You can define values as static strings or reference values from ConfigMaps or Secrets. For configuration details, see the [official Kubernetes documentation](https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/). |
 | **labels**  | map\[string\]string | Defines labels used in Deployment's PodTemplate and applied on the Function's runtime Pod. |
 | **replicas**  | integer | Defines the exact number of Function's Pods to run at a time. If **ScaleConfig** is configured, or if the Function is targeted by an external scaler, then the **Replicas** field is used by the relevant HorizontalPodAutoscaler to control the number of active replicas. |
 | **resourceConfiguration**  | object | Specifies resources requested by the Function and the build Job. |

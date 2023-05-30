@@ -166,6 +166,7 @@ type FunctionSpec struct {
 
 	// Specifies an array of key-value pairs to be used as environment variables for the Function.
 	// You can define values as static strings or reference values from ConfigMaps or Secrets.
+	// For configuration details, see the [official Kubernetes documentation](https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/).
 	Env []v1.EnvVar `json:"env,omitempty"`
 
 	// Specifies resources requested by the Function and the build Job.

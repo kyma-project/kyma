@@ -69,7 +69,8 @@ spec:
               env:
                 description: Specifies an array of key-value pairs to be used as environment
                   variables for the Function. You can define values as static strings
-                  or reference values from ConfigMaps or Secrets.
+                  or reference values from ConfigMaps or Secrets. For configuration
+                  details, see the [official Kubernetes documentation](https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/).
                 items:
                   description: EnvVar represents an environment variable present in
                     a Container.
