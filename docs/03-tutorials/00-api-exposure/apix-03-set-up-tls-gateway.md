@@ -31,15 +31,15 @@ This tutorial shows how to set up a TLS Gateway in both manual and simple modes.
           istio: ingressgateway # Use Istio Ingress Gateway as default
         servers:
           - port:
-              number: 443
-              name: https
-               protocol: HTTPS
-            tls:
-              mode: SIMPLE
-              credentialName: $TLS_SECRET
-            hosts:
-              - "*.$DOMAIN_TO_EXPOSE_WORKLOADS"
-    EOF
+            number: 443
+            name: https
+            protocol: HTTPS
+          tls:
+            mode: SIMPLE
+            credentialName: $TLS_SECRET
+          hosts:
+            - "*.$DOMAIN_TO_EXPOSE_WORKLOADS"
+      EOF
     ```
     
 ## Set up a TLS Gateway in mutual mode
@@ -83,7 +83,7 @@ This tutorial shows how to set up a TLS Gateway in both manual and simple modes.
               httpsRedirect: true
             hosts:
               - '*.${DOMAIN_TO_EXPOSE_WORKLOADS}'
-    EOF
+      EOF
     ```
   2. Export the following value as an environment variable:
 
@@ -104,5 +104,5 @@ This tutorial shows how to set up a TLS Gateway in both manual and simple modes.
       type: Opaque
       data:
         cacert: ${CLIENT_ROOT_CA_CRT_ENCODED}
-    EOF
+      EOF
     ```
