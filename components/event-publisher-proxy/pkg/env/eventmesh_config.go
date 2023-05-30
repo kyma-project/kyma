@@ -19,9 +19,9 @@ type EventMeshConfig struct {
 	MaxIdleConns        int           `envconfig:"MAX_IDLE_CONNS" default:"100"`
 	MaxIdleConnsPerHost int           `envconfig:"MAX_IDLE_CONNS_PER_HOST" default:"2"`
 	RequestTimeout      time.Duration `envconfig:"REQUEST_TIMEOUT" default:"5s"`
-	// EventMeshNamespace is the name of the namespace in EventMesh which is used as the event source for legacy events
+	// EventMeshNamespace is the name of the namespace in EventMesh which is used as the event source for legacy events.
 	EventMeshNamespace string `envconfig:"BEB_NAMESPACE" required:"true"`
-	// EventTypePrefix is the prefix of each event as per the eventing specification
+	// EventTypePrefix is the prefix of each event as per the eventing specification.
 	// It follows the eventType format: <eventTypePrefix>.<appName>.<event-name>.<version>
 	EventTypePrefix string `envconfig:"EVENT_TYPE_PREFIX" default:""`
 }
