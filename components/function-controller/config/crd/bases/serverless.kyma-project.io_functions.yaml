@@ -359,11 +359,11 @@ spec:
                           fetches the changes in the Function's code and dependencies.
                         type: string
                       url:
-                        description: URL of the Git repository with the Function's
-                          code and dependencies. Depending on whether the repository
-                          is public or private and what authentication method is used
-                          to access it, the URL must start with the `http(s)`, `git`,
-                          or `ssh` prefix.
+                        description: Specifies the URL of the Git repository with
+                          the Function's code and dependencies. Depending on whether
+                          the repository is public or private and what authentication
+                          method is used to access it, the URL must start with the
+                          `http(s)`, `git`, or `ssh` prefix.
                         type: string
                     required:
                     - url
@@ -384,7 +384,7 @@ spec:
                 type: object
               template:
                 description: 'Deprecated: **Labels** and **Annotations** should be
-                  used to annotate/label function''s pods.'
+                  used to and/or label Function''s Pods.'
                 properties:
                   annotations:
                     additionalProperties:
@@ -411,7 +411,7 @@ spec:
                   contains the source code from which the Function is built.
                 type: string
               commit:
-                description: Specifies the commit hash used to build the Function
+                description: Specifies the commit hash used to build the Function.
                 type: string
               conditions:
                 description: Specifies an array of conditions describing the status
@@ -432,10 +432,10 @@ spec:
                       type: string
                     status:
                       description: Specifies the status of the condition. The value
-                        is either 'True', 'False', or 'Unknown'.
+                        is either `True`, `False`, or `Unknown`.
                       type: string
                     type:
-                      description: Specifies the type of the Function condition.
+                      description: Specifies the type of the Function's condition.
                       type: string
                   required:
                   - status
@@ -443,7 +443,7 @@ spec:
                 type: array
               podSelector:
                 description: Specifies the Pod selector used to match Pods in the
-                  Function deployment.
+                  Function Deployment.
                 type: string
               reference:
                 description: Specifies either the branch name, tag or commit revision

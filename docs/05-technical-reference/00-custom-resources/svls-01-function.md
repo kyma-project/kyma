@@ -141,11 +141,11 @@ spec:
 | **source.&#x200b;gitRepository.&#x200b;auth.&#x200b;type** (required) | string | Defines the repository authentication method. The value is either `basic` if you use a password or token, or `key` if you use an SSH key. |
 | **source.&#x200b;gitRepository.&#x200b;baseDir**  | string | Specifies the relative path to the Git directory that contains the source code from which the Function is built. |
 | **source.&#x200b;gitRepository.&#x200b;reference**  | string | Specifies either the branch name, tag or commit revision from which the Function Controller automatically fetches the changes in the Function's code and dependencies. |
-| **source.&#x200b;gitRepository.&#x200b;url** (required) | string | URL of the Git repository with the Function's code and dependencies. Depending on whether the repository is public or private and what authentication method is used to access it, the URL must start with the `http(s)`, `git`, or `ssh` prefix. |
+| **source.&#x200b;gitRepository.&#x200b;url** (required) | string | Specifies the URL of the Git repository with the Function's code and dependencies. Depending on whether the repository is public or private and what authentication method is used to access it, the URL must start with the `http(s)`, `git`, or `ssh` prefix. |
 | **source.&#x200b;inline**  | object | Defines the Function as the inline Function. Can't be used together with **GitRepository**. |
 | **source.&#x200b;inline.&#x200b;dependencies**  | string | Specifies the Function's dependencies. |
 | **source.&#x200b;inline.&#x200b;source** (required) | string | Specifies the Function's full source code. |
-| **template**  | object | Deprecated: **Labels** and **Annotations** should be used to annotate/label function's pods. |
+| **template**  | object | Deprecated: **Labels** and **Annotations** should be used to and/or label Function's Pods. |
 | **template.&#x200b;annotations**  | map\[string\]string | Deprecated: Use **FunctionSpec.Annotations** to annotate Function's Pods. |
 | **template.&#x200b;labels**  | map\[string\]string | Deprecated: Use **FunctionSpec.Labels**  to label Function's Pods. |
 
@@ -154,14 +154,14 @@ spec:
 | Parameter | Type | Description |
 | ---- | ----------- | ---- |
 | **baseDir**  | string | Specifies the relative path to the Git directory that contains the source code from which the Function is built. |
-| **commit**  | string | Specifies the commit hash used to build the Function |
+| **commit**  | string | Specifies the commit hash used to build the Function. |
 | **conditions**  | \[\]object | Specifies an array of conditions describing the status of the parser. |
 | **conditions.&#x200b;lastTransitionTime**  | string | Specifies the last time the condition transitioned from one status to another. |
 | **conditions.&#x200b;message**  | string | Provides a human-readable message indicating details about the transition. |
 | **conditions.&#x200b;reason**  | string | Specifies the reason for the condition's last transition. |
-| **conditions.&#x200b;status** (required) | string | Specifies the status of the condition. The value is either 'True', 'False', or 'Unknown'. |
-| **conditions.&#x200b;type**  | string | Specifies the type of the Function condition. |
-| **podSelector**  | string | Specifies the Pod selector used to match Pods in the Function deployment. |
+| **conditions.&#x200b;status** (required) | string | Specifies the status of the condition. The value is either `True`, `False`, or `Unknown`. |
+| **conditions.&#x200b;type**  | string | Specifies the type of the Function's condition. |
+| **podSelector**  | string | Specifies the Pod selector used to match Pods in the Function Deployment. |
 | **reference**  | string | Specifies either the branch name, tag or commit revision from which the Function Controller automatically fetches the changes in the Function's code and dependencies. |
 | **replicas**  | integer | Specifies the total number of non-terminated Pods targeted by this Function. |
 | **runtime**  | string | Specifies the **Runtime** type of the Function. |

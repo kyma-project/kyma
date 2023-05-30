@@ -60,7 +60,7 @@ type InlineSource struct {
 type GitRepositorySource struct {
 	// +kubebuilder:validation:Required
 
-	// URL of the Git repository with the Function's code and dependencies.
+	// Specifies the URL of the Git repository with the Function's code and dependencies.
 	// Depending on whether the repository is public or private and what authentication method is used to access it,
 	// the URL must start with the `http(s)`, `git`, or `ssh` prefix.
 	URL string `json:"url"`
@@ -186,7 +186,7 @@ type FunctionSpec struct {
 	Replicas *int32 `json:"replicas,omitempty"`
 
 	// +optional
-	// Deprecated: **Labels** and **Annotations** should be used to annotate/label function's pods.
+	// Deprecated: **Labels** and **Annotations** should be used to and/or label Function's Pods.
 	Template *Template `json:"template,omitempty"`
 
 	// Specifies Secrets to mount into the Function's container filesystem.
@@ -236,9 +236,9 @@ const (
 )
 
 type Condition struct {
-	// Specifies the type of the Function condition.
+	// Specifies the type of the Function's condition.
 	Type ConditionType `json:"type,omitempty"`
-	// Specifies the status of the condition. The value is either 'True', 'False', or 'Unknown'.
+	// Specifies the status of the condition. The value is either `True`, `False`, or `Unknown`.
 	Status v1.ConditionStatus `json:"status"`
 	// Specifies the last time the condition transitioned from one status to another.
 	LastTransitionTime metav1.Time `json:"lastTransitionTime,omitempty"`
@@ -268,9 +268,9 @@ type FunctionStatus struct {
 	Repository `json:",inline,omitempty"`
 	// Specifies the total number of non-terminated Pods targeted by this Function.
 	Replicas int32 `json:"replicas,omitempty"`
-	// Specifies the Pod selector used to match Pods in the Function deployment.
+	// Specifies the Pod selector used to match Pods in the Function Deployment.
 	PodSelector string `json:"podSelector,omitempty"`
-	// Specifies the commit hash used to build the Function
+	// Specifies the commit hash used to build the Function.
 	Commit string `json:"commit,omitempty"`
 	// Specifies the image version used to build and run the Function Pods.
 	RuntimeImage string `json:"runtimeImage,omitempty"`
