@@ -47,7 +47,7 @@ type Commander struct {
 	opts             *options.Options
 }
 
-// NewCommander creates the Commander for publisher to BEB.
+// NewCommander creates the Commander for publisher to EventMesh.
 func NewCommander(opts *options.Options, metricsCollector *metrics.Collector, logger *logger.Logger) *Commander {
 	return &Commander{
 		metricsCollector: metricsCollector,
