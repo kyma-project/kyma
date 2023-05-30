@@ -18,7 +18,7 @@ This tutorial shows how to set up a TLS Gateway in both manual and simple modes.
 
 To create a TLS Gateway in simple mode, run:
 
-    ```bash
+  ```bash
       cat <<EOF | kubectl apply -f -
       ---
       apiVersion: networking.istio.io/v1alpha3
