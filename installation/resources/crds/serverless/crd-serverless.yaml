@@ -201,7 +201,8 @@ spec:
                         type: string
                       resources:
                         description: Defines the amount of resources available for
-                          the Pod. Can't be used together with **Profile**.
+                          the Pod. Can't be used together with **Profile**. For configuration
+                          details, see the [official Kubernetes documentation](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/).
                         properties:
                           limits:
                             additionalProperties:
@@ -237,7 +238,8 @@ spec:
                         type: string
                       resources:
                         description: Defines the amount of resources available for
-                          the Pod. Can't be used together with **Profile**.
+                          the Pod. Can't be used together with **Profile**. For configuration
+                          details, see the [official Kubernetes documentation](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/).
                         properties:
                           limits:
                             additionalProperties:
@@ -399,7 +401,7 @@ spec:
             - source
             type: object
           status:
-            description: FunctionStatus defines the observed state of Function
+            description: FunctionStatus defines the observed state of the Function
             properties:
               baseDir:
                 description: Specifies the relative path to the Git directory that

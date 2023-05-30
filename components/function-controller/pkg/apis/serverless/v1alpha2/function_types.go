@@ -112,6 +112,7 @@ type ResourceRequirements struct {
 
 	// Defines the amount of resources available for the Pod.
 	// Can't be used together with **Profile**.
+	// For configuration details, see the [official Kubernetes documentation](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/).
 	// +optional
 	Resources *v1.ResourceRequirements `json:"resources,omitempty"`
 }
@@ -256,7 +257,7 @@ type Repository struct {
 	Reference string `json:"reference,omitempty"`
 }
 
-// FunctionStatus defines the observed state of Function
+// FunctionStatus defines the observed state of the Function
 type FunctionStatus struct {
 	// Specify the **Runtime** type of function
 	Runtime Runtime `json:"runtime,omitempty"`
