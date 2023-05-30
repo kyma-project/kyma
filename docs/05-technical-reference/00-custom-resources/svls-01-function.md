@@ -155,18 +155,18 @@ spec:
 | ---- | ----------- | ---- |
 | **baseDir**  | string | Specifies the relative path to the Git directory that contains the source code from which the Function is built. |
 | **commit**  | string | Specifies the commit hash used to build the Function |
-| **conditions**  | \[\]object | An array of conditions describing the status of the parser |
-| **conditions.&#x200b;lastTransitionTime**  | string | Last time the condition transitioned from one status to another. |
-| **conditions.&#x200b;message**  | string | A human-readable message indicating details about the transition. |
-| **conditions.&#x200b;reason**  | string | The reason for the condition's last transition. |
-| **conditions.&#x200b;status** (required) | string | Status of the condition, one of True, False, Unknown. |
-| **conditions.&#x200b;type**  | string | Type of function condition. |
-| **podSelector**  | string | Pod selector used to match pods in function deployment |
+| **conditions**  | \[\]object | Specifies an array of conditions describing the status of the parser. |
+| **conditions.&#x200b;lastTransitionTime**  | string | Specifies the last time the condition transitioned from one status to another. |
+| **conditions.&#x200b;message**  | string | Provides a human-readable message indicating details about the transition. |
+| **conditions.&#x200b;reason**  | string | Specifies the reason for the condition's last transition. |
+| **conditions.&#x200b;status** (required) | string | Specifies the status of the condition. The value is either 'True', 'False', or 'Unknown'. |
+| **conditions.&#x200b;type**  | string | Specifies the type of the Function condition. |
+| **podSelector**  | string | Specifies the Pod selector used to match Pods in the Function deployment. |
 | **reference**  | string | Specifies either the branch name, tag or commit revision from which the Function Controller automatically fetches the changes in the Function's code and dependencies. |
-| **replicas**  | integer | Total number of non-terminated pods targeted by this function |
-| **runtime**  | string | Specify the **Runtime** type of function |
-| **runtimeImage**  | string | Specifies the image version used to build and run function pods |
-| **runtimeImageOverride**  | string | Deprecated: RuntimeImageOverride exists for historical compatibility and should be removed with v1alpha3 version. RuntimeImage has the override image if it isn't empty. |
+| **replicas**  | integer | Specifies the total number of non-terminated Pods targeted by this Function. |
+| **runtime**  | string | Specifies the **Runtime** type of the Function. |
+| **runtimeImage**  | string | Specifies the image version used to build and run the Function Pods. |
+| **runtimeImageOverride**  | string | Deprecated: Specifies the runtime image version which overrides the **RuntimeImage** status parameter. **RuntimeImageOverride** exists for historical compatibility and should be removed with v1alpha3 version. |
 
 <!-- TABLE-END -->
 

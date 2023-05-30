@@ -412,33 +412,36 @@ spec:
                 description: Specifies the commit hash used to build the Function
                 type: string
               conditions:
-                description: An array of conditions describing the status of the parser
+                description: Specifies an array of conditions describing the status
+                  of the parser.
                 items:
                   properties:
                     lastTransitionTime:
-                      description: Last time the condition transitioned from one status
-                        to another.
+                      description: Specifies the last time the condition transitioned
+                        from one status to another.
                       format: date-time
                       type: string
                     message:
-                      description: A human-readable message indicating details about
-                        the transition.
+                      description: Provides a human-readable message indicating details
+                        about the transition.
                       type: string
                     reason:
-                      description: The reason for the condition's last transition.
+                      description: Specifies the reason for the condition's last transition.
                       type: string
                     status:
-                      description: Status of the condition, one of True, False, Unknown.
+                      description: Specifies the status of the condition. The value
+                        is either 'True', 'False', or 'Unknown'.
                       type: string
                     type:
-                      description: Type of function condition.
+                      description: Specifies the type of the Function condition.
                       type: string
                   required:
                   - status
                   type: object
                 type: array
               podSelector:
-                description: Pod selector used to match pods in function deployment
+                description: Specifies the Pod selector used to match Pods in the
+                  Function deployment.
                 type: string
               reference:
                 description: Specifies either the branch name, tag or commit revision
@@ -446,21 +449,22 @@ spec:
                   in the Function's code and dependencies.
                 type: string
               replicas:
-                description: Total number of non-terminated pods targeted by this
-                  function
+                description: Specifies the total number of non-terminated Pods targeted
+                  by this Function.
                 format: int32
                 type: integer
               runtime:
-                description: Specify the **Runtime** type of function
+                description: Specifies the **Runtime** type of the Function.
                 type: string
               runtimeImage:
-                description: Specifies the image version used to build and run function
-                  pods
+                description: Specifies the image version used to build and run the
+                  Function Pods.
                 type: string
               runtimeImageOverride:
-                description: 'Deprecated: RuntimeImageOverride exists for historical
-                  compatibility and should be removed with v1alpha3 version. RuntimeImage
-                  has the override image if it isn''t empty.'
+                description: 'Deprecated: Specifies the runtime image version which
+                  overrides the **RuntimeImage** status parameter. **RuntimeImageOverride**
+                  exists for historical compatibility and should be removed with v1alpha3
+                  version.'
                 type: string
             type: object
         type: object

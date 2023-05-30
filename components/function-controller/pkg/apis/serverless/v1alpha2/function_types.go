@@ -236,15 +236,15 @@ const (
 )
 
 type Condition struct {
-	// Type of function condition.
+	// Specifies the type of the Function condition.
 	Type ConditionType `json:"type,omitempty"`
-	// Status of the condition, one of True, False, Unknown.
+	// Specifies the status of the condition. The value is either 'True', 'False', or 'Unknown'.
 	Status v1.ConditionStatus `json:"status"`
-	// Last time the condition transitioned from one status to another.
+	// Specifies the last time the condition transitioned from one status to another.
 	LastTransitionTime metav1.Time `json:"lastTransitionTime,omitempty"`
-	// The reason for the condition's last transition.
+	// Specifies the reason for the condition's last transition.
 	Reason ConditionReason `json:"reason,omitempty"`
-	// A human-readable message indicating details about the transition.
+	// Provides a human-readable message indicating details about the transition.
 	Message string `json:"message,omitempty"`
 }
 
@@ -260,23 +260,23 @@ type Repository struct {
 
 // FunctionStatus defines the observed state of the Function
 type FunctionStatus struct {
-	// Specify the **Runtime** type of function
+	// Specifies the **Runtime** type of the Function.
 	Runtime Runtime `json:"runtime,omitempty"`
-	// An array of conditions describing the status of the parser
+	// Specifies an array of conditions describing the status of the parser.
 	Conditions []Condition `json:"conditions,omitempty"`
-	// Specify the repository which was used to build the function
+	// Specify the repository which was used to build the function.
 	Repository `json:",inline,omitempty"`
-	// Total number of non-terminated pods targeted by this function
+	// Specifies the total number of non-terminated Pods targeted by this Function.
 	Replicas int32 `json:"replicas,omitempty"`
-	// Pod selector used to match pods in function deployment
+	// Specifies the Pod selector used to match Pods in the Function deployment.
 	PodSelector string `json:"podSelector,omitempty"`
 	// Specifies the commit hash used to build the Function
 	Commit string `json:"commit,omitempty"`
-	// Specifies the image version used to build and run function pods
+	// Specifies the image version used to build and run the Function Pods.
 	RuntimeImage string `json:"runtimeImage,omitempty"`
-	// Deprecated: RuntimeImageOverride exists for historical compatibility
-	// and should be removed with v1alpha3 version. RuntimeImage has the
-	// override image if it isn't empty.
+	// Deprecated: Specifies the runtime image version which overrides the **RuntimeImage** status parameter.
+	// **RuntimeImageOverride** exists for historical compatibility
+	// and should be removed with v1alpha3 version.
 	RuntimeImageOverride string `json:"runtimeImageOverride,omitempty"`
 }
 
