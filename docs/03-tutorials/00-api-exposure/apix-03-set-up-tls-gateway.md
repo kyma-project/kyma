@@ -16,30 +16,30 @@ This tutorial shows how to set up a TLS Gateway in both manual and simple modes.
    
 ## Set up a TLS Gateway in simple mode
 
-  To create a TLS Gateway in simple mode, run:
+To create a TLS Gateway in simple mode, run:
 
     ```bash
-    cat <<EOF | kubectl apply -f -
-    ---
-    apiVersion: networking.istio.io/v1alpha3
-    kind: Gateway
-    metadata:
-      name: httpbin-gateway
-      namespace: $NAMESPACE
-    spec:
-      selector:
-        istio: ingressgateway # Use Istio Ingress Gateway as default
-      servers:
-        - port:
-            number: 443
-            name: https
-            protocol: HTTPS
-          tls:
-            mode: SIMPLE
-            credentialName: $TLS_SECRET
-          hosts:
-            - "*.$DOMAIN_TO_EXPOSE_WORKLOADS"
-    EOF
+      cat <<EOF | kubectl apply -f -
+      ---
+      apiVersion: networking.istio.io/v1alpha3
+      kind: Gateway
+      metadata:
+        name: httpbin-gateway
+        namespace: $NAMESPACE
+      spec:
+        selector:
+          istio: ingressgateway # Use Istio Ingress Gateway as default
+        servers:
+          - port:
+              number: 443
+              name: https
+              protocol: HTTPS
+            tls:
+              mode: SIMPLE
+              credentialName: $TLS_SECRET
+            hosts:
+              - "*.$DOMAIN_TO_EXPOSE_WORKLOADS"
+      EOF
     ```
     
 ## Set up a TLS Gateway in mutual mode
