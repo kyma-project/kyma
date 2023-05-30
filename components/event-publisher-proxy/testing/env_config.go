@@ -12,10 +12,10 @@ const (
 
 func NewEnvConfig(emsCEURL, authURL string, opts ...EnvConfigOption) *env.EventMeshConfig {
 	envConfig := &env.EventMeshConfig{
-		Port:           defaultPort,
-		EventMeshPublishURL:  emsCEURL,
-		TokenEndpoint:  authURL,
-		RequestTimeout: time.Minute,
+		Port:                defaultPort,
+		EventMeshPublishURL: emsCEURL,
+		TokenEndpoint:       authURL,
+		RequestTimeout:      time.Minute,
 	}
 	for _, opt := range opts {
 		opt(envConfig)

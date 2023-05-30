@@ -35,16 +35,16 @@ type RequestToCETransformer interface {
 }
 
 type Transformer struct {
-	eventMeshNamespace      string
-	eventTypePrefix   string
-	applicationLister *application.Lister
+	eventMeshNamespace string
+	eventTypePrefix    string
+	applicationLister  *application.Lister
 }
 
 func NewTransformer(bebNamespace string, eventTypePrefix string, applicationLister *application.Lister) *Transformer {
 	return &Transformer{
-		eventMeshNamespace:      bebNamespace,
-		eventTypePrefix:   eventTypePrefix,
-		applicationLister: applicationLister,
+		eventMeshNamespace: bebNamespace,
+		eventTypePrefix:    eventTypePrefix,
+		applicationLister:  applicationLister,
 	}
 }
 
