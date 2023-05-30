@@ -15,7 +15,7 @@ type EventMeshConfig struct {
 	ClientID            string        `envconfig:"CLIENT_ID" required:"true"`
 	ClientSecret        string        `envconfig:"CLIENT_SECRET" required:"true"`
 	TokenEndpoint       string        `envconfig:"TOKEN_ENDPOINT" required:"true"`
-	EventMeshPublishURL string        `envconfig:"EMS_PUBLISH_URL"true"`
+	EventMeshPublishURL string        `envconfig:"EMS_PUBLISH_URL" required:"true"`
 	MaxIdleConns        int           `envconfig:"MAX_IDLE_CONNS" default:"100"`
 	MaxIdleConnsPerHost int           `envconfig:"MAX_IDLE_CONNS_PER_HOST" default:"2"`
 	RequestTimeout      time.Duration `envconfig:"REQUEST_TIMEOUT" default:"5s"`
