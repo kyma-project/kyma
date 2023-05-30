@@ -60,19 +60,19 @@ To create a TLS Gateway in simple mode, run:
           app: istio-ingressgateway
         servers:
           - port:
-            number: 443
-            name: https
-            protocol: HTTPS
-          tls:
-            mode: MUTUAL
-            credentialName: ${TLS_SECRET}
-            minProtocolVersion: TLSV1_2
-            cipherSuites:
-              - ECDHE-RSA-CHACHA20-POLY1305
-              - ECDHE-RSA-AES256-GCM-SHA384
-              - ECDHE-RSA-AES256-SHA
-              - ECDHE-RSA-AES128-GCM-SHA256
-              - ECDHE-RSA-AES128-SHA
+              number: 443
+              name: https
+              protocol: HTTPS
+            tls:
+              mode: MUTUAL
+              credentialName: ${TLS_SECRET}
+              minProtocolVersion: TLSV1_2
+              cipherSuites:
+                - ECDHE-RSA-CHACHA20-POLY1305
+                - ECDHE-RSA-AES256-GCM-SHA384
+                - ECDHE-RSA-AES256-SHA
+                - ECDHE-RSA-AES128-GCM-SHA256
+                - ECDHE-RSA-AES128-SHA
             hosts:
               - '*.${DOMAIN_TO_EXPOSE_WORKLOADS}'
           - port:
