@@ -8,7 +8,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/commander"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/commander/beb"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/commander/eventmesh"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/commander/nats"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics/latency"
@@ -63,7 +63,7 @@ func main() {
 	var c commander.Commander
 	switch cfg.Backend {
 	case backendBEB:
-		c = beb.NewCommander(opts, metricsCollector, logger)
+		c = eventmesh.NewCommander(opts, metricsCollector, logger)
 	case backendNATS:
 		c = nats.NewCommander(opts, metricsCollector, logger)
 	default:
