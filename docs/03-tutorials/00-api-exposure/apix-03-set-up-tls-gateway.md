@@ -9,28 +9,28 @@ This tutorial shows how to set up a TLS Gateway in both manual and simple modes.
 * Deploy [a sample HttpBin service and a sample Function](./apix-01-create-workload.md).
 * Set up [your custom domain](./apix-02-setup-custom-domain-for-workload.md) and export the following values as environment variables:
 
-    ```bash
-    export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
-    export GATEWAY=$NAMESPACE/httpbin-gateway
-    ```
+  ```bash
+  export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
+  export GATEWAY=$NAMESPACE/httpbin-gateway
+  ```
    
 ## Set up a TLS Gateway in simple mode
 
   To create a TLS Gateway in simple mode, run:
 
     ```bash
-      cat <<EOF | kubectl apply -f -
-      ---
-      apiVersion: networking.istio.io/v1alpha3
-      kind: Gateway
-      metadata:
-        name: httpbin-gateway
-        namespace: $NAMESPACE
-      spec:
-        selector:
-          istio: ingressgateway # Use Istio Ingress Gateway as default
-        servers:
-          - port:
+    cat <<EOF | kubectl apply -f -
+    ---
+    apiVersion: networking.istio.io/v1alpha3
+    kind: Gateway
+    metadata:
+      name: httpbin-gateway
+      namespace: $NAMESPACE
+    spec:
+      selector:
+        istio: ingressgateway # Use Istio Ingress Gateway as default
+      servers:
+        - port:
             number: 443
             name: https
             protocol: HTTPS
@@ -39,7 +39,7 @@ This tutorial shows how to set up a TLS Gateway in both manual and simple modes.
             credentialName: $TLS_SECRET
           hosts:
             - "*.$DOMAIN_TO_EXPOSE_WORKLOADS"
-      EOF
+    EOF
     ```
     
 ## Set up a TLS Gateway in mutual mode
