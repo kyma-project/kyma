@@ -40,7 +40,7 @@ To create a TLS Gateway in simple mode, run:
             hosts:
               - "*.$DOMAIN_TO_EXPOSE_WORKLOADS"
       EOF
-    ```
+  ```
     
 ## Set up a TLS Gateway in mutual mode
   
