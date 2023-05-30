@@ -15,7 +15,7 @@ type EventMeshConfig struct {
 	ClientID            string        `envconfig:"CLIENT_ID" required:"true"`
 	ClientSecret        string        `envconfig:"CLIENT_SECRET" required:"true"`
 	TokenEndpoint       string        `envconfig:"TOKEN_ENDPOINT" required:"true"`
-	EmsPublishURL       string        `envconfig:"EMS_PUBLISH_URL" required:"true"`
+	EventMeshPublishURL string        `envconfig:"EMS_PUBLISH_URL"true"`
 	MaxIdleConns        int           `envconfig:"MAX_IDLE_CONNS" default:"100"`
 	MaxIdleConnsPerHost int           `envconfig:"MAX_IDLE_CONNS_PER_HOST" default:"2"`
 	RequestTimeout      time.Duration `envconfig:"REQUEST_TIMEOUT" default:"5s"`
@@ -36,6 +36,6 @@ func (c *EventMeshConfig) ConfigureTransport(transport *http.Transport) {
 func (c *EventMeshConfig) String() string {
 	return fmt.Sprintf("EventMeshConfig{ Port: %v; TokenEndPoint: %v; EmsPublishURL: %v; "+
 		"MaxIdleConns: %v; MaxIdleConnsPerHost: %v; RequestTimeout: %v; BEBNamespace: %v; EventTypePrefix: %v }",
-		c.Port, c.TokenEndpoint, c.EmsPublishURL, c.MaxIdleConns,
+		c.Port, c.TokenEndpoint, c.EventMeshPublishURL, c.MaxIdleConns,
 		c.MaxIdleConnsPerHost, c.RequestTimeout, c.EventMeshNamespace, c.EventTypePrefix)
 }
