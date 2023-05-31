@@ -46,7 +46,10 @@ function btpManagerSecretTest() {
             const actualSecret = await getSecret(secretName, ns);
             checkSecretDataKeys(actualSecret);
             const actualSecretData = await getSecretData(secretName, ns);
-            checkSecretDataValues(actualSecretData);
+            expect(actualSecretData.clientid).to.equal('test_clientid');
+            expect(actualSecretData.clientsecret).to.equal('test_clientsecret');
+            expect(actualSecretData.sm_url).to.equal('test_sm_url');
+            expect(actualSecretData.tokenurl).to.equal('test_tokenurl');
             console.log(`Secret has been properly reconciled`)
         });
     });
