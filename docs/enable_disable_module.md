@@ -6,13 +6,13 @@ title: Enable and disable a Kyma module
 
 Your cluster comes with the Kyma custom resource (CR) already installed. It collects all metadata about the cluster, such as enabled modules, their statuses, or synchronization, using Lifecycle Manager. Lifecycle Manager uses `moduletemplate.yaml` to enable or disable modules on your cluster. 
 
-## Procedure
+## Enable a module
 
 > **NOTE:** To quickly enable a module, go to your **Cluster Details** view and select **Add Module**. Then, choose the channel of your choice and click **Add** to choose and upload your module.
 
 > **TIP:** You can also configure your Kyma CR to enable a module manually. For more details, see [Kyma CR](https://github.com/kyma-project/lifecycle-manager/blob/main/docs/technical-reference/api/kyma-cr.md).
 
-<div tabs name="steps" group="enable-module">
+<div tabs name="Enable a module" group="enable-disable-module">
   <details>
   <summary label="cli">
   Kyma CLI
@@ -43,13 +43,6 @@ You should see the following message:
    - Modules patched!
    ```
 
-Similarly, to disable a module, run: 
-
-   ```bash
-   kyma alpha disable module {MODULE_NAME}
-   ``` 
-You should see the same message as the one displayed when you enable a module.
-
 </details>
 <details>
 <summary label= Kyma Dashboard>
@@ -66,8 +59,42 @@ Follow these steps to enable a Kyma module in Kyma Dashboard:
 7. Select **Update**.
 
 This process may take a while, depending on the number of modules. The operation was successful if the module Status changed to `READY`.
+</details>
+</div>
 
-To disable a module, edit your Kyma instance and click on the trash icon next to your module, then force update the changes. Your module should disappear from the Module list.
+## Disable a module
+
+<div tabs name="Disable a module" group="enable-disable-module">
+  <details>
+  <summary label="cli">
+  Kyma CLI
+  </summary>
+
+To disable a module, run: 
+
+   ```bash
+   kyma alpha disable module {MODULE_NAME}
+   ``` 
+You should see the following message:
+
+```bash
+   - Successfully connected to cluster
+   - Modules patched!
+   ```
+
+</details>
+<details>
+<summary label= Kyma Dashboard>
+Kyma Dashboard
+</summary>
+
+Follow these steps to disable a Kyma module in Kyma Dashboard:
+1. Go to the `kyma-system` Namespace.
+2. In the **Kyma** section, Choose the **Kyma** resource.
+3. Select your Kyma instance (`default-kyma`) and click **Edit**.
+4. Click on the thrash icon next to your module and update the changes.
+
+Your module should disappear from the Module list.
 </details>
 </div>
 
