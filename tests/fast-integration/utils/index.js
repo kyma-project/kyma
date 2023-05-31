@@ -824,7 +824,25 @@ function waitForConfigMap(
         );
       },
       timeout,
-      `Waiting for ${cmName} service plan timeout (${timeout} ms)`,
+      `Waiting for ${cmName} ConfigMap timeout (${timeout} ms)`,
+  );
+}
+
+function waitForSecret(
+    secretName,
+    namespace = 'default',
+    timeout = 90_000,
+) {
+  return waitForK8sObject(
+      `/api/v1/namespaces/${namespace}/secrets`,
+      {},
+      (_type, _apiObj, watchObj) => {
+        return watchObj.object.metadata.name.includes(
+            secretName,
+        );
+      },
+      timeout,
+      `Waiting for ${secretName} Secret timeout (${timeout} ms)`,
   );
 }
 
@@ -1898,6 +1916,7 @@ module.exports = {
   waitForPodWithLabel,
   waitForPodStatusWithLabel,
   waitForConfigMap,
+  waitForSecret,
   waitForJob,
   deleteNamespaces,
   deleteAllK8sResources,

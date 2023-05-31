@@ -4,6 +4,8 @@ const {
     initializeK8sClient,
     getSecret,
     getSecretData,
+    k8sDelete,
+    waitForSecret,
 } = require('../../utils');
 const {BTPOperatorCreds} = require('../../smctl/helpers');
 
@@ -20,21 +22,13 @@ function btpManagerSecretTest() {
         });
         // Check if BTP Manager Secret with BTP Operator credentials is created properly
         it('should check if Secret exists and contains the expected data keys', async function() {
-            console.log(`Checking the data keys of the "sap-btp-manager" Secret`);
             expectedSecret = await getSecret(secretName, ns);
+            checkSecretDataKeys(expectedSecret)
             console.log(expectedSecret)
-            expect(expectedSecret).to.not.be.empty;
-            expect(expectedSecret.metadata.labels['app.kubernetes.io/managed-by']).to.equal('kcp-kyma-environment-broker');
-            expect(expectedSecret.data).to.have.property('clientid');
-            expect(expectedSecret.data).to.have.property('clientsecret');
-            expect(expectedSecret.data).to.have.property('sm_url');
-            expect(expectedSecret.data).to.have.property('tokenurl');
-            expect(expectedSecret.data).to.have.property('cluster_id');
             modifiedSecret = JSON.parse(JSON.stringify(expectedSecret))
         });
         // Check if the Secret contains expected values
         it('should check if Secret data values match expected values', async function() {
-            console.log(`Checking data values of the "sap-btp-manager" Secret`);
             const actualSecretData = await getSecretData(secretName, ns);
             console.log(actualSecretData)
             expect(actualSecretData.clientid).to.equal('test_clientid');
@@ -42,7 +36,39 @@ function btpManagerSecretTest() {
             expect(actualSecretData.sm_url).to.equal('test_sm_url');
             expect(actualSecretData.tokenurl).to.equal('test_tokenurl');
         });
+        // Check if the Secret is properly reconciled after deletion
+        it('should check if Secret is reconciled after deletion', async function() {
+            console.log(`Deleting the "sap-btp-manager" Secret`);
+            await k8sDelete([expectedSecret], ns);
+            console.log(`Waiting for the reconciliation for 90s`);
+            await waitForSecret(secretName, ns, 1000* 90);
+            console.log(`Secret has been re-created. Checking Secret's data`);
+            const actualSecret = await getSecret(secretName, ns);
+            checkSecretDataKeys(actualSecret);
+            const actualSecretData = await getSecretData(secretName, ns);
+            checkSecretDataValues(actualSecretData);
+            console.log(`Secret has been properly reconciled`)
+        });
     });
+}
+
+function checkSecretDataKeys(secret) {
+    console.log(`Checking the data keys of the "sap-btp-manager" Secret`);
+    expect(secret).to.not.be.empty;
+    expect(secret.metadata.labels['app.kubernetes.io/managed-by']).to.equal('kcp-kyma-environment-broker');
+    expect(secret.data).to.have.property('clientid');
+    expect(secret.data).to.have.property('clientsecret');
+    expect(secret.data).to.have.property('sm_url');
+    expect(secret.data).to.have.property('tokenurl');
+    expect(secret.data).to.have.property('cluster_id');
+}
+
+function checkSecretDataValues(secret) {
+    console.log(`Checking data values of the "sap-btp-manager" Secret`);
+    expect(secret.clientid).to.equal(expectedBtpOperatorCreds.clientid);
+    expect(secret.clientsecret).to.equal(expectedBtpOperatorCreds.clientsecret);
+    expect(secret.sm_url).to.equal(expectedBtpOperatorCreds.smURL);
+    expect(secret.tokenurl).to.equal(expectedBtpOperatorCreds.url);
 }
 
 module.exports = {
