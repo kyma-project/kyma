@@ -185,8 +185,8 @@ type FunctionSpec struct {
 	// +optional
 	Replicas *int32 `json:"replicas,omitempty"`
 
+	// Deprecated: Use **Labels** and **Annotations** to label and/or annotate Function's Pods.
 	// +optional
-	// Deprecated: **Labels** and **Annotations** should be used to and/or label Function's Pods.
 	Template *Template `json:"template,omitempty"`
 
 	// Specifies Secrets to mount into the Function's container filesystem.
@@ -268,7 +268,7 @@ type FunctionStatus struct {
 	Repository `json:",inline,omitempty"`
 	// Specifies the total number of non-terminated Pods targeted by this Function.
 	Replicas int32 `json:"replicas,omitempty"`
-	// Specifies the Pod selector used to match Pods in the Function Deployment.
+	// Specifies the Pod selector used to match Pods in the Function's Deployment.
 	PodSelector string `json:"podSelector,omitempty"`
 	// Specifies the commit hash used to build the Function.
 	Commit string `json:"commit,omitempty"`

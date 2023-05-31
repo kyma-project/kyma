@@ -145,7 +145,7 @@ spec:
 | **source.&#x200b;inline**  | object | Defines the Function as the inline Function. Can't be used together with **GitRepository**. |
 | **source.&#x200b;inline.&#x200b;dependencies**  | string | Specifies the Function's dependencies. |
 | **source.&#x200b;inline.&#x200b;source** (required) | string | Specifies the Function's full source code. |
-| **template**  | object | Deprecated: **Labels** and **Annotations** should be used to and/or label Function's Pods. |
+| **template**  | object | Deprecated: Use **Labels** and **Annotations** to label and/or annotate Function's Pods. |
 | **template.&#x200b;annotations**  | map\[string\]string | Deprecated: Use **FunctionSpec.Annotations** to annotate Function's Pods. |
 | **template.&#x200b;labels**  | map\[string\]string | Deprecated: Use **FunctionSpec.Labels**  to label Function's Pods. |
 
@@ -161,7 +161,7 @@ spec:
 | **conditions.&#x200b;reason**  | string | Specifies the reason for the condition's last transition. |
 | **conditions.&#x200b;status** (required) | string | Specifies the status of the condition. The value is either `True`, `False`, or `Unknown`. |
 | **conditions.&#x200b;type**  | string | Specifies the type of the Function's condition. |
-| **podSelector**  | string | Specifies the Pod selector used to match Pods in the Function Deployment. |
+| **podSelector**  | string | Specifies the Pod selector used to match Pods in the Function's Deployment. |
 | **reference**  | string | Specifies either the branch name, tag or commit revision from which the Function Controller automatically fetches the changes in the Function's code and dependencies. |
 | **replicas**  | integer | Specifies the total number of non-terminated Pods targeted by this Function. |
 | **runtime**  | string | Specifies the **Runtime** type of the Function. |

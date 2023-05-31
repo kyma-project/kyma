@@ -383,8 +383,8 @@ spec:
                     type: object
                 type: object
               template:
-                description: 'Deprecated: **Labels** and **Annotations** should be
-                  used to and/or label Function''s Pods.'
+                description: 'Deprecated: Use **Labels** and **Annotations** to label
+                  and/or annotate Function''s Pods.'
                 properties:
                   annotations:
                     additionalProperties:
@@ -443,7 +443,7 @@ spec:
                 type: array
               podSelector:
                 description: Specifies the Pod selector used to match Pods in the
-                  Function Deployment.
+                  Function's Deployment.
                 type: string
               reference:
                 description: Specifies either the branch name, tag or commit revision
