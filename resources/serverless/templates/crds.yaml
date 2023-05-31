@@ -458,7 +458,7 @@ spec:
                 type: string
               runtimeImage:
                 description: Specifies the image version used to build and run the
-                  Function Pods.
+                  Function's Pods.
                 type: string
               runtimeImageOverride:
                 description: 'Deprecated: Specifies the runtime image version which

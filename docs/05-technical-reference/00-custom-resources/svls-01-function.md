@@ -165,7 +165,7 @@ spec:
 | **reference**  | string | Specifies either the branch name, tag or commit revision from which the Function Controller automatically fetches the changes in the Function's code and dependencies. |
 | **replicas**  | integer | Specifies the total number of non-terminated Pods targeted by this Function. |
 | **runtime**  | string | Specifies the **Runtime** type of the Function. |
-| **runtimeImage**  | string | Specifies the image version used to build and run the Function Pods. |
+| **runtimeImage**  | string | Specifies the image version used to build and run the Function's Pods. |
 | **runtimeImageOverride**  | string | Deprecated: Specifies the runtime image version which overrides the **RuntimeImage** status parameter. **RuntimeImageOverride** exists for historical compatibility and should be removed with v1alpha3 version. |
 
 <!-- TABLE-END -->

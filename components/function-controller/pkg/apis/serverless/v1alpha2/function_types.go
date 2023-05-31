@@ -272,7 +272,7 @@ type FunctionStatus struct {
 	PodSelector string `json:"podSelector,omitempty"`
 	// Specifies the commit hash used to build the Function.
 	Commit string `json:"commit,omitempty"`
-	// Specifies the image version used to build and run the Function Pods.
+	// Specifies the image version used to build and run the Function's Pods.
 	RuntimeImage string `json:"runtimeImage,omitempty"`
 	// Deprecated: Specifies the runtime image version which overrides the **RuntimeImage** status parameter.
 	// **RuntimeImageOverride** exists for historical compatibility
