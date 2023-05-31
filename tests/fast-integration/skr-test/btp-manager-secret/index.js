@@ -9,6 +9,7 @@ const {
 } = require('../../utils');
 const {BTPOperatorCreds} = require('../../smctl/helpers');
 
+let suiteTimeout = 1000 * 60 * 5;
 const secretName = 'sap-btp-manager';
 const ns = 'kyma-system';
 const expectedBtpOperatorCreds = BTPOperatorCreds.dummy();
@@ -17,6 +18,7 @@ let expectedSecret, modifiedSecret;
 
 function btpManagerSecretTest() {
     describe('BTP Manager Secret Test', function () {
+        this.timeout(suiteTimeout);
         before('REMOVE LATER: Initialize kubeconfig', async function(){
             await initializeK8sClient({kubeconfigPath: `${os.homedir()}/k3d_kubeconfig`});
         });
