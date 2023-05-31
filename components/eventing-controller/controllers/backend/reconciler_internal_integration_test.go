@@ -171,10 +171,12 @@ var _ = BeforeSuite(func(done Done) {
 		JSStreamName:    reconcilertesting.JSStreamName,
 	}
 
+	envConfig := env.Config{}
 	err = NewReconciler(
 		context.Background(),
 		natsSubMgr,
 		natsConfig,
+		envConfig,
 		bebSubMgr,
 		k8sManager.GetClient(),
 		defaultLogger,
@@ -668,8 +670,8 @@ func createOAuth2Secret(ctx context.Context, clientID, clientSecret []byte) {
 			Namespace: deployment.ControllerNamespace,
 		},
 		Data: map[string][]byte{
-			"client_id":     clientID,
-			"client_secret": clientSecret,
+			secretKeyClientID:     clientID,
+			secretKeyClientSecret: clientSecret,
 		},
 	}
 	err := k8sClient.Create(ctx, sec)

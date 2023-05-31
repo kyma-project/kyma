@@ -146,6 +146,7 @@ func setupSuite() error {
 	credentials := &backendeventmesh.OAuth2ClientCredentials{
 		ClientID:     "foo-client-id",
 		ClientSecret: "foo-client-secret",
+		TokenURL:     "foo-token-url",
 	}
 	emTestEnsemble.envConfig = getEnvConfig()
 	testReconciler := eventmeshreconciler.NewReconciler(

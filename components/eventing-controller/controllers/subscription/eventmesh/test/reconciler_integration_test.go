@@ -233,7 +233,7 @@ func Test_CreateSubscription(t *testing.T) {
 				eventmeshsubmatchers.HaveWebhookAuth(eventMeshtypes.WebhookAuth{
 					ClientID:     "foo-client-id",
 					ClientSecret: "foo-client-secret",
-					TokenURL:     emTestEnsemble.envConfig.WebhookTokenEndpoint,
+					TokenURL:     "foo-token-url",
 					Type:         eventMeshtypes.AuthTypeClientCredentials,
 					GrantType:    eventMeshtypes.GrantTypeClientCredentials,
 				}),
