@@ -3,10 +3,13 @@ const {expect} = require('chai');
 const {
     initializeK8sClient,
     getSecret,
+    getSecretData,
 } = require('../../utils');
+const {BTPOperatorCreds} = require('../../smctl/helpers');
 
 const secretName = 'sap-btp-manager';
 const ns = 'kyma-system';
+const expectedBtpOperatorCreds = BTPOperatorCreds.dummy();
 
 let expectedSecret, modifiedSecret;
 
@@ -27,6 +30,15 @@ function btpManagerSecretTest() {
             expect(expectedSecret.data).to.have.property('tokenurl');
             expect(expectedSecret.data).to.have.property('cluster_id');
             modifiedSecret = JSON.parse(JSON.stringify(expectedSecret))
+        });
+        // Check if the Secret contains expected values
+        it('should check if Secret data values match expected values', async function() {
+            console.log(`Checking data values of the "sap-btp-manager" Secret`);
+            const actualSecretData = await getSecretData(secretName, ns);
+            expect(actualSecretData.clientid).to.equal(expectedBtpOperatorCreds.clientid);
+            expect(actualSecretData.clientsecret).to.equal(expectedBtpOperatorCreds.clientsecret);
+            expect(actualSecretData.sm_url).to.equal(expectedBtpOperatorCreds.smURL);
+            expect(actualSecretData.tokenurl).to.equal(expectedBtpOperatorCreds.url);
         });
     });
 }
