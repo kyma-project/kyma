@@ -92,7 +92,7 @@ Follow these steps to disable a Kyma module in Kyma Dashboard:
 1. Go to the `kyma-system` Namespace.
 2. In the **Kyma** section, Choose the **Kyma** resource.
 3. Select your Kyma instance (`default-kyma`) and click **Edit**.
-4. Click on the thrash icon next to your module and update the changes.
+4. Click on the trash icon next to your module and update the changes.
 
 Your module should disappear from the Module list.
 </details>
