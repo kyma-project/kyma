@@ -2,6 +2,7 @@ const {
   gatherOptions,
   oidcE2ETest,
   machineTypeE2ETest,
+  btpManagerSecretTest,
 } = require('./index');
 const {getOrProvisionSKR} = require('./provision/provision-skr');
 const {deprovisionAndUnregisterSKR} = require('./provision/deprovision-skr');
@@ -36,8 +37,13 @@ describe('SKR test', function() {
     options = skr.options;
   });
 
-  // Run the OIDC and machine type tests
+  // Run BTP Manager Secret tests
+  btpManagerSecretTest();
+
+  // Run OIDC tests
   oidcE2ETest(getShootOptionsFunc, getShootInfoFunc);
+
+  // Run Machine Type tests
   machineTypeE2ETest(getShootOptionsFunc, getShootInfoFunc);
 
   after('Cleanup the resources', async function() {
