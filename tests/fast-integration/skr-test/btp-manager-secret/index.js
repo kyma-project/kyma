@@ -11,11 +11,12 @@ const {
 } = require('../../utils');
 const {BTPOperatorCreds} = require('../../smctl/helpers');
 
-let suiteTimeout = 1000 * 60 * 5;
 const secretName = 'sap-btp-manager';
 const ns = 'kyma-system';
 const expectedBtpOperatorCreds = BTPOperatorCreds.dummy();
 
+let suiteTimeout = 1000 * 60 * 5;
+let reconciliationTimeout = 1000 * 70;
 let expectedSecret, modifiedSecret;
 
 function btpManagerSecretTest() {
@@ -44,8 +45,8 @@ function btpManagerSecretTest() {
         it('should check if Secret is reconciled after deletion', async function() {
             console.log(`Deleting the "sap-btp-manager" Secret`);
             await k8sDelete([expectedSecret], ns);
-            console.log(`Waiting for the reconciliation for 90s`);
-            await waitForSecret(secretName, ns, 1000* 90);
+            console.log(`Waiting for the reconciliation for ${reconciliationTimeout} ms`);
+            await waitForSecret(secretName, ns, reconciliationTimeout);
             console.log(`Secret has been re-created. Checking Secret's data`);
             const actualSecret = await getSecret(secretName, ns);
             checkSecretDataKeys(actualSecret);
@@ -63,7 +64,7 @@ function btpManagerSecretTest() {
             console.log(`Changing data in the "sap-btp-manager" Secret`);
             await k8sApply([modifiedSecret], ns)
             let actualSecret = await getSecret(secretName, ns);
-            console.log(`Waiting for the reconciliation for 90s`);
+            console.log(`Waiting for the reconciliation for ${reconciliationTimeout} ms`);
             await waitForK8sObject(
                 `/api/v1/namespaces/${ns}/secrets`,
                 {},
@@ -73,8 +74,8 @@ function btpManagerSecretTest() {
                         watchObj.object.metadata.resourceVersion !== actualSecret.metadata.resourceVersion
                     );
                 },
-                1000 * 90,
-                `Waiting for ${secretName} Secret reconciliation timeout (90 s)`,
+                reconciliationTimeout,
+                `Waiting for ${secretName} Secret reconciliation timeout (${reconciliationTimeout} ms)`,
             );
             console.log(`Secret has been reconciled`);
             actualSecret = await getSecret(secretName, ns);
