@@ -97,6 +97,7 @@ function checkSecretDataValues(secret) {
 
 function prepareSecretForApply(secret) {
   delete secret.metadata.uid;
+  delete secret.metadata.resourceVersion;
   delete secret.metadata.creationTimestamp;
   delete secret.metadata.annotations;
   delete secret.metadata.managedFields;
