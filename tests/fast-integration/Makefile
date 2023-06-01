@@ -115,7 +115,6 @@ telemetry:
 	npm run test-telemetry
 
 .PHONY: ci-keb-endpoints
-ci-skr:
+ci-keb-endpoints:
 	npm install
 	npm run test-keb-endpoints
-	
