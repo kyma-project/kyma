@@ -1,6 +1,6 @@
 {{- $username := include "tplValue" ( dict "value" .Values.dockerRegistry.username "context" . ) -}}
 {{- $password := include "tplValue" ( dict "value" .Values.dockerRegistry.password "context" . ) -}}
-{{- $encodedUsernamePassword := printf "%s:%s" $username $password }}
+{{- $encodedUsernamePassword := printf "%s:%s" $username $password | b64enc }}
 {{- $internalRegPullAddr := printf "localhost:%d" (int .Values.global.registryNodePort) }}
 {{- $internalRegPushAddr := printf "%s.%s.svc.cluster.local:%d" (include  "registry-fullname" . ) .Release.Namespace ( int .Values.global.registryServicePort) }}
 
