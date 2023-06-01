@@ -113,3 +113,9 @@ ci-test-eventing-deprovision-skr:
 telemetry:
 	npm install
 	npm run test-telemetry
+
+.PHONY: ci-keb-endpoints
+ci-skr:
+	npm install
+	npm run test-keb-endpoints
+	
