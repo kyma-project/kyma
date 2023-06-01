@@ -5,7 +5,7 @@ title: Set an external Docker registry
 By default, you install Kyma with Serverless that uses the internal Docker registry running on a cluster. This tutorial shows how to override this default setup with an external Docker registry from one of these cloud providers:
 
 - [Docker Hub](https://hub.docker.com/)
-- [Google Container Registry (GCR)](https://cloud.google.com/container-registry)
+- [Google Artifact Registry (GAR)](https://cloud.google.com/artifact-registry)
 - [Azure Container Registry (ACR)](https://azure.microsoft.com/en-us/services/container-registry/)
 
 >**CAUTION:** Function images are not cached in the Docker Hub. The reason is that this registry is not compatible with the caching logic defined in [Kaniko](https://cloud.google.com/cloud-build/docs/kaniko-cache) that Serverless uses for building images.
@@ -22,8 +22,8 @@ By default, you install Kyma with Serverless that uses the internal Docker regis
 
   </details>
   <details>
-  <summary label="gcr">
-  GCR
+  <summary label="gar">
+  GAR
   </summary>
 
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
@@ -73,11 +73,11 @@ By default, you install Kyma with Serverless that uses the internal Docker regis
 
   </details>
   <details>
-  <summary label="gcr">
-  GCR
+  <summary label="gar">
+  GAR
   </summary>
 
-To use GCR, create a Google service account that has a private key and the **Storage Admin** role permissions. Follow these steps:
+To use GAR, create a Google service account that has a private key and the **Storage Admin** role permissions. Follow these steps:
 
 1. Run the `export {VARIABLE}={value}` command to set up these environment variables, where:
 
@@ -96,7 +96,7 @@ To use GCR, create a Google service account that has a private key and the **Sto
     export PROJECT=test-project-012345
     export SECRET_FILE=my-private-key-path
     export ROLE=roles/storage.admin
-    export SERVER_ADDRESS=gcr.io
+    export SERVER_ADDRESS=gar.io
     ```
 
 2. When you communicate with Google Cloud for the first time, set the context for your Google Cloud project. Run this command:
@@ -226,8 +226,8 @@ EOF
 
   </details>
   <details>
-  <summary label="gcr">
-  GCR
+  <summary label="gar">
+  GAR
   </summary>
 
 ```bash
