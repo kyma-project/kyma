@@ -4,7 +4,7 @@ title: Enable and disable a Kyma module
 
 ## Overview
 
-Your cluster comes with the Kyma custom resource (CR) already installed. It collects all metadata about the cluster, such as enabled modules, their statuses, or synchronization, using Lifecycle Manager. Lifecycle Manager uses `moduletemplate.yaml` to enable or disable modules on your cluster. 
+Your cluster comes with the Kyma custom resource (CR) already installed. It collects all metadata about the cluster, such as enabled modules, their statuses, or synchronization. `moduletemplate.yaml` contains the ModuleTemplate CR used to enable or disable modules on your cluster. 
 
 ## Enable a module
 
