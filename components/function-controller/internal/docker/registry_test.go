@@ -71,10 +71,10 @@ func Test_registryCfgCredentials_MarshalJSON(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			r := &registryCfgCredentials{
-				username:        tt.args.username,
-				password:        tt.args.password,
-				registryAddress: tt.args.serverAddress,
-				provideEncoder:  tt.args.provideEncoder,
+				username:       tt.args.username,
+				password:       tt.args.password,
+				serverAddress:  tt.args.serverAddress,
+				provideEncoder: tt.args.provideEncoder,
 			}
 			got, err := r.MarshalJSON()
 			if (err != nil) != tt.wantErr {
@@ -102,8 +102,8 @@ func TestNewRegistryCfgMarshaller(t *testing.T) {
 			name: "err missing username",
 			args: args{
 				data: map[string][]byte{
-					keyPassword:        []byte("-"),
-					keyRegistryAddress: []byte("-"),
+					keyPassword:      []byte("-"),
+					keyServerAddress: []byte("-"),
 				},
 			},
 			wantErr: true,
@@ -112,8 +112,8 @@ func TestNewRegistryCfgMarshaller(t *testing.T) {
 			name: "err missing password",
 			args: args{
 				data: map[string][]byte{
-					keyUsername:        []byte("-"),
-					keyRegistryAddress: []byte("-"),
+					keyUsername:      []byte("-"),
+					keyServerAddress: []byte("-"),
 				},
 			},
 			wantErr: true,
@@ -132,9 +132,9 @@ func TestNewRegistryCfgMarshaller(t *testing.T) {
 			name: "OK",
 			args: args{
 				data: map[string][]byte{
-					keyUsername:        []byte("-"),
-					keyPassword:        []byte("-"),
-					keyRegistryAddress: []byte("-"),
+					keyUsername:      []byte("-"),
+					keyPassword:      []byte("-"),
+					keyServerAddress: []byte("-"),
 				},
 			},
 			wantErr: false,

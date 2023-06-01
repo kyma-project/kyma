@@ -9,19 +9,19 @@ import (
 )
 
 const (
-	keyUsername        = "username"
-	keyPassword        = "password"
-	keyRegistryAddress = "registryAddress"
+	keyUsername      = "username"
+	keyPassword      = "password"
+	keyServerAddress = "serverAddress"
 )
 
 var (
 	errUsernameNotFound      = errors.New("username field not found")
 	errPasswordNotFound      = errors.New("password field not found")
-	errServerAddressNotFound = errors.New("registryAddress field not found")
+	errServerAddressNotFound = errors.New("serverAddress field not found")
 )
 
 type registryCfgCredentials struct {
-	username, password, registryAddress []byte
+	username, password, serverAddress []byte
 	provideEncoder
 }
 
@@ -60,7 +60,7 @@ func (r *registryCfgCredentials) MarshalJSON() ([]byte, error) {
 	}
 	config := map[string]interface{}{
 		"auths": map[string]interface{}{
-			string(r.registryAddress): createAuthMap(userAndPassword),
+			string(r.serverAddress): createAuthMap(userAndPassword),
 		},
 	}
 
@@ -84,7 +84,7 @@ func NewRegistryCfgMarshaler(data map[string][]byte) (json.Marshaler, error) {
 		return nil, errPasswordNotFound
 	}
 
-	result.registryAddress, found = data[keyRegistryAddress]
+	result.serverAddress, found = data[keyServerAddress]
 	if !found {
 		return nil, errServerAddressNotFound
 	}
