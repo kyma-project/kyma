@@ -99,7 +99,7 @@ values:
   function:
     replicas:
       minValue: "1"
-      defaultPreset: "S"
+      defaultPreset: "L"
       presets: |-
         {
           "S": {
@@ -122,7 +122,7 @@ values:
     resources:
       minRequestCpu: "10m"
       minRequestMemory: "16Mi"
-      defaultPreset: "XS"
+      defaultPreset: "L"
       presets: |-
         {
           "XS": {
@@ -162,7 +162,7 @@ values:
     resources:
       minRequestCpu: "200m"
       minRequestMemory: "200Mi"
-      defaultPreset: "normal"
+      defaultPreset: "fast"
       presets: |-
         {
           "local-dev": {
