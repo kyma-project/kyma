@@ -14,27 +14,27 @@ Your cluster comes with the Kyma custom resource (CR) already installed. It coll
   Kyma CLI
   </summary>
 
-Check which modules are available on your cluster. Run: 
+1. Check which modules are available on your cluster. Run: 
    ```bash
    kyma alpha list module
    ```
 
-You should get a result similar to this example:
+   You should get a result similar to this example:
 
    ```bash
    operator.kyma-project.io/module-name    Domain Name (FQDN)         Channel     Version                      Template                     State
         cluster-ip                   kyma-project.io/cluster-ip        fast       v0.0.24    kyma-system/moduletemplate-cluster-ip-fast   <no value>
    ```
 
-Enable a module on your cluster in the release channel of your choice. Run: 
+2. Enable a module on your cluster in the release channel of your choice. Run: 
 
    ```bash
    kyma alpha enable module {MODULE_NAME} --channel {CHANNEL_NAME} --wait
    ```
 
-You should see the following message:
+   You should see the following message:
 
-```bash
+   ```bash
    - Successfully connected to cluster
    - Modules patched!
    ```
