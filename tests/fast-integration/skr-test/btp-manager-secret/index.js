@@ -50,6 +50,8 @@ function btpManagerSecretTest() {
       changeSecretData(modifiedSecret);
       console.log(`Applying edited Secret`);
       await k8sApply([modifiedSecret], ns);
+      console.log(`Waiting ${reconciliationTimeout} ms until edited Secret is created`);
+      await waitForSecret(secretName, ns, reconciliationTimeout);
       let actualSecret = await getSecret(secretName, ns);
       console.log(`Waiting for the reconciliation for ${reconciliationTimeout} ms`);
       await waitForK8sObject(
