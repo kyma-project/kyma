@@ -23,11 +23,6 @@ ci-skr:
 	npm install
 	npm run test-skr
 
-.PHONY: ci-msz
-ci-msz:
-	npm install
-	npm run test-msz
-
 .PHONY: ci-skr-own-cluster
 ci-skr-own-cluster:
 	npm install
