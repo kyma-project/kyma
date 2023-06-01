@@ -1253,7 +1253,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		_, err := reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		assertSuccessfulFunctionBuild(t, resourceClient, reconciler, request, fnLabels, false)
-		assertSuccessfulFunctionDeployment(t, resourceClient, reconciler, request, fnLabels, "registry.kyma.local", false)
+		assertSuccessfulFunctionDeployment(t, resourceClient, reconciler, request, fnLabels, "localhost:32132", false)
 
 		t.Log("updating deployment.spec.template.metadata.annotations, e.g. by using kubectl rollout restart command")
 		deployments := &appsv1.DeploymentList{}

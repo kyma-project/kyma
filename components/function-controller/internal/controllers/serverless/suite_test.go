@@ -77,6 +77,7 @@ func initializeServerlessResources(g *gomega.GomegaWithT, client resource.Client
 			Namespace: testNamespace,
 		},
 		StringData: map[string]string{
+			keyIsInternal:       "true",
 			keyRegistryPullAddr: "localhost:32132",
 			keyRegistryPushAddr: "registry.kyma.local",
 		},
