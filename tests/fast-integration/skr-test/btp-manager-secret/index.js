@@ -1,7 +1,6 @@
 const os = require('os');
 const {expect} = require('chai');
 const {
-    initializeK8sClient,
     getSecret,
     getSecretData,
     k8sDelete,
@@ -15,53 +14,41 @@ const secretName = 'sap-btp-manager';
 const ns = 'kyma-system';
 const expectedBtpOperatorCreds = BTPOperatorCreds.dummy();
 
-let suiteTimeout = 1000 * 60 * 5;
 let reconciliationTimeout = 1000 * 70;
-let expectedSecret, modifiedSecret;
+let secretFromProvisioning, modifiedSecret;
 
 function btpManagerSecretTest() {
     describe('BTP Manager Secret Test', function () {
-        this.timeout(suiteTimeout);
-        before('REMOVE LATER: Initialize kubeconfig', async function(){
-            await initializeK8sClient({kubeconfigPath: `${os.homedir()}/k3d_kubeconfig`});
-        });
         // Check if BTP Manager Secret with BTP Operator credentials is created properly
         it('should check if Secret exists and contains the expected data keys', async function() {
-            expectedSecret = await getSecret(secretName, ns);
-            checkSecretDataKeys(expectedSecret)
-            console.log(expectedSecret)
-            modifiedSecret = JSON.parse(JSON.stringify(expectedSecret))
+            secretFromProvisioning = await getSecret(secretName, ns);
+            checkSecretDataKeys(secretFromProvisioning)
+            modifiedSecret = JSON.parse(JSON.stringify(secretFromProvisioning))
         });
         // Check if the Secret contains expected values
         it('should check if Secret data values match expected values', async function() {
             const actualSecretData = await getSecretData(secretName, ns);
-            console.log(actualSecretData)
-            expect(actualSecretData.clientid).to.equal('test_clientid');
-            expect(actualSecretData.clientsecret).to.equal('test_clientsecret');
-            expect(actualSecretData.sm_url).to.equal('test_sm_url');
-            expect(actualSecretData.tokenurl).to.equal('test_tokenurl');
+            checkSecretDataValues(actualSecretData);
         });
         // Check if the Secret is properly reconciled after deletion
         it('should check if Secret is reconciled after deletion', async function() {
             console.log(`Deleting the "sap-btp-manager" Secret`);
-            await k8sDelete([expectedSecret], ns);
+            await k8sDelete([secretFromProvisioning], ns);
             console.log(`Waiting for the reconciliation for ${reconciliationTimeout} ms`);
             await waitForSecret(secretName, ns, reconciliationTimeout);
             console.log(`Secret has been re-created. Checking Secret's data`);
             const actualSecret = await getSecret(secretName, ns);
             checkSecretDataKeys(actualSecret);
             const actualSecretData = await getSecretData(secretName, ns);
-            expect(actualSecretData.clientid).to.equal('test_clientid');
-            expect(actualSecretData.clientsecret).to.equal('test_clientsecret');
-            expect(actualSecretData.sm_url).to.equal('test_sm_url');
-            expect(actualSecretData.tokenurl).to.equal('test_tokenurl');
+            checkSecretDataValues(actualSecretData);
             console.log(`Secret has been properly reconciled`)
         });
         // Check if the Secret is properly reconciled after being edited
         it('should check if Secret is reconciled after being edited', async function() {
+            console.log(`Changing data in the "sap-btp-manager" Secret`);
             prepareSecretForApply(modifiedSecret)
             changeSecretData(modifiedSecret)
-            console.log(`Changing data in the "sap-btp-manager" Secret`);
+            console.log(`Applying edited Secret`);
             await k8sApply([modifiedSecret], ns)
             let actualSecret = await getSecret(secretName, ns);
             console.log(`Waiting for the reconciliation for ${reconciliationTimeout} ms`);
@@ -77,11 +64,11 @@ function btpManagerSecretTest() {
                 reconciliationTimeout,
                 `Waiting for ${secretName} Secret reconciliation timeout (${reconciliationTimeout} ms)`,
             );
-            console.log(`Secret has been reconciled`);
+            console.log(`Secret has been reconciled. Checking Secret's data`);
             actualSecret = await getSecret(secretName, ns);
             checkSecretDataKeys(actualSecret);
             const actualSecretData = await getSecretData(secretName, ns);
-            checkSecretDataValues(actualSecret);
+            checkSecretDataValues(actualSecretData);
             console.log(`Secret is correct`)
         });
     });
