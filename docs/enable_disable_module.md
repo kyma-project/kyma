@@ -8,10 +8,6 @@ Your cluster comes with the Kyma custom resource (CR) already installed. It coll
 
 ## Enable a module
 
-> **NOTE:** To quickly enable a module, go to your **Cluster Details** view and select **Add Module**. Then, choose the channel of your choice and click **Add** to choose and upload your module.
-
-> **TIP:** You can also configure your Kyma CR to enable a module manually. For more details, see [Kyma CR](https://github.com/kyma-project/lifecycle-manager/blob/main/docs/technical-reference/api/kyma-cr.md).
-
 <div tabs name="Enable a module" group="enable-disable-module">
   <details>
   <summary label="cli">
@@ -49,6 +45,8 @@ You should see the following message:
 Kyma Dashboard
 </summary>
 
+> **NOTE:** To quickly enable a module using Kyma Dashboard, go to your **Cluster Details** view and select **Add Module**. Then, select the channel of your choice and click **Add** to choose and upload your module.
+
 Follow these steps to enable a Kyma module in Kyma Dashboard:
 1. Go to the `kyma-system` Namespace.
 2. In the **Kyma** section, Choose the **Kyma** resource.
@@ -61,6 +59,8 @@ Follow these steps to enable a Kyma module in Kyma Dashboard:
 This process may take a while, depending on the number of modules. The operation was successful if the module Status changed to `READY`.
 </details>
 </div>
+
+> **TIP:** You can also configure the Kyma CR to enable a module manually. For more details, see [Kyma CR](https://github.com/kyma-project/lifecycle-manager/blob/main/docs/technical-reference/api/kyma-cr.md).
 
 ## Disable a module
 
