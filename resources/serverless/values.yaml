@@ -81,16 +81,16 @@ global:
       directory: "prod"
     function_controller:
       name: "function-controller"
-      version: "PR-17260"
-      directory: "dev"
+      version: "v20230602-ec54dc09"
+      directory: "prod"
     function_webhook:
       name: "function-webhook"
-      version: "PR-17260"
-      directory: "dev"
+      version: "v20230602-ec54dc09"
+      directory: "prod"
     function_build_init:
       name: "function-build-init"
-      version: "PR-17260"
-      directory: "dev"
+      version: "v20230602-ec54dc09"
+      directory: "prod"
     function_registry_gc:
       name: "function-registry-gc"
       version: "v20230509-142454e6"
