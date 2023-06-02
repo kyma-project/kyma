@@ -151,12 +151,13 @@ func setupTestEnvironment(t *testing.T) *TestEnvironment {
 
 // createCloudEvent build a cloud event.
 func createCloudEvent(t *testing.T) *event.Event {
+	jsType := fmt.Sprintf("%s.%s", testingutils.StreamName, testingutils.CloudEventTypeWithPrefix)
 	builder := testingutils.NewCloudEventBuilder(
-		testingutils.WithCloudEventType(testingutils.CloudEventTypeWithPrefix),
+		testingutils.WithCloudEventType(jsType),
 	)
 	payload, _ := builder.BuildStructured()
 	newEvent := cloudevents.NewEvent()
-	newEvent.SetType(testingutils.CloudEventTypeWithPrefix)
+	newEvent.SetType(jsType)
 	err := json.Unmarshal([]byte(payload), &newEvent)
 	assert.NoError(t, err)
 
@@ -264,9 +265,7 @@ func TestSender_getJsSubjectToPublish(t *testing.T) {
 			subject: "sap.kyma.custom.noapp.order.created.v1",
 			want:    "kyma.sap.kyma.custom.noapp.order.created.v1",
 			fields: fields{
-				opts: &options.Options{
-					Env: options.Env{EnableNewCRDVersion: true},
-				},
+				opts: &options.Options{},
 			},
 		},
 		{
@@ -274,9 +273,7 @@ func TestSender_getJsSubjectToPublish(t *testing.T) {
 			subject: "kyma.noapp.order.created.v1",
 			want:    "kyma.noapp.order.created.v1",
 			fields: fields{
-				opts: &options.Options{
-					Env: options.Env{EnableNewCRDVersion: true},
-				},
+				opts: &options.Options{},
 			},
 		},
 	}

@@ -3,12 +3,15 @@ package serverless
 import (
 	"context"
 	"fmt"
+	"regexp"
+	"strings"
 	"time"
 
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	apilabels "k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
@@ -21,11 +24,11 @@ var backoffLimitExceeded = func(reason string) bool {
 	return reason == "BackoffLimitExceeded"
 }
 
-// build state function that will check if a job responsible for building function image succeeded or failed;
+// build state function that will check if a job responsible for building function fnImage succeeded or failed;
 // if a job is not running start one
 func buildStateFnCheckImageJob(expectedJob batchv1.Job) stateFn {
 	return func(ctx context.Context, r *reconciler, s *systemState) (stateFn, error) {
-		labels := s.internalFunctionLabels()
+		labels := internalFunctionLabels(s.instance)
 
 		err := r.client.ListByLabel(ctx, s.instance.GetNamespace(), labels, &s.jobs)
 		if err != nil {
@@ -35,7 +38,7 @@ func buildStateFnCheckImageJob(expectedJob batchv1.Job) stateFn {
 		jobLen := len(s.jobs.Items)
 
 		if jobLen == 0 {
-			return buildStateFnInlineCreateJob(expectedJob), nil
+			return buildStateFnRunJob(expectedJob), nil
 		}
 
 		jobFailed := s.jobFailed(backoffLimitExceeded)
@@ -65,7 +68,16 @@ func buildStateFnCheckImageJob(expectedJob batchv1.Job) stateFn {
 			return buildStatusUpdateStateFnWithCondition(condition), nil
 		}
 
-		s.image = s.buildImageAddress(r.cfg.docker.PullAddress)
+		s.fnImage = s.buildImageAddress(r.cfg.docker.PullAddress)
+
+		diffRuntimeImage, err := functionRuntimeChanged(ctx, r, s)
+		if err != nil {
+			return nil, errors.Wrap(err, "while checking runtime image change")
+		}
+
+		if diffRuntimeImage {
+			return stateFnInlineDeleteJobs, nil
+		}
 
 		jobChanged := s.fnJobChanged(expectedJob)
 		if !jobChanged {
@@ -86,7 +98,25 @@ func buildStateFnCheckImageJob(expectedJob batchv1.Job) stateFn {
 	}
 }
 
-func buildStateFnInlineCreateJob(expectedJob batchv1.Job) stateFn {
+func functionRuntimeChanged(ctx context.Context, r *reconciler, s *systemState) (bool, error) {
+	functionRuntimeImage := s.instance.Status.RuntimeImage
+	if functionRuntimeImage == "" {
+		return false, nil
+	}
+	if s.instance.Spec.RuntimeImageOverride != "" {
+		result := functionRuntimeImage == s.instance.Spec.RuntimeImageOverride
+		return !result, nil
+	}
+
+	latestRuntimeImage, err := getRuntimeImageFromConfigMap(ctx, r, s)
+	if err != nil {
+		return false, errors.Wrap(err, "while fetching runtime image from config map")
+	}
+	result := latestRuntimeImage == functionRuntimeImage
+	return !result, nil
+}
+
+func buildStateFnRunJob(expectedJob batchv1.Job) stateFn {
 	return func(ctx context.Context, r *reconciler, s *systemState) (stateFn, error) {
 		// validate if the max number of running jobs
 		// didn't exceed max simultaneous jobs number
@@ -111,6 +141,11 @@ func buildStateFnInlineCreateJob(expectedJob batchv1.Job) stateFn {
 			return nil, errors.Wrap(err, "while creating job")
 		}
 
+		runtimeImage, err := getRuntimeImageFromConfigMap(ctx, r, s)
+		if err != nil {
+			return nil, errors.Wrap(err, "while extracting runtime fn-image from config map")
+		}
+
 		condition := serverlessv1alpha2.Condition{
 			Type:               serverlessv1alpha2.ConditionBuildReady,
 			Status:             corev1.ConditionUnknown,
@@ -119,14 +154,32 @@ func buildStateFnInlineCreateJob(expectedJob batchv1.Job) stateFn {
 			Message:            fmt.Sprintf("Job %s created", expectedJob.GetName()),
 		}
 
+		s.instance.Status.RuntimeImage = runtimeImage
 		return buildStatusUpdateStateFnWithCondition(condition), nil
 	}
+}
+
+func getRuntimeImageFromConfigMap(ctx context.Context, r *reconciler, s *systemState) (string, error) {
+	instance := &corev1.ConfigMap{}
+	dockerfileConfigMapName := fmt.Sprintf("dockerfile-%s", s.instance.Status.Runtime)
+	err := r.client.Get(ctx, types.NamespacedName{Namespace: s.instance.Namespace, Name: dockerfileConfigMapName}, instance)
+	if err != nil {
+		return "", errors.Wrap(err, "while extracting correct config map for given runtime")
+	}
+	baseImage := instance.Data["Dockerfile"]
+	re := regexp.MustCompile(`base_image=.*`)
+	matchedLines := re.FindStringSubmatch(baseImage)
+	if len(matchedLines) == 0 {
+		return "", errors.Errorf("could not find the base image from %s", dockerfileConfigMapName)
+	}
+	runtimeImage := strings.TrimPrefix(matchedLines[0], "base_image=")
+	return runtimeImage, err
 }
 
 func stateFnInlineDeleteJobs(ctx context.Context, r *reconciler, s *systemState) (stateFn, error) {
 	r.log.Info("delete Jobs")
 
-	labels := s.internalFunctionLabels()
+	labels := internalFunctionLabels(s.instance)
 	selector := apilabels.SelectorFromSet(labels)
 
 	err := r.client.DeleteAllBySelector(ctx, &batchv1.Job{}, s.instance.GetNamespace(), selector)

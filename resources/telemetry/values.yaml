@@ -4,20 +4,19 @@ global:
   images:
     directory_size_exporter:
       name: "directory-size-exporter"
-      version: "v20230308-ff6cf204"
+      version: "v20230503-c10c571f"
       directory: "prod"
     telemetry_operator:
       name: "telemetry-manager"
-      version: "v20230414-e04962ae"
+      version: "v20230526-081fd485"
       directory: "prod"
     telemetry_otel_collector:
       name: "otel-collector"
-      version: "0.74.0-acb36420"
+      version: "0.77.0-8115210c"
       directory: "prod/tpi"
     fluent_bit:
       name: "fluent-bit"
-      version: "2.0.11-f89ab2e3"
+      version: "2.1.2-95ba1b02"
       directory: "prod/tpi"
-  highPriorityClassName: "kyma-system-priority"
   log:
     level: "info"

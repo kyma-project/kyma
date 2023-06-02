@@ -1,5 +1,5 @@
-# image builder base on golang:1.20.2-alpine3.17
-FROM eu.gcr.io/kyma-project/external/golang@sha256:4e6bc0eafc261b6c8ba9bd9999b6698e8cefbe21e6d90fbc10c34599d75dc608 as builder
+# image builder base on golang:1.20.3-alpine3.17
+FROM europe-docker.pkg.dev/kyma-project/prod/external/golang@sha256:48c87cd759e3342fcbc4241533337141e7d8457ec33ab9660abe0a4346c30b60 as builder
 
 ENV BASE_APP_DIR=/workspace/go/src/github.com/kyma-project/kyma/components/function-controller \
     CGO_ENABLED=1 \
@@ -19,8 +19,8 @@ RUN go build -ldflags "-s -w" -a -o registry-gc cmd/registry-gc/main.go \
     && mkdir /app \
     && mv ./registry-gc /app/registry-gc
 
-# result container base on alpine:3.17.2
-FROM eu.gcr.io/kyma-project/external/alpine@sha256:e2e16842c9b54d985bf1ef9242a313f36b856181f188de21313820e177002501
+# result container base on alpine:3.17.3
+FROM europe-docker.pkg.dev/kyma-project/prod/external/alpine@sha256:b6ca290b6b4cdcca5b3db3ffa338ee0285c11744b4a6abaa9627746ee3291d8d
 
 LABEL source = git@github.com:kyma-project/kyma.git
 

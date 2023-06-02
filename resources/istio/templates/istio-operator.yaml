@@ -5,7 +5,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   name: default-operator
 spec:
-  hub: {{ .Values.global.images.istio_pilot.containerRegistryPath }}/{{ .Values.global.images.istio_pilot.directory}}
+  hub: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.images.istio_pilot.directory}}
   tag: {{ .Values.global.images.istio_pilot.version }}
   profile: default
   components:
@@ -61,6 +61,7 @@ spec:
         serviceAnnotations:
           dns.gardener.cloud/class: garden
           dns.gardener.cloud/dnsnames: "*.{{ .Values.global.domainName }}"
+          service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "4000"
           reconciler.kyma-project.io/managed-by-reconciler-disclaimer: |
             DO NOT EDIT - This resource is managed by Kyma.
             Any modifications are discarded and the resource is reverted to the original state.

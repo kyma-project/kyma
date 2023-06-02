@@ -23,7 +23,6 @@ import (
 	"github.com/avast/retry-go"
 	"github.com/cucumber/godog"
 	"github.com/cucumber/godog/colors"
-	"github.com/kyma-project/kyma/common/ingressgateway"
 	"github.com/kyma-project/kyma/tests/components/api-gateway/gateway-tests/pkg/client"
 	"github.com/kyma-project/kyma/tests/components/api-gateway/gateway-tests/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/components/api-gateway/gateway-tests/pkg/jwt"
@@ -46,27 +45,25 @@ import (
 )
 
 const (
-	testIDLength                   = 8
-	OauthClientSecretLength        = 8
-	OauthClientIDLength            = 8
-	manifestsDirectory             = "manifests/"
-	testingAppFile                 = "testing-app.yaml"
-	twoServicesDeploymentFile      = "two-services-deployment.yaml"
-	globalCommonResourcesFile      = "global-commons.yaml"
-	hydraClientFile                = "hydra-client.yaml"
-	noAccessStrategyApiruleFile    = "no_access_strategy.yaml"
-	twoServicesApiruleFile         = "two-services.yaml"
-	oauthStrategyApiruleFile       = "oauth-strategy.yaml"
-	jwtAndOauthStrategyApiruleFile = "jwt-oauth-strategy.yaml"
-	jwtAndOauthOnePathApiruleFile  = "jwt-oauth-one-path-strategy.yaml"
-	resourceSeparator              = "---"
-	defaultHeaderName              = "Authorization"
-	customDomainEnv                = "TEST_CUSTOM_DOMAIN"
-	exportResultVar                = "EXPORT_RESULT"
-	junitFileName                  = "junit-report.xml"
-	cucumberFileName               = "cucumber-report.json"
-	anyToken                       = "any"
-	authorizationHeaderName        = "Authorization"
+	testIDLength                     = 8
+	OauthClientSecretLength          = 8
+	OauthClientIDLength              = 8
+	manifestsDirectory               = "manifests/"
+	testingAppFile                   = "testing-app.yaml"
+	twoServicesDeploymentFile        = "two-services-deployment.yaml"
+	globalCommonResourcesFile        = "global-commons.yaml"
+	hydraClientFile                  = "hydra-client.yaml"
+	noAccessStrategyApiruleFile      = "no_access_strategy.yaml"
+	twoServicesApiruleFile           = "two-services.yaml"
+	oauthStrategyApiruleFile         = "oauth-strategy.yaml"
+	oauth2SecuredEndpointApiruleFile = "oauth2-secured-endpoint.yaml"
+	jwtAndOauthStrategyApiruleFile   = "jwt-oauth-strategy.yaml"
+	jwtAndOauthOnePathApiruleFile    = "jwt-oauth-one-path-strategy.yaml"
+	resourceSeparator                = "---"
+	exportResultVar                  = "EXPORT_RESULT"
+	cucumberFileName                 = "cucumber-report.json"
+	anyToken                         = "any"
+	authorizationHeaderName          = "Authorization"
 )
 
 var (
@@ -99,7 +96,6 @@ type Config struct {
 	GatewayName      string        `envconfig:"TEST_GATEWAY_NAME,default=kyma-gateway"`
 	GatewayNamespace string        `envconfig:"TEST_GATEWAY_NAMESPACE,default=kyma-system"`
 	ClientTimeout    time.Duration `envconfig:"TEST_CLIENT_TIMEOUT,default=10s"` // Don't forget the unit!
-	IsMinikubeEnv    bool          `envconfig:"TEST_MINIKUBE_ENV,default=false"`
 	TestConcurency   int           `envconfig:"TEST_CONCURENCY,default=1"`
 }
 
@@ -127,22 +123,11 @@ func InitTestSuite() {
 		log.Fatalf("Unable to setup config: %v", err)
 	}
 
-	if conf.IsMinikubeEnv {
-		var err error
-		log.Printf("Using dedicated ingress client")
-		httpClient, err = ingressgateway.FromEnv().Client()
-		if err != nil {
-			log.Fatalf("Unable to initialize ingress gateway client: %v", err)
-		}
-	} else {
-		log.Printf("Fallback to default http client")
-		httpClient = &http.Client{
-			Transport: &http.Transport{
-				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-			},
-			Timeout: conf.ClientTimeout,
-		}
-		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	httpClient = &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
+		Timeout: conf.ClientTimeout,
 	}
 
 	commonRetryOpts := []retry.Option{
@@ -275,7 +260,8 @@ func getOAUTHToken(oauth2Cfg clientcredentials.Config) (*oauth2.Token, error) {
 	var tokenOAUTH oauth2.Token
 	err := retry.Do(
 		func() error {
-			token, err := oauth2Cfg.Token(context.Background())
+			ctx := context.WithValue(context.Background(), oauth2.HTTPClient, httpClient)
+			token, err := oauth2Cfg.Token(ctx)
 			if err != nil {
 				return fmt.Errorf("error during Token retrival: %+v", err)
 			}

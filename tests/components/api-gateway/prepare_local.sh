@@ -56,6 +56,9 @@ spec:
               value: "3000"
           ports:
           - containerPort: 3000
+          resources:
+            limits:
+              memory: 200Mi
 ---
 kind: Service
 apiVersion: v1

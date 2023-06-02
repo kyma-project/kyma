@@ -5,9 +5,9 @@ import (
 )
 
 type FunctionConfig struct {
-	PublisherProxyAddress                       string        `envconfig:"default=http://eventing-publisher-proxy.kyma-system.svc.cluster.local/publish"`
-	JaegerServiceEndpoint                       string        `envconfig:"default=http://tracing-jaeger-collector.kyma-system.svc.cluster.local:14268/api/traces"`
-	TraceCollectorEndpoint                      string        `envconfig:"default=http://tracing-jaeger-collector.kyma-system.svc.cluster.local:4318/v1/traces"`
+	PublisherProxyAddress                       string        `envconfig:"optional"`
+	JaegerServiceEndpoint                       string        `envconfig:"optional"`
+	TraceCollectorEndpoint                      string        `envconfig:"optional"`
 	ImageRegistryDefaultDockerConfigSecretName  string        `envconfig:"default=serverless-registry-config-default"`
 	ImageRegistryExternalDockerConfigSecretName string        `envconfig:"default=serverless-registry-config"`
 	PackageRegistryConfigSecretName             string        `envconfig:"default=serverless-package-registry-config"`
@@ -22,7 +22,7 @@ type FunctionConfig struct {
 type BuildConfig struct {
 	ExecutorArgs        []string `envconfig:"default=--insecure;--skip-tls-verify;--skip-unused-stages;--log-format=text;--cache=true"`
 	ExecutorImage       string   `envconfig:"default=gcr.io/kaniko-project/executor:v0.22.0"`
-	RepoFetcherImage    string   `envconfig:"default=eu.gcr.io/kyma-project/function-build-init:305bee60"`
+	RepoFetcherImage    string   `envconfig:"default=europe-docker.pkg.dev/kyma-project/prod/function-build-init:v20230426-37b02524"`
 	MaxSimultaneousJobs int      `envconfig:"default=5"`
 }
 

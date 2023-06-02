@@ -59,18 +59,14 @@ func ConvertRuntimeObjToSubscription(sObj runtime.Object) (*eventingv1alpha2.Sub
 }
 
 // GenerateSubscriptionInfFactory generates DynamicSharedInformerFactory for Subscription.
-func GenerateSubscriptionInfFactory(k8sConfig *rest.Config, enableNewCrd bool) dynamicinformer.DynamicSharedInformerFactory {
+func GenerateSubscriptionInfFactory(k8sConfig *rest.Config) dynamicinformer.DynamicSharedInformerFactory {
 	subDynamicClient := dynamic.NewForConfigOrDie(k8sConfig)
 	dFilteredSharedInfFactory := dynamicinformer.NewFilteredDynamicSharedInformerFactory(subDynamicClient,
 		informers.DefaultResyncPeriod,
 		v1.NamespaceAll,
 		nil,
 	)
-	if enableNewCrd {
-		dFilteredSharedInfFactory.ForResource(GVR)
-	} else {
-		dFilteredSharedInfFactory.ForResource(GVRV1alpha1)
-	}
+	dFilteredSharedInfFactory.ForResource(GVR)
 	return dFilteredSharedInfFactory
 }
 

@@ -18,7 +18,3 @@ data:
         editable: true
         jsonData:
           maxLines: 1000
-{{- if .Values.global.tracing.enabled }}
-          derivedFields:
-            {{- tpl .Values.grafana.datasource.derivedFields . | nindent 10}}
-{{- end }}

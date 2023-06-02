@@ -40,7 +40,6 @@
 /installation/resources/crds/ory @kyma-project/goat
 /installation/resources/crds/serverless @kyma-project/Otters
 /installation/resources/crds/telemetry @kyma-project/observability
-/installation/resources/crds/tracing @kyma-project/observability
 
 /resources/api-gateway @kyma-project/goat
 /resources/application-connector @kyma-project/Framefrog
@@ -57,7 +56,9 @@
 /resources/ory @kyma-project/goat
 /resources/serverless @kyma-project/Otters
 /resources/telemetry @kyma-project/observability
-/resources/tracing @kyma-project/observability
+
+/resources/keda-manager @kyma-project/Otters
+/resources/btp-manager @kyma-project/gopher
 
 # Fast Integration Tests
 /tests/fast-integration/test @kyma-project/observability @kyma-project/eventing @kyma-project/Otters @kyma-project/goat
@@ -98,3 +99,5 @@ VERSION @kyma-project/prow
 
 # Managed Modules
 /modules @pbochynski @kyma-project/Jellyfish
+
+/hack/table-gen @k15r @kyma-project/kyma-steering-committee

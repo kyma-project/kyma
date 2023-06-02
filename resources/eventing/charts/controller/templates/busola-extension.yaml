@@ -1,5 +1,3 @@
-# TODO Remove this file after the v1alpha2 Subscription will be enabled per default and this ConfigMap will be moved to kyma-dashboard repository.
-{{ if .Values.enableNewCRDVersion }}
 kind: ConfigMap
 apiVersion: v1
 metadata:
@@ -21,7 +19,7 @@ data:
     description:  {{`'{{[Subscription](https://kyma-project.io/docs/kyma/latest/05-technical-reference/00-custom-resources/evnt-01-subscription#documentation-content)}} is used to subscribe to events.'`}}
     urlPath: subscriptions
   details: |-
-    header: 
+    header:
       - name: status.conditions.status
         source: 'status.ready = false ? "error" : "ready"'
         widget: Badge
@@ -37,7 +35,7 @@ data:
           name: '$substringBefore($substringAfter(spec.sink, "http://"), ".")'
           namespace: $root.metadata.namespace
           kind: "'Service'"
-    body: 
+    body:
       - source: status.conditions
         widget: Table
         name: status.conditions
@@ -118,7 +116,7 @@ data:
   presets: |-
     - name: Default Type Matching
       default: true
-      value: 
+      value:
         spec:
           typeMatching: standard
   translations: |-
@@ -148,4 +146,3 @@ data:
       status.conditions.type: Type
       status.conditions.message: Message
       status.type: Type
-  {{- end }}

@@ -1,0 +1,27 @@
+{{- $username := include "tplValue" ( dict "value" .Values.dockerRegistry.username "context" . ) -}}
+{{- $password := include "tplValue" ( dict "value" .Values.dockerRegistry.password "context" . ) -}}
+{{- $encodedUsernamePassword := printf "%s:%s" $username $password | b64enc }}
+{{- $internalRegPullAddr := printf "localhost:%d" (int .Values.global.registryNodePort) }}
+{{- $internalRegPushAddr := printf "%s.%s.svc.cluster.local:%d" (include  "registry-fullname" . ) .Release.Namespace ( int .Values.global.registryServicePort) }}
+
+apiVersion: v1
+kind: Secret
+type: kubernetes.io/dockerconfigjson
+metadata:
+  name: {{ template "fullname" . }}-registry-config-default
+  namespace: {{ .Release.Namespace }}
+  labels:
+    serverless.kyma-project.io/config: credentials
+data:
+  username: "{{ $username | b64enc }}"
+  password: "{{ $password | b64enc }}"
+  isInternal: "{{ .Values.dockerRegistry.enableInternal | toString | b64enc }}"
+  {{- if .Values.dockerRegistry.enableInternal }}
+  pullRegAddr: {{ $internalRegPullAddr | b64enc }}
+  pushRegAddr: "{{ $internalRegPushAddr | b64enc }}"
+  .dockerconfigjson: "{{- (printf "{\"auths\": {\"%s\": {\"auth\": \"%s\"}, \"%s\": {\"auth\": \"%s\"}}}" $internalRegPushAddr $encodedUsernamePassword $internalRegPullAddr $encodedUsernamePassword) | b64enc }}"
+  {{- else }}
+  serverAddress: "{{ .Values.dockerRegistry.serverAddress | b64enc }}"
+  registryAddress: "{{ .Values.dockerRegistry.registryAddress | b64enc }}"
+  .dockerconfigjson: "{{- (printf "{\"auths\": {\"%s\": {\"auth\": \"%s\"}}}" .Values.dockerRegistry.serverAddress $encodedUsernamePassword) | b64enc }}"
+  {{- end }}

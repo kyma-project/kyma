@@ -557,12 +557,12 @@ function waitForDeployment(name, namespace = 'default', timeout = 90_000) {
 
 function waitForService(name, namespace = 'default', timeout = 90_000) {
   return waitForK8sObject(
-      `/apis/apps/v1/namespaces/${namespace}/service`,
+      `/api/v1/namespaces/${namespace}/services`,
       {},
       (_type, _apiObj, watchObj) => {
         return (
           watchObj.object.metadata.name === name &&
-          watchObj.object.clusterIP
+          watchObj.object.spec.clusterIP
         );
       },
       timeout,
@@ -1843,6 +1843,31 @@ function waitForDeploymentWithLabel(
   );
 }
 
+function waitForTracePipeline(name, timeout = 90_000) {
+  return waitForK8sObject(
+      `/apis/telemetry.kyma-project.io/v1alpha1/tracepipelines`,
+      {},
+      (_type, _apiObj, watchObj) => {
+        return (
+          watchObj.object.metadata.name === name &&
+        watchObj.object.status.conditions &&
+        watchObj.object.status.conditions.some(
+            (c) => c.type === 'Running',
+        )
+        );
+      },
+      timeout,
+      `Waiting for Tracepipeline ${name} timeout (${timeout} ms)`,
+  );
+}
+
+async function deployJaeger(jaegerObj) {
+  await k8sApply(jaegerObj, 'kyma-system').catch(console.error);
+  await waitForDeployment('tracing-jaeger', 'kyma-system');
+  await waitForTracePipeline('jaeger');
+  await sleep(20 * 1000); // give istio some time to propagate the changes to the proxies
+}
+
 module.exports = {
   initializeK8sClient,
   getShootNameFromK8sServerUrl,
@@ -1938,4 +1963,6 @@ module.exports = {
   waitForPodWithLabelAndCondition,
   waitForDeploymentWithLabel,
   getSubscription,
+  deployJaeger,
+  waitForTracePipeline,
 };

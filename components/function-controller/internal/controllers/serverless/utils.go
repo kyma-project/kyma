@@ -92,7 +92,7 @@ func equalJobs(existing batchv1.Job, expected batchv1.Job) bool {
 	existingArgs := existing.Spec.Template.Spec.Containers[0].Args
 	expectedArgs := expected.Spec.Template.Spec.Containers[0].Args
 
-	// Compare destination argument as it contains image tag
+	// Compare destination argument as it contains fnImage tag
 	existingDst := getArg(existingArgs, destinationArg)
 	expectedDst := getArg(expectedArgs, destinationArg)
 
@@ -206,7 +206,8 @@ func equalDeployments(existing appsv1.Deployment, expected appsv1.Deployment) bo
 		mapsEqual(existing.Spec.Template.GetLabels(), expected.Spec.Template.GetLabels()) &&
 		equalResources(existing.Spec.Template.Spec.Containers[0].Resources, expected.Spec.Template.Spec.Containers[0].Resources) &&
 		equalInt32Pointer(existing.Spec.Replicas, expected.Spec.Replicas) &&
-		equalSecretMounts(existing.Spec.Template.Spec, expected.Spec.Template.Spec)
+		equalSecretMounts(existing.Spec.Template.Spec, expected.Spec.Template.Spec) &&
+		mapsEqual(existing.Spec.Template.GetAnnotations(), expected.Spec.Template.GetAnnotations())
 }
 
 func equalServices(existing corev1.Service, expected corev1.Service) bool {

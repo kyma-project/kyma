@@ -33,6 +33,9 @@ securityContext:
     drop:
       - ALL
 
+highPriorityClassName: "telemetry-priority-class-high"
+priorityClassName: "telemetry-priority-class"
+
 livenessProbe:
   httpGet:
     path: /healthz

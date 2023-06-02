@@ -17,7 +17,7 @@ import (
 
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
-	eventingtestingv2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
+	eventingtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
 func TestConvertKymaSubToEventMeshSub(t *testing.T) {
@@ -44,7 +44,7 @@ func TestConvertKymaSubToEventMeshSub(t *testing.T) {
 	defaultNameMapper := NewBEBSubscriptionNameMapper("my-shoot", 50)
 
 	bebSubEvents := types.Events{types.Event{
-		Source: eventingtestingv2.EventMeshNamespace,
+		Source: eventingtesting.EventMeshNamespace,
 		Type:   "prefix.testapp1023.order.created.v1",
 	}}
 
@@ -57,7 +57,7 @@ func TestConvertKymaSubToEventMeshSub(t *testing.T) {
 		return result
 	}
 
-	defaultNamespace := eventingtestingv2.EventMeshNamespace
+	defaultNamespace := eventingtesting.EventMeshNamespace
 	svcName := "foo-svc"
 	host := "foo-host"
 	scheme := "https"
@@ -73,16 +73,16 @@ func TestConvertKymaSubToEventMeshSub(t *testing.T) {
 	}{
 		{
 			name: "subscription with protocol settings and webhook auth",
-			givenSubscription: eventingtestingv2.NewSubscription("name", "namespace",
-				eventingtestingv2.WithDefaultSource(),
-				eventingtestingv2.WithOrderCreatedFilter(),
-				eventingtestingv2.WithValidSink("ns", svcName),
-				eventingtestingv2.WithWebhookAuthForBEB(),
+			givenSubscription: eventingtesting.NewSubscription("name", "namespace",
+				eventingtesting.WithDefaultSource(),
+				eventingtesting.WithOrderCreatedFilter(),
+				eventingtesting.WithValidSink("ns", svcName),
+				eventingtesting.WithWebhookAuthForBEB(),
 			),
 			givenAPIRuleFunc: func(subscription *eventingv1alpha2.Subscription) *apigatewayv1beta1.APIRule {
-				return eventingtestingv2.NewAPIRule(subscription,
-					eventingtestingv2.WithPath(),
-					eventingtestingv2.WithService(svcName, host),
+				return eventingtesting.NewAPIRule(subscription,
+					eventingtesting.WithPath(),
+					eventingtesting.WithService(svcName, host),
 				)
 			},
 			wantEventMeshSubscriptionFunc: func(subscription *eventingv1alpha2.Subscription) *types.Subscription {
@@ -94,7 +94,7 @@ func TestConvertKymaSubToEventMeshSub(t *testing.T) {
 					TokenURL:     subscription.Spec.Config[eventingv1alpha2.WebhookAuthTokenURL],
 				}
 
-				return eventingtestingv2.NewBEBSubscription(
+				return eventingtesting.NewBEBSubscription(
 					defaultNameMapper.MapSubscriptionName(subscription.Name, subscription.Namespace),
 					subscription.Spec.Config[eventingv1alpha2.ProtocolSettingsContentMode],
 					expectedWebhookURL,
@@ -105,18 +105,18 @@ func TestConvertKymaSubToEventMeshSub(t *testing.T) {
 		},
 		{
 			name: "subscription with default setting",
-			givenSubscription: eventingtestingv2.NewSubscription("name", "namespace",
-				eventingtestingv2.WithOrderCreatedFilter(),
-				eventingtestingv2.WithValidSink("ns", svcName),
+			givenSubscription: eventingtesting.NewSubscription("name", "namespace",
+				eventingtesting.WithOrderCreatedFilter(),
+				eventingtesting.WithValidSink("ns", svcName),
 			),
 			givenAPIRuleFunc: func(subscription *eventingv1alpha2.Subscription) *apigatewayv1beta1.APIRule {
-				return eventingtestingv2.NewAPIRule(subscription,
-					eventingtestingv2.WithPath(),
-					eventingtestingv2.WithService(svcName, host),
+				return eventingtesting.NewAPIRule(subscription,
+					eventingtesting.WithPath(),
+					eventingtesting.WithService(svcName, host),
 				)
 			},
 			wantEventMeshSubscriptionFunc: func(subscription *eventingv1alpha2.Subscription) *types.Subscription {
-				return eventingtestingv2.NewBEBSubscription(
+				return eventingtesting.NewBEBSubscription(
 					defaultNameMapper.MapSubscriptionName(subscription.Name, subscription.Namespace),
 					*defaultProtocolSettings.ContentMode,
 					expectedWebhookURL,
@@ -307,8 +307,8 @@ func TestGetCleanedEventMeshSubscription(t *testing.T) {
 
 		Events: []types.Event{
 			{
-				Source: eventingtestingv2.EventSource,
-				Type:   eventingtestingv2.OrderCreatedEventTypeNotClean,
+				Source: eventingtesting.EventSource,
+				Type:   eventingtesting.OrderCreatedEventTypeNotClean,
 			},
 		},
 	}
@@ -325,8 +325,8 @@ func TestGetCleanedEventMeshSubscription(t *testing.T) {
 
 	g.Expect(eventMeshSubscription.Events).To(BeEquivalentTo(types.Events{
 		{
-			Source: eventingtestingv2.EventSource,
-			Type:   eventingtestingv2.OrderCreatedEventTypeNotClean,
+			Source: eventingtesting.EventSource,
+			Type:   eventingtesting.OrderCreatedEventTypeNotClean,
 		},
 	}))
 	g.Expect(eventMeshSubscription)
@@ -575,22 +575,22 @@ func Test_getEventMeshEvents(t *testing.T) {
 	t.Run("with standard type matching", func(t *testing.T) {
 		// given
 		eventTypeInfos := getTypeInfos([]string{
-			eventingtestingv2.OrderCreatedV1Event,
-			eventingtestingv2.OrderCreatedV2Event,
+			eventingtesting.OrderCreatedV1Event,
+			eventingtesting.OrderCreatedV2Event,
 		})
 
-		defaultNamespace := eventingtestingv2.EventMeshNamespace
+		defaultNamespace := eventingtesting.EventMeshNamespace
 		typeMatching := eventingv1alpha2.TypeMatchingStandard
 		source := "custom-namespace"
 
 		expectedEventMeshEvents := types.Events{
 			types.Event{
 				Source: defaultNamespace,
-				Type:   eventingtestingv2.OrderCreatedV1Event,
+				Type:   eventingtesting.OrderCreatedV1Event,
 			},
 			types.Event{
 				Source: defaultNamespace,
-				Type:   eventingtestingv2.OrderCreatedV2Event,
+				Type:   eventingtesting.OrderCreatedV2Event,
 			},
 		}
 
@@ -604,22 +604,22 @@ func Test_getEventMeshEvents(t *testing.T) {
 	t.Run("with exact type matching with empty source", func(t *testing.T) {
 		// given
 		eventTypeInfos := getTypeInfos([]string{
-			eventingtestingv2.OrderCreatedV1Event,
-			eventingtestingv2.OrderCreatedV2Event,
+			eventingtesting.OrderCreatedV1Event,
+			eventingtesting.OrderCreatedV2Event,
 		})
 
-		defaultNamespace := eventingtestingv2.EventMeshNamespace
+		defaultNamespace := eventingtesting.EventMeshNamespace
 		typeMatching := eventingv1alpha2.TypeMatchingExact
 		source := ""
 
 		expectedEventMeshEvents := types.Events{
 			types.Event{
 				Source: defaultNamespace,
-				Type:   eventingtestingv2.OrderCreatedV1Event,
+				Type:   eventingtesting.OrderCreatedV1Event,
 			},
 			types.Event{
 				Source: defaultNamespace,
-				Type:   eventingtestingv2.OrderCreatedV2Event,
+				Type:   eventingtesting.OrderCreatedV2Event,
 			},
 		}
 
@@ -633,22 +633,22 @@ func Test_getEventMeshEvents(t *testing.T) {
 	t.Run("with exact type matching with non-empty source", func(t *testing.T) {
 		// given
 		eventTypeInfos := getTypeInfos([]string{
-			eventingtestingv2.OrderCreatedV1Event,
-			eventingtestingv2.OrderCreatedV2Event,
+			eventingtesting.OrderCreatedV1Event,
+			eventingtesting.OrderCreatedV2Event,
 		})
 
-		defaultNamespace := eventingtestingv2.EventMeshNamespace
+		defaultNamespace := eventingtesting.EventMeshNamespace
 		typeMatching := eventingv1alpha2.TypeMatchingExact
 		source := "custom-namespace"
 
 		expectedEventMeshEvents := types.Events{
 			types.Event{
 				Source: source,
-				Type:   eventingtestingv2.OrderCreatedV1Event,
+				Type:   eventingtesting.OrderCreatedV1Event,
 			},
 			types.Event{
 				Source: source,
-				Type:   eventingtestingv2.OrderCreatedV2Event,
+				Type:   eventingtesting.OrderCreatedV2Event,
 			},
 		}
 

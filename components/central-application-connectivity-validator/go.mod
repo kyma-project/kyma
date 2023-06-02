@@ -8,11 +8,11 @@ require (
 	github.com/kyma-project/kyma/components/central-application-gateway v0.0.0-20230130154909-4c81ab2cee61
 	github.com/oklog/run v1.1.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
-	github.com/stretchr/testify v1.8.2
+	github.com/stretchr/testify v1.8.3
 	github.com/vrischmann/envconfig v1.3.0
 	go.uber.org/zap v1.24.0
-	k8s.io/apimachinery v0.27.0
-	k8s.io/client-go v0.26.3
+	k8s.io/apimachinery v0.27.2
+	k8s.io/client-go v0.26.5
 	sigs.k8s.io/controller-runtime v0.14.6
 )
 
@@ -57,7 +57,7 @@ require (
 	golang.org/x/net v0.8.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20220223155221-ee480838109b // indirect
 	golang.org/x/sys v0.6.0 // indirect
-	golang.org/x/term v0.5.0 // indirect
+	golang.org/x/term v0.6.0 // indirect
 	golang.org/x/text v0.8.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.2.0 // indirect
@@ -66,11 +66,11 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/api v0.26.3 // indirect
+	k8s.io/api v0.26.5 // indirect
 	k8s.io/apiextensions-apiserver v0.26.1 // indirect
 	k8s.io/component-base v0.26.1 // indirect
 	k8s.io/klog/v2 v2.90.1 // indirect
-	k8s.io/kube-openapi v0.0.0-20230308215209-15aac26d736a // indirect
+	k8s.io/kube-openapi v0.0.0-20230501164219-8b0f38b5fd1f // indirect
 	k8s.io/utils v0.0.0-20230209194617-a36077c30491 // indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
@@ -82,7 +82,7 @@ replace (
 	github.com/docker/docker => github.com/docker/docker v20.10.8+incompatible
 	github.com/opencontainers/runc => github.com/opencontainers/runc v1.0.0-rc92
 	golang.org/x/crypto => golang.org/x/crypto v0.4.0
-	golang.org/x/net => golang.org/x/net v0.4.0
+	golang.org/x/net => golang.org/x/net v0.8.0
 	golang.org/x/sys => golang.org/x/sys v0.3.0
 	golang.org/x/text => golang.org/x/text v0.5.0
 )

@@ -21,7 +21,6 @@ func Test_GetConfig(t *testing.T) {
 		"BEB_API_URL":                "BEB_API_URL",
 		"BEB_NAMESPACE":              "/test",
 		"WEBHOOK_ACTIVATION_TIMEOUT": "60s",
-		"ENABLE_NEW_CRD_VERSION":     "true",
 	}
 
 	for k, v := range envs {
@@ -42,5 +41,4 @@ func Test_GetConfig(t *testing.T) {
 	webhookActivationTimeout, err := time.ParseDuration(envs["WEBHOOK_ACTIVATION_TIMEOUT"])
 	g.Expect(err).ShouldNot(HaveOccurred())
 	g.Expect(config.WebhookActivationTimeout).To(Equal(webhookActivationTimeout))
-	g.Expect(config.EnableNewCRDVersion).To(Equal(true))
 }

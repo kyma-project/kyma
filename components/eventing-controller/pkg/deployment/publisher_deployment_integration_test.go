@@ -5,7 +5,6 @@ import (
 	"strings"
 	"testing"
 
-	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
 	appsv1 "k8s.io/api/apps/v1"
 
 	"github.com/stretchr/testify/assert"
@@ -50,11 +49,11 @@ func TestNewDeployment(t *testing.T) {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			var deployment *appsv1.Deployment
-			var natsConfig backendnats.Config
+			var natsConfig env.NATSConfig
 
 			switch tc.givenBackend {
 			case "NATS":
-				natsConfig = backendnats.Config{
+				natsConfig = env.NATSConfig{
 					JSStreamName: "kyma",
 					URL:          natsURL,
 				}
@@ -100,7 +99,7 @@ func Test_GetNATSEnvVars(t *testing.T) {
 	testCases := []struct {
 		name            string
 		givenEnvs       map[string]string
-		givenNATSConfig backendnats.Config
+		givenNATSConfig env.NATSConfig
 		wantEnvs        map[string]string
 	}{
 		{
@@ -110,7 +109,7 @@ func Test_GetNATSEnvVars(t *testing.T) {
 				"PUBLISHER_REQUESTS_MEMORY": "128Mi",
 				"PUBLISHER_REQUEST_TIMEOUT": "10s",
 			},
-			givenNATSConfig: backendnats.Config{},
+			givenNATSConfig: env.NATSConfig{},
 			wantEnvs: map[string]string{
 				"REQUEST_TIMEOUT": "10s",
 				"JS_STREAM_NAME":  "",
@@ -121,7 +120,7 @@ func Test_GetNATSEnvVars(t *testing.T) {
 			givenEnvs: map[string]string{
 				"PUBLISHER_REQUEST_TIMEOUT": "10s",
 			},
-			givenNATSConfig: backendnats.Config{
+			givenNATSConfig: env.NATSConfig{
 				JSStreamName: "kyma",
 			},
 			wantEnvs: map[string]string{

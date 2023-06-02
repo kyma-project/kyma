@@ -29,7 +29,7 @@ type SystemState interface{}
 // TODO extract interface
 type systemState struct {
 	instance    serverlessv1alpha2.Function
-	image       string               // TODO make sure this is needed
+	fnImage     string               // TODO make sure this is needed
 	configMaps  corev1.ConfigMapList // TODO create issue to refactor this (only 1 config map should be here)
 	deployments appsv1.DeploymentList
 	jobs        batchv1.JobList
@@ -39,18 +39,18 @@ type systemState struct {
 
 var _ SystemState = systemState{}
 
-func (s *systemState) internalFunctionLabels() map[string]string {
+func internalFunctionLabels(fn serverlessv1alpha2.Function) map[string]string {
 	intLabels := make(map[string]string, 3)
 
-	intLabels[serverlessv1alpha2.FunctionNameLabel] = s.instance.Name
+	intLabels[serverlessv1alpha2.FunctionNameLabel] = fn.Name
 	intLabels[serverlessv1alpha2.FunctionManagedByLabel] = serverlessv1alpha2.FunctionControllerValue
-	intLabels[serverlessv1alpha2.FunctionUUIDLabel] = string(s.instance.GetUID())
+	intLabels[serverlessv1alpha2.FunctionUUIDLabel] = string(fn.GetUID())
 
 	return intLabels
 }
 
 func (s *systemState) functionLabels() map[string]string {
-	internalLabels := s.internalFunctionLabels()
+	internalLabels := internalFunctionLabels(s.instance)
 	functionLabels := s.instance.GetLabels()
 
 	return labels.Merge(functionLabels, internalLabels)
@@ -116,7 +116,7 @@ func (s *systemState) fnJobChanged(expectedJob batchv1.Job) bool {
 	)
 
 	if len(s.deployments.Items) == 1 &&
-		s.deployments.Items[0].Spec.Template.Spec.Containers[0].Image == s.image &&
+		s.deployments.Items[0].Spec.Template.Spec.Containers[0].Image == s.fnImage &&
 		conditionStatus != corev1.ConditionUnknown &&
 		len(s.jobs.Items) > 0 &&
 		mapsEqual(expectedJob.GetLabels(), s.jobs.Items[0].GetLabels()) {
@@ -126,7 +126,7 @@ func (s *systemState) fnJobChanged(expectedJob batchv1.Job) bool {
 
 	return len(s.jobs.Items) != 1 ||
 		len(s.jobs.Items[0].Spec.Template.Spec.Containers) != 1 ||
-		// Compare image argument
+		// Compare fnImage argument
 		!equalJobs(s.jobs.Items[0], expectedJob) ||
 		!mapsEqual(expectedJob.GetLabels(), s.jobs.Items[0].GetLabels()) ||
 		conditionStatus == corev1.ConditionUnknown ||
@@ -331,7 +331,7 @@ func (s *systemState) deploymentSelectorLabels() map[string]string {
 		map[string]string{
 			serverlessv1alpha2.FunctionResourceLabel: serverlessv1alpha2.FunctionResourceLabelDeploymentValue,
 		},
-		s.internalFunctionLabels(),
+		internalFunctionLabels(s.instance),
 	)
 }
 
@@ -367,7 +367,25 @@ func (s *systemState) podAnnotations() map[string]string {
 	if s.instance.Spec.Annotations != nil {
 		result = labels.Merge(s.instance.Spec.Annotations, result)
 	}
+	result = labels.Merge(s.specialDeploymentAnnotations(), result)
 	return result
+}
+
+func (s *systemState) specialDeploymentAnnotations() map[string]string {
+	deployments := s.deployments.Items
+	if len(deployments) == 0 {
+		return map[string]string{}
+	}
+	deploymentAnnotations := deployments[0].Spec.Template.GetAnnotations()
+	specialDeploymentAnnotations := map[string]string{}
+	for _, k := range []string{
+		"kubectl.kubernetes.io/restartedAt",
+	} {
+		if v, found := deploymentAnnotations[k]; found {
+			specialDeploymentAnnotations[k] = v
+		}
+	}
+	return specialDeploymentAnnotations
 }
 
 type buildDeploymentArgs struct {
@@ -538,12 +556,6 @@ func (s *systemState) getReplicas(defaultVal int32) *int32 {
 		return s.instance.Spec.Replicas
 	}
 	return &defaultVal
-}
-
-// TODO do not negate
-func (s *systemState) deploymentEqual(d appsv1.Deployment) bool {
-	return len(s.deployments.Items) == 1 &&
-		equalDeployments(s.deployments.Items[0], d)
 }
 
 func (s *systemState) hasDeploymentConditionTrueStatusWithReason(conditionType appsv1.DeploymentConditionType, reason string) bool {
