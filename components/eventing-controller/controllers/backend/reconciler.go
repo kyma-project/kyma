@@ -77,6 +77,12 @@ var (
 	errInvalidObject  = errors.New("invalid object")
 )
 
+type oauth2Credentials struct {
+	clientID     []byte
+	clientSecret []byte
+	tokenURL     []byte
+}
+
 type Reconciler struct {
 	client.Client
 	ctx               context.Context
@@ -91,10 +97,8 @@ type Reconciler struct {
 	envCfg            env.Config
 	// backendType is the type of the backend which the reconciler detects at runtime
 	backendType eventingv1alpha1.BackendType
-	// The OAuth2 credentials that are passed to the BEB subscription reconciler
-	oauth2ClientID     []byte
-	oauth2ClientSecret []byte
-	oauth2TokenURL     []byte
+	// credentials that are passed to the BEB subscription reconciler
+	credentials oauth2Credentials
 }
 
 func NewReconciler(ctx context.Context, natsSubMgr subscriptionmanager.Manager, natsConfig env.NATSConfig,
@@ -277,7 +281,7 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 	}
 
 	// Start the BEB subscription controller
-	if startErr := r.startBEBController(r.oauth2ClientID, r.oauth2ClientSecret, r.oauth2TokenURL); startErr != nil {
+	if startErr := r.startBEBController(); startErr != nil {
 		backendStatus.SetSubscriptionControllerReadyCondition(false,
 			eventingv1alpha1.ConditionReasonControllerStartFailed, startErr.Error())
 		if updateErr := r.syncBackendStatus(ctx, backendStatus, nil); updateErr != nil {
@@ -312,16 +316,16 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 func (r *Reconciler) syncOauth2ClientIDAndSecret(ctx context.Context, backendStatus *eventingv1alpha1.EventingBackendStatus) error {
 	// Following could return an error when the OAuth2Client CR is created for the first time, until the secret is
 	// created by the Hydra operator. However, eventually it should get resolved in the next few reconciliation loops.
-	oauth2ClientID, oauth2ClientSecret, tokenURL, err := r.getOAuth2ClientCredentials(ctx)
+	credentials, err := r.getOAuth2ClientCredentials(ctx)
 	if err != nil && !k8serrors.IsNotFound(err) {
 		return err
 	}
 	oauth2CredentialsNotFound := k8serrors.IsNotFound(err)
 	oauth2CredentialsChanged := false
 	if err == nil {
-		oauth2CredentialsChanged = !bytes.Equal(r.oauth2ClientID, oauth2ClientID) ||
-			!bytes.Equal(r.oauth2ClientSecret, oauth2ClientSecret) ||
-			!bytes.Equal(r.oauth2TokenURL, tokenURL)
+		oauth2CredentialsChanged = !bytes.Equal(r.credentials.clientID, credentials.clientID) ||
+			!bytes.Equal(r.credentials.clientSecret, credentials.clientSecret) ||
+			!bytes.Equal(r.credentials.tokenURL, credentials.tokenURL)
 	}
 	if oauth2CredentialsNotFound || oauth2CredentialsChanged {
 		// Stop the controller and mark all subs as not ready
@@ -341,9 +345,9 @@ func (r *Reconciler) syncOauth2ClientIDAndSecret(ctx context.Context, backendSta
 		return err
 	}
 	if oauth2CredentialsChanged {
-		r.oauth2ClientID = oauth2ClientID
-		r.oauth2ClientSecret = oauth2ClientSecret
-		r.oauth2TokenURL = tokenURL
+		r.credentials.clientID = credentials.clientID
+		r.credentials.clientSecret = credentials.clientSecret
+		r.credentials.tokenURL = credentials.tokenURL
 	}
 	return nil
 }
@@ -725,7 +729,7 @@ func (r *Reconciler) getOAuth2SecretNamespacedName() types.NamespacedName {
 	return types.NamespacedName{Name: name, Namespace: namespace}
 }
 
-func (r *Reconciler) getOAuth2ClientCredentials(ctx context.Context) ([]byte, []byte, []byte, error) {
+func (r *Reconciler) getOAuth2ClientCredentials(ctx context.Context) (*oauth2Credentials, error) {
 	var err error
 	var exists bool
 	var clientID, clientSecret, tokenURL []byte
@@ -738,29 +742,29 @@ func (r *Reconciler) getOAuth2ClientCredentials(ctx context.Context) ([]byte, []
 	if getErr := r.Get(ctx, oauth2SecretNamespacedName, oauth2Secret); getErr != nil {
 		err = errors.Wrapf(getErr, "get secret failed namespace:%s name:%s",
 			oauth2SecretNamespacedName.Namespace, oauth2SecretNamespacedName.Name)
-		return clientID, clientSecret, tokenURL, err
+		return nil, err
 	}
 	if clientID, exists = oauth2Secret.Data[secretKeyClientID]; !exists {
 		err = errors.Errorf("key '%s' not found in secret %s",
 			secretKeyClientID, oauth2SecretNamespacedName.String())
-		return clientID, clientSecret, tokenURL, err
+		return nil, err
 	}
 	if clientSecret, exists = oauth2Secret.Data[secretKeyClientSecret]; !exists {
 		err = errors.Errorf("key '%s' not found in secret %s",
 			secretKeyClientSecret, oauth2SecretNamespacedName.String())
-		return clientID, clientSecret, tokenURL, err
+		return nil, err
 	}
 	if !featureflags.IsEventingWebhookAuthEnabled() {
 		tokenURL = []byte(r.envCfg.WebhookTokenEndpoint)
-		return clientID, clientSecret, tokenURL, err
+		return &oauth2Credentials{clientID: clientID, clientSecret: clientSecret, tokenURL: tokenURL}, nil
 	}
 	if tokenURL, exists = oauth2Secret.Data[secretKeyTokenURL]; !exists {
 		err = errors.Errorf("key '%s' not found in secret %s",
 			secretKeyTokenURL, oauth2SecretNamespacedName.String())
-		return clientID, clientSecret, tokenURL, err
+		return nil, err
 	}
 
-	return clientID, clientSecret, tokenURL, err
+	return &oauth2Credentials{clientID: clientID, clientSecret: clientSecret, tokenURL: tokenURL}, nil
 }
 
 func getDeploymentMapper() handler.EventHandler {
@@ -834,12 +838,12 @@ func (r *Reconciler) stopNATSController() error {
 	return nil
 }
 
-func (r *Reconciler) startBEBController(clientID, clientSecret, tokenURL []byte) error {
+func (r *Reconciler) startBEBController() error {
 	if !r.bebSubMgrStarted {
 		bebSubMgrParams := subscriptionmanager.Params{
-			subscriptionmanager.ParmaNameClientID:     clientID,
-			subscriptionmanager.ParmaNameClientSecret: clientSecret,
-			subscriptionmanager.ParmaNameTokenURL:     tokenURL,
+			subscriptionmanager.ParmaNameClientID:     r.credentials.clientID,
+			subscriptionmanager.ParmaNameClientSecret: r.credentials.clientSecret,
+			subscriptionmanager.ParmaNameTokenURL:     r.credentials.tokenURL,
 		}
 		if err := r.bebSubMgr.Start(r.cfg.DefaultSubscriptionConfig, bebSubMgrParams); err != nil {
 			return xerrors.Errorf("failed to start BEB subscription manager: %v", err)

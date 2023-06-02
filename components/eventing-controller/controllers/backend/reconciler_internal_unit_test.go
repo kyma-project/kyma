@@ -525,16 +525,16 @@ func Test_getOAuth2ClientCredentials(t *testing.T) {
 			}
 
 			// when
-			clientID, clientSecret, tokenURL, err := r.getOAuth2ClientCredentials(ctx)
+			credentials, err := r.getOAuth2ClientCredentials(ctx)
 
 			// then
 			if tc.wantError {
 				require.Error(t, err)
 				return
 			}
-			require.Equal(t, tc.wantClientID, clientID)
-			require.Equal(t, tc.wantClientSecret, clientSecret)
-			require.Equal(t, tc.wantTokenURL, tokenURL)
+			require.Equal(t, tc.wantClientID, credentials.clientID)
+			require.Equal(t, tc.wantClientSecret, credentials.clientSecret)
+			require.Equal(t, tc.wantTokenURL, credentials.tokenURL)
 		})
 	}
 }
