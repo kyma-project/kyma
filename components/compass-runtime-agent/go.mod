@@ -94,7 +94,6 @@ replace (
 	github.com/containerd/containerd => github.com/containerd/containerd v1.4.11
 	github.com/docker/distribution => github.com/docker/distribution v0.0.0-20191216044856-a8371794149d
 	github.com/docker/docker => github.com/docker/docker v20.10.8+incompatible
-	go.etcd.io/etcd/v3 => go.etcd.io/etcd/v3 v3.5.8
 	golang.org/x/crypto => golang.org/x/crypto v0.1.0
 	golang.org/x/net => golang.org/x/net v0.8.0
 	golang.org/x/text => golang.org/x/text v0.3.8
