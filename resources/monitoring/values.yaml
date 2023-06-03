@@ -127,7 +127,7 @@ global:
       sha: ""
     alertmanager:
       name: "alertmanager"
-      version: "v0.25.0-34ee9954"
+      version: "v0.25.0-66960dfb"
       directory: "prod/tpi"
       sha: ""
     prometheus:

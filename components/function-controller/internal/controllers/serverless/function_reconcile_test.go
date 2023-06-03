@@ -95,7 +95,7 @@ func TestFunctionReconciler_Reconcile_Scaling(t *testing.T) {
 
 		assertSuccessfulFunctionBuild(t, resourceClient, reconciler, request, fnLabels, false)
 
-		assertSuccessfulFunctionDeployment(t, resourceClient, reconciler, request, fnLabels, "registry.kyma.local", false)
+		assertSuccessfulFunctionDeployment(t, resourceClient, reconciler, request, fnLabels, "localhost:32132", false)
 		two := int32(2)
 		four := int32(4)
 
@@ -220,7 +220,7 @@ func TestFunctionReconciler_Reconcile_Scaling(t *testing.T) {
 
 		assertSuccessfulFunctionBuild(t, resourceClient, reconciler, request, fnLabels, false)
 
-		assertSuccessfulFunctionDeployment(t, resourceClient, reconciler, request, fnLabels, "registry.kyma.local", false)
+		assertSuccessfulFunctionDeployment(t, resourceClient, reconciler, request, fnLabels, "localhost:32132", false)
 
 		t.Log("update function")
 		function := &serverlessv1alpha2.Function{}
@@ -334,7 +334,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 
 		assertSuccessfulFunctionBuild(t, resourceClient, reconciler, request, fnLabels, false)
 
-		assertSuccessfulFunctionDeployment(t, resourceClient, reconciler, request, fnLabels, "registry.kyma.local", false)
+		assertSuccessfulFunctionDeployment(t, resourceClient, reconciler, request, fnLabels, "localhost:32132", false)
 
 		t.Log("should detect registry configuration change and rebuild function")
 		customDockerRegistryConfiguration := corev1.Secret{
@@ -385,7 +385,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 
 		assertSuccessfulFunctionBuild(t, resourceClient, reconciler, request, fnLabels, true)
 
-		assertSuccessfulFunctionDeployment(t, resourceClient, reconciler, request, fnLabels, "registry.kyma.local", true)
+		assertSuccessfulFunctionDeployment(t, resourceClient, reconciler, request, fnLabels, "localhost:32132", true)
 	})
 	t.Run("should set proper status on deployment fail", func(t *testing.T) {
 		//GIVEN
@@ -1253,7 +1253,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		_, err := reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		assertSuccessfulFunctionBuild(t, resourceClient, reconciler, request, fnLabels, false)
-		assertSuccessfulFunctionDeployment(t, resourceClient, reconciler, request, fnLabels, "registry.kyma.local", false)
+		assertSuccessfulFunctionDeployment(t, resourceClient, reconciler, request, fnLabels, "localhost:32132", false)
 
 		t.Log("updating deployment.spec.template.metadata.annotations, e.g. by using kubectl rollout restart command")
 		deployments := &appsv1.DeploymentList{}
