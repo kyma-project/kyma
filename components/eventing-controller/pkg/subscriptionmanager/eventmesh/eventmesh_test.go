@@ -32,26 +32,26 @@ const (
 	domain = "domain.com"
 )
 
-type bebSubMgrMock struct {
+type eventMeshSubMgrMock struct {
 	Client           dynamic.Interface
 	eventMeshBackend backendeventmesh.Backend
 }
 
-func (c *bebSubMgrMock) Init(_ manager.Manager) error {
+func (c *eventMeshSubMgrMock) Init(_ manager.Manager) error {
 	return nil
 }
 
-func (c *bebSubMgrMock) Start(_ env.DefaultSubscriptionConfig, _ subscriptionmanager.Params) error {
+func (c *eventMeshSubMgrMock) Start(_ env.DefaultSubscriptionConfig, _ subscriptionmanager.Params) error {
 	return nil
 }
 
-func (c *bebSubMgrMock) Stop(_ bool) error {
+func (c *eventMeshSubMgrMock) Stop(_ bool) error {
 	return nil
 }
 
 func Test_cleanupEventMesh(t *testing.T) {
 	// given
-	bebSubMgr := bebSubMgrMock{}
+	eventMeshSubMgr := eventMeshSubMgrMock{}
 	ctx := context.Background()
 
 	// create a Kyma subscription
@@ -98,24 +98,24 @@ func Test_cleanupEventMesh(t *testing.T) {
 	eventMeshHandler := backendeventmesh.NewEventMesh(credentials, nameMapper, defaultLogger)
 	err = eventMeshHandler.Initialize(envConf)
 	require.NoError(t, err)
-	bebSubMgr.eventMeshBackend = eventMeshHandler
+	eventMeshSubMgr.eventMeshBackend = eventMeshHandler
 
 	// create fake Dynamic clients
 	fakeClient, err := controllertesting.NewFakeSubscriptionClient(subscription)
 	require.NoError(t, err)
-	bebSubMgr.Client = fakeClient
+	eventMeshSubMgr.Client = fakeClient
 
 	// Create APIRule
 	unstructuredAPIRule, err := controllertesting.ToUnstructuredAPIRule(apiRule)
 	require.NoError(t, err)
-	unstructuredAPIRuleBeforeCleanup, err := bebSubMgr.Client.Resource(utils.APIRuleGroupVersionResource()).Namespace(
+	unstructuredAPIRuleBeforeCleanup, err := eventMeshSubMgr.Client.Resource(utils.APIRuleGroupVersionResource()).Namespace(
 		"test").Create(ctx, unstructuredAPIRule, metav1.CreateOptions{})
 	require.NoError(t, err)
 	require.NotNil(t, unstructuredAPIRuleBeforeCleanup)
 
 	// create an EventMesh subscription from Kyma subscription
 	eventMeshCleaner := cleaner.NewEventMeshCleaner(defaultLogger)
-	_, err = bebSubMgr.eventMeshBackend.SyncSubscription(subscription, eventMeshCleaner, apiRule)
+	_, err = eventMeshSubMgr.eventMeshBackend.SyncSubscription(subscription, eventMeshCleaner, apiRule)
 	require.NoError(t, err)
 
 	// check that the subscription exist in bebMock
@@ -127,20 +127,20 @@ func Test_cleanupEventMesh(t *testing.T) {
 	require.Equal(t, resp.StatusCode, http.StatusOK)
 
 	// check that the Kyma subscription exists
-	unstructuredSub, err := bebSubMgr.Client.Resource(controllertesting.SubscriptionGroupVersionResource()).Namespace(
+	unstructuredSub, err := eventMeshSubMgr.Client.Resource(controllertesting.SubscriptionGroupVersionResource()).Namespace(
 		"test").Get(ctx, subscription.Name, metav1.GetOptions{})
 	require.NoError(t, err)
 	_, err = controllertesting.ToSubscription(unstructuredSub)
 	require.NoError(t, err)
 
 	// check that the APIRule exists
-	unstructuredAPIRuleBeforeCleanup, err = bebSubMgr.Client.Resource(utils.APIRuleGroupVersionResource()).Namespace(
+	unstructuredAPIRuleBeforeCleanup, err = eventMeshSubMgr.Client.Resource(utils.APIRuleGroupVersionResource()).Namespace(
 		"test").Get(ctx, apiRule.Name, metav1.GetOptions{})
 	require.NoError(t, err)
 	require.NotNil(t, unstructuredAPIRuleBeforeCleanup)
 
 	// when
-	err = cleanupEventMesh(bebSubMgr.eventMeshBackend, bebSubMgr.Client, defaultLogger.WithContext())
+	err = cleanupEventMesh(eventMeshSubMgr.eventMeshBackend, eventMeshSubMgr.Client, defaultLogger.WithContext())
 	require.NoError(t, err)
 
 	// then
@@ -150,7 +150,7 @@ func Test_cleanupEventMesh(t *testing.T) {
 	require.Equal(t, resp.StatusCode, http.StatusNotFound)
 
 	// the Kyma subscription status should be empty
-	unstructuredSub, err = bebSubMgr.Client.Resource(controllertesting.SubscriptionGroupVersionResource()).Namespace(
+	unstructuredSub, err = eventMeshSubMgr.Client.Resource(controllertesting.SubscriptionGroupVersionResource()).Namespace(
 		"test").Get(ctx, subscription.Name, metav1.GetOptions{})
 	require.NoError(t, err)
 	gotSub, err := controllertesting.ToSubscription(unstructuredSub)
@@ -159,7 +159,7 @@ func Test_cleanupEventMesh(t *testing.T) {
 	require.Equal(t, expectedSubStatus, gotSub.Status)
 
 	// the associated APIRule should be deleted
-	unstructuredAPIRuleAfterCleanup, err := bebSubMgr.Client.Resource(utils.APIRuleGroupVersionResource()).Namespace(
+	unstructuredAPIRuleAfterCleanup, err := eventMeshSubMgr.Client.Resource(utils.APIRuleGroupVersionResource()).Namespace(
 		"test").Get(ctx, apiRule.Name, metav1.GetOptions{})
 	require.Error(t, err)
 	require.Nil(t, unstructuredAPIRuleAfterCleanup)
