@@ -113,7 +113,7 @@ func v1WithBEBStatusFields() eventingtesting.SubscriptionV1alpha1Opt {
 		s.Status.ExternalSink = "testlink.com"
 		s.Status.FailedActivation = "123156464672"
 		s.Status.APIRuleName = "APIRule"
-		s.Status.EmsSubscriptionStatus = &v1alpha1.EmsSubscriptionStatus{
+		s.Status.EmsSubscriptionStatus = &v1alpha1.EventMeshSubscriptionStatus{
 			SubscriptionStatus:       "not active",
 			SubscriptionStatusReason: "reason",
 			LastSuccessfulDelivery:   "",

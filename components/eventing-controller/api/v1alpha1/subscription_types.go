@@ -164,7 +164,7 @@ type SubscriptionSpec struct {
 	Config *SubscriptionConfig `json:"config,omitempty"`
 }
 
-type EmsSubscriptionStatus struct {
+type EventMeshSubscriptionStatus struct {
 	// Status of the Subscription as reported by EventMesh.
 	// +optional
 	SubscriptionStatus string `json:"subscriptionStatus,omitempty"`
@@ -220,7 +220,7 @@ type SubscriptionStatus struct {
 
 	// Defines the status of the Subscription in EventMesh.
 	// +optional
-	EmsSubscriptionStatus *EmsSubscriptionStatus `json:"emsSubscriptionStatus,omitempty"`
+	EmsSubscriptionStatus *EventMeshSubscriptionStatus `json:"emsSubscriptionStatus,omitempty"`
 
 	// Defines the configurations that have been applied to the eventing backend when creating this Subscription.
 	// +optional

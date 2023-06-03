@@ -279,7 +279,7 @@ func (src *Subscription) bebBackendStatusToV1(dst *v1alpha2.Subscription) {
 	src.Status.FailedActivation = dst.Status.Backend.FailedActivation
 	src.Status.APIRuleName = dst.Status.Backend.APIRuleName
 	if dst.Status.Backend.EventMeshSubscriptionStatus != nil {
-		src.Status.EmsSubscriptionStatus = &EmsSubscriptionStatus{
+		src.Status.EmsSubscriptionStatus = &EventMeshSubscriptionStatus{
 			SubscriptionStatus:       dst.Status.Backend.EventMeshSubscriptionStatus.Status,
 			SubscriptionStatusReason: dst.Status.Backend.EventMeshSubscriptionStatus.StatusReason,
 			LastSuccessfulDelivery:   dst.Status.Backend.EventMeshSubscriptionStatus.LastSuccessfulDelivery,
