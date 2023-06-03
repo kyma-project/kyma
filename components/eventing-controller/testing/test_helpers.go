@@ -35,7 +35,7 @@ const (
 	EventSourceUnclean       = "s>o>*u*r>c.e"
 	EventSourceClean         = "source"
 
-	EventMeshProtocl = "BEB"
+	EventMeshProtocol = "BEB"
 
 	EventMeshNamespaceNS        = "/default/ns"
 	EventMeshNamespace          = "/default/kyma/id"
@@ -132,7 +132,7 @@ func WithStatusCleanEventTypes(cleanEventTypes []string) SubscriptionV1alpha1Opt
 
 func WithV1alpha1ProtocolEventMesh() SubscriptionV1alpha1Opt {
 	return func(s *eventingv1alpha1.Subscription) {
-		s.Spec.Protocol = EventMeshProtocl
+		s.Spec.Protocol = EventMeshProtocol
 	}
 }
 
@@ -554,7 +554,7 @@ func WithEmsSubscriptionStatus(status string) SubscriptionOpt {
 func WithWebhookAuthForEventMesh() SubscriptionOpt {
 	return func(s *eventingv1alpha2.Subscription) {
 		s.Spec.Config = map[string]string{
-			eventingv1alpha2.Protocol:                        EventMeshProtocl,
+			eventingv1alpha2.Protocol:                        EventMeshProtocol,
 			eventingv1alpha2.ProtocolSettingsContentMode:     "BINARY",
 			eventingv1alpha2.ProtocolSettingsExemptHandshake: "true",
 			eventingv1alpha2.ProtocolSettingsQos:             "AT_LEAST_ONCE",
@@ -600,7 +600,7 @@ func WithProtocolEventMesh() SubscriptionOpt {
 		if s.Spec.Config == nil {
 			s.Spec.Config = map[string]string{}
 		}
-		s.Spec.Config[eventingv1alpha2.Protocol] = EventMeshProtocl
+		s.Spec.Config[eventingv1alpha2.Protocol] = EventMeshProtocol
 	}
 }
 
