@@ -10,7 +10,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/internal"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/ems"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/eventmesh"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/health"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
 )
@@ -21,7 +21,7 @@ var (
 	// additionalHeaders are the required headers by EMS for publish requests.
 	// Any alteration or removal of those headers might cause publish requests to fail.
 	additionalHeaders = http.Header{
-		"qos":    []string{string(ems.QosAtLeastOnce)},
+		"qos":    []string{string(eventmesh.QosAtLeastOnce)},
 		"Accept": []string{internal.ContentTypeApplicationJSON},
 	}
 )
