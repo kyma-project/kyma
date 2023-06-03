@@ -4,6 +4,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ template "docker-registry.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ template "docker-registry.name" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
@@ -63,8 +64,6 @@ spec:
           {{- toYaml . | nindent 12 }}
           {{- end }}
           command:
-          # TODO: after helm@3.5.0 is used in kyma-installer we may be able to remove that init container, as helm 3.5.0 uses sprig@3.2.0, which has `bcrypt` function
-          # might want to investigate
             - sh
             - -ec
             - |
