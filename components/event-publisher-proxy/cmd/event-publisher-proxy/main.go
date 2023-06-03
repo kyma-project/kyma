@@ -16,8 +16,8 @@ import (
 )
 
 const (
-	backendBEB  = "beb"
-	backendNATS = "nats"
+	backendEventMesh = "beb"
+	backendNATS      = "nats"
 )
 
 type Config struct {
@@ -62,7 +62,7 @@ func main() {
 	// Instantiate configured commander.
 	var c commander.Commander
 	switch cfg.Backend {
-	case backendBEB:
+	case backendEventMesh:
 		c = eventmesh.NewCommander(opts, metricsCollector, logger)
 	case backendNATS:
 		c = nats.NewCommander(opts, metricsCollector, logger)
