@@ -278,7 +278,7 @@ func (em *EventMesh) handleKymaSubStatusUpdate(eventMeshServerSub *types.Subscri
 	kymaSub.Status.Types = statusCleanEventTypes(typesInfo)
 
 	// Update status.backend.emsTypes
-	kymaSub.Status.Backend.EmsTypes = statusFinalEventTypes(typesInfo)
+	kymaSub.Status.Backend.EventMeshTypes = statusFinalEventTypes(typesInfo)
 
 	// Update hashes in status
 	if err := updateHashesInStatus(kymaSub, eventMeshSub, eventMeshServerSub); err != nil {

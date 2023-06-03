@@ -41,7 +41,7 @@ type Backend struct {
 
 	// List of mappings from event type to EventMesh compatible types. Used only with EventMesh as the backend.
 	// +optional
-	EmsTypes []EventMeshTypes `json:"emsTypes,omitempty"`
+	EventMeshTypes []EventMeshTypes `json:"emsTypes,omitempty"`
 }
 
 type EventMeshSubscriptionStatus struct {

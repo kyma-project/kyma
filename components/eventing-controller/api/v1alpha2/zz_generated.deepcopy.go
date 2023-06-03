@@ -22,8 +22,8 @@ func (in *Backend) DeepCopyInto(out *Backend) {
 		*out = make([]JetStreamTypes, len(*in))
 		copy(*out, *in)
 	}
-	if in.EmsTypes != nil {
-		in, out := &in.EmsTypes, &out.EmsTypes
+	if in.EventMeshTypes != nil {
+		in, out := &in.EventMeshTypes, &out.EventMeshTypes
 		*out = make([]EventMeshTypes, len(*in))
 		copy(*out, *in)
 	}

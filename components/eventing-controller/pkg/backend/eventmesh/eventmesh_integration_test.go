@@ -569,7 +569,7 @@ func Test_handleKymaSubStatusUpdate(t *testing.T) {
 			// then
 			require.Equal(t, isChanged, true)
 			require.Equal(t, tc.givenKymaSub.Status.Types, tc.wantEventTypes)
-			require.Equal(t, tc.givenKymaSub.Status.Backend.EmsTypes, tc.wantEventMeshTypes)
+			require.Equal(t, tc.givenKymaSub.Status.Backend.EventMeshTypes, tc.wantEventMeshTypes)
 			require.Equal(t, tc.givenKymaSub.Status.Backend.EventMeshSubscriptionStatus.StatusReason,
 				tc.givenEventMeshSub.SubscriptionStatusReason)
 		})
