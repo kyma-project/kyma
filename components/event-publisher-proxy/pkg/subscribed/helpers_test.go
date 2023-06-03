@@ -356,7 +356,7 @@ func WithOneBEBFilter(bebFilters *eventingv1alpha1.BEBFilters) {
 	evSource := "/default/foo.kyma/kt1"
 	evType := "foo.prefix.custom.foovarkes.order.created.v1"
 	bebFilters.Filters = []*eventingv1alpha1.BEBFilter{
-		NewBEBFilter(evSource, evType),
+		NewEventMeshFilter(evSource, evType),
 	}
 }
 
@@ -364,9 +364,9 @@ func WithMultipleBEBFiltersFromSameSource(bebFilters *eventingv1alpha1.BEBFilter
 	evSource := "/default/foo.kyma/kt1"
 	evType := "foo.prefix.custom.foovarkes.order.created.v1"
 	bebFilters.Filters = []*eventingv1alpha1.BEBFilter{
-		NewBEBFilter(evSource, evType),
-		NewBEBFilter(evSource, evType),
-		NewBEBFilter(evSource, evType),
+		NewEventMeshFilter(evSource, evType),
+		NewEventMeshFilter(evSource, evType),
+		NewEventMeshFilter(evSource, evType),
 	}
 }
 
@@ -377,10 +377,10 @@ func WithMultipleBEBFiltersFromDiffSource(bebFilters *eventingv1alpha1.BEBFilter
 	evSource4 := ""
 	evType := "foo.prefix.custom.foovarkes.order.created.v1"
 	bebFilters.Filters = []*eventingv1alpha1.BEBFilter{
-		NewBEBFilter(evSource1, evType),
-		NewBEBFilter(evSource2, evType),
-		NewBEBFilter(evSource3, evType),
-		NewBEBFilter(evSource4, evType),
+		NewEventMeshFilter(evSource1, evType),
+		NewEventMeshFilter(evSource2, evType),
+		NewEventMeshFilter(evSource3, evType),
+		NewEventMeshFilter(evSource4, evType),
 	}
 }
 
@@ -389,13 +389,13 @@ func WithMultipleBEBFiltersFromDiffEventTypePrefix(bebFilters *eventingv1alpha1.
 	evType1 := "foo.prefix.custom.foovarkes.order.created.v1"
 	evType2 := "foo.prefixdifferent.custom.foovarkes.order.created.v1"
 	bebFilters.Filters = []*eventingv1alpha1.BEBFilter{
-		NewBEBFilter(evSource, evType1),
-		NewBEBFilter(evSource, evType2),
-		NewBEBFilter(evSource, evType1),
+		NewEventMeshFilter(evSource, evType1),
+		NewEventMeshFilter(evSource, evType2),
+		NewEventMeshFilter(evSource, evType1),
 	}
 }
 
-func NewBEBFilter(evSource, evType string) *eventingv1alpha1.BEBFilter {
+func NewEventMeshFilter(evSource, evType string) *eventingv1alpha1.BEBFilter {
 	return &eventingv1alpha1.BEBFilter{
 		EventSource: &eventingv1alpha1.Filter{
 			Property: "source",

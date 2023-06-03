@@ -49,9 +49,9 @@ func WithRequestTimeout(requestTimeout time.Duration) EnvConfigOption {
 	}
 }
 
-func WithBEBNamespace(bebNs string) EnvConfigOption {
+func WithNamespace(namespace string) EnvConfigOption {
 	return func(e *env.EventMeshConfig) {
-		e.EventMeshNamespace = bebNs
+		e.EventMeshNamespace = namespace
 	}
 }
 
