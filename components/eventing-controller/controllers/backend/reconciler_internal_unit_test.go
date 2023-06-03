@@ -2,8 +2,8 @@ package backend
 
 import (
 	"context"
+	"crypto/rand"
 	"errors"
-	"math/rand"
 	"testing"
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
