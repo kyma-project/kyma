@@ -9,7 +9,7 @@ async function testEndpointWithoutToken(requestBody, endpoint, method) {
     await keb.callKEBWithoutToken(requestBody, endpoint, method);
     keb.getRegion();
   } catch (err) {
-    throw new Error(`error while calling KEB endpoint without authorization: ${err.toString()}`);
+    throw new Error(`error while calling KEB endpoint "${endpoint}" without authorization: ${err.toString()}`);
   }
 }
 
@@ -21,10 +21,10 @@ describe('KEB endpoints test', function() {
     {payload: {}, endpoint: `runtimes`, method: 'get'},
     {payload: {}, endpoint: `info/runtimes`, method: 'get'},
     {payload: {}, endpoint: `orchestrations`, method: 'get'},
-    {payload: {}, endpoint: `oauth/${region}/v2/service_instances/${instanceID}`, method: 'put'},
+    {payload: {}, endpoint: `oauth/${region}v2/service_instances/${instanceID}`, method: 'put'},
     {payload: {}, endpoint: `upgrade/cluster`, method: 'post'},
     {payload: {}, endpoint: `upgrade/kyma`, method: 'post'},
-    {payload: {}, endpoint: `service_instances/${instanceID}`, method: 'patch'},
+    {payload: {}, endpoint: `oauth/v2/service_instances/${instanceID}`, method: 'patch'},
     {payload: {}, endpoint: `oauth/v2/service_instances/${instanceID}`, method: 'delete'},
   ];
 
