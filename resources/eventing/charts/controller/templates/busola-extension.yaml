@@ -16,7 +16,8 @@ data:
     name: Subscriptions
     category: Configuration
     scope: namespace
-    description:  {{"{{[Subscription](https://kyma-project.io/docs/kyma/latest/05-technical-reference/00-custom-resources/evnt-01-subscription#documentation-content)}}"}} is used to subscribe to events.
+    description: >-
+      {{"{{[Subscription](https://kyma-project.io/docs/kyma/latest/05-technical-reference/00-custom-resources/evnt-01-subscription#documentation-content)}}"}} is used to subscribe to events.
     urlPath: subscriptions
   details: |-
     header:
