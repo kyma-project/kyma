@@ -66,8 +66,7 @@ class KEBClient {
   }
 
   async buildRequestWithoutToken(payload, endpoint, verb) {
-    const region = this.getRegion();
-    const url = `https://kyma-env-broker.${this.host}/oauth/${region}v2/${endpoint}`;
+    const url = `https://kyma-env-broker.${this.host}/${endpoint}`;
     const headers = {
       'X-Broker-API-Version': 2.14,
       'Content-Type': 'application/json',
