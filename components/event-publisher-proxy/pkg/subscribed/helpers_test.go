@@ -355,7 +355,7 @@ func NewEventMeshFilters(opts ...EventMeshFilterOption) *eventingv1alpha1.BEBFil
 func WithOneEventMeshFilter(filters *eventingv1alpha1.BEBFilters) {
 	evSource := "/default/foo.kyma/kt1"
 	evType := "foo.prefix.custom.foovarkes.order.created.v1"
-	filters.Filters = []*eventingv1alpha1.BEBFilter{
+	filters.Filters = []*eventingv1alpha1.EventMeshFilter{
 		NewEventMeshFilter(evSource, evType),
 	}
 }
@@ -363,7 +363,7 @@ func WithOneEventMeshFilter(filters *eventingv1alpha1.BEBFilters) {
 func WithMultipleEventMeshFiltersFromSameSource(filters *eventingv1alpha1.BEBFilters) {
 	evSource := "/default/foo.kyma/kt1"
 	evType := "foo.prefix.custom.foovarkes.order.created.v1"
-	filters.Filters = []*eventingv1alpha1.BEBFilter{
+	filters.Filters = []*eventingv1alpha1.EventMeshFilter{
 		NewEventMeshFilter(evSource, evType),
 		NewEventMeshFilter(evSource, evType),
 		NewEventMeshFilter(evSource, evType),
@@ -376,7 +376,7 @@ func WithMultipleEventMeshFiltersFromDiffSource(filters *eventingv1alpha1.BEBFil
 	evSource3 := "/default/foo.different2/kt1"
 	evSource4 := ""
 	evType := "foo.prefix.custom.foovarkes.order.created.v1"
-	filters.Filters = []*eventingv1alpha1.BEBFilter{
+	filters.Filters = []*eventingv1alpha1.EventMeshFilter{
 		NewEventMeshFilter(evSource1, evType),
 		NewEventMeshFilter(evSource2, evType),
 		NewEventMeshFilter(evSource3, evType),
@@ -388,15 +388,15 @@ func WithMultipleEventMeshFiltersFromDiffEventTypePrefix(filters *eventingv1alph
 	evSource := "/default/foo.kyma/kt1"
 	evType1 := "foo.prefix.custom.foovarkes.order.created.v1"
 	evType2 := "foo.prefixdifferent.custom.foovarkes.order.created.v1"
-	filters.Filters = []*eventingv1alpha1.BEBFilter{
+	filters.Filters = []*eventingv1alpha1.EventMeshFilter{
 		NewEventMeshFilter(evSource, evType1),
 		NewEventMeshFilter(evSource, evType2),
 		NewEventMeshFilter(evSource, evType1),
 	}
 }
 
-func NewEventMeshFilter(evSource, evType string) *eventingv1alpha1.BEBFilter {
-	return &eventingv1alpha1.BEBFilter{
+func NewEventMeshFilter(evSource, evType string) *eventingv1alpha1.EventMeshFilter {
+	return &eventingv1alpha1.EventMeshFilter{
 		EventSource: &eventingv1alpha1.Filter{
 			Property: "source",
 			Value:    evSource,
