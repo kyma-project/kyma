@@ -270,12 +270,12 @@ func natsBackendAssertions(t *testing.T, deployment appsv1.Deployment) {
 	}
 }
 
-// bebBackendAssertions checks that the beb-specific data was set in the NewBEBPublisherDeployment.
+// bebBackendAssertions checks that the eventmesh-specific data was set in the NewBEBPublisherDeployment.
 func bebBackendAssertions(t *testing.T, deployment appsv1.Deployment) {
 	container := findPublisherContainer(deployment)
 	assert.NotNil(t, container)
 
-	// check beb-specific env variables
+	// check eventmesh-specific env variables
 	bebNamespace := findEnvVar(container.Env, "BEB_NAMESPACE")
 	assert.Equal(t, bebNamespace.Value, fmt.Sprintf("%s$(BEB_NAMESPACE_VALUE)", bebNamespacePrefix))
 

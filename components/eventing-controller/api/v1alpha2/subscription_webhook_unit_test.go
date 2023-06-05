@@ -3,11 +3,12 @@ package v1alpha2_test
 import (
 	"testing"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
-	eventingtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	"github.com/stretchr/testify/require"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/util/validation/field"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
+	eventingtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
 const (
@@ -92,7 +93,7 @@ func Test_validateSubscription(t *testing.T) {
 			givenSub: eventingtesting.NewSubscription(subName, subNamespace,
 				eventingtesting.WithSource(eventingtesting.EventSourceClean),
 				eventingtesting.WithEventType(eventingtesting.OrderCreatedV1Event),
-				eventingtesting.WithWebhookAuthForBEB(),
+				eventingtesting.WithWebhookAuthForEventMesh(),
 				eventingtesting.WithMaxInFlightMessages(v1alpha2.DefaultMaxInFlightMessages),
 				eventingtesting.WithSink(sink),
 			),
