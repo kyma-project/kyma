@@ -17,7 +17,7 @@ type Backend struct {
 
 	// Hash that is used in EventMesh to identify this Subscription.
 	// +optional
-	Emshash int64 `json:"emshash,omitempty"`
+	EventMeshHash int64 `json:"emshash,omitempty"`
 
 	// Webhook URL used by EventMesh to trigger subscribers.
 	// +optional
@@ -33,7 +33,7 @@ type Backend struct {
 
 	// Status of the Subscription as reported by EventMesh.
 	// +optional
-	EmsSubscriptionStatus *EmsSubscriptionStatus `json:"emsSubscriptionStatus,omitempty"`
+	EventMeshSubscriptionStatus *EventMeshSubscriptionStatus `json:"emsSubscriptionStatus,omitempty"`
 
 	// List of event type to consumer name mappings for the NATS backend.
 	// +optional
@@ -44,7 +44,7 @@ type Backend struct {
 	EmsTypes []EventMeshTypes `json:"emsTypes,omitempty"`
 }
 
-type EmsSubscriptionStatus struct {
+type EventMeshSubscriptionStatus struct {
 	// Status of the Subscription as reported by the backend.
 	// +optional
 	Status string `json:"status,omitempty"`

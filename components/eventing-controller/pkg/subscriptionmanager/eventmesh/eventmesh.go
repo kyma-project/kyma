@@ -1,4 +1,4 @@
-package beb
+package eventmesh
 
 import (
 	"context"
@@ -9,6 +9,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 
 	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
+
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 
 	"github.com/pkg/errors"

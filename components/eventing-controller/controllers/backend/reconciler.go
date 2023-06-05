@@ -7,8 +7,9 @@ import (
 	"fmt"
 	"os"
 
-	pkgerrors "github.com/kyma-project/kyma/components/eventing-controller/pkg/errors"
 	"golang.org/x/xerrors"
+
+	pkgerrors "github.com/kyma-project/kyma/components/eventing-controller/pkg/errors"
 
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
