@@ -7,7 +7,6 @@ const keb = new KEBClient(KEBConfig.fromEnv());
 async function testEndpointWithoutToken(requestBody, endpoint, method) {
   try {
     await keb.callKEBWithoutToken(requestBody, endpoint, method);
-    keb.getRegion();
   } catch (err) {
     throw new Error(`error while calling KEB endpoint "${endpoint}" without authorization: ${err.toString()}`);
   }
