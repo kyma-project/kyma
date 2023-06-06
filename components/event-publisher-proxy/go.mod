@@ -102,7 +102,7 @@ replace (
 )
 
 replace (
-	github.com/kyma-incubator/api-gateway => github.com/kyma-project/api-gateway v0.0.0-20230321131415-ea1b79aa2ddb
+	github.com/kyma-incubator/api-gateway => github.com/kyma-project/api-gateway v0.0.0-20230606080956-34713d47a4f9
 	github.com/prometheus/client_golang => github.com/prometheus/client_golang v1.15.1
 	golang.org/x/crypto => golang.org/x/crypto v0.9.0
 )
