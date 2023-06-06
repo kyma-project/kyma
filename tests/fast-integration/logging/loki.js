@@ -54,6 +54,10 @@ async function checkPersistentVolumeClaimSize() {
 
 async function verifyIstioAccessLogFormat(startTimestamp) {
   const query = '{container="istio-proxy",namespace="kyma-system",pod="logging-loki-0"}';
+
+  const accessLogsPresent = await logsPresentInLoki(query, startTimestamp);
+  assert.isTrue(accessLogsPresent, 'No Istio access logs present in Loki');
+
   const responseBody = await queryLoki(query, startTimestamp);
   assert.isDefined(responseBody.data.result[0].values, 'Empty response for the query for Istio access logs');
   assert.isTrue(responseBody.data.result[0].values.length > 0, 'No Istio access logs found for loki');
