@@ -171,10 +171,12 @@ var _ = BeforeSuite(func(done Done) {
 		JSStreamName:    reconcilertesting.JSStreamName,
 	}
 
+	envConfig := env.Config{}
 	err = NewReconciler(
 		context.Background(),
 		natsSubMgr,
 		natsConfig,
+		envConfig,
 		bebSubMgr,
 		k8sManager.GetClient(),
 		defaultLogger,
@@ -634,7 +636,7 @@ func ensurePublisherProxyIsReady(ctx context.Context) {
 	Expect(err).ShouldNot(HaveOccurred())
 }
 
-// getCurrentBackendType gets the backend type depending on the beb secret.
+// getCurrentBackendType gets the backend type depending on the eventmesh secret.
 func getCurrentBackendType(ctx context.Context) string {
 	backendType := eventingv1alpha1.NatsBackendType
 	if bebSecretExists(ctx) {
@@ -668,8 +670,8 @@ func createOAuth2Secret(ctx context.Context, clientID, clientSecret []byte) {
 			Namespace: deployment.ControllerNamespace,
 		},
 		Data: map[string][]byte{
-			"client_id":     clientID,
-			"client_secret": clientSecret,
+			secretKeyClientID:     clientID,
+			secretKeyClientSecret: clientSecret,
 		},
 	}
 	err := k8sClient.Create(ctx, sec)
