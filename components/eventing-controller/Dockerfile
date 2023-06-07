@@ -12,6 +12,7 @@ COPY logger/ logger/
 COPY options/ options/
 COPY pkg/ pkg/
 COPY controllers/ controllers/
+COPY internal/ internal/
 COPY testing/ testing/
 COPY utils/ utils/
 

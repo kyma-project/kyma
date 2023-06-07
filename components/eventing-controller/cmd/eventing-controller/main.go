@@ -4,8 +4,6 @@ import (
 	"context"
 	"log"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-
 	"github.com/go-logr/zapr"
 	"k8s.io/apimachinery/pkg/runtime"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -15,9 +13,11 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/backend"
+	"github.com/kyma-project/kyma/components/eventing-controller/internal/featureflags"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/options"
 	backendmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager/eventmesh"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager/jetstream"
@@ -65,6 +65,10 @@ func main() {
 	if err = jetstream.AddV1Alpha2ToScheme(scheme); err != nil {
 		setupLogger.Fatalw("Failed to start manager", "backend", v1alpha1.NatsBackendType, "error", err)
 	}
+
+	// Get env config and set feature flags
+	envConfig := env.GetConfig()
+	featureflags.SetEventingWebhookAuthEnabled(envConfig.EventingWebhookAuthEnabled)
 
 	bebSubMgr := eventmesh.NewSubscriptionManager(restCfg, opts.MetricsAddr, opts.ReconcilePeriod, ctrLogger)
 	if err = eventmesh.AddToScheme(scheme); err != nil {
@@ -114,7 +118,8 @@ func main() {
 	// Start the backend manager.
 	ctx := context.Background()
 	recorder := mgr.GetEventRecorderFor("backend-controller")
-	backendReconciler := backend.NewReconciler(ctx, natsSubMgr, natsConfig, bebSubMgr, mgr.GetClient(), ctrLogger, recorder)
+	backendReconciler := backend.NewReconciler(ctx, natsSubMgr, natsConfig, envConfig, bebSubMgr,
+		mgr.GetClient(), ctrLogger, recorder)
 	if err = backendReconciler.SetupWithManager(mgr); err != nil {
 		setupLogger.Fatalw("Failed to start backend controller", "error", err)
 	}

@@ -71,7 +71,7 @@ func (em *EventMesh) Initialize(cfg env.Config) error {
 			return err
 		}
 		em.client = client.NewClient(httpClient)
-		em.webhookAuth = getWebHookAuth(cfg, em.oAuth2credentials)
+		em.webhookAuth = getWebHookAuth(em.oAuth2credentials)
 		em.protocolSettings = &backendutils.ProtocolSettings{
 			ContentMode:     &cfg.ContentMode,
 			ExemptHandshake: &cfg.ExemptHandshake,
@@ -85,11 +85,11 @@ func (em *EventMesh) Initialize(cfg env.Config) error {
 
 // getWebHookAuth returns the webhook auth config from the given env config
 // or returns an error if the env config contains invalid grant type or auth type.
-func getWebHookAuth(cfg env.Config, credentials *OAuth2ClientCredentials) *types.WebhookAuth {
+func getWebHookAuth(credentials *OAuth2ClientCredentials) *types.WebhookAuth {
 	return &types.WebhookAuth{
 		ClientID:     credentials.ClientID,
 		ClientSecret: credentials.ClientSecret,
-		TokenURL:     cfg.WebhookTokenEndpoint,
+		TokenURL:     credentials.TokenURL,
 		Type:         types.AuthTypeClientCredentials,
 		GrantType:    types.GrantTypeClientCredentials,
 	}
