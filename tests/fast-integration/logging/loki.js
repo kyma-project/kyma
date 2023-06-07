@@ -1,6 +1,7 @@
 module.exports = {
   checkCommerceMockLogs,
   checkKymaLogs,
+  checkFluentBitLogs,
   checkRetentionPeriod,
   checkPersistentVolumeClaimSize,
   verifyIstioAccessLogFormat,
@@ -33,6 +34,14 @@ async function checkKymaLogs(startTimestamp) {
   const kymaSystemLogsPresent = await logsPresentInLoki(systemLabel, startTimestamp);
 
   assert.isTrue(kymaSystemLogsPresent, 'No logs from kyma-system namespace present in Loki');
+}
+
+async function checkFluentBitLogs(startTimestamp) {
+  const labels = '{container="fluent-bit", namespace="kyma-system"}';
+
+  const fluentBitLogsPresent = await logsPresentInLoki(labels, startTimestamp);
+
+  assert.isFalse(fluentBitLogsPresent, 'Fluent Bit logs present in Loki');
 }
 
 async function checkRetentionPeriod() {
