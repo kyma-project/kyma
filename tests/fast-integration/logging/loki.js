@@ -39,7 +39,7 @@ async function checkKymaLogs(startTimestamp) {
 async function checkFluentBitLogs(startTimestamp) {
   const labels = '{container="fluent-bit", namespace="kyma-system"}';
 
-  const fluentBitLogsPresent = await logsPresentInLoki(labels, startTimestamp);
+  const fluentBitLogsPresent = await logsPresentInLoki(labels, startTimestamp, 1);
 
   assert.isFalse(fluentBitLogsPresent, 'Fluent Bit logs present in Loki');
 }
