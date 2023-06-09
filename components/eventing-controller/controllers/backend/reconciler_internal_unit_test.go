@@ -2,8 +2,8 @@ package backend
 
 import (
 	"context"
+	"crypto/rand"
 	"errors"
-	"math/rand"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -16,6 +16,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/internal/featureflags"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
