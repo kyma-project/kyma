@@ -34,9 +34,9 @@ func Test_GetConfig(t *testing.T) {
 	g.Expect(config.WebhookTokenEndpoint).To(Equal(envs["WEBHOOK_TOKEN_ENDPOINT"]))
 	g.Expect(config.Domain).To(Equal(envs["DOMAIN"]))
 	g.Expect(config.EventTypePrefix).To(Equal(envs["EVENT_TYPE_PREFIX"]))
-	g.Expect(config.BEBNamespace).To(Equal(envs["BEB_NAMESPACE"]))
+	g.Expect(config.EventMeshNamespace).To(Equal(envs["BEB_NAMESPACE"]))
 	// Ensure optional variables can be set
-	g.Expect(config.BEBAPIURL).To(Equal(envs["BEB_API_URL"]))
+	g.Expect(config.EventMeshAPIURL).To(Equal(envs["BEB_API_URL"]))
 
 	webhookActivationTimeout, err := time.ParseDuration(envs["WEBHOOK_ACTIVATION_TIMEOUT"])
 	g.Expect(err).ShouldNot(HaveOccurred())

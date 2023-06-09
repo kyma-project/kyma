@@ -6,10 +6,11 @@ import (
 	"strconv"
 
 	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
-	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/mitchellh/hashstructure/v2"
 	"github.com/pkg/errors"
+
+	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 )
 
 // eventMeshSubscriptionNameMapper maps a Kyma subscription to an ID that can be used on the EventMesh backend,
@@ -19,7 +20,7 @@ type eventMeshSubscriptionNameMapper struct {
 	maxLength  int
 }
 
-func NewBEBSubscriptionNameMapper(domainName string, maxNameLength int) NameMapper {
+func NewEventMeshSubscriptionNameMapper(domainName string, maxNameLength int) NameMapper {
 	return &eventMeshSubscriptionNameMapper{
 		domainName: domainName,
 		maxLength:  maxNameLength,

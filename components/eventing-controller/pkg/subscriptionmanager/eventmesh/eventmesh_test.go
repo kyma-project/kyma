@@ -32,26 +32,26 @@ const (
 	domain = "domain.com"
 )
 
-type bebSubMgrMock struct {
+type eventMeshSubMgrMock struct {
 	Client           dynamic.Interface
 	eventMeshBackend backendeventmesh.Backend
 }
 
-func (c *bebSubMgrMock) Init(_ manager.Manager) error {
+func (c *eventMeshSubMgrMock) Init(_ manager.Manager) error {
 	return nil
 }
 
-func (c *bebSubMgrMock) Start(_ env.DefaultSubscriptionConfig, _ subscriptionmanager.Params) error {
+func (c *eventMeshSubMgrMock) Start(_ env.DefaultSubscriptionConfig, _ subscriptionmanager.Params) error {
 	return nil
 }
 
-func (c *bebSubMgrMock) Stop(_ bool) error {
+func (c *eventMeshSubMgrMock) Stop(_ bool) error {
 	return nil
 }
 
 func Test_cleanupEventMesh(t *testing.T) {
 	// given
-	bebSubMgr := bebSubMgrMock{}
+	subMgr := eventMeshSubMgrMock{}
 	ctx := context.Background()
 
 	// create a Kyma subscription
@@ -69,19 +69,19 @@ func Test_cleanupEventMesh(t *testing.T) {
 	)
 	subscription.Status.Backend.APIRuleName = apiRule.Name
 
-	// start BEB Mock
-	bebMock := startBEBMock()
+	// start eventMesh Mock
+	eventMeshMock := startEventMeshMock()
 	envConf := env.Config{
 
-		BEBAPIURL:                bebMock.MessagingURL,
+		EventMeshAPIURL:          eventMeshMock.MessagingURL,
 		ClientID:                 "client-id",
 		ClientSecret:             "client-secret",
-		TokenEndpoint:            bebMock.TokenURL,
+		TokenEndpoint:            eventMeshMock.TokenURL,
 		WebhookActivationTimeout: 0,
 		WebhookTokenEndpoint:     "webhook-token-endpoint",
 		Domain:                   domain,
 		EventTypePrefix:          controllertesting.EventTypePrefix,
-		BEBNamespace:             "/default/ns",
+		EventMeshNamespace:       "/default/ns",
 		Qos:                      string(types.QosAtLeastOnce),
 	}
 	credentials := &backendeventmesh.OAuth2ClientCredentials{
@@ -93,64 +93,65 @@ func Test_cleanupEventMesh(t *testing.T) {
 	require.NoError(t, err)
 
 	// create a EventMesh handler to connect to BEB Mock
-	nameMapper := utils.NewBEBSubscriptionNameMapper("mydomain.com",
+	nameMapper := utils.NewEventMeshSubscriptionNameMapper("mydomain.com",
 		backendeventmesh.MaxSubscriptionNameLength)
 	eventMeshHandler := backendeventmesh.NewEventMesh(credentials, nameMapper, defaultLogger)
 	err = eventMeshHandler.Initialize(envConf)
 	require.NoError(t, err)
-	bebSubMgr.eventMeshBackend = eventMeshHandler
+	subMgr.eventMeshBackend = eventMeshHandler
 
 	// create fake Dynamic clients
 	fakeClient, err := controllertesting.NewFakeSubscriptionClient(subscription)
 	require.NoError(t, err)
-	bebSubMgr.Client = fakeClient
+	subMgr.Client = fakeClient
 
 	// Create APIRule
 	unstructuredAPIRule, err := controllertesting.ToUnstructuredAPIRule(apiRule)
 	require.NoError(t, err)
-	unstructuredAPIRuleBeforeCleanup, err := bebSubMgr.Client.Resource(utils.APIRuleGroupVersionResource()).Namespace(
+	unstructuredAPIRuleBeforeCleanup, err := subMgr.Client.Resource(utils.APIRuleGroupVersionResource()).Namespace(
 		"test").Create(ctx, unstructuredAPIRule, metav1.CreateOptions{})
 	require.NoError(t, err)
 	require.NotNil(t, unstructuredAPIRuleBeforeCleanup)
 
 	// create an EventMesh subscription from Kyma subscription
 	eventMeshCleaner := cleaner.NewEventMeshCleaner(defaultLogger)
-	_, err = bebSubMgr.eventMeshBackend.SyncSubscription(subscription, eventMeshCleaner, apiRule)
+	_, err = subMgr.eventMeshBackend.SyncSubscription(subscription, eventMeshCleaner, apiRule)
 	require.NoError(t, err)
 
-	// check that the subscription exist in bebMock
+	// check that the subscription exist in eventMeshMock
 	getSubscriptionURL := fmt.Sprintf(client.GetURLFormat, nameMapper.MapSubscriptionName(subscription.Name,
 		subscription.Namespace))
-	getSubscriptionURL = bebMock.MessagingURL + getSubscriptionURL
+	getSubscriptionURL = eventMeshMock.MessagingURL + getSubscriptionURL
 	resp, err := http.Get(getSubscriptionURL)
 	require.NoError(t, err)
 	require.Equal(t, resp.StatusCode, http.StatusOK)
 
 	// check that the Kyma subscription exists
-	unstructuredSub, err := bebSubMgr.Client.Resource(controllertesting.SubscriptionGroupVersionResource()).Namespace(
+	unstructuredSub, err := subMgr.Client.Resource(controllertesting.SubscriptionGroupVersionResource()).Namespace(
 		"test").Get(ctx, subscription.Name, metav1.GetOptions{})
 	require.NoError(t, err)
 	_, err = controllertesting.ToSubscription(unstructuredSub)
 	require.NoError(t, err)
 
 	// check that the APIRule exists
-	unstructuredAPIRuleBeforeCleanup, err = bebSubMgr.Client.Resource(utils.APIRuleGroupVersionResource()).Namespace(
+	unstructuredAPIRuleBeforeCleanup, err = subMgr.Client.Resource(utils.APIRuleGroupVersionResource()).Namespace(
 		"test").Get(ctx, apiRule.Name, metav1.GetOptions{})
 	require.NoError(t, err)
 	require.NotNil(t, unstructuredAPIRuleBeforeCleanup)
 
 	// when
-	err = cleanupEventMesh(bebSubMgr.eventMeshBackend, bebSubMgr.Client, defaultLogger.WithContext())
+	err = cleanupEventMesh(subMgr.eventMeshBackend, subMgr.Client, defaultLogger.WithContext())
 	require.NoError(t, err)
 
 	// then
-	// the BEB subscription should be deleted from BEB Mock
+	// the EventMesh
+	// subscription should be deleted from EventMesh Mock
 	resp, err = http.Get(getSubscriptionURL)
 	require.NoError(t, err)
 	require.Equal(t, resp.StatusCode, http.StatusNotFound)
 
 	// the Kyma subscription status should be empty
-	unstructuredSub, err = bebSubMgr.Client.Resource(controllertesting.SubscriptionGroupVersionResource()).Namespace(
+	unstructuredSub, err = subMgr.Client.Resource(controllertesting.SubscriptionGroupVersionResource()).Namespace(
 		"test").Get(ctx, subscription.Name, metav1.GetOptions{})
 	require.NoError(t, err)
 	gotSub, err := controllertesting.ToSubscription(unstructuredSub)
@@ -159,11 +160,11 @@ func Test_cleanupEventMesh(t *testing.T) {
 	require.Equal(t, expectedSubStatus, gotSub.Status)
 
 	// the associated APIRule should be deleted
-	unstructuredAPIRuleAfterCleanup, err := bebSubMgr.Client.Resource(utils.APIRuleGroupVersionResource()).Namespace(
+	unstructuredAPIRuleAfterCleanup, err := subMgr.Client.Resource(utils.APIRuleGroupVersionResource()).Namespace(
 		"test").Get(ctx, apiRule.Name, metav1.GetOptions{})
 	require.Error(t, err)
 	require.Nil(t, unstructuredAPIRuleAfterCleanup)
-	bebMock.Stop()
+	eventMeshMock.Stop()
 }
 
 func Test_markAllV1Alpha2SubscriptionsAsNotReady(t *testing.T) {
@@ -206,7 +207,7 @@ func Test_markAllV1Alpha2SubscriptionsAsNotReady(t *testing.T) {
 	require.Equal(t, false, gotSub.Status.Ready)
 }
 
-func startBEBMock() *controllertesting.EventMeshMock {
+func startEventMeshMock() *controllertesting.EventMeshMock {
 	// TODO(k15r): FIX THIS HACK
 	// this is a very evil hack for the time being, until we refactored the config properly
 	// it sets the URLs to relative paths, that can easily be used in the mux.

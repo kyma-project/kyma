@@ -387,7 +387,7 @@ func Test_syncConditionSubscribed(t *testing.T) {
 	}
 
 	r := Reconciler{
-		nameMapper: backendutils.NewBEBSubscriptionNameMapper(domain, eventmesh.MaxSubscriptionNameLength),
+		nameMapper: backendutils.NewEventMeshSubscriptionNameMapper(domain, eventmesh.MaxSubscriptionNameLength),
 	}
 
 	for _, tc := range testCases {
@@ -488,7 +488,7 @@ func Test_syncConditionSubscriptionActive(t *testing.T) {
 	}
 
 	r := Reconciler{
-		nameMapper: backendutils.NewBEBSubscriptionNameMapper(domain, eventmesh.MaxSubscriptionNameLength),
+		nameMapper: backendutils.NewEventMeshSubscriptionNameMapper(domain, eventmesh.MaxSubscriptionNameLength),
 		logger:     logger,
 	}
 
@@ -882,7 +882,7 @@ func setupTestEnvironment(t *testing.T, objs ...client.Object) *testEnvironment 
 	}
 	emptyConfig := env.Config{}
 	credentials := &eventmesh.OAuth2ClientCredentials{}
-	nameMapper := backendutils.NewBEBSubscriptionNameMapper(domain, eventmesh.MaxSubscriptionNameLength)
+	nameMapper := backendutils.NewEventMeshSubscriptionNameMapper(domain, eventmesh.MaxSubscriptionNameLength)
 	cleaner := cleaner.NewEventMeshCleaner(nil)
 
 	return &testEnvironment{

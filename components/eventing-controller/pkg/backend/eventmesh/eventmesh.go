@@ -66,7 +66,7 @@ type EventMesh struct {
 func (em *EventMesh) Initialize(cfg env.Config) error {
 	if em.client == nil {
 		authenticatedClient := auth.NewAuthenticatedClient(cfg)
-		httpClient, err := httpclient.NewHTTPClient(cfg.BEBAPIURL, authenticatedClient)
+		httpClient, err := httpclient.NewHTTPClient(cfg.EventMeshAPIURL, authenticatedClient)
 		if err != nil {
 			return err
 		}
@@ -77,7 +77,7 @@ func (em *EventMesh) Initialize(cfg env.Config) error {
 			ExemptHandshake: &cfg.ExemptHandshake,
 			Qos:             &cfg.Qos,
 		}
-		em.namespace = cfg.BEBNamespace
+		em.namespace = cfg.EventMeshNamespace
 		em.eventMeshPrefix = cfg.EventTypePrefix
 	}
 	return nil
