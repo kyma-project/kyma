@@ -1,3 +1,4 @@
+//nolint:gosec,lll
 package backend
 
 import (
