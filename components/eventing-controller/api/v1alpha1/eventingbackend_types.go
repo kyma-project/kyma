@@ -9,8 +9,8 @@ import (
 type BackendType string
 
 const (
-	BEBBackendType  BackendType = "BEB"
-	NatsBackendType BackendType = "NATS"
+	EventMeshBackend BackendType = "BEB"
+	NATSBackend      BackendType = "NATS"
 )
 
 // EventingBackendSpec defines the desired state of EventingBackend.
@@ -35,11 +35,11 @@ type EventingBackendStatus struct {
 
 	// Name of the Secret containing BEB access tokens, required for BEB only.
 	// +optional
-	BEBSecretName string `json:"bebSecretName,omitempty"`
+	EventMeshSecretName string `json:"bebSecretName,omitempty"`
 
 	// Namespace of the Secret containing BEB access tokens, required for BEB only.
 	// +optional
-	BEBSecretNamespace string `json:"bebSecretNamespace,omitempty"`
+	EventMeshSecretNamespace string `json:"bebSecretNamespace,omitempty"`
 }
 
 // +kubebuilder:object:root=true

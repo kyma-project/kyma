@@ -150,7 +150,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, _ ctrl.Request) (ctrl.Result
 	if len(secretList.Items) > 1 {
 		// This is not allowed!
 		r.namedLogger().Debugw("More than one secret with the EventingBackend label exist", "key", BEBBackendSecretLabelKey, "value", BEBBackendSecretLabelValue, "count", len(secretList.Items))
-		defaultStatus.Backend = eventingv1alpha1.BEBBackendType
+		defaultStatus.Backend = eventingv1alpha1.EventMeshBackend
 		defaultStatus.SetSubscriptionControllerReadyCondition(false, eventingv1alpha1.ConditionDuplicateSecrets, "")
 		if updateErr := r.syncBackendStatus(ctx, &defaultStatus, nil); updateErr != nil {
 			return ctrl.Result{}, errors.Wrapf(updateErr, "update EventingBackend status failed")
@@ -168,7 +168,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, _ ctrl.Request) (ctrl.Result
 }
 
 func (r *Reconciler) reconcileNATSBackend(ctx context.Context, backendStatus *eventingv1alpha1.EventingBackendStatus) (ctrl.Result, error) {
-	r.backendType = eventingv1alpha1.NatsBackendType
+	r.backendType = eventingv1alpha1.NATSBackend
 	backendStatus.Backend = r.backendType
 	// CreateOrUpdate CR with NATS
 	err := r.CreateOrUpdateBackendCR(ctx)
@@ -177,7 +177,7 @@ func (r *Reconciler) reconcileNATSBackend(ctx context.Context, backendStatus *ev
 		if updateErr := r.syncBackendStatus(ctx, backendStatus, nil); updateErr != nil {
 			return ctrl.Result{}, errors.Wrapf(err, "failed to update status while creating/updating of EventingBackend")
 		}
-		return ctrl.Result{}, errors.Wrapf(err, "create or update EventingBackend failed, type: %s", eventingv1alpha1.NatsBackendType)
+		return ctrl.Result{}, errors.Wrapf(err, "create or update EventingBackend failed, type: %s", eventingv1alpha1.NATSBackend)
 	}
 
 	// Stop the BEB subscription controller
@@ -228,8 +228,8 @@ func (r *Reconciler) reconcileNATSBackend(ctx context.Context, backendStatus *ev
 }
 
 func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secret, backendStatus *eventingv1alpha1.EventingBackendStatus) (ctrl.Result, error) {
-	r.backendType = eventingv1alpha1.BEBBackendType
-	backendStatus.Backend, backendStatus.BEBSecretName, backendStatus.BEBSecretNamespace = r.backendType, bebSecret.Name, bebSecret.Namespace
+	r.backendType = eventingv1alpha1.EventMeshBackend
+	backendStatus.Backend, backendStatus.EventMeshSecretName, backendStatus.EventMeshSecretNamespace = r.backendType, bebSecret.Name, bebSecret.Namespace
 
 	// CreateOrUpdate CR with BEB
 	err := r.CreateOrUpdateBackendCR(ctx)
@@ -238,7 +238,7 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 		if updateErr := r.syncBackendStatus(ctx, backendStatus, nil); updateErr != nil {
 			return ctrl.Result{}, errors.Wrapf(err, "failed to update status while creating/updating EventingBackend")
 		}
-		return ctrl.Result{}, errors.Wrapf(err, "create/update EventingBackend failed, type: %s", eventingv1alpha1.BEBBackendType)
+		return ctrl.Result{}, errors.Wrapf(err, "create/update EventingBackend failed, type: %s", eventingv1alpha1.EventMeshBackend)
 	}
 
 	// Stop the NATS subscription controller
@@ -471,8 +471,8 @@ func hasBackendTypeChanged(currentBackendStatus, desiredBackendStatus eventingv1
 func getDefaultBackendStatus() eventingv1alpha1.EventingBackendStatus {
 	defaultStatus := eventingv1alpha1.EventingBackendStatus{}
 	defaultStatus.InitializeConditions()
-	defaultStatus.BEBSecretName = ""
-	defaultStatus.BEBSecretNamespace = ""
+	defaultStatus.EventMeshSecretName = ""
+	defaultStatus.EventMeshSecretNamespace = ""
 	defaultStatus.EventingReady = utils.BoolPtr(true)
 	return defaultStatus
 }
@@ -622,9 +622,9 @@ func (r *Reconciler) CreateOrUpdatePublisherProxy(ctx context.Context, backend e
 	var desiredPublisher *appsv1.Deployment
 
 	switch backend {
-	case eventingv1alpha1.NatsBackendType:
+	case eventingv1alpha1.NATSBackend:
 		desiredPublisher = deployment.NewNATSPublisherDeployment(r.natsConfig, r.cfg.PublisherConfig)
-	case eventingv1alpha1.BEBBackendType:
+	case eventingv1alpha1.EventMeshBackend:
 		desiredPublisher = deployment.NewBEBPublisherDeployment(r.cfg.PublisherConfig)
 	default:
 		return nil, fmt.Errorf("unknown EventingBackend type %q", backend)

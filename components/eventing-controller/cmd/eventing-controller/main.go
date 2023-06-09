@@ -60,10 +60,10 @@ func main() {
 	}
 	natsSubMgr = jetstream.NewSubscriptionManager(restCfg, natsConfig, opts.MetricsAddr, metricsCollector, ctrLogger)
 	if err = jetstream.AddToScheme(scheme); err != nil {
-		setupLogger.Fatalw("Failed to start manager", "backend", v1alpha1.NatsBackendType, "error", err)
+		setupLogger.Fatalw("Failed to start manager", "backend", v1alpha1.NATSBackend, "error", err)
 	}
 	if err = jetstream.AddV1Alpha2ToScheme(scheme); err != nil {
-		setupLogger.Fatalw("Failed to start manager", "backend", v1alpha1.NatsBackendType, "error", err)
+		setupLogger.Fatalw("Failed to start manager", "backend", v1alpha1.NATSBackend, "error", err)
 	}
 
 	// Get env config and set feature flags
@@ -72,10 +72,10 @@ func main() {
 
 	bebSubMgr := eventmesh.NewSubscriptionManager(restCfg, opts.MetricsAddr, opts.ReconcilePeriod, ctrLogger)
 	if err = eventmesh.AddToScheme(scheme); err != nil {
-		setupLogger.Fatalw("Failed to start subscription manager", "backend", v1alpha1.BEBBackendType, "error", err)
+		setupLogger.Fatalw("Failed to start subscription manager", "backend", v1alpha1.EventMeshBackend, "error", err)
 	}
 	if err = eventmesh.AddV1Alpha2ToScheme(scheme); err != nil {
-		setupLogger.Fatalw("Failed to start subscription manager", "backend", v1alpha1.BEBBackendType, "error", err)
+		setupLogger.Fatalw("Failed to start subscription manager", "backend", v1alpha1.EventMeshBackend, "error", err)
 	}
 
 	// Init the manager.
@@ -91,11 +91,11 @@ func main() {
 	}
 
 	if err = natsSubMgr.Init(mgr); err != nil {
-		setupLogger.Fatalw("Failed to initialize subscription manager", "backend", v1alpha1.NatsBackendType, "error", err)
+		setupLogger.Fatalw("Failed to initialize subscription manager", "backend", v1alpha1.NATSBackend, "error", err)
 	}
 
 	if err = bebSubMgr.Init(mgr); err != nil {
-		setupLogger.Fatalw("Failed to initialize subscription manager", "backend", v1alpha1.BEBBackendType, "error", err)
+		setupLogger.Fatalw("Failed to initialize subscription manager", "backend", v1alpha1.EventMeshBackend, "error", err)
 	}
 
 	setupLogger.Infow("Starting the webhook server")

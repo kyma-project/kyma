@@ -250,9 +250,9 @@ func TestEventingBackendStatusEqual(t *testing.T) {
 		{
 			name: "should be unequal if missing secret",
 			givenBackendStatus1: eventingv1alpha1.EventingBackendStatus{
-				EventingReady:      utils.BoolPtr(false),
-				BEBSecretName:      "secret",
-				BEBSecretNamespace: "default",
+				EventingReady:            utils.BoolPtr(false),
+				EventMeshSecretName:      "secret",
+				EventMeshSecretNamespace: "default",
 			},
 			givenBackendStatus2: eventingv1alpha1.EventingBackendStatus{
 				EventingReady: utils.BoolPtr(false),
@@ -262,35 +262,35 @@ func TestEventingBackendStatusEqual(t *testing.T) {
 		{
 			name: "should be unequal if different secretName",
 			givenBackendStatus1: eventingv1alpha1.EventingBackendStatus{
-				EventingReady:      utils.BoolPtr(false),
-				BEBSecretName:      "secret",
-				BEBSecretNamespace: "default",
+				EventingReady:            utils.BoolPtr(false),
+				EventMeshSecretName:      "secret",
+				EventMeshSecretNamespace: "default",
 			},
 			givenBackendStatus2: eventingv1alpha1.EventingBackendStatus{
-				EventingReady:      utils.BoolPtr(false),
-				BEBSecretName:      "secretnew",
-				BEBSecretNamespace: "default",
+				EventingReady:            utils.BoolPtr(false),
+				EventMeshSecretName:      "secretnew",
+				EventMeshSecretNamespace: "default",
 			},
 			wantResult: false,
 		},
 		{
 			name: "should be unequal if different secretNamespace",
 			givenBackendStatus1: eventingv1alpha1.EventingBackendStatus{
-				EventingReady:      utils.BoolPtr(false),
-				BEBSecretName:      "secret",
-				BEBSecretNamespace: "default",
+				EventingReady:            utils.BoolPtr(false),
+				EventMeshSecretName:      "secret",
+				EventMeshSecretNamespace: "default",
 			},
 			givenBackendStatus2: eventingv1alpha1.EventingBackendStatus{
-				EventingReady:      utils.BoolPtr(false),
-				BEBSecretName:      "secret",
-				BEBSecretNamespace: "kyma-system",
+				EventingReady:            utils.BoolPtr(false),
+				EventMeshSecretName:      "secret",
+				EventMeshSecretNamespace: "kyma-system",
 			},
 			wantResult: false,
 		},
 		{
 			name: "should be unequal if missing backend",
 			givenBackendStatus1: eventingv1alpha1.EventingBackendStatus{
-				Backend: eventingv1alpha1.NatsBackendType,
+				Backend: eventingv1alpha1.NATSBackend,
 			},
 			givenBackendStatus2: eventingv1alpha1.EventingBackendStatus{},
 			wantResult:          false,
@@ -298,10 +298,10 @@ func TestEventingBackendStatusEqual(t *testing.T) {
 		{
 			name: "should be unequal if different backend",
 			givenBackendStatus1: eventingv1alpha1.EventingBackendStatus{
-				Backend: eventingv1alpha1.NatsBackendType,
+				Backend: eventingv1alpha1.NATSBackend,
 			},
 			givenBackendStatus2: eventingv1alpha1.EventingBackendStatus{
-				Backend: eventingv1alpha1.BEBBackendType,
+				Backend: eventingv1alpha1.EventMeshBackend,
 			},
 			wantResult: false,
 		},
@@ -348,7 +348,7 @@ func TestEventingBackendStatusEqual(t *testing.T) {
 		{
 			name: "should be equal if the status are the same",
 			givenBackendStatus1: eventingv1alpha1.EventingBackendStatus{
-				Backend: eventingv1alpha1.NatsBackendType,
+				Backend: eventingv1alpha1.NATSBackend,
 				Conditions: []eventingv1alpha1.Condition{
 					{Type: eventingv1alpha1.ConditionControllerReady, Status: corev1.ConditionTrue},
 					{Type: eventingv1alpha1.ConditionPublisherProxyReady, Status: corev1.ConditionTrue},
@@ -356,7 +356,7 @@ func TestEventingBackendStatusEqual(t *testing.T) {
 				EventingReady: utils.BoolPtr(true),
 			},
 			givenBackendStatus2: eventingv1alpha1.EventingBackendStatus{
-				Backend: eventingv1alpha1.NatsBackendType,
+				Backend: eventingv1alpha1.NATSBackend,
 				Conditions: []eventingv1alpha1.Condition{
 					{Type: eventingv1alpha1.ConditionControllerReady, Status: corev1.ConditionTrue},
 					{Type: eventingv1alpha1.ConditionPublisherProxyReady, Status: corev1.ConditionTrue},

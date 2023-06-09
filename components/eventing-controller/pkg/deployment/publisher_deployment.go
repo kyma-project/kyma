@@ -54,7 +54,7 @@ var (
 func NewBEBPublisherDeployment(publisherConfig env.PublisherConfig) *appsv1.Deployment {
 	return NewDeployment(
 		publisherConfig,
-		WithLabels(v1alpha1.BEBBackendType),
+		WithLabels(v1alpha1.EventMeshBackend),
 		WithContainers(publisherConfig),
 		WithBEBEnvVars(publisherConfig),
 		WithLogEnvVars(publisherConfig),
@@ -63,7 +63,7 @@ func NewBEBPublisherDeployment(publisherConfig env.PublisherConfig) *appsv1.Depl
 func NewNATSPublisherDeployment(natsConfig env.NATSConfig, publisherConfig env.PublisherConfig) *appsv1.Deployment {
 	return NewDeployment(
 		publisherConfig,
-		WithLabels(v1alpha1.NatsBackendType),
+		WithLabels(v1alpha1.NATSBackend),
 		WithContainers(publisherConfig),
 		WithNATSEnvVars(natsConfig, publisherConfig),
 		WithLogEnvVars(publisherConfig),
