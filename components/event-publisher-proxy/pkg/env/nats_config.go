@@ -29,7 +29,7 @@ type NATSConfig struct {
 	JSStreamName string `envconfig:"JS_STREAM_NAME" default:"kyma"`
 }
 
-// ToConfig converts to a default BEB BEBConfig.
+// ToConfig converts to a default EventMeshConfig.
 func (c *NATSConfig) ToConfig() *EventMeshConfig {
 	cfg := &EventMeshConfig{
 		EventMeshNamespace: c.LegacyNamespace,

@@ -1,4 +1,4 @@
-package ems
+package eventmesh
 
 type Qos string
 

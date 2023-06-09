@@ -15,13 +15,13 @@ type EventMeshConfig struct {
 	ClientID            string        `envconfig:"CLIENT_ID" required:"true"`
 	ClientSecret        string        `envconfig:"CLIENT_SECRET" required:"true"`
 	TokenEndpoint       string        `envconfig:"TOKEN_ENDPOINT" required:"true"`
-	EmsPublishURL       string        `envconfig:"EMS_PUBLISH_URL" required:"true"`
+	EventMeshPublishURL string        `envconfig:"EMS_PUBLISH_URL" required:"true"`
 	MaxIdleConns        int           `envconfig:"MAX_IDLE_CONNS" default:"100"`
 	MaxIdleConnsPerHost int           `envconfig:"MAX_IDLE_CONNS_PER_HOST" default:"2"`
 	RequestTimeout      time.Duration `envconfig:"REQUEST_TIMEOUT" default:"5s"`
-	// EventMeshNamespace is the name of the namespace in EventMesh which is used as the event source for legacy events
+	// EventMeshNamespace is the name of the namespace in EventMesh which is used as the event source for legacy events.
 	EventMeshNamespace string `envconfig:"BEB_NAMESPACE" required:"true"`
-	// EventTypePrefix is the prefix of each event as per the eventing specification
+	// EventTypePrefix is the prefix of each event as per the eventing specification.
 	// It follows the eventType format: <eventTypePrefix>.<appName>.<event-name>.<version>
 	EventTypePrefix string `envconfig:"EVENT_TYPE_PREFIX" default:""`
 }
@@ -36,6 +36,6 @@ func (c *EventMeshConfig) ConfigureTransport(transport *http.Transport) {
 func (c *EventMeshConfig) String() string {
 	return fmt.Sprintf("EventMeshConfig{ Port: %v; TokenEndPoint: %v; EmsPublishURL: %v; "+
 		"MaxIdleConns: %v; MaxIdleConnsPerHost: %v; RequestTimeout: %v; BEBNamespace: %v; EventTypePrefix: %v }",
-		c.Port, c.TokenEndpoint, c.EmsPublishURL, c.MaxIdleConns,
+		c.Port, c.TokenEndpoint, c.EventMeshPublishURL, c.MaxIdleConns,
 		c.MaxIdleConnsPerHost, c.RequestTimeout, c.EventMeshNamespace, c.EventTypePrefix)
 }
