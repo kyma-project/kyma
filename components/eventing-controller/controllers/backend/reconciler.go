@@ -35,7 +35,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
 
-//nolint:gosec,lll
+//nolint:gosec,lll // refactor this later.
 const (
 	BEBBackendSecretLabelKey   = "kyma-project.io/eventing-backend"
 	BEBBackendSecretLabelValue = "beb"
