@@ -34,8 +34,8 @@ func Backend() (string, error) {
 
 // Config represents the environment config for the Eventing Controller.
 type Config struct {
-	// Following details are for eventing-controller to communicate to BEB
-	EventMeshAPIURL string `envconfig:"BEB_API_URL" default:"https://enterprise-messaging-pubsub.cfapps.sap.hana.ondemand.com/sap/ems/v1"`
+	// Following details are for eventing-controller to communicate to EventMesh.
+	EventMeshAPIURL string `envconfig:"BEB_API_URL" default:"https://enterprise-messaging-pubsub.cfapps.sap.hana.ondemand.com/sap/ems/v1"` //nolint:lll
 	ClientID        string `envconfig:"CLIENT_ID" default:"client-id"`
 	ClientSecret    string `envconfig:"CLIENT_SECRET" default:"client-secret"`
 	TokenEndpoint   string `envconfig:"TOKEN_ENDPOINT" default:"token-endpoint"`
