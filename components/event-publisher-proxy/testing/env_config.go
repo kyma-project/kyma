@@ -12,10 +12,10 @@ const (
 
 func NewEnvConfig(emsCEURL, authURL string, opts ...EnvConfigOption) *env.EventMeshConfig {
 	envConfig := &env.EventMeshConfig{
-		Port:           defaultPort,
-		EmsPublishURL:  emsCEURL,
-		TokenEndpoint:  authURL,
-		RequestTimeout: time.Minute,
+		Port:                defaultPort,
+		EventMeshPublishURL: emsCEURL,
+		TokenEndpoint:       authURL,
+		RequestTimeout:      time.Minute,
 	}
 	for _, opt := range opts {
 		opt(envConfig)
@@ -49,9 +49,9 @@ func WithRequestTimeout(requestTimeout time.Duration) EnvConfigOption {
 	}
 }
 
-func WithBEBNamespace(bebNs string) EnvConfigOption {
+func WithNamespace(namespace string) EnvConfigOption {
 	return func(e *env.EventMeshConfig) {
-		e.EventMeshNamespace = bebNs
+		e.EventMeshNamespace = namespace
 	}
 }
 

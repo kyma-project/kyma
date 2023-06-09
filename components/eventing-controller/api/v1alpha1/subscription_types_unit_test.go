@@ -12,7 +12,7 @@ import (
 )
 
 func TestBEBFilters_Deduplicate(t *testing.T) {
-	filter1 := &v1alpha1.BEBFilter{
+	filter1 := &v1alpha1.EventMeshFilter{
 		EventSource: &v1alpha1.Filter{
 			Type:     "exact",
 			Property: "source",
@@ -24,7 +24,7 @@ func TestBEBFilters_Deduplicate(t *testing.T) {
 			Value:    orderCreatedEventType,
 		},
 	}
-	filter2 := &v1alpha1.BEBFilter{
+	filter2 := &v1alpha1.EventMeshFilter{
 		EventSource: &v1alpha1.Filter{
 			Type:     "exact",
 			Property: "source",
@@ -36,7 +36,7 @@ func TestBEBFilters_Deduplicate(t *testing.T) {
 			Value:    orderProcessedEventType,
 		},
 	}
-	filter3 := &v1alpha1.BEBFilter{
+	filter3 := &v1alpha1.EventMeshFilter{
 		EventSource: &v1alpha1.Filter{
 			Type:     "exact",
 			Property: "source",
@@ -58,11 +58,11 @@ func TestBEBFilters_Deduplicate(t *testing.T) {
 			caseName: "Only one filter",
 			input: &v1alpha1.BEBFilters{
 				Dialect: "beb",
-				Filters: []*v1alpha1.BEBFilter{filter1},
+				Filters: []*v1alpha1.EventMeshFilter{filter1},
 			},
 			expected: &v1alpha1.BEBFilters{
 				Dialect: "beb",
-				Filters: []*v1alpha1.BEBFilter{filter1},
+				Filters: []*v1alpha1.EventMeshFilter{filter1},
 			},
 			expectErr: false,
 		},
@@ -70,21 +70,21 @@ func TestBEBFilters_Deduplicate(t *testing.T) {
 			caseName: "Filters with duplicate",
 			input: &v1alpha1.BEBFilters{
 				Dialect: "nats",
-				Filters: []*v1alpha1.BEBFilter{filter1, filter1},
+				Filters: []*v1alpha1.EventMeshFilter{filter1, filter1},
 			},
 			expected: &v1alpha1.BEBFilters{
 				Dialect: "nats",
-				Filters: []*v1alpha1.BEBFilter{filter1},
+				Filters: []*v1alpha1.EventMeshFilter{filter1},
 			},
 			expectErr: false,
 		},
 		{
 			caseName: "Filters without duplicate",
 			input: &v1alpha1.BEBFilters{
-				Filters: []*v1alpha1.BEBFilter{filter1, filter2, filter3},
+				Filters: []*v1alpha1.EventMeshFilter{filter1, filter2, filter3},
 			},
 			expected: &v1alpha1.BEBFilters{
-				Filters: []*v1alpha1.BEBFilter{filter1, filter2, filter3},
+				Filters: []*v1alpha1.EventMeshFilter{filter1, filter2, filter3},
 			},
 			expectErr: false,
 		},

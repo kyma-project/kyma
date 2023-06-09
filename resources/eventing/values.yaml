@@ -10,11 +10,11 @@ global:
       pullPolicy: "IfNotPresent"
     publisher_proxy:
       name: event-publisher-proxy
-      version: PR-17538
+      version: PR-17638
       directory: dev
     certHandler:
       name: eventing-webhook-certificates
-      version: v20230502-386f07fc
+      version: 1.6.0
       directory: prod
     nats:
       name: nats
