@@ -56,7 +56,7 @@ import (
 type eventMeshTestEnsemble struct {
 	k8sClient     client.Client
 	testEnv       *envtest.Environment
-	eventMeshMock *reconcilertesting.BEBMock
+	eventMeshMock *reconcilertesting.EventMeshMock
 	nameMapper    backendutils.NameMapper
 	envConfig     env.Config
 }
@@ -146,6 +146,7 @@ func setupSuite() error {
 	credentials := &backendeventmesh.OAuth2ClientCredentials{
 		ClientID:     "foo-client-id",
 		ClientSecret: "foo-client-secret",
+		TokenURL:     "foo-token-url",
 	}
 	emTestEnsemble.envConfig = getEnvConfig()
 	testReconciler := eventmeshreconciler.NewReconciler(
@@ -264,8 +265,8 @@ func tearDownSuite() error {
 	return err
 }
 
-func startNewEventMeshMock() *reconcilertesting.BEBMock {
-	emMock := reconcilertesting.NewBEBMock()
+func startNewEventMeshMock() *reconcilertesting.EventMeshMock {
+	emMock := reconcilertesting.NewEventMeshMock()
 	emMock.Start()
 	return emMock
 }

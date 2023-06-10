@@ -1,4 +1,4 @@
-package beb
+package eventmesh
 
 import (
 	"context"
@@ -34,8 +34,8 @@ import (
 )
 
 const (
-	bebBackend       = "beb"
-	bebCommanderName = bebBackend + "-commander"
+	backend       = "beb"
+	commanderName = backend + "-commander"
 )
 
 // Commander implements the Commander interface.
@@ -47,7 +47,7 @@ type Commander struct {
 	opts             *options.Options
 }
 
-// NewCommander creates the Commander for publisher to BEB.
+// NewCommander creates the Commander for publisher to EventMesh.
 func NewCommander(opts *options.Options, metricsCollector *metrics.Collector, logger *logger.Logger) *Commander {
 	return &Commander{
 		metricsCollector: metricsCollector,
@@ -60,7 +60,7 @@ func NewCommander(opts *options.Options, metricsCollector *metrics.Collector, lo
 // Init implements the Commander interface and initializes the publisher to BEB.
 func (c *Commander) Init() error {
 	if err := envconfig.Process("", c.envCfg); err != nil {
-		return xerrors.Errorf("failed to read configuration for %s : %v", bebCommanderName, err)
+		return xerrors.Errorf("failed to read configuration for %s : %v", commanderName, err)
 	}
 	return nil
 }
@@ -81,7 +81,7 @@ func (c *Commander) Start() error {
 	defer client.CloseIdleConnections()
 
 	// configure message sender
-	messageSender := eventmesh.NewSender(c.envCfg.EmsPublishURL, client)
+	messageSender := eventmesh.NewSender(c.envCfg.EventMeshPublishURL, client)
 
 	// cluster config
 	k8sConfig := config.GetConfigOrDie()
@@ -138,7 +138,7 @@ func (c *Commander) Start() error {
 		c.envCfg.EventTypePrefix,
 		env.EventMeshBackend,
 	).Start(ctx); err != nil {
-		return xerrors.Errorf("failed to start handler for %s : %v", bebCommanderName, err)
+		return xerrors.Errorf("failed to start handler for %s : %v", commanderName, err)
 	}
 	c.namedLogger().Info("Event Publisher was shut down")
 	return nil
@@ -151,5 +151,5 @@ func (c *Commander) Stop() error {
 }
 
 func (c *Commander) namedLogger() *zap.SugaredLogger {
-	return c.logger.WithContext().Named(bebCommanderName).With("backend", bebBackend)
+	return c.logger.WithContext().Named(commanderName).With("backend", backend)
 }
