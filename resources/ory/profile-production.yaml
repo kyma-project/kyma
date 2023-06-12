@@ -30,10 +30,11 @@ hydra:
   deployment:
     resources:
       requests:
-        cpu: "250m"
-        memory: "256Mi"
+        cpu: 250m
+        memory: 256Mi
       limits:
-        memory: "1Gi"
+        cpu: 10m
+        memory: 1Gi
     autoscaling:
       enabled: true
       minReplicas: 2
@@ -44,10 +45,11 @@ oathkeeper:
   deployment:
     resources:
       limits:
-        memory: "512Mi"
+        cpu: 10m
+        memory: 512Mi
       requests:
-        cpu: "100m"
-        memory: "64Mi"
+        cpu: 100m
+        memory: 64Mi
     autoscaling:
       enabled: true
       minReplicas: 3

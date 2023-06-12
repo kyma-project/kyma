@@ -3,26 +3,34 @@ global:
   ory:
     hydra:
       persistence:
-        enabled: false
+        enabled: true
         postgresql:
-          enabled: false
+          enabled: true
         gcloud:
           enabled: false
 hydra:
   replicaCount: 1
   hydra:
-    autoMigrate: false
+    autoMigrate: true
   deployment:
     autoscaling:
       enabled: false
     resources:
       requests:
-        cpu: "10m"
+        cpu: 10m
 oathkeeper:
   replicaCount: 1
   deployment:
     resources:
       requests:
-        cpu: "10m"
+        cpu: 10m
     autoscaling:
       enabled: false
+postgresql:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi      
+    limits:
+      cpu: 500m
+      memory: 256Mi
