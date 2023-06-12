@@ -1,8 +1,8 @@
 loki:
   resources:
     limits:
-      cpu: 100m
-      memory: 512Mi
+      cpu: 300m
+      memory: 2.5Gi
     requests:
       cpu: 10m
       memory: 128Mi

@@ -3,7 +3,7 @@ prometheus:
     resources:
       limits:
         cpu: 1000m
-        memory: 4Gi
+        memory: 8Gi
       requests:
         cpu: 125m
         memory: 1Gi
@@ -17,6 +17,8 @@ prometheus:
               storage: 20Gi
 
 prometheusOperator:
+  namespaces:
+    releaseNamespace: "true"
   resources:
     requests:
       cpu: "10m"
@@ -24,6 +26,20 @@ prometheusOperator:
     limits:
       cpu: "500m"
 
+prometheus-istio:
+  server:
+    resources:
+      requests:
+        cpu: 200m
+        memory: 768Mi
+      limits:
+        cpu: 1000m
+        memory: 8Gi
+
+defaultRules:
+  disabled:
+    PrometheusNotConnectedToAlertmanagers: "true"
+    
 alertmanager:
   alertmanagerSpec:
     retention: 240h
@@ -35,4 +51,30 @@ kube-state-metrics:
       memory: "128Mi"
     limits:
       cpu: "500m"
-      memory: "1Gi"
+      memory: "2Gi"
+
+grafana:
+  persistence:
+    enabled: "false"
+    inMemory:
+      enabled: "false"
+  env:
+    GF_ALERTING_ENABLED: "false"
+    GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+    GF_DASHBOARDS_MIN_REFRESH_INTERVAL: 5m
+  dataSources:
+    jaeger:
+      enabled: "false"
+  extraExposePorts: |-
+    - name: proxy-status
+      port: 15020
+      protocol: TCP
+      targetPort: 15020
+  sidecar:
+    dashboards:
+      searchNamespace: "kyma-system"
+    datasources:
+      searchNamespace: "kyma-system"
+  kyma:
+    authProxy:
+      configDocsLink: "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/3e4299cfd0884c428e6b4774225638e8.html"
