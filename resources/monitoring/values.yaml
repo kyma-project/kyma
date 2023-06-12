@@ -1781,7 +1781,7 @@ prometheusOperator:
 
   ## Namespaces not to scope the interaction of the Prometheus Operator (deny list).
   ##
-  denyNamespaces: "monitoring-system"
+  denyNamespaces: []
 
   ## Filter namespaces to look for prometheus-operator custom resources
   ##
