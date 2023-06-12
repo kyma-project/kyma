@@ -245,19 +245,26 @@ func cleanupEventMesh(backend backendeventmesh.Backend, dynamicClient dynamic.In
 }
 
 func getOAuth2ClientCredentials(params subscriptionmanager.Params) (*backendeventmesh.OAuth2ClientCredentials, error) {
-	val := params["client_id"]
+	val := params[subscriptionmanager.ParmaNameClientID]
 	id, ok := val.([]byte)
 	if !ok {
-		return nil, fmt.Errorf("expected []byte value for client_id, but received %T", val)
+		return nil, fmt.Errorf("expected []byte value for %s, but received %T", subscriptionmanager.ParmaNameClientID, val)
 	}
-	val = params["client_secret"]
+	val = params[subscriptionmanager.ParmaNameClientSecret]
 	secret, ok := val.([]byte)
 	if !ok {
-		return nil, fmt.Errorf("expected []byte value for client_secret, but received %T", val)
+		return nil, fmt.Errorf("expected []byte value for %s, but received %T",
+			subscriptionmanager.ParmaNameClientSecret, val)
+	}
+	val = params[subscriptionmanager.ParmaNameTokenURL]
+	tokenURL, ok := val.([]byte)
+	if !ok {
+		return nil, fmt.Errorf("expected []byte value for %s, but received %T", subscriptionmanager.ParmaNameTokenURL, val)
 	}
 	return &backendeventmesh.OAuth2ClientCredentials{
 		ClientID:     string(id),
 		ClientSecret: string(secret),
+		TokenURL:     string(tokenURL),
 	}, nil
 }
 
