@@ -248,23 +248,32 @@ func getOAuth2ClientCredentials(params subscriptionmanager.Params) (*backendeven
 	val := params[subscriptionmanager.ParmaNameClientID]
 	id, ok := val.([]byte)
 	if !ok {
-		return nil, fmt.Errorf("expected []byte value for %s, but received %T", subscriptionmanager.ParmaNameClientID, val)
+		return nil, fmt.Errorf("expected []byte value for %s", subscriptionmanager.ParmaNameClientID)
 	}
+
 	val = params[subscriptionmanager.ParmaNameClientSecret]
 	secret, ok := val.([]byte)
 	if !ok {
-		return nil, fmt.Errorf("expected []byte value for %s, but received %T",
-			subscriptionmanager.ParmaNameClientSecret, val)
+		return nil, fmt.Errorf("expected []byte value for %s", subscriptionmanager.ParmaNameClientSecret)
 	}
+
 	val = params[subscriptionmanager.ParmaNameTokenURL]
 	tokenURL, ok := val.([]byte)
 	if !ok {
-		return nil, fmt.Errorf("expected []byte value for %s, but received %T", subscriptionmanager.ParmaNameTokenURL, val)
+		return nil, fmt.Errorf("expected []byte value for %s", subscriptionmanager.ParmaNameTokenURL)
 	}
+
+	val = params[subscriptionmanager.ParmaNameCertsURL]
+	certsURL, ok := val.([]byte)
+	if !ok {
+		return nil, fmt.Errorf("expected []byte value for %s", subscriptionmanager.ParmaNameCertsURL)
+	}
+
 	return &backendeventmesh.OAuth2ClientCredentials{
 		ClientID:     string(id),
 		ClientSecret: string(secret),
 		TokenURL:     string(tokenURL),
+		CertsURL:     string(certsURL),
 	}, nil
 }
 

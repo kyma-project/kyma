@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -81,6 +82,7 @@ type oauth2Credentials struct {
 	clientID     []byte
 	clientSecret []byte
 	tokenURL     []byte
+	certsURL     []byte
 }
 
 type Reconciler struct {
@@ -348,8 +350,22 @@ func (r *Reconciler) syncOauth2ClientIDAndSecret(ctx context.Context, backendSta
 		r.credentials.clientID = credentials.clientID
 		r.credentials.clientSecret = credentials.clientSecret
 		r.credentials.tokenURL = credentials.tokenURL
+		certsURL := computeCertsURL(string(credentials.tokenURL))
+		r.credentials.certsURL = []byte(certsURL)
 	}
 	return nil
+}
+
+// computeCertsURL computes the certs url from the given token url.
+// TODO Remove this function when the certs url becomes available
+// as part of the secret created by the Eventing auth manager.
+// https://github.com/kyma-project/eventing-auth-manager/issues/27
+func computeCertsURL(tokenURL string) string {
+	const endpointToken, endpointCerts = "token", "certs"
+	if strings.HasSuffix(tokenURL, endpointToken) {
+		return strings.TrimSuffix(tokenURL, endpointToken) + endpointCerts
+	}
+	return ""
 }
 
 func setUpEnvironmentForBEBController(secret *v1.Secret) error {
@@ -844,6 +860,7 @@ func (r *Reconciler) startBEBController() error {
 			subscriptionmanager.ParmaNameClientID:     r.credentials.clientID,
 			subscriptionmanager.ParmaNameClientSecret: r.credentials.clientSecret,
 			subscriptionmanager.ParmaNameTokenURL:     r.credentials.tokenURL,
+			subscriptionmanager.ParmaNameCertsURL:     r.credentials.certsURL,
 		}
 		if err := r.bebSubMgr.Start(r.cfg.DefaultSubscriptionConfig, bebSubMgrParams); err != nil {
 			return xerrors.Errorf("failed to start BEB subscription manager: %v", err)

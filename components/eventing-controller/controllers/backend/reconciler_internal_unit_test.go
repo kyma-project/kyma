@@ -539,6 +539,36 @@ func Test_getOAuth2ClientCredentials(t *testing.T) {
 	}
 }
 
+func Test_computeCertsURL(t *testing.T) {
+	testCases := []struct {
+		name          string
+		givenTokenURL string
+		wantCertsURL  string
+	}{
+		{
+			name:          "Token endpoint is not found",
+			givenTokenURL: "https://domain.com",
+			wantCertsURL:  "",
+		},
+		{
+			name:          "Token endpoint is found once",
+			givenTokenURL: "https://domain.com/oauth2/token",
+			wantCertsURL:  "https://domain.com/oauth2/certs",
+		},
+		{
+			name:          "Token endpoint is found multiple times",
+			givenTokenURL: "https://domain.com/oauth2/token/token/token",
+			wantCertsURL:  "https://domain.com/oauth2/token/token/certs",
+		},
+	}
+	for _, testcase := range testCases {
+		tc := testcase
+		t.Run(tc.name, func(t *testing.T) {
+			require.Equal(t, tc.wantCertsURL, computeCertsURL(tc.givenTokenURL))
+		})
+	}
+}
+
 func setup(objs ...client.Object) Reconciler {
 	fakeClient := fake.NewClientBuilder().WithObjects(objs...).Build()
 	return Reconciler{

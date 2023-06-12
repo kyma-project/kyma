@@ -10,6 +10,7 @@ const (
 	ParmaNameClientID     = "client_id"
 	ParmaNameClientSecret = "client_secret"
 	ParmaNameTokenURL     = "token_url"
+	ParmaNameCertsURL     = "certs_url"
 )
 
 type Params map[string]interface{}
