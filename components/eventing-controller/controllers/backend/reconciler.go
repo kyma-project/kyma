@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -65,6 +64,7 @@ const (
 	secretKeyClientID     = "client_id"
 	secretKeyClientSecret = "client_secret"
 	secretKeyTokenURL     = "token_url"
+	secretKeyCertsURL     = "certs_url"
 )
 
 var (
@@ -350,22 +350,9 @@ func (r *Reconciler) syncOauth2ClientIDAndSecret(ctx context.Context, backendSta
 		r.credentials.clientID = credentials.clientID
 		r.credentials.clientSecret = credentials.clientSecret
 		r.credentials.tokenURL = credentials.tokenURL
-		certsURL := computeCertsURL(string(credentials.tokenURL))
-		r.credentials.certsURL = []byte(certsURL)
+		r.credentials.certsURL = credentials.certsURL
 	}
 	return nil
-}
-
-// computeCertsURL computes the certs url from the given token url.
-// TODO Remove this function when the certs url becomes available
-// as part of the secret created by the Eventing auth manager.
-// https://github.com/kyma-project/eventing-auth-manager/issues/27
-func computeCertsURL(tokenURL string) string {
-	const endpointToken, endpointCerts = "token", "certs"
-	if strings.HasSuffix(tokenURL, endpointToken) {
-		return strings.TrimSuffix(tokenURL, endpointToken) + endpointCerts
-	}
-	return ""
 }
 
 func setUpEnvironmentForBEBController(secret *v1.Secret) error {
@@ -748,7 +735,7 @@ func (r *Reconciler) getOAuth2SecretNamespacedName() types.NamespacedName {
 func (r *Reconciler) getOAuth2ClientCredentials(ctx context.Context) (*oauth2Credentials, error) {
 	var err error
 	var exists bool
-	var clientID, clientSecret, tokenURL []byte
+	var clientID, clientSecret, tokenURL, certsURL []byte
 
 	oauth2Secret := new(v1.Secret)
 	oauth2SecretNamespacedName := r.getOAuth2SecretNamespacedName()
@@ -760,27 +747,51 @@ func (r *Reconciler) getOAuth2ClientCredentials(ctx context.Context) (*oauth2Cre
 			oauth2SecretNamespacedName.Namespace, oauth2SecretNamespacedName.Name)
 		return nil, err
 	}
+
 	if clientID, exists = oauth2Secret.Data[secretKeyClientID]; !exists {
 		err = errors.Errorf("key '%s' not found in secret %s",
 			secretKeyClientID, oauth2SecretNamespacedName.String())
 		return nil, err
 	}
+
 	if clientSecret, exists = oauth2Secret.Data[secretKeyClientSecret]; !exists {
 		err = errors.Errorf("key '%s' not found in secret %s",
 			secretKeyClientSecret, oauth2SecretNamespacedName.String())
 		return nil, err
 	}
+
 	if !featureflags.IsEventingWebhookAuthEnabled() {
 		tokenURL = []byte(r.envCfg.WebhookTokenEndpoint)
-		return &oauth2Credentials{clientID: clientID, clientSecret: clientSecret, tokenURL: tokenURL}, nil
+		certsURL = []byte("")
+		credentials := oauth2Credentials{
+			clientID:     clientID,
+			clientSecret: clientSecret,
+			tokenURL:     tokenURL,
+			certsURL:     certsURL,
+		}
+		return &credentials, nil
 	}
+
 	if tokenURL, exists = oauth2Secret.Data[secretKeyTokenURL]; !exists {
 		err = errors.Errorf("key '%s' not found in secret %s",
 			secretKeyTokenURL, oauth2SecretNamespacedName.String())
 		return nil, err
 	}
 
-	return &oauth2Credentials{clientID: clientID, clientSecret: clientSecret, tokenURL: tokenURL}, nil
+	if certsURL, exists = oauth2Secret.Data[secretKeyCertsURL]; !exists {
+		err = errors.Errorf("key '%s' not found in secret %s",
+			secretKeyCertsURL, oauth2SecretNamespacedName.String())
+		return nil, err
+	}
+
+	credentials := oauth2Credentials{
+		clientID:     clientID,
+		clientSecret: clientSecret,
+		tokenURL:     tokenURL,
+		certsURL:     certsURL,
+	}
+
+	return &credentials, nil
 }
 
 func getDeploymentMapper() handler.EventHandler {
