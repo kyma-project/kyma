@@ -868,10 +868,10 @@ func (r *Reconciler) stopNATSController() error {
 func (r *Reconciler) startBEBController() error {
 	if !r.bebSubMgrStarted {
 		bebSubMgrParams := subscriptionmanager.Params{
-			subscriptionmanager.ParmaNameClientID:     r.credentials.clientID,
-			subscriptionmanager.ParmaNameClientSecret: r.credentials.clientSecret,
-			subscriptionmanager.ParmaNameTokenURL:     r.credentials.tokenURL,
-			subscriptionmanager.ParmaNameCertsURL:     r.credentials.certsURL,
+			subscriptionmanager.ParamNameClientID:     r.credentials.clientID,
+			subscriptionmanager.ParamNameClientSecret: r.credentials.clientSecret,
+			subscriptionmanager.ParamNameTokenURL:     r.credentials.tokenURL,
+			subscriptionmanager.ParamNameCertsURL:     r.credentials.certsURL,
 		}
 		if err := r.bebSubMgr.Start(r.cfg.DefaultSubscriptionConfig, bebSubMgrParams); err != nil {
 			return xerrors.Errorf("failed to start BEB subscription manager: %v", err)
