@@ -16,8 +16,8 @@ controller:
       cpu: 2000m
       memory: 1Gi
     requests:
-      cpu: 100m
-      memory: 64Mi
+      cpu: 50m
+      memory: 256Mi
   publisherProxy:
     replicas: 2
     resources:
@@ -25,8 +25,8 @@ controller:
         cpu: 500m
         memory: 512Mi
       requests:
-        cpu: 50m
-        memory: 128Mi
+        cpu: 1000m
+        memory: 1Gi
 
 nats:
   cluster:
@@ -41,10 +41,10 @@ nats:
         size: 1Gi
     resources:
       limits:
-        cpu: 500m
+        cpu: 1000m
         memory: 1Gi
       requests:
-        cpu: 400m
+        cpu: 100m
         memory: 512Mi
     logging:
       debug: false
