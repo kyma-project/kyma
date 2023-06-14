@@ -176,7 +176,7 @@ containers:
   manager:
     resources:
       limits:
-        cpu: 600m
+        cpu: 1500m
         memory: 1Gi
       requests:
         cpu: 10m
