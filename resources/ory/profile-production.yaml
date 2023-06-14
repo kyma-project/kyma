@@ -33,7 +33,6 @@ hydra:
         cpu: 250m
         memory: 256Mi
       limits:
-        cpu: 10m
         memory: 1Gi
     autoscaling:
       enabled: true
