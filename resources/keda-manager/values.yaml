@@ -4,7 +4,7 @@ global:
   images:
     keda_manager:
       name: "keda-manager"
-      version: "v20230607-3d318794"
+      version: "v20230614-5e3ba091"
       directory: "prod"
     keda:
       name: "keda"
