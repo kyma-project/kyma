@@ -11,8 +11,6 @@ prometheus:
     retentionSize: 1GB
 
 prometheusOperator:
-  namespaces:
-    releaseNamespace: "true"
   resources:
     limits:
       memory: 1Gi
@@ -41,23 +39,3 @@ grafana:
     enabled: "false"
     inMemory:
       enabled: "false"
-  env:
-    GF_ALERTING_ENABLED: "false"
-    GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
-    GF_DASHBOARDS_MIN_REFRESH_INTERVAL: 5m
-  dataSources:
-    jaeger:
-      enabled: "false"
-  extraExposePorts: |-
-    - name: proxy-status
-      port: 15020
-      protocol: TCP
-      targetPort: 15020
-  sidecar:
-    dashboards:
-      searchNamespace: "kyma-system"
-    datasources:
-      searchNamespace: "kyma-system"
-  kyma:
-    authProxy:
-      configDocsLink: "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/3e4299cfd0884c428e6b4774225638e8.html"
