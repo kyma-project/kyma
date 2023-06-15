@@ -9,7 +9,7 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/kyma-project/kyma/components/application-operator v0.0.0-20221118103320-ffe096ff3455
 	github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20230605123955-9a13db476af1
-	github.com/nats-io/nats-server/v2 v2.9.17
+	github.com/nats-io/nats-server/v2 v2.9.18
 	github.com/nats-io/nats.go v1.27.0
 	github.com/onsi/gomega v1.27.8
 	github.com/pkg/errors v0.9.1
@@ -70,7 +70,7 @@ require (
 	github.com/stretchr/objx v0.5.0 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
-	golang.org/x/crypto v0.8.0 // indirect
+	golang.org/x/crypto v0.9.0 // indirect
 	golang.org/x/net v0.10.0 // indirect
 	golang.org/x/sys v0.8.0 // indirect
 	golang.org/x/term v0.8.0 // indirect
