@@ -22,11 +22,11 @@ controller:
     replicas: 2
     resources:
       limits:
-        cpu: 500m
-        memory: 512Mi
-      requests:
         cpu: 1000m
         memory: 1Gi
+      requests:
+        cpu: 50m
+        memory: 128mi
 
 nats:
   cluster:

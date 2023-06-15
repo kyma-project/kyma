@@ -3,7 +3,7 @@ global:
   ory:
     hydra:
       persistence:
-        enabled: true
+        enabled: false
         postgresql:
           enabled: true
         gcloud:
