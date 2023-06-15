@@ -518,7 +518,13 @@ func (r *Reconciler) handlePreviousAPIRule(ctx context.Context, subscription *ev
 
 		// update the APIRule OwnerReferences list and Spec Rules
 		object.WithOwnerReference(subscriptions)(previousAPIRule)
-		object.WithRules(subscriptions, *previousAPIRule.Spec.Service, http.MethodPost, http.MethodOptions)(previousAPIRule)
+		object.WithRules(
+			r.oauth2credentials.CertsURL,
+			subscriptions,
+			*previousAPIRule.Spec.Service,
+			http.MethodPost,
+			http.MethodOptions,
+		)(previousAPIRule)
 
 		if err := r.Client.Update(ctx, previousAPIRule); err != nil {
 			return err
@@ -596,7 +602,7 @@ func (r *Reconciler) makeAPIRule(svcNs, svcName string, labels map[string]string
 		object.WithOwnerReference(subs),
 		object.WithService(hostName, svcName, port),
 		object.WithGateway(constants.ClusterLocalAPIGateway),
-		object.WithRules(subs, svc, http.MethodPost, http.MethodOptions))
+		object.WithRules(r.oauth2credentials.CertsURL, subs, svc, http.MethodPost, http.MethodOptions))
 	return apiRule
 }
 

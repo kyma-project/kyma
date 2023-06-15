@@ -403,7 +403,7 @@ func WithService(name, host string) APIRuleOption {
 
 func WithPath() APIRuleOption {
 	return func(r *apigatewayv1beta1.APIRule) {
-		handlerOAuth := object.OAuthHandlerName
+		handlerOAuth := object.OAuthHandlerNameOAuth2Introspection
 		handler := apigatewayv1beta1.Handler{
 			Name: handlerOAuth,
 		}
