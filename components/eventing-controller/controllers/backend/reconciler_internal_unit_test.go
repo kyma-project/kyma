@@ -351,6 +351,7 @@ func Test_getOAuth2ClientCredentials(t *testing.T) {
 		wantClientID     []byte
 		wantClientSecret []byte
 		wantTokenURL     []byte
+		wantCertsURL     []byte
 	}{
 		// secret is not found
 		{
@@ -391,6 +392,7 @@ func Test_getOAuth2ClientCredentials(t *testing.T) {
 						secretKeyClientID:     []byte("test-client-id-1"),
 						secretKeyClientSecret: []byte("test-client-secret-1"),
 						secretKeyTokenURL:     []byte("test-token-url-1"),
+						secretKeyCertsURL:     []byte("test-certs-url-1"),
 					},
 				},
 			},
@@ -410,6 +412,7 @@ func Test_getOAuth2ClientCredentials(t *testing.T) {
 						secretKeyClientID:     []byte("test-client-id-0"),
 						secretKeyClientSecret: []byte("test-client-secret-0"),
 						secretKeyTokenURL:     []byte("test-token-url-0"),
+						secretKeyCertsURL:     []byte("test-certs-url-0"),
 					},
 				},
 				// required secret
@@ -441,6 +444,7 @@ func Test_getOAuth2ClientCredentials(t *testing.T) {
 						secretKeyClientID:     []byte("test-client-id-0"),
 						secretKeyClientSecret: []byte("test-client-secret-0"),
 						secretKeyTokenURL:     []byte("test-token-url-0"),
+						secretKeyCertsURL:     []byte("test-certs-url-0"),
 					},
 				},
 				// not required secret
@@ -453,6 +457,7 @@ func Test_getOAuth2ClientCredentials(t *testing.T) {
 						secretKeyClientID:     []byte("test-client-id-1"),
 						secretKeyClientSecret: []byte("test-client-secret-1"),
 						secretKeyTokenURL:     []byte("test-token-url-1"),
+						secretKeyCertsURL:     []byte("test-certs-url-1"),
 					},
 				},
 			},
@@ -460,6 +465,7 @@ func Test_getOAuth2ClientCredentials(t *testing.T) {
 			wantClientID:     []byte("test-client-id-0"),
 			wantClientSecret: []byte("test-client-secret-0"),
 			wantTokenURL:     []byte("test-token-url-0"),
+			wantCertsURL:     []byte("test-certs-url-0"),
 		},
 		{
 			name:             "eventing auth manager disabled, and secret exists with all data",
@@ -475,6 +481,7 @@ func Test_getOAuth2ClientCredentials(t *testing.T) {
 						secretKeyClientID:     []byte("test-client-id-0"),
 						secretKeyClientSecret: []byte("test-client-secret-0"),
 						secretKeyTokenURL:     []byte("test-token-url-0"),
+						secretKeyCertsURL:     []byte("test-certs-url-0"),
 					},
 				},
 				// required secret
@@ -487,6 +494,7 @@ func Test_getOAuth2ClientCredentials(t *testing.T) {
 						secretKeyClientID:     []byte("test-client-id-1"),
 						secretKeyClientSecret: []byte("test-client-secret-1"),
 						secretKeyTokenURL:     []byte("test-token-url-1"),
+						secretKeyCertsURL:     []byte("test-certs-url-1"),
 					},
 				},
 			},
@@ -494,6 +502,7 @@ func Test_getOAuth2ClientCredentials(t *testing.T) {
 			wantClientID:     []byte("test-client-id-1"),
 			wantClientSecret: []byte("test-client-secret-1"),
 			wantTokenURL:     []byte(defaultWebhookTokenEndpoint),
+			wantCertsURL:     []byte(""),
 		},
 	}
 
@@ -535,6 +544,7 @@ func Test_getOAuth2ClientCredentials(t *testing.T) {
 			require.Equal(t, tc.wantClientID, credentials.clientID)
 			require.Equal(t, tc.wantClientSecret, credentials.clientSecret)
 			require.Equal(t, tc.wantTokenURL, credentials.tokenURL)
+			require.Equal(t, tc.wantCertsURL, credentials.certsURL)
 		})
 	}
 }
