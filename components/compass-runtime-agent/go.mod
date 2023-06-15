@@ -14,10 +14,10 @@ require (
 	github.com/sirupsen/logrus v1.9.2
 	github.com/stretchr/testify v1.8.2
 	github.com/vrischmann/envconfig v1.3.0
-	k8s.io/api v0.26.5
+	k8s.io/api v0.26.6
 	k8s.io/apimachinery v0.27.2
-	k8s.io/client-go v0.26.5
-	k8s.io/metrics v0.26.5
+	k8s.io/client-go v0.26.6
+	k8s.io/metrics v0.26.6
 	sigs.k8s.io/controller-runtime v0.14.6
 )
 
