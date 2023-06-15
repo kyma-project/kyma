@@ -25,10 +25,6 @@ prometheus-istio:
         cpu: 1000m
         memory: 8Gi
 
-defaultRules:
-  disabled:
-    PrometheusNotConnectedToAlertmanagers: "true"
-
 kube-state-metrics:
   resources:
     limit:
