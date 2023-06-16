@@ -5,13 +5,13 @@ global:
       persistence:
         enabled: false
         postgresql:
-          enabled: true
+          enabled: false
         gcloud:
           enabled: false
 hydra:
   replicaCount: 1
   hydra:
-    autoMigrate: true
+    autoMigrate: false
   deployment:
     autoscaling:
       enabled: false
