@@ -15,23 +15,7 @@ prometheusOperator:
     limits:
       memory: 1Gi
 
-prometheus-istio:
-  server:
-    resources:
-      requests:
-        cpu: 200m
-        memory: 768Mi
-      limits:
-        cpu: 1000m
-        memory: 8Gi
-
 kube-state-metrics:
   resources:
     limit:
       memory: 256Mi
-
-grafana:
-  persistence:
-    enabled: "false"
-    inMemory:
-      enabled: "false"
