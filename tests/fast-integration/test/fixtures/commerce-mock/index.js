@@ -365,6 +365,11 @@ async function checkTrace(traceId, expectedTraceProcessSequence) {
     debug(`${buildLevel(i)} ${expectedTraceProcessSequence[i]}`);
   }
 
+  debug('traceRes:');
+  debug(traceRes)
+  debug('traceRes: console');
+  console.dir(traceRes, {depth: null});
+
   // the trace response should have data for single trace
   expect(traceRes.data).to.have.length(1);
 
