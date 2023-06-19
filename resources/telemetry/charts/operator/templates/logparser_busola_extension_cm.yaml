@@ -2,64 +2,38 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   labels:
-    app.kubernetes.io/name: logparsers.telemetry.kyma-project.io
+    app.kubernetes.io/name: telemetry-logparsers
     busola.io/extension: resource
     busola.io/extension-version: "0.5"
-  name: logparsers.telemetry.kyma-project.io
-  namespace: kube-public
+  name: telemetry-logparsers
+  namespace: kyma-system
 data:
   details: |-
-    {
-      "header": [
-        {
-          "source": "status.conditions[-1].type",
-          "name": "Status",
-          "widget": "Badge"
-        }
-      ],
-      "body": [
-        {
-          "source": "spec.parser",
-          "widget": "CodeViewer",
-          "language": "'plaintext'"
-        }
-      ]
-    }
+    header:
+      - source: status.conditions[-1].type
+        name: Status
+        widget: Badge
+    body:
+      - source: spec.parser
+        widget: CodeViewer
+        language: "'plaintext'"
   form: |-
-    [
-      {
-        "widget": "CodeEditor",
-        "path": "spec.parser",
-        "simple": true,
-        "language": "'plaintext'"
-      }
-    ]
+    - widget: CodeEditor
+      path: spec.parser
+      simple: true
+      language: "'plaintext'"
   general: |-
-    {
-      "resource": {
-        "kind": "LogParser",
-        "group": "telemetry.kyma-project.io",
-        "version": "v1alpha1"
-      },
-      "name": "Log Parsers",
-      "category": "Observability",
-      "urlPath": "logparsers",
-      "scope": "cluster",
-      "description": "Configure custom Log Parsers",
-    }
+    resource:
+      kind: LogParser
+      group: telemetry.kyma-project.io
+      version: v1alpha1
+    name: Log Parsers
+    category: Observability
+    urlPath: logparsers
+    scope: cluster
+    description: >-
+      {{"{{[LogParser](https://kyma-project.io/docs/kyma/latest/05-technical-reference/00-custom-resources/telemetry-02-logparser)}}"}} configures a custom Log Parser.
   list: |-
-    [
-      {
-        "source": "status.conditions[-1].type",
-        "name": "Status",
-        "widget": "Badge"
-      }
-    ]
-  translations: |-
-    {
-      "en": {
-        "metadata.annotations": "Annotations",
-        "metadata.labels": "Labels",
-        "metadata.creationTimestamp": "Created at"
-      }
-    }
+    - source: status.conditions[-1].type
+      name: Status
+      widget: Badge

@@ -6,6 +6,13 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 )
 
+const (
+	ParamNameClientID     = "client_id"
+	ParamNameClientSecret = "client_secret"
+	ParamNameTokenURL     = "token_url"
+	ParamNameCertsURL     = "certs_url"
+)
+
 type Params map[string]interface{}
 
 // Manager defines the interface that subscription managers for different messaging backends should implement.

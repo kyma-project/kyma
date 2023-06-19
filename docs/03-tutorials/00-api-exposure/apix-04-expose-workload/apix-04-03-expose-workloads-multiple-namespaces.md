@@ -8,44 +8,18 @@ This tutorial shows how to expose service endpoints in multiple Namespaces using
 
 ##  Prerequisites
 
-1. Create a sample HttpBin service deployment and a sample Function in the separate Namespaces:
+1. Create three Namespaces: one for an instance of the HttpBin service, one for a sample Function, and one for an APIRule custom resource (CR). Deploy an instance of the HttpBin service and a sample Function in their respective Namespaces. To learn how to do it, follow the [Create a workload](../apix-01-create-workload.md) tutorial. 
 
-   * Create a Namespace for the HttpBin service and export its value as an environment variable. Run:
+  >**NOTE:** Remember to [enable the Istio sidecar proxy injection](https://kyma-project.io/docs/kyma/latest/04-operation-guides/operations/smsh-01-istio-enable-sidecar-injection/) in each Namespace.
 
-     ```bash
-     export NAMESPACE_HTTPBIN={NAMESPACE_HTTPBIN}
-     kubectl create ns $NAMESPACE_HTTPBIN
-     kubectl label namespace $NAMESPACE_HTTPBIN istio-injection=enabled --overwrite
-     ```
-
-   * Create a different Namespace for the Function service and export its value as an environment variable. Run:
-
-     ```bash
-     export NAMESPACE_FUNCTION={NAMESPACE_FUNCTION}
-     kubectl create ns $NAMESPACE_FUNCTION
-     kubectl label namespace $NAMESPACE_FUNCTION istio-injection=enabled --overwrite
-     ```
-
-   * Deploy an instance of the HttpBin service in its Namespace using the [sample code](https://raw.githubusercontent.com/istio/istio/master/samples/httpbin/httpbin.yaml):
-
-     ```bash
-     kubectl -n $NAMESPACE_HTTPBIN create -f https://raw.githubusercontent.com/istio/istio/master/samples/httpbin/httpbin.yaml
-     ```
-
-   * Create a Function in its Namespace using the [sample code](../assets/function.yaml):
-
-     ```bash
-     kubectl -n $NAMESPACE_FUNCTION apply -f https://raw.githubusercontent.com/kyma-project/kyma/main/docs/03-tutorials/assets/function.yaml
-     ```
-
-2. Create a Namespace for the Gateway and APIRule CRs and export its value as the environment variable. Run:
+2. Export the Namespaces' names as environment variables:
 
   ```bash
-  export NAMESPACE={NAMESPACE}
-  kubectl create ns $NAMESPACE
-  kubectl label namespace $NAMESPACE istio-injection=enabled --overwrite
+  export NAMESPACE_HTTPBIN={NAMESPACE_NAME}
+  export NAMESPACE_FUNCTION={NAMESPACE_NAME}
+  export NAMESPACE_APIRULE={NAMESPACE_NAME}
   ```
-
+  
 3. Depending on whether you use your custom domain or a Kyma domain, export the necessary values as environment variables:
   
 <div tabs name="export-values">
@@ -57,7 +31,7 @@ This tutorial shows how to expose service endpoints in multiple Namespaces using
     
   ```bash
   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
-  export GATEWAY=$NAMESPACE/httpbin-gateway
+  export GATEWAY=$NAMESPACE_APIRULE/httpbin-gateway
   ```
   </details>
 
@@ -83,7 +57,7 @@ This tutorial shows how to expose service endpoints in multiple Namespaces using
    kind: APIRule
    metadata:
      name: httpbin-and-function
-     namespace: $NAMESPACE
+     namespace: $NAMESPACE_APIRULE
    spec:
      host: httpbin-and-function.$DOMAIN_TO_EXPOSE_WORKLOADS
      gateway: $GATEWAY

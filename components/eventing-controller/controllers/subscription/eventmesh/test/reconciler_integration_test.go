@@ -23,9 +23,10 @@ import (
 	"github.com/onsi/gomega"
 	gomegatypes "github.com/onsi/gomega/types"
 
+	corev1 "k8s.io/api/core/v1"
+
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
-	corev1 "k8s.io/api/core/v1"
 )
 
 const (
@@ -157,7 +158,7 @@ func Test_CreateSubscription(t *testing.T) {
 						fmt.Sprintf("%s0", reconcilertesting.OrderCreatedV1EventNotClean),
 						fmt.Sprintf("%s1", reconcilertesting.OrderCreatedV1EventNotClean),
 					}),
-					reconcilertesting.WithWebhookAuthForBEB(),
+					reconcilertesting.WithWebhookAuthForEventMesh(),
 					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, "invalid")),
 				)
 			},
@@ -178,7 +179,7 @@ func Test_CreateSubscription(t *testing.T) {
 						fmt.Sprintf("%s0", reconcilertesting.OrderCreatedV1EventNotClean),
 						fmt.Sprintf("%s1", reconcilertesting.OrderCreatedV1EventNotClean),
 					}),
-					reconcilertesting.WithWebhookAuthForBEB(),
+					reconcilertesting.WithWebhookAuthForEventMesh(),
 					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, testName)),
 				)
 			},
@@ -232,7 +233,7 @@ func Test_CreateSubscription(t *testing.T) {
 				eventmeshsubmatchers.HaveWebhookAuth(eventMeshtypes.WebhookAuth{
 					ClientID:     "foo-client-id",
 					ClientSecret: "foo-client-secret",
-					TokenURL:     emTestEnsemble.envConfig.WebhookTokenEndpoint,
+					TokenURL:     "foo-token-url",
 					Type:         eventMeshtypes.AuthTypeClientCredentials,
 					GrantType:    eventMeshtypes.GrantTypeClientCredentials,
 				}),
@@ -278,7 +279,7 @@ func Test_CreateSubscription(t *testing.T) {
 				return reconcilertesting.NewSubscription(testName, namespace,
 					reconcilertesting.WithNotCleanSource(),
 					reconcilertesting.WithNotCleanType(),
-					reconcilertesting.WithWebhookAuthForBEB(),
+					reconcilertesting.WithWebhookAuthForEventMesh(),
 					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, testName)),
 				)
 			},
@@ -381,7 +382,7 @@ func Test_UpdateSubscription(t *testing.T) {
 					reconcilertesting.WithTypes([]string{
 						fmt.Sprintf("%s0", reconcilertesting.OrderCreatedV1EventNotClean),
 					}),
-					reconcilertesting.WithWebhookAuthForBEB(),
+					reconcilertesting.WithWebhookAuthForEventMesh(),
 					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, testName)),
 				)
 			},
@@ -401,7 +402,7 @@ func Test_UpdateSubscription(t *testing.T) {
 						fmt.Sprintf("%s0", reconcilertesting.OrderCreatedV1EventNotClean),
 						fmt.Sprintf("%s1", reconcilertesting.OrderCreatedV1EventNotClean),
 					}),
-					reconcilertesting.WithWebhookAuthForBEB(),
+					reconcilertesting.WithWebhookAuthForEventMesh(),
 					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, testName)),
 				)
 			},
@@ -427,7 +428,7 @@ func Test_UpdateSubscription(t *testing.T) {
 						fmt.Sprintf("%s0", reconcilertesting.OrderCreatedV1EventNotClean),
 						fmt.Sprintf("%s1", reconcilertesting.OrderCreatedV1EventNotClean),
 					}),
-					reconcilertesting.WithWebhookAuthForBEB(),
+					reconcilertesting.WithWebhookAuthForEventMesh(),
 					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, testName)),
 				)
 			},
@@ -450,7 +451,7 @@ func Test_UpdateSubscription(t *testing.T) {
 						fmt.Sprintf("%s0alpha", reconcilertesting.OrderCreatedV1EventNotClean),
 						fmt.Sprintf("%s1alpha", reconcilertesting.OrderCreatedV1EventNotClean),
 					}),
-					reconcilertesting.WithWebhookAuthForBEB(),
+					reconcilertesting.WithWebhookAuthForEventMesh(),
 					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, testName)),
 				)
 			},
@@ -476,7 +477,7 @@ func Test_UpdateSubscription(t *testing.T) {
 						fmt.Sprintf("%s0", reconcilertesting.OrderCreatedV1EventNotClean),
 						fmt.Sprintf("%s1", reconcilertesting.OrderCreatedV1EventNotClean),
 					}),
-					reconcilertesting.WithWebhookAuthForBEB(),
+					reconcilertesting.WithWebhookAuthForEventMesh(),
 					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, testName)),
 				)
 			},
@@ -498,7 +499,7 @@ func Test_UpdateSubscription(t *testing.T) {
 					reconcilertesting.WithTypes([]string{
 						fmt.Sprintf("%s0", reconcilertesting.OrderCreatedV1EventNotClean),
 					}),
-					reconcilertesting.WithWebhookAuthForBEB(),
+					reconcilertesting.WithWebhookAuthForEventMesh(),
 					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, testName)),
 				)
 			},
@@ -617,7 +618,7 @@ func Test_FixingSinkAndApiRule(t *testing.T) {
 		return reconcilertesting.NewSubscription(name, namespace,
 			reconcilertesting.WithDefaultSource(),
 			reconcilertesting.WithOrderCreatedV1Event(),
-			reconcilertesting.WithWebhookAuthForBEB(),
+			reconcilertesting.WithWebhookAuthForEventMesh(),
 			// The following sink is invalid because it has an invalid svc name
 			reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, "invalid")),
 		)
@@ -636,7 +637,7 @@ func Test_FixingSinkAndApiRule(t *testing.T) {
 		return reconcilertesting.NewSubscription(name, namespace,
 			reconcilertesting.WithDefaultSource(),
 			reconcilertesting.WithOrderCreatedV1Event(),
-			reconcilertesting.WithWebhookAuthForBEB(),
+			reconcilertesting.WithWebhookAuthForEventMesh(),
 			reconcilertesting.WithSink(fmt.Sprintf(sinkFormat, name, namespace, path)),
 		)
 	}
@@ -704,7 +705,11 @@ func Test_FixingSinkAndApiRule(t *testing.T) {
 			getAPIRuleAssert(ctx, g, &apiRuleUpdated).Should(gomega.And(
 				reconcilertesting.HaveNotEmptyHost(),
 				reconcilertesting.HaveNotEmptyAPIRule(),
-				reconcilertesting.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, sinkPath),
+				reconcilertesting.HaveAPIRuleSpecRules(
+					acceptableMethods,
+					object.OAuthHandlerNameOAuth2Introspection,
+					sinkPath,
+				),
 				reconcilertesting.HaveAPIRuleOwnersRefs(givenSubscription.UID),
 			))
 
@@ -890,8 +895,16 @@ func Test_APIRuleReUseAfterUpdatingSink(t *testing.T) {
 	getAPIRuleAssert(ctx, g, apiRule1).Should(gomega.And(
 		reconcilertesting.HaveNotEmptyAPIRule(),
 		reconcilertesting.HaveAPIRuleOwnersRefs(createdSubscription1.UID, createdSubscription2.UID),
-		reconcilertesting.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, "/path1"),
-		reconcilertesting.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, "/path2"),
+		reconcilertesting.HaveAPIRuleSpecRules(
+			acceptableMethods,
+			object.OAuthHandlerNameOAuth2Introspection,
+			"/path1",
+		),
+		reconcilertesting.HaveAPIRuleSpecRules(
+			acceptableMethods,
+			object.OAuthHandlerNameOAuth2Introspection,
+			"/path2",
+		),
 	))
 
 	// phase 4: check that the unused APIRule is deleted.
@@ -949,8 +962,16 @@ func Test_APIRuleExistsAfterDeletingSub(t *testing.T) {
 	getAPIRuleAssert(ctx, g, apiRule1).Should(gomega.And(
 		reconcilertesting.HaveNotEmptyAPIRule(),
 		reconcilertesting.HaveAPIRuleOwnersRefs(createdSubscription1.UID, createdSubscription2.UID),
-		reconcilertesting.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, "/path1"),
-		reconcilertesting.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, "/path2"),
+		reconcilertesting.HaveAPIRuleSpecRules(
+			acceptableMethods,
+			object.OAuthHandlerNameOAuth2Introspection,
+			"/path1",
+		),
+		reconcilertesting.HaveAPIRuleSpecRules(
+			acceptableMethods,
+			object.OAuthHandlerNameOAuth2Introspection,
+			"/path2",
+		),
 	))
 	ensureAPIRuleStatusUpdatedWithStatusReady(ctx, t, apiRule1)
 
@@ -967,12 +988,20 @@ func Test_APIRuleExistsAfterDeletingSub(t *testing.T) {
 		reconcilertesting.HaveNotEmptyHost(),
 		reconcilertesting.HaveNotEmptyAPIRule(),
 		reconcilertesting.HaveAPIRuleOwnersRefs(createdSubscription1.UID),
-		reconcilertesting.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, "/path1"),
+		reconcilertesting.HaveAPIRuleSpecRules(
+			acceptableMethods,
+			object.OAuthHandlerNameOAuth2Introspection,
+			"/path1",
+		),
 	))
 	// ensure that the deleted Subscription is removed as Owner from the APIRule
 	getAPIRuleAssert(ctx, g, apiRule1).ShouldNot(gomega.And(
 		reconcilertesting.HaveAPIRuleOwnersRefs(createdSubscription1.UID),
-		reconcilertesting.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, "/path2"),
+		reconcilertesting.HaveAPIRuleSpecRules(
+			acceptableMethods,
+			object.OAuthHandlerNameOAuth2Introspection,
+			"/path2",
+		),
 	))
 }
 
@@ -1139,7 +1168,7 @@ func TestWithEventMeshServerErrors(t *testing.T) {
 				sub.SubscriptionStatus = eventMeshtypes.SubscriptionStatusPaused
 				subKey := getEventMeshKeyForMock(sub.Name)
 				emTestEnsemble.eventMeshMock.Subscriptions.PutSubscription(subKey, &sub)
-				reconcilertesting.BEBCreateSuccess(w)
+				reconcilertesting.EventMeshCreateSuccess(w)
 			},
 			wantSubscriptionMatchers: gomega.And(
 				reconcilertesting.HaveSubscriptionNotReady(),
@@ -1164,7 +1193,7 @@ func TestWithEventMeshServerErrors(t *testing.T) {
 
 				subKey := getEventMeshKeyForMock(sub.Name)
 				emTestEnsemble.eventMeshMock.Subscriptions.PutSubscription(subKey, &sub)
-				reconcilertesting.BEBCreateSuccess(w)
+				reconcilertesting.EventMeshCreateSuccess(w)
 			},
 			wantSubscriptionMatchers: gomega.And(
 				reconcilertesting.HaveSubscriptionNotReady(),

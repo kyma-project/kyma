@@ -11,7 +11,7 @@ import (
 	cehttp "github.com/cloudevents/sdk-go/v2/protocol/http"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/internal"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/ems"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/eventmesh"
 )
 
 func TestWriteRequestWithHeaders(t *testing.T) {
@@ -24,7 +24,7 @@ func TestWriteRequestWithHeaders(t *testing.T) {
 	defer func() { _ = message.Finish(nil) }()
 
 	additionalHeaders := http.Header{
-		"qos":    []string{string(ems.QosAtLeastOnce)},
+		"qos":    []string{string(eventmesh.QosAtLeastOnce)},
 		"accept": []string{internal.ContentTypeApplicationJSON},
 		"key1":   []string{"value1", "value2"},
 		"key2":   []string{"value3"},

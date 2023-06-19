@@ -47,8 +47,8 @@ For details, see the [LogParser specification file](https://github.com/kyma-proj
 | Parameter | Type | Description |
 | ---- | ----------- | ---- |
 | **conditions**  | \[\]object | An array of conditions describing the status of the parser. |
-| **conditions.lastTransitionTime**  | string | An array of conditions describing the status of the parser. |
-| **conditions.reason**  | string | An array of conditions describing the status of the parser. |
-| **conditions.type**  | string | The possible transition types are:<br>- `Running`: The parser is ready and usable.<br>- `Pending`: The parser is being activated. |
+| **conditions.&#x200b;lastTransitionTime**  | string | An array of conditions describing the status of the parser. |
+| **conditions.&#x200b;reason**  | string | An array of conditions describing the status of the parser. |
+| **conditions.&#x200b;type**  | string | The possible transition types are:<br>- `Running`: The parser is ready and usable.<br>- `Pending`: The parser is being activated. |
 
 <!-- TABLE-END -->

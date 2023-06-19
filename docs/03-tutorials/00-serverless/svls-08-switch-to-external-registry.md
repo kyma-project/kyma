@@ -5,7 +5,7 @@ title: Switch to an external Docker registry at runtime
 This tutorial shows how you can [switch to an external Docker registry](../../05-technical-reference/svls-03-switching-registries.md) in a specific Namespace, with Serverless already installed on your cluster. This example relies on the `default` Namespace but you can use any other. You will create a Secret custom resource (CR) with credentials to one of these registries:
 
 - [Docker Hub](https://hub.docker.com/)
-- [Google Container Registry (GCR)](https://cloud.google.com/container-registry)
+- [Google Artifact Registry (GAR)](https://cloud.google.com/artifact-registry)
 - [Azure Container Registry (ACR)](https://azure.microsoft.com/en-us/services/container-registry/)
 
 After this change, any Function deployed in the `default` Namespace will store images in this registry.
@@ -24,8 +24,8 @@ After this change, any Function deployed in the `default` Namespace will store i
 
   </details>
   <details>
-  <summary label="gcr">
-  GCR
+  <summary label="gar">
+  GAR
   </summary>
 
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)

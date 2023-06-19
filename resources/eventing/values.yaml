@@ -5,16 +5,16 @@ global:
   images:
     eventing_controller:
       name: eventing-controller
-      version: v20230505-359667c1
-      directory: prod
+      version: PR-17665
+      directory: dev
       pullPolicy: "IfNotPresent"
     publisher_proxy:
       name: event-publisher-proxy
-      version: v20230503-d232ed76
-      directory: prod
+      version: PR-17646
+      directory: dev
     certHandler:
       name: eventing-webhook-certificates
-      version: v20230502-386f07fc
+      version: 1.6.0
       directory: prod
     nats:
       name: nats

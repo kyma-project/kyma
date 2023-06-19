@@ -46,7 +46,7 @@ status:
 
 ## Custom resource parameters
 
-This table lists all the possible parameters of the CompassConnection custom resource together with their descriptions:
+This table lists all the possible parameters of the CompassConnection custom resource together with their descriptions. For more details, see the [CompassConnection specification file](../../../installation/resources/crds/compass-runtime-agent/compass-connection.crd.yaml).
 
 <!-- The table below was generated automatically -->
 <!-- Some special tags (html comments) are at the end of lines due to markdown requirements. -->
@@ -60,31 +60,31 @@ This table lists all the possible parameters of the CompassConnection custom res
 | Parameter | Type | Description |
 | ---- | ----------- | ---- |
 | **managementInfo** (required) | object |  |
-| **managementInfo.connectorUrl** (required) | string | Connector URL used for maintaining secure connection. |
-| **managementInfo.directorUrl** (required) | string | Director URL used for fetching Applications |
-| **refreshCredentialsNow**  | boolean | If true - ignore certificate expiration date and refresh next round |
-| **resyncNow**  | boolean | If true - ignore `APP_MINIMAL_COMPASS_SYNC_TIME` and sync next round |
+| **managementInfo.&#x200b;connectorUrl** (required) | string | URL used for maintaining the secure connection. |
+| **managementInfo.&#x200b;directorUrl** (required) | string | URL used for fetching Applications. |
+| **refreshCredentialsNow**  | boolean | If set to `true`, ignores certificate expiration date and refreshes in the next round. |
+| **resyncNow**  | boolean | If set to `true`, ignores `APP_MINIMAL_COMPASS_SYNC_TIME` and syncs in the next round. |
 
 **Status:**
 
 | Parameter | Type | Description |
 | ---- | ----------- | ---- |
 | **connectionState** (required) | string |  |
-| **connectionStatus** (required) | object | ConnectionStatus represents status of a connection to Compass |
-| **connectionStatus.certificateStatus** (required) | object | Provides the certificate issue and expiration dates. |
-| **connectionStatus.certificateStatus.acquired**  | string | When the certificate was acquired |
-| **connectionStatus.certificateStatus.notAfter**  | string | When the certificate stops being valid |
-| **connectionStatus.certificateStatus.notBefore**  | string | When the certificate becomes valid |
-| **connectionStatus.error**  | string |  |
-| **connectionStatus.established**  | string | Provides the date of when the connection was established |
-| **connectionStatus.lastSuccess**  | string | Provides the date of the last successful synchronization with the Connector |
-| **connectionStatus.lastSync**  | string | Provides the date of the last synchronization attempt |
-| **connectionStatus.renewed**  | string | Provides the date of the last certificate renewal |
-| **synchronizationStatus**  | object | Describes the status of the synchronization with the Director |
-| **synchronizationStatus.error**  | string |  |
-| **synchronizationStatus.lastAttempt**  | string | Provides the date of the last synchronization attempt with the Director |
-| **synchronizationStatus.lastSuccessfulApplication**  | string | Provides the date of the last successful application of resources fetched from Compass |
-| **synchronizationStatus.lastSuccessfulFetch**  | string | Provides the date of the last successful fetch of resources from the Director |
+| **connectionStatus** (required) | object | Represents the status of the connection to Compass. |
+| **connectionStatus.&#x200b;certificateStatus** (required) | object | Specifies the certificate issue and expiration dates. |
+| **connectionStatus.&#x200b;certificateStatus.&#x200b;acquired**  | string | Specifies when the certificate was acquired. |
+| **connectionStatus.&#x200b;certificateStatus.&#x200b;notAfter**  | string | Specifies when the certificate stops being valid. |
+| **connectionStatus.&#x200b;certificateStatus.&#x200b;notBefore**  | string | Specifies when the certificate becomes valid. |
+| **connectionStatus.&#x200b;error**  | string |  |
+| **connectionStatus.&#x200b;established**  | string | Specifies when the connection was established. |
+| **connectionStatus.&#x200b;lastSuccess**  | string | Specifies the date of the last successful synchronization with the Connector. |
+| **connectionStatus.&#x200b;lastSync**  | string | Specifies the date of the last synchronization attempt. |
+| **connectionStatus.&#x200b;renewed**  | string | Specifies the date of the last certificate renewal. |
+| **synchronizationStatus**  | object | Provides the status of the synchronization with the Director. |
+| **synchronizationStatus.&#x200b;error**  | string |  |
+| **synchronizationStatus.&#x200b;lastAttempt**  | string | Specifies the date of the last synchronization attempt with the Director. |
+| **synchronizationStatus.&#x200b;lastSuccessfulApplication**  | string | Specifies the date of the last successful application of resources fetched from Compass. |
+| **synchronizationStatus.&#x200b;lastSuccessfulFetch**  | string | Specifies the date of the last successful fetch of resources from the Director. |
 
 <!-- TABLE-END -->
 

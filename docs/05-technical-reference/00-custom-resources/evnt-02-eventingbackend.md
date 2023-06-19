@@ -21,32 +21,29 @@ metadata:
 spec: {}
 ```
 
-## Additional information
+## Custom resource parameters
 
-When you fetch an existing EventingBackend CR, the Eventing Controller adds the **status** section, which shows the current status of Kyma Eventing. The following table lists the fields of the **status** section.
+When you fetch an existing EventingBackend CR, the Eventing Controller adds the **status** section, which shows the current status of Kyma Eventing. 
 
-| Field   |  Description |
-|:---|:---|
-| **status.backendType** | Specifies the backend type used. |
-| **status.conditions.code** | Conditions defines the ready status of the Eventing Controller and the Eventing Publisher Proxy. |
-| **status.eventingReady** | Current ready status of the EventingBackend. |
+<!-- TABLE-START -->
+### EventingBackend.eventing.kyma-project.io/v1alpha1
 
-The `status` field of this CR looks like this:
+**Status:**
 
-```shell
-status:
-  backendType: NATS
-  conditions:
-  - lastTransitionTime: "2022-07-05T06:07:57Z"
-    reason: Publisher proxy deployment ready
-    status: "True"
-    type: Publisher Proxy Ready
-  - lastTransitionTime: "2022-07-05T06:07:57Z"
-    reason: Subscription controller started
-    status: "True"
-    type: Subscription Controller Ready
-  eventingReady: true
-```
+| Parameter | Type | Description |
+| ---- | ----------- | ---- |
+| **backendType**  | string | Specifies the backend type used. The value is either `BEB`, or `NATS`. |
+| **bebSecretName**  | string | Name of the Secret containing BEB access tokens, required for BEB only. |
+| **bebSecretNamespace**  | string | Namespace of the Secret containing BEB access tokens, required for BEB only. |
+| **conditions**  | \[\]object | Defines the status of the Controller and the EPP. |
+| **conditions.&#x200b;lastTransitionTime**  | string | Defines the date of the last condition status change. |
+| **conditions.&#x200b;message**  | string | Provides more details about the condition status change. |
+| **conditions.&#x200b;reason**  | string | Defines the reason for the condition status change. |
+| **conditions.&#x200b;status** (required) | string | Status of the condition. The value is either `True`, `False`, or `Unknown`. |
+| **conditions.&#x200b;type**  | string | Short description of the condition. |
+| **eventingReady**  | boolean | Defines the overall Backend status. |
+
+<!-- TABLE-END -->
 
 ## Related resources and components
 

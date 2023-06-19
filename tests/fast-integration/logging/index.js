@@ -21,6 +21,10 @@ function loggingTests() {
       await loki.checkKymaLogs(testStartTimestamp);
     });
 
+    it('Should exclude fluent-bit logs', async () => {
+      await loki.checkFluentBitLogs(testStartTimestamp);
+    });
+
     it('Retention Period and Max look-back Period should be 120h', async () => {
       await loki.checkRetentionPeriod();
     });

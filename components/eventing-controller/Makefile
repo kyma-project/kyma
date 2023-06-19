@@ -37,6 +37,8 @@ SHELL = /usr/bin/env bash -o pipefail
 GOBUILD_FLAGS := -v
 PKG := github.com/kyma-project/kyma/components/eventing-controller
 
+CONTROLLER_TOOLS_VERSION ?= v0.11.1
+
 help-generic:
 	@printf "\nUsage:\n  make \033[36m<target>\033[0m\n"
 	@printf "\nTargets from common makefile:\n"
@@ -110,7 +112,7 @@ undeploy: ## Undeploy controller from the K8s cluster specified in ~/.kube/confi
 CONTROLLER_GEN = $(PROJECT_DIR)/bin/$(shell uname)/controller-gen
 OS := $(shell uname)
 controller-gen-local: ## Download controller-gen locally if necessary.
-	GOBIN=$(PROJECT_DIR)/bin/$(OS) go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.4.1
+	GOBIN=$(PROJECT_DIR)/bin/$(OS) go install sigs.k8s.io/controller-tools/cmd/controller-gen@$(CONTROLLER_TOOLS_VERSION)
 
 path-to-referenced-charts:
 	@echo "resources/eventing"
@@ -144,3 +146,7 @@ update_metrics_docs:
 	@promlinter list -ojson ../event-publisher-proxy > metrics_epp.json
 	@promlinter list -ojson ../eventing-controller/ > metrics_ec.json
 	@gomplate -d ec=metrics_ec.json -d epp=metrics_epp.json -f hack/metrics.doc.tpl  | prettier --parser markdown > ../../docs/04-operation-guides/operations/evnt-02-eventing-metrics.md
+
+update_docs: copy-crds
+	go run ../../hack/table-gen/main.go --crd-filename ../../installation/resources/crds/eventing/subscriptions.eventing.kyma-project.io.crd.yaml --md-filename ../../docs/05-technical-reference/00-custom-resources/evnt-01-subscription.md
+	go run ../../hack/table-gen/main.go --crd-filename ../../installation/resources/crds/eventing/eventingbackends.eventing.kyma-project.io.crd.yaml --md-filename ../../docs/05-technical-reference/00-custom-resources/evnt-02-eventingbackend.md

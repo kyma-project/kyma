@@ -2,6 +2,7 @@ package main
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -135,7 +136,7 @@ func TestFlatten(t *testing.T) {
 				{
 					Path:        []string{"name"},
 					Description: "itemsdesc",
-					ElemType:    "array",
+					ElemType:    "[]object",
 				},
 				{
 					Path:        []string{"name", "propname"},
@@ -149,6 +150,55 @@ func TestFlatten(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := flatten(tt.args.e); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("flatten() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestFilterIgnored(t *testing.T) {
+	type args struct {
+		fe         []flatElement
+		properties arrayFlags
+	}
+	tests := []struct {
+		name string
+		args args
+		want []flatElement
+	}{
+		{
+			name: "Simple",
+			args: args{
+				fe: []flatElement{
+					{
+						Path:        strings.Split("foo", "."),
+						Description: "",
+						ElemType:    "",
+						Required:    false,
+					},
+					{
+						Path:        strings.Split("foo.bar", "."),
+						Description: "",
+						ElemType:    "",
+						Required:    false,
+					},
+					{
+						Path:        strings.Split("foo.bar.baz", "."),
+						Description: "",
+						ElemType:    "",
+						Required:    false,
+					},
+				},
+				properties: arrayFlags{"foo.bar", "foo.bar.baz"},
+			},
+			want: []flatElement{{
+				Path: []string{"foo"},
+			}},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := filterIgnored(tt.args.fe, tt.args.properties); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("filterIgnored() = %v, want %v", got, tt.want)
 			}
 		})
 	}
