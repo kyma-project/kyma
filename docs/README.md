@@ -7,7 +7,7 @@ Classic Kyma offered a fixed set of preconfigured components whose development r
 The modular approach boosts Kyma's extensibility and scalability, making it even more cost-effective. With fully modularized Kyma, you can choose from many of its modules to facilitate your business needs best.  You can enable modules on demand and configure them. By disabling the modules you don't need to use, you considerably reduce the attack surface area, as well as the upgrade time and risk.
 
 The first available Kyma modules are:
-- [Keda module](https://docsify-this.net/?basePath=https://raw.githubusercontent.com/kyma-project/keda-manager/df4a40b16b49076f5bcc777f87d206b8c5724c3f/docs/user/&homepage=README.md&sidebar=true&loadSidebar=_sidebar.md&browser-tab-title=Keda%20module%20Documentation#/)
+- [Keda module](https://docsify-this.net/?basePath=https://raw.githubusercontent.com/kyma-project/keda-manager/48e2d17f21382a76139e90f7a035075961d31fd5/docs/user/&homepage=README.md&sidebar=true&loadSidebar=_sidebar.md&browser-tab-title=Keda%20module%20Documentation#/)
 
 - [BTP Operator](https://docsify-this.net/?basePath=https://raw.githubusercontent.com/kyma-project/btp-manager/aa50848013372806eaf2e707c217b8bed4eb09cb/docs/user/&homepage=README.md&sidebar=true&loadSidebar=_sidebar.md&browser-tab-title=BTP%20Operator%20Documentation#/)
 
