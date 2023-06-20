@@ -9,7 +9,7 @@ The modular approach boosts Kyma's extensibility and scalability, making it even
 The first available Kyma modules are:
 - [Keda module](https://docsify-this.net/?basePath=https://raw.githubusercontent.com/kyma-project/keda-manager/df4a40b16b49076f5bcc777f87d206b8c5724c3f/docs/user/&homepage=README.md&sidebar=true&loadSidebar=_sidebar.md&browser-tab-title=Keda%20module%20Documentation#/)
 
-- [BTP Operator](https://docsify-this.net/?basePath=https://raw.githubusercontent.com/kyma-project/btp-manager/4eda59678b8ce369589b2e164f5393f349f5e265/docs/user/&homepage=README.md&sidebar=true&loadSidebar=_sidebar.md&browser-tab-title=BTP%20Operator%20Documentation#/)
+- [BTP Operator](https://docsify-this.net/?basePath=https://raw.githubusercontent.com/kyma-project/btp-manager/aa50848013372806eaf2e707c217b8bed4eb09cb/docs/user/&homepage=README.md&sidebar=true&loadSidebar=_sidebar.md&browser-tab-title=BTP%20Operator%20Documentation#/)
 
 Kyma offers various functionalities, such as:  
 
