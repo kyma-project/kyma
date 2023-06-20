@@ -4,4 +4,4 @@ global:
   images:
     btp_manager:
       name: "btp-manager"
-      version: "0.4.2"
+      version: "0.4.3"
