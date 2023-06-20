@@ -1,0 +1,269 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app: loki-test
+  name: logging-loki-test
+  namespace: kyma-system
+automountServiceAccountToken: true
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: logging-loki-test
+  namespace: kyma-system
+  labels:
+    app: loki-test
+data:
+  loki.yaml: YXV0aF9lbmFibGVkOiBmYWxzZQpjaHVua19zdG9yZV9jb25maWc6CiAgbWF4X2xvb2tfYmFja19wZXJpb2Q6IDEyMGgKY29tcGFjdG9yOgogIHNoYXJlZF9zdG9yZTogZmlsZXN5c3RlbQogIHdvcmtpbmdfZGlyZWN0b3J5OiAvZGF0YS9sb2tpL2JvbHRkYi1zaGlwcGVyLWNvbXBhY3Rvcgppbmdlc3RlcjoKICBjaHVua19ibG9ja19zaXplOiAyNjIxNDQKICBjaHVua19pZGxlX3BlcmlvZDogM20KICBjaHVua19yZXRhaW5fcGVyaW9kOiAxbQogIGNodW5rX3RhcmdldF9zaXplOiAxNTcyODY0CiAgbGlmZWN5Y2xlcjoKICAgIHJpbmc6CiAgICAgIGt2c3RvcmU6CiAgICAgICAgc3RvcmU6IGlubWVtb3J5CiAgICAgIHJlcGxpY2F0aW9uX2ZhY3RvcjogMQogIG1heF9jaHVua19hZ2U6IDJoCiAgbWF4X3RyYW5zZmVyX3JldHJpZXM6IDAKbGltaXRzX2NvbmZpZzoKICBlbmZvcmNlX21ldHJpY19uYW1lOiBmYWxzZQogIGluZ2VzdGlvbl9yYXRlX21iOiAzCiAgcmVqZWN0X29sZF9zYW1wbGVzOiB0cnVlCiAgcmVqZWN0X29sZF9zYW1wbGVzX21heF9hZ2U6IDE2OGgKc2NoZW1hX2NvbmZpZzoKICBjb25maWdzOgogIC0gZnJvbTogIjIwMTgtMDQtMTUiCiAgICBpbmRleDoKICAgICAgcGVyaW9kOiAyNGgKICAgICAgcHJlZml4OiBpbmRleF8KICAgIG9iamVjdF9zdG9yZTogZmlsZXN5c3RlbQogICAgc2NoZW1hOiB2OQogICAgc3RvcmU6IGJvbHRkYgpzZXJ2ZXI6CiAgaHR0cF9saXN0ZW5fcG9ydDogMzEwMApzdG9yYWdlX2NvbmZpZzoKICBib2x0ZGI6CiAgICBkaXJlY3Rvcnk6IC9kYXRhL2xva2kvaW5kZXgKICBmaWxlc3lzdGVtOgogICAgZGlyZWN0b3J5OiAvZGF0YS9sb2tpL2NodW5rcwp0YWJsZV9tYW5hZ2VyOgogIHJldGVudGlvbl9kZWxldGVzX2VuYWJsZWQ6IHRydWUKICByZXRlbnRpb25fcGVyaW9kOiAxMjBo
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: logging-loki-test-grafana-datasource
+  namespace: kyma-system
+  labels:
+    grafana_datasource: "1"
+    app: loki-test
+data:
+  loki-test-datasource.yaml: |-
+    apiVersion: 1
+    datasources:
+      - name: Loki-Test
+        type: loki
+        access: proxy
+        url: http://logging-loki-test.kyma-system:3100
+        editable: true
+        jsonData:
+          maxLines: 1000
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: logging-loki-test
+  namespace: kyma-system
+  labels:
+    app: loki-test
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: logging-loki-test
+  namespace: kyma-system
+  labels:
+    app: loki-test
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: logging-loki-test
+subjects:
+  - kind: ServiceAccount
+    name: logging-loki-test
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: logging-loki-headless-test
+  namespace: kyma-system
+  labels:
+    app: loki-test
+spec:
+  clusterIP: None
+  ports:
+    - port: 3100
+      protocol: TCP
+      name: http-metrics
+      targetPort: http-metrics
+  selector:
+    app: loki-test
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: logging-loki-test
+  namespace: kyma-system
+  labels:
+    app: loki-test
+  annotations:
+    prometheus.io/port: "3100"
+    prometheus.io/scrape: "true"
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3100
+      protocol: TCP
+      name: http-metrics
+      targetPort: http-metrics
+  selector:
+    app: loki-test
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: logging-loki-test
+  namespace: kyma-system
+  labels:
+    app: loki-test
+spec:
+  podManagementPolicy: OrderedReady
+  replicas: 1
+  selector:
+    matchLabels:
+      app: loki-test
+  serviceName: logging-loki-headless-test
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: loki-test
+        name: loki-test
+    spec:
+      serviceAccountName: logging-loki-test
+      securityContext:
+        fsGroup: 10001
+        runAsGroup: 10001
+        runAsNonRoot: true
+        runAsUser: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+        []
+      containers:
+        - name: loki
+          image: europe-docker.pkg.dev/kyma-project/prod/tpi/loki:2.2.1-0065b2a5
+          imagePullPolicy: IfNotPresent
+          args:
+            - "-config.file=/etc/loki/loki.yaml"
+            - "-log.level=info"
+          volumeMounts:
+            - name: config
+              mountPath: /etc/loki
+            - name: storage-test
+              mountPath: "/data"
+          ports:
+            - name: http-metrics
+              containerPort: 3100
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /ready
+              port: http-metrics
+            initialDelaySeconds: 45
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http-metrics
+            initialDelaySeconds: 45
+          resources:
+            limits:
+              cpu: 200m
+              memory: 300Mi
+            requests:
+              cpu: 10m
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+      nodeSelector:
+        {}
+      affinity:
+        {}
+      tolerations:
+        []
+      terminationGracePeriodSeconds: 4800
+      volumes:
+        - name: config
+          secret:
+            secretName: logging-loki-test
+  volumeClaimTemplates:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: storage-test
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: "30Gi"
+      volumeMode: Filesystem
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  labels:
+    app: loki-test
+  name: logging-loki-test
+  namespace: kyma-system
+spec:
+  action: ALLOW
+  selector:
+    matchLabels:
+      app: loki-test
+  rules:
+    # Grafana having SA can query v1 API
+    - from:
+        - source:
+            principals:
+              - "cluster.local/ns/kyma-system/sa/monitoring-grafana"
+      to:
+        - operation:
+            paths: ["/loki/api/v1/*"]
+            methods: ["GET"]
+    # fluent-bit with SA can push to v1 API
+    - from:
+        - source:
+            principals:
+              - "cluster.local/ns/kyma-system/sa/telemetry-fluent-bit"
+      to:
+        - operation:
+            paths: ["/loki/api/v1/push"]
+            methods: ["POST"]
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/kyma-system/sa/monitoring-prometheus
+      to:
+        - operation:
+            paths: ["/metrics"]
+            methods: ["GET"]
+---
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  labels:
+    app: loki-test
+  name: logging-loki-test
+  namespace: kyma-system
+spec:
+  selector:
+    matchLabels:
+      app: loki-test
+  mtls:
+    mode: STRICT
+---
+apiVersion: telemetry.kyma-project.io/v1alpha1
+kind: LogPipeline
+metadata:
+  name: loki-test
+spec:
+  input:
+    application:
+      containers: {}
+      namespaces:
+        system: true
+  output:
+    grafana-loki:
+      labels:
+        job: telemetry-fluent-bit
+      removeKeys:
+        - kubernetes
+        - stream
+      url:
+        value: http://logging-loki-test:3100/loki/api/v1/push

@@ -40,14 +40,14 @@ async function tryGetLokiPersistentVolumeClaim() {
 }
 
 async function lokiSecretData() {
-  const secretData = await getSecretData('logging-loki', 'kyma-system');
+  const secretData = await getSecretData('logging-loki-test', 'kyma-system');
   return secretData['loki.yaml'];
 }
 
 async function queryLoki(query, startTimestamp) {
   const path = `loki/api/v1/query_range?query=${query}&start=${startTimestamp}`;
   try {
-    const response = await proxyGrafanaDatasource('Loki', path, 5, 30, 10000);
+    const response = await proxyGrafanaDatasource('Loki-Test', path, 5, 30, 12000);
     return response.data;
   } catch (err) {
     throw convertAxiosError(err, 'cannot query loki');

@@ -16,6 +16,7 @@ const {
   getVirtualService,
   retryPromise,
   deployJaeger,
+  deployLoki,
   waitForConfigMap,
 } = require('../utils');
 const {
@@ -70,6 +71,15 @@ async function prepareEnvironment() {
       },
   );
   await deployJaeger(k8s.loadAllYaml(jaegerYaml));
+
+  const lokiYaml = fs.readFileSync(
+      path.join(__dirname, '../test/fixtures/loki/loki.yaml'),
+      {
+        encoding: 'utf-8',
+      },
+  );
+
+  await deployLoki(k8s.loadAllYaml(lokiYaml));
 }
 
 async function cleanEnvironment() {
