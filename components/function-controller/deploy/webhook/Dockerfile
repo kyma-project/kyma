@@ -16,8 +16,8 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o webhook-server cmd/webh
 && mkdir /app \
 && mv ./webhook-server /app/webhook-server
 
-# get latest CA certs from alpine:3.17.3
-FROM europe-docker.pkg.dev/kyma-project/prod/external/alpine@sha256:b6ca290b6b4cdcca5b3db3ffa338ee0285c11744b4a6abaa9627746ee3291d8d as certs
+# get latest CA certs from alpine:3.17.4
+FROM europe-docker.pkg.dev/kyma-project/prod/external/alpine@sha256:e95676db9e4a4f16f6cc01a8915368f82b018cc07aba951c1bd1db586c081388
 RUN apk add --no-cache ca-certificates
 
 FROM scratch
