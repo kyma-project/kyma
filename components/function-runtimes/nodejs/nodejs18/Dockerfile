@@ -1,5 +1,5 @@
-# image base on node:lts-alpine3.17 (node:18.14.2, alpine:3.17.2)
-FROM node@sha256:fdbd2737cb94e25cae3db9fc5d7dc073c9675dad34239bfb3948c499a6908c19
+# image base on node:18.16.0-alpine3.17 (node:18.16.0, alpine:3.17.4)
+FROM node@sha256:3a8e866c074d57792f7bfe4328d45cd1ad6b43cd8d8fd5e67435583a36fbd340
 
 ARG NODE_ENV
 ENV NODE_ENV $NODE_ENV
