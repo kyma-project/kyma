@@ -26,8 +26,8 @@ FROM europe-docker.pkg.dev/kyma-project/prod/external/alpine@sha256:b6ca290b6b4c
 
 RUN apk add --no-cache ca-certificates
 
-# result container base on alpine:3.17.3
-FROM europe-docker.pkg.dev/kyma-project/prod/external/alpine@sha256:b6ca290b6b4cdcca5b3db3ffa338ee0285c11744b4a6abaa9627746ee3291d8d
+# result container base on alpine:3.17.4
+FROM europe-docker.pkg.dev/kyma-project/prod/external/alpine@sha256:e95676db9e4a4f16f6cc01a8915368f82b018cc07aba951c1bd1db586c081388
 
 ENV LIBGIT2_VERSION=1.1.0-r2
 
