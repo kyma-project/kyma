@@ -81,19 +81,19 @@ global:
       directory: "prod"
     function_controller:
       name: "function-controller"
-      version: "v20230619-d5f4d07b"
+      version: "v20230620-176d820a"
       directory: "prod"
     function_webhook:
       name: "function-webhook"
-      version: "v20230619-d5f4d07b"
+      version: "v20230620-176d820a"
       directory: "prod"
     function_build_init:
       name: "function-build-init"
-      version: "v20230619-d5f4d07b"
+      version: "v20230620-176d820a"
       directory: "prod"
     function_registry_gc:
       name: "function-registry-gc"
-      version: "v20230619-d5f4d07b"
+      version: "v20230620-176d820a"
       directory: "prod"
     function_runtime_nodejs14:
       name: "function-runtime-nodejs14"
@@ -101,11 +101,11 @@ global:
       directory: "prod"
     function_runtime_nodejs16:
       name: "function-runtime-nodejs16"
-      version: "v20230302-a6a85f47"
+      version: "v20230620-176d820a"
       directory: "prod"
     function_runtime_nodejs18:
       name: "function-runtime-nodejs18"
-      version: "v20230302-a6a85f47"
+      version: "v20230620-176d820a"
       directory: "prod"
     function_runtime_python39:
       name: "function-runtime-python39"
