@@ -32,16 +32,3 @@ Classic Kyma offered a fixed set of preconfigured components whose development r
 | Module | Purpose |
 |---|---|
 | [Keda](https://kyma-docs.netlify.app//?basePath=https://raw.githubusercontent.com/kyma-project/keda-manager/main/docs/user/&homepage=README.md&sidebar=true&loadSidebar=_sidebar.md&browser-tab-title=Keda%20module%20Documentation#/) | The Keda module comes with Keda Manager, an extension to Kyma that allows you to install KEDA (Kubernetes Event Driven Autoscaler). |
-
-
-## Kyma main areas
-
-![areas](./assets/kyma-areas.svg)
-
-To learn more about specific Kyma areas and functionalities, go to the respective sections.
-
-Kyma is built upon leading cloud-native, open-source projects, such as Istio, NATS, Serverless, and Prometheus. The features developed by Kyma are the unique “glue” that holds them together, so you can connect and extend your applications easily and intuitively. To learn how to do that, head over to the [Get Started](./02-get-started) section where you can find step-by-step instructions to get your environment up and running.
-
-The extensions and customizations you create are decoupled from your core applications, which adds to these general advantages of using Kyma:
-
-![advantages](./assets/kyma-advantages.svg)
