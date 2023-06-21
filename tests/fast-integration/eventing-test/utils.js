@@ -60,7 +60,7 @@ const eppInClusterUrl = 'eventing-event-publisher-proxy.kyma-system';
 const eventingSinkName = 'eventing-sink';
 const eventingUpgradeSinkName = 'eventing-upgrade-sink';
 
-// ****** Event types to test ***********//
+// ****** Event types test to test ***********//
 const v1alpha1SubscriptionsTypes = [
   {
     name: 'fi-test-sub-0',
