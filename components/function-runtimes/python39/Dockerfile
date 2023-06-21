@@ -28,7 +28,7 @@ RUN set -eux; \
 # other runtime dependencies for Python are installed later
 
 ENV GPG_KEY E3FF2839C048B25C084DEBE9B26995E310250568
-ENV PYTHON_VERSION 3.9.16
+ENV PYTHON_VERSION 3.9.17
 
 # hadolint ignore=DL3003,SC2155
 RUN set -ex \
