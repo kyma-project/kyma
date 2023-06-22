@@ -14,7 +14,7 @@ To install a module, deploy its module manager and apply the module configuratio
 
 ```bash
 kubectl apply -f {PATH_TO_THE_MODULE_MANAGER_YAML_FILE}
-kubectl apply -f {PATH_TO_THE_MODULE_CR}
+kubectl apply -f {PATH_TO_THE_MODULE_CUSTOM_RESOURCE}
 ```
 
 ## Install classic Kyma
