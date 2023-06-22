@@ -6,34 +6,25 @@ The Kyma project is currently in the transition phase from classic to modular Ky
 
 ## Install a Kyma module
 
-To install a module, deploy its module manager and apply the module configuration. The table lists the available Kyma modules and provides quick installation steps. For more details, see the module documentation in GitHub.
+To install a module, deploy its module manager and apply the module configuration. See the available Kyma modules with quick installation steps and links to their GitHub repositories.
 
-<table>
-<tr>
-<td> <b>Module</b> </td> <td> <b>Installation steps</b> </td> <td> <b>Documentation</b> </td>
-</tr>
-<tr>
-<td> Keda </td>
-<td>
-<code>
-kubectl apply -f https://github.com/kyma-project/keda-manager/releases/latest/download/keda-manager.yaml<br>
+### Keda
+
+```bash
+kubectl apply -f https://github.com/kyma-project/keda-manager/releases/latest/download/keda-manager.yaml
 kubectl apply -f https://github.com/kyma-project/keda-manager/releases/latest/download/keda-default-cr.yaml
-</code>
+```
 
-</td>
-<td> <a href="https://github.com/kyma-project/keda-manager">Keda Manager</a></td>
-</tr>
-<tr>
-<td> BTP Operator </td>
-<td>
-<code>
-kubectl apply -f https://github.com/kyma-project/btp-manager/releases/latest/download/btp-operator.yaml<br>
+For more details see, [`keda-manager`](https://github.com/kyma-project/keda-manager) repository in GitHub.
+
+### BTP Operator
+
+```bash
+kubectl apply -f https://github.com/kyma-project/btp-manager/releases/latest/download/btp-operator.yaml
 kubectl apply -f https://github.com/kyma-project/btp-manager/releases/latest/download/btpoperator-default-cr.yaml
-</code>
-<td> <a href="https://github.com/kyma-project/btp-manager">BTP Manager</a></td>
-</td>
-</tr>
-</table>
+```
+
+For more details see, [`btp-manager`](https://github.com/kyma-project/btp-manager) repository in GitHub.
 
 ## Uninstall a Kyma module
 
