@@ -101,7 +101,7 @@ global:
       directory: "prod"
     function_runtime_nodejs16:
       name: "function-runtime-nodejs16"
-      version: "v20230620-176d820a"
+      version: "v20230622-a0625acb"
       directory: "prod"
     function_runtime_nodejs18:
       name: "function-runtime-nodejs18"
