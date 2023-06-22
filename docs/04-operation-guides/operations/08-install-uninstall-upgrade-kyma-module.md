@@ -10,7 +10,7 @@ To install a module, deploy its module manager and apply the module configuratio
 
 <table>
 <tr>
-<td> Module </td> <td> Installation steps </td> <td> Documentation </td>
+<td> <b>Module</b> </td> <td> <b>Installation steps</b> </td> <td> <b>Documentation</b> </td>
 </tr>
 <tr>
 <td> Keda </td>
@@ -22,7 +22,8 @@ kubectl apply -f https://github.com/kyma-project/keda-manager/releases/latest/do
 ```
 
 </td>
-<td> [Keda Manager](https://github.com/kyma-project/keda-manager) </td>
+<td> <a href="https://github.com/kyma-project/keda-manager">Keda Manager</a>
+</td>
 </tr>
 <tr>
 <td> BTP Operator </td>
@@ -33,15 +34,11 @@ kubectl apply -f https://github.com/kyma-project/btp-manager/releases/latest/dow
 kubectl apply -f https://github.com/kyma-project/btp-manager/releases/latest/download/btpoperator-default-cr.yaml
 ```
 
-<td> [BTP Manager](https://github.com/kyma-project/btp-manager) </td>
+<td> <a href="https://github.com/kyma-project/btp-manager">BTP Manager</a>
+</td>
 </td>
 </tr>
 </table>
-
-| Module       | Installation steps               | Documentation     |
-|--------      |----------------------------------|-------------------|
-| Keda         | <pre lang="bash">kubectl apply -f https://github.com/kyma-project/keda-manager/releases/latest/download/keda-manager.yaml<br>kubectl apply -f https://github.com/kyma-project/keda-manager/releases/latest/download/keda-default-cr.yaml</pre>| [Keda Manager](https://github.com/kyma-project/keda-manager) |
-| BTP Operator | <pre lang="bash">kubectl apply -f https://github.com/kyma-project/btp-manager/releases/latest/download/btp-operator.yaml<br>kubectl apply -f https://github.com/kyma-project/btp-manager/releases/latest/download/btpoperator-default-cr.yaml</pre> | [BTP Manager](https://github.com/kyma-project/btp-manager) |
 
 ## Uninstall a Kyma module
 
