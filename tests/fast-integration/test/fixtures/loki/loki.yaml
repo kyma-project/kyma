@@ -9,14 +9,58 @@ metadata:
 automountServiceAccountToken: true
 ---
 apiVersion: v1
-kind: Secret
+kind: ConfigMap
 metadata:
   name: logging-loki-test
   namespace: kyma-system
   labels:
     app: loki-test
 data:
-  loki.yaml: YXV0aF9lbmFibGVkOiBmYWxzZQpjaHVua19zdG9yZV9jb25maWc6CiAgbWF4X2xvb2tfYmFja19wZXJpb2Q6IDEyMGgKY29tcGFjdG9yOgogIHNoYXJlZF9zdG9yZTogZmlsZXN5c3RlbQogIHdvcmtpbmdfZGlyZWN0b3J5OiAvZGF0YS9sb2tpL2JvbHRkYi1zaGlwcGVyLWNvbXBhY3Rvcgppbmdlc3RlcjoKICBjaHVua19ibG9ja19zaXplOiAyNjIxNDQKICBjaHVua19pZGxlX3BlcmlvZDogM20KICBjaHVua19yZXRhaW5fcGVyaW9kOiAxbQogIGNodW5rX3RhcmdldF9zaXplOiAxNTcyODY0CiAgbGlmZWN5Y2xlcjoKICAgIHJpbmc6CiAgICAgIGt2c3RvcmU6CiAgICAgICAgc3RvcmU6IGlubWVtb3J5CiAgICAgIHJlcGxpY2F0aW9uX2ZhY3RvcjogMQogIG1heF9jaHVua19hZ2U6IDJoCiAgbWF4X3RyYW5zZmVyX3JldHJpZXM6IDAKbGltaXRzX2NvbmZpZzoKICBlbmZvcmNlX21ldHJpY19uYW1lOiBmYWxzZQogIGluZ2VzdGlvbl9yYXRlX21iOiAzCiAgcmVqZWN0X29sZF9zYW1wbGVzOiB0cnVlCiAgcmVqZWN0X29sZF9zYW1wbGVzX21heF9hZ2U6IDE2OGgKc2NoZW1hX2NvbmZpZzoKICBjb25maWdzOgogIC0gZnJvbTogIjIwMTgtMDQtMTUiCiAgICBpbmRleDoKICAgICAgcGVyaW9kOiAyNGgKICAgICAgcHJlZml4OiBpbmRleF8KICAgIG9iamVjdF9zdG9yZTogZmlsZXN5c3RlbQogICAgc2NoZW1hOiB2OQogICAgc3RvcmU6IGJvbHRkYgpzZXJ2ZXI6CiAgaHR0cF9saXN0ZW5fcG9ydDogMzEwMApzdG9yYWdlX2NvbmZpZzoKICBib2x0ZGI6CiAgICBkaXJlY3Rvcnk6IC9kYXRhL2xva2kvaW5kZXgKICBmaWxlc3lzdGVtOgogICAgZGlyZWN0b3J5OiAvZGF0YS9sb2tpL2NodW5rcwp0YWJsZV9tYW5hZ2VyOgogIHJldGVudGlvbl9kZWxldGVzX2VuYWJsZWQ6IHRydWUKICByZXRlbnRpb25fcGVyaW9kOiAxMjBo
+  loki.yaml: |
+    auth_enabled: false
+    ingester:
+      chunk_idle_period: 3m
+      chunk_block_size: 262144
+      chunk_target_size: 1572864
+      chunk_retain_period: 1m
+      max_chunk_age: 2h
+      max_transfer_retries: 0
+      lifecycler:
+        ring:
+          kvstore:
+            store: inmemory
+          replication_factor: 1
+    
+    limits_config:
+      enforce_metric_name: false
+      ingestion_rate_mb: 3
+      reject_old_samples: true
+      reject_old_samples_max_age: 168h
+    schema_config:
+      configs:
+        - from: 2018-04-15
+          store: boltdb
+          object_store: filesystem
+          schema: v9
+          index:
+            prefix: index_
+            period: 24h
+    server:
+      http_listen_port: 3100
+    storage_config:
+      boltdb:
+        directory: /data/loki/index
+      filesystem:
+        directory: /data/loki/chunks
+    chunk_store_config:
+      max_look_back_period: 120h
+    table_manager:
+      retention_deletes_enabled: true
+      retention_period: 120h
+    compactor:
+      working_directory: /data/loki/boltdb-shipper-compactor
+      shared_store: filesystem
+
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -179,8 +223,11 @@ spec:
       terminationGracePeriodSeconds: 4800
       volumes:
         - name: config
-          secret:
-            secretName: logging-loki-test
+          configMap:
+            name: logging-loki-test
+            items:
+              - key: loki.yaml
+                path: loki.yaml
   volumeClaimTemplates:
   - apiVersion: v1
     kind: PersistentVolumeClaim
