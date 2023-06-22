@@ -36,7 +36,18 @@ rules:
   verbs:
   - create
   - get
+  - list
+  - patch
   - update
+  - watch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - networkpolicies
+  verbs:
+  - get
+  - list
+  - watch
 - apiGroups:
   - rbac.authorization.k8s.io
   resources:
@@ -217,4 +228,12 @@ rules:
   - get
   - list
   - watch
-
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - networkpolicies
+  verbs:
+  - create
+  - delete
+  - patch
+  - update
