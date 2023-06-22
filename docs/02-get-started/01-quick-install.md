@@ -4,13 +4,13 @@ title: Quick install
 
 To get started with Kyma, let's quickly install it first.
 
-Kyma project is currently in the transition phase from classic to modular Kyma. You can either install classic Kyma with its components, or available modules. To see a list of Kyma modules, go to [Overview](/docs/01-overview/README.md).
+The Kyma project is currently in the transition phase from classic to modular Kyma. You can either install classic Kyma with its components, or available modules. To see a list of Kyma modules, go to [Overview](/docs/01-overview/README.md).
 
 > **CAUTION:** Components transformed into modules aren't installed as part of the preconfigured classic Kyma.
 
 ## Install a Kyma module
 
-To install a module, deploy a module manager and apply the module configuration. Run:
+To install a module, deploy its module manager and apply the module configuration. Run:
 
 ```bash
 kubectl apply -f {PATH_TO_THE_MODULE_MANAGER_YAML_FILE}
