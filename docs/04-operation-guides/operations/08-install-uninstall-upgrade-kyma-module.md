@@ -15,11 +15,10 @@ To install a module, deploy its module manager and apply the module configuratio
 <tr>
 <td> Keda </td>
 <td>
-
-```bash
-kubectl apply -f https://github.com/kyma-project/keda-manager/releases/latest/download/keda-manager.yaml
+<code>
+kubectl apply -f https://github.com/kyma-project/keda-manager/releases/latest/download/keda-manager.yaml<br>
 kubectl apply -f https://github.com/kyma-project/keda-manager/releases/latest/download/keda-default-cr.yaml
-```
+</code>
 
 </td>
 <td> <a href="https://github.com/kyma-project/keda-manager">Keda Manager</a></td>
@@ -27,12 +26,10 @@ kubectl apply -f https://github.com/kyma-project/keda-manager/releases/latest/do
 <tr>
 <td> BTP Operator </td>
 <td>
-
-```bash
-kubectl apply -f https://github.com/kyma-project/btp-manager/releases/latest/download/btp-operator.yaml
+<code>
+kubectl apply -f https://github.com/kyma-project/btp-manager/releases/latest/download/btp-operator.yaml<br>
 kubectl apply -f https://github.com/kyma-project/btp-manager/releases/latest/download/btpoperator-default-cr.yaml
-```
-
+</code>
 <td> <a href="https://github.com/kyma-project/btp-manager">BTP Manager</a></td>
 </td>
 </tr>
