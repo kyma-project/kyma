@@ -22,8 +22,7 @@ kubectl apply -f https://github.com/kyma-project/keda-manager/releases/latest/do
 ```
 
 </td>
-<td> <a href="https://github.com/kyma-project/keda-manager">Keda Manager</a>
-</td>
+<td> <a href="https://github.com/kyma-project/keda-manager">Keda Manager</a></td>
 </tr>
 <tr>
 <td> BTP Operator </td>
@@ -34,8 +33,7 @@ kubectl apply -f https://github.com/kyma-project/btp-manager/releases/latest/dow
 kubectl apply -f https://github.com/kyma-project/btp-manager/releases/latest/download/btpoperator-default-cr.yaml
 ```
 
-<td> <a href="https://github.com/kyma-project/btp-manager">BTP Manager</a>
-</td>
+<td> <a href="https://github.com/kyma-project/btp-manager">BTP Manager</a></td>
 </td>
 </tr>
 </table>
