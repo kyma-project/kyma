@@ -8,7 +8,7 @@ Kyma project is currently in the transition phase from classic to modular Kyma. 
 
 > **CAUTION:** Components transformed into modules aren't installed as part of the preconfigured classic Kyma.
 
-## Install Kyma modules
+## Install a Kyma module
 
 To install a module, deploy a module manager and apply the module configuration. Run:
 
