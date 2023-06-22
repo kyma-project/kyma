@@ -4,9 +4,9 @@ title: Quick install
 
 To get started with Kyma, let's quickly install it first.
 
-The Kyma project is currently in the transition phase from classic to modular Kyma. You can either install classic Kyma with its components, or available modules. To see a list of Kyma modules, go to [Overview](/docs/01-overview/README.md).
+The Kyma project is currently in the transition phase from classic to modular Kyma. You can either install classic Kyma with its components, or available modules. To see the list of Kyma modules, go to [Overview](/docs/01-overview/README.md).
 
-> **CAUTION:** Components transformed into modules aren't installed as part of the preconfigured classic Kyma.
+> **CAUTION:** Components transformed into modules aren't installed as part of preconfigured classic Kyma.
 
 ## Install a Kyma module
 
