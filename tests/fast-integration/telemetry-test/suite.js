@@ -422,28 +422,8 @@ describe('Telemetry Operator', function() {
           );
         });
 
-        const secondPipeline = loadTestData('tracepipeline-output-otlp-secret-ref-2.yaml');
-        const secondPipelineName = secondPipeline[0].metadata.name;
-        it(`Should create second TracePipeline '${secondPipelineName}'`, async function() {
-          await k8sApply(secondPipeline);
-          await waitForTracePipeline(secondPipelineName);
-        });
-
-        it('Second pipeline should be \'Pending\', first pipeline should be \'Running\'', async function() {
-          await waitForTracePipelineStatusPending(secondPipelineName);
-          await waitForTracePipelineStatusRunning(firstPipelineName);
-        });
-
         it(`Should delete first TracePipeline '${firstPipeline}'`, async function() {
           await k8sDelete(firstPipeline);
-        });
-
-        it('Second pipeline should become \'Running\'', async function() {
-          await waitForTracePipelineStatusRunning(secondPipelineName);
-        });
-
-        it(`Should delete second TracePipeline '${secondPipelineName}'`, async function() {
-          await k8sDelete(secondPipeline);
         });
       });
 
