@@ -32,7 +32,6 @@ const {
   waitForTracePipeline,
   waitForPodWithLabel,
   waitForTracePipelineStatusRunning,
-  waitForTracePipelineStatusPending,
 } = require('./helpers');
 const axios = require('axios');
 const {getJaegerTracesForService, getJaegerServices} = require('../tracing/client');
