@@ -4,7 +4,20 @@ title: Quick install
 
 To get started with Kyma, let's quickly install it first.
 
-## Install Kyma
+Kyma project is currently in the transition phase from classic to modular Kyma. You can either install classic Kyma with its components, or available modules. To see a list of Kyma modules, go to [Overview](/docs/01-overview/README.md).
+
+> **CAUTION:** Components transformed into modules aren't installed as part of the preconfigured classic Kyma.
+
+## Install Kyma modules
+
+To install a module, deploy a module manager and apply the module configuration. Run:
+
+```bash
+kubectl apply -f {PATH_TO_THE_MODULE_MANAGER_YAML_FILE}
+kubectl apply -f {PATH_TO_THE_MODULE_CR}
+```
+
+## Install classic Kyma
 
 To install Kyma on a local k3d cluster, run:
 
