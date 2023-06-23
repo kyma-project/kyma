@@ -35,7 +35,7 @@ const {
   namespaceObj,
   getTraceDAG,
   printStatusOfInClusterEventingInfrastructure,
-  deployJaeger,
+  deployJaeger, deployLoki,
 } = require('../../../utils');
 
 const {
@@ -84,6 +84,12 @@ const jaegerYaml = fs.readFileSync(
     },
 );
 
+const lokiYaml = fs.readFileSync(
+    path.join(__dirname, '../loki/loki.yaml'),
+    {
+      encoding: 'utf8',
+    },
+);
 
 const eventTypeOrderCompleted = 'order.completed.v1';
 const uncleanEventType = 'Order-$.Final.R-e-c-e-i-v-e-d.v1';
@@ -738,6 +744,7 @@ async function provisionCommerceMockResources(appName, mockNamespace, targetName
   ]);
   await waitForDeployment('commerce-mock', mockNamespace, 120 * 1000);
   await deployJaeger(k8s.loadAllYaml(jaegerYaml));
+  await deployLoki(k8s.loadAllYaml(lokiYaml));
   const vs = await waitForVirtualService(mockNamespace, 'commerce-mock');
   const mockHost = vs.spec.hosts[0];
   await retryPromise(

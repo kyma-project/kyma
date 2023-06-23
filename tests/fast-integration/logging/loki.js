@@ -10,7 +10,7 @@ module.exports = {
 const {assert} = require('chai');
 const k8s = require('@kubernetes/client-node');
 const {
-  lokiSecretData,
+  lokiConfigData,
   tryGetLokiPersistentVolumeClaim,
   logsPresentInLoki,
   queryLoki,
@@ -45,7 +45,7 @@ async function checkFluentBitLogs(startTimestamp) {
 }
 
 async function checkRetentionPeriod() {
-  const secretData = k8s.loadYaml(await lokiSecretData());
+  const secretData = k8s.loadYaml(await lokiConfigData());
 
   assert.equal(secretData?.table_manager?.retention_period, '120h');
   assert.equal(secretData?.chunk_store_config?.max_look_back_period, '120h');
@@ -62,7 +62,7 @@ async function checkPersistentVolumeClaimSize() {
 }
 
 async function verifyIstioAccessLogFormat(startTimestamp) {
-  const query = '{container="istio-proxy",namespace="kyma-system",pod="logging-loki-0"}';
+  const query = '{container="istio-proxy",namespace="kyma-system",pod="logging-loki-test-0"}';
 
   const accessLogsPresent = await logsPresentInLoki(query, startTimestamp);
   assert.isTrue(accessLogsPresent, 'No Istio access logs present in Loki');
