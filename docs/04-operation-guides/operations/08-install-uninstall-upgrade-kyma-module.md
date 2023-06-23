@@ -15,16 +15,16 @@ kubectl apply -f https://github.com/kyma-project/keda-manager/releases/latest/do
 kubectl apply -f https://github.com/kyma-project/keda-manager/releases/latest/download/keda-default-cr.yaml
 ```
 
-For more details see, [`keda-manager`](https://github.com/kyma-project/keda-manager) repository in GitHub.
+For more details see, the [`keda-manager`](https://github.com/kyma-project/keda-manager) repository in GitHub.
 
 ### BTP Operator
 
 ```bash
-kubectl apply -f https://github.com/kyma-project/btp-manager/releases/latest/download/btp-operator.yaml
-kubectl apply -f https://github.com/kyma-project/btp-manager/releases/latest/download/btpoperator-default-cr.yaml
+kubectl apply -f https://github.com/kyma-project/btp-manager/releases/latest/download/rendered.yaml
+kubectl apply -f https://raw.githubusercontent.com/kyma-project/btp-manager/main/config/samples/operator_v1alpha1_btpoperator.yaml
 ```
 
-For more details see, [`btp-manager`](https://github.com/kyma-project/btp-manager) repository in GitHub.
+For more details see, the [`btp-manager`](https://github.com/kyma-project/btp-manager) repository in GitHub.
 
 ## Uninstall a Kyma module
 
