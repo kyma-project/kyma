@@ -5,15 +5,15 @@ title: Useful links
 If you're interested in learning more about API Exposure in Kyma, follow these links to:
 
 - Perform some simple and more advanced tasks:
-  - [Create a workload](../../../03-tutorials/00-api-exposure/apix-01-create-workload.md)
-  - [Set up a custom domain for a workload](../../../03-tutorials/00-api-exposure/apix-02-setup-custom-domain-for-workload.md)
-  - [Expose a workload](../../../03-tutorials/00-api-exposure/apix-04-expose-workload/apix-04-01-expose-workload-apigateway.md)
-  - [Expose multiple workloads on the same host](../../../03-tutorials/00-api-exposure/apix-04-expose-workload/apix-04-02-expose-multiple-workloads.md)
-  - [Expose and secure a workload with OAuth2](../../../03-tutorials/00-api-exposure/apix-05-expose-and-secure-a-workload/apix-05-01-expose-and-secure-workload-oauth2.md)
-  - [Get a JWT](../../../03-tutorials/00-api-exposure/apix-05-expose-and-secure-a-workload/apix-05-02-get-jwt.md)
-  - [Expose and secure a workload with Istio](../../../03-tutorials/00-api-exposure/apix-05-expose-and-secure-a-workload/apix-05-04-expose-and-secure-workload-istio.md)
-  - [Expose and secure a workload with JWT](../../../03-tutorials/00-api-exposure/apix-05-expose-and-secure-a-workload/apix-05-03-expose-and-secure-workload-jwt.md)
-  - [Activate access logs](../../../04-operation-guides/operations/obsv-03-enable-istio-access-logs.md)
+  - [Create a workload](/docs/03-tutorials/00-api-exposure/apix-01-create-workload.md)
+  - [Set up a custom domain for a workload](/docs/03-tutorials/00-api-exposure/apix-02-setup-custom-domain-for-workload.md)
+  - [Expose a workload](/docs/03-tutorials/00-api-exposure/apix-04-expose-workload/apix-04-01-expose-workload-apigateway.md)
+  - [Expose multiple workloads on the same host](/docs/03-tutorials/00-api-exposure/apix-04-expose-workload/apix-04-02-expose-multiple-workloads.md)
+  - [Expose and secure a workload with OAuth2](/docs/03-tutorials/00-api-exposure/apix-05-expose-and-secure-a-workload/apix-05-01-expose-and-secure-workload-oauth2.md)
+  - [Get a JWT](/docs/03-tutorials/00-api-exposure/apix-05-expose-and-secure-a-workload/apix-05-02-get-jwt.md)
+  - [Expose and secure a workload with Istio](/docs/03-tutorials/00-api-exposure/apix-05-expose-and-secure-a-workload/apix-05-04-expose-and-secure-workload-istio.md)
+  - [Expose and secure a workload with JWT](/docs/03-tutorials/00-api-exposure/apix-05-expose-and-secure-a-workload/apix-05-03-expose-and-secure-workload-jwt.md)
+  - [Activate access logs](/docs/04-operation-guides/operations/obsv-03-enable-istio-access-logs.md)
 
 - Troubleshoot API Exposure-related issues when:
 
