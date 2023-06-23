@@ -8,7 +8,14 @@ The Kyma project is currently in the transition phase from classic to modular Ky
 
 To install a module, deploy its module manager and apply the module configuration. See the available Kyma modules with quick installation steps and links to their GitHub repositories.
 
-### Keda
+### Prerequisites
+
+- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
+- Kubernetes cluster, or [k3d](https://k3d.io) for local installation
+
+### Steps
+
+#### Keda
 
 ```bash
 kubectl create ns kyma-system
@@ -18,18 +25,18 @@ kubectl apply -f https://github.com/kyma-project/keda-manager/releases/latest/do
 
 For more details see, the [`keda-manager`](https://github.com/kyma-project/keda-manager) repository in GitHub.
 
-### BTP Operator
+#### BTP Operator
 
 ```bash
-kubectl apply -f https://github.com/kyma-project/btp-manager/releases/latest/download/rendered.yaml
-kubectl apply -f https://raw.githubusercontent.com/kyma-project/btp-manager/main/config/samples/operator_v1alpha1_btpoperator.yaml
+kubectl apply -f https://github.com/kyma-project/btp-manager/releases/latest/download/btp-manager.yaml
+kubectl apply -f https://github.com/kyma-project/btp-manager/releases/latest/download/btp-operator-default-cr.yaml
 ```
 
-For more details see, the [`btp-manager`](https://github.com/kyma-project/btp-manager) repository in GitHub.
+> **CAUTION:** The CR is in `WarningState` and the message is `Secret resource not found reason: MissingSecret`. To create a Secret, follow the instructions in the [`btp-manager`](https://github.com/kyma-project/btp-manager) repository.
 
 ## Uninstall a Kyma module
 
-To uninstall a Kyma module, use the `kubectl delete` command. First, delete the module configuration, and then the module manager. Use the paths from the table in the [Install a Kyma module](#install-a-kyma-module) section. Run:
+To uninstall a Kyma module, use the `kubectl delete` command. First, delete the module configuration, and then the module manager. Use the paths from the [Install a Kyma module](#install-a-kyma-module) section. Run:
 
 ```bash
 kubectl delete {PATH_TO_THE_MODULE_CUSTOM_RESOURCE}
