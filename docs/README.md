@@ -3,9 +3,11 @@
 Kyma is an opinionated set of Kubernetes-based modular building blocks, including all necessary capabilities to develop and run enterprise-grade cloud-native applications.
 It is the open path to the SAP ecosystem supporting business scenarios end-to-end.
 
+![overview](./assets/modular-kyma.png)
+
 Kyma is an actively maintained open-source project supported by SAP. The Kyma project is also a foundation of SAP BTP, Kyma Runtime which is a part of SAP Business Technology Platform (BTP). You can use Kyma modules in your own Kubernetes cluster, or try the managed version from SAP BTP with a ready-to-use Kubernetes cluster powered by Gardener. 
 
-![overview](./assets/kyma-overview.svg)
+
 
 ## Kyma modules 
 
