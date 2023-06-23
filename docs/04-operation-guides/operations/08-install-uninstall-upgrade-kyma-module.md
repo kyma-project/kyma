@@ -11,8 +11,9 @@ To install a module, deploy its module manager and apply the module configuratio
 ### Keda
 
 ```bash
+kubectl create ns kyma-system
 kubectl apply -f https://github.com/kyma-project/keda-manager/releases/latest/download/keda-manager.yaml
-kubectl apply -f https://github.com/kyma-project/keda-manager/releases/latest/download/keda-default-cr.yaml
+kubectl apply -f https://github.com/kyma-project/keda-manager/releases/latest/download/keda-default-cr.yaml -n kyma-system
 ```
 
 For more details see, the [`keda-manager`](https://github.com/kyma-project/keda-manager) repository in GitHub.
