@@ -67,10 +67,6 @@ spec:
 {{- if or .Values.priorityClassName .Values.global.priorityClassName }}
             - --metric-gateway-priority-class={{ coalesce .Values.priorityClassName .Values.global.priorityClassName }}
 {{- end }}
-            - --metric-gateway-cpu-limit={{ .Values.metricGateway.resources.limits.cpu }}
-            - --metric-gateway-memory-limit={{ .Values.metricGateway.resources.limits.memory }}
-            - --metric-gateway-cpu-request={{ .Values.metricGateway.resources.requests.cpu }}
-            - --metric-gateway-memory-request={{ .Values.metricGateway.resources.requests.memory }}
 {{- end }}
           name: manager
           ports:
