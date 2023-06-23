@@ -11,7 +11,7 @@ The objective of Eventing in Kyma is to simplify the process of publishing and s
 Kyma Eventing uses the following technology:
 - [NATS JetStream](https://docs.nats.io/) as backend within the cluster
 - [HTTP POST](https://www.w3schools.com/tags/ref_httpmethods.asp) requests to simplify sending and receiving events
-- Declarative [Subscription CR](../../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) to subscribe to events
+- Declarative [Subscription CR](../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) to subscribe to events
 
 ## Kyma Eventing flow
 
@@ -22,9 +22,9 @@ Kyma Eventing follows the PubSub messaging pattern: Kyma publishes messages to a
 Eventing in Kyma from a user’s perspective works as follows:
 
 - Offer an HTTP end point, for example a Function to receive the events.
-- Specify the events the user is interested in using the Kyma [Subscription CR](../../../05-technical-reference/00-custom-resources/evnt-01-subscription.md).
+- Specify the events the user is interested in using the Kyma [Subscription CR](../../05-technical-reference/00-custom-resources/evnt-01-subscription.md).
 - Send [CloudEvents](https://cloudevents.io/) or legacy events (deprecated) to the following HTTP end points on our [Event Publishing Proxy](https://github.com/kyma-project/kyma/tree/main/components/event-publisher-proxy) service.
     - `/publish` for CloudEvents.
     - `<application_name>/v1/events` for legacy events.
 
-For more information, read the [Eventing architecture](../../../05-technical-reference/00-architecture/evnt-01-architecture.md).
+For more information, read the [Eventing architecture](../../05-technical-reference/00-architecture/evnt-01-architecture.md).

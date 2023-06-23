@@ -3,9 +3,9 @@ title: Application Gateway
 ---
 
 Application Gateway is an intermediary component between a Function or a microservice and an external API. 
-It [proxies the requests](../../../05-technical-reference/00-architecture/ac-03-application-gateway.md) from Functions and microservices in Kyma to external APIs based on the configuration stored in Secrets.
+It [proxies the requests](../../05-technical-reference/00-architecture/ac-03-application-gateway.md) from Functions and microservices in Kyma to external APIs based on the configuration stored in Secrets.
 
-Application Gateway also supports redirects for the request flows in which the URL host remains unchanged. For more details, see [Response rewriting](../../../05-technical-reference/ac-01-application-gateway-details.md#response-rewriting).
+Application Gateway also supports redirects for the request flows in which the URL host remains unchanged. For more details, see [Response rewriting](../../05-technical-reference/ac-01-application-gateway-details.md#response-rewriting).
 
 ## Supported API authentication for Application CR
 
@@ -26,4 +26,4 @@ Application Gateway overrides the registered API's security type if it gets a re
 
 This mechanism is suited for implementations in which an external application handles user authentication.
 
-See how to [pass an access token in a request header](../../../04-operation-guides/operations/ac-01-pass-access-token-in-request-header.md).
+See how to [pass an access token in a request header](../../04-operation-guides/operations/ac-01-pass-access-token-in-request-header.md).
