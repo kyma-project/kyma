@@ -14,7 +14,7 @@ global:
       directory: dev
     certHandler:
       name: eventing-webhook-certificates
-      version: 1.6.0
+      version: 1.7.0
       directory: prod
     nats:
       name: nats
