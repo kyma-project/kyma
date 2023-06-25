@@ -26,7 +26,7 @@ rules:
 - apiGroups: ["applicationconnector.kyma-project.io"]
   resources: ["applications"]
   verbs: ["get"]
-- apiGroups: ["*"]
+- apiGroups: [""]
   resources: ["secrets"]
   verbs: ["get"]
 ---
