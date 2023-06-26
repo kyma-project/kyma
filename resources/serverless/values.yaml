@@ -95,10 +95,6 @@ global:
       name: "function-registry-gc"
       version: "PR-17692"
       directory: "dev"
-    function_runtime_nodejs14:
-      name: "function-runtime-nodejs14"
-      version: "v20230302-a6a85f47"
-      directory: "prod"
     function_runtime_nodejs16:
       name: "function-runtime-nodejs16"
       version: "PR-17692"

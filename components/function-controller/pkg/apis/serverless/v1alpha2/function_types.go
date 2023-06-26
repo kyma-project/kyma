@@ -26,7 +26,6 @@ type Runtime string
 
 const (
 	Python39 Runtime = "python39"
-	NodeJs14 Runtime = "nodejs14"
 	NodeJs16 Runtime = "nodejs16"
 	NodeJs18 Runtime = "nodejs18"
 )

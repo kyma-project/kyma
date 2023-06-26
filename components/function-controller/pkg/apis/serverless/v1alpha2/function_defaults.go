@@ -55,7 +55,7 @@ type BuildJobDefaulting struct {
 type DefaultingConfig struct {
 	Function FunctionDefaulting
 	BuildJob BuildJobDefaulting
-	Runtime  Runtime `envconfig:"default=nodejs14"`
+	Runtime  Runtime `envconfig:"default=nodejs18"`
 }
 
 func (fn *Function) Default(config *DefaultingConfig) {

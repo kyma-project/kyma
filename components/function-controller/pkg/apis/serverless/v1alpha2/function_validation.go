@@ -169,7 +169,7 @@ func (spec *FunctionSpec) validateGitAuthType(_ *ValidationConfig) error {
 func (spec *FunctionSpec) validateRuntime(_ *ValidationConfig) error {
 	runtimeName := spec.Runtime
 	switch runtimeName {
-	case Python39, NodeJs14, NodeJs16, NodeJs18:
+	case Python39, NodeJs16, NodeJs18:
 		return nil
 	}
 	return fmt.Errorf("spec.runtime contains unsupported value")
