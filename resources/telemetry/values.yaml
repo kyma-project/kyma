@@ -8,11 +8,11 @@ global:
       directory: "prod"
     telemetry_operator:
       name: "telemetry-manager"
-      version: "v20230613-081a3df3"
+      version: "v20230623-c4beae5e"
       directory: "prod"
     telemetry_otel_collector:
       name: "otel-collector"
-      version: "0.79.0-0065b2a5"
+      version: "0.79.0-3b3cb87a"
       directory: "prod/tpi"
     fluent_bit:
       name: "fluent-bit"

@@ -77,7 +77,7 @@ global:
   images:
     k8s_tools:
       name: "tpi/k8s-tools"
-      version: "v20230518-2bc1b552"
+      version: "v20230626-ce139c33"
       directory: "prod"
     function_controller:
       name: "function-controller"
@@ -101,16 +101,16 @@ global:
       directory: "prod"
     function_runtime_nodejs16:
       name: "function-runtime-nodejs16"
-      version: "PR-17692"
+      version: "PR-17718"
       directory: "dev"
     function_runtime_nodejs18:
       name: "function-runtime-nodejs18"
-      version: "PR-17692"
+      version: "PR-17718"
       directory: "dev"
     function_runtime_python39:
       name: "function-runtime-python39"
-      version: "v20230426-29ad7593"
-      directory: "prod"
+      version: "PR-17718"
+      directory: "dev"
     kaniko_executor:
       name: "tpi/kaniko-executor"
       version: "1.9.1-406380b9"
