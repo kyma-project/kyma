@@ -6,9 +6,9 @@ This tutorial describes how you can deploy a simple SAP BTP audit log service in
 
 ## Prerequisites
 
-- [Kyma cluster](https://kyma-project.io/docs/kyma/latest/04-operation-guides/operations/02-install-kyma/) running on Kubernetes v1.19 or higher
+- [Kyma cluster](https://kyma-project.io/docs/kyma/latest/04-operation-guides/operations/02-install-kyma/) running on Kubernetes v1.26 or higher
 - SAP BTP [Global Account](https://help.sap.com/products/BTP/65de2977205c403bbc107264b8eccf4b/d61c2819034b48e68145c45c36acba6e.html?locale=en-US) and [Subaccount](https://help.sap.com/products/BTP/65de2977205c403bbc107264b8eccf4b/55d0b6d8b96846b8ae93b85194df0944.html?locale=en-US)
-- [kubectl](https://kubernetes.io/docs/tasks/tools/) v1.17 or higher
+- [kubectl](https://kubernetes.io/docs/tasks/tools/) v1.26 or higher
 - [helm](https://helm.sh/) v3.0 or higher
 - [jq](https://stedolan.github.io/jq/download/)
 

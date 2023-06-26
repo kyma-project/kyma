@@ -9,9 +9,9 @@ All the steps are performed in the `default` Namespace.
 
 ## Prerequisites
 
-- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) (v1.20 or higher)
+- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) (v1.26 or higher)
 - [curl](https://github.com/curl/curl)
-- [k3d](https://k3d.io) (v5.0.0 or higher with [a Kubernetes version supported by Kyma](../04-operation-guides/operations/02-install-kyma.md))
+- [k3d](https://k3d.io) (v5.4.9 or higher with [a Kubernetes version supported by Kyma](../04-operation-guides/operations/02-install-kyma.md))
 - [Kyma CLI](../04-operation-guides/operations/01-install-kyma-CLI.md)
 - Minimum Docker resources: 4 CPUs and 8 GB RAM 
   > **NOTE:** Learn how to adjust these Docker values on [Mac](https://docs.docker.com/desktop/settings/mac/#resources), [Windows](https://docs.docker.com/desktop/settings/windows/#resources), or [Linux](https://docs.docker.com/desktop/settings/linux/#resources).

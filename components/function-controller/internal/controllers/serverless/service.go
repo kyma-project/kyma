@@ -14,7 +14,7 @@ func stateFnCheckService(ctx context.Context, r *reconciler, s *systemState) (st
 	err := r.client.ListByLabel(
 		ctx,
 		s.instance.GetNamespace(),
-		s.internalFunctionLabels(),
+		internalFunctionLabels(s.instance),
 		&s.services)
 
 	if err != nil {

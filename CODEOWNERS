@@ -99,3 +99,5 @@ VERSION @kyma-project/prow
 
 # Managed Modules
 /modules @pbochynski @kyma-project/Jellyfish
+
+/hack/table-gen @k15r @kyma-project/kyma-steering-committee

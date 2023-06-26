@@ -11,10 +11,11 @@ import (
 
 	eventingtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 )
 
 func Test_Conversion(t *testing.T) {
@@ -118,7 +119,7 @@ func Test_Conversion(t *testing.T) {
 		{
 			name: "Converting BEB Subscription",
 			alpha1Sub: newDefaultSubscription(
-				eventingtesting.WithV1alpha1ProtocolBEB(),
+				eventingtesting.WithV1alpha1ProtocolEventMesh(),
 				v1WithWebhookAuthForBEB(),
 				eventingtesting.WithV1alpha1Filter(eventSource, orderCreatedEventType),
 				eventingtesting.WithV1alpha1Filter(eventSource, orderUpdatedEventType),
@@ -137,8 +138,8 @@ func Test_Conversion(t *testing.T) {
 					orderUpdatedEventType,
 					orderDeletedEventTypeNonClean,
 				}),
-				eventingtesting.WithProtocolBEB(),
-				eventingtesting.WithWebhookAuthForBEB(),
+				eventingtesting.WithProtocolEventMesh(),
+				eventingtesting.WithWebhookAuthForEventMesh(),
 				v2WithStatusTypes([]v1alpha2.EventType{
 					{
 						OriginalType: orderCreatedEventType,
@@ -159,7 +160,7 @@ func Test_Conversion(t *testing.T) {
 		{
 			name: "Converting Subscription with Protocol, ProtocolSettings and WebhookAuth",
 			alpha1Sub: newDefaultSubscription(
-				eventingtesting.WithV1alpha1ProtocolBEB(),
+				eventingtesting.WithV1alpha1ProtocolEventMesh(),
 				eventingtesting.WithV1alpha1ProtocolSettings(
 					eventingtesting.NewProtocolSettings(
 						eventingtesting.WithAtLeastOnceQOS(),
@@ -174,7 +175,7 @@ func Test_Conversion(t *testing.T) {
 				eventingtesting.WithTypes([]string{
 					orderCreatedEventType,
 				}),
-				eventingtesting.WithProtocolBEB(),
+				eventingtesting.WithProtocolEventMesh(),
 				eventingtesting.WithConfigValue(v1alpha2.ProtocolSettingsQos,
 					string(types.QosAtLeastOnce)),
 				eventingtesting.WithConfigValue(v1alpha2.WebhookAuthGrantType,

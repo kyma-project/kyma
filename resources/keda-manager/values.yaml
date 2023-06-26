@@ -1,18 +1,20 @@
 global:
   containerRegistry:
-    path: ghcr.io/kedacore
+    path: europe-docker.pkg.dev/kyma-project
   images:
     keda_manager:
       name: "keda-manager"
-      version: "v20230425-c16f4893"
-      containerRegistryPath: "europe-docker.pkg.dev/kyma-project"
+      version: "v20230621-a32a09b8"
       directory: "prod"
     keda:
       name: "keda"
-      version: "2.10.0"
+      version: "2.10.1"
+      directory: "prod/external/ghcr.io/kedacore"
     keda_admission_webhooks:
       name: "keda-admission-webhooks"
-      version: "2.10.0"
+      version: "2.10.1"
+      directory: "prod/external/ghcr.io/kedacore"
     keda_metrics_apiserver:
       name: "keda-metrics-apiserver"
-      version: "2.10.0"
+      version: "2.10.1"
+      directory: "prod/external/ghcr.io/kedacore"

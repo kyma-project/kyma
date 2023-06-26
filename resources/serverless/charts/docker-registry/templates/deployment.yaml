@@ -4,6 +4,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ template "docker-registry.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ template "docker-registry.name" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
@@ -63,8 +64,6 @@ spec:
           {{- toYaml . | nindent 12 }}
           {{- end }}
           command:
-          # TODO: after helm@3.5.0 is used in kyma-installer we may be able to remove that init container, as helm 3.5.0 uses sprig@3.2.0, which has `bcrypt` function
-          # might want to investigate
             - sh
             - -ec
             - |
@@ -217,7 +216,7 @@ spec:
           - sh
           - -ec
           - | 
-              # garbage-collect will fail if the registry storage is not initialized (images are already pused to it), so we check fist before we run the command
+              # garbage-collect will fail if the registry storage is not initialized (images are already paused to it), so we check fist before we run the command
               while true; do test -d /var/lib/registry/docker/registry/v2/ && /bin/registry garbage-collect /etc/docker/registry/config.yml -m || echo "failed to run garbage-collect, retrying"; sleep 1h; done
           resources:
 {{ toYaml .Values.resources | indent 12 }}

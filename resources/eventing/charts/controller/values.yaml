@@ -102,3 +102,9 @@ jetstream:
   consumerDeliverPolicy: new
   maxMessages: -1 # no limit
   maxBytes: -1
+
+eventingWebhookAuth:
+  enabled: false
+  secret:
+    name: eventing-webhook-auth
+    namespace: kyma-system

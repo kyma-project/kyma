@@ -35,16 +35,20 @@ spec:
                 managementInfo:
                   properties:
                     connectorUrl:
+                      description: 'URL used for maintaining the secure connection.'
                       type: string
                     directorUrl:
+                      description: 'URL used for fetching Applications.'
                       type: string
                   required:
                     - connectorUrl
                     - directorUrl
                   type: object
                 refreshCredentialsNow:
+                  description: 'If set to `true`, ignores certificate expiration date and refreshes in the next round.'
                   type: boolean
                 resyncNow:
+                  description: 'If set to `true`, ignores `APP_MINIMAL_COMPASS_SYNC_TIME` and syncs in the next round.'
                   type: boolean
               required:
                 - managementInfo
@@ -54,21 +58,24 @@ spec:
                 connectionState:
                   type: string
                 connectionStatus:
-                  description: ConnectionStatus represents status of a connection to
-                    Compass
+                  description: 'Represents the status of the connection to
+                    Compass.'
                   properties:
                     certificateStatus:
-                      description: CertificateStatus represents the status of the certificate
+                      description: 'Specifies the certificate issue and expiration dates.'
                       properties:
                         acquired:
+                          description: 'Specifies when the certificate was acquired.'
                           format: date-time
                           nullable: true
                           type: string
                         notAfter:
+                          description: 'Specifies when the certificate stops being valid.'
                           format: date-time
                           nullable: true
                           type: string
                         notBefore:
+                          description: 'Specifies when the certificate becomes valid.'
                           format: date-time
                           nullable: true
                           type: string
@@ -76,18 +83,22 @@ spec:
                     error:
                       type: string
                     established:
+                      description: 'Specifies when the connection was established.'
                       format: date-time
                       nullable: true
                       type: string
                     lastSuccess:
+                      description: 'Specifies the date of the last successful synchronization with the Connector.'
                       format: date-time
                       nullable: true
                       type: string
                     lastSync:
+                      description: 'Specifies the date of the last synchronization attempt.'
                       format: date-time
                       nullable: true
                       type: string
                     renewed:
+                      description: 'Specifies the date of the last certificate renewal.'
                       format: date-time
                       nullable: true
                       type: string
@@ -95,21 +106,23 @@ spec:
                     - certificateStatus
                   type: object
                 synchronizationStatus:
-                  description: SynchronizationStatus represent the status of Applications
-                    synchronization with Compass
+                  description: 'Provides the status of the synchronization with the Director.'
                   nullable: true
                   properties:
                     error:
                       type: string
                     lastAttempt:
+                      description: 'Specifies the date of the last synchronization attempt with the Director.'
                       format: date-time
                       nullable: true
                       type: string
                     lastSuccessfulApplication:
+                      description: 'Specifies the date of the last successful application of resources fetched from Compass.'
                       format: date-time
                       nullable: true
                       type: string
                     lastSuccessfulFetch:
+                      description: 'Specifies the date of the last successful fetch of resources from the Director.'
                       format: date-time
                       nullable: true
                       type: string

@@ -9,3 +9,10 @@ global:
     gateway:
       name: kyma-gateway
       namespace: kyma-system
+      minProtocolVersion: TLSV1_2
+      cipherSuites:
+      - ECDHE-RSA-CHACHA20-POLY1305
+      - ECDHE-RSA-AES256-GCM-SHA384
+      - ECDHE-RSA-AES256-SHA
+      - ECDHE-RSA-AES128-GCM-SHA256
+      - ECDHE-RSA-AES128-SHA

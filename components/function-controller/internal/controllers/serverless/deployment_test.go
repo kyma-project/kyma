@@ -33,7 +33,7 @@ func TestFunctionReconciler_equalDeployments(t *testing.T) {
 			want: false, // yes, false, as we can't compare services without spec.template.containers, it makes no sense
 		},
 		{
-			name: "simple case",
+			name: "equal deployments",
 			args: args{
 				existing: appsv1.Deployment{
 					ObjectMeta: metav1.ObjectMeta{
@@ -47,6 +47,9 @@ func TestFunctionReconciler_equalDeployments(t *testing.T) {
 							ObjectMeta: metav1.ObjectMeta{
 								Labels: map[string]string{
 									"some-template-label-key": "some-template-label-val",
+								},
+								Annotations: map[string]string{
+									"some-template-annotation-key": "some-template-annotation-val",
 								},
 							},
 							Spec: corev1.PodSpec{
@@ -85,6 +88,9 @@ func TestFunctionReconciler_equalDeployments(t *testing.T) {
 							ObjectMeta: metav1.ObjectMeta{
 								Labels: map[string]string{
 									"some-template-label-key": "some-template-label-val",
+								},
+								Annotations: map[string]string{
+									"some-template-annotation-key": "some-template-annotation-val",
 								},
 							},
 							Spec: corev1.PodSpec{
@@ -199,7 +205,7 @@ func TestFunctionReconciler_equalDeployments(t *testing.T) {
 			want: false,
 		},
 		{
-			name: "different pod annotations - spec.template.metadata.annotations is ignored so that kubectl rollout restart works properly",
+			name: "different pod annotations",
 			args: args{
 				existing: appsv1.Deployment{
 					ObjectMeta: metav1.ObjectMeta{
@@ -236,7 +242,7 @@ func TestFunctionReconciler_equalDeployments(t *testing.T) {
 				},
 				scalingEnabled: true,
 			},
-			want: true,
+			want: false,
 		},
 		{
 			name: "different resources",
@@ -291,6 +297,64 @@ func TestFunctionReconciler_equalDeployments(t *testing.T) {
 					},
 				},
 				scalingEnabled: true,
+			},
+			want: false,
+		},
+		{
+			name: "different env",
+			args: args{
+				existing: appsv1.Deployment{
+					Spec: appsv1.DeploymentSpec{
+						Template: corev1.PodTemplateSpec{
+							Spec: corev1.PodSpec{
+
+								Containers: []corev1.Container{
+									{
+										Image: "container-image1",
+										Env:   []corev1.EnvVar{{Name: "AAA", Value: "BBB"}},
+										Resources: corev1.ResourceRequirements{
+											Limits: map[corev1.ResourceName]k8sresource.Quantity{
+												corev1.ResourceCPU:    k8sresource.MustParse("50m"),
+												corev1.ResourceMemory: k8sresource.MustParse("50Mi"),
+											},
+											Requests: map[corev1.ResourceName]k8sresource.Quantity{
+												corev1.ResourceCPU:    k8sresource.MustParse("20m"),
+												corev1.ResourceMemory: k8sresource.MustParse("20Mi"),
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+				expected: appsv1.Deployment{
+					Spec: appsv1.DeploymentSpec{
+
+						Template: corev1.PodTemplateSpec{
+							Spec: corev1.PodSpec{
+
+								Containers: []corev1.Container{
+									{
+										Image: "container-image1",
+										Env:   []corev1.EnvVar{{Name: "CCC", Value: "DDD"}},
+										Resources: corev1.ResourceRequirements{
+											Limits: map[corev1.ResourceName]k8sresource.Quantity{
+												corev1.ResourceCPU:    k8sresource.MustParse("50m"),
+												corev1.ResourceMemory: k8sresource.MustParse("50Mi"),
+											},
+											Requests: map[corev1.ResourceName]k8sresource.Quantity{
+												corev1.ResourceCPU:    k8sresource.MustParse("400m"),
+												corev1.ResourceMemory: k8sresource.MustParse("40Mi"),
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+				scalingEnabled: false,
 			},
 			want: false,
 		},

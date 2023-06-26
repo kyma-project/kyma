@@ -6,21 +6,20 @@ import (
 	"math/rand"
 	"testing"
 
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	admissionv1 "k8s.io/api/admissionregistration/v1"
+	corev1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
-	"github.com/stretchr/testify/assert"
-
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
+	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
+	"github.com/kyma-project/kyma/components/eventing-controller/internal/featureflags"
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 )
 
 // TestGetSecretForPublisher verifies the successful and failing retrieval
@@ -333,6 +332,219 @@ func Test_updateMutatingValidatingWebhookWithCABundle(t *testing.T) {
 				require.Equal(t, mutatingWH.Webhooks[0], tC.wantMutatingWH.Webhooks[0])
 				require.Equal(t, validatingWH.Webhooks[0], tC.wantValidatingWH.Webhooks[0])
 			}
+		})
+	}
+}
+
+func Test_getOAuth2ClientCredentials(t *testing.T) {
+	const (
+		defaultWebhookTokenEndpoint               = "http://domain.com/token"
+		defaultEventingWebhookAuthSecretName      = "eventing-webhook-auth"
+		defaultEventingWebhookAuthSecretNamespace = "kyma-system"
+	)
+
+	testCases := []struct {
+		name             string
+		givenFlagEnabled bool
+		givenSecrets     []*corev1.Secret
+		wantError        bool
+		wantClientID     []byte
+		wantClientSecret []byte
+		wantTokenURL     []byte
+		wantCertsURL     []byte
+	}{
+		// secret is not found
+		{
+			name:             "eventing auth manager enabled, but secret does not exist",
+			givenFlagEnabled: true,
+			givenSecrets:     nil,
+			wantError:        true,
+		},
+		{
+			name:             "eventing auth manager disabled, but secret does not exist",
+			givenFlagEnabled: false,
+			givenSecrets:     nil,
+			wantError:        true,
+		},
+		// secret is found but some of the required data is missing
+		{
+			name:             "eventing auth manager enabled, and secret exists with missing data",
+			givenFlagEnabled: true,
+			givenSecrets: []*corev1.Secret{
+				// required secret
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      defaultEventingWebhookAuthSecretName,
+						Namespace: defaultEventingWebhookAuthSecretNamespace,
+					},
+					Data: map[string][]byte{
+						secretKeyClientID: []byte("test-client-id-0"),
+						// missing data
+					},
+				},
+				// not required secret
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      getOAuth2ClientSecretName(),
+						Namespace: deployment.ControllerNamespace,
+					},
+					Data: map[string][]byte{
+						secretKeyClientID:     []byte("test-client-id-1"),
+						secretKeyClientSecret: []byte("test-client-secret-1"),
+						secretKeyTokenURL:     []byte("test-token-url-1"),
+						secretKeyCertsURL:     []byte("test-certs-url-1"),
+					},
+				},
+			},
+			wantError: true,
+		},
+		{
+			name:             "eventing auth manager disabled, and secret exists with missing data",
+			givenFlagEnabled: false,
+			givenSecrets: []*corev1.Secret{
+				// not required secret
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      defaultEventingWebhookAuthSecretName,
+						Namespace: defaultEventingWebhookAuthSecretNamespace,
+					},
+					Data: map[string][]byte{
+						secretKeyClientID:     []byte("test-client-id-0"),
+						secretKeyClientSecret: []byte("test-client-secret-0"),
+						secretKeyTokenURL:     []byte("test-token-url-0"),
+						secretKeyCertsURL:     []byte("test-certs-url-0"),
+					},
+				},
+				// required secret
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      getOAuth2ClientSecretName(),
+						Namespace: deployment.ControllerNamespace,
+					},
+					Data: map[string][]byte{
+						secretKeyClientID: []byte("test-client-id-1"),
+						// missing data
+					},
+				},
+			},
+			wantError: true,
+		},
+		// secret is found with all the required data
+		{
+			name:             "eventing auth manager enabled, and secret exists with all data",
+			givenFlagEnabled: true,
+			givenSecrets: []*corev1.Secret{
+				// required secret
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      defaultEventingWebhookAuthSecretName,
+						Namespace: defaultEventingWebhookAuthSecretNamespace,
+					},
+					Data: map[string][]byte{
+						secretKeyClientID:     []byte("test-client-id-0"),
+						secretKeyClientSecret: []byte("test-client-secret-0"),
+						secretKeyTokenURL:     []byte("test-token-url-0"),
+						secretKeyCertsURL:     []byte("test-certs-url-0"),
+					},
+				},
+				// not required secret
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      getOAuth2ClientSecretName(),
+						Namespace: deployment.ControllerNamespace,
+					},
+					Data: map[string][]byte{
+						secretKeyClientID:     []byte("test-client-id-1"),
+						secretKeyClientSecret: []byte("test-client-secret-1"),
+						secretKeyTokenURL:     []byte("test-token-url-1"),
+						secretKeyCertsURL:     []byte("test-certs-url-1"),
+					},
+				},
+			},
+			wantError:        false,
+			wantClientID:     []byte("test-client-id-0"),
+			wantClientSecret: []byte("test-client-secret-0"),
+			wantTokenURL:     []byte("test-token-url-0"),
+			wantCertsURL:     []byte("test-certs-url-0"),
+		},
+		{
+			name:             "eventing auth manager disabled, and secret exists with all data",
+			givenFlagEnabled: false,
+			givenSecrets: []*corev1.Secret{
+				// not required secret
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      defaultEventingWebhookAuthSecretName,
+						Namespace: defaultEventingWebhookAuthSecretNamespace,
+					},
+					Data: map[string][]byte{
+						secretKeyClientID:     []byte("test-client-id-0"),
+						secretKeyClientSecret: []byte("test-client-secret-0"),
+						secretKeyTokenURL:     []byte("test-token-url-0"),
+						secretKeyCertsURL:     []byte("test-certs-url-0"),
+					},
+				},
+				// required secret
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      getOAuth2ClientSecretName(),
+						Namespace: deployment.ControllerNamespace,
+					},
+					Data: map[string][]byte{
+						secretKeyClientID:     []byte("test-client-id-1"),
+						secretKeyClientSecret: []byte("test-client-secret-1"),
+						secretKeyTokenURL:     []byte("test-token-url-1"),
+						secretKeyCertsURL:     []byte("test-certs-url-1"),
+					},
+				},
+			},
+			wantError:        false,
+			wantClientID:     []byte("test-client-id-1"),
+			wantClientSecret: []byte("test-client-secret-1"),
+			wantTokenURL:     []byte(defaultWebhookTokenEndpoint),
+			wantCertsURL:     []byte(""),
+		},
+	}
+
+	l, e := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
+	require.NoError(t, e)
+
+	for _, testcase := range testCases {
+		tc := testcase
+		t.Run(tc.name, func(t *testing.T) {
+			// given
+			ctx := context.Background()
+			featureflags.SetEventingWebhookAuthEnabled(tc.givenFlagEnabled)
+			r := Reconciler{
+				Client: fake.NewClientBuilder().WithObjects().Build(),
+				logger: l,
+				envCfg: env.Config{
+					WebhookTokenEndpoint: defaultWebhookTokenEndpoint,
+				},
+				cfg: env.BackendConfig{
+					EventingWebhookAuthSecretName:      defaultEventingWebhookAuthSecretName,
+					EventingWebhookAuthSecretNamespace: defaultEventingWebhookAuthSecretNamespace,
+				},
+			}
+			if len(tc.givenSecrets) > 0 {
+				for _, secret := range tc.givenSecrets {
+					err := r.Client.Create(ctx, secret)
+					require.NoError(t, err)
+				}
+			}
+
+			// when
+			credentials, err := r.getOAuth2ClientCredentials(ctx)
+
+			// then
+			if tc.wantError {
+				require.Error(t, err)
+				return
+			}
+			require.Equal(t, tc.wantClientID, credentials.clientID)
+			require.Equal(t, tc.wantClientSecret, credentials.clientSecret)
+			require.Equal(t, tc.wantTokenURL, credentials.tokenURL)
+			require.Equal(t, tc.wantCertsURL, credentials.certsURL)
 		})
 	}
 }

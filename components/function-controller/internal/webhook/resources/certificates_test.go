@@ -68,8 +68,9 @@ func TestEnsureWebhookSecret(t *testing.T) {
 	t.Run("can ensure the secret if it doesn't exist", func(t *testing.T) {
 		client := fake.NewClientBuilder().Build()
 
-		err := EnsureWebhookSecret(ctx, client, testSecretName, testNamespaceName, testServiceName, fakeLogger)
+		result, err := EnsureWebhookSecret(ctx, client, testSecretName, testNamespaceName, testServiceName, fakeLogger)
 		require.NoError(t, err)
+		require.Equal(t, Updated, result)
 
 		secret := &corev1.Secret{}
 		err = client.Get(ctx, types.NamespacedName{Name: testSecretName, Namespace: testNamespaceName}, secret)
@@ -96,8 +97,9 @@ func TestEnsureWebhookSecret(t *testing.T) {
 		err := client.Create(ctx, secret)
 		require.NoError(t, err)
 
-		err = EnsureWebhookSecret(ctx, client, testSecretName, testNamespaceName, testServiceName, fakeLogger)
+		result, err := EnsureWebhookSecret(ctx, client, testSecretName, testNamespaceName, testServiceName, fakeLogger)
 		require.NoError(t, err)
+		require.Equal(t, Updated, result)
 
 		updatedSecret := &corev1.Secret{}
 		err = client.Get(ctx, types.NamespacedName{Name: testSecretName, Namespace: testNamespaceName}, updatedSecret)
@@ -128,8 +130,9 @@ func TestEnsureWebhookSecret(t *testing.T) {
 		err := client.Create(ctx, secret)
 		require.NoError(t, err)
 
-		err = EnsureWebhookSecret(ctx, client, testSecretName, testNamespaceName, testServiceName, fakeLogger)
+		result, err := EnsureWebhookSecret(ctx, client, testSecretName, testNamespaceName, testServiceName, fakeLogger)
 		require.NoError(t, err)
+		require.Equal(t, Updated, result)
 
 		updatedSecret := &corev1.Secret{}
 		err = client.Get(ctx, types.NamespacedName{Name: testSecretName, Namespace: testNamespaceName}, updatedSecret)
@@ -163,8 +166,9 @@ func TestEnsureWebhookSecret(t *testing.T) {
 		err := client.Create(ctx, secret)
 		require.NoError(t, err)
 
-		err = EnsureWebhookSecret(ctx, client, testSecretName, testNamespaceName, testServiceName, fakeLogger)
+		result, err := EnsureWebhookSecret(ctx, client, testSecretName, testNamespaceName, testServiceName, fakeLogger)
 		require.NoError(t, err)
+		require.Equal(t, NoResult, result)
 
 		updatedSecret := &corev1.Secret{}
 		err = client.Get(ctx, types.NamespacedName{Name: testSecretName, Namespace: testNamespaceName}, updatedSecret)
@@ -204,8 +208,9 @@ func TestEnsureWebhookSecret(t *testing.T) {
 		err = client.Create(ctx, secret)
 		require.NoError(t, err)
 
-		err = EnsureWebhookSecret(ctx, client, testSecretName, testNamespaceName, testServiceName, fakeLogger)
+		result, err := EnsureWebhookSecret(ctx, client, testSecretName, testNamespaceName, testServiceName, fakeLogger)
 		require.NoError(t, err)
+		require.Equal(t, Updated, result)
 
 		updatedSecret := &corev1.Secret{}
 		err = client.Get(ctx, types.NamespacedName{Name: testSecretName, Namespace: testNamespaceName}, updatedSecret)
@@ -245,8 +250,9 @@ func TestEnsureWebhookSecret(t *testing.T) {
 		err = client.Create(ctx, secret)
 		require.NoError(t, err)
 
-		err = EnsureWebhookSecret(ctx, client, testSecretName, testNamespaceName, testServiceName, fakeLogger)
+		result, err := EnsureWebhookSecret(ctx, client, testSecretName, testNamespaceName, testServiceName, fakeLogger)
 		require.NoError(t, err)
+		require.Equal(t, NoResult, result)
 
 		updatedSecret := &corev1.Secret{}
 		err = client.Get(ctx, types.NamespacedName{Name: testSecretName, Namespace: testNamespaceName}, updatedSecret)

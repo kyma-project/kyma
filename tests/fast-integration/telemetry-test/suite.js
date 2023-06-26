@@ -16,6 +16,8 @@ const {
   getVirtualService,
   retryPromise,
   deployJaeger,
+  deployLoki,
+  waitForConfigMap,
 } = require('../utils');
 const {
   logsPresentInLoki,
@@ -31,7 +33,6 @@ const {
   waitForTracePipeline,
   waitForPodWithLabel,
   waitForTracePipelineStatusRunning,
-  waitForTracePipelineStatusPending,
 } = require('./helpers');
 const axios = require('axios');
 const {getJaegerTracesForService, getJaegerServices} = require('../tracing/client');
@@ -69,6 +70,15 @@ async function prepareEnvironment() {
       },
   );
   await deployJaeger(k8s.loadAllYaml(jaegerYaml));
+
+  const lokiYaml = fs.readFileSync(
+      path.join(__dirname, '../test/fixtures/loki/loki.yaml'),
+      {
+        encoding: 'utf-8',
+      },
+  );
+
+  await deployLoki(k8s.loadAllYaml(lokiYaml));
 }
 
 async function cleanEnvironment() {
@@ -133,7 +143,7 @@ describe('Telemetry Operator', function() {
 
       it('Should push system logs to Kyma Loki', async function() {
         const labels = '{namespace="kyma-system", job="telemetry-fluent-bit"}';
-        const logsPresent = await logsPresentInLoki(labels, testStartTimestamp, 5);
+        const logsPresent = await logsPresentInLoki(labels, testStartTimestamp, 10);
         assert.isTrue(logsPresent, 'No logs present in Loki with namespace="kyma-system"');
       });
     });
@@ -386,7 +396,7 @@ describe('Telemetry Operator', function() {
 
         it('Should have created telemetry-trace-collector secret', async () => {
           const secret = await getSecret('telemetry-trace-collector', 'kyma-system');
-          assert.equal(secret.data.OTLP_ENDPOINT, 'aHR0cDovL25vLWVuZHBvaW50');
+          assert.equal(secret.data.OTLP_ENDPOINT_OTLP_OUTPUT_ENDPOINT_SECRET_REF_1, 'aHR0cDovL25vLWVuZHBvaW50');
         });
 
         it(`Should reflect secret ref change in telemetry-trace-collector secret and pod restart`, async function() {
@@ -403,7 +413,7 @@ describe('Telemetry Operator', function() {
           await k8sApply(loadTestData('secret-patched-trace-endpoint.yaml'), 'default');
           await sleep(5*1000);
           const secret = await getSecret('telemetry-trace-collector', 'kyma-system');
-          assert.equal(secret.data.OTLP_ENDPOINT, 'aHR0cDovL2Fub3RoZXItZW5kcG9pbnQ=');
+          assert.equal(secret.data.OTLP_ENDPOINT_OTLP_OUTPUT_ENDPOINT_SECRET_REF_1, 'aHR0cDovL2Fub3RoZXItZW5kcG9pbnQ=');
 
           const newPodRes = await k8sCoreV1Api.listNamespacedPod(
               'kyma-system',
@@ -421,28 +431,8 @@ describe('Telemetry Operator', function() {
           );
         });
 
-        const secondPipeline = loadTestData('tracepipeline-output-otlp-secret-ref-2.yaml');
-        const secondPipelineName = secondPipeline[0].metadata.name;
-        it(`Should create second TracePipeline '${secondPipelineName}'`, async function() {
-          await k8sApply(secondPipeline);
-          await waitForTracePipeline(secondPipelineName);
-        });
-
-        it('Second pipeline should be \'Pending\', first pipeline should be \'Running\'', async function() {
-          await waitForTracePipelineStatusPending(secondPipelineName);
-          await waitForTracePipelineStatusRunning(firstPipelineName);
-        });
-
         it(`Should delete first TracePipeline '${firstPipeline}'`, async function() {
           await k8sDelete(firstPipeline);
-        });
-
-        it('Second pipeline should become \'Running\'', async function() {
-          await waitForTracePipelineStatusRunning(secondPipelineName);
-        });
-
-        it(`Should delete second TracePipeline '${secondPipelineName}'`, async function() {
-          await k8sDelete(secondPipeline);
         });
       });
 
@@ -458,22 +448,24 @@ describe('Telemetry Operator', function() {
 
         it('Should have created telemetry-trace-collector secret', async () => {
           const secret = await getSecret('telemetry-trace-collector', 'kyma-system');
-          assert.equal(fromBase64(secret.data.OTLP_ENDPOINT), 'http://foo-bar');
+          assert.equal(fromBase64(secret.data.OTLP_ENDPOINT_TEST_TRACE), 'http://foo-bar');
         });
 
         it(`Should create override configmap with paused flag`, async function() {
-          await k8sApply(overrideConfig);
+          await retryWithDelay( (r) => k8sApply(overrideConfig), defaultRetryDelayMs, defaultRetries);
+          await waitForConfigMap('telemetry-override-config', 'kyma-system');
         });
 
         it(`Tries to change the otlp endpoint`, async function() {
+          await sleep(5*1000);
           pipeline[0].spec.output.otlp.endpoint.value = 'http://another-foo';
-          await k8sApply(pipeline);
+          await retryWithDelay( (r) => k8sApply(pipeline), defaultRetryDelayMs, defaultRetries);
         });
 
         it(`Should not change the OTLP endpoint in the telemetry-trace-collector secret in paused state`, async () => {
           await sleep(5*1000);
           const secret = await getSecret('telemetry-trace-collector', 'kyma-system');
-          assert.equal(fromBase64(secret.data.OTLP_ENDPOINT), 'http://foo-bar');
+          assert.equal(fromBase64(secret.data.OTLP_ENDPOINT_TEST_TRACE), 'http://foo-bar');
         });
 
         it(`Deletes the override configmap`, async function() {
@@ -491,7 +483,7 @@ describe('Telemetry Operator', function() {
         it(`Should now change the OTLP endpoint in the telemetry-trace-collector secret`, async function() {
           await sleep(5*1000);
           const secret = await getSecret('telemetry-trace-collector', 'kyma-system');
-          assert.equal(fromBase64(secret.data.OTLP_ENDPOINT), 'http://another-foo-bar');
+          assert.equal(fromBase64(secret.data.OTLP_ENDPOINT_TEST_TRACE), 'http://another-foo-bar');
         });
 
         it(`Should delete TracePipeline`, async function() {

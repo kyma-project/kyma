@@ -8,16 +8,16 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/kyma-project/kyma/components/application-operator v0.0.0-20221118103320-ffe096ff3455
-	github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20230426090856-c122afc6c6b9
-	github.com/nats-io/nats-server/v2 v2.9.15
-	github.com/nats-io/nats.go v1.25.0
-	github.com/onsi/gomega v1.27.6
+	github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20230605123955-9a13db476af1
+	github.com/nats-io/nats-server/v2 v2.9.18
+	github.com/nats-io/nats.go v1.27.0
+	github.com/onsi/gomega v1.27.8
 	github.com/pkg/errors v0.9.1
-	github.com/prometheus/client_golang v1.14.0
-	github.com/stretchr/testify v1.8.2
+	github.com/prometheus/client_golang v1.16.0
+	github.com/stretchr/testify v1.8.4
 	go.opencensus.io v0.24.0
 	go.uber.org/zap v1.24.0
-	golang.org/x/oauth2 v0.7.0
+	golang.org/x/oauth2 v0.9.0
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2
 	k8s.io/api v0.25.7
 	k8s.io/apimachinery v0.25.7
@@ -50,7 +50,7 @@ require (
 	github.com/imdario/mergo v0.3.12 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/klauspost/compress v1.16.4 // indirect
+	github.com/klauspost/compress v1.16.5 // indirect
 	github.com/kyma-project/kyma/common/logging v0.0.0-20221118103320-ffe096ff3455 // indirect
 	github.com/mailru/easyjson v0.7.6 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.2-0.20181231171920-c182affec369 // indirect
@@ -70,11 +70,11 @@ require (
 	github.com/stretchr/objx v0.5.0 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
-	golang.org/x/crypto v0.8.0 // indirect
-	golang.org/x/net v0.9.0 // indirect
-	golang.org/x/sys v0.7.0 // indirect
-	golang.org/x/term v0.7.0 // indirect
-	golang.org/x/text v0.9.0 // indirect
+	golang.org/x/crypto v0.10.0 // indirect
+	golang.org/x/net v0.11.0 // indirect
+	golang.org/x/sys v0.9.0 // indirect
+	golang.org/x/term v0.9.0 // indirect
+	golang.org/x/text v0.10.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.2.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
