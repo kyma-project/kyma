@@ -1,17 +1,27 @@
-# Serverless dictionary
+# Serverless naming proposal
 
-The target of this document is the attempt to unify naming convention in serverless component to avoid confusion.
+## Problem
+
+Serverless consist of two projects:
+
+- [function-controller](https://github.com/kyma-project/kyma/tree/main/components/function-controller), which is
+  responsible for running function on k8s cluster
+- [serverless-manager](https://github.com/kyma-project/serverless-manager), which is responsible for installation and
+  configuration of serverless
+- additionally we have 3rd-party additional components like [keda](https://keda.sh/)
+
 Example of confusion with name `controller`. In our case we name `controller`:
 
 - serverless reconcile loop
 - serverless pod with reconcile loop
 - component in kyma/directory
 
-Serverless consist of two projects:
+## Goal
 
-- serverless itself, which is responsible for running function on k8s cluster
-- serverless-manager, which is responsible for instalation and configuration of serverless
-- additionally we have 3rd-party additional components like keda
+The target of this document is the attempt to unify naming convention in serverless component to avoid confusion and
+make it more logical.
+
+# Proposal
 
 ## Components naming convention
 
@@ -19,27 +29,25 @@ The proposed naming conversion is:
 
 - Serverless - component which is doing some buisness logic related to functions on k8s cluster and can contain its own
   CRD.
-- Serverless-operator - name of the component which install and configure
-  Serverless. *[Operator framework](https://operatorframework.io/) *The Operator Framework is an open source toolkit to
-  manage Kubernetes native applications, called Operators, in an effective, automated, and scalable way.
+- Serverless-operator - name of the component which install and configure Serverless.
 - Kyma-Keda-operator - the operator install and configure [keda](https://keda.sh/)
 
-## Services naming description
+## Deployment naming description
 
-Serverless consist of two services:
+Serverless consist of two deployment:
 
 - controller - responsible for creating, configuring k8s resources to finally run function on a cluster. The main
-  responsibility is controlling of functions cr
+  responsibility is reconciliation of functions cr.
 - defaulting/validation/conversion webhooks responsible for defaulting/validation for function CR, mutating external
   registry secret but also reconcile certificates. The main responsibility is doing webhook things.
 
-Serverkess uses kubebuilder to build the services and has the
+Serverless uses kubebuilder to build the program and has the
 following [architecture](./assets/kubebuilder-architecture.png).
 
-The service consists of `process` which have `manager`.
+The program consists of `process` which have `manager`.
 The `manager` can have 2 components:
 
-- Controller, which focuses on reconciliation of given k8s resoruce. Uses predicate and reconciler.
+- Controller, which focuses on reconciliation of given k8s resource. Uses predicates and reconciler.
 - Webhook, which works with AdmissionRequests
 
 ## Components naming convention
@@ -60,8 +68,11 @@ Deployment with webhook as main responsibility:
 
 Deployment with both of those components:
 
-- ${component_name} TODO: czy to jest dobra nazwa, przykład wardena? Wprowadza się tutaj podwójna nazwę, jedną dla
-  technicznego komponentu a druga dla produktu. Może to jednak jest dobry pomysł?
+- ${component_name}
+
+I decided to go with pure component name as it contains two responsibilities and from technical perspective it's very
+similar to the component.
+It might be confusing, and I am open to hear some proposals.
 
 For controller reconcile loop inside the manger:
 
@@ -74,7 +85,13 @@ For webhook inside the manager:
 - ${component_name}-${crd_name}-validaton-webhook
 - ${crd_name}-validaton-webhook
 
-Summary, from the top to the bottom:
+For serverless runtimes:
+
+- ${runtime_name}, eg.: `python310`
+
+## Summary
+
+Table is arrange from the least technical to the most technical terms.
 
 | component name                | responsibility                                 |
 |-------------------------------|------------------------------------------------|
