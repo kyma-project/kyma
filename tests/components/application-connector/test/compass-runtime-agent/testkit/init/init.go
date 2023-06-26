@@ -14,6 +14,7 @@ const (
 	NewCompassRuntimeConfigName   = "test-compass-runtime-agent-config"
 	NewCACertSecretName           = "ca-cert-test"
 	NewClientCertSecretName       = "client-cert-test"
+	NewControllerSyncPeriodTime   = "15s"
 	RetryAttempts                 = 6
 	RetrySeconds                  = 5
 )
@@ -79,11 +80,12 @@ func (crc compassRuntimeAgentConfigurator) Do(runtimeName, formationName string)
 	newCACertNamespacedSecretName := fmt.Sprintf("%s/%s", IstioSystemNamespace, NewCACertSecretName)
 	newClientCertNamespacedSecretName := fmt.Sprintf("%s/%s", CompassSystemNamespace, NewClientCertSecretName)
 	newCompassRuntimeNamespacedSecretConfigName := fmt.Sprintf("%s/%s", CompassSystemNamespace, NewCompassRuntimeConfigName)
+	newControllerSyncPeriodTime := fmt.Sprintf("%s", NewControllerSyncPeriodTime)
 
 	log.Info("Preparing Compass Runtime Agent configuration secret")
 	deploymentRollbackFunc, err := crc.deploymentConfigurator.Do(newCACertNamespacedSecretName,
 		newClientCertNamespacedSecretName,
-		newCompassRuntimeNamespacedSecretConfigName)
+		newCompassRuntimeNamespacedSecretConfigName, newControllerSyncPeriodTime)
 	if err != nil {
 		return nil, crc.rollbackOnError(err,
 			compassConfiguratorRollbackFunc,

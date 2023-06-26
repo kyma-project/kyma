@@ -46,7 +46,8 @@ func TestCompassRuntimeAgentInit(t *testing.T) {
 		deploymentConfiguratorMock.On("Do",
 			fmt.Sprintf("%s/%s", IstioSystemNamespace, NewCACertSecretName),
 			fmt.Sprintf("%s/%s", CompassSystemNamespace, NewClientCertSecretName),
-			fmt.Sprintf("%s/%s", CompassSystemNamespace, NewCompassRuntimeConfigName)).
+			fmt.Sprintf("%s/%s", CompassSystemNamespace, NewCompassRuntimeConfigName),
+			fmt.Sprintf("%s", NewControllerSyncPeriodTime)).
 			Return(deploymentRollbackFunc.Func(), nil)
 
 		configurator := NewCompassRuntimeAgentConfigurator(compassConfiguratorMock, certificateSecretConfiguratorMock, configurationSecretConfiguratorMock, compassConnectionConfiguratorMock, deploymentConfiguratorMock, "tenant")
@@ -149,7 +150,8 @@ func TestCompassRuntimeAgentInit(t *testing.T) {
 		deploymentConfiguratorMock.On("Do",
 			fmt.Sprintf("%s/%s", IstioSystemNamespace, NewCACertSecretName),
 			fmt.Sprintf("%s/%s", CompassSystemNamespace, NewClientCertSecretName),
-			fmt.Sprintf("%s/%s", CompassSystemNamespace, NewCompassRuntimeConfigName)).
+			fmt.Sprintf("%s/%s", CompassSystemNamespace, NewCompassRuntimeConfigName),
+			fmt.Sprintf("%s", NewControllerSyncPeriodTime)).
 			Return(nil, errors.New("some error"))
 
 		configurator := NewCompassRuntimeAgentConfigurator(compassConfiguratorMock, certificateSecretConfiguratorMock, configurationSecretConfiguratorMock, nil, deploymentConfiguratorMock, "tenant")
@@ -195,7 +197,8 @@ func TestCompassRuntimeAgentInit(t *testing.T) {
 		deploymentConfiguratorMock.On("Do",
 			fmt.Sprintf("%s/%s", IstioSystemNamespace, NewCACertSecretName),
 			fmt.Sprintf("%s/%s", CompassSystemNamespace, NewClientCertSecretName),
-			fmt.Sprintf("%s/%s", CompassSystemNamespace, NewCompassRuntimeConfigName)).
+			fmt.Sprintf("%s/%s", CompassSystemNamespace, NewCompassRuntimeConfigName),
+			fmt.Sprintf("%s", NewControllerSyncPeriodTime)).
 			Return(deploymentRollbackFunc.Func(), nil)
 
 		configurator := NewCompassRuntimeAgentConfigurator(compassConfiguratorMock, certificateSecretConfiguratorMock, configurationSecretConfiguratorMock, compassConnectionConfiguratorMock, deploymentConfiguratorMock, "tenant")

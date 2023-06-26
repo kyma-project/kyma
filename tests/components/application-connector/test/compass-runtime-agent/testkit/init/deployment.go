@@ -14,10 +14,11 @@ import (
 )
 
 const (
-	CRAContainerNumber         = 0
-	ConfigurationSecretEnvName = "APP_AGENT_CONFIGURATION_SECRET"
-	CASecretEnvName            = "APP_CA_CERTIFICATES_SECRET"
-	ClusterCertSecretEnvName   = "APP_CLUSTER_CERTIFICATES_SECRET"
+	CRAContainerNumber          = 0
+	ConfigurationSecretEnvName  = "APP_AGENT_CONFIGURATION_SECRET"
+	CASecretEnvName             = "APP_CA_CERTIFICATES_SECRET"
+	ClusterCertSecretEnvName    = "APP_CLUSTER_CERTIFICATES_SECRET"
+	ControllerSyncPeriodEnvTime = "APP_CONTROLLER_SYNC_PERIOD"
 )
 
 type deploymentConfiguration struct {
@@ -34,7 +35,7 @@ func NewDeploymentConfiguration(kubernetesInterface kubernetes.Interface, deploy
 	}
 }
 
-func (dc deploymentConfiguration) Do(newCANamespacedSecretName, newClusterNamespacedCertSecretName, newConfigNamespacedSecretName string) (types.RollbackFunc, error) {
+func (dc deploymentConfiguration) Do(newCANamespacedSecretName, newClusterNamespacedCertSecretName, newConfigNamespacedSecretName, newControllerSyncPeriodTime string) (types.RollbackFunc, error) {
 	deploymentInterface := dc.kubernetesInterface.AppsV1().Deployments(dc.namespaceName)
 
 	deployment, err := retryGetDeployment(dc.deploymentName, deploymentInterface)
@@ -61,18 +62,23 @@ func (dc deploymentConfiguration) Do(newCANamespacedSecretName, newClusterNamesp
 		return nil, fmt.Errorf("environment variable '%s' not found in %s deployment", ClusterCertSecretEnvName, dc.deploymentName)
 	}
 
+	previousControllerSyncPeriodTime, found := replaceEnvValue(deployment, ControllerSyncPeriodEnvTime, newControllerSyncPeriodTime)
+	if !found {
+		return nil, fmt.Errorf("environment variable '%s' not found in %s deployment", ControllerSyncPeriodEnvTime, dc.deploymentName)
+	}
+
 	err = retryUpdateDeployment(deployment, deploymentInterface)
 	if err != nil {
 		return nil, err
 	}
-	rollbackDeploymentFunc := newRollbackDeploymentFunc(dc.deploymentName, previousConfigSecretNamespacedName, previousCASecretNamespacedName, previousCertSecretNamespacedName, deploymentInterface)
+	rollbackDeploymentFunc := newRollbackDeploymentFunc(dc.deploymentName, previousConfigSecretNamespacedName, previousCASecretNamespacedName, previousCertSecretNamespacedName, previousControllerSyncPeriodTime, deploymentInterface)
 
 	err = waitForRollout(dc.deploymentName, deploymentInterface)
 
 	return rollbackDeploymentFunc, err
 }
 
-func newRollbackDeploymentFunc(name, previousConfigSecretNamespacedName, previousCASecretNamespacedName, previousCertSecretNamespacedName string, deploymentInterface v13.DeploymentInterface) types.RollbackFunc {
+func newRollbackDeploymentFunc(name, previousConfigSecretNamespacedName, previousCASecretNamespacedName, previousCertSecretNamespacedName, previousControllerSyncPeriodTime string, deploymentInterface v13.DeploymentInterface) types.RollbackFunc {
 	return func() error {
 		deployment, err := retryGetDeployment(name, deploymentInterface)
 		if err != nil {
@@ -92,6 +98,11 @@ func newRollbackDeploymentFunc(name, previousConfigSecretNamespacedName, previou
 		_, found = replaceEnvValue(deployment, ClusterCertSecretEnvName, previousCertSecretNamespacedName)
 		if !found {
 			return fmt.Errorf("environment variable '%s' not found in %s deployment", ClusterCertSecretEnvName, name)
+		}
+
+		_, found = replaceEnvValue(deployment, ControllerSyncPeriodEnvTime, previousControllerSyncPeriodTime)
+		if !found {
+			return fmt.Errorf("environment variable '%s' not found in %s deployment", ControllerSyncPeriodEnvTime, name)
 		}
 
 		return retryUpdateDeployment(deployment, deploymentInterface)
