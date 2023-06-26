@@ -2,11 +2,11 @@
 title: Install, uninstall and upgrade a Kyma module
 ---
 
-Learn how to install, uninstall and upgrade a Kyma module. To see the list of all Kyma modules, go to [Overview](/docs/01-overview/README.md).
+Learn how to install, uninstall and upgrade a Kyma module. To see the list of all available and planned Kyma modules, go to [Overview](/docs/01-overview/README.md).
 
 ## Install a Kyma module
 
-To install a module, deploy its module manager and apply the module configuration. See the already available Kyma modules with their quick installation steps and links to their GitHub repositories below:
+To install a module, deploy its module manager and apply the module configuration. See the already available Kyma modules with their quick installation steps and links to their GitHub repositories:
 
 ### Prerequisites
 
