@@ -22,4 +22,4 @@ These configuration changes are applied to customize Istio for use with Kyma:
 - [Mutual TLS (mTLS)](https://istio.io/docs/concepts/security/#mutual-tls-authentication) is enabled cluster-wide in a STRICT mode.
 - Ingress Gateway is expanded to handle ports `80`, `443`, and `31400` for local Kyma deployments.
 - The use of HTTP 1.0 is enabled in the outbound HTTP listeners by `PILOT_HTTP10` flag set in Istiod component environment variables.
-- IstioOperator configuration file is modified. [Change Kyma settings](../../../04-operation-guides/operations/03-change-kyma-config-values.md) to customize the configuration.
+- IstioOperator configuration file is modified. [Change Kyma settings](../../04-operation-guides/operations/03-change-kyma-config-values.md) to customize the configuration.
