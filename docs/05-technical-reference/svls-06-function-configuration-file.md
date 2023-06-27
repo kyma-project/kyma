@@ -18,7 +18,7 @@ See the sample `config.yaml` for an inline Function for which code and dependenc
 name: function-practical-filip5
 namespace: testme
 runtime: nodejs18
-runtimeImageOverride: eu.gcr.io/kyma-project/function-runtime-nodejs16:9e934c09 //TODO:?
+runtimeImageOverride: eu.gcr.io/kyma-project/function-runtime-nodejs18:v20230228-b2981e80
 labels:
     app: serverless-test
 source:
@@ -203,7 +203,7 @@ See all parameter descriptions.
 name: function-practical-filip5
 namespace: testme
 runtime: nodejs18
-runtimeImageOverride: eu.gcr.io/kyma-project/function-runtime-nodejs16:9e934c09 ??TODO
+runtimeImageOverride: eu.gcr.io/kyma-project/function-runtime-nodejs16:v20230228-b2981e80
 labels:
     app: serverless-test
 source:
