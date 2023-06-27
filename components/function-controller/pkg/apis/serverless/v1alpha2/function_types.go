@@ -26,6 +26,7 @@ type Runtime string
 
 const (
 	Python39 Runtime = "python39"
+	// Deprecated: Nodejs16 will be removed soon
 	NodeJs16 Runtime = "nodejs16"
 	NodeJs18 Runtime = "nodejs18"
 )
