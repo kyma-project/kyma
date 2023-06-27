@@ -39,6 +39,7 @@ type EventMeshMock struct {
 	GetResponse       ResponseWithName
 	ListResponse      Response
 	CreateResponse    Response
+	UpdateResponse    ResponseUpdateReq
 	DeleteResponse    Response
 	server            *httptest.Server
 	ResponseOverrides *EventMeshMockResponseOverride
@@ -66,6 +67,7 @@ func NewEventMeshMockResponseOverride() *EventMeshMockResponseOverride {
 	}
 }
 
+type ResponseUpdateReq func(w http.ResponseWriter, key string, webhookAuth *eventmeshtypes.WebhookAuth)
 type ResponseWithSub func(w http.ResponseWriter, subscription eventmeshtypes.Subscription)
 type ResponseWithName func(w http.ResponseWriter, subscriptionName string)
 type Response func(w http.ResponseWriter)
@@ -80,6 +82,7 @@ func (m *EventMeshMock) Reset() {
 	m.CreateResponse = EventMeshCreateSuccess
 	m.DeleteResponse = EventMeshDeleteResponseSuccess
 	m.ResponseOverrides = NewEventMeshMockResponseOverride()
+	m.UpdateResponse = UpdateSubscriptionResponse(m)
 }
 
 func (m *EventMeshMock) ResetResponseOverrides() {
@@ -135,6 +138,18 @@ func (m *EventMeshMock) Start() string {
 			m.Requests.PutSubscription(r, subscription)
 			m.Subscriptions.PutSubscription(key, &subscription)
 			m.CreateResponse(w)
+		case http.MethodPatch:
+			var subscription eventmeshtypes.Subscription
+			err := json.NewDecoder(r.Body).Decode(&subscription)
+			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+
+			key := r.URL.Path // i.e. Path will be `/messaging/events/subscriptions/<name>`
+			// save request.
+			m.Requests.PutSubscription(r, subscription)
+			m.UpdateResponse(w, key, subscription.WebhookAuth)
 		case http.MethodGet:
 			key := r.URL.Path
 			// check if any response override defined for this subscription
@@ -193,6 +208,22 @@ func GetSubscriptionResponse(m *EventMeshMock) ResponseWithName {
 			if subscriptionSaved.SubscriptionStatus == "" {
 				subscriptionSaved.SubscriptionStatus = eventmeshtypes.SubscriptionStatusActive
 			}
+			w.WriteHeader(http.StatusOK)
+			err := json.NewEncoder(w).Encode(*subscriptionSaved)
+			Expect(err).ShouldNot(HaveOccurred())
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}
+}
+
+// UpdateSubscriptionResponse updates the webhook auth of subscription in the mock.
+func UpdateSubscriptionResponse(m *EventMeshMock) ResponseUpdateReq {
+	return func(w http.ResponseWriter, key string, webhookAuth *eventmeshtypes.WebhookAuth) {
+		subscriptionSaved := m.Subscriptions.GetSubscription(key)
+		if subscriptionSaved != nil {
+			subscriptionSaved.WebhookAuth = webhookAuth
+			m.Subscriptions.PutSubscription(key, subscriptionSaved)
 			w.WriteHeader(http.StatusOK)
 			err := json.NewEncoder(w).Encode(*subscriptionSaved)
 			Expect(err).ShouldNot(HaveOccurred())
