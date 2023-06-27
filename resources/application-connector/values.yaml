@@ -35,7 +35,7 @@ global:
       directory: "dev"
     central_application_gateway:
       name: "central-application-gateway"
-      version: "PR-17634"
+      version: "PR-17684"
       directory: "dev"
     busybox:
       name: "busybox"

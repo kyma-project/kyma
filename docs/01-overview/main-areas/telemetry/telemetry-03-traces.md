@@ -213,7 +213,7 @@ spec:
              secretKeyRef:
                 name: backend
                 namespace: default
-                key: token 
+                key: token
 ```
 
 The related Secret must fulfill the referenced name and Namespace, and contain the mapped key as in the following example:
@@ -333,9 +333,8 @@ The destination can be unavailable for up to 5 minutes; a retry for data will be
 ### No guaranteed delivery
 The used buffers are volatile, and the data can be lost on the otel-collector instance crash.
 
-### Single TracePipeline support
-
-Only one TracePipeline resource at a time is supported at the moment.
+### Three TracePipelines supported
+Not more than three TracePipelines can be created. Additional TracePipelines will stay in `Pending` state and not be active.
 
 ### System span filtering
 System-related spans reported by Istio are filtered out without the opt-out option. Here are a few examples of such spans:

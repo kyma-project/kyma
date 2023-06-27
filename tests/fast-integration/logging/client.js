@@ -1,7 +1,7 @@
 module.exports = {
   logsPresentInLoki,
   tryGetLokiPersistentVolumeClaim,
-  lokiSecretData,
+  lokiConfigData,
   queryLoki,
   createIstioAccessLogResource,
   loadResourceFromFile,
@@ -10,9 +10,8 @@ module.exports = {
 const {
   convertAxiosError,
   getPersistentVolumeClaim,
-  getSecretData,
   sleep,
-  k8sApply,
+  k8sApply, getConfigMap,
 } = require('../utils');
 const {proxyGrafanaDatasource} = require('../monitoring/client');
 
@@ -39,15 +38,15 @@ async function tryGetLokiPersistentVolumeClaim() {
   }
 }
 
-async function lokiSecretData() {
-  const secretData = await getSecretData('logging-loki', 'kyma-system');
-  return secretData['loki.yaml'];
+async function lokiConfigData() {
+  const configData = await getConfigMap('logging-loki-test', 'kyma-system');
+  return configData.data['loki.yaml'];
 }
 
 async function queryLoki(query, startTimestamp) {
   const path = `loki/api/v1/query_range?query=${query}&start=${startTimestamp}`;
   try {
-    const response = await proxyGrafanaDatasource('Loki', path, 5, 30, 10000);
+    const response = await proxyGrafanaDatasource('Loki-Test', path, 5, 30, 12000);
     return response.data;
   } catch (err) {
     throw convertAxiosError(err, 'cannot query loki');
