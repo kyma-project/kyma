@@ -10,16 +10,16 @@ Every runtime provides its own unique environment configuration which can be rea
 
 ### Common environments
 
-| Environment | Default | Description |
-|---------------|-----------|-------------|
-| **FUNC_HANDLER** | `main` | The name of the exported Function inside the `MOD_NAME` file. |
+| Environment | Default | Description                                                                                                                                                           |
+|---------------|-----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **FUNC_HANDLER** | `main` | The name of the exported Function inside the `MOD_NAME` file.                                                                                                         |
 | **MOD_NAME** | `handler` | The name of the main exported file. The extension must be added on the server side and must be equal to `.py` for the Python runtimes and `.js` for the Node.js ones. |
-| **FUNC_PORT** | `8080` | The right port, a server listens to. |
-| **SERVICE_NAMESPACE** | | The Namespace where the right Function exists on a cluster. |
-| **KUBELESS_INSTALL_VOLUME** | `/kubeless` | Full path to volume mount with users source code. |
-| **FUNC_RUNTIME** | | The name of the actual runtime. Possible values: `python39`, `nodejs16`, `nodejs18`. |
-| **TRACE_COLLECTOR_ENDPOINT** | | Full address of the OpenTelemetry Trace Collector is exported if trace collector endpoint is present |
-| **PUBLISHER_PROXY_ADDRESS** | `http://eventing-publisher-proxy.kyma-system.svc.cluster.local/publish` | Full address of the Publisher Proxy service. |
+| **FUNC_PORT** | `8080` | The right port, a server listens to.                                                                                                                                  |
+| **SERVICE_NAMESPACE** | | The Namespace where the right Function exists on a cluster.                                                                                                           |
+| **KUBELESS_INSTALL_VOLUME** | `/kubeless` | Full path to volume mount with users source code.                                                                                                                     |
+| **FUNC_RUNTIME** | | The name of the actual runtime. Possible values: `nodejs16` - deprecated, `nodejs18`, `python39`.                                                                               |
+| **TRACE_COLLECTOR_ENDPOINT** | | Full address of the OpenTelemetry Trace Collector is exported if trace collector endpoint is present                                                                  |
+| **PUBLISHER_PROXY_ADDRESS** | `http://eventing-publisher-proxy.kyma-system.svc.cluster.local/publish` | Full address of the Publisher Proxy service.                                                                                                                          |
 
 ### Specific environments
 

@@ -272,7 +272,7 @@ spec:
                 type: object
               runtime:
                 description: Specifies the runtime of the Function. The available
-                  values are `nodejs16`, `nodejs18`, and `python39`.
+                  values are `nodejs16` - deprecated, `nodejs18`, and `python39`.
                 type: string
               runtimeImageOverride:
                 description: Specifies the runtime image used instead of the default
