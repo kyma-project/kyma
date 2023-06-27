@@ -157,7 +157,7 @@ This opens the Function's external address as a new page.
 
 > **NOTE:** Alternatively, from the left navigation go to **API Rules**, and click on the **Host** URL there.
 
-The operation was successful if the page says `Hello World from the Kyma Function main running on nodejs16!`.
+The operation was successful if the page says `Hello Serverless`.
   </details>
   <details>
   <summary label="kubectl">

@@ -45,7 +45,7 @@ This guide shows how to call a registered external service from Kyma using a sim
      labels:
        app: $APP_NAME
    spec:
-     runtime: nodejs16
+     runtime: nodejs18
      source:
        inline:
          source: |-

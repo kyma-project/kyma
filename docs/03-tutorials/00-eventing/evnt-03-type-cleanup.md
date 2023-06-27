@@ -48,7 +48,7 @@ You learn how Eventing behaves when you create a [Subscription](../../05-technic
          profile: S
        build:
          profile: local-dev
-     runtime: nodejs16
+     runtime: nodejs18
      source:
        inline:
          source: |-

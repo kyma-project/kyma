@@ -23,7 +23,7 @@ metadata:
   labels:
     app: my-test-function
 spec:
-  runtime: nodejs16
+  runtime: nodejs18
   source:
     inline:
       dependencies: |
@@ -104,7 +104,7 @@ spec:
       auth:
         type: basic
         secretName: secret-name
-  runtime: "nodejs16"
+  runtime: "nodejs18"
 ```
 
 ## Custom resource parameters

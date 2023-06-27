@@ -119,7 +119,7 @@ This tutorial shows only one possible use case. There are many more use cases on
    ```yaml
     name: event-receiver
     namespace: default
-    runtime: nodejs16
+    runtime: nodejs18
     source:
        sourceType: inline
     subscriptions:
@@ -147,7 +147,7 @@ This tutorial shows only one possible use case. There are many more use cases on
 ```yaml
     name: event-receiver
     namespace: default
-    runtime: nodejs16
+    runtime: nodejs18
     source:
        sourceType: inline
     subscriptions:

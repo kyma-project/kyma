@@ -70,7 +70,7 @@ Follow these steps:
 
     ```bash
     NAME            CONFIGURED   BUILT     RUNNING   RUNTIME    VERSION   AGE
-    test-function   True         True      True      nodejs16   1         96s
+    test-function   True         True      True      nodejs18   1         96s
     ```
 
   </details>
@@ -96,7 +96,7 @@ Follow these steps:
      name: $NAME
      namespace: $NAMESPACE
    spec:
-     runtime: nodejs16
+     runtime: nodejs18
      source:
        inline:
          source: |
@@ -118,7 +118,7 @@ Follow these steps:
 
     ```bash
     NAME            CONFIGURED   BUILT     RUNNING   RUNTIME    VERSION   AGE
-    test-function   True         True      True      nodejs16   1         96s
+    test-function   True         True      True      nodejs18   1         96s
     ```
 
     </details>

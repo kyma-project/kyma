@@ -17,8 +17,8 @@ See the sample `config.yaml` for an inline Function for which code and dependenc
 ```yaml
 name: function-practical-filip5
 namespace: testme
-runtime: nodejs16
-runtimeImageOverride: eu.gcr.io/kyma-project/function-runtime-nodejs16:9e934c09
+runtime: nodejs18
+runtimeImageOverride: eu.gcr.io/kyma-project/function-runtime-nodejs16:9e934c09 //TODO:?
 labels:
     app: serverless-test
 source:
@@ -111,7 +111,7 @@ See the sample `config.yaml` for a [Git Function](./svls-04-git-source-type.md) 
 ```yaml
 name: function-practical-marcin
 namespace: iteration-review
-runtime: nodejs16
+runtime: nodejs18
 source:
     sourceType: git
     url: https://github.com/username/public-gitops.git
@@ -202,8 +202,8 @@ See all parameter descriptions.
 ```yaml
 name: function-practical-filip5
 namespace: testme
-runtime: nodejs16
-runtimeImageOverride: eu.gcr.io/kyma-project/function-runtime-nodejs16:9e934c09
+runtime: nodejs18
+runtimeImageOverride: eu.gcr.io/kyma-project/function-runtime-nodejs16:9e934c09 ??TODO
 labels:
     app: serverless-test
 source:
@@ -288,7 +288,7 @@ See the sample `config.yaml` for a [Git Function](./svls-04-git-source-type.md) 
 ```yaml
 name: function-practical-marcin
 namespace: iteration-review
-runtime: nodejs16
+runtime: nodejs18
 source:
     sourceType: git
     url: https://github.com/username/public-gitops.git
