@@ -1,7 +1,0 @@
-loki:
-  resources:
-    limits:
-      cpu: 300m
-      memory: 2.5Gi
-  extraArgs:
-    log.level: warn
