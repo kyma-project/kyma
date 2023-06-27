@@ -63,7 +63,7 @@ data:
         source: 'spec.source.gitRepository ? "Git Repository" : "Inline Editor"'
       - name: header.runtime
         source: >-
-          spec.runtime = 'nodejs16' ? 'Node.js 16' : (spec.runtime = 'python39' ? 'Python 3.9' : (spec.runtime = 'nodejs18' ? 'Node.js 18' : spec.runtime))
+          spec.runtime = 'nodejs16' ? 'Node.js 16 - deprecated' : (spec.runtime = 'python39' ? 'Python 3.9' : (spec.runtime = 'nodejs18' ? 'Node.js 18' : spec.runtime))
     body:
       - widget: Tabs
         children:
@@ -400,7 +400,7 @@ data:
   list: |-
     - name: header.runtime
       source: >-
-        spec.runtime = 'nodejs16' ? 'Node.js 16' : (spec.runtime = 'python39' ? 'Python 3.9' : (spec.runtime = 'nodejs18' ? 'Node.js 18' : spec.runtime))
+        spec.runtime = 'nodejs16' ? 'Node.js 16 - deprecated' : (spec.runtime = 'python39' ? 'Python 3.9' : (spec.runtime = 'nodejs18' ? 'Node.js 18' : spec.runtime))
     - name: header.sourceType
       source: 'spec.source.gitRepository ? "Git Repository" : "Inline Editor"'
     - name: header.status
@@ -511,7 +511,7 @@ data:
       Status: Status
       Runtime: Runtime
       'Source Type': Source Type
-      spec.runtime.nodejs16: Node.js 16
+      spec.runtime.nodejs16: Node.js 16 - deprecated
       spec.runtime.nodejs18: Node.js 18
       spec.runtime.python39: Python 3.9
       spec.resourceConfiguration.build: Build
