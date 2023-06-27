@@ -230,6 +230,7 @@ const (
 	ConditionReasonDeploymentReady                ConditionReason = "DeploymentReady"
 	ConditionReasonServiceCreated                 ConditionReason = "ServiceCreated"
 	ConditionReasonServiceUpdated                 ConditionReason = "ServiceUpdated"
+	ConditionReasonServiceFailed                  ConditionReason = "ServiceFailed"
 	ConditionReasonHorizontalPodAutoscalerCreated ConditionReason = "HorizontalPodAutoscalerCreated"
 	ConditionReasonHorizontalPodAutoscalerUpdated ConditionReason = "HorizontalPodAutoscalerUpdated"
 	ConditionReasonMinReplicasNotAvailable        ConditionReason = "MinReplicasNotAvailable"
