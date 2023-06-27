@@ -18,8 +18,19 @@ First, let's create the Function and apply it.
 2. Go to **Workloads** > **Functions**.
 3. Click on **Create Function**.
 4. Name the Function `hello-world`.
-5. From the **Language** dropdown, choose `nodejs`
-6. From the **Runtime** dropdown choose one of the available `nodejs` and click **Create**.
+5. From the **Language** dropdown, choose `nodejs`.
+6. From the **Runtime** dropdown choose one of the available `nodejs`.
+7. Paste the following source code:
+```javascript
+module.exports = {
+  main: async function (event, context) {
+    const message = `Hello Serverless`
+    console.log(message);
+    return message;
+  }
+}
+```
+7. Click **Create**.
   </details>
   <details>
   <summary label="kubectl">
