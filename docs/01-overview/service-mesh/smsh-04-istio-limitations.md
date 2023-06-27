@@ -26,4 +26,4 @@ The autoscaling configuration of the Istio components is as follows:
 | Pilot           | 2            | 5            |
 | Ingress Gateway | 3            | 10           |
 
-The CNI component is provided as a DaemonSet, meaning that one replica is present on every node of the target cluster. Istio sidecar proxy isn't configured in terms of autoscaling as it is injected into a Pod with the [sidecar injection enabled](../../../04-operation-guides/operations/smsh-01-istio-enable-sidecar-injection.md).
+The CNI component is provided as a DaemonSet, meaning that one replica is present on every node of the target cluster. Istio sidecar proxy isn't configured in terms of autoscaling as it is injected into a Pod with the [sidecar injection enabled](../../04-operation-guides/operations/smsh-01-istio-enable-sidecar-injection.md).

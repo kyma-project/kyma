@@ -14,15 +14,15 @@ With an Istio sidecar, the resource becomes part of Istio service mesh, which br
 
 In Kyma's [default Istio configuration](./smsh-02-default-istio-setup-in-kyma.md), [peer authentication](https://istio.io/latest/docs/concepts/security/#peer-authentication) is set to cluster-wide `STRICT` mode. This ensures that your workload only accepts [mutual TLS traffic](https://www.cloudflare.com/learning/access-management/what-is-mutual-tls/) where both, client and server certificates, are validated to have all traffic encrypted. This provides each service with a strong identity, with reliable key and certificate management system.
 
-Another security benefit of having a sidecar proxy is that you can perform [request authentication](https://istio.io/latest/docs/reference/config/security/request_authentication/) for your service. Istio enables request authentication with JSON Web Token (JWT) validation using a custom authentication provider. Learn how to [secure your workload using JWT](../../../03-tutorials/00-api-exposure/apix-05-expose-and-secure-a-workload/apix-05-03-expose-and-secure-workload-jwt.md).
+Another security benefit of having a sidecar proxy is that you can perform [request authentication](https://istio.io/latest/docs/reference/config/security/request_authentication/) for your service. Istio enables request authentication with JSON Web Token (JWT) validation using a custom authentication provider. Learn how to [secure your workload using JWT](../../03-tutorials/00-api-exposure/apix-05-expose-and-secure-a-workload/apix-05-03-expose-and-secure-workload-jwt.md).
 
 ## Observability
 
-Furthermore, Istio proxies improve tracing: Istio performs global tracing and forwards the data to a tracing backend using the [OTLP protocol](https://opentelemetry.io/docs/reference/specification/protocol/). Learn more in [Tracing Architecture](../../../01-overview/main-areas/telemetry/telemetry-03-traces.md#architecture).
+Furthermore, Istio proxies improve tracing: Istio performs global tracing and forwards the data to a tracing backend using the [OTLP protocol](https://opentelemetry.io/docs/reference/specification/protocol/). Learn more in [Tracing Architecture](../../01-overview/telemetry/telemetry-03-traces.md#architecture).
 
 Kiali is another tool to monitor the service mesh; and Kyma configures Istio to export metrics necessary to support Kiali features that facilitate managing, visualizing, and troubleshooting your service mesh. Learn more about deploying Kiali to your Kyma cluster in our [Kiali example](https://github.com/kyma-project/examples/tree/main/kiali).
 
-Moreover, Kyma provides [Istio-specific Grafana dashboards](https://istio.io/latest/docs/ops/integrations/grafana/#configuration) for the [monitoring component](../../../05-technical-reference/00-architecture/obsv-01-architecture-monitoring.md). Together with metrics exposed by the Istio sidecar, you get better visibility into workloads and the mesh control plane performance.
+Moreover, Kyma provides [Istio-specific Grafana dashboards](https://istio.io/latest/docs/ops/integrations/grafana/#configuration) for the [monitoring component](../../05-technical-reference/00-architecture/obsv-01-architecture-monitoring.md). Together with metrics exposed by the Istio sidecar, you get better visibility into workloads and the mesh control plane performance.
 
 Being part of Istio service mesh enables all these advanced observability features, which would not be possible without advanced instrumentation code within your application.
 
