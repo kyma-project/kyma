@@ -51,7 +51,7 @@ Furthermore, the operator manages the full lifecycle of the OTel Collector Deplo
 
 ## Setting up a TracePipeline
 
-In the following steps, you can see how to set up a typical TracePipeline. For an overview of all available attributes, see the [reference document](../../05-technical-reference/00-custom-resources/telemetry-03-tracepipeline.md).
+In the following steps, you can see how to set up a typical TracePipeline. For an overview of all available attributes, see the [reference document](./../../../05-technical-reference/00-custom-resources/telemetry-03-tracepipeline.md).
 
 ### Step 1. Create a TracePipeline with an output
 1. To ship traces to a new OTLP output, create a resource file of the TracePipeline kind:
@@ -213,7 +213,7 @@ spec:
              secretKeyRef:
                 name: backend
                 namespace: default
-                key: token 
+                key: token
 ```
 
 The related Secret must fulfill the referenced name and Namespace, and contain the mapped key as in the following example:
@@ -294,7 +294,7 @@ spec:
     randomSamplingPercentage: 100.00
 ```
 
-To enable the propagation of the [w3c-tracecontext](https://www.w3.org/TR/trace-context/) only, without reporting any spans (so the actual tracing feature is disabled), you must enable the `kyma-traces` provider with a sampling rate of 0. With this configuration, you get the relevant trace context into the [access logs](../../04-operation-guides/operations/obsv-03-enable-istio-access-logs.md) without any active trace reporting.
+To enable the propagation of the [w3c-tracecontext](https://www.w3.org/TR/trace-context/) only, without reporting any spans (so the actual tracing feature is disabled), you must enable the `kyma-traces` provider with a sampling rate of 0. With this configuration, you get the relevant trace context into the [access logs](../../../04-operation-guides/operations/obsv-03-enable-istio-access-logs.md) without any active trace reporting.
 
 ```yaml
 apiVersion: telemetry.istio.io/v1alpha1
@@ -310,10 +310,10 @@ spec:
 ```
 
 ### Eventing
-The Kyma [Eventing](../eventing/README.md) component dispatches events from an in- or out-cluster backend to your workload. Hereby, it is leveraging the [cloudevents](https://cloudevents.io/) protocol which natively supports the [W3C Trace Context](https://www.w3.org/TR/trace-context) propagation. That said, the Eventing component already propagates trace context properly but does not enrich a trace with more advanced span data.
+The Kyma [Eventing](./../../main-areas/eventing/README.md) component dispatches events from an in- or out-cluster backend to your workload. Hereby, it is leveraging the [cloudevents](https://cloudevents.io/) protocol which natively supports the [W3C Trace Context](https://www.w3.org/TR/trace-context) propagation. That said, the Eventing component already propagates trace context properly but does not enrich a trace with more advanced span data.
 
 ### Serverless
-All engines for the [Serverless](../serverless/README.md) runtime integrate the [Open Telemetry SDK](https://opentelemetry.io/docs/reference/specification/metrics/sdk/) by default. With that, trace propagation will no longer be your concern, as the used middlewares are configured to automatically propagate the context for chained calls. By having the Telemetry endpoints configured by default, it also reports custom spans for incoming and outgoing requests. With the provided [tooling](../..///03-tutorials/00-serverless/svls-12-customize-function-traces.md), more spans can be easily added as part of your Serverless source code.
+All engines for the [Serverless](./../../main-areas/serverless/README.md) runtime integrate the [Open Telemetry SDK](https://opentelemetry.io/docs/reference/specification/metrics/sdk/) by default. With that, trace propagation will no longer be your concern, as the used middlewares are configured to automatically propagate the context for chained calls. By having the Telemetry endpoints configured by default, it also reports custom spans for incoming and outgoing requests. With the provided [tooling](./../../..///03-tutorials/00-serverless/svls-12-customize-function-traces.md), more spans can be easily added as part of your Serverless source code.
 
 ## Limitations
 
@@ -333,9 +333,8 @@ The destination can be unavailable for up to 5 minutes; a retry for data will be
 ### No guaranteed delivery
 The used buffers are volatile, and the data can be lost on the otel-collector instance crash.
 
-### Single TracePipeline support
-
-Only one TracePipeline resource at a time is supported at the moment.
+### Three TracePipelines supported
+Not more than three TracePipelines can be created. Additional TracePipelines will stay in `Pending` state and not be active.
 
 ### System span filtering
 System-related spans reported by Istio are filtered out without the opt-out option. Here are a few examples of such spans:
