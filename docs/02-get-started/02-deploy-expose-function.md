@@ -18,7 +18,8 @@ First, let's create the Function and apply it.
 2. Go to **Workloads** > **Functions**.
 3. Click on **Create Function**.
 4. Name the Function `hello-world`.
-5. From the **Language** dropdown, choose `nodejs` and click **Create**.
+5. From the **Language** dropdown, choose `nodejs`
+6. From the **Runtime** dropdown choose one of the available `nodejs` and click **Create**.
   </details>
   <details>
   <summary label="kubectl">

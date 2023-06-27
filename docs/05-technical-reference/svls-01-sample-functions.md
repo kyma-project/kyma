@@ -9,8 +9,8 @@ Functions support multiple languages through the use of runtimes. To use a chose
 See sample Functions for all available runtimes:
 <div tabs name="available-runtimes" group="available-runtimes">
   <details>
-  <summary label="nodejs16">
-  Node.js 16
+  <summary label="nodejs">
+  Node.js
   </summary>
 
 ```yaml
