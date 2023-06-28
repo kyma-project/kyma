@@ -141,7 +141,7 @@ global:
       directory: "prod/external/prom"
     node_exporter:
       name: "node-exporter"
-      version: "1.5.0-0065b2a5"
+      version: "1.6.0-7c1ec291"
       directory: "prod/tpi"
     kube_state_metrics:
       name: "kube-state-metrics"
