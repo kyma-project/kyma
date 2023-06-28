@@ -22,7 +22,5 @@ You can use the following in-cluster components to observe your applications' te
 
 - [Prometheus](https://prometheus.io/docs/introduction), a lightweight backend for metrics.
 > **NOTE:** The Prometheus integration has been [deprecated](https://kyma-project.io/blog/2022/12/9/monitoring-deprecation) and is planned to be removed.
-- [Loki](https://grafana.com/oss/loki/), a lightweight backend for metrics. 
-> **NOTE:** The Loki integration has been [deprecated](https://kyma-project.io/blog/2022/11/2/loki-deprecation/) and is planned to be removed.
-- [Grafana](https://grafana.com/docs/guides/getting_started/) to provide a dashboard and a query editor to visualize metrics and logs collected from Prometheus and Loki.
+- [Grafana](https://grafana.com/docs/guides/getting_started/) to provide a dashboard and a query editor to visualize metrics collected from Prometheus.
 > **NOTE:** The Grafana integration has been [deprecated](https://kyma-project.io/blog/2022/12/9/monitoring-deprecation) and is planned to be removed.
