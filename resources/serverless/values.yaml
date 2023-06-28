@@ -81,24 +81,20 @@ global:
       directory: "prod"
     function_controller:
       name: "function-controller"
-      version: "PR-17692"
+      version: "PR-17744"
       directory: "dev"
     function_webhook:
       name: "function-webhook"
-      version: "PR-17692"
+      version: "PR-17744"
       directory: "dev"
     function_build_init:
       name: "function-build-init"
-      version: "PR-17692"
+      version: "PR-17744"
       directory: "dev"
     function_registry_gc:
       name: "function-registry-gc"
       version: "PR-17692"
       directory: "dev"
-    function_runtime_nodejs14:
-      name: "function-runtime-nodejs14"
-      version: "v20230302-a6a85f47"
-      directory: "prod"
     function_runtime_nodejs16:
       name: "function-runtime-nodejs16"
       version: "PR-17718"

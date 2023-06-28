@@ -759,7 +759,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 						MinReplicas: pointer.Int32(1),
 						MaxReplicas: pointer.Int32(1),
 					},
-					Runtime: NodeJs14,
+					Runtime: NodeJs18,
 					ResourceConfiguration: &ResourceConfiguration{
 						Function: &ResourceRequirements{
 							Resources: &corev1.ResourceRequirements{Limits: corev1.ResourceList{
