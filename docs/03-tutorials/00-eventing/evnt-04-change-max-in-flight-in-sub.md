@@ -51,7 +51,7 @@ The "in-flight messages" config defines the number of events that Kyma Eventing 
          profile: S
        build:
          profile: local-dev
-     runtime: nodejs16
+     runtime: nodejs18
      source:
        inline:
          source: |-

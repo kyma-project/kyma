@@ -126,7 +126,7 @@ You should get a result similar to the this example:
 
 ```bash
 NAME            CONFIGURED   BUILT     RUNNING   RUNTIME    VERSION   AGE
-test-function   True         True      True      nodejs16   1         96s
+test-function   True         True      True      nodejs18   1         96s
 ```
 
 >**CAUTION:** If you want to create a cluster-wide Secret, you must create it in the `kyma-system` Namespace and add the `serverless.kyma-project.io/config: credentials` label. Read more about [requirements for Secret CRs](../../05-technical-reference/svls-03-switching-registries.md).

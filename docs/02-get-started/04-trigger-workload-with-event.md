@@ -53,7 +53,7 @@ spec:
       profile: S
     build:
         profile: local-dev
-  runtime: nodejs16
+  runtime: nodejs18
   source:
     inline:
       source: |-
