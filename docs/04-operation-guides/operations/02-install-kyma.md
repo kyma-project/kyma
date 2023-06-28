@@ -140,4 +140,5 @@ components:
   ```
 
 >**TIP:** To see a complete list of all Kyma components go to the [`components.yaml`](https://github.com/kyma-project/kyma/blob/main/installation/resources/components.yaml) file.
-> **NOTE:** To learn how to install a Kyma module go to [Install, uninstall and upgrade a Kyma module](/docs/04-operation-guides/operations/08-install-uninstall-upgrade-kyma-module.md#install-a-kyma-module).
+
+> **NOTE:** To learn how to install a Kyma module go to [Install, uninstall and upgrade a Kyma module](./08-install-uninstall-upgrade-kyma-module.md#install-a-kyma-module).
