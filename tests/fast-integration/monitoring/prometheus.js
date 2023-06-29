@@ -172,7 +172,6 @@ function shouldIgnoreTarget(target) {
     'test',
     'nodejs16-',
     'nodejs12-',
-    'nodejs14-',
     'upgrade',
     // Ignore the pods created by jobs which are executed after installation of control-plane.
     'compass-migration',
