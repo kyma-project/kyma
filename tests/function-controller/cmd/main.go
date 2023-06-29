@@ -132,7 +132,7 @@ func runScenario(scenario testScenario, scenarioName string, logf *logrus.Logger
 		scenarioLogger.Error(err)
 		return err
 	}
-	scenarioLogger.Info("Scenario succeeded: %s", scenarioName)
+	scenarioLogger.Infof("Scenario succeeded: %s", scenarioName)
 	return nil
 }
 
