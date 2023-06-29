@@ -36,8 +36,6 @@ spec:
           value: "50"
         - name: "USE_LOCAL_MYSQL"
           value: "false"
-        # - name: "CUSTOM_FUNCTIONS"
-        #   value: "nodejs14-xs nodejs14-s"
         image: eu.gcr.io/kyma-project/serverless-bench:347b49eb
         imagePullPolicy: Always
         name: serverless-benchmark
