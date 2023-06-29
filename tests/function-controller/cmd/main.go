@@ -56,15 +56,15 @@ func loadRestConfigWithContext(apiServerURL string, loader clientcmd.ClientConfi
 
 type scenario struct {
 	displayName string
-	testSuite   testSuite
+	scenario    testScenario
 }
 
 var availableScenarios = map[string][]scenario{
 	"serverless-integration": {
-		{displayName: "simple", testSuite: scenarios.SimpleFunctionTest},
-		{displayName: "gitops", testSuite: scenarios.GitopsSteps},
+		{displayName: "simple", scenario: scenarios.SimpleFunctionTest},
+		{displayName: "gitops", scenario: scenarios.GitopsSteps},
 	},
-	"git-auth-integration": {{displayName: "gitauth", testSuite: scenarios.GitAuthTestSteps}},
+	"git-auth-integration": {{displayName: "gitauth", scenario: scenarios.GitAuthTestSteps}},
 }
 
 type config struct {
@@ -106,19 +106,20 @@ func main() {
 	for _, scenario := range pickedScenarios {
 		// https://eli.thegreenplace.net/2019/go-internals-capturing-loop-variables-in-closures/
 		scenarioDisplayName := fmt.Sprintf("%s-%s", scenarioName, scenario.displayName)
-		func(testSuite testSuite, name string) {
+		func(scenario testScenario, name string) {
 			g.Go(func() error {
-				return runScenario(testSuite, name, logf, cfg, restConfig)
+				return runScenario(scenario, name, logf, cfg, restConfig)
 			})
-		}(scenario.testSuite, scenarioDisplayName)
+		}(scenario.scenario, scenarioDisplayName)
 	}
 	failOnError(g.Wait(), logf)
 }
 
-type testSuite func(*rest.Config, testsuite.Config, *logrus.Entry) (step.Step, error)
+type testScenario func(*rest.Config, testsuite.Config, *logrus.Entry) (step.Step, error)
 
-func runScenario(testFunc testSuite, name string, logf *logrus.Logger, cfg config, restConfig *rest.Config) error {
-	steps, err := testFunc(restConfig, cfg.Test, logf.WithField("suite", name))
+func runScenario(scenario testScenario, scenarioName string, logf *logrus.Logger, cfg config, restConfig *rest.Config) error {
+	scenarioLogger := logf.WithField("scenario", scenarioName)
+	steps, err := scenario(restConfig, cfg.Test, scenarioLogger)
 	if err != nil {
 		logf.Error(err)
 		return err
@@ -128,9 +129,10 @@ func runScenario(testFunc testSuite, name string, logf *logrus.Logger, cfg confi
 
 	err = runner.Execute(steps)
 	if err != nil {
-		logf.Error(err)
+		scenarioLogger.Error(err)
 		return err
 	}
+	scenarioLogger.Infof("Scenario succeeded: %s", scenarioName)
 	return nil
 }
 
