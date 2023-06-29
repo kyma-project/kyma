@@ -23,7 +23,7 @@ The table of Kyma modules:
 
 | Module | Purpose |
 |---|---|
-| [BTP Operator](https://kyma-docs.netlify.app//?basePath=https://raw.githubusercontent.com/kyma-project/btp-manager/aa50848013372806eaf2e707c217b8bed4eb09cb/docs/user/&homepage=README.md&sidebar=true&loadSidebar=_sidebar.md&browser-tab-title=BTP%20Operator%20Documentation#/) | Within the BTP Operator module, BTP Manager installs SAP BTP Service Operator that allows you to consume SAP BTP services from your Kubernetes cluster using Kubernetes-native tools. |
+| [BTP Operator](https://kyma-docs.netlify.app//?basePath=https://raw.githubusercontent.com/kyma-project/btp-manager/main/docs/user/&homepage=README.md&sidebar=true&loadSidebar=_sidebar.md&browser-tab-title=BTP%20Operator%20Documentation#/) | Within the BTP Operator module, BTP Manager installs SAP BTP Service Operator that allows you to consume SAP BTP services from your Kubernetes cluster using Kubernetes-native tools. |
 | [Istio*](https://github.com/kyma-project/istio) | Istio is a service mesh with the Kyma-specific configuration. |
 | [Serverless](https://github.com/kyma-project/serverless-manager) | With the Serverless module, you can define simple code snippets (Functions) with minimal implementation effort. |
 | [Telemetry*](https://github.com/kyma-project/telemetry-manager) | Enable telemetry agents to easily collect application logs and distributed traces for your application and dispatch them to backends.|
