@@ -4,7 +4,7 @@ title: Access Kyma securely
 
 As a user, you can access Kyma using the following user interfaces:
 
-- [Kyma Dashboard](../../01-overview/main-areas/ui/ui-01-gui.md), which allows you to view, create, and manage your resources.
+- [Kyma Dashboard](../../01-overview/ui/ui-01-gui.md), which allows you to view, create, and manage your resources.
 - [Kubernetes-native CLI (kubectl)](https://kubernetes.io/docs/reference/kubectl/overview/), which allows you to manage your resources using a command-line interface.
 
 ## Kyma Dashboard
