@@ -75,7 +75,7 @@ The following code samples illustrate how to enrich the default trace with custo
    Python
    </summary>
 
-      [OpenTelemetry SDK](https://opentelemetry.io/docs/instrumentation/python/manual/#tracing) allows you to customize trace spans and events.
+      [OpenTelemetry SDK](https://opentelemetry.io/docs/instrumentation/python/manual/#traces) allows you to customize trace spans and events.
       Additionally, if you are using the `requests` library then all the HTTP communication can be auto-instrumented:
 
       ```python
