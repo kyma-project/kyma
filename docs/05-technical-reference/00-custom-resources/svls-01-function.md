@@ -23,7 +23,7 @@ metadata:
   labels:
     app: my-test-function
 spec:
-  runtime: nodejs16
+  runtime: nodejs18
   source:
     inline:
       dependencies: |
@@ -104,7 +104,7 @@ spec:
       auth:
         type: basic
         secretName: secret-name
-  runtime: "nodejs16"
+  runtime: "nodejs18"
 ```
 
 ## Custom resource parameters
@@ -126,7 +126,7 @@ spec:
 | **resourceConfiguration.&#x200b;function**  | object | Specifies resources requested by the Function's Pod. |
 | **resourceConfiguration.&#x200b;function.&#x200b;profile**  | string | Defines the name of the predefined set of values of the resource. Can't be used together with **Resources**. |
 | **resourceConfiguration.&#x200b;function.&#x200b;resources**  | object | Defines the amount of resources available for the Pod. Can't be used together with **Profile**. For configuration details, see the [official Kubernetes documentation](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/). |
-| **runtime** (required) | string | Specifies the runtime of the Function. The available values are `nodejs16`, `nodejs18`, and `python39`. |
+| **runtime** (required) | string | Specifies the runtime of the Function. The available values are `nodejs16` - deprecated, `nodejs18`, and `python39`. |
 | **runtimeImageOverride**  | string | Specifies the runtime image used instead of the default one. |
 | **scaleConfig**  | object | Defines the minimum and maximum number of Function's Pods to run at a time. When it is configured, a HorizontalPodAutoscaler will be deployed and will control the **Replicas** field to scale the Function based on the CPU utilisation. |
 | **scaleConfig.&#x200b;maxReplicas** (required) | integer | Defines the maximum number of Function's Pods to run at a time. |
@@ -193,6 +193,7 @@ Processing of a Function CR can succeed, continue, or fail for one of these reas
 | `DeploymentReady`                | `Running`            | The Function was deployed and is ready.                                                                                                                       |
 | `ServiceCreated`                 | `Running`            | A new Service referencing the Function's Deployment was created.                                                                                              |
 | `ServiceUpdated`                 | `Running`            | The existing Service was updated after applying required changes.                                                                                             |
+| `ServiceFailed`                  | `Running`            | The Function's service could not be created or updated.                                                                                             |
 | `HorizontalPodAutoscalerCreated` | `Running`            | A new Horizontal Pod Scaler referencing the Function's Deployment was created.                                                                                  |
 | `HorizontalPodAutoscalerUpdated` | `Running`            | The existing Horizontal Pod Scaler was updated after applying required changes.                                                                                 |
 | `MinimumReplicasUnavailable`     | `Running`            | Insufficient number of available Replicas. The Function is unhealthy.                                                                                                       |

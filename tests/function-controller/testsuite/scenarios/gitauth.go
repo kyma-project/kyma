@@ -179,7 +179,7 @@ func getAzureDevopsTestcase(cfg *config) testRepo {
 		baseDir:          cfg.Azure.BaseDir,
 		reference:        cfg.Azure.Reference,
 		expectedResponse: "Hello azure",
-		runtime:          serverlessv1alpha2.NodeJs14,
+		runtime:          serverlessv1alpha2.NodeJs18,
 		auth: &serverlessv1alpha2.RepositoryAuth{
 			Type:       serverlessv1alpha2.RepositoryAuthBasic,
 			SecretName: "azure-devops-auth-secret",

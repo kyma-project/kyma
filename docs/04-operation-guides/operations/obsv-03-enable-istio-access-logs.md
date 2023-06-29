@@ -17,7 +17,7 @@ The Istio setup shipped with Kyma provides a pre-configured [extension provider]
             tracestate: "%REQ(TRACESTATE)%"
 
 ```
-The [log format](https://github.com/kyma-project/kyma/blob/main/resources/istio/values.yaml#L62) is based on the Istio default format enhanced with the attributes relevant for identifying the related trace context conform to the [w3c-tracecontext](https://www.w3.org/TR/trace-context/) protocol. See [Kyma tracing](./../../01-overview/main-areas/telemetry/telemetry-03-traces.md) for more details on tracing. See [Istio tracing](./../../01-overview/main-areas/telemetry/telemetry-03-traces.md#istio) on how to enable trace context propagation with Istio.
+The [log format](https://github.com/kyma-project/kyma/blob/main/resources/istio/values.yaml#L62) is based on the Istio default format enhanced with the attributes relevant for identifying the related trace context conform to the [w3c-tracecontext](https://www.w3.org/TR/trace-context/) protocol. See [Kyma tracing](./../../01-overview/telemetry/telemetry-03-traces.md) for more details on tracing. See [Istio tracing](./../../01-overview/telemetry/telemetry-03-traces.md#istio) on how to enable trace context propagation with Istio.
 
 >**CAUTION:** Enabling access logs may drastically increase logs volume and might quickly fill up your log storage. Also, the provided feature uses an API in alpha state, which may change in future releases.
 
