@@ -1,5 +1,5 @@
 setuptools==61.0.0
-requests
+requests>=2.31.0
 bottle==0.12.21
 cherrypy==8.9.1
 wsgi-request-logger==0.4.6
