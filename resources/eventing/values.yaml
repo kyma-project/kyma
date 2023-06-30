@@ -6,12 +6,12 @@ global:
     eventing_controller:
       name: eventing-controller
       version: PR-17768
-      directory: prod
+      directory: dev
       pullPolicy: "IfNotPresent"
     publisher_proxy:
       name: event-publisher-proxy
       version: PR-17768
-      directory: prod
+      directory: dev
     certHandler:
       name: eventing-webhook-certificates
       version: 1.6.0
