@@ -81,31 +81,31 @@ global:
       directory: "prod"
     function_controller:
       name: "function-controller"
-      version: "PR-17758"
-      directory: "dev"
+      version: "v20230628-61d97068"
+      directory: "prod"
     function_webhook:
       name: "function-webhook"
-      version: "PR-17758"
-      directory: "dev"
+      version: "v20230628-61d97068"
+      directory: "prod"
     function_build_init:
       name: "function-build-init"
-      version: "PR-17758"
-      directory: "dev"
+      version: "v20230628-61d97068"
+      directory: "prod"
     function_registry_gc:
       name: "function-registry-gc"
-      version: "PR-17750"
-      directory: "dev"
+      version: "v20230628-61d97068"
+      directory: "prod"
     function_runtime_nodejs16:
       name: "function-runtime-nodejs16"
-      version: "PR-17718"
-      directory: "dev"
+      version: "v20230628-fd5fd7c3"
+      directory: "prod"
     function_runtime_nodejs18:
       name: "function-runtime-nodejs18"
-      version: "PR-17718"
-      directory: "dev"
+      version: "v20230628-fd5fd7c3"
+      directory: "prod"
     function_runtime_python39:
       name: "function-runtime-python39"
-      version: "PR-17718"
+      version: "PR-17779"
       directory: "dev"
     kaniko_executor:
       name: "tpi/kaniko-executor"

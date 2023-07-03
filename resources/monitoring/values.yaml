@@ -145,7 +145,7 @@ global:
       directory: "prod/tpi"
     kube_state_metrics:
       name: "kube-state-metrics"
-      version: "2.8.1-0065b2a5"
+      version: "2.9.2-7e9317a5"
       directory: "prod/tpi"
       sha: ""
     grafana:

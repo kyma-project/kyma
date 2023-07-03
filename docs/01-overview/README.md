@@ -17,21 +17,23 @@ With the modular approach, Kyma components become modules, each providing one fu
 
 The Kyma project is currently in the transition phase. Some components are already independent modules, but others are still part of the big Kyma release and are installed with the `kyma deploy` command. With each successive release, fewer components will be available within preconfigured Kyma, but more and more will be offered as independent modules.
 
+You can enable modules at any time. Give them a try! If you decide that some of them are not needed for your use case, you can disable them and free the resources. Learn how to [enable, disable, and upgrade a module](https://kyma-project.io/docs/kyma/main/04-operation-guides/operations/08-install-uninstall-upgrade-kyma-module/).
+
 The table of Kyma modules:
 
 > **NOTE:** The entries marked with "*" are still components that will be modularized soon.
 
 | Module | Purpose |
 |---|---|
-| [BTP Operator](https://kyma-docs.netlify.app//?basePath=https://raw.githubusercontent.com/kyma-project/btp-manager/bed8100b519ae0d740f2cbe05668963b75224e1d/&homepage=docs/user/README.md&sidebar=true&loadSidebar=docs/user/_sidebar.md&browser-tab-title=BTP%20Operator%20Documentation#/) | Within the BTP Operator module, BTP Manager installs SAP BTP Service Operator that allows you to consume SAP BTP services from your Kubernetes cluster using Kubernetes-native tools. |
+| [BTP Operator](https://kyma-docs.netlify.app//?basePath=https://raw.githubusercontent.com/kyma-project/btp-manager/main/&homepage=docs/user/README.md&sidebar=true&loadSidebar=docs/user/_sidebar.md&browser-tab-title=BTP%20Operator%20Documentation#/docs/user/README) | Within the BTP Operator module, BTP Manager installs SAP BTP Service Operator that allows you to consume SAP BTP services from your Kubernetes cluster using Kubernetes-native tools. |
+| [Keda](https://kyma-docs.netlify.app//?basePath=https://raw.githubusercontent.com/kyma-project/keda-manager/main/&homepage=docs/user/README.md&sidebar=true&loadSidebar=docs/user/_sidebar.md&browser-tab-title=Keda%20module%20Documentation#/docs/user/README) | The Keda module comes with Keda Manager, an extension to Kyma that allows you to install [KEDA (Kubernetes Event Driven Autoscaler)](https://keda.sh/). |
 | [Istio*](https://github.com/kyma-project/istio) | Istio is a service mesh with the Kyma-specific configuration. |
-| [Serverless](https://github.com/kyma-project/serverless-manager) | With the Serverless module, you can define simple code snippets (Functions) with minimal implementation effort. |
+| [Serverless*](https://github.com/kyma-project/serverless-manager) | With the Serverless module, you can define simple code snippets (Functions) with minimal implementation effort. |
 | [Telemetry*](https://github.com/kyma-project/telemetry-manager) | Enable telemetry agents to easily collect application logs and distributed traces for your application and dispatch them to backends.|
 | [Eventing*](https://github.com/kyma-project/eventing-manager) | Eventing provides functionality to publish and subscribe to CloudEvents. <br> At the moment, the SAP Event Mesh default plan and NATS (provided by the NATS module) are supported. |
 | [NATS*](https://github.com/kyma-project/nats-manager) | NATS deploys a NATS cluster within the Kyma cluster. You can use it as a backend for Kyma Eventing. |
 | [Application Connector*](https://github.com/kyma-project/application-connector-manager) | Application Connector allows you to connect with external solutions. No matter if you want to integrate an on-premise or a cloud system, the integration process doesn't change, which allows you to avoid any configuration or network-related problems. | 
 | [API Gateway*](https://github.com/kyma-project/api-gateway) | API Gateway provides functionalities that allow you to expose and secure APIs. |
-| [Keda](https://kyma-docs.netlify.app//?basePath=https://raw.githubusercontent.com/kyma-project/keda-manager/main/&homepage=docs/user/README.md&sidebar=true&loadSidebar=docs/user/_sidebar.md&browser-tab-title=Keda%20module%20Documentation#/) | The Keda module comes with Keda Manager, an extension to Kyma that allows you to install [KEDA (Kubernetes Event Driven Autoscaler)](https://keda.sh/). |
 
 ## Kyma's strengths
 Kyma is built upon leading cloud-native, open-source projects and open standards, such as Istio, NATS, Cloud Events, Open Telemetry, and Prometheus. We created an opinionated set of modules you can easily enable in your Kubernetes cluster to speed up cloud application development and operations. With Kyma, you save the time to pick the right tools and the effort to keep them secure and up to date. Also, you can use the modules you need from Kyma and complement them with other Kubernetes tools.

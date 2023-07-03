@@ -2,7 +2,7 @@
 title: Application Logs
 ---
 
-Application logs are the historical go-to signals for debugging an application and deriving the internal state of an application. They can be very useful if developers emit the logs wisely (using the right severity level and context) and are essential for observing an application. However, they usually lack contextual information, such as where they were called from. 
+Application logs are the historical go-to signals for debugging an application and deriving the internal state of an application. They can be very useful if developers emit the logs wisely (using the right severity level and context) and are essential for observing an application. However, they usually lack contextual information, such as where they were called from.
 
 The Telemetry component provides the [Fluent Bit](https://fluentbit.io/) log collector for the collection and shipment of application logs of any container running in the Kyma runtime. You can configure the log collector with external systems using runtime configuration with a dedicated Kubernetes API (CRD) named `LogPipeline`. With the LogPipeline's HTTP output, you can natively integrate with vendors which support this output, or with any vendor using a [Fluentd integration](https://medium.com/hepsiburadatech/fluent-logging-architecture-fluent-bit-fluentd-elasticsearch-ca4a898e28aa). The support for the aimed vendor-neutral OTLP protocol will be [added soon](https://github.com/kyma-project/kyma/issues/16307). To overcome the missing flexibility of the current proprietary protocol, you can run the collector in the [unsupported mode](#unsupported-mode), leveraging the full vendor-specific output options of Fluent Bit. You can also bring your own log collector if you need advanced configuration options.
 
@@ -76,9 +76,9 @@ In the following steps, you can see how to set up a typical LogPipeline. For an 
     An output is a data destination configured by a [Fluent Bit output](https://docs.fluentbit.io/manual/pipeline/outputs) of the relevant type. The LogPipeline supports the following output types:
 
     - **http**, which sends the data to the specified HTTP destination. The output is designed to integrate with a [Fluentd HTTP Input](https://docs.fluentd.org/input/http), which opens up a huge ecosystem of integration possibilities.
-    - **grafana-loki**, which sends the data to the Kyma-internal Loki instance. 
+    - **grafana-loki**, which sends the data to the Kyma-internal Loki instance.
     > **Note:** This output is considered legacy and is only provided for backward compatibility with the [deprecated](https://kyma-project.io/blog/2022/11/2/loki-deprecation/) in-cluster Loki instance. It might not be compatible with the latest Loki versions. For integration with a custom Loki installation, use the `custom` output with the name `loki` instead. See also [Installing a custom Loki stack in Kyma](https://github.com/kyma-project/examples/tree/main/loki).
-    - **custom**, which supports the configuration of any destination in the Fluent Bit configuration syntax. 
+    - **custom**, which supports the configuration of any destination in the Fluent Bit configuration syntax.
 
     See the following example of the `custom` output:
     ```yaml
@@ -448,7 +448,7 @@ Furthermore, the `__kyma__` prefix is used internally by the Telemetry Operator.
 
 ### Buffer limits
 
-Fluent Bit buffers up to 1 GB of logs if a configured output cannot receive logs. The oldest logs are dropped when the limit is reached.
+Fluent Bit buffers up to 1 GB of logs if a configured output cannot receive logs. The oldest logs are dropped when the limit is reached or after 300 retries.
 
 ### Throughput
 

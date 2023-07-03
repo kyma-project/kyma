@@ -17,14 +17,16 @@ With the modular approach, Kyma components become modules, each providing one fu
 
 The Kyma project is currently in the transition phase. Some components are already independent modules, but others are still part of the big Kyma release and are installed with the `kyma deploy` command. With each successive release, fewer components will be available within preconfigured Kyma, but more and more will be offered as independent modules.
 
+You can enable modules at any time. Give them a try! If you decide that some of them are not needed for your use case, you can disable them and free the resources. Learn how to [enable, disable, and upgrade a module](https://kyma-project.io/docs/kyma/main/04-operation-guides/operations/08-install-uninstall-upgrade-kyma-module/).
+
 The table of Kyma modules:
 
 > **NOTE:** The entries marked with "*" are still components that will be modularized soon.
 
 | Module | Purpose |
 |---|---|
-| [BTP Operator](https://kyma-docs.netlify.app//?basePath=https://raw.githubusercontent.com/kyma-project/btp-manager/main/docs/user/&homepage=README.md&sidebar=true&loadSidebar=_sidebar.md&browser-tab-title=BTP%20Operator%20Documentation#/) | Within the BTP Operator module, BTP Manager installs SAP BTP Service Operator that allows you to consume SAP BTP services from your Kubernetes cluster using Kubernetes-native tools. |
-| [Keda](https://kyma-docs.netlify.app//?basePath=https://raw.githubusercontent.com/kyma-project/keda-manager/main/docs/user/&homepage=README.md&sidebar=true&loadSidebar=_sidebar.md&browser-tab-title=Keda%20module%20Documentation#/) | The Keda module comes with Keda Manager, an extension to Kyma that allows you to install [KEDA (Kubernetes Event Driven Autoscaler)](https://keda.sh/). |
+| [BTP Operator](https://kyma-docs.netlify.app//?basePath=https://raw.githubusercontent.com/kyma-project/btp-manager/main/&homepage=docs/user/README.md&sidebar=true&loadSidebar=docs/user/_sidebar.md&browser-tab-title=BTP%20Operator%20Documentation#/docs/user/README) | Within the BTP Operator module, BTP Manager installs SAP BTP Service Operator that allows you to consume SAP BTP services from your Kubernetes cluster using Kubernetes-native tools. |
+| [Keda](https://kyma-docs.netlify.app//?basePath=https://raw.githubusercontent.com/kyma-project/keda-manager/main/&homepage=docs/user/README.md&sidebar=true&loadSidebar=docs/user/_sidebar.md&browser-tab-title=Keda%20module%20Documentation#/docs/user/README) | The Keda module comes with Keda Manager, an extension to Kyma that allows you to install [KEDA (Kubernetes Event Driven Autoscaler)](https://keda.sh/). |
 | [Istio*](https://github.com/kyma-project/istio) | Istio is a service mesh with the Kyma-specific configuration. |
 | [Serverless*](https://github.com/kyma-project/serverless-manager) | With the Serverless module, you can define simple code snippets (Functions) with minimal implementation effort. |
 | [Telemetry*](https://github.com/kyma-project/telemetry-manager) | Enable telemetry agents to easily collect application logs and distributed traces for your application and dispatch them to backends.|
