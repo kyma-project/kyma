@@ -17,7 +17,7 @@ With the modular approach, Kyma components become modules, each providing one fu
 
 The Kyma project is currently in the transition phase. Some components are already independent modules, but others are still part of the big Kyma release and are installed with the `kyma deploy` command. With each successive release, fewer components will be available within preconfigured Kyma, but more and more will be offered as independent modules.
 
-Modular Kyma guarantees a seamless and personalized experience. You have the freedom to pick and use specific modules that suit your needs. By enabling or disabling modules, you can optimize and adapt your system to accommodate your evolving demands and preferences.
+You can enable modules at any time. Give them a try! If you decide that some of them are not needed for your use case, you can disable them and free the resources.
 
 The table of Kyma modules:
 
