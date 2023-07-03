@@ -346,7 +346,7 @@ func (r *Reconciler) syncOauth2ClientIDAndSecret(ctx context.Context, backendSta
 	if oauth2CredentialsNotFound {
 		return err
 	}
-	if oauth2CredentialsChanged {
+	if oauth2CredentialsChanged || !r.isOauth2CredentialsInitialized() {
 		r.credentials.clientID = credentials.clientID
 		r.credentials.clientSecret = credentials.clientSecret
 		r.credentials.tokenURL = credentials.tokenURL
