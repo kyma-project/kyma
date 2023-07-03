@@ -6,4 +6,4 @@ To remove Kyma from a running Kubernetes cluster, use the `kyma undeploy` Kyma C
 
 If you only want to remove single components, go to your [Helm](https://helm.sh/) client and modify the components as you need them.
 
-> **NOTE:** To learn how to disable a Kyma module go to [Enable, disable and upgrade a Kyma module](./08-enable-disable-upgrade-kyma-module.md#uninstall-a-kyma-module).
+> **NOTE:** To learn how to disable a Kyma module go to [Enable, disable and upgrade a Kyma module](./08-enable-disable-upgrade-kyma-module.md#disable-a-kyma-module).
