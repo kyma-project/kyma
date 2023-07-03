@@ -17,4 +17,4 @@ The compatibility check only works with release versions. If you installed Kyma 
 
 Downgrading your Kyma version is not supported.
 
-> **NOTE:** To learn how to upgrade a Kyma module go to [Install, uninstall and upgrade a Kyma module](./08-install-uninstall-upgrade-kyma-module.md#upgrade-a-kyma-module).
+> **NOTE:** To learn how to upgrade a Kyma module go to [Install, uninstall and upgrade a Kyma module](./08-enable-disable-upgrade-kyma-module.md#upgrade-a-kyma-module).
