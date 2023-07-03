@@ -1,6 +1,7 @@
 const {
   printRestartReport,
   getContainerRestartsForAllNamespaces,
+  deployLoki,
 } = require('../utils');
 const {loggingTests} = require('../logging');
 const {
@@ -23,6 +24,16 @@ describe('Upgrade test tests', function() {
 
   it('Deploys Istio access logs', async function() {
     await createIstioAccessLogResource();
+  });
+
+  if ('Deploys the Loki', async function() {
+    const lokiYaml = fs.readFileSync(
+        path.join(__dirname, '../test/fixtures/loki/loki.yaml'),
+        {
+          encoding: 'utf8',
+        },
+    );
+    await deployLoki(k8s.loadAllYaml(lokiYaml));
   });
 
   it('Listing all pods in cluster', async function() {
