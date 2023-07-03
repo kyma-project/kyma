@@ -26,7 +26,7 @@ describe('Upgrade test tests', function() {
     await createIstioAccessLogResource();
   });
 
-  if ('Deploys the Loki', async function() {
+  it('Deploys the Loki resource', async function() {
     const lokiYaml = fs.readFileSync(
         path.join(__dirname, '../test/fixtures/loki/loki.yaml'),
         {
