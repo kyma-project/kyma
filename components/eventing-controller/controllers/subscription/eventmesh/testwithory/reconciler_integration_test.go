@@ -1,4 +1,4 @@
-package test
+package testwithory
 
 import (
 	"context"
@@ -699,10 +699,9 @@ func Test_FixingSinkAndApiRule(t *testing.T) {
 			getAPIRuleAssert(ctx, g, &apiRuleUpdated).Should(gomega.And(
 				reconcilertesting.HaveNotEmptyHost(),
 				reconcilertesting.HaveNotEmptyAPIRule(),
-				reconcilertesting.HaveAPIRuleSpecRules(
+				reconcilertesting.HaveAPIRuleSpecRulesWithOry(
 					acceptableMethods,
-					object.OAuthHandlerNameJWT,
-					certsURL,
+					object.OAuthHandlerNameOAuth2Introspection,
 					sinkPath,
 				),
 				reconcilertesting.HaveAPIRuleOwnersRefs(givenSubscription.UID),
@@ -890,16 +889,14 @@ func Test_APIRuleReUseAfterUpdatingSink(t *testing.T) {
 	getAPIRuleAssert(ctx, g, apiRule1).Should(gomega.And(
 		reconcilertesting.HaveNotEmptyAPIRule(),
 		reconcilertesting.HaveAPIRuleOwnersRefs(createdSubscription1.UID, createdSubscription2.UID),
-		reconcilertesting.HaveAPIRuleSpecRules(
+		reconcilertesting.HaveAPIRuleSpecRulesWithOry(
 			acceptableMethods,
-			object.OAuthHandlerNameJWT,
-			certsURL,
+			object.OAuthHandlerNameOAuth2Introspection,
 			"/path1",
 		),
-		reconcilertesting.HaveAPIRuleSpecRules(
+		reconcilertesting.HaveAPIRuleSpecRulesWithOry(
 			acceptableMethods,
-			object.OAuthHandlerNameJWT,
-			certsURL,
+			object.OAuthHandlerNameOAuth2Introspection,
 			"/path2",
 		),
 	))
@@ -959,16 +956,14 @@ func Test_APIRuleExistsAfterDeletingSub(t *testing.T) {
 	getAPIRuleAssert(ctx, g, apiRule1).Should(gomega.And(
 		reconcilertesting.HaveNotEmptyAPIRule(),
 		reconcilertesting.HaveAPIRuleOwnersRefs(createdSubscription1.UID, createdSubscription2.UID),
-		reconcilertesting.HaveAPIRuleSpecRules(
+		reconcilertesting.HaveAPIRuleSpecRulesWithOry(
 			acceptableMethods,
-			object.OAuthHandlerNameJWT,
-			certsURL,
+			object.OAuthHandlerNameOAuth2Introspection,
 			"/path1",
 		),
-		reconcilertesting.HaveAPIRuleSpecRules(
+		reconcilertesting.HaveAPIRuleSpecRulesWithOry(
 			acceptableMethods,
-			object.OAuthHandlerNameJWT,
-			certsURL,
+			object.OAuthHandlerNameOAuth2Introspection,
 			"/path2",
 		),
 	))
@@ -987,20 +982,18 @@ func Test_APIRuleExistsAfterDeletingSub(t *testing.T) {
 		reconcilertesting.HaveNotEmptyHost(),
 		reconcilertesting.HaveNotEmptyAPIRule(),
 		reconcilertesting.HaveAPIRuleOwnersRefs(createdSubscription1.UID),
-		reconcilertesting.HaveAPIRuleSpecRules(
+		reconcilertesting.HaveAPIRuleSpecRulesWithOry(
 			acceptableMethods,
-			object.OAuthHandlerNameJWT,
-			certsURL,
+			object.OAuthHandlerNameOAuth2Introspection,
 			"/path1",
 		),
 	))
 	// ensure that the deleted Subscription is removed as Owner from the APIRule
 	getAPIRuleAssert(ctx, g, apiRule1).ShouldNot(gomega.And(
 		reconcilertesting.HaveAPIRuleOwnersRefs(createdSubscription1.UID),
-		reconcilertesting.HaveAPIRuleSpecRules(
+		reconcilertesting.HaveAPIRuleSpecRulesWithOry(
 			acceptableMethods,
-			object.OAuthHandlerNameJWT,
-			certsURL,
+			object.OAuthHandlerNameOAuth2Introspection,
 			"/path2",
 		),
 	))

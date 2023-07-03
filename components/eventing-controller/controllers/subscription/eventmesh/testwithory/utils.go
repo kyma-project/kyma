@@ -1,5 +1,5 @@
 //nolint:gosec //this is just a test, and security issues found here will not result in code used in a prod environment
-package test
+package testwithory
 
 import (
 	"context"
@@ -70,7 +70,6 @@ const (
 	syncPeriodSeconds        = 2
 	maxReconnects            = 10
 	eventMeshMockKeyPrefix   = "/messaging/events/subscriptions"
-	certsURL                 = "https://domain.com/oauth2/certs"
 )
 
 //nolint:gochecknoglobals // only used in tests
@@ -81,7 +80,7 @@ var (
 )
 
 func setupSuite() error {
-	featureflags.SetEventingWebhookAuthEnabled(true)
+	featureflags.SetEventingWebhookAuthEnabled(false)
 	emTestEnsemble = &eventMeshTestEnsemble{}
 
 	// define logger
@@ -138,7 +137,6 @@ func setupSuite() error {
 		ClientID:     "foo-client-id",
 		ClientSecret: "foo-client-secret",
 		TokenURL:     "foo-token-url",
-		CertsURL:     certsURL,
 	}
 	emTestEnsemble.envConfig = getEnvConfig()
 	testReconciler := eventmeshreconciler.NewReconciler(
