@@ -17,6 +17,8 @@ With the modular approach, Kyma components become modules, each providing one fu
 
 The Kyma project is currently in the transition phase. Some components are already independent modules, but others are still part of the big Kyma release and are installed with the `kyma deploy` command. With each successive release, fewer components will be available within preconfigured Kyma, but more and more will be offered as independent modules.
 
+You can enable modules at any time. Give them a try! If you decide that some of them are not needed for your use case, you can disable them and free the resources. Learn how to [enable, disable, and upgrade a module](../04-operation-guides/operations/08-enable-disable-upgrade-kyma-module.md).
+
 The table of Kyma modules:
 
 > **NOTE:** The entries marked with "*" are still components that will be modularized soon.

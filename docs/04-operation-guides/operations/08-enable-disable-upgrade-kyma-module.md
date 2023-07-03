@@ -1,12 +1,12 @@
 ---
-title: Install, uninstall and upgrade a Kyma module
+title: Enable, disable and upgrade a Kyma module
 ---
 
-Learn how to install, uninstall and upgrade a Kyma module. To see the list of all available and planned Kyma modules, go to [Overview](../../01-overview/README.md).
+Learn how to enable, disable and upgrade a Kyma module. To see the list of all available and planned Kyma modules, go to [Overview](../../01-overview/README.md).
 
-## Install a Kyma module
+## Enable a Kyma module
 
-To install a module, deploy its module manager and apply the module configuration. See the already available Kyma modules with their quick installation steps and links to their GitHub repositories:
+To enable a module, deploy its module manager and apply the module configuration. See the already available Kyma modules with their quick installation steps and links to their GitHub repositories:
 
 ### Prerequisites
 
@@ -32,13 +32,13 @@ kubectl apply -f https://github.com/kyma-project/btp-manager/releases/latest/dow
 kubectl apply -f https://github.com/kyma-project/btp-manager/releases/latest/download/btp-operator-default-cr.yaml
 ```
 
-> **CAUTION:** The CR is in the `Warning` state and the message is `Secret resource not found reason: MissingSecret`. To create a Secret, follow the instructions in the [`btp-manager`](https://github.com/kyma-project/btp-manager) repository.
+> **CAUTION:** The CR is in the `Warning` state and the message is `Secret resource not found reason: MissingSecret`. To create a Secret, follow the instructions in the [`btp-manager`](https://github.com/kyma-project/btp-manager/blob/main/docs/user/02-10-usage.md#create-and-install-secret) repository.
 
-## Uninstall a Kyma module
+## Disable a Kyma module
 
-You uninstall a Kyma module with the `kubectl delete` command.
+You disable a Kyma module with the `kubectl delete` command.
 
-1. Find out the paths for the module you want to uninstall; for example, from the [Install a Kyma module](#install-a-kyma-module) section.
+1. Find out the paths for the module you want to disable; for example, from the [Enable a Kyma module](#enable-a-kyma-module) section.
 
 2. Delete the module configuration:
 
