@@ -13,8 +13,8 @@ require (
 	github.com/kyma-project/kyma/common/logging v0.0.0-20230616102347-ad6927dc28d5
 	github.com/kyma-project/kyma/components/application-operator v0.0.0-20230127165033-ec8e43477eca
 	github.com/mitchellh/hashstructure/v2 v2.0.2
-	github.com/nats-io/nats-server/v2 v2.9.18
-	github.com/nats-io/nats.go v1.27.0
+	github.com/nats-io/nats-server/v2 v2.9.19
+	github.com/nats-io/nats.go v1.27.1
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.27.8
 	github.com/pkg/errors v0.9.1
@@ -24,9 +24,9 @@ require (
 	go.uber.org/zap v1.24.0
 	golang.org/x/oauth2 v0.9.0
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2
-	k8s.io/api v0.26.0
-	k8s.io/apimachinery v0.26.0
-	k8s.io/client-go v0.26.0
+	k8s.io/api v0.27.2
+	k8s.io/apimachinery v0.27.2
+	k8s.io/client-go v0.27.2
 	sigs.k8s.io/controller-runtime v0.13.1
 )
 
@@ -38,7 +38,7 @@ require (
 	github.com/emicklei/go-restful/v3 v3.9.0 // indirect
 	github.com/evanphx/json-patch v4.12.0+incompatible // indirect
 	github.com/evanphx/json-patch/v5 v5.6.0 // indirect
-	github.com/fsnotify/fsnotify v1.5.4 // indirect
+	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/jsonreference v0.20.0 // indirect
 	github.com/go-openapi/swag v0.19.14 // indirect
@@ -54,7 +54,7 @@ require (
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/compress v1.16.5 // indirect
 	github.com/mailru/easyjson v0.7.6 // indirect
-	github.com/matttproud/golang_protobuf_extensions v1.0.2-0.20181231171920-c182affec369 // indirect
+	github.com/matttproud/golang_protobuf_extensions v1.0.2 // indirect
 	github.com/minio/highwayhash v1.0.2 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
@@ -83,11 +83,11 @@ require (
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/apiextensions-apiserver v0.25.0 // indirect
-	k8s.io/component-base v0.25.7 // indirect
+	k8s.io/apiextensions-apiserver v0.26.1 // indirect
+	k8s.io/component-base v0.26.1 // indirect
 	k8s.io/klog/v2 v2.80.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20221012153701-172d655c2280 // indirect
-	k8s.io/utils v0.0.0-20221107191617-1a15be271d1d // indirect
+	k8s.io/utils v0.0.0-20221128185143-99ec85e7a448 // indirect
 	sigs.k8s.io/json v0.0.0-20220713155537-f223a00ba0e2 // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
@@ -95,11 +95,11 @@ require (
 
 // keep the following always at the same version:
 replace (
-	k8s.io/api => k8s.io/api v0.25.7
-	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.25.7
-	k8s.io/apimachinery => k8s.io/apimachinery v0.25.7
-	k8s.io/client-go => k8s.io/client-go v0.25.7
-	k8s.io/component-base => k8s.io/component-base v0.25.7
+	k8s.io/api => k8s.io/api v0.25.11
+	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.25.11
+	k8s.io/apimachinery => k8s.io/apimachinery v0.25.11
+	k8s.io/client-go => k8s.io/client-go v0.25.11
+	k8s.io/component-base => k8s.io/component-base v0.25.11
 )
 
 replace (
