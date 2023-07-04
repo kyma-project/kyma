@@ -147,6 +147,8 @@ func (em *EventMesh) SyncSubscription(subscription *eventingv1alpha2.Subscriptio
 			return false, err
 		}
 
+		// Make sure the EventMesh subscription was not deleted by checking
+		// the isEventMeshSubModified flag to be false.
 		if featureflags.IsEventingWebhookAuthEnabled() && !isEventMeshSubModified {
 			if err = em.handleWebhookAuthChange(eventMeshSub, subscription); err != nil {
 				log.Errorw("Failed to handle WebhookAuth Change", errorLogKey, err)
@@ -227,19 +229,18 @@ func (em *EventMesh) getProcessedEventTypes(kymaSubscription *eventingv1alpha2.S
 func (em *EventMesh) handleKymaSubModified(eventMeshSub *types.Subscription, kymaSub *eventingv1alpha2.Subscription) (bool, error) {
 	var (
 		isModified bool
+		hash       int64
 		err        error
 	)
 
 	if featureflags.IsEventingWebhookAuthEnabled() {
-		hash := kymaSub.Status.Backend.EventMeshLocalHash
-		if isModified, err = backendutils.IsEventMeshSubModified(eventMeshSub, hash); err != nil {
-			return false, err
-		}
+		hash = kymaSub.Status.Backend.EventMeshLocalHash
 	} else {
-		hash := kymaSub.Status.Backend.Ev2hash
-		if isModified, err = backendutils.IsEventMeshSubModified(eventMeshSub, hash); err != nil {
-			return false, err
-		}
+		hash = kymaSub.Status.Backend.Ev2hash
+	}
+
+	if isModified, err = backendutils.IsEventMeshSubModified(eventMeshSub, hash); err != nil {
+		return false, err
 	}
 
 	if isModified {
