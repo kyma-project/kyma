@@ -1001,6 +1001,12 @@ func (r *Reconciler) getMutatingAndValidatingWebHookConfig(ctx context.Context) 
 }
 
 func (r *Reconciler) isOauth2CredentialsInitialized() bool {
+	if featureflags.IsEventingWebhookAuthEnabled() {
+		return len(r.credentials.clientID) > 0 &&
+			len(r.credentials.clientSecret) > 0 &&
+			len(r.credentials.tokenURL) > 0 &&
+			len(r.credentials.certsURL) > 0
+	}
 	return len(r.credentials.clientID) > 0 && len(r.credentials.clientSecret) > 0
 }
 
