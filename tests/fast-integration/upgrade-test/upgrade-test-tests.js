@@ -1,3 +1,7 @@
+const k8s = require('@kubernetes/client-node');
+const fs = require('fs');
+const path = require('path');
+
 const {
   printRestartReport,
   getContainerRestartsForAllNamespaces,
