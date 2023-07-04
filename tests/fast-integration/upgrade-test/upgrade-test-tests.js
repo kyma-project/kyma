@@ -5,6 +5,7 @@ const path = require('path');
 const {
   printRestartReport,
   getContainerRestartsForAllNamespaces,
+  deployLoki,
 } = require('../utils');
 const {loggingTests} = require('../logging');
 const {
