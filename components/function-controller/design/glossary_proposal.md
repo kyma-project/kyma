@@ -1,64 +1,53 @@
-# Serverless naming proposal
+# Serverless naming convention
 
-## Problem
+## Problem overview
 
-Serverless consist of two projects:
+Currently, Serverless in Kyma consists of two projects:
 
-- [function-controller](https://github.com/kyma-project/kyma/tree/main/components/function-controller), which is
-  responsible for running function on k8s cluster
-- [serverless-manager](https://github.com/kyma-project/serverless-manager), which is responsible for installation and
-  configuration of serverless
-- additionally we have 3rd-party additional components like [keda](https://keda.sh/)
+- [function-controller](https://github.com/kyma-project/kyma/tree/main/components/function-controller) -
+  responsible for running a Function on a k8s cluster
+- [serverless-manager](https://github.com/kyma-project/serverless-manager) - responsible for installation and
+  configuration of Serverless
 
-Example of confusion with name `controller`. In our case we name `controller`:
+Additionally, we have 3rd-party additional components like [KEDA](https://keda.sh/)
 
-- serverless reconcile loop
-- serverless pod with reconcile loop
-- component in kyma/directory
+In Serverless, we overuse the word "controller" which causes confusion and requires clarification. Saying "controller", we refer to:
+
+- Serverless reconcile loop
+- Serverless Pod with the reconcile loop
+- the Function Controller component in the `kyma` directory
 
 ## Goal
 
-The target of this document is the attempt to unify naming convention in serverless component to avoid confusion and
-make it more logical.
+The goal of this document is to clarify the naming convention in Serverless and define its elements to avoid confusion and make it more logical.
 
-# Proposal
+## Proposal
 
-## Components naming convention
+The proposed naming conventions refer to different architecture layers of the whole project. See the [architecture](./assets/kubebuilder-architecture.png) diagram for details.
 
-The proposed naming conversion is:
+### Project naming convention
 
-- Serverless - component which is doing some buisness logic related to functions on k8s cluster and can contain its own
+This section refers to the high-level architecture elements, namely to the main projects:
+
+- Serverless - the new naming convention for the `function-controller`. Serverless is responsible for running a Function on a k8s cluster. It can contain its own
   CRD.
-- Serverless-operator - name of the component which install and configure Serverless.
-- Kyma-Keda-operator - the operator install and configure [keda](https://keda.sh/)
+- Serverless-operator - the new naming convention for `serverless-manager`. Serverless-operator installs and configures Serverless.
+- Kyma-Keda-operator - the operator which installs and configures [KEDA](https://keda.sh/).
 
-## Deployment naming description
+### Component naming convention
 
-Serverless consist of two deployment:
+This section refers to the Serverless components:
 
-- controller - responsible for creating, configuring k8s resources to finally run function on a cluster. The main
-  responsibility is reconciliation of functions cr.
-- defaulting/validation/conversion webhooks responsible for defaulting/validation for function CR, mutating external
-  registry secret but also reconcile certificates. The main responsibility is doing webhook things.
+- Controller - responsible for creating and configuring k8s resources to finally run a function on a cluster. It is responsible for the reconciliation of the Function CR.
+- Webhook - responsible for defaulting, validation, and conversion of the Function CR, mutating the external registry Secret, and reconciling certificates.
 
-Serverless uses kubebuilder to build the program and has the
-following [architecture](./assets/kubebuilder-architecture.png).
+Proposed naming convention:
 
-The program consists of `process` which have `manager`.
-The `manager` can have 2 components:
-
-- Controller, which focuses on reconciliation of given k8s resource. Uses predicates and reconciler.
-- Webhook, which works with AdmissionRequests
-
-## Components naming convention
-
-My proposal about naming:
-
-Deployment with controller as main responsibility:
+Deployment with the controller as the main responsibility:
 
 - ${component_name}-controller
 
-In case of introducing separate CRD and separate deployment:
+In the case of introducing a separate CRD and a separate deployment:
 
 - ${component_name}-{crd_name}-controller
 
@@ -70,11 +59,22 @@ Deployment with both of those components:
 
 - ${component_name}
 
-I decided to go with pure component name as it contains two responsibilities and from technical perspective it's very
-similar to the component.
-It might be confusing, and I am open to hear some proposals.
+I decided to go with the pure component name as it contains two responsibilities and from a technical perspective it's very similar to the component.
+It might be confusing, and I am open to other proposals.
 
-For controller reconcile loop inside the manger:
+### Kubebuilder component naming convention
+
+Serverless uses Kubebuilder to build a controller and/or webhook. This section describes the naming convention of the most detailed project layer, namely Kubebuilder components.
+
+Looking at the [architecture](./assets/kubebuilder-architecture.png) diagram, you can see that a program consists of a **process** which includes a **manager**.
+The **manager** can include 2 components:
+
+- Controller, which focuses on the reconciliation of a given k8s resource. It uses predicates and the reconciler.
+- Webhook, which works with `AdmissionRequests`.
+
+Proposed naming convention:
+
+For controller reconcile loop inside the manager:
 
 - ${crd_name}-reconcile
 - ${component_name}-${crd_name}-reconcile
@@ -91,15 +91,15 @@ For serverless runtimes:
 
 ## Summary
 
-Table is arrange from the least technical to the most technical terms.
+The table lists the terms from the most general to the most detailed ones:
 
 | component name                | responsibility                                 |
 |-------------------------------|------------------------------------------------|
 | serverless                    | The product like `Keda`                        |
-| serverless-operator           | serverless isntaller                           |
+| serverless-operator           | serverless installer                           |
 | serverless-controller         | serverless main reconciliation loop deployment |
 | serverless-webhook            | serverless webhook deployment                  |
 | serverless-reconciler         | serverless reconciliation loop                 |
-| serverless-validation-webhook | serverless validation webhook                  | 
-| serverless-defaulting-webhook | serverless defaulting webhook                  | 
-| serverless-conversion-webhook | serverless conversion webhook                  | 
+| serverless-validation-webhook | serverless validation webhook                  |
+| serverless-defaulting-webhook | serverless defaulting webhook                  |
+| serverless-conversion-webhook | serverless conversion webhook                  |
