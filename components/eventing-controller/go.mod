@@ -105,6 +105,5 @@ replace (
 
 replace (
 	github.com/kyma-incubator/api-gateway => github.com/kyma-project/api-gateway v0.0.0-20220819093753-296e6704d413
-	golang.org/x/crypto => golang.org/x/crypto v0.7.0
 	k8s.io/utils => k8s.io/utils v0.0.0-20221012122500-cfd413dd9e85
 )
