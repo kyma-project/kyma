@@ -563,6 +563,22 @@ func Test_isOauth2CredentialsInitialized(t *testing.T) {
 			wantResult:       false,
 		},
 		{
+			name:             "[feature-flag: disabled] should return false when clientID is not initialized",
+			givenFlagEnabled: false,
+			givenCredentials: &oauth2Credentials{
+				clientSecret: []byte("test"),
+			},
+			wantResult: false,
+		},
+		{
+			name:             "[feature-flag: disabled] should return false when clientSecret is not initialized",
+			givenFlagEnabled: false,
+			givenCredentials: &oauth2Credentials{
+				clientID: []byte("test"),
+			},
+			wantResult: false,
+		},
+		{
 			name:             "[feature-flag: disabled] should return true when credentials are initialized",
 			givenFlagEnabled: false,
 			givenCredentials: &oauth2Credentials{
@@ -576,6 +592,38 @@ func Test_isOauth2CredentialsInitialized(t *testing.T) {
 			givenFlagEnabled: true,
 			givenCredentials: nil,
 			wantResult:       false,
+		},
+		{
+			name:             "[feature-flag: enabled] should return false when only clientID is initialized",
+			givenFlagEnabled: true,
+			givenCredentials: &oauth2Credentials{
+				clientID: []byte("test"),
+			},
+			wantResult: false,
+		},
+		{
+			name:             "[feature-flag: enabled] should return false when only clientSecret is initialized",
+			givenFlagEnabled: true,
+			givenCredentials: &oauth2Credentials{
+				clientSecret: []byte("test"),
+			},
+			wantResult: false,
+		},
+		{
+			name:             "[feature-flag: enabled] should return false when only certsURL is initialized",
+			givenFlagEnabled: true,
+			givenCredentials: &oauth2Credentials{
+				certsURL: []byte("http://kyma-project.io"),
+			},
+			wantResult: false,
+		},
+		{
+			name:             "[feature-flag: enabled] should return false when only tokenURL is initialized",
+			givenFlagEnabled: true,
+			givenCredentials: &oauth2Credentials{
+				tokenURL: []byte("http://kyma-project.io"),
+			},
+			wantResult: false,
 		},
 		{
 			name:             "[feature-flag: enabled] should return true when credentials are initialized",
