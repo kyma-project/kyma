@@ -110,7 +110,7 @@ func getArg(args []string, arg string) string {
 
 func getPackageConfigVolumeMountsForRuntime(rtm serverlessv1alpha2.Runtime) []corev1.VolumeMount {
 	switch rtm {
-	case serverlessv1alpha2.NodeJs14, serverlessv1alpha2.NodeJs16, serverlessv1alpha2.NodeJs18:
+	case serverlessv1alpha2.NodeJs16, serverlessv1alpha2.NodeJs18:
 		return []corev1.VolumeMount{
 			{
 				Name:      "registry-config",
@@ -206,7 +206,8 @@ func equalDeployments(existing appsv1.Deployment, expected appsv1.Deployment) bo
 		mapsEqual(existing.Spec.Template.GetLabels(), expected.Spec.Template.GetLabels()) &&
 		equalResources(existing.Spec.Template.Spec.Containers[0].Resources, expected.Spec.Template.Spec.Containers[0].Resources) &&
 		equalInt32Pointer(existing.Spec.Replicas, expected.Spec.Replicas) &&
-		equalSecretMounts(existing.Spec.Template.Spec, expected.Spec.Template.Spec)
+		equalSecretMounts(existing.Spec.Template.Spec, expected.Spec.Template.Spec) &&
+		mapsEqual(existing.Spec.Template.GetAnnotations(), expected.Spec.Template.GetAnnotations())
 }
 
 func equalServices(existing corev1.Service, expected corev1.Service) bool {

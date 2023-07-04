@@ -24,7 +24,11 @@ import (
 )
 
 const (
-	healthCheckTimeout = time.Second
+	healthCheckTimeout  = time.Second
+	keyRegistryPullAddr = "pullRegAddr"
+	keyRegistryPushAddr = "pushRegAddr"
+	keyRegistryAddress  = "registryAddress"
+	keyIsInternal       = "isInternal"
 )
 
 //go:generate mockery --name=GitClient --output=automock --outpkg=automock --case=underscore
@@ -175,8 +179,8 @@ func (r *FunctionReconciler) readDockerConfig(ctx context.Context, instance *ser
 		data := readSecretData(secret.Data)
 		return DockerConfig{
 			ActiveRegistryConfigSecretName: r.config.ImageRegistryExternalDockerConfigSecretName,
-			PushAddress:                    data["registryAddress"],
-			PullAddress:                    data["registryAddress"],
+			PushAddress:                    data[keyRegistryAddress],
+			PullAddress:                    data[keyRegistryAddress],
 		}, nil
 	}
 
@@ -185,16 +189,18 @@ func (r *FunctionReconciler) readDockerConfig(ctx context.Context, instance *ser
 		return DockerConfig{}, errors.Wrapf(err, "docker registry configuration not found, none of configuration secrets (%s, %s) found in function namespace", r.config.ImageRegistryDefaultDockerConfigSecretName, r.config.ImageRegistryExternalDockerConfigSecretName)
 	}
 	data := readSecretData(secret.Data)
-	if data["isInternal"] == "true" {
+	if data[keyIsInternal] == "true" {
 		return DockerConfig{
 			ActiveRegistryConfigSecretName: r.config.ImageRegistryDefaultDockerConfigSecretName,
-			PushAddress:                    data["registryAddress"],
-			PullAddress:                    data["serverAddress"],
+			PushAddress:                    data[keyRegistryPushAddr],
+			PullAddress:                    data[keyRegistryPullAddr],
+		}, nil
+	} else {
+		return DockerConfig{
+			ActiveRegistryConfigSecretName: r.config.ImageRegistryDefaultDockerConfigSecretName,
+			PushAddress:                    data[keyRegistryAddress],
+			PullAddress:                    data[keyRegistryAddress],
 		}, nil
 	}
-	return DockerConfig{
-		ActiveRegistryConfigSecretName: r.config.ImageRegistryDefaultDockerConfigSecretName,
-		PushAddress:                    data["registryAddress"],
-		PullAddress:                    data["registryAddress"],
-	}, nil
+
 }

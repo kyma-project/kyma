@@ -15,12 +15,8 @@ image:
     # - name: docker
 service:
   name: registry
-  type: ClusterIP
-  # clusterIP:
-  port: "{{ .Values.global.dockerServicePort }}"    # same as configData.http.addr
-  # nodePort:
+  port: "{{ .Values.global.registryServicePort }}"    # same as configData.http.addr
   annotations: {}
-  # foo.io/bar: "true"
 ingress:
   enabled: false
   path: /

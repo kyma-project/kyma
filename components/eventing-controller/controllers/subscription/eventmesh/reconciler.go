@@ -8,12 +8,6 @@ import (
 	"reflect"
 	"time"
 
-	recerrors "github.com/kyma-project/kyma/components/eventing-controller/controllers/errors"
-	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
-	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -21,15 +15,22 @@ import (
 	k8slabels "k8s.io/apimachinery/pkg/labels"
 	k8stypes "k8s.io/apimachinery/pkg/types"
 
+	recerrors "github.com/kyma-project/kyma/components/eventing-controller/controllers/errors"
+	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 
 	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
-	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventmesh"
 	"golang.org/x/xerrors"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/source"
+
+	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventmesh"
 
 	"go.uber.org/zap"
 
@@ -310,11 +311,22 @@ func (r *Reconciler) syncConditionSubscribed(subscription *eventingv1alpha2.Subs
 
 // syncConditionSubscriptionActive syncs the condition ConditionSubscribed.
 func (r *Reconciler) syncConditionSubscriptionActive(subscription *eventingv1alpha2.Subscription, isActive bool, logger *zap.SugaredLogger) {
-	condition := eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionSubscriptionActive, eventingv1alpha2.ConditionReasonSubscriptionActive, corev1.ConditionTrue, "")
+	condition := eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionSubscriptionActive,
+		eventingv1alpha2.ConditionReasonSubscriptionActive,
+		corev1.ConditionTrue,
+		"")
 	if !isActive {
-		logger.Debugw("Waiting for subscription to be active", "name", subscription.Name, "status", subscription.Status.Backend.EmsSubscriptionStatus.Status)
+		logger.Debugw("Waiting for subscription to be active",
+			"name",
+			subscription.Name,
+			"status",
+			subscription.Status.Backend.EventMeshSubscriptionStatus.Status)
+
 		message := "Waiting for subscription to be active"
-		condition = eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionSubscriptionActive, eventingv1alpha2.ConditionReasonSubscriptionNotActive, corev1.ConditionFalse, message)
+		condition = eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionSubscriptionActive,
+			eventingv1alpha2.ConditionReasonSubscriptionNotActive,
+			corev1.ConditionFalse,
+			message)
 	}
 	r.replaceStatusCondition(subscription, condition)
 }
@@ -326,7 +338,7 @@ func (r *Reconciler) syncConditionWebhookCallStatus(subscription *eventingv1alph
 	if isWebhookCallError, err := r.checkLastFailedDelivery(subscription); err != nil {
 		condition.Message = err.Error()
 	} else if isWebhookCallError {
-		condition.Message = subscription.Status.Backend.EmsSubscriptionStatus.LastFailedDeliveryReason
+		condition.Message = subscription.Status.Backend.EventMeshSubscriptionStatus.LastFailedDeliveryReason
 	} else {
 		condition.Status = corev1.ConditionTrue
 	}
@@ -506,7 +518,13 @@ func (r *Reconciler) handlePreviousAPIRule(ctx context.Context, subscription *ev
 
 		// update the APIRule OwnerReferences list and Spec Rules
 		object.WithOwnerReference(subscriptions)(previousAPIRule)
-		object.WithRules(subscriptions, *previousAPIRule.Spec.Service, http.MethodPost, http.MethodOptions)(previousAPIRule)
+		object.WithRules(
+			r.oauth2credentials.CertsURL,
+			subscriptions,
+			*previousAPIRule.Spec.Service,
+			http.MethodPost,
+			http.MethodOptions,
+		)(previousAPIRule)
 
 		if err := r.Client.Update(ctx, previousAPIRule); err != nil {
 			return err
@@ -584,7 +602,7 @@ func (r *Reconciler) makeAPIRule(svcNs, svcName string, labels map[string]string
 		object.WithOwnerReference(subs),
 		object.WithService(hostName, svcName, port),
 		object.WithGateway(constants.ClusterLocalAPIGateway),
-		object.WithRules(subs, svc, http.MethodPost, http.MethodOptions))
+		object.WithRules(r.oauth2credentials.CertsURL, subs, svc, http.MethodPost, http.MethodOptions))
 	return apiRule
 }
 
@@ -733,12 +751,12 @@ func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
 
 // checkStatusActive checks if the subscription is active and if not, sets a timer for retry.
 func (r *Reconciler) checkStatusActive(subscription *eventingv1alpha2.Subscription) (active bool, err error) {
-	if subscription.Status.Backend.EmsSubscriptionStatus == nil {
+	if subscription.Status.Backend.EventMeshSubscriptionStatus == nil {
 		return false, nil
 	}
 
 	// check if the EMS subscription status is active
-	if subscription.Status.Backend.EmsSubscriptionStatus.Status == string(types.SubscriptionStatusActive) {
+	if subscription.Status.Backend.EventMeshSubscriptionStatus.Status == string(types.SubscriptionStatusActive) {
 		if len(subscription.Status.Backend.FailedActivation) > 0 {
 			subscription.Status.Backend.FailedActivation = ""
 		}
@@ -764,22 +782,32 @@ func (r *Reconciler) checkStatusActive(subscription *eventingv1alpha2.Subscripti
 
 // checkLastFailedDelivery checks if LastFailedDelivery exists and if it happened after LastSuccessfulDelivery.
 func (r *Reconciler) checkLastFailedDelivery(subscription *eventingv1alpha2.Subscription) (bool, error) {
-	if len(subscription.Status.Backend.EmsSubscriptionStatus.LastFailedDelivery) > 0 {
-		var lastFailedDeliveryTime, LastSuccessfulDeliveryTime time.Time
-		var err error
-		if lastFailedDeliveryTime, err = time.Parse(time.RFC3339, subscription.Status.Backend.EmsSubscriptionStatus.LastFailedDelivery); err != nil {
-			return true, xerrors.Errorf("failed to parse LastFailedDelivery: %v", err)
-		}
-		if len(subscription.Status.Backend.EmsSubscriptionStatus.LastSuccessfulDelivery) > 0 {
-			if LastSuccessfulDeliveryTime, err = time.Parse(time.RFC3339, subscription.Status.Backend.EmsSubscriptionStatus.LastSuccessfulDelivery); err != nil {
-				return true, xerrors.Errorf("failed to parse LastSuccessfulDelivery: %v", err)
-			}
-		}
-		if lastFailedDeliveryTime.After(LastSuccessfulDeliveryTime) {
-			return true, nil
-		}
+	// Check if LastFailedDelivery exists.
+	lastFailed := subscription.Status.Backend.EventMeshSubscriptionStatus.LastFailedDelivery
+	if len(lastFailed) == 0 {
+		return false, nil
 	}
-	return false, nil
+
+	// Try to parse LastFailedDelivery.
+	var err error
+	var lastFailedDeliveryTime time.Time
+	if lastFailedDeliveryTime, err = time.Parse(time.RFC3339, lastFailed); err != nil {
+		return true, xerrors.Errorf("failed to parse LastFailedDelivery: %v", err)
+	}
+
+	// Check if LastSuccessfulDelivery exists. If not, LastFailedDelivery happened last.
+	lastSuccessful := subscription.Status.Backend.EventMeshSubscriptionStatus.LastSuccessfulDelivery
+	if len(lastSuccessful) == 0 {
+		return true, nil
+	}
+
+	// Try to parse LastSuccessfulDelivery.
+	var lastSuccessfulDeliveryTime time.Time
+	if lastSuccessfulDeliveryTime, err = time.Parse(time.RFC3339, lastSuccessful); err != nil {
+		return true, xerrors.Errorf("failed to parse LastSuccessfulDelivery: %v", err)
+	}
+
+	return lastFailedDeliveryTime.After(lastSuccessfulDeliveryTime), nil
 }
 
 func (r *Reconciler) namedLogger() *zap.SugaredLogger {

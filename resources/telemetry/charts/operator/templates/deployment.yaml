@@ -44,8 +44,8 @@ spec:
             - --fluent-bit-exporter-image={{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.directory_size_exporter) }}
             - --validating-webhook-enabled={{ .Values.webhook.enabled }}
             - --enable-telemetry-manager-module=false
-{{- if or .Values.priorityClassName .Values.global.highPriorityClassName }}
-            - --fluent-bit-priority-class-name={{ coalesce .Values.priorityClassName .Values.global.highPriorityClassName }}
+{{- if or .Values.highPriorityClassName .Values.global.highPriorityClassName }}
+            - --fluent-bit-priority-class-name={{ coalesce .Values.highPriorityClassName .Values.global.highPriorityClassName }}
 {{- end }}
 {{- if not .Values.controllers.logging.enabled }}
             - --enable-logging=false
@@ -58,10 +58,6 @@ spec:
 {{- if or .Values.priorityClassName .Values.global.priorityClassName }}
             - --trace-collector-priority-class={{ coalesce .Values.priorityClassName .Values.global.priorityClassName }}
 {{- end }}
-            - --trace-collector-cpu-limit={{ .Values.traceCollector.resources.limits.cpu }}
-            - --trace-collector-memory-limit={{ .Values.traceCollector.resources.limits.memory }}
-            - --trace-collector-cpu-request={{ .Values.traceCollector.resources.requests.cpu }}
-            - --trace-collector-memory-request={{ .Values.traceCollector.resources.requests.memory }}
 {{- end }}
 {{- if not .Values.controllers.metrics.enabled }}
             - --enable-metrics=false
@@ -69,10 +65,6 @@ spec:
 {{- if or .Values.priorityClassName .Values.global.priorityClassName }}
             - --metric-gateway-priority-class={{ coalesce .Values.priorityClassName .Values.global.priorityClassName }}
 {{- end }}
-            - --metric-gateway-cpu-limit={{ .Values.metricGateway.resources.limits.cpu }}
-            - --metric-gateway-memory-limit={{ .Values.metricGateway.resources.limits.memory }}
-            - --metric-gateway-cpu-request={{ .Values.metricGateway.resources.requests.cpu }}
-            - --metric-gateway-memory-request={{ .Values.metricGateway.resources.requests.memory }}
 {{- end }}
           name: manager
           ports:

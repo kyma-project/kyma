@@ -63,8 +63,7 @@ data:
         source: 'spec.source.gitRepository ? "Git Repository" : "Inline Editor"'
       - name: header.runtime
         source: >-
-          spec.runtime = 'nodejs16' ? 'Node.js 16' : (spec.runtime = 'nodejs14' ?
-          'Node.js 14 - deprecated' : (spec.runtime = 'python39' ? 'Python 3.9' : (spec.runtime = 'nodejs18' ? 'Node.js 18' : spec.runtime)))
+          spec.runtime = 'nodejs16' ? 'Node.js 16 - deprecated' : (spec.runtime = 'python39' ? 'Python 3.9' : (spec.runtime = 'nodejs18' ? 'Node.js 18' : spec.runtime))
     body:
       - widget: Tabs
         children:
@@ -157,6 +156,7 @@ data:
               - widget: ResourceList
                 source: $subscriptions()
                 name: configuration.subscriptions
+                disableCreate: true
           - name: tabs.resources
             children:
               - widget: Panel
@@ -209,23 +209,23 @@ data:
       name: Language
       var: language
       required: true
-      enum: [nodejs, python]
+      enum: [JavaScript, Python]
       trigger: [language]
       dynamicValue: |
-        spec.runtime in ['nodejs14', 'nodejs16', 'nodejs18'] ? 'nodejs' :
-        spec.runtime in ['python39'] ? 'python' :
+        spec.runtime in ['nodejs16', 'nodejs18'] ? 'JavaScript' :
+        spec.runtime in ['python39'] ? 'Python' :
         ''
     - simple: true
       path: spec.runtime
       placeholder: placeholders.spec.runtime
       enum: |
-        $language = 'nodejs' ? ['nodejs14', 'nodejs16', 'nodejs18'] :
-        $language = 'python' ? ['python39'] :
+        $language = 'JavaScript' ? ['nodejs16', 'nodejs18'] :
+        $language = 'Python' ? ['python39'] :
         []
       subscribe:
         language: |
-          $language = 'nodejs' ? ($exists($root.spec.runtime) and $root.spec.runtime != 'python39') ? $root.spec.runtime : 'nodejs16' :
-          $language = 'python' ? 'python39' :
+          $language = 'JavaScript' ? ($exists($root.spec.runtime) and $root.spec.runtime != 'python39') ? $root.spec.runtime : 'nodejs16' :
+          $language = 'Python' ? 'python39' :
           ''
     - path: spec.resourceConfiguration.function.profile
       simple: true
@@ -241,7 +241,7 @@ data:
           defaultExpanded: true
           subscribe:
             sourceType: |-
-              $sourceType = 'Inline' ? $language = 'nodejs' ? $exists($root.metadata.creationTimestamp) ? $root.spec.source.inline.source : "module.exports = {
+              $sourceType = 'Inline' ? $language = 'JavaScript' ? $exists($root.metadata.creationTimestamp) ? $root.spec.source.inline.source : "module.exports = {
                 main: async function (event, context) {
                   const message = `Hello World`
                     + ` from the Kyma Function ${context['function-name']}`
@@ -250,13 +250,13 @@ data:
                   return message;
                 }
               }" :
-              $language = 'python' ? $exists($root.metadata.creationTimestamp) ? $root.spec.source.inline.source : "def main(event, context):
+              $language = 'Python' ? $exists($root.metadata.creationTimestamp) ? $root.spec.source.inline.source : "def main(event, context):
                   message = 'Hello World from the Kyma Function '+context['function-name']+' running on '+context['runtime']+ '!';
                   print(message)
                   return message" :
               '' : ''
             language: |-
-              $language = 'nodejs' ? $exists($root.metadata.creationTimestamp) ? $root.spec.source.inline.source : "module.exports = {
+              $language = 'JavaScript' ? $exists($root.metadata.creationTimestamp) ? $root.spec.source.inline.source : "module.exports = {
                 main: async function (event, context) {
                   const message = `Hello World`
                     + ` from the Kyma Function ${context['function-name']}`
@@ -265,7 +265,7 @@ data:
                   return message;
                 }
               }" :
-              $language = 'python' ? $exists($root.metadata.creationTimestamp) ? $root.spec.source.inline.source : "def main(event, context):
+              $language = 'Python' ? $exists($root.metadata.creationTimestamp) ? $root.spec.source.inline.source : "def main(event, context):
                   message = 'Hello World from the Kyma Function '+context['function-name']+' running on '+context['runtime']+ '!';
                   print(message)
                   return message" :
@@ -400,8 +400,7 @@ data:
   list: |-
     - name: header.runtime
       source: >-
-        spec.runtime = 'nodejs16' ? 'Node.js 16' : (spec.runtime = 'nodejs14' ?
-        'Node.js 14 - deprecated' : (spec.runtime = 'python39' ? 'Python 3.9' : (spec.runtime = 'nodejs18' ? 'Node.js 18' : spec.runtime)))
+        spec.runtime = 'nodejs16' ? 'Node.js 16 - deprecated' : (spec.runtime = 'python39' ? 'Python 3.9' : (spec.runtime = 'nodejs18' ? 'Node.js 18' : spec.runtime))
     - name: header.sourceType
       source: 'spec.source.gitRepository ? "Git Repository" : "Inline Editor"'
     - name: header.status
@@ -460,7 +459,7 @@ data:
     subscriptions:
       resource:
         kind: Subscription
-        version: v1alpha1
+        version: v1alpha2
         group: eventing.kyma-project.io
       filter: $contains($item.spec.sink, $root.metadata.name)
   translations: |
@@ -512,8 +511,7 @@ data:
       Status: Status
       Runtime: Runtime
       'Source Type': Source Type
-      spec.runtime.nodejs14: Node.js 14 - deprecated
-      spec.runtime.nodejs16: Node.js 16
+      spec.runtime.nodejs16: Node.js 16 - deprecated
       spec.runtime.nodejs18: Node.js 18
       spec.runtime.python39: Python 3.9
       spec.resourceConfiguration.build: Build

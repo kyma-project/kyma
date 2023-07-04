@@ -88,6 +88,12 @@ spec:
             value: {{ .Values.webhook.mutating.name | quote }}
           - name: VALIDATING_WEBHOOK_NAME
             value: {{ .Values.webhook.validating.name | quote }}
+          - name: EVENTING_WEBHOOK_AUTH_ENABLED
+            value: {{ .Values.eventingWebhookAuth.enabled | quote }}
+          - name: EVENTING_WEBHOOK_AUTH_SECRET_NAME
+            value: {{ .Values.eventingWebhookAuth.secret.name | quote }}
+          - name: EVENTING_WEBHOOK_AUTH_SECRET_NAMESPACE
+            value: {{ .Values.eventingWebhookAuth.secret.namespace | quote }}
           resources:
             requests:
               cpu: {{ .Values.resources.requests.cpu }}

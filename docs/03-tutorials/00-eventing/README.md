@@ -9,7 +9,7 @@ Browse the tutorials for Eventing to learn how to use it step-by-step in differe
 To perform the steps described in the Eventing tutorials, you need the following: 
 
 1. [Kyma cluster provisioned](../../04-operation-guides/operations/02-install-kyma.md).
-2. (Optional) [Kyma Dashboard](../../01-overview/main-areas/ui/ui-01-gui.md) deployed on the Kyma cluster. To access the Dashboard, run: 
+2. (Optional) [Kyma Dashboard](../../01-overview/ui/ui-01-gui.md) deployed on the Kyma cluster. To access the Dashboard, run: 
    ```bash
    kyma dashboard
    ```

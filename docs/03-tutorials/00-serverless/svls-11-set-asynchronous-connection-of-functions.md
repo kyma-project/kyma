@@ -4,7 +4,7 @@ title: Set asynchronous communication between Functions
 
 This tutorial demonstrates how to connect two Functions asynchronously. It is based on the [in-cluster Eventing example](https://github.com/kyma-project/examples/tree/main/incluster_eventing).
 
-The example provides a very simple scenario of asynchronous communication between two Functions. The first Function accepts the incoming traffic via HTTP, sanitizes the payload, and publishes the content as an in-cluster event using [Kyma Eventing](../../01-overview/main-areas/eventing).
+The example provides a very simple scenario of asynchronous communication between two Functions. The first Function accepts the incoming traffic via HTTP, sanitizes the payload, and publishes the content as an in-cluster event using [Kyma Eventing](../../01-overview/eventing).
 The second Function is a message receiver. It subscribes to the given event type and stores the payload.
 
 This tutorial shows only one possible use case. There are many more use cases on how to orchestrate your application logic into specialized Functions and benefit from decoupled, re-usable components and event-driven architecture.
@@ -119,7 +119,7 @@ This tutorial shows only one possible use case. There are many more use cases on
    ```yaml
     name: event-receiver
     namespace: default
-    runtime: nodejs16
+    runtime: nodejs18
     source:
        sourceType: inline
     subscriptions:
@@ -147,7 +147,7 @@ This tutorial shows only one possible use case. There are many more use cases on
 ```yaml
     name: event-receiver
     namespace: default
-    runtime: nodejs16
+    runtime: nodejs18
     source:
        sourceType: inline
     subscriptions:

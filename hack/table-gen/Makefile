@@ -1,21 +1,44 @@
 .PHONY: generate
-generate: telemetry-docs cra-docs
+generate: telemetry-docs cra-docs eventing-docs apix-docs istio-docs
 
 .PHONY: telemetry-tracepipeline
 telemetry-tracepipeline:
-	go run table-gen.go --crd-filename ../../installation/resources/crds/telemetry/tracepipelines.crd.yaml --md-filename ../../docs/05-technical-reference/00-custom-resources/telemetry-03-tracepipeline.md
+	go run main.go --crd-filename ../../installation/resources/crds/telemetry/tracepipelines.crd.yaml --md-filename ../../docs/05-technical-reference/00-custom-resources/telemetry-03-tracepipeline.md
 
 .PHONY: telemetry-logpipeline
 telemetry-logpipeline:
-	go run table-gen.go --crd-filename ../../installation/resources/crds/telemetry/logpipelines.crd.yaml --md-filename ../../docs/05-technical-reference/00-custom-resources/telemetry-01-logpipeline.md
+	go run main.go --crd-filename ../../installation/resources/crds/telemetry/logpipelines.crd.yaml --md-filename ../../docs/05-technical-reference/00-custom-resources/telemetry-01-logpipeline.md
 
 .PHONY: telemetry-logparser
 telemetry-logparser:
-	go run table-gen.go --crd-filename ../../installation/resources/crds/telemetry/logparsers.crd.yaml --md-filename ../../docs/05-technical-reference/00-custom-resources/telemetry-02-logparser.md
+	go run main.go --crd-filename ../../installation/resources/crds/telemetry/logparsers.crd.yaml --md-filename ../../docs/05-technical-reference/00-custom-resources/telemetry-02-logparser.md
 
 .PHONY: telemetry-docs
 telemetry-docs: telemetry-tracepipeline telemetry-logparser telemetry-logpipeline
 
 .PHONY: cra-docs
 cra-docs:
-	go run table-gen.go --crd-filename ../../installation/resources/crds/compass-runtime-agent/compass-connection.crd.yaml --md-filename ../../docs/05-technical-reference/00-custom-resources/ra-01-compassconnection.md
+	go run main.go --crd-filename ../../installation/resources/crds/compass-runtime-agent/compass-connection.crd.yaml --md-filename ../../docs/05-technical-reference/00-custom-resources/ra-01-compassconnection.md
+
+.PHONY: serverless-docs
+serverless-docs:
+	go run main.go --crd-filename ../../installation/resources/crds/serverless/crd-serverless.yaml --md-filename ../../docs/05-technical-reference/00-custom-resources/svls-01-function.md --ignore-spec env.valueFrom --ignore-spec env.name --ignore-spec env.value --ignore-spec resourceConfiguration.build.resources.requests --ignore-spec resourceConfiguration.build.resources.limits --ignore-spec resourceConfiguration.function.resources.requests --ignore-spec resourceConfiguration.function.resources.limits
+
+.PHONY: eventing-subscription
+eventing-subscription:
+	go run main.go --crd-filename ../../installation/resources/crds/eventing/subscriptions.eventing.kyma-project.io.crd.yaml --md-filename ../../docs/05-technical-reference/00-custom-resources/evnt-01-subscription.md
+
+.PHONY: eventing-backend
+eventing-backend:
+	go run main.go --crd-filename ../../installation/resources/crds/eventing/eventingbackends.eventing.kyma-project.io.crd.yaml --md-filename ../../docs/05-technical-reference/00-custom-resources/evnt-02-eventingbackend.md
+
+.PHONY: eventing-docs
+eventing-docs: eventing-subscription eventing-backend
+
+.PHONY: apix-docs
+apix-docs:
+	go run main.go --crd-filename ../../installation/resources/crds/api-gateway/apirules.gateway.crd.yaml --md-filename ../../docs/05-technical-reference/00-custom-resources/apix-01-apirule.md
+
+.PHONY: istio-docs
+istio-docs:
+	go run main.go --crd-filename ../../installation/resources/crds/istio/istios.operator.crd.yaml --md-filename ../../docs/05-technical-reference/00-custom-resources/oper-01-istio.md

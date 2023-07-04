@@ -6,6 +6,7 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: {{ template "docker-registry.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ template "docker-registry.name" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}

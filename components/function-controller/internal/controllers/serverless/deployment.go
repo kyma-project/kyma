@@ -28,7 +28,7 @@ const (
 )
 
 func stateFnCheckDeployments(ctx context.Context, r *reconciler, s *systemState) (stateFn, error) {
-	labels := s.internalFunctionLabels()
+	labels := internalFunctionLabels(s.instance)
 
 	err := r.client.ListByLabel(ctx, s.instance.GetNamespace(), labels, &s.deployments)
 	if err != nil {
@@ -48,12 +48,6 @@ func stateFnCheckDeployments(ctx context.Context, r *reconciler, s *systemState)
 	}
 
 	expectedDeployment := s.buildDeployment(args)
-	deploymentChanged := !s.deploymentEqual(expectedDeployment)
-
-	if !deploymentChanged {
-		return stateFnCheckService, nil
-	}
-
 	if len(s.deployments.Items) == 0 {
 		return buildStateFnCreateDeployment(expectedDeployment), nil
 	}
@@ -65,8 +59,7 @@ func stateFnCheckDeployments(ctx context.Context, r *reconciler, s *systemState)
 	if !equalDeployments(s.deployments.Items[0], expectedDeployment) {
 		return buildStateFnUpdateDeployment(expectedDeployment.Spec, expectedDeployment.Labels), nil
 	}
-
-	return stateFnUpdateDeploymentStatus, nil
+	return stateFnCheckService, nil
 }
 
 func buildStateFnCreateDeployment(d appsv1.Deployment) stateFn {
@@ -91,7 +84,7 @@ func buildStateFnCreateDeployment(d appsv1.Deployment) stateFn {
 func stateFnDeleteDeployments(ctx context.Context, r *reconciler, s *systemState) (stateFn, error) {
 	r.log.Info("deleting function")
 
-	labels := s.internalFunctionLabels()
+	labels := internalFunctionLabels(s.instance)
 	selector := apilabels.SelectorFromSet(labels)
 
 	err := r.client.DeleteAllBySelector(ctx, &appsv1.Deployment{}, s.instance.GetNamespace(), selector)

@@ -2,7 +2,7 @@ package resources
 
 import (
 	"context"
-	"io/ioutil"
+	"os"
 	"path"
 	"time"
 
@@ -23,7 +23,7 @@ import (
 func SetupResourcesController(ctx context.Context, mgr ctrl.Manager, serviceName, serviceNamespace, secretName string, log *zap.SugaredLogger) error {
 	logger := log.Named("resource-ctrl")
 	certPath := path.Join(DefaultCertDir, CertFile)
-	certBytes, err := ioutil.ReadFile(certPath)
+	certBytes, err := os.ReadFile(certPath)
 	if err != nil {
 		return errors.Wrapf(err, "failed to read caBundle file: %s", certPath)
 	}
@@ -107,8 +107,15 @@ func (r *resourceReconciler) Reconcile(ctx context.Context, request reconcile.Re
 	if err := r.reconcilerWebhooks(ctx, request); err != nil {
 		return reconcile.Result{}, errors.Wrap(err, "failed to reconcile webhook resources")
 	}
-	if err := r.reconcilerSecret(ctx, request); err != nil {
+	result, err := r.reconcilerSecret(ctx, request)
+	if err != nil {
 		return reconcile.Result{}, errors.Wrap(err, "failed to reconcile webhook resources")
+	}
+	if result == Updated {
+		r.logger.Info("certificate updated successfully, restarting")
+		//This is not an elegant solution, but the webhook need to reconfigure itself to use updated certificate.
+		//Cert-watcher from controller-runtime should refresh the certificate, but it doesn't work.
+		os.Exit(0)
 	}
 	r.logger.With("name", request.Name).Info("webhook resources reconciled successfully")
 	return reconcile.Result{RequeueAfter: 1 * time.Hour}, nil
@@ -130,14 +137,15 @@ func (r *resourceReconciler) reconcilerWebhooks(ctx context.Context, request rec
 	return nil
 }
 
-func (r *resourceReconciler) reconcilerSecret(ctx context.Context, request reconcile.Request) error {
+func (r *resourceReconciler) reconcilerSecret(ctx context.Context, request reconcile.Request) (Result, error) {
 	ctrl.LoggerFrom(ctx).Info("reconciling webhook secret")
 	secretNamespaced := types.NamespacedName{Name: r.secretName, Namespace: r.webhookConfig.ServiceNamespace}
 	if request.NamespacedName.String() != secretNamespaced.String() {
-		return nil
+		return NoResult, nil
 	}
-	if err := EnsureWebhookSecret(ctx, r.client, request.Name, request.Namespace, r.webhookConfig.ServiceName, r.logger); err != nil {
-		return errors.Wrap(err, "failed to reconcile webhook secret")
+	result, err := EnsureWebhookSecret(ctx, r.client, request.Name, request.Namespace, r.webhookConfig.ServiceName, r.logger)
+	if err != nil {
+		return NoResult, errors.Wrap(err, "failed to reconcile webhook secret")
 	}
-	return nil
+	return result, nil
 }

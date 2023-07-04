@@ -14,7 +14,7 @@ import (
 
 func stateFnInlineCheckSources(ctx context.Context, r *reconciler, s *systemState) (stateFn, error) {
 
-	labels := s.internalFunctionLabels()
+	labels := internalFunctionLabels(s.instance)
 
 	err := r.client.ListByLabel(ctx, s.instance.GetNamespace(), labels, &s.configMaps)
 	if err != nil {
@@ -51,7 +51,7 @@ func stateFnInlineCheckSources(ctx context.Context, r *reconciler, s *systemStat
 func stateFnInlineDeleteConfigMap(ctx context.Context, r *reconciler, s *systemState) (stateFn, error) {
 	r.log.Info("delete all ConfigMaps")
 
-	labels := s.internalFunctionLabels()
+	labels := internalFunctionLabels(s.instance)
 	selector := apilabels.SelectorFromSet(labels)
 
 	err := r.client.DeleteAllBySelector(ctx, &corev1.ConfigMap{}, s.instance.GetNamespace(), selector)

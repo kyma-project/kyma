@@ -20,6 +20,11 @@ type BackendConfig struct {
 	ValidatingWebhookName string `envconfig:"VALIDATING_WEBHOOK_NAME" default:"subscription-validating-webhook-configuration"`
 
 	DefaultSubscriptionConfig DefaultSubscriptionConfig
+
+	//nolint:lll
+	EventingWebhookAuthSecretName string `envconfig:"EVENTING_WEBHOOK_AUTH_SECRET_NAME" required:"true" default:"eventing-webhook-auth"`
+	//nolint:lll
+	EventingWebhookAuthSecretNamespace string `envconfig:"EVENTING_WEBHOOK_AUTH_SECRET_NAMESPACE" required:"true" default:"kyma-system"`
 }
 
 type PublisherConfig struct {

@@ -9,9 +9,9 @@ All the steps are performed in the `default` Namespace.
 
 ## Prerequisites
 
-- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) (v1.20 or higher)
+- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) (v1.26 or higher)
 - [curl](https://github.com/curl/curl)
-- [k3d](https://k3d.io) (v5.0.0 or higher with [a Kubernetes version supported by Kyma](../04-operation-guides/operations/02-install-kyma.md))
+- [k3d](https://k3d.io) (v5.4.9 or higher with [a Kubernetes version supported by Kyma](../04-operation-guides/operations/02-install-kyma.md))
 - [Kyma CLI](../04-operation-guides/operations/01-install-kyma-CLI.md)
 - Minimum Docker resources: 4 CPUs and 8 GB RAM 
   > **NOTE:** Learn how to adjust these Docker values on [Mac](https://docs.docker.com/desktop/settings/mac/#resources), [Windows](https://docs.docker.com/desktop/settings/windows/#resources), or [Linux](https://docs.docker.com/desktop/settings/linux/#resources).
@@ -22,7 +22,7 @@ All the steps are performed in the `default` Namespace.
   
     Alternatively, you can just use `curl` to publish events.
 - Istio sidecar injection enabled in the `default` Namespace
-  >**NOTE:** Read about [Istio sidecars in Kyma and why you want them](../01-overview/main-areas/service-mesh/smsh-03-istio-sidecars-in-kyma.md). Then, check how to [enable automatic Istio sidecar proxy injection](../04-operation-guides/operations/smsh-01-istio-enable-sidecar-injection.md). For more details, see [Default Istio setup in Kyma](../01-overview/main-areas/service-mesh/smsh-02-default-istio-setup-in-kyma.md).
+  >**NOTE:** Read about [Istio sidecars in Kyma and why you want them](../01-overview/service-mesh/smsh-03-istio-sidecars-in-kyma.md). Then, check how to [enable automatic Istio sidecar proxy injection](../04-operation-guides/operations/smsh-01-istio-enable-sidecar-injection.md). For more details, see [Default Istio setup in Kyma](../01-overview//service-mesh/smsh-02-default-istio-setup-in-kyma.md).
 
 ## Steps
 

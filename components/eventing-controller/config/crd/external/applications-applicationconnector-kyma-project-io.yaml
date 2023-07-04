@@ -43,6 +43,9 @@ spec:
                   type: boolean
                 skipVerify:
                   type: boolean
+                encodeUrl:
+                  type: boolean
+                  default: true
                 labels:
                   nullable: true
                   additionalProperties:

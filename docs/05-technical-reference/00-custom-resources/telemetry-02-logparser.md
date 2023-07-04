@@ -34,11 +34,21 @@ For details, see the [LogParser specification file](https://github.com/kyma-proj
 <!-- The content between "TABLE-START" and "TABLE-END" will be replaced -->
 
 <!-- TABLE-START -->
-<!-- LogParser v1alpha1 telemetry.kyma-project.io -->
-| Parameter         | Description                                   |
-| ---------------------------------------- | ---------|
-| **spec.parser** | [Fluent Bit Parsers](https://docs.fluentbit.io/manual/pipeline/parsers). The parser specified here has no effect until it is referenced by a [Pod annotation](https://docs.fluentbit.io/manual/pipeline/filters/kubernetes#kubernetes-annotations) on your workload or by a [Parser Filter](https://docs.fluentbit.io/manual/pipeline/filters/parser) defined in a pipeline's filters section. |
-| **status.conditions** | An array of conditions describing the status of the parser. |
-| **status.conditions.lastTransitionTime** | An array of conditions describing the status of the parser. |
-| **status.conditions.reason** | An array of conditions describing the status of the parser. |
-| **status.conditions.type** | The possible transition types are:<br>- `Running`: The parser is ready and usable.<br>- `Pending`: The parser is being activated. |<!-- TABLE-END -->
+### LogParser.telemetry.kyma-project.io/v1alpha1
+
+**Spec:**
+
+| Parameter | Type | Description |
+| ---- | ----------- | ---- |
+| **parser**  | string | [Fluent Bit Parsers](https://docs.fluentbit.io/manual/pipeline/parsers). The parser specified here has no effect until it is referenced by a [Pod annotation](https://docs.fluentbit.io/manual/pipeline/filters/kubernetes#kubernetes-annotations) on your workload or by a [Parser Filter](https://docs.fluentbit.io/manual/pipeline/filters/parser) defined in a pipeline's filters section. |
+
+**Status:**
+
+| Parameter | Type | Description |
+| ---- | ----------- | ---- |
+| **conditions**  | \[\]object | An array of conditions describing the status of the parser. |
+| **conditions.&#x200b;lastTransitionTime**  | string | An array of conditions describing the status of the parser. |
+| **conditions.&#x200b;reason**  | string | An array of conditions describing the status of the parser. |
+| **conditions.&#x200b;type**  | string | The possible transition types are:<br>- `Running`: The parser is ready and usable.<br>- `Pending`: The parser is being activated. |
+
+<!-- TABLE-END -->

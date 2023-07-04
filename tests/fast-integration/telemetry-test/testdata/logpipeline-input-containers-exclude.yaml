@@ -11,7 +11,7 @@ spec:
   output:
     grafana-loki:
       url:
-        value: "http://logging-loki:3100/loki/api/v1/push"
+        value: "http://logging-loki-test:3100/loki/api/v1/push"
       labels:
         "job": "exclude-istio-proxy-telemetry-fluent-bit"
       removeKeys: ["stream"]

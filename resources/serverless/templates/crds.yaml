@@ -58,18 +58,19 @@ spec:
           metadata:
             type: object
           spec:
-            description: FunctionSpec defines the desired state of Function
+            description: Defines the desired state of the Function
             properties:
               annotations:
                 additionalProperties:
                   type: string
-                description: Annotations will be used in Deployment's PodTemplate
-                  and will be applied on the function's runtime Pod.
+                description: Defines annotations used in Deployment's PodTemplate
+                  and applied on the Function's runtime Pod.
                 type: object
               env:
-                description: Env specifies an array of key-value pairs to be used
-                  as environment variables for the Function. You can define values
-                  as static strings or reference values from ConfigMaps or Secrets.
+                description: Specifies an array of key-value pairs to be used as environment
+                  variables for the Function. You can define values as static strings
+                  or reference values from ConfigMaps or Secrets. For configuration
+                  details, see the [official Kubernetes documentation](https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/).
                 items:
                   description: EnvVar represents an environment variable present in
                     a Container.
@@ -176,33 +177,33 @@ spec:
               labels:
                 additionalProperties:
                   type: string
-                description: Labels will be used in Deployment's PodTemplate and will
-                  be applied on the function's runtime Pod.
+                description: Defines labels used in Deployment's PodTemplate and applied
+                  on the Function's runtime Pod.
                 type: object
               replicas:
-                description: Replicas defines the exact number of Function's Pods
-                  to run at a time. If ScaleConfig is configured, or if Function is
-                  targeted by an external scaler, then the Replicas field is used
+                description: Defines the exact number of Function's Pods to run at
+                  a time. If **ScaleConfig** is configured, or if the Function is
+                  targeted by an external scaler, then the **Replicas** field is used
                   by the relevant HorizontalPodAutoscaler to control the number of
                   active replicas.
                 format: int32
                 type: integer
               resourceConfiguration:
-                description: ResourceConfiguration specifies resources requested by
-                  Function and build Job.
+                description: Specifies resources requested by the Function and the
+                  build Job.
                 properties:
                   build:
-                    description: Build specifies resources requested by the build
-                      Job's Pod.
+                    description: Specifies resources requested by the build Job's
+                      Pod.
                     properties:
                       profile:
-                        description: Profile defines name of predefined set of values
-                          of resource. Can't be used at the same time with Resources.
+                        description: Defines the name of the predefined set of values
+                          of the resource. Can't be used together with **Resources**.
                         type: string
                       resources:
-                        description: Resources defines amount of resources available
-                          for the Pod to use. Can't be used at the same time with
-                          Profile.
+                        description: Defines the amount of resources available for
+                          the Pod. Can't be used together with **Profile**. For configuration
+                          details, see the [official Kubernetes documentation](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/).
                         properties:
                           limits:
                             additionalProperties:
@@ -230,17 +231,16 @@ spec:
                         type: object
                     type: object
                   function:
-                    description: Function specifies resources requested by the Function's
-                      Pod.
+                    description: Specifies resources requested by the Function's Pod.
                     properties:
                       profile:
-                        description: Profile defines name of predefined set of values
-                          of resource. Can't be used at the same time with Resources.
+                        description: Defines the name of the predefined set of values
+                          of the resource. Can't be used together with **Resources**.
                         type: string
                       resources:
-                        description: Resources defines amount of resources available
-                          for the Pod to use. Can't be used at the same time with
-                          Profile.
+                        description: Defines the amount of resources available for
+                          the Pod. Can't be used together with **Profile**. For configuration
+                          details, see the [official Kubernetes documentation](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/).
                         properties:
                           limits:
                             additionalProperties:
@@ -269,28 +269,28 @@ spec:
                     type: object
                 type: object
               runtime:
-                description: Runtime specifies the runtime of the Function. The available
-                  values are `nodejs16`, `nodejs18`, and `python39`.
+                description: Specifies the runtime of the Function. The available
+                  values are `nodejs16` - deprecated, `nodejs18`, and `python39`.
                 type: string
               runtimeImageOverride:
-                description: RuntimeImageOverride specifies the runtimes image which
-                  must be used instead of the default one.
+                description: Specifies the runtime image used instead of the default
+                  one.
                 type: string
               scaleConfig:
-                description: ScaleConfig defines minimum and maximum number of Function's
+                description: Defines the minimum and maximum number of Function's
                   Pods to run at a time. When it is configured, a HorizontalPodAutoscaler
-                  will be deployed and will control the Replicas field to scale Function
-                  based on the CPU utilisation.
+                  will be deployed and will control the **Replicas** field to scale
+                  the Function based on the CPU utilisation.
                 properties:
                   maxReplicas:
-                    description: MaxReplicas defines the maximum number of Function's
-                      Pods to run at a time.
+                    description: Defines the maximum number of Function's Pods to
+                      run at a time.
                     format: int32
                     minimum: 1
                     type: integer
                   minReplicas:
-                    description: MinReplicas defines the minimum number of Function's
-                      Pods to run at a time.
+                    description: Defines the minimum number of Function's Pods to
+                      run at a time.
                     format: int32
                     minimum: 1
                     type: integer
@@ -299,17 +299,17 @@ spec:
                 - minReplicas
                 type: object
               secretMounts:
-                description: SecretMounts specifies Secrets to mount into the Function's
-                  container filesystem.
+                description: Specifies Secrets to mount into the Function's container
+                  filesystem.
                 items:
                   properties:
                     mountPath:
-                      description: MountPath specifies path within the container at
-                        which the Secret should be mounted.
+                      description: Specifies the path within the container where the
+                        Secret should be mounted.
                       type: string
                     secretName:
-                      description: SecretName specifies name of the Secret in the
-                        Function's Namespace to use.
+                      description: Specifies the name of the Secret in the Function's
+                        Namespace.
                       type: string
                   required:
                   - mountPath
@@ -317,29 +317,27 @@ spec:
                   type: object
                 type: array
               source:
-                description: Source contains the Function's specification.
+                description: Contains the Function's source code configuration.
                 properties:
                   gitRepository:
-                    description: GitRepository defines Function as git-sourced. Can't
-                      be used at the same time with Inline.
+                    description: Defines the Function as git-sourced. Can't be used
+                      together with **Inline**.
                     properties:
                       auth:
-                        description: Auth specifies that you must authenticate to
-                          the Git repository. Required for SSH.
+                        description: Specifies the authentication method. Required
+                          for SSH.
                         properties:
                           secretName:
-                            description: SecretName specifies the name of the Secret
-                              with credentials used by the Function Controller to
-                              authenticate to the Git repository in order to fetch
-                              the Function's source code and dependencies. This Secret
-                              must be stored in the same Namespace as the Function
-                              CR.
+                            description: Specifies the name of the Secret with credentials
+                              used by the Function Controller to authenticate to the
+                              Git repository in order to fetch the Function's source
+                              code and dependencies. This Secret must be stored in
+                              the same Namespace as the Function CR.
                             type: string
                           type:
-                            description: RepositoryAuthType defines if you must authenticate
-                              to the repository with a password or token (`basic`),
-                              or an SSH key (`key`). For SSH, this parameter must
-                              be set to `key`.
+                            description: Defines the repository authentication method.
+                              The value is either `basic` if you use a password or
+                              token, or `key` if you use an SSH key.
                             enum:
                             - basic
                             - key
@@ -349,20 +347,19 @@ spec:
                         - type
                         type: object
                       baseDir:
-                        description: BaseDir specifies the relative path to the Git
-                          directory that contains the source code from which the Function
-                          is built.
+                        description: Specifies the relative path to the Git directory
+                          that contains the source code from which the Function is
+                          built.
                         type: string
                       reference:
-                        description: Reference specifies either the branch name, tag
-                          or the commit revision from which the Function Controller
-                          automatically fetches the changes in the Function's code
-                          and dependencies.
+                        description: Specifies either the branch name, tag or commit
+                          revision from which the Function Controller automatically
+                          fetches the changes in the Function's code and dependencies.
                         type: string
                       url:
-                        description: URL provides the address to the Git repository
-                          with the Function's code and dependencies. Depending on
-                          whether the repository is public or private and what authentication
+                        description: Specifies the URL of the Git repository with
+                          the Function's code and dependencies. Depending on whether
+                          the repository is public or private and what authentication
                           method is used to access it, the URL must start with the
                           `http(s)`, `git`, or `ssh` prefix.
                         type: string
@@ -370,30 +367,34 @@ spec:
                     - url
                     type: object
                   inline:
-                    description: Inline defines Function as the inline Function. Can't
-                      be used at the same time with GitRepository.
+                    description: Defines the Function as the inline Function. Can't
+                      be used together with **GitRepository**.
                     properties:
                       dependencies:
-                        description: Dependencies specifies the Function's dependencies.
+                        description: Specifies the Function's dependencies.
                         type: string
                       source:
-                        description: Source provides the Function's full source code.
+                        description: Specifies the Function's full source code.
                         type: string
                     required:
                     - source
                     type: object
                 type: object
               template:
-                description: 'Deprecated: `.spec.Labels` and `.spec.Annotations` should
-                  be used to annotate/label function''s pods.'
+                description: 'Deprecated: Use **Labels** and **Annotations** to label
+                  and/or annotate Function''s Pods.'
                 properties:
                   annotations:
                     additionalProperties:
                       type: string
+                    description: 'Deprecated: Use **FunctionSpec.Annotations** to
+                      annotate Function''s Pods.'
                     type: object
                   labels:
                     additionalProperties:
                       type: string
+                    description: 'Deprecated: Use **FunctionSpec.Labels**  to label
+                      Function''s Pods.'
                     type: object
                 type: object
             required:
@@ -401,52 +402,69 @@ spec:
             - source
             type: object
           status:
-            description: FunctionStatus defines the observed state of Function
+            description: FunctionStatus defines the observed state of the Function
             properties:
               baseDir:
-                description: BaseDir specifies the relative path to the Git directory
-                  that contains the source code from which the Function is built.
+                description: Specifies the relative path to the Git directory that
+                  contains the source code from which the Function is built.
                 type: string
               commit:
+                description: Specifies the commit hash used to build the Function.
                 type: string
               conditions:
+                description: Specifies an array of conditions describing the status
+                  of the parser.
                 items:
                   properties:
                     lastTransitionTime:
+                      description: Specifies the last time the condition transitioned
+                        from one status to another.
                       format: date-time
                       type: string
                     message:
+                      description: Provides a human-readable message indicating details
+                        about the transition.
                       type: string
                     reason:
+                      description: Specifies the reason for the condition's last transition.
                       type: string
                     status:
+                      description: Specifies the status of the condition. The value
+                        is either `True`, `False`, or `Unknown`.
                       type: string
                     type:
-                      description: 'TODO: Status related things needs to be developed.'
+                      description: Specifies the type of the Function's condition.
                       type: string
                   required:
                   - status
                   type: object
                 type: array
               podSelector:
+                description: Specifies the Pod selector used to match Pods in the
+                  Function's Deployment.
                 type: string
               reference:
-                description: Reference specifies either the branch name, tag or the
-                  commit revision from which the Function Controller automatically
-                  fetches the changes in the Function's code and dependencies.
+                description: Specifies either the branch name, tag or commit revision
+                  from which the Function Controller automatically fetches the changes
+                  in the Function's code and dependencies.
                 type: string
               replicas:
+                description: Specifies the total number of non-terminated Pods targeted
+                  by this Function.
                 format: int32
                 type: integer
               runtime:
-                description: Runtime specifies the name of the Function's runtime.
+                description: Specifies the **Runtime** type of the Function.
                 type: string
               runtimeImage:
+                description: Specifies the image version used to build and run the
+                  Function's Pods.
                 type: string
               runtimeImageOverride:
-                description: 'Deprecated: RuntimeImageOverride exists for historical
-                  compatibility and should be removed with v1alpha3 version. RuntimeImage
-                  has the override image if it isn''t empty.'
+                description: 'Deprecated: Specifies the runtime image version which
+                  overrides the **RuntimeImage** status parameter. **RuntimeImageOverride**
+                  exists for historical compatibility and should be removed with v1alpha3
+                  version.'
                 type: string
             type: object
         type: object

@@ -14,7 +14,7 @@ import (
 
 func stateFnCheckScaling(ctx context.Context, r *reconciler, s *systemState) (stateFn, error) {
 	namespace := s.instance.GetNamespace()
-	labels := s.internalFunctionLabels()
+	labels := internalFunctionLabels(s.instance)
 
 	err := r.client.ListByLabel(ctx, namespace, labels, &s.hpas)
 	if err != nil {
@@ -93,7 +93,7 @@ func buildStateFnCreateHorizontalPodAutoscaler(hpa autoscalingv1.HorizontalPodAu
 
 func stateFnDeleteAllHorizontalPodAutoscalers(ctx context.Context, r *reconciler, s *systemState) (stateFn, error) {
 	r.log.Info("Deleting all HorizontalPodAutoscalers attached to function")
-	selector := apilabels.SelectorFromSet(s.internalFunctionLabels())
+	selector := apilabels.SelectorFromSet(internalFunctionLabels(s.instance))
 
 	err := r.client.DeleteAllBySelector(ctx, &autoscalingv1.HorizontalPodAutoscaler{}, s.instance.GetNamespace(), selector)
 	return nil, errors.Wrap(err, "while deleting HPAs")

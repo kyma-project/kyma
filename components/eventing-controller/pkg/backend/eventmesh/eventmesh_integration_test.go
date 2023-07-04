@@ -5,8 +5,9 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 	"github.com/stretchr/testify/require"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 
@@ -298,7 +299,7 @@ func Test_handleEventMeshSubModified(t *testing.T) {
 			givenKymaSub: &eventingv1alpha2.Subscription{
 				Status: eventingv1alpha2.SubscriptionStatus{
 					Backend: eventingv1alpha2.Backend{
-						Emshash: int64(-9219276050977208880),
+						EventMeshHash: int64(-9219276050977208880),
 					},
 				},
 			},
@@ -323,7 +324,7 @@ func Test_handleEventMeshSubModified(t *testing.T) {
 			givenKymaSub: &eventingv1alpha2.Subscription{
 				Status: eventingv1alpha2.SubscriptionStatus{
 					Backend: eventingv1alpha2.Backend{
-						Emshash: int64(-9219276050977208880),
+						EventMeshHash: int64(-9219276050977208880),
 					},
 				},
 			},
@@ -348,7 +349,7 @@ func Test_handleEventMeshSubModified(t *testing.T) {
 			givenKymaSub: &eventingv1alpha2.Subscription{
 				Status: eventingv1alpha2.SubscriptionStatus{
 					Backend: eventingv1alpha2.Backend{
-						Emshash: int64(-9219276050977208880),
+						EventMeshHash: int64(-9219276050977208880),
 					},
 				},
 			},
@@ -569,7 +570,7 @@ func Test_handleKymaSubStatusUpdate(t *testing.T) {
 			require.Equal(t, isChanged, true)
 			require.Equal(t, tc.givenKymaSub.Status.Types, tc.wantEventTypes)
 			require.Equal(t, tc.givenKymaSub.Status.Backend.EmsTypes, tc.wantEventMeshTypes)
-			require.Equal(t, tc.givenKymaSub.Status.Backend.EmsSubscriptionStatus.StatusReason,
+			require.Equal(t, tc.givenKymaSub.Status.Backend.EventMeshSubscriptionStatus.StatusReason,
 				tc.givenEventMeshSub.SubscriptionStatusReason)
 		})
 	}
@@ -607,7 +608,7 @@ func Test_SyncSubscription(t *testing.T) {
 	require.NoError(t, err)
 
 	subscription := fixtureValidSubscription("some-name", "some-namespace")
-	subscription.Status.Backend.Emshash = 0
+	subscription.Status.Backend.EventMeshHash = 0
 	subscription.Status.Backend.Ev2hash = 0
 
 	apiRule := controllertesting.NewAPIRule(subscription,
@@ -660,12 +661,12 @@ func fixtureValidSubscription(name, namespace string) *eventingv1alpha2.Subscrip
 		controllertesting.WithSinkURL("https://webhook.xxx.com"),
 		controllertesting.WithDefaultSource(),
 		controllertesting.WithEventType(controllertesting.OrderCreatedEventTypeNotClean),
-		controllertesting.WithWebhookAuthForBEB(),
+		controllertesting.WithWebhookAuthForEventMesh(),
 	)
 }
 
-func startEventMeshMock() *controllertesting.BEBMock {
-	eventMesh := controllertesting.NewBEBMock()
+func startEventMeshMock() *controllertesting.EventMeshMock {
+	eventMesh := controllertesting.NewEventMeshMock()
 	eventMesh.Start()
 	return eventMesh
 }

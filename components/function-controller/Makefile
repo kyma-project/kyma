@@ -3,11 +3,8 @@ ROOT :=  $(shell pwd)
 # Image URL to use all building/pushing image targets
 APP_NAME = function-controller
 APP_PATH = components/$(APP_NAME)
-SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
 override VERIFY_IGNORE := /vendor\|/automock\|/pkg/apis/serverless/v1alpha2/zz_generated.deepcopy.go\|/pkg/apis/serverless/v1alpha2/zz_generated.deepcopy.go
-
-include $(SCRIPTS_DIR)/generic-make-go.mk
 
 # Image URL to use all building/pushing image targets
 IMG ?= $(APP_NAME):latest
@@ -46,6 +43,7 @@ manifests: controller-gen-local generate-local
 	kustomize build config/crd > config/crd/crd-serverless.yaml
 	cp config/crd/crd-serverless.yaml ../../installation/resources/crds/serverless/
 	cp config/crd/crd-serverless.yaml ../../resources/serverless/templates/crds.yaml
+	(cd ../../hack/table-gen && make serverless-docs )
 
 # Generate code
 .PHONY: generate-local
@@ -169,7 +167,7 @@ REGISTRY_GC_NAME = registry-gc
 REGISTRY_GC_IMG_NAME = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(REGISTRY_GC_NAME)
 
 
-PHONY: build-image-registry-gc push-registry-gc
+.PHONY: build-image-registry-gc push-registry-gc
 build-image-registry-gc:
 	docker build -t $(REGISTRY_GC_NAME) -f $(ROOT)/deploy/registry-gc/Dockerfile .
 

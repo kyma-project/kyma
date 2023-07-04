@@ -56,7 +56,21 @@ class KEBClient {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',
     };
+    const request = {
+      url: url,
+      method: verb,
+      headers: headers,
+      data: payload,
+    };
+    return request;
+  }
 
+  async buildRequestWithoutToken(payload, endpoint, verb) {
+    const url = `https://kyma-env-broker.${this.host}/${endpoint}`;
+    const headers = {
+      'X-Broker-API-Version': 2.14,
+      'Content-Type': 'application/json',
+    };
     const request = {
       url: url,
       method: verb,
@@ -79,6 +93,25 @@ class KEBClient {
       const msg = 'Error calling KEB';
       if (err.response) {
         throw new Error(`${msg}: ${err.response.status} ${err.response.statusText}`);
+      } else {
+        throw new Error(`${msg}: ${err.toString()}`);
+      }
+    }
+  }
+
+  async callKEBWithoutToken(payload, endpoint, verb) {
+    const config = await this.buildRequestWithoutToken(payload, endpoint, verb);
+    try {
+      const resp = await axios.request(config);
+      if (!(resp.status === 403 || resp.status === 401)) {
+        throw new Error(`Unexpected status: ${resp.status}`);
+      }
+    } catch (err) {
+      const msg = 'Error calling KEB';
+      if (err.response) {
+        if (!(err.response.status === 403 || err.response.status === 401)) {
+          throw new Error(`${msg}: ${err.response.status} ${err.response.statusText}`);
+        }
       } else {
         throw new Error(`${msg}: ${err.toString()}`);
       }

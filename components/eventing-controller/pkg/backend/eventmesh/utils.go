@@ -58,7 +58,7 @@ func setEventMeshServerSubHashInStatus(kymaSubscription *eventingv1alpha2.Subscr
 	}
 
 	// set hash in status
-	kymaSubscription.Status.Backend.Emshash = newHash
+	kymaSubscription.Status.Backend.EventMeshHash = newHash
 	return nil
 }
 
@@ -86,34 +86,34 @@ func statusFinalEventTypes(typeInfos []backendutils.EventTypeInfo) []eventingv1a
 func setEmsSubscriptionStatus(subscription *eventingv1alpha2.Subscription,
 	eventMeshSubscription *types.Subscription) bool {
 	var statusChanged = false
-	if subscription.Status.Backend.EmsSubscriptionStatus == nil {
-		subscription.Status.Backend.EmsSubscriptionStatus = &eventingv1alpha2.EmsSubscriptionStatus{}
+	if subscription.Status.Backend.EventMeshSubscriptionStatus == nil {
+		subscription.Status.Backend.EventMeshSubscriptionStatus = &eventingv1alpha2.EventMeshSubscriptionStatus{}
 	}
-	if subscription.Status.Backend.EmsSubscriptionStatus.Status != string(eventMeshSubscription.SubscriptionStatus) {
-		subscription.Status.Backend.EmsSubscriptionStatus.Status = string(eventMeshSubscription.SubscriptionStatus)
+	if subscription.Status.Backend.EventMeshSubscriptionStatus.Status != string(eventMeshSubscription.SubscriptionStatus) {
+		subscription.Status.Backend.EventMeshSubscriptionStatus.Status = string(eventMeshSubscription.SubscriptionStatus)
 		statusChanged = true
 	}
-	if subscription.Status.Backend.EmsSubscriptionStatus.StatusReason !=
+	if subscription.Status.Backend.EventMeshSubscriptionStatus.StatusReason !=
 		eventMeshSubscription.SubscriptionStatusReason {
-		subscription.Status.Backend.EmsSubscriptionStatus.StatusReason =
+		subscription.Status.Backend.EventMeshSubscriptionStatus.StatusReason =
 			eventMeshSubscription.SubscriptionStatusReason
 		statusChanged = true
 	}
-	if subscription.Status.Backend.EmsSubscriptionStatus.LastSuccessfulDelivery !=
+	if subscription.Status.Backend.EventMeshSubscriptionStatus.LastSuccessfulDelivery !=
 		eventMeshSubscription.LastSuccessfulDelivery {
-		subscription.Status.Backend.EmsSubscriptionStatus.LastSuccessfulDelivery =
+		subscription.Status.Backend.EventMeshSubscriptionStatus.LastSuccessfulDelivery =
 			eventMeshSubscription.LastSuccessfulDelivery
 		statusChanged = true
 	}
-	if subscription.Status.Backend.EmsSubscriptionStatus.LastFailedDelivery !=
+	if subscription.Status.Backend.EventMeshSubscriptionStatus.LastFailedDelivery !=
 		eventMeshSubscription.LastFailedDelivery {
-		subscription.Status.Backend.EmsSubscriptionStatus.LastFailedDelivery =
+		subscription.Status.Backend.EventMeshSubscriptionStatus.LastFailedDelivery =
 			eventMeshSubscription.LastFailedDelivery
 		statusChanged = true
 	}
-	if subscription.Status.Backend.EmsSubscriptionStatus.LastFailedDeliveryReason !=
+	if subscription.Status.Backend.EventMeshSubscriptionStatus.LastFailedDeliveryReason !=
 		eventMeshSubscription.LastFailedDeliveryReason {
-		subscription.Status.Backend.EmsSubscriptionStatus.LastFailedDeliveryReason =
+		subscription.Status.Backend.EventMeshSubscriptionStatus.LastFailedDeliveryReason =
 			eventMeshSubscription.LastFailedDeliveryReason
 		statusChanged = true
 	}

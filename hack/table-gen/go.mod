@@ -1,4 +1,4 @@
-module table-gen
+module github.com/kyma-project/kyma/hack/table-gen
 
 go 1.20
 

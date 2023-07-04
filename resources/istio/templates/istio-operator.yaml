@@ -61,6 +61,7 @@ spec:
         serviceAnnotations:
           dns.gardener.cloud/class: garden
           dns.gardener.cloud/dnsnames: "*.{{ .Values.global.domainName }}"
+          service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "4000"
           reconciler.kyma-project.io/managed-by-reconciler-disclaimer: |
             DO NOT EDIT - This resource is managed by Kyma.
             Any modifications are discarded and the resource is reverted to the original state.

@@ -7,9 +7,10 @@ import (
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/pkg/errors"
 	"sigs.k8s.io/controller-runtime/pkg/conversion"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 )
 
 const (
@@ -80,11 +81,11 @@ func V2ToV1(dst *Subscription, src *v1alpha2.Subscription) error {
 	dst.setV1ProtocolFields(src)
 
 	dst.Spec.Filter = &BEBFilters{
-		Filters: []*BEBFilter{},
+		Filters: []*EventMeshFilter{},
 	}
 
 	for _, eventType := range src.Spec.Types {
-		filter := &BEBFilter{
+		filter := &EventMeshFilter{
 			EventSource: &Filter{
 				Property: "source",
 				Type:     fmt.Sprint(v1alpha2.TypeMatchingExact),
@@ -273,17 +274,17 @@ func (src *Subscription) natsSpecConfigToV2(dst *v1alpha2.Subscription) {
 // setBEBBackendStatus moves the BEB-related to Backend fields of the Status in the v1alpha2.
 func (src *Subscription) bebBackendStatusToV1(dst *v1alpha2.Subscription) {
 	src.Status.Ev2hash = dst.Status.Backend.Ev2hash
-	src.Status.Emshash = dst.Status.Backend.Emshash
+	src.Status.Emshash = dst.Status.Backend.EventMeshHash
 	src.Status.ExternalSink = dst.Status.Backend.ExternalSink
 	src.Status.FailedActivation = dst.Status.Backend.FailedActivation
 	src.Status.APIRuleName = dst.Status.Backend.APIRuleName
-	if dst.Status.Backend.EmsSubscriptionStatus != nil {
+	if dst.Status.Backend.EventMeshSubscriptionStatus != nil {
 		src.Status.EmsSubscriptionStatus = &EmsSubscriptionStatus{
-			SubscriptionStatus:       dst.Status.Backend.EmsSubscriptionStatus.Status,
-			SubscriptionStatusReason: dst.Status.Backend.EmsSubscriptionStatus.StatusReason,
-			LastSuccessfulDelivery:   dst.Status.Backend.EmsSubscriptionStatus.LastSuccessfulDelivery,
-			LastFailedDelivery:       dst.Status.Backend.EmsSubscriptionStatus.LastFailedDelivery,
-			LastFailedDeliveryReason: dst.Status.Backend.EmsSubscriptionStatus.LastFailedDeliveryReason,
+			SubscriptionStatus:       dst.Status.Backend.EventMeshSubscriptionStatus.Status,
+			SubscriptionStatusReason: dst.Status.Backend.EventMeshSubscriptionStatus.StatusReason,
+			LastSuccessfulDelivery:   dst.Status.Backend.EventMeshSubscriptionStatus.LastSuccessfulDelivery,
+			LastFailedDelivery:       dst.Status.Backend.EventMeshSubscriptionStatus.LastFailedDelivery,
+			LastFailedDeliveryReason: dst.Status.Backend.EventMeshSubscriptionStatus.LastFailedDeliveryReason,
 		}
 	}
 }

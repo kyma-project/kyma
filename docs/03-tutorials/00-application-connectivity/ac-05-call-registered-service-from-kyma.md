@@ -16,7 +16,7 @@ This guide shows how to call a registered external service from Kyma using a sim
   export FUNCTION_NAME=my-function
   export APIRULE_NAME=$FUNCTION_NAME-ar
   ```
-- [Istio sidecar injection](../../01-overview/main-areas/service-mesh/smsh-03-istio-sidecars-in-kyma.md) enabled in your Namespace
+- [Istio sidecar injection](../../01-overview/service-mesh/smsh-03-istio-sidecars-in-kyma.md) enabled in your Namespace
   ```bash
   kubectl label namespace $NAMESPACE istio-injection=enabled
   ```
@@ -45,7 +45,7 @@ This guide shows how to call a registered external service from Kyma using a sim
      labels:
        app: $APP_NAME
    spec:
-     runtime: nodejs16
+     runtime: nodejs18
      source:
        inline:
          source: |-

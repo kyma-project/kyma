@@ -37,7 +37,6 @@ deployment:
 pod:
   annotations:
     sidecar.istio.io/inject: "false"
-    cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
   extraProperties:
     # the following guidelines should be followed for this https://github.com/kyma-project/community/tree/main/concepts/psp-replacement
     securityContext:
@@ -100,7 +99,7 @@ values:
   function:
     replicas:
       minValue: "1"
-      defaultPreset: "S"
+      defaultPreset: "L"
       presets: |-
         {
           "S": {
@@ -123,7 +122,7 @@ values:
     resources:
       minRequestCpu: "10m"
       minRequestMemory: "16Mi"
-      defaultPreset: "XS"
+      defaultPreset: "L"
       presets: |-
         {
           "XS": {
@@ -163,7 +162,7 @@ values:
     resources:
       minRequestCpu: "200m"
       minRequestMemory: "200Mi"
-      defaultPreset: "normal"
+      defaultPreset: "fast"
       presets: |-
         {
           "local-dev": {

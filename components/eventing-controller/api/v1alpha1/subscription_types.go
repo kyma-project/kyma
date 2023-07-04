@@ -14,42 +14,43 @@ var Finalizer = GroupVersion.Group
 // WebhookAuth defines the Webhook called by an active subscription in BEB.
 // TODO: Remove it when depreciating code of v1alpha1
 type WebhookAuth struct {
-	// Type defines type of authentication
+	// Defines the authentication type.
 	// +optional
 	Type string `json:"type,omitempty"`
 
-	// GrantType defines grant type for OAuth2
+	// Defines the grant type for OAuth2.
 	GrantType string `json:"grantType"`
 
-	// ClientID defines clientID for OAuth2
+	// Defines the clientID for OAuth2.
 	ClientID string `json:"clientId"`
 
-	// ClientSecret defines client secret for OAuth2
+	// Defines the Client Secret for OAuth2.
 	ClientSecret string `json:"clientSecret"`
 
-	// TokenURL defines token URL for OAuth2
+	// Defines the token URL for OAuth2.
 	TokenURL string `json:"tokenUrl"`
 
-	// Scope defines scope for OAuth2
+	// Defines the scope for OAuth2.
 	Scope []string `json:"scope,omitempty"`
 }
 
 // ProtocolSettings defines the CE protocol setting specification implementation.
 // TODO: Remove it when depreciating code of v1alpha1
 type ProtocolSettings struct {
-	// ContentMode defines content mode for eventing based on BEB.
+	// Defines the content mode for eventing based on BEB.
+	//  The value is either `BINARY`, or `STRUCTURED`.
 	// +optional
 	ContentMode *string `json:"contentMode,omitempty"`
 
-	// ExemptHandshake defines whether exempt handshake for eventing based on BEB.
+	// Defines if the exempt handshake for eventing is based on BEB.
 	// +optional
 	ExemptHandshake *bool `json:"exemptHandshake,omitempty"`
 
-	// Qos defines quality of service for eventing based on BEB.
+	// Defines the quality of service for eventing based on BEB.
 	// +optional
 	Qos *string `json:"qos,omitempty"`
 
-	// WebhookAuth defines the Webhook called by an active subscription in BEB.
+	// Defines the Webhook called by an active subscription on BEB.
 	// +optional
 	WebhookAuth *WebhookAuth `json:"webhookAuth,omitempty"`
 }
@@ -62,36 +63,38 @@ const (
 
 // Filter defines the CE filter element.
 type Filter struct {
-	// Type defines the type of the filter
+	// Defines the type of the filter.
 	// +optional
 	Type string `json:"type,omitempty"`
 
-	// Property defines the property of the filter
+	// Defines the property of the filter.
 	Property string `json:"property"`
 
-	// Value defines the value of the filter
+	// Defines the value of the filter.
 	Value string `json:"value"`
 }
 
-// BEBFilter defines the BEB filter element as a combination of two CE filter elements.
-type BEBFilter struct {
-	// EventSource defines the source of CE filter
+// Defines the BEB filter element as a combination of two CE filter elements.
+type EventMeshFilter struct {
+	// Defines the source of the CE filter.
 	EventSource *Filter `json:"eventSource"`
 
-	// EventType defines the type of CE filter
+	// Defines the type of the CE filter.
 	EventType *Filter `json:"eventType"`
 }
 
-func (bf *BEBFilter) hash() (uint64, error) {
+func (bf *EventMeshFilter) hash() (uint64, error) {
 	return hashstructure.Hash(bf, hashstructure.FormatV2, nil)
 }
 
 // BEBFilters defines the list of BEB filters.
 type BEBFilters struct {
+	// Contains a `URI-reference` to the CloudEvent filter dialect. See
+	// [here](https://github.com/cloudevents/spec/blob/main/subscriptions/spec.md#3241-filter-dialects) for more details.
 	// +optional
 	Dialect string `json:"dialect,omitempty"`
 
-	Filters []*BEBFilter `json:"filters"`
+	Filters []*EventMeshFilter `json:"filters"`
 }
 
 // Deduplicate returns a deduplicated copy of BEBFilters.
@@ -114,6 +117,7 @@ func (bf *BEBFilters) Deduplicate() (*BEBFilters, error) {
 }
 
 type SubscriptionConfig struct {
+	// Defines how many not-ACKed messages can be in flight simultaneously.
 	// +optional
 	// +kubebuilder:validation:Minimum=1
 	MaxInFlightMessages int `json:"maxInFlightMessages,omitempty"`
@@ -136,101 +140,100 @@ func MergeSubsConfigs(config *SubscriptionConfig, defaults *env.DefaultSubscript
 
 // SubscriptionSpec defines the desired state of Subscription.
 type SubscriptionSpec struct {
-	// ID is the unique identifier of Subscription, read-only.
+	// Unique identifier of the Subscription, read-only.
 	// +optional
 	ID string `json:"id,omitempty"`
 
-	// Protocol defines the CE protocol specification implementation
+	// Defines the CE protocol specification implementation.
 	// +optional
 	Protocol string `json:"protocol,omitempty"`
 
-	// ProtocolSettings defines the CE protocol setting specification implementation
+	// Defines the CE protocol settings specification implementation.
 	// +optional
 	ProtocolSettings *ProtocolSettings `json:"protocolsettings,omitempty"`
 
-	// Sink defines endpoint of the subscriber
+	// Kubernetes Service that should be used as a target for the events that match the Subscription.
+	// Must exist in the same Namespace as the Subscription.
 	Sink string `json:"sink"`
 
-	// Filter defines the list of filters
+	// Defines which events will be sent to the sink.
 	Filter *BEBFilters `json:"filter"`
 
-	// Config defines the configurations that can be applied to the eventing backend when creating this subscription
+	// Defines additional configuration for the active backend.
 	// +optional
 	Config *SubscriptionConfig `json:"config,omitempty"`
 }
 
 type EmsSubscriptionStatus struct {
-	// SubscriptionStatus defines the status of the Subscription
+	// Status of the Subscription as reported by EventMesh.
 	// +optional
 	SubscriptionStatus string `json:"subscriptionStatus,omitempty"`
 
-	// SubscriptionStatusReason defines the reason of the status
+	// Reason for the current status.
 	// +optional
 	SubscriptionStatusReason string `json:"subscriptionStatusReason,omitempty"`
 
-	// LastSuccessfulDelivery defines the timestamp of the last successful delivery
+	// Timestamp of the last successful delivery.
 	// +optional
 	LastSuccessfulDelivery string `json:"lastSuccessfulDelivery,omitempty"`
 
-	// LastFailedDelivery defines the timestamp of the last failed delivery
+	// Timestamp of the last failed delivery.
 	// +optional
 	LastFailedDelivery string `json:"lastFailedDelivery,omitempty"`
 
-	// LastFailedDeliveryReason defines the reason of failed delivery
+	// Reason for the last failed delivery.
 	// +optional
 	LastFailedDeliveryReason string `json:"lastFailedDeliveryReason,omitempty"`
 }
 
-// SubscriptionStatus defines the observed state of Subscription
-// +kubebuilder:subresource:status
+// SubscriptionStatus defines the observed state of the Subscription.
 type SubscriptionStatus struct {
-	// Conditions defines the status conditions
+	// Current state of the Subscription.
 	// +optional
 	Conditions []Condition `json:"conditions,omitempty"`
 
-	// Ready defines the overall readiness status of a subscription
+	// Overall readiness of the Subscription.
 	Ready bool `json:"ready"`
 
-	// CleanEventTypes defines the filter's event types after cleanup for use with the configured backend
+	// CleanEventTypes defines the filter's event types after cleanup to use it with the configured backend.
 	CleanEventTypes []string `json:"cleanEventTypes"`
 
-	// Ev2hash defines the hash for the Subscription custom resource
+	// Defines the checksum for the Subscription custom resource.
 	// +optional
 	Ev2hash int64 `json:"ev2hash,omitempty"`
 
-	// Emshash defines the hash for the Subscription in BEB
+	// Defines the checksum for the Subscription in EventMesh.
 	// +optional
 	Emshash int64 `json:"emshash,omitempty"`
 
-	// ExternalSink defines the webhook URL which is used by BEB to trigger subscribers
+	// Defines the webhook URL which is used by EventMesh to trigger subscribers.
 	// +optional
 	ExternalSink string `json:"externalSink,omitempty"`
 
-	// FailedActivation defines the reason if a Subscription had failed activation in BEB
+	// Defines the reason if a Subscription failed activation in EventMesh.
 	// +optional
 	FailedActivation string `json:"failedActivation,omitempty"`
 
-	// APIRuleName defines the name of the APIRule which is used by the Subscription
+	// Defines the name of the APIRule which is used by the Subscription.
 	// +optional
 	APIRuleName string `json:"apiRuleName,omitempty"`
 
-	// EmsSubscriptionStatus defines the status of Subscription in BEB
+	// Defines the status of the Subscription in EventMesh.
 	// +optional
 	EmsSubscriptionStatus *EmsSubscriptionStatus `json:"emsSubscriptionStatus,omitempty"`
 
-	// Config defines the configurations that have been applied to the eventing backend when creating this subscription
+	// Defines the configurations that have been applied to the eventing backend when creating this Subscription.
 	// +optional
 	Config *SubscriptionConfig `json:"config,omitempty"`
 }
 
 // Subscription is the Schema for the subscriptions API.
 // +kubebuilder:object:root=true
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +kubebuilder:subresource:status
+// +kubebuilder:deprecatedversion:warning=The v1alpha1 API version is deprecated as of Kyma 2.14.X.
 // +kubebuilder:printcolumn:name="Ready",type="string",JSONPath=".status.ready"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 // +kubebuilder:printcolumn:name="Clean Event Types",type="string",JSONPath=".status.cleanEventTypes"
-// +kubebuilder:deprecatedversion:warning=v1alpha1 is deprecated as of Kyma 2.12.X.
 type Subscription struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -252,9 +255,8 @@ func (s Subscription) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-// +kubebuilder:object:root=true
-
 // SubscriptionList contains a list of Subscription.
+// +kubebuilder:object:root=true
 type SubscriptionList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`

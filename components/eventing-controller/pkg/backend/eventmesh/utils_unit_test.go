@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 	eventingtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
-	"github.com/stretchr/testify/require"
 )
 
 func Test_IsEventTypeSegmentsOverLimit(t *testing.T) {
@@ -122,7 +123,7 @@ func Test_setEventMeshServerSubHashInStatus(t *testing.T) {
 
 	// then
 	require.NoError(t, err)
-	require.Equal(t, kymaSubscription.Status.Backend.Emshash, wantHash)
+	require.Equal(t, kymaSubscription.Status.Backend.EventMeshHash, wantHash)
 }
 
 func Test_setEventMeshLocalSubHashInStatus(t *testing.T) {
@@ -157,7 +158,7 @@ func Test_updateHashesInStatus(t *testing.T) {
 	// then
 	require.NoError(t, err)
 	require.Equal(t, kymaSubscription.Status.Backend.Ev2hash, wantHash)
-	require.Equal(t, kymaSubscription.Status.Backend.Emshash, wantHash)
+	require.Equal(t, kymaSubscription.Status.Backend.EventMeshHash, wantHash)
 }
 
 func Test_setEmsSubscriptionStatus(t *testing.T) {
@@ -178,15 +179,15 @@ func Test_setEmsSubscriptionStatus(t *testing.T) {
 
 	// then
 	require.True(t, isChanged)
-	require.NotNil(t, kymaSubscription.Status.Backend.EmsSubscriptionStatus)
-	require.Equal(t, kymaSubscription.Status.Backend.EmsSubscriptionStatus.Status,
+	require.NotNil(t, kymaSubscription.Status.Backend.EventMeshSubscriptionStatus)
+	require.Equal(t, kymaSubscription.Status.Backend.EventMeshSubscriptionStatus.Status,
 		string(eventMeshSubscription.SubscriptionStatus))
-	require.Equal(t, kymaSubscription.Status.Backend.EmsSubscriptionStatus.StatusReason,
+	require.Equal(t, kymaSubscription.Status.Backend.EventMeshSubscriptionStatus.StatusReason,
 		eventMeshSubscription.SubscriptionStatusReason)
-	require.Equal(t, kymaSubscription.Status.Backend.EmsSubscriptionStatus.LastSuccessfulDelivery,
+	require.Equal(t, kymaSubscription.Status.Backend.EventMeshSubscriptionStatus.LastSuccessfulDelivery,
 		eventMeshSubscription.LastSuccessfulDelivery)
-	require.Equal(t, kymaSubscription.Status.Backend.EmsSubscriptionStatus.LastFailedDelivery,
+	require.Equal(t, kymaSubscription.Status.Backend.EventMeshSubscriptionStatus.LastFailedDelivery,
 		eventMeshSubscription.LastFailedDelivery)
-	require.Equal(t, kymaSubscription.Status.Backend.EmsSubscriptionStatus.LastFailedDeliveryReason,
+	require.Equal(t, kymaSubscription.Status.Backend.EventMeshSubscriptionStatus.LastFailedDeliveryReason,
 		eventMeshSubscription.LastFailedDeliveryReason)
 }

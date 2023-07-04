@@ -77,7 +77,9 @@ func initializeServerlessResources(g *gomega.GomegaWithT, client resource.Client
 			Namespace: testNamespace,
 		},
 		StringData: map[string]string{
-			"registryAddress": "registry.kyma.local",
+			keyIsInternal:       "true",
+			keyRegistryPullAddr: "localhost:32132",
+			keyRegistryPushAddr: "registry.kyma.local",
 		},
 	}
 	g.Expect(client.Create(context.TODO(), &ns)).To(gomega.Succeed())

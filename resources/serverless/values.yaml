@@ -64,7 +64,8 @@ global:
     app.kubernetes.io/instance: "{{ .Release.Name }}"
     app.kubernetes.io/version: "{{ .Values.global.images.function_controller.version }}"
     helm.sh/chart: '{{ include "chart" . }}'
-  dockerServicePort: 5000
+  registryServicePort: 5000
+  registryNodePort: 32137
   configuration:
     configmapName: "serverless-configuration"
     targetDir: "/appdata"
@@ -76,47 +77,43 @@ global:
   images:
     k8s_tools:
       name: "tpi/k8s-tools"
-      version: "v20230426-b7682b0e"
+      version: "v20230626-ce139c33"
       directory: "prod"
     function_controller:
       name: "function-controller"
-      version: "v20230505-9d02d7cf"
+      version: "v20230628-61d97068"
       directory: "prod"
     function_webhook:
       name: "function-webhook"
-      version: "v20230505-9d02d7cf"
+      version: "v20230628-61d97068"
       directory: "prod"
     function_build_init:
       name: "function-build-init"
-      version: "v20230505-9d02d7cf"
-      directory: "prod"
-    function_runtime_nodejs14:
-      name: "function-runtime-nodejs14"
-      version: "v20230302-a6a85f47"
-      directory: "prod"
-    function_runtime_nodejs16:
-      name: "function-runtime-nodejs16"
-      version: "v20230302-a6a85f47"
-      directory: "prod"
-    function_runtime_nodejs18:
-      name: "function-runtime-nodejs18"
-      version: "v20230302-a6a85f47"
-      directory: "prod"
-    function_runtime_python39:
-      name: "function-runtime-python39"
-      version: "v20230426-29ad7593"
-      directory: "prod"
-    kaniko_executor:
-      name: "tpi/kaniko-executor"
-      version: "1.9.1-ab1cf603"
-      directory: "prod"
-    registry:
-      name: "tpi/registry"
-      version: "2.8.1-ab1cf603"
+      version: "v20230628-61d97068"
       directory: "prod"
     function_registry_gc:
       name: "function-registry-gc"
-      version: "v20230505-9d02d7cf"
+      version: "v20230628-61d97068"
+      directory: "prod"
+    function_runtime_nodejs16:
+      name: "function-runtime-nodejs16"
+      version: "v20230628-fd5fd7c3"
+      directory: "prod"
+    function_runtime_nodejs18:
+      name: "function-runtime-nodejs18"
+      version: "v20230628-fd5fd7c3"
+      directory: "prod"
+    function_runtime_python39:
+      name: "function-runtime-python39"
+      version: "PR-17779"
+      directory: "dev"
+    kaniko_executor:
+      name: "tpi/kaniko-executor"
+      version: "1.9.1-406380b9"
+      directory: "prod"
+    registry:
+      name: "tpi/registry"
+      version: "2.8.1-1b099a1d"
       directory: "prod"
     google_pause:
       name: "external/gcr.io/google-containers/pause"
@@ -130,9 +127,9 @@ images:
 
 deployment:
   replicas: 1
-  labels: {}
-  annotations: {}
-  extraProperties: {}
+  labels: { }
+  annotations: { }
+  extraProperties: { }
   livenessProbe:
     successThreshold: 1
     failureThreshold: 3
@@ -147,7 +144,7 @@ deployment:
     periodSeconds: 30
 
 pod:
-  labels: {}
+  labels: { }
   annotations:
     sidecar.istio.io/inject: "false"
     prometheus.io/scrape: "false"
@@ -175,7 +172,7 @@ containers:
   manager:
     resources:
       limits:
-        cpu: 300m
+        cpu: 500m
         memory: 160Mi
       requests:
         cpu: 10m
@@ -185,12 +182,12 @@ containers:
       privileged: false
       allowPrivilegeEscalation: false
       capabilities:
-        drop: ["ALL"]
+        drop: [ "ALL" ]
       procMount: default # Optional. The default is false if the entry is not there.
       readOnlyRootFilesystem: true # Mandatory
     healthz:
       port: "8090"
-    extraProperties: {}
+    extraProperties: { }
     configuration:
       data:
         logLevel: "info"
@@ -238,7 +235,7 @@ containers:
 services:
   manager:
     type: ClusterIP
-    labels: {}
+    labels: { }
     annotations:
       prometheus.io/scrape: "true"
       prometheus.io/port: "8080"
@@ -256,8 +253,8 @@ metrics:
       targerPort: 8080
       protocol: TCP
   pod:
-    labels: {}
-    annotations: {}
+    labels: { }
+    annotations: { }
 
 backendModule:
   enabled: true
@@ -276,9 +273,10 @@ dockerRegistry:
   gatewayCert: "kyma-gateway-certs"
   username: "{{ randAlphaNum 20 | b64enc }}" # for gcr "_json_key"
   password: "{{ randAlphaNum 40 | b64enc }}" # for gcr data from json key
-  internalServerAddress: '{{ template "registry-fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.dockerServicePort }}'
-  serverAddress: "registry.{{ .Values.global.domainName -}}"
-  registryAddress: "registry.{{ .Values.global.domainName -}}"
+  #  This is the registry address, for dockerhub it's username, for other it's url.
+  registryAddress: ""
+  #  This is the server address of the registry which will be used to create docker configuration.
+  serverAddress: ""
 
 docker-registry:
   fullnameOverride: "serverless-docker-registry"
@@ -300,13 +298,10 @@ docker-registry:
           - key: password
             path: password.txt
     - name: htpasswd-data
-      emptyDir: {}
+      emptyDir: { }
   rollme: "{{ randAlphaNum 5}}"
   registryHTTPSecret: "{{ randAlphaNum 16 | b64enc }}"
 
 webhook:
   enabled: true
   fullnameOverride: "serverless-webhook"
-
-k3s-tests:
-  enabled: false # this chart is installed manually, do not flip this value

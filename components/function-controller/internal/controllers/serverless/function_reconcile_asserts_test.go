@@ -89,7 +89,7 @@ func assertSuccessfulFunctionBuild(t *testing.T, resourceClient resource.Client,
 	g.Expect(getConditionReason(function.Status.Conditions, serverlessv1alpha2.ConditionBuildReady)).To(gomega.Equal(serverlessv1alpha2.ConditionReasonJobFinished))
 }
 
-func assertSuccessfulFunctionDeployment(t *testing.T, resourceClient resource.Client, reconciler *FunctionReconciler, request ctrl.Request, fnLabels map[string]string, registryAddress string, redeployment bool) {
+func assertSuccessfulFunctionDeployment(t *testing.T, resourceClient resource.Client, reconciler *FunctionReconciler, request ctrl.Request, fnLabels map[string]string, regPullAddr string, redeployment bool) {
 	g := gomega.NewGomegaWithT(t)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -119,7 +119,7 @@ func assertSuccessfulFunctionDeployment(t *testing.T, resourceClient resource.Cl
 		instance: *function,
 	}
 
-	g.Expect(deployment.Spec.Template.Spec.Containers[0].Image).To(gomega.Equal(s.buildImageAddress(registryAddress)))
+	g.Expect(deployment.Spec.Template.Spec.Containers[0].Image).To(gomega.Equal(s.buildImageAddress(regPullAddr)))
 	g.Expect(deployment.Spec.Template.Labels).To(gomega.HaveLen(7))
 	g.Expect(deployment.Spec.Template.Labels[serverlessv1alpha2.FunctionNameLabel]).To(gomega.Equal(function.Name))
 	g.Expect(deployment.Spec.Template.Labels[serverlessv1alpha2.FunctionManagedByLabel]).To(gomega.Equal(serverlessv1alpha2.FunctionControllerValue))

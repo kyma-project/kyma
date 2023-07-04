@@ -13,50 +13,44 @@ import (
 	"testing"
 	"time"
 
-	"k8s.io/apimachinery/pkg/util/validation/field"
-
-	"sigs.k8s.io/controller-runtime/pkg/manager"
-
-	"github.com/stretchr/testify/require"
-
-	k8slabels "k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/types"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"
-
 	"github.com/avast/retry-go/v3"
 	"github.com/go-logr/zapr"
-	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
-	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
-
-	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
-	eventmeshreconciler "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/eventmesh"
-	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
-	backendeventmesh "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventmesh"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
-	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
-	eventMeshtypes "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
-
+	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	k8slabels "k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
 
+	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
+	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
+	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
+	eventmeshreconciler "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/eventmesh"
+	"github.com/kyma-project/kyma/components/eventing-controller/internal/featureflags"
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
+	backendeventmesh "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventmesh"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
+	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"
+	eventMeshtypes "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
 
 type eventMeshTestEnsemble struct {
 	k8sClient     client.Client
 	testEnv       *envtest.Environment
-	eventMeshMock *reconcilertesting.BEBMock
+	eventMeshMock *reconcilertesting.EventMeshMock
 	nameMapper    backendutils.NameMapper
 	envConfig     env.Config
 }
@@ -76,6 +70,7 @@ const (
 	syncPeriodSeconds        = 2
 	maxReconnects            = 10
 	eventMeshMockKeyPrefix   = "/messaging/events/subscriptions"
+	certsURL                 = "https://domain.com/oauth2/certs"
 )
 
 //nolint:gochecknoglobals // only used in tests
@@ -86,6 +81,7 @@ var (
 )
 
 func setupSuite() error {
+	featureflags.SetEventingWebhookAuthEnabled(true)
 	emTestEnsemble = &eventMeshTestEnsemble{}
 
 	// define logger
@@ -115,22 +111,17 @@ func setupSuite() error {
 	}
 	// +kubebuilder:scaffold:scheme
 
-	// get a free port for eventMesh manager
-	metricsPort, err := reconcilertesting.GetFreePort()
-	if err != nil {
-		return err
-	}
-
 	// start eventMesh manager instance
 	syncPeriod := syncPeriodSeconds * time.Second
 	webhookInstallOptions := &emTestEnsemble.testEnv.WebhookInstallOptions
 	k8sManager, err := ctrl.NewManager(cfg, ctrl.Options{
-		Scheme:             scheme.Scheme,
-		SyncPeriod:         &syncPeriod,
-		Host:               webhookInstallOptions.LocalServingHost,
-		Port:               webhookInstallOptions.LocalServingPort,
-		CertDir:            webhookInstallOptions.LocalServingCertDir,
-		MetricsBindAddress: fmt.Sprintf("localhost:%v", metricsPort),
+		Scheme:                 scheme.Scheme,
+		SyncPeriod:             &syncPeriod,
+		Host:                   webhookInstallOptions.LocalServingHost,
+		Port:                   webhookInstallOptions.LocalServingPort,
+		CertDir:                webhookInstallOptions.LocalServingCertDir,
+		MetricsBindAddress:     "0", // disable
+		HealthProbeBindAddress: "0", // disable
 	})
 	if err != nil {
 		return err
@@ -146,6 +137,8 @@ func setupSuite() error {
 	credentials := &backendeventmesh.OAuth2ClientCredentials{
 		ClientID:     "foo-client-id",
 		ClientSecret: "foo-client-secret",
+		TokenURL:     "foo-token-url",
+		CertsURL:     certsURL,
 	}
 	emTestEnsemble.envConfig = getEnvConfig()
 	testReconciler := eventmeshreconciler.NewReconciler(
@@ -177,11 +170,7 @@ func setupSuite() error {
 
 	emTestEnsemble.k8sClient = k8sManager.GetClient()
 
-	if err = StartAndWaitForWebhookServer(k8sManager, webhookInstallOptions); err != nil {
-		return err
-	}
-
-	return nil
+	return StartAndWaitForWebhookServer(k8sManager, webhookInstallOptions)
 }
 
 func StartAndWaitForWebhookServer(k8sManager manager.Manager, webhookInstallOpts *envtest.WebhookInstallOptions) error {
@@ -264,8 +253,8 @@ func tearDownSuite() error {
 	return err
 }
 
-func startNewEventMeshMock() *reconcilertesting.BEBMock {
-	emMock := reconcilertesting.NewBEBMock()
+func startNewEventMeshMock() *reconcilertesting.EventMeshMock {
+	emMock := reconcilertesting.NewEventMeshMock()
 	emMock.Start()
 	return emMock
 }

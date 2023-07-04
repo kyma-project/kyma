@@ -18,7 +18,7 @@ title: Logging Architecture
 6. The user queries the logs using Grafana dashboards to analyze and visualize logs fetched and processed by Loki. Learn more about [accessing Grafana](../../04-operation-guides/security/sec-06-access-expose-grafana.md).
 
 
-With the integration of Kyma's [telemetry component](./../../01-overview/main-areas/telemetry/README.md), you can use additional functionality:
+With the integration of Kyma's [telemetry component](./../../01-overview/telemetry/README.md), you can use additional functionality:
 
 7. The telemetry operator provides your custom output configuration for Fluent Bit.
 8. As specified in your configuration, Fluent Bit sends the log data to observability systems outside the Kyma cluster.

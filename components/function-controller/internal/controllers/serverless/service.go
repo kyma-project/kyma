@@ -14,7 +14,7 @@ func stateFnCheckService(ctx context.Context, r *reconciler, s *systemState) (st
 	err := r.client.ListByLabel(
 		ctx,
 		s.instance.GetNamespace(),
-		s.internalFunctionLabels(),
+		internalFunctionLabels(s.instance),
 		&s.services)
 
 	if err != nil {
@@ -54,7 +54,14 @@ func buildStateFnUpdateService(newService corev1.Service) stateFn {
 
 		err := r.client.Update(ctx, svc)
 		if err != nil {
-			return nil, errors.Wrap(err, "while updating service")
+			condition := serverlessv1alpha2.Condition{
+				Type:               serverlessv1alpha2.ConditionRunning,
+				Status:             corev1.ConditionFalse,
+				LastTransitionTime: metav1.Now(),
+				Reason:             serverlessv1alpha2.ConditionReasonServiceFailed,
+				Message:            fmt.Sprintf("Service %s update error: %s", svc.GetName(), err.Error()),
+			}
+			return buildStatusUpdateStateFnWithCondition(condition), nil
 		}
 
 		condition := serverlessv1alpha2.Condition{
@@ -75,7 +82,14 @@ func buildStateFnCreateNewService(svc corev1.Service) stateFn {
 
 		err := r.client.CreateWithReference(ctx, &s.instance, &svc)
 		if err != nil {
-			return nil, errors.Wrap(err, "while creating service")
+			condition := serverlessv1alpha2.Condition{
+				Type:               serverlessv1alpha2.ConditionRunning,
+				Status:             corev1.ConditionFalse,
+				LastTransitionTime: metav1.Now(),
+				Reason:             serverlessv1alpha2.ConditionReasonServiceFailed,
+				Message:            fmt.Sprintf("Service %s create error: %s", svc.GetName(), err.Error()),
+			}
+			return buildStatusUpdateStateFnWithCondition(condition), nil
 		}
 
 		condition := serverlessv1alpha2.Condition{

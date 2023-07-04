@@ -35,16 +35,16 @@ type RequestToCETransformer interface {
 }
 
 type Transformer struct {
-	bebNamespace      string
-	eventTypePrefix   string
-	applicationLister *application.Lister
+	eventMeshNamespace string
+	eventTypePrefix    string
+	applicationLister  *application.Lister
 }
 
 func NewTransformer(bebNamespace string, eventTypePrefix string, applicationLister *application.Lister) *Transformer {
 	return &Transformer{
-		bebNamespace:      bebNamespace,
-		eventTypePrefix:   eventTypePrefix,
-		applicationLister: applicationLister,
+		eventMeshNamespace: bebNamespace,
+		eventTypePrefix:    eventTypePrefix,
+		applicationLister:  applicationLister,
 	}
 }
 
@@ -232,7 +232,7 @@ func (t *Transformer) convertPublishRequestToCloudEvent(appName string, publishR
 	prefix := removeNonAlphanumeric(t.eventTypePrefix)
 	eventType := formatEventType(prefix, appName, eventName, publishRequest.PublishrequestV1.EventTypeVersion)
 	event.SetType(eventType)
-	event.SetSource(t.bebNamespace)
+	event.SetSource(t.eventMeshNamespace)
 	event.SetExtension(eventTypeVersionExtensionKey, publishRequest.PublishrequestV1.EventTypeVersion)
 	event.SetDataContentType(internal.ContentTypeApplicationJSON)
 	return &event, nil

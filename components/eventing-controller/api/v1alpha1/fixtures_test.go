@@ -7,8 +7,9 @@ import (
 	eventingtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 )
 
 const (
@@ -70,7 +71,7 @@ func newDefaultSubscription(opts ...eventingtesting.SubscriptionV1alpha1Opt) *v1
 		o(newSub)
 	}
 
-	// remove nats specific field in beb case
+	// remove nats specific field in eventmesh case
 	if newSub.Status.EmsSubscriptionStatus != nil {
 		newSub.Spec.Config = nil
 		newSub.Status.Config = nil
@@ -160,7 +161,7 @@ func v2WithBEBStatusFields() eventingtesting.SubscriptionOpt {
 		s.Status.Backend.ExternalSink = "testlink.com"
 		s.Status.Backend.FailedActivation = "123156464672"
 		s.Status.Backend.APIRuleName = "APIRule"
-		s.Status.Backend.EmsSubscriptionStatus = &v1alpha2.EmsSubscriptionStatus{
+		s.Status.Backend.EventMeshSubscriptionStatus = &v1alpha2.EventMeshSubscriptionStatus{
 			Status:                   "not active",
 			StatusReason:             "reason",
 			LastSuccessfulDelivery:   "",
