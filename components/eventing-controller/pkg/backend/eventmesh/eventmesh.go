@@ -303,6 +303,7 @@ func (em *EventMesh) handleWebhookAuthChange(eventMeshSub *types.Subscription,
 	}
 
 	// pause subscription
+	em.namedLogger().Debugf("Pausing EventMmesh subscription: %s", eventMeshSub.Name)
 	state := types.State{Action: types.StateActionPause}
 	resp, err := em.client.UpdateState(eventMeshSub.Name, state)
 	if err != nil {
@@ -318,6 +319,7 @@ func (em *EventMesh) handleWebhookAuthChange(eventMeshSub *types.Subscription,
 	}
 
 	// update webhook auth config
+	em.namedLogger().Debugf("Updating WebhookAuth config for EventMmesh subscription: %s", eventMeshSub.Name)
 	updateResp, err := em.client.Update(eventMeshSub.Name, eventMeshSub.WebhookAuth)
 	if err != nil {
 		return fmt.Errorf("failed to update webhook auth config: %w", err)
@@ -332,6 +334,7 @@ func (em *EventMesh) handleWebhookAuthChange(eventMeshSub *types.Subscription,
 	}
 
 	// resume subscription
+	em.namedLogger().Debugf("Resuming EventMmesh subscription: %s", eventMeshSub.Name)
 	state = types.State{Action: types.StateActionResume}
 	resp, err = em.client.UpdateState(eventMeshSub.Name, state)
 	if err != nil {
@@ -398,6 +401,7 @@ func (em *EventMesh) getSubscription(name string) (*types.Subscription, error) {
 
 // deleteSubscription deletes the subscription on EventMesh.
 func (em *EventMesh) deleteSubscription(name string) error {
+	em.namedLogger().Debugf("Deleting EventMmesh subscription: %s", name)
 	resp, err := em.client.Delete(name)
 	if err != nil {
 		return fmt.Errorf("delete subscription failed: %v", err)
