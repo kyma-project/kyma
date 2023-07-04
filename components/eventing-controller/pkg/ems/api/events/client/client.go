@@ -18,6 +18,7 @@ const (
 	CreateURL            = "/events/subscriptions"
 	ListURL              = "/events/subscriptions"
 	GetURLFormat         = "/events/subscriptions/%s"
+	UpdateURLFormat      = "/events/subscriptions/%s"
 	DeleteURLFormat      = "/events/subscriptions/%s"
 	HandshakeURLFormat   = "/events/subscriptions/%s/handshake"
 	UpdateStateURLFormat = "/events/subscriptions/%s/state"
@@ -31,6 +32,7 @@ type SubscriptionManager interface {
 	Create(subscription *types.Subscription) (*types.CreateResponse, error)
 	List() (*types.Subscriptions, *types.Response, error)
 	Get(name string) (*types.Subscription, *types.Response, error)
+	Update(name string, webhookAuth *types.WebhookAuth) (*types.UpdateResponse, error)
 	Delete(name string) (*types.DeleteResponse, error)
 	TriggerHandshake(name string) (*types.TriggerHandshake, error)
 	UpdateState(name string, state types.State) (*types.UpdateStateResponse, error)
@@ -41,6 +43,7 @@ type PublisherManager interface {
 	SubscriptionManager
 }
 
+//go:generate mockery --name PublisherManager
 type Client struct {
 	client httpclient.BaseURLAwareClient
 }
@@ -154,6 +157,36 @@ func (c Client) Get(name string) (*types.Subscription, *types.Response, error) {
 	}
 
 	return subscription, &response, nil
+}
+
+// Update updates the EventMesh Subscription WebhookAuth config.
+func (c Client) Update(name string, webhookAuth *types.WebhookAuth) (*types.UpdateResponse, error) {
+	subscription := types.Subscription{WebhookAuth: webhookAuth}
+	req, err := c.client.NewRequest(http.MethodPatch, fmt.Sprintf(UpdateURLFormat, name), subscription)
+	if err != nil {
+		return nil, err
+	}
+
+	var response *types.UpdateResponse
+	resp, responseBody, err := c.client.Do(req, &response)
+	if err != nil {
+		return nil, err
+	}
+	if resp == nil {
+		return nil, fmt.Errorf("unmarshal response failed: %v", resp)
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	if response == nil {
+		response = &types.UpdateResponse{}
+	}
+	response.StatusCode = resp.StatusCode
+	response.Message = resp.Status
+	if responseBody != nil {
+		response.Message = response.Message + ";" + string(*responseBody)
+	}
+
+	return response, nil
 }
 
 func (c Client) Delete(name string) (*types.DeleteResponse, error) {

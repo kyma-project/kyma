@@ -1,11 +1,10 @@
-package test
+package testwebhookauth
 
 import (
 	"context"
 	"log"
 
 	"github.com/onsi/gomega"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 
 	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
@@ -26,15 +25,6 @@ func getSubscriptionAssert(ctx context.Context, g *gomega.GomegaWithT,
 		}
 		return subscription
 	}, bigTimeOut, bigPollingInterval)
-}
-
-// getAPIRuleForASvcAssert fetches an apiRule for a given service and allows making assertions on it.
-func getAPIRuleForASvcAssert(ctx context.Context, g *gomega.GomegaWithT, svc *corev1.Service) gomega.AsyncAssertion {
-	return g.Eventually(func() apigatewayv1beta1.APIRule {
-		apiRules, err := getAPIRulesList(ctx, svc)
-		g.Expect(err).Should(gomega.BeNil())
-		return filterAPIRulesForASvc(apiRules, svc)
-	}, smallTimeOut, smallPollingInterval)
 }
 
 // getAPIRuleAssert fetches an apiRule and allows making assertions on it.

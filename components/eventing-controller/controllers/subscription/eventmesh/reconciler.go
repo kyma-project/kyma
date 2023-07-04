@@ -813,3 +813,10 @@ func (r *Reconciler) checkLastFailedDelivery(subscription *eventingv1alpha2.Subs
 func (r *Reconciler) namedLogger() *zap.SugaredLogger {
 	return r.logger.WithContext().Named(reconcilerName)
 }
+
+// SetCredentials sets the WebhookAuth credentials.
+// WARNING: This functions should be used for testing purposes only.
+func (r *Reconciler) SetCredentials(credentials *eventmesh.OAuth2ClientCredentials) {
+	r.namedLogger().Warn("This logic should be used for testing purposes only")
+	r.oauth2credentials = credentials
+}

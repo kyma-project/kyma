@@ -482,6 +482,21 @@ func TestGetHash(t *testing.T) {
 	g.Expect(hash).To(BeNumerically(">", 0))
 }
 
+func TestGetWebhookAuthHash(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	webhookAuth := &types.WebhookAuth{
+		Type:         types.AuthTypeClientCredentials,
+		GrantType:    types.GrantTypeClientCredentials,
+		ClientID:     "client-id",
+		ClientSecret: "client-secret",
+		TokenURL:     "token-url",
+	}
+	hash, err := GetWebhookAuthHash(webhookAuth)
+	g.Expect(err).ShouldNot(HaveOccurred())
+	g.Expect(hash).To(BeNumerically(">", 0))
+}
+
 func TestHashSubscriptionFullName(t *testing.T) {
 	g := NewGomegaWithT(t)
 
