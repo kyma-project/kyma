@@ -39,7 +39,8 @@ type proxyHandler struct {
 	legacyEventsProxy *httputil.ReverseProxy
 	cloudEventsProxy  *httputil.ReverseProxy
 
-	log *logger.Logger
+	log          *logger.Logger
+	subjectRegex *regexp.Regexp
 
 	cache Cache
 }
@@ -63,8 +64,9 @@ func NewProxyHandler(
 		legacyEventsProxy: createReverseProxy(log, eventingPublisherHost, withEmptyRequestHost, withEmptyXFwdClientCert, withHTTPScheme),
 		cloudEventsProxy:  createReverseProxy(log, eventingPublisherHost, withRewriteBaseURL(eventingDestinationPath), withEmptyRequestHost, withEmptyXFwdClientCert, withHTTPScheme),
 
-		cache: cache,
-		log:   log,
+		cache:        cache,
+		log:          log,
+		subjectRegex: regexp.MustCompile(`Subject="(.*?)"`),
 	}
 }
 
@@ -89,7 +91,7 @@ func (ph *proxyHandler) ProxyAppConnectorRequests(w http.ResponseWriter, r *http
 		return
 	}
 
-	subjects := extractSubjects(certInfoData)
+	subjects := ph.extractSubjects(certInfoData)
 
 	if !hasValidSubject(subjects, applicationClientIDs, applicationName) {
 		httptools.RespondWithError(ph.log.WithTracing(r.Context()).With("handler", handlerName).With("applicationName", applicationName), w, apperrors.Forbidden("no valid subject found"))
@@ -180,11 +182,10 @@ func newSubjectValidator(applicationClientIDs []string, appName string) func(sub
 	}
 }
 
-func extractSubjects(certInfoData string) []string {
+func (ph *proxyHandler) extractSubjects(certInfoData string) []string {
 	var subjects []string
 
-	subjectRegex := regexp.MustCompile(`Subject="(.*?)"`)
-	subjectMatches := subjectRegex.FindAllStringSubmatch(certInfoData, -1)
+	subjectMatches := ph.subjectRegex.FindAllStringSubmatch(certInfoData, -1)
 
 	for _, subjectMatch := range subjectMatches {
 		subject := get(subjectMatch, 1)
