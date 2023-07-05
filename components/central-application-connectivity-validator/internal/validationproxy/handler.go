@@ -93,6 +93,10 @@ func (ph *proxyHandler) ProxyAppConnectorRequests(w http.ResponseWriter, r *http
 
 	subjects := ph.extractSubjects(certInfoData)
 
+	for _, s := range subjects {
+		ph.log.WithTracing(r.Context()).With("handler", handlerName).With("application", applicationName).With("proxyPath", r.URL.Path).With("Subject", s).Infof("Proxying request for application...")
+	}
+
 	if !hasValidSubject(subjects, applicationClientIDs, applicationName) {
 		httptools.RespondWithError(ph.log.WithTracing(r.Context()).With("handler", handlerName).With("applicationName", applicationName), w, apperrors.Forbidden("no valid subject found"))
 		return
