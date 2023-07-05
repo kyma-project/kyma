@@ -653,8 +653,6 @@ func Test_SyncSubscription(t *testing.T) {
 }
 
 func Test_handleWebhookAuthChange(t *testing.T) {
-	t.Parallel()
-
 	// setup
 	mock := startEventMeshMock()
 	defer func() { mock.Stop() }()
@@ -722,8 +720,8 @@ func Test_handleWebhookAuthChange(t *testing.T) {
 			require.NotNil(t, emSub)
 
 			if test.givenSameHash {
-				hash, err := backendutils.GetWebhookAuthHash(emSub.WebhookAuth)
-				require.NoError(t, err)
+				hash, hashErr := backendutils.GetWebhookAuthHash(emSub.WebhookAuth)
+				require.NoError(t, hashErr)
 				require.True(t, hash != 0)
 				kymaSub.Status.Backend.WebhookAuthHash = hash // simulate equal hashes
 			}
