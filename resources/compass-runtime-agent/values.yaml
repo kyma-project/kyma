@@ -19,7 +19,7 @@ compassRuntimeAgent:
   image:
     pullPolicy: IfNotPresent
   sync:
-    controllerSyncPeriod: 15s
+    controllerSyncPeriod: 180s
     minimalConfigSyncTime: 15s
   resources:
     systemNamespace: "kyma-system"
