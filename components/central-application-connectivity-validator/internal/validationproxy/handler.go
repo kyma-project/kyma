@@ -91,10 +91,12 @@ func (ph *proxyHandler) ProxyAppConnectorRequests(w http.ResponseWriter, r *http
 		return
 	}
 
+	ph.log.WithTracing(r.Context()).With("handler", handlerName).With("application", applicationName).With("proxyPath", r.URL.Path).With("CertInfoData", certInfoData).Infof("Debug cert info")
+
 	subjects := ph.extractSubjects(certInfoData)
 
 	for _, s := range subjects {
-		ph.log.WithTracing(r.Context()).With("handler", handlerName).With("application", applicationName).With("proxyPath", r.URL.Path).With("Subject", s).Infof("Proxying request for application...")
+		ph.log.WithTracing(r.Context()).With("handler", handlerName).With("application", applicationName).With("proxyPath", r.URL.Path).With("Subject", s).Infof("Debug cert header...")
 	}
 
 	if !hasValidSubject(subjects, applicationClientIDs, applicationName) {
