@@ -2,7 +2,7 @@
 title: Function's specification
 ---
 
-Serverless in Kyma allows you to create Functions in both Node.js (v14 & v16) and Python (v3.9). Although the Function's interface is unified, its specification differs depending on the runtime used to run the Function.
+Serverless in Kyma allows you to create Functions in both Node.js and Python. Although the Function's interface is unified, its specification differs depending on the runtime used to run the Function.
 
 ## Signature
 
@@ -156,18 +156,18 @@ See sample context details:
 ...
 { "function-name": "main",
   "timeout": 180,
-  "runtime": "nodejs16",
+  "runtime": "nodejs18",
   "memory-limit": 200Mi }
 ```
 
 See the detailed descriptions of these fields:
 
-| Field | Description |
-|-------|-------------|
-| **function-name** | Name of the invoked Function |
-| **timeout** | Time, in seconds, after which the system cancels the request to invoke the Function |
-| **runtime** | Environment used to run the Function. You can use `nodejs16`, `nodejs16`, or `python39`. |
-| **memory-limit** | Maximum amount of memory assigned to run a Function |
+| Field | Description                                                                               |
+|-------|-------------------------------------------------------------------------------------------|
+| **function-name** | Name of the invoked Function                                                              |
+| **timeout** | Time, in seconds, after which the system cancels the request to invoke the Function       |
+| **runtime** | Environment used to run the Function. You can use `nodejs16` - deprecated, `nodejs18`, or `python39`. |
+| **memory-limit** | Maximum amount of memory assigned to run a Function                                       |
 
 ## HTTP requests
 

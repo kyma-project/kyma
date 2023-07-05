@@ -8,7 +8,7 @@ Application Gateway is an intermediary component between a Function or a microse
 
 To call a remote system's API from a workload with Application Gateway, you use the URL to the `central-application-gateway.kyma-system` service at an appropriate port and with a respective suffix to access the API of a specific application.
 
-The suffix and the port number differ depending on whether you're using Kyma in the [Standalone or Compass mode](../01-overview/main-areas/application-connectivity/README.md):
+The suffix and the port number differ depending on whether you're using Kyma in the [Standalone or Compass mode](../01-overview/application-connectivity/README.md):
 
 | **Kyma mode** | **Application Gateway URL** |
 |-----------|-------------------------|

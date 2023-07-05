@@ -160,8 +160,9 @@ var _ = BeforeSuite(func(done Done) {
 	k8sManager, err := ctrl.NewManager(cfg, ctrl.Options{
 		Scheme:                  scheme.Scheme,
 		SyncPeriod:              &syncPeriod,
-		MetricsBindAddress:      "localhost:7071",
 		GracefulShutdownTimeout: &shutdownTimeout,
+		MetricsBindAddress:      "0", // disable
+		HealthProbeBindAddress:  "0", // disable
 	})
 	Expect(err).To(BeNil())
 
@@ -300,6 +301,12 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 					reconcilertesting.HaveBEBSecretNameAndNamespace(bebSecret1name, kymaSystemNamespace),
 					reconcilertesting.HaveEventingBackendNotReady(),
 				))
+
+			// should not have called bebSubMgr.Stop() as nothing was created on EventMesh before, and
+			// the cache for secret is empty. Triggering bebSubMgr.Stop() would delete all subscriptions on EventMesh
+			// even on controller restart.
+			Expect(bebSubMgr.StopCalledWithCleanup).Should(BeFalse())
+			Expect(bebSubMgr.StopCalledWithoutCleanup).Should(BeFalse())
 		})
 		It("Should mark eventing as ready when publisher proxy is ready", func() {
 			ctx := context.Background()

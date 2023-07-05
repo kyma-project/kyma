@@ -77,47 +77,43 @@ global:
   images:
     k8s_tools:
       name: "tpi/k8s-tools"
-      version: "v20230518-2bc1b552"
+      version: "v20230626-ce139c33"
       directory: "prod"
     function_controller:
       name: "function-controller"
-      version: "v20230602-ec54dc09"
+      version: "v20230628-61d97068"
       directory: "prod"
     function_webhook:
       name: "function-webhook"
-      version: "v20230602-ec54dc09"
+      version: "v20230628-61d97068"
       directory: "prod"
     function_build_init:
       name: "function-build-init"
-      version: "v20230602-ec54dc09"
+      version: "v20230628-61d97068"
       directory: "prod"
     function_registry_gc:
       name: "function-registry-gc"
-      version: "v20230509-142454e6"
-      directory: "prod"
-    function_runtime_nodejs14:
-      name: "function-runtime-nodejs14"
-      version: "v20230302-a6a85f47"
+      version: "v20230628-61d97068"
       directory: "prod"
     function_runtime_nodejs16:
       name: "function-runtime-nodejs16"
-      version: "v20230302-a6a85f47"
+      version: "v20230628-fd5fd7c3"
       directory: "prod"
     function_runtime_nodejs18:
       name: "function-runtime-nodejs18"
-      version: "v20230302-a6a85f47"
+      version: "v20230628-fd5fd7c3"
       directory: "prod"
     function_runtime_python39:
       name: "function-runtime-python39"
-      version: "v20230426-29ad7593"
-      directory: "prod"
+      version: "PR-17779"
+      directory: "dev"
     kaniko_executor:
       name: "tpi/kaniko-executor"
-      version: "1.9.1-ab1cf603"
+      version: "1.9.1-406380b9"
       directory: "prod"
     registry:
       name: "tpi/registry"
-      version: "2.8.1-ab1cf603"
+      version: "2.8.1-1b099a1d"
       directory: "prod"
     google_pause:
       name: "external/gcr.io/google-containers/pause"

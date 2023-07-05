@@ -30,14 +30,14 @@ global:
   images:
     k8s_tools:
       name: "k8s-tools"
-      version: "v20230518-2bc1b552"
+      version: "v20230626-ce139c33"
       directory: "prod/tpi"
     ## Google Cloud SQL Proxy image
     ## ref: https://cloud.google.com/sql/docs/mysql/sql-proxy
     ## ref: https://cloud.google.com/sql/docs/postgres/sql-proxy
     gce_proxy:
       name: "gce-proxy"
-      version: "v1.33.6-1bdccf0a"
+      version: "v1.33.8-afb993b8"
       directory: "prod/tpi/cloudsql-docker"
     hydra:
       name: "hydra"

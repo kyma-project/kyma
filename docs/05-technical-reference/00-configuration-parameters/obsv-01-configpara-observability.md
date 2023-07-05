@@ -17,11 +17,3 @@ To override the configuration, redefine the default values in your custom `value
 - [Prometheus Pushgateway `values.yaml`](https://github.com/kyma-project/kyma/blob/main/resources/monitoring/charts/prometheus-pushgateway/values.yaml)
 
     > **NOTE:** Prometheus and Grafana are [deprecated](https://kyma-project.io/blog/2022/12/9/monitoring-deprecation) and are planned to be removed. If you want to install a custom stack, take a look at [Install a custom kube-prometheus-stack in Kyma](https://github.com/kyma-project/examples/tree/main/prometheus).
-
-### Logging
-
-[Logging `values.yaml`](https://github.com/kyma-project/kyma/blob/main/resources/logging/values.yaml) and subcharts:
-
-- [Loki `values.yaml`](https://github.com/kyma-project/kyma/blob/main/resources/logging/charts/loki/values.yaml)
-
-    > **NOTE:** Loki is [deprecated](https://kyma-project.io/blog/2022/11/2/loki-deprecation/) and is planned to be removed. If you want to install a custom Loki stack, take a look at [Installing a custom Loki stack in Kyma](https://github.com/kyma-project/examples/tree/main/loki).

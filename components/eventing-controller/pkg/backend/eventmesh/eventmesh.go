@@ -8,8 +8,8 @@ import (
 	"go.uber.org/zap"
 
 	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
-
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
+	"github.com/kyma-project/kyma/components/eventing-controller/internal/featureflags"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
@@ -146,6 +146,15 @@ func (em *EventMesh) SyncSubscription(subscription *eventingv1alpha2.Subscriptio
 			log.Errorw("Failed to handle EventMesh subscription modified", errorLogKey, err)
 			return false, err
 		}
+
+		// Make sure the EventMesh subscription was not deleted by checking
+		// the isEventMeshSubModified flag to be false.
+		if featureflags.IsEventingWebhookAuthEnabled() && !isEventMeshSubModified {
+			if err = em.handleWebhookAuthChange(eventMeshSub, subscription); err != nil {
+				log.Errorw("Failed to handle WebhookAuth Change", errorLogKey, err)
+				return false, err
+			}
+		}
 	}
 
 	// create a new subscription on EventMesh server
@@ -218,13 +227,23 @@ func (em *EventMesh) getProcessedEventTypes(kymaSubscription *eventingv1alpha2.S
 // handleKymaSubModified checks if the Kyma subscription is modified.
 // If modified, then it deletes the corresponding subscription on EventMesh and returns true.
 func (em *EventMesh) handleKymaSubModified(eventMeshSub *types.Subscription, kymaSub *eventingv1alpha2.Subscription) (bool, error) {
-	// uses Ev2hash which is to store the hash related to kyma sub
-	isKymaSubModified, err := backendutils.IsEventMeshSubModified(eventMeshSub, kymaSub.Status.Backend.Ev2hash)
-	if err != nil {
+	var (
+		isModified bool
+		hash       int64
+		err        error
+	)
+
+	if featureflags.IsEventingWebhookAuthEnabled() {
+		hash = kymaSub.Status.Backend.EventMeshLocalHash
+	} else {
+		hash = kymaSub.Status.Backend.Ev2hash
+	}
+
+	if isModified, err = backendutils.IsEventMeshSubModified(eventMeshSub, hash); err != nil {
 		return false, err
 	}
 
-	if isKymaSubModified {
+	if isModified {
 		// delete subscription from EventMesh server, so it will be re-created later.
 		if err := em.deleteSubscription(eventMeshSub.Name); err != nil {
 			return false, fmt.Errorf("failed to delete subscription on EventMesh: %w", err)
@@ -267,6 +286,70 @@ func (em *EventMesh) handleCreateEventMeshSub(eventMeshSub *types.Subscription, 
 	}
 
 	return eventMeshServerSub, nil
+}
+
+// handleWebhookAuthChange handles the EventMesh subscription WebhookAuth changes.
+// It uses the PATCH request API provided by EventMesh to update the subscription WebhookAuth.
+func (em *EventMesh) handleWebhookAuthChange(eventMeshSub *types.Subscription,
+	kymaSub *eventingv1alpha2.Subscription) error {
+	hash, err := backendutils.GetWebhookAuthHash(eventMeshSub.WebhookAuth)
+	if err != nil {
+		return fmt.Errorf("failed to get the EventMesh WebhookAuth hash: %w", err)
+	}
+
+	// skip if the WebhookAuth did not change
+	if hash == kymaSub.Status.Backend.WebhookAuthHash {
+		return nil
+	}
+
+	// pause subscription
+	em.namedLogger().Debugf("Pausing EventMmesh subscription: %s", eventMeshSub.Name)
+	state := types.State{Action: types.StateActionPause}
+	resp, err := em.client.UpdateState(eventMeshSub.Name, state)
+	if err != nil {
+		return fmt.Errorf("failed to pause EventMesh subscription: %w", err)
+	}
+	if resp.StatusCode == http.StatusNotFound {
+		em.namedLogger().Warnf("failed to pause EventMesh subscription: %s, not found", eventMeshSub.Name)
+		return nil
+	}
+	if resp.StatusCode != http.StatusAccepted {
+		return fmt.Errorf("failed to pause EventMesh subscription: %w; %v",
+			HTTPStatusError{StatusCode: resp.StatusCode}, resp.Message)
+	}
+
+	// update webhook auth config
+	em.namedLogger().Debugf("Updating WebhookAuth config for EventMmesh subscription: %s", eventMeshSub.Name)
+	updateResp, err := em.client.Update(eventMeshSub.Name, eventMeshSub.WebhookAuth)
+	if err != nil {
+		return fmt.Errorf("failed to update webhook auth config: %w", err)
+	}
+	if updateResp.StatusCode == http.StatusNotFound {
+		em.namedLogger().Warnf("failed to update webhook auth config: %s, not found", eventMeshSub.Name)
+		return nil
+	}
+	if updateResp.StatusCode != http.StatusNoContent {
+		return fmt.Errorf("failed to update webhook auth config: %w; %v",
+			HTTPStatusError{StatusCode: updateResp.StatusCode}, updateResp.Message)
+	}
+
+	// resume subscription
+	em.namedLogger().Debugf("Resuming EventMmesh subscription: %s", eventMeshSub.Name)
+	state = types.State{Action: types.StateActionResume}
+	resp, err = em.client.UpdateState(eventMeshSub.Name, state)
+	if err != nil {
+		return fmt.Errorf("failed to resume EventMesh subscription: %w", err)
+	}
+	if resp.StatusCode == http.StatusNotFound {
+		em.namedLogger().Warnf("failed to resume EventMesh subscription: %s, not found", eventMeshSub.Name)
+		return nil
+	}
+	if resp.StatusCode != http.StatusAccepted {
+		return fmt.Errorf("failed to resume EventMesh subscription: %w; %v",
+			HTTPStatusError{StatusCode: resp.StatusCode}, resp.Message)
+	}
+
+	return nil
 }
 
 // handleKymaSubStatusUpdate updates the status in Kyma subscription.
@@ -318,6 +401,7 @@ func (em *EventMesh) getSubscription(name string) (*types.Subscription, error) {
 
 // deleteSubscription deletes the subscription on EventMesh.
 func (em *EventMesh) deleteSubscription(name string) error {
+	em.namedLogger().Debugf("Deleting EventMmesh subscription: %s", name)
 	resp, err := em.client.Delete(name)
 	if err != nil {
 		return fmt.Errorf("delete subscription failed: %v", err)
@@ -360,4 +444,11 @@ func (em *EventMesh) createAndGetSubscription(subscription *types.Subscription) 
 
 func (em *EventMesh) namedLogger() *zap.SugaredLogger {
 	return em.logger.WithContext().Named(eventMeshHandlerName)
+}
+
+// SetCredentials sets the WebhookAuth credentials.
+// WARNING: This functions should be used for testing purposes only.
+func (em *EventMesh) SetCredentials(credentials *OAuth2ClientCredentials) {
+	em.namedLogger().Warn("This logic should be used for testing purposes only")
+	em.webhookAuth = getWebHookAuth(credentials)
 }

@@ -1404,37 +1404,6 @@ data:
           "panels": [],
           "title": "Pod Logs",
           "type": "row"
-        },
-        {
-          "datasource": "Loki",
-          "fieldConfig": {
-            "defaults": {},
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 24,
-            "x": 0,
-            "y": 55
-          },
-          "id": 14,
-          "options": {
-            "dedupStrategy": "none",
-            "showLabels": false,
-            "showTime": true,
-            "sortOrder": "Descending",
-            "wrapLogMessage": true
-          },
-          "targets": [
-            {
-              "expr": "{namespace=\"$namespace\", pod=\"$pod\"}",
-              "refId": "A"
-            }
-          ],
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "Logs",
-          "type": "logs"
         }
       ],
       "refresh": "10s",

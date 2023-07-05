@@ -15,9 +15,17 @@ type Backend struct {
 	// +optional
 	Ev2hash int64 `json:"ev2hash,omitempty"`
 
-	// Hash that is used in EventMesh to identify this Subscription.
+	// Hash used to identify an EventMesh Subscription retrieved from the server without the WebhookAuth config.
 	// +optional
 	EventMeshHash int64 `json:"emshash,omitempty"`
+
+	// Hash used to identify an EventMesh Subscription posted to the server without the WebhookAuth config.
+	// +optional
+	EventMeshLocalHash int64 `json:"eventMeshLocalHash,omitempty"`
+
+	// Hash used to identify the WebhookAuth of an EventMesh Subscription existing on the server.
+	// +optional
+	WebhookAuthHash int64 `json:"webhookAuthHash,omitempty"`
 
 	// Webhook URL used by EventMesh to trigger subscribers.
 	// +optional

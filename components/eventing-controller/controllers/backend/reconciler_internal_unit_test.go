@@ -351,6 +351,7 @@ func Test_getOAuth2ClientCredentials(t *testing.T) {
 		wantClientID     []byte
 		wantClientSecret []byte
 		wantTokenURL     []byte
+		wantCertsURL     []byte
 	}{
 		// secret is not found
 		{
@@ -391,6 +392,7 @@ func Test_getOAuth2ClientCredentials(t *testing.T) {
 						secretKeyClientID:     []byte("test-client-id-1"),
 						secretKeyClientSecret: []byte("test-client-secret-1"),
 						secretKeyTokenURL:     []byte("test-token-url-1"),
+						secretKeyCertsURL:     []byte("test-certs-url-1"),
 					},
 				},
 			},
@@ -410,6 +412,7 @@ func Test_getOAuth2ClientCredentials(t *testing.T) {
 						secretKeyClientID:     []byte("test-client-id-0"),
 						secretKeyClientSecret: []byte("test-client-secret-0"),
 						secretKeyTokenURL:     []byte("test-token-url-0"),
+						secretKeyCertsURL:     []byte("test-certs-url-0"),
 					},
 				},
 				// required secret
@@ -441,6 +444,7 @@ func Test_getOAuth2ClientCredentials(t *testing.T) {
 						secretKeyClientID:     []byte("test-client-id-0"),
 						secretKeyClientSecret: []byte("test-client-secret-0"),
 						secretKeyTokenURL:     []byte("test-token-url-0"),
+						secretKeyCertsURL:     []byte("test-certs-url-0"),
 					},
 				},
 				// not required secret
@@ -453,6 +457,7 @@ func Test_getOAuth2ClientCredentials(t *testing.T) {
 						secretKeyClientID:     []byte("test-client-id-1"),
 						secretKeyClientSecret: []byte("test-client-secret-1"),
 						secretKeyTokenURL:     []byte("test-token-url-1"),
+						secretKeyCertsURL:     []byte("test-certs-url-1"),
 					},
 				},
 			},
@@ -460,6 +465,7 @@ func Test_getOAuth2ClientCredentials(t *testing.T) {
 			wantClientID:     []byte("test-client-id-0"),
 			wantClientSecret: []byte("test-client-secret-0"),
 			wantTokenURL:     []byte("test-token-url-0"),
+			wantCertsURL:     []byte("test-certs-url-0"),
 		},
 		{
 			name:             "eventing auth manager disabled, and secret exists with all data",
@@ -475,6 +481,7 @@ func Test_getOAuth2ClientCredentials(t *testing.T) {
 						secretKeyClientID:     []byte("test-client-id-0"),
 						secretKeyClientSecret: []byte("test-client-secret-0"),
 						secretKeyTokenURL:     []byte("test-token-url-0"),
+						secretKeyCertsURL:     []byte("test-certs-url-0"),
 					},
 				},
 				// required secret
@@ -487,6 +494,7 @@ func Test_getOAuth2ClientCredentials(t *testing.T) {
 						secretKeyClientID:     []byte("test-client-id-1"),
 						secretKeyClientSecret: []byte("test-client-secret-1"),
 						secretKeyTokenURL:     []byte("test-token-url-1"),
+						secretKeyCertsURL:     []byte("test-certs-url-1"),
 					},
 				},
 			},
@@ -494,6 +502,7 @@ func Test_getOAuth2ClientCredentials(t *testing.T) {
 			wantClientID:     []byte("test-client-id-1"),
 			wantClientSecret: []byte("test-client-secret-1"),
 			wantTokenURL:     []byte(defaultWebhookTokenEndpoint),
+			wantCertsURL:     []byte(""),
 		},
 	}
 
@@ -535,6 +544,115 @@ func Test_getOAuth2ClientCredentials(t *testing.T) {
 			require.Equal(t, tc.wantClientID, credentials.clientID)
 			require.Equal(t, tc.wantClientSecret, credentials.clientSecret)
 			require.Equal(t, tc.wantTokenURL, credentials.tokenURL)
+			require.Equal(t, tc.wantCertsURL, credentials.certsURL)
+		})
+	}
+}
+
+func Test_isOauth2CredentialsInitialized(t *testing.T) {
+	testCases := []struct {
+		name             string
+		givenFlagEnabled bool
+		givenCredentials *oauth2Credentials
+		wantResult       bool
+	}{
+		{
+			name:             "[feature-flag: disabled] should return false when credentials are not initialized",
+			givenFlagEnabled: false,
+			givenCredentials: nil,
+			wantResult:       false,
+		},
+		{
+			name:             "[feature-flag: disabled] should return false when clientID is not initialized",
+			givenFlagEnabled: false,
+			givenCredentials: &oauth2Credentials{
+				clientSecret: []byte("test"),
+			},
+			wantResult: false,
+		},
+		{
+			name:             "[feature-flag: disabled] should return false when clientSecret is not initialized",
+			givenFlagEnabled: false,
+			givenCredentials: &oauth2Credentials{
+				clientID: []byte("test"),
+			},
+			wantResult: false,
+		},
+		{
+			name:             "[feature-flag: disabled] should return true when credentials are initialized",
+			givenFlagEnabled: false,
+			givenCredentials: &oauth2Credentials{
+				clientID:     []byte("test"),
+				clientSecret: []byte("test"),
+			},
+			wantResult: true,
+		},
+		{
+			name:             "[feature-flag: enabled] should return false when credentials are not initialized",
+			givenFlagEnabled: true,
+			givenCredentials: nil,
+			wantResult:       false,
+		},
+		{
+			name:             "[feature-flag: enabled] should return false when only clientID is initialized",
+			givenFlagEnabled: true,
+			givenCredentials: &oauth2Credentials{
+				clientID: []byte("test"),
+			},
+			wantResult: false,
+		},
+		{
+			name:             "[feature-flag: enabled] should return false when only clientSecret is initialized",
+			givenFlagEnabled: true,
+			givenCredentials: &oauth2Credentials{
+				clientSecret: []byte("test"),
+			},
+			wantResult: false,
+		},
+		{
+			name:             "[feature-flag: enabled] should return false when only certsURL is initialized",
+			givenFlagEnabled: true,
+			givenCredentials: &oauth2Credentials{
+				certsURL: []byte("http://kyma-project.io"),
+			},
+			wantResult: false,
+		},
+		{
+			name:             "[feature-flag: enabled] should return false when only tokenURL is initialized",
+			givenFlagEnabled: true,
+			givenCredentials: &oauth2Credentials{
+				tokenURL: []byte("http://kyma-project.io"),
+			},
+			wantResult: false,
+		},
+		{
+			name:             "[feature-flag: enabled] should return true when credentials are initialized",
+			givenFlagEnabled: true,
+			givenCredentials: &oauth2Credentials{
+				clientID:     []byte("test"),
+				clientSecret: []byte("test"),
+				certsURL:     []byte("http://kyma-project.io"),
+				tokenURL:     []byte("http://kyma-project.io"),
+			},
+			wantResult: true,
+		},
+	}
+
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			// given
+			featureflags.SetEventingWebhookAuthEnabled(tc.givenFlagEnabled)
+			r := Reconciler{}
+			if tc.givenCredentials != nil {
+				r.credentials = *tc.givenCredentials
+			}
+
+			// when
+			result := r.isOauth2CredentialsInitialized()
+
+			// then
+			require.Equal(t, tc.wantResult, result)
 		})
 	}
 }

@@ -11,7 +11,7 @@ Your Function cannot be built:
 ```
 $ kubectl get functions.serverless.kyma-project.io nyfun
 NAME    CONFIGURED   BUILT   RUNNING   RUNTIME    VERSION   AGE
-myfun   True         False             nodejs16   1         3h15m
+myfun   True         False             nodejs18   1         3h15m
 ```
 and the Function build job shows the following error, meaning that your host k3d environment is likely to experience the problem:
 ```

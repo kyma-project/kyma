@@ -29,7 +29,7 @@ func updateHashesInStatus(kymaSubscription *eventingv1alpha2.Subscription,
 	if err := setEventMeshServerSubHashInStatus(kymaSubscription, eventMeshServerSubscription); err != nil {
 		return err
 	}
-	return nil
+	return setWebhookAuthHashInStatus(kymaSubscription, eventMeshLocalSubscription.WebhookAuth)
 }
 
 // setEventMeshLocalSubHashInStatus sets the hash for EventMesh local sub in Kyma Sub status.
@@ -43,6 +43,24 @@ func setEventMeshLocalSubHashInStatus(kymaSubscription *eventingv1alpha2.Subscri
 
 	// set hash in status
 	kymaSubscription.Status.Backend.Ev2hash = newHash
+
+	// set EventMesh Subscription hash without the webhook auth config
+	cleanedEventMeshSub := backendutils.GetCleanedEventMeshSubscription(eventMeshSubscription)
+	newHash, err = backendutils.GetHash(cleanedEventMeshSub)
+	if err != nil {
+		return err
+	}
+	kymaSubscription.Status.Backend.EventMeshLocalHash = newHash
+
+	return nil
+}
+
+func setWebhookAuthHashInStatus(kymaSubscription *eventingv1alpha2.Subscription, webhookAuth *types.WebhookAuth) error {
+	newHash, err := backendutils.GetWebhookAuthHash(webhookAuth)
+	if err != nil {
+		return err
+	}
+	kymaSubscription.Status.Backend.WebhookAuthHash = newHash
 	return nil
 }
 

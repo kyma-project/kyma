@@ -12,7 +12,7 @@ Serverless relies heavily on Kubernetes resources. It uses [Deployments](https:/
 
 1. Create a Function either through the UI or by applying a Function custom resource (CR). This CR contains the Function definition (business logic that you want to execute) and information on the environment on which it should run.
 
-2. Before the Function can be saved or modified, it is first updated and then verified by the [defaulting and validation webhooks](../svls-07-supported-webhooks.md) respectively.
+2. Before the Function can be saved or modified, it is first updated and then verified by the defaulting and validation webhooks respectively.
 
 3. Function Controller (FC) detects the new, validated Function CR.
 

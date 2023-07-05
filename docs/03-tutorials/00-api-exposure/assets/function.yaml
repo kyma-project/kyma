@@ -3,7 +3,7 @@ kind: Function
 metadata:
   name: function
 spec:
-  runtime: nodejs16
+  runtime: nodejs18
   source:
     inline:
       source: |
