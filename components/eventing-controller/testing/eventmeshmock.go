@@ -159,7 +159,7 @@ func (m *EventMeshMock) Start() string {
 				return
 			}
 
-			// extract get request key from /events/subscriptions/%s/state
+			// extract get request key from /messaging/events/subscriptions/%s/state
 			key := strings.TrimSuffix(r.URL.Path, "/state")
 			m.UpdateStateResponse(w, key, state)
 		case http.MethodGet:
