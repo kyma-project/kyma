@@ -5,7 +5,7 @@
 Currently, Serverless in Kyma consists of two projects:
 
 - [function-controller](https://github.com/kyma-project/kyma/tree/main/components/function-controller) -
-  responsible for running a Function on a k8s cluster
+  responsible for running a Function on a Kubernetes cluster
 - [serverless-manager](https://github.com/kyma-project/serverless-manager) - responsible for installation and
   configuration of Serverless
 
@@ -29,7 +29,7 @@ The proposed naming conventions refer to different architecture layers of the wh
 
 This section refers to the high-level architecture elements, namely to the main projects:
 
-- Serverless - the new naming convention for the `function-controller`. Serverless is responsible for running a Function on a k8s cluster. It can contain its own
+- Serverless - the new naming convention for the `function-controller`. Serverless is responsible for running a Function on a Kubernetes cluster. It can contain its own
   CRD.
 - Serverless-operator - the new naming convention for `serverless-manager`. Serverless-operator installs and configures Serverless.
 - Kyma-Keda-operator - the operator which installs and configures [KEDA](https://keda.sh/).
@@ -55,12 +55,11 @@ Deployment with webhook as main responsibility:
 
 - ${component_name}-webhook
 
-Deployment with both of those components:
+Deployment with both controller and webhook:
 
 - ${component_name}
 
-I decided to go with the pure component name as it contains two responsibilities and from a technical perspective it's very similar to the component.
-It might be confusing, and I am open to other proposals.
+> **NOTE:** I decided to go with the pure component name as it contains both the controller and webhook responsibilities and from the technical perspective it's very similar to the component itself. It might be confusing, and I am open to other proposals.
 
 ### Kubebuilder component naming convention
 
@@ -69,17 +68,17 @@ Serverless uses Kubebuilder to build a controller and/or webhook. This section d
 Looking at the [architecture](./assets/kubebuilder-architecture.png) diagram, you can see that a program consists of a **process** which includes a **manager**.
 The **manager** can include 2 components:
 
-- Controller, which focuses on the reconciliation of a given k8s resource. It uses predicates and the reconciler.
+- Controller, which focuses on the reconciliation of a given Kubernetes resource. It uses predicates and the reconciler.
 - Webhook, which works with `AdmissionRequests`.
 
 Proposed naming convention:
 
-For controller reconcile loop inside the manager:
+For the controller reconcile loop inside the manager:
 
 - ${crd_name}-reconcile
 - ${component_name}-${crd_name}-reconcile
 
-For webhook inside the manager:
+For the webhook inside the manager:
 
 - ${component_name}-validaton-webhook
 - ${component_name}-${crd_name}-validaton-webhook
@@ -95,7 +94,7 @@ The table lists the terms from the most general to the most detailed ones:
 
 | component name                | responsibility                                 |
 |-------------------------------|------------------------------------------------|
-| serverless                    | The product like `Keda`                        |
+| serverless                    | the product, such as Keda                      |
 | serverless-operator           | serverless installer                           |
 | serverless-controller         | serverless main reconciliation loop deployment |
 | serverless-webhook            | serverless webhook deployment                  |
