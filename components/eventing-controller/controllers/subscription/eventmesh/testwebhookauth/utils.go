@@ -1,5 +1,5 @@
 //nolint:gosec //this is just a test, and security issues found here will not result in code used in a prod environment
-package test
+package testwebhookauth
 
 import (
 	"context"
@@ -7,9 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"net/http"
 	"path/filepath"
-	"strings"
 	"testing"
 	"time"
 
@@ -19,9 +17,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	k8slabels "k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/apimachinery/pkg/util/validation/field"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -40,8 +36,7 @@ import (
 	backendeventmesh "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventmesh"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
 	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"
-	eventMeshtypes "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
+	eventmeshtypes "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
@@ -63,21 +58,27 @@ const (
 	twoMinTimeOut            = 120 * time.Second
 	bigPollingInterval       = 3 * time.Second
 	bigTimeOut               = 40 * time.Second
-	smallTimeOut             = 5 * time.Second
-	smallPollingInterval     = 1 * time.Second
 	domain                   = "domain.com"
 	namespacePrefixLength    = 5
 	syncPeriodSeconds        = 2
 	maxReconnects            = 10
 	eventMeshMockKeyPrefix   = "/messaging/events/subscriptions"
+	tokenURL                 = "https://domain.com/oauth2/token"
 	certsURL                 = "https://domain.com/oauth2/certs"
 )
 
 //nolint:gochecknoglobals // only used in tests
 var (
-	emTestEnsemble    *eventMeshTestEnsemble
-	k8sCancelFn       context.CancelFunc
-	acceptableMethods = []string{http.MethodPost, http.MethodOptions}
+	emTestEnsemble   *eventMeshTestEnsemble
+	k8sCancelFn      context.CancelFunc
+	eventMeshBackend *backendeventmesh.EventMesh
+	testReconciler   *eventmeshreconciler.Reconciler
+	credentials      = &backendeventmesh.OAuth2ClientCredentials{
+		ClientID:     "client-id",
+		ClientSecret: "client-secret",
+		TokenURL:     tokenURL,
+		CertsURL:     certsURL,
+	}
 )
 
 func setupSuite() error {
@@ -134,21 +135,16 @@ func setupSuite() error {
 	// setup eventMesh reconciler
 	recorder := k8sManager.GetEventRecorderFor("eventing-controller")
 	sinkValidator := sink.NewValidator(context.Background(), k8sManager.GetClient(), recorder)
-	credentials := &backendeventmesh.OAuth2ClientCredentials{
-		ClientID:     "foo-client-id",
-		ClientSecret: "foo-client-secret",
-		TokenURL:     "foo-token-url",
-		CertsURL:     certsURL,
-	}
 	emTestEnsemble.envConfig = getEnvConfig()
-	testReconciler := eventmeshreconciler.NewReconciler(
+	eventMeshBackend = backendeventmesh.NewEventMesh(credentials, emTestEnsemble.nameMapper, defaultLogger)
+	testReconciler = eventmeshreconciler.NewReconciler(
 		context.Background(),
 		k8sManager.GetClient(),
 		defaultLogger,
 		recorder,
 		getEnvConfig(),
 		cleaner.NewEventMeshCleaner(defaultLogger),
-		backendeventmesh.NewEventMesh(credentials, emTestEnsemble.nameMapper, defaultLogger),
+		eventMeshBackend,
 		credentials,
 		emTestEnsemble.nameMapper,
 		sinkValidator,
@@ -173,12 +169,12 @@ func setupSuite() error {
 	return startAndWaitForWebhookServer(k8sManager, webhookInstallOptions)
 }
 
-func startAndWaitForWebhookServer(k8sManager manager.Manager, webhookInstallOpts *envtest.WebhookInstallOptions) error {
-	if err := (&eventingv1alpha2.Subscription{}).SetupWebhookWithManager(k8sManager); err != nil {
+func startAndWaitForWebhookServer(manager manager.Manager, installOpts *envtest.WebhookInstallOptions) error {
+	if err := (&eventingv1alpha2.Subscription{}).SetupWebhookWithManager(manager); err != nil {
 		return err
 	}
 	dialer := &net.Dialer{Timeout: time.Second}
-	addrPort := fmt.Sprintf("%s:%d", webhookInstallOpts.LocalServingHost, webhookInstallOpts.LocalServingPort)
+	addrPort := fmt.Sprintf("%s:%d", installOpts.LocalServingHost, installOpts.LocalServingPort)
 	// wait for the webhook server to get ready
 	err := retry.Do(func() error {
 		conn, connErr := tls.DialWithDialer(dialer, "tcp", addrPort, &tls.Config{InsecureSkipVerify: true})
@@ -191,14 +187,13 @@ func startAndWaitForWebhookServer(k8sManager manager.Manager, webhookInstallOpts
 }
 
 func startTestEnv() (*rest.Config, error) {
-	useExistingCluster := useExistingCluster
 	emTestEnsemble.testEnv = &envtest.Environment{
 		CRDDirectoryPaths: []string{
 			filepath.Join("../../../../", "config", "crd", "bases"),
 			filepath.Join("../../../../", "config", "crd", "external"),
 		},
 		AttachControlPlaneOutput: attachControlPlaneOutput,
-		UseExistingCluster:       &useExistingCluster,
+		UseExistingCluster:       utils.BoolPtr(useExistingCluster),
 		WebhookInstallOptions: envtest.WebhookInstallOptions{
 			Paths: []string{filepath.Join("../../../../", "config", "webhook")},
 		},
@@ -240,7 +235,7 @@ func getEnvConfig() env.Config {
 		Domain:                   domain,
 		EventTypePrefix:          reconcilertesting.EventMeshPrefix,
 		BEBNamespace:             reconcilertesting.EventMeshNamespaceNS,
-		Qos:                      string(eventMeshtypes.QosAtLeastOnce),
+		Qos:                      string(eventmeshtypes.QosAtLeastOnce),
 	}
 }
 
@@ -257,15 +252,6 @@ func startNewEventMeshMock() *reconcilertesting.EventMeshMock {
 	emMock := reconcilertesting.NewEventMeshMock()
 	emMock.Start()
 	return emMock
-}
-
-func GenerateInvalidSubscriptionError(subName, errType string, path *field.Path) error {
-	webhookErr := "admission webhook \"vsubscription.kb.io\" denied the request: "
-	givenError := k8serrors.NewInvalid(
-		eventingv1alpha2.GroupKind, subName,
-		field.ErrorList{eventingv1alpha2.MakeInvalidFieldError(path, subName, errType)})
-	givenError.ErrStatus.Message = webhookErr + givenError.ErrStatus.Message
-	return givenError
 }
 
 func getTestNamespace() string {
@@ -299,14 +285,6 @@ func fixtureNamespace(name string) *corev1.Namespace {
 
 func ensureK8sResourceCreated(ctx context.Context, t *testing.T, obj client.Object) {
 	require.NoError(t, emTestEnsemble.k8sClient.Create(ctx, obj))
-}
-
-func ensureK8sResourceNotCreated(ctx context.Context, t *testing.T, obj client.Object, err error) {
-	require.Equal(t, emTestEnsemble.k8sClient.Create(ctx, obj), err)
-}
-
-func ensureK8sResourceDeleted(ctx context.Context, t *testing.T, obj client.Object) {
-	require.NoError(t, emTestEnsemble.k8sClient.Delete(ctx, obj))
 }
 
 func ensureK8sSubscriptionUpdated(ctx context.Context, t *testing.T, subscription *eventingv1alpha2.Subscription) {
@@ -343,33 +321,6 @@ func ensureAPIRuleStatusUpdatedWithStatusReady(ctx context.Context, t *testing.T
 	}, bigTimeOut, bigPollingInterval)
 }
 
-// ensureAPIRuleNotFound ensures that a APIRule does not exists (or deleted).
-func ensureAPIRuleNotFound(ctx context.Context, t *testing.T, apiRule *apigatewayv1beta1.APIRule) {
-	require.Eventually(t, func() bool {
-		apiRuleKey := client.ObjectKey{
-			Namespace: apiRule.Namespace,
-			Name:      apiRule.Name,
-		}
-
-		apiRule2 := new(apigatewayv1beta1.APIRule)
-		err := emTestEnsemble.k8sClient.Get(ctx, apiRuleKey, apiRule2)
-		return k8serrors.IsNotFound(err)
-	}, bigTimeOut, bigPollingInterval)
-}
-
-func getAPIRulesList(ctx context.Context, svc *corev1.Service) (*apigatewayv1beta1.APIRuleList, error) {
-	labels := map[string]string{
-		constants.ControllerServiceLabelKey:  svc.Name,
-		constants.ControllerIdentityLabelKey: constants.ControllerIdentityLabelValue,
-	}
-	apiRules := &apigatewayv1beta1.APIRuleList{}
-	err := emTestEnsemble.k8sClient.List(ctx, apiRules, &client.ListOptions{
-		LabelSelector: k8slabels.SelectorFromSet(labels),
-		Namespace:     svc.Namespace,
-	})
-	return apiRules, err
-}
-
 func getAPIRule(ctx context.Context, apiRule *apigatewayv1beta1.APIRule) (*apigatewayv1beta1.APIRule, error) {
 	lookUpKey := types.NamespacedName{
 		Namespace: apiRule.Namespace,
@@ -379,45 +330,7 @@ func getAPIRule(ctx context.Context, apiRule *apigatewayv1beta1.APIRule) (*apiga
 	return apiRule, err
 }
 
-func filterAPIRulesForASvc(apiRules *apigatewayv1beta1.APIRuleList, svc *corev1.Service) apigatewayv1beta1.APIRule {
-	if len(apiRules.Items) == 1 && *apiRules.Items[0].Spec.Service.Name == svc.Name {
-		return apiRules.Items[0]
-	}
-	return apigatewayv1beta1.APIRule{}
-}
-
-// countEventMeshRequests returns how many requests for a given subscription are sent for each HTTP method
-//
-//nolint:gocognit
-func countEventMeshRequests(subscriptionName, eventType string) (int, int, int) {
-	countGet, countPost, countDelete := 0, 0, 0
-	emTestEnsemble.eventMeshMock.Requests.ReadEach(
-		func(request *http.Request, payload interface{}) {
-			switch method := request.Method; method {
-			case http.MethodGet:
-				if strings.Contains(request.URL.Path, subscriptionName) {
-					countGet++
-				}
-			case http.MethodPost:
-				if sub, ok := payload.(eventMeshtypes.Subscription); ok {
-					if len(sub.Events) > 0 {
-						for _, event := range sub.Events {
-							if event.Type == eventType && sub.Name == subscriptionName {
-								countPost++
-							}
-						}
-					}
-				}
-			case http.MethodDelete:
-				if strings.Contains(request.URL.Path, subscriptionName) {
-					countDelete++
-				}
-			}
-		})
-	return countGet, countPost, countDelete
-}
-
-func getEventMeshSubFromMock(subscriptionName, subscriptionNamespace string) *eventMeshtypes.Subscription {
+func getEventMeshSubFromMock(subscriptionName, subscriptionNamespace string) *eventmeshtypes.Subscription {
 	key := getEventMeshSubKeyForMock(subscriptionName, subscriptionNamespace)
 	return emTestEnsemble.eventMeshMock.Subscriptions.GetSubscription(key)
 }
@@ -427,33 +340,7 @@ func getEventMeshSubKeyForMock(subscriptionName, subscriptionNamespace string) s
 	return fmt.Sprintf("%s/%s", eventMeshMockKeyPrefix, nm1)
 }
 
-func getEventMeshKeyForMock(name string) string {
-	return fmt.Sprintf("%s/%s", eventMeshMockKeyPrefix, name)
-}
-
-// ensureK8sEventReceived checks if a certain event have triggered for the given namespace.
-func ensureK8sEventReceived(t *testing.T, event corev1.Event, namespace string) {
-	ctx := context.TODO()
-	require.Eventually(t, func() bool {
-		// get all events from k8s for namespace
-		eventList := &corev1.EventList{}
-		err := emTestEnsemble.k8sClient.List(ctx, eventList, client.InNamespace(namespace))
-		require.NoError(t, err)
-
-		// find the desired event
-		var receivedEvent *corev1.Event
-		for i, e := range eventList.Items {
-			if e.Reason == event.Reason {
-				receivedEvent = &eventList.Items[i]
-				break
-			}
-		}
-
-		// check the received event
-		require.NotNil(t, receivedEvent)
-		require.Equal(t, receivedEvent.Reason, event.Reason)
-		require.Equal(t, receivedEvent.Message, event.Message)
-		require.Equal(t, receivedEvent.Type, event.Type)
-		return true
-	}, bigTimeOut, bigPollingInterval)
+func setCredentials(credentials *backendeventmesh.OAuth2ClientCredentials) {
+	eventMeshBackend.SetCredentials(credentials)
+	testReconciler.SetCredentials(credentials)
 }

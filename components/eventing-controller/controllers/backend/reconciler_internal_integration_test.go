@@ -160,8 +160,9 @@ var _ = BeforeSuite(func(done Done) {
 	k8sManager, err := ctrl.NewManager(cfg, ctrl.Options{
 		Scheme:                  scheme.Scheme,
 		SyncPeriod:              &syncPeriod,
-		MetricsBindAddress:      "localhost:7071",
 		GracefulShutdownTimeout: &shutdownTimeout,
+		MetricsBindAddress:      "0", // disable
+		HealthProbeBindAddress:  "0", // disable
 	})
 	Expect(err).To(BeNil())
 
