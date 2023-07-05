@@ -340,8 +340,7 @@ Not more than three TracePipelines can be created. Additional TracePipelines wil
 System-related spans reported by Istio are filtered out without the opt-out option. Here are a few examples of such spans:
 - `/healtz` endpoint of a component deployed in the `kyma-system` Namespace
 - `/metrics` endpoint of a component deployed in the `kyma-system` Namespace
-- All outgoing spans reported by Grafana and Jaeger
-- All spans related to Fluent Bit and Loki communication
+- All outgoing spans reported by Grafana
 
 ## Frequently Asked Questions
 
