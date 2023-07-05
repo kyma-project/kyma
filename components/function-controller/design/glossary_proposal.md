@@ -43,7 +43,7 @@ This section refers to the Serverless components:
 
 Proposed naming convention:
 
-Deployment with the controller as the main responsibility:
+Deployment with the controller in charge:
 
 - ${component_name}-controller
 
