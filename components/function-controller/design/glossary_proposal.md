@@ -9,7 +9,7 @@ Currently, Serverless in Kyma consists of two projects:
 - [serverless-manager](https://github.com/kyma-project/serverless-manager) - responsible for installation and
   configuration of Serverless
 
-Additionally, we have 3rd-party additional components like [KEDA](https://keda.sh/)
+Additionally, we have 3rd-party components, such as [KEDA](https://keda.sh/).
 
 In Serverless, we overuse the word "controller" which causes confusion and requires clarification. Saying "controller", we refer to:
 
