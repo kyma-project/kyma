@@ -43,6 +43,7 @@ func getAPIRuleAssert(ctx context.Context, g *gomega.GomegaWithT,
 	return g.Eventually(func() apigatewayv1beta1.APIRule {
 		fetchedAPIRule, err := getAPIRule(ctx, apiRule)
 		if err != nil {
+			log.Printf("fetch APIRule %s/%s failed: %v", apiRule.Namespace, apiRule.Name, err)
 			return apigatewayv1beta1.APIRule{}
 		}
 		return *fetchedAPIRule

@@ -20,24 +20,6 @@ To do that, we'll use the Grafana dashboard that comes with Kyma.
     ```
 2. In your browser, go to [`http://localhost:3000`](http://localhost:3000) to open Grafana dashboard.
 
-## View the logs
-
-1. In the Grafana dashboard, use the left menu to navigate to **Explore** and choose **Loki** from the dropdown list.
-
-    > **NOTE:** Loki is [deprecated](https://kyma-project.io/blog/2022/11/2/loki-deprecation/) and is planned to be removed. If you want to install a custom Loki stack, take a look at [Installing a custom Loki stack in Kyma](https://github.com/kyma-project/examples/tree/main/loki).
-
-2. Click on **Log browser** and select the following values:
-   - **1. Select labels to search in**: `container`, `function`
-   - **2. Find values for the selected labels**: for **function** choose `lastorder`, for **container** choose `function` 
-   
-   Click **Show logs**.
-
-    > **NOTE:** Alternatively, type or paste the `{function="lastorder", container="function"}` query and press `Shift`+`Enter` or click on **Run query**. 
-
-You can now browse the logs.  
-
-   > **NOTE:** To learn about different ways to view logs (for example, in Kyma Dashboard or using `kubectl`), see [Access Kyma application logs](../04-operation-guides/operations/obsv-01-access-logs.md).
-
 ## View the metrics
 
 1. In the Grafana dashboard, use the search tool from the left menu.

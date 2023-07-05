@@ -310,3 +310,27 @@ func HaveEvent(event corev1.Event) gomegatypes.GomegaMatcher {
 			"Type":    Equal(event.Type),
 		})))
 }
+
+func HaveNonZeroEv2Hash() gomegatypes.GomegaMatcher {
+	return WithTransform(func(s *eventingv1alpha2.Subscription) int64 {
+		return s.Status.Backend.Ev2hash
+	}, Not(BeZero()))
+}
+
+func HaveNonZeroEventMeshHash() gomegatypes.GomegaMatcher {
+	return WithTransform(func(s *eventingv1alpha2.Subscription) int64 {
+		return s.Status.Backend.EventMeshHash
+	}, Not(BeZero()))
+}
+
+func HaveNonZeroEventMeshLocalHash() gomegatypes.GomegaMatcher {
+	return WithTransform(func(s *eventingv1alpha2.Subscription) int64 {
+		return s.Status.Backend.EventMeshLocalHash
+	}, Not(BeZero()))
+}
+
+func HaveNonZeroWebhookAuthHash() gomegatypes.GomegaMatcher {
+	return WithTransform(func(s *eventingv1alpha2.Subscription) int64 {
+		return s.Status.Backend.WebhookAuthHash
+	}, Not(BeZero()))
+}

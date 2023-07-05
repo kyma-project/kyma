@@ -3,7 +3,6 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.11.1
-  creationTimestamp: null
   name: subscriptions.eventing.kyma-project.io
 spec:
   conversion:
@@ -383,11 +382,17 @@ spec:
                       type: object
                     type: array
                   emshash:
-                    description: Hash that is used in EventMesh to identify this Subscription.
+                    description: Hash used to identify an EventMesh Subscription retrieved
+                      from the server without the WebhookAuth config.
                     format: int64
                     type: integer
                   ev2hash:
                     description: Checksum for the Subscription custom resource.
+                    format: int64
+                    type: integer
+                  eventMeshLocalHash:
+                    description: Hash used to identify an EventMesh Subscription posted
+                      to the server without the WebhookAuth config.
                     format: int64
                     type: integer
                   externalSink:
@@ -413,6 +418,11 @@ spec:
                       - originalType
                       type: object
                     type: array
+                  webhookAuthHash:
+                    description: Hash used to identify the WebhookAuth of an EventMesh
+                      Subscription existing on the server.
+                    format: int64
+                    type: integer
                 type: object
               conditions:
                 description: Current state of the Subscription.

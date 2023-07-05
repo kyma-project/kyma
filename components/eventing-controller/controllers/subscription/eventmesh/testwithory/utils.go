@@ -168,10 +168,10 @@ func setupSuite() error {
 
 	emTestEnsemble.k8sClient = k8sManager.GetClient()
 
-	return StartAndWaitForWebhookServer(k8sManager, webhookInstallOptions)
+	return startAndWaitForWebhookServer(k8sManager, webhookInstallOptions)
 }
 
-func StartAndWaitForWebhookServer(k8sManager manager.Manager, webhookInstallOpts *envtest.WebhookInstallOptions) error {
+func startAndWaitForWebhookServer(k8sManager manager.Manager, webhookInstallOpts *envtest.WebhookInstallOptions) error {
 	if err := (&eventingv1alpha2.Subscription{}).SetupWebhookWithManager(k8sManager); err != nil {
 		return err
 	}
