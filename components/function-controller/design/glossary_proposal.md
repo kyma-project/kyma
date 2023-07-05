@@ -51,7 +51,7 @@ In the case of introducing a separate CRD and a separate deployment:
 
 - ${component_name}-{crd_name}-controller
 
-Deployment with webhook as main responsibility:
+Deployment with the webhook as main responsibility:
 
 - ${component_name}-webhook
 
