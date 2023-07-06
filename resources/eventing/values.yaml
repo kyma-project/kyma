@@ -11,7 +11,7 @@ global:
     publisher_proxy:
       name: event-publisher-proxy
       version: PR-17802
-      directory: prod
+      directory: dev
     certHandler:
       name: eventing-webhook-certificates
       version: 1.7.0
