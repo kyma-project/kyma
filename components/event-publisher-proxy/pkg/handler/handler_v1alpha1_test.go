@@ -629,9 +629,27 @@ func TestHandler_sendEventAndRecordMetrics(t *testing.T) {
 				result:          nil,
 				assertionFunc:   assert.Error,
 				metricErrors:    1,
-				metricTotal:     0,
-				metricLatency:   0,
+				metricTotal:     1,
+				metricLatency:   1,
 				metricPublished: 0,
+				metricLatencyTEF: `
+					# HELP eventing_epp_backend_duration_milliseconds The duration of sending events to the messaging server in milliseconds
+					# TYPE eventing_epp_backend_duration_milliseconds histogram
+					eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="foo",le="0.005"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="foo",le="0.01"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="foo",le="0.025"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="foo",le="0.05"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="foo",le="0.1"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="foo",le="0.25"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="foo",le="0.5"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="foo",le="1"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="foo",le="2.5"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="foo",le="5"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="foo",le="10"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="foo",le="+Inf"} 1
+					eventing_epp_backend_duration_milliseconds_sum{code="500",destination_service="foo"} 0
+					eventing_epp_backend_duration_milliseconds_count{code="500",destination_service="foo"} 1
+				`,
 			},
 		},
 	}
