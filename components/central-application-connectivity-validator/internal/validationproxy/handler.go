@@ -250,8 +250,8 @@ func createReverseProxy(log *logger.Logger, destinationHost string, reqOpts ...r
 		},
 		Transport: &http.Transport{
 			DialContext: (&net.Dialer{
-				Timeout:   10 * time.Second,
-				KeepAlive: 10 * time.Second,
+				Timeout:   20 * time.Second,
+				KeepAlive: 20 * time.Second,
 			}).DialContext,
 			MaxIdleConns:          400,
 			DisableKeepAlives:     false,
