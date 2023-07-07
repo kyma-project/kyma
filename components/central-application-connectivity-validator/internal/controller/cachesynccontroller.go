@@ -27,8 +27,7 @@ func NewController(log *logger.Logger, client client.Client, appCache *gocache.C
 }
 
 func (c *controller) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
-	//return ctrl.Result{}, c.cacheSync.Sync(ctx, request.Name)
-	return ctrl.Result{}, nil
+	return ctrl.Result{}, c.cacheSync.Sync(ctx, request.Name)
 }
 
 func (c *controller) SetupWithManager(mgr ctrl.Manager) error {

@@ -2,6 +2,8 @@ package validationproxy
 
 import (
 	"crypto/x509/pkix"
+	"github.com/gorilla/mux"
+	"github.com/kyma-project/kyma/components/central-application-connectivity-validator/internal/httptools"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -70,42 +72,32 @@ func NewProxyHandler(
 }
 
 func (ph *proxyHandler) ProxyAppConnectorRequests(w http.ResponseWriter, r *http.Request) {
-	//certInfoData := r.Header.Get(CertificateInfoHeader)
-	//if certInfoData == "" {
-	//	httptools.RespondWithError(ph.log.WithTracing(r.Context()).With("handler", handlerName), w, apperrors.Internal("%s header not found", CertificateInfoHeader))
-	//	return
-	//}
+	certInfoData := r.Header.Get(CertificateInfoHeader)
+	if certInfoData == "" {
+		httptools.RespondWithError(ph.log.WithTracing(r.Context()).With("handler", handlerName), w, apperrors.Internal("%s header not found", CertificateInfoHeader))
+		return
+	}
 
-	//applicationName := mux.Vars(r)["application"]
-	//if applicationName == "" {
-	//	httptools.RespondWithError(ph.log.WithTracing(r.Context()).With("handler", handlerName), w, apperrors.BadRequest("application name not specified"))
-	//	return
-	//}
+	applicationName := mux.Vars(r)["application"]
+	if applicationName == "" {
+		httptools.RespondWithError(ph.log.WithTracing(r.Context()).With("handler", handlerName), w, apperrors.BadRequest("application name not specified"))
+		return
+	}
 
-	//ph.log.WithTracing(r.Context()).With("handler", handlerName).With("application", applicationName).With("proxyPath", r.URL.Path).Infof("Proxying request for application...")
+	ph.log.WithTracing(r.Context()).With("handler", handlerName).With("application", applicationName).With("proxyPath", r.URL.Path).Infof("Proxying request for application...")
 
-	//applicationClientIDs, err := ph.getCompassMetadataClientIDs(applicationName)
-	//if err != nil {
-	//	httptools.RespondWithError(ph.log.WithTracing(r.Context()).With("handler", handlerName).With("applicationName", applicationName), w, apperrors.NotFound("while getting application ClientIds: %s", err))
-	//	return
-	//}
+	applicationClientIDs, err := ph.getCompassMetadataClientIDs(applicationName)
+	if err != nil {
+		httptools.RespondWithError(ph.log.WithTracing(r.Context()).With("handler", handlerName).With("applicationName", applicationName), w, apperrors.NotFound("while getting application ClientIds: %s", err))
+		return
+	}
 
-	// TODO race check
+	subjects := ph.extractSubjects(certInfoData)
 
-	//applicationClientIDs := []string{"clientId1", "clientId2"}
-
-	//	ph.log.WithTracing(r.Context()).With("handler", handlerName).With("application", applicationName).With("proxyPath", r.URL.Path).With("CertInfoData", certInfoData).Infof("Debug cert info")
-
-	//subjects := ph.extractSubjects(certInfoData)
-
-	//for _, s := range subjects {
-	//	ph.log.WithTracing(r.Context()).With("handler", handlerName).With("application", applicationName).With("proxyPath", r.URL.Path).With("Subject", s).Infof("Debug cert header...")
-	//}
-	//
-	//if !hasValidSubject(subjects, applicationClientIDs, applicationName) {
-	//	httptools.RespondWithError(ph.log.WithTracing(r.Context()).With("handler", handlerName).With("applicationName", applicationName), w, apperrors.Forbidden("no valid subject found"))
-	//	return
-	//}
+	if !hasValidSubject(subjects, applicationClientIDs, applicationName) {
+		httptools.RespondWithError(ph.log.WithTracing(r.Context()).With("handler", handlerName).With("applicationName", applicationName), w, apperrors.Forbidden("no valid subject found"))
+		return
+	}
 
 	//reverseProxy, err := ph.mapRequestToProxy(r.URL.Path, applicationName)
 	//if err != nil {
