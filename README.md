@@ -14,7 +14,7 @@
 Out of the box, Kyma offers various functionalities, such as:  
 
 - [Serverless](https://kyma-project.io/docs/kyma/latest/01-overview/serverless/) development platform to run lightweight Functions in a cost-efficient and scalable way
-- [System connectivity]() that provides endpoint to securely register Events and APIs of external applications
+- [System connectivity](https://kyma-project.io/docs/kyma/latest/01-overview/application-connectivity/) that provides endpoint to securely register Events and APIs of external applications
 - [Eventing](https://kyma-project.io/docs/kyma/latest/01-overview/eventing/) that provides messaging channel to receive events, enrich them, and trigger business flows using Functions or services
 - [Service Mesh](https://kyma-project.io/docs/kyma/latest/01-overview/service-mesh/) for service-to-service communication and proxying
 - [Service Management](https://kyma-project.io/docs/kyma/latest/01-overview/service-management/smgt-01-overview/) to use the built-in cloud services from such cloud providers as GCP, Azure, and AWS
