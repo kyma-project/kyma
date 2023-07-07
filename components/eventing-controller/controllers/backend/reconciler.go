@@ -104,9 +104,8 @@ type Reconciler struct {
 }
 
 func NewReconciler(ctx context.Context, natsSubMgr subscriptionmanager.Manager, natsConfig env.NATSConfig,
-	envCfg env.Config, bebSubMgr subscriptionmanager.Manager, client client.Client, logger *logger.Logger,
+	envCfg env.Config, backendCfg env.BackendConfig, bebSubMgr subscriptionmanager.Manager, client client.Client, logger *logger.Logger,
 	recorder record.EventRecorder) *Reconciler {
-	cfg := env.GetBackendConfig()
 	return &Reconciler{
 		ctx:        ctx,
 		natsSubMgr: natsSubMgr,
@@ -116,7 +115,7 @@ func NewReconciler(ctx context.Context, natsSubMgr subscriptionmanager.Manager, 
 		Client:     client,
 		logger:     logger,
 		record:     recorder,
-		cfg:        cfg,
+		cfg:        backendCfg,
 	}
 }
 
@@ -633,9 +632,9 @@ func (r *Reconciler) CreateOrUpdatePublisherProxy(ctx context.Context, backend e
 		return nil, fmt.Errorf("unknown EventingBackend type %q", backend)
 	}
 
-	if err := r.setAsOwnerReference(ctx, desiredPublisher); err != nil {
-		return nil, errors.Wrapf(err, "set owner reference for Event Publisher failed")
-	}
+	// if err := r.setAsOwnerReference(ctx, desiredPublisher); err != nil {
+	// 	return nil, errors.Wrapf(err, "set owner reference for Event Publisher failed")
+	// }
 
 	currentPublisher, err := r.getEPPDeployment(ctx)
 	if err != nil {
