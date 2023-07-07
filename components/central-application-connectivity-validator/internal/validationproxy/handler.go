@@ -91,7 +91,7 @@ func (ph *proxyHandler) ProxyAppConnectorRequests(w http.ResponseWriter, r *http
 	//	return
 	//}
 
-	applicationClientIDs := []string{"clientId1"}
+	applicationClientIDs := []string{"clientId1", "clientId2"}
 
 	//	ph.log.WithTracing(r.Context()).With("handler", handlerName).With("application", applicationName).With("proxyPath", r.URL.Path).With("CertInfoData", certInfoData).Infof("Debug cert info")
 
