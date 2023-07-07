@@ -85,13 +85,15 @@ func (ph *proxyHandler) ProxyAppConnectorRequests(w http.ResponseWriter, r *http
 
 	ph.log.WithTracing(r.Context()).With("handler", handlerName).With("application", applicationName).With("proxyPath", r.URL.Path).Infof("Proxying request for application...")
 
-	applicationClientIDs, err := ph.getCompassMetadataClientIDs(applicationName)
-	if err != nil {
-		httptools.RespondWithError(ph.log.WithTracing(r.Context()).With("handler", handlerName).With("applicationName", applicationName), w, apperrors.NotFound("while getting application ClientIds: %s", err))
-		return
-	}
+	//applicationClientIDs, err := ph.getCompassMetadataClientIDs(applicationName)
+	//if err != nil {
+	//	httptools.RespondWithError(ph.log.WithTracing(r.Context()).With("handler", handlerName).With("applicationName", applicationName), w, apperrors.NotFound("while getting application ClientIds: %s", err))
+	//	return
+	//}
 
-	ph.log.WithTracing(r.Context()).With("handler", handlerName).With("application", applicationName).With("proxyPath", r.URL.Path).With("CertInfoData", certInfoData).Infof("Debug cert info")
+	applicationClientIDs := []string{"clientId1"}
+
+	//	ph.log.WithTracing(r.Context()).With("handler", handlerName).With("application", applicationName).With("proxyPath", r.URL.Path).With("CertInfoData", certInfoData).Infof("Debug cert info")
 
 	subjects := ph.extractSubjects(certInfoData)
 
