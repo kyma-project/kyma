@@ -2,6 +2,7 @@ package validationproxy
 
 import (
 	"crypto/x509/pkix"
+	"net"
 	"net/http"
 	"net/http/httputil"
 	"regexp"
@@ -241,6 +242,7 @@ func extractSubject(subject string) map[string]string {
 }
 
 func createReverseProxy(log *logger.Logger, destinationHost string, reqOpts ...requestOption) *httputil.ReverseProxy {
+
 	return &httputil.ReverseProxy{
 		Director: func(request *http.Request) {
 			request.URL.Host = destinationHost
@@ -253,6 +255,20 @@ func createReverseProxy(log *logger.Logger, destinationHost string, reqOpts ...r
 		ModifyResponse: func(response *http.Response) error {
 			log.WithContext().With("handler", handlerName).Infof("Host responded with status %s", response.Status)
 			return nil
+		},
+		Transport: &http.Transport{
+			DialContext: (&net.Dialer{
+				Timeout:   10 * time.Second,
+				KeepAlive: 10 * time.Second,
+			}).DialContext,
+			MaxIdleConns:          400,
+			DisableKeepAlives:     false,
+			MaxIdleConnsPerHost:   200,
+			MaxConnsPerHost:       200,
+			ForceAttemptHTTP2:     false,
+			IdleConnTimeout:       10 * time.Second,
+			ExpectContinueTimeout: 5 * time.Second,
+			TLSHandshakeTimeout:   1 * time.Second,
 		},
 	}
 }
