@@ -136,12 +136,12 @@ describe('Telemetry Operator', function() {
   });
 
   context('Configurable Logging', function() {
-    context('Default Loki LogPipeline', function() {
+    context('Custom Loki LogPipeline', function() {
       it('Should be \'Running\'', async function() {
-        await waitForLogPipelineStatusRunning('loki');
+        await waitForLogPipelineStatusRunning('loki-test');
       });
 
-      it('Should push system logs to Kyma Loki', async function() {
+      it('Should push system logs to Loki', async function() {
         const labels = '{namespace="kyma-system", job="telemetry-fluent-bit"}';
         const logsPresent = await logsPresentInLoki(labels, testStartTimestamp, 10);
         assert.isTrue(logsPresent, 'No logs present in Loki with namespace="kyma-system"');
