@@ -42,7 +42,6 @@ func (cs *CompassRuntimeAgentSuite) TestApplication() {
 	cs.NoError(err)
 
 	// Compare Application created by Compass Runtime Agent with expected result
-
 	cs.Run("Compass Runtime Agent should create Application", func() {
 		err = cs.appComparator.Compare(cs.T(), expectedAppName, synchronizedCompassAppName)
 		cs.NoError(err)
