@@ -20,9 +20,9 @@ type controller struct {
 	cacheSync CacheSync
 }
 
-func NewController(log *logger.Logger, client client.Client, appCache *gocache.Cache) Controller {
+func NewController(log *logger.Logger, client client.Client, appCache *gocache.Cache, eventingPathPrefixV1, eventingPathPrefixV2, eventingPathPrefixEvents, appNamePlaceholder string) Controller {
 	return &controller{
-		cacheSync: NewCacheSync(log, client, appCache, "cache_sync_controller"),
+		cacheSync: NewCacheSync(log, client, appCache, "cache_sync_controller", eventingPathPrefixV1, eventingPathPrefixV2, eventingPathPrefixEvents, appNamePlaceholder),
 	}
 }
 

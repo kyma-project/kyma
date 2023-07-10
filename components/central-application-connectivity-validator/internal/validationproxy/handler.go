@@ -3,6 +3,7 @@ package validationproxy
 import (
 	"crypto/x509/pkix"
 	"github.com/gorilla/mux"
+	"github.com/kyma-project/kyma/components/central-application-connectivity-validator/internal/controller"
 	"github.com/kyma-project/kyma/components/central-application-connectivity-validator/internal/httptools"
 	"net"
 	"net/http"
@@ -111,38 +112,53 @@ func (ph *proxyHandler) ProxyAppConnectorRequests(w http.ResponseWriter, r *http
 func (ph *proxyHandler) getCompassMetadataClientIDs(applicationName string) ([]string, apperrors.AppError) {
 	applicationClientIDs, found := ph.getClientIDsFromCache(applicationName)
 	if !found {
-		err := apperrors.NotFound("application with name %s is not found in the cache. Please retry", applicationName)
+		err := apperrors.NotFound("application data for name %s is not found in the cache. Please retry", applicationName)
 		return nil, err
 	}
 	return applicationClientIDs, nil
 }
 
 func (ph *proxyHandler) getClientIDsFromCache(applicationName string) ([]string, bool) {
-	clientIDs, found := ph.cache.Get(applicationName)
+	appData, found := ph.cache.Get(applicationName)
 	if !found {
 		// try to lazy load the application, maybe we are just starting now
 		return []string{}, found
 	}
-	return clientIDs.([]string), found
+
+	appInfo := appData.(controller.CachedAppData)
+
+	return appInfo.ClientIDs, found
 }
 
 func (ph *proxyHandler) mapRequestToProxy(path string, applicationName string) (*httputil.ReverseProxy, apperrors.AppError) {
+
+	appData, found := ph.cache.Get(applicationName)
+
+	if !found {
+		return nil, apperrors.NotFound("application data for name %s is not found in the cache. Please retry", applicationName)
+	}
+
+	appInfo := appData.(controller.CachedAppData)
+
 	switch {
+
 	// legacy-events reaching /{application}/v1/events are routed to /{application}/v1/events endpoint of event-publisher-proxy
-	case strings.HasPrefix(path, ph.getApplicationPrefix(ph.eventingPathPrefixV1, applicationName)):
+	case strings.HasPrefix(path, appInfo.AppPathPrefixV1):
 		return ph.legacyEventsProxy, nil
 
 	// cloud-events reaching /{application}/v2/events or /{application}/events are routed to /publish endpoint of event-publisher-proxy
-	case strings.HasPrefix(path, ph.getApplicationPrefix(ph.eventingPathPrefixV2, applicationName)):
+	case strings.HasPrefix(path, appInfo.AppPathPrefixV2):
 		return ph.cloudEventsProxy, nil
 
 	// cloud-events reaching /{application}/events are routed to /publish endpoint of event-publisher-proxy
-	case strings.HasPrefix(path, ph.getApplicationPrefix(ph.eventingPathPrefixEvents, applicationName)):
+	case strings.HasPrefix(path, appInfo.AppPathPrefixEvents):
 		return ph.cloudEventsProxy, nil
 	}
 
 	return nil, apperrors.NotFound("could not determine destination host, requested resource not found")
 }
+
+// /event-test-compass/v1/events
 
 func (ph *proxyHandler) getApplicationPrefix(path string, applicationName string) string {
 	if ph.appNamePlaceholder != "" {
@@ -251,8 +267,8 @@ func createReverseProxy(log *logger.Logger, destinationHost string, reqOpts ...r
 		},
 		Transport: &http.Transport{
 			DialContext: (&net.Dialer{
-				Timeout:   20 * time.Second,
-				KeepAlive: 20 * time.Second,
+				Timeout:   30 * time.Second,
+				KeepAlive: 30 * time.Second,
 			}).DialContext,
 			MaxIdleConns:          400,
 			DisableKeepAlives:     false,
@@ -260,8 +276,8 @@ func createReverseProxy(log *logger.Logger, destinationHost string, reqOpts ...r
 			MaxConnsPerHost:       200,
 			ForceAttemptHTTP2:     false,
 			IdleConnTimeout:       10 * time.Second,
-			ExpectContinueTimeout: 5 * time.Second,
-			TLSHandshakeTimeout:   1 * time.Second,
+			TLSHandshakeTimeout:   10 * time.Second,
+			ExpectContinueTimeout: 1 * time.Second,
 		},
 	}
 }

@@ -7,6 +7,7 @@ import (
 	gocache "github.com/patrickmn/go-cache"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"strings"
 )
 
 type CacheSync interface {
@@ -15,18 +16,33 @@ type CacheSync interface {
 }
 
 type cacheSync struct {
-	client         client.Reader
-	appCache       *gocache.Cache
-	log            *logger.Logger
-	controllerName string
+	client                   client.Reader
+	appCache                 *gocache.Cache
+	log                      *logger.Logger
+	controllerName           string
+	eventingPathPrefixV1     string
+	eventingPathPrefixV2     string
+	eventingPathPrefixEvents string
+	appNamePlaceholder       string
 }
 
-func NewCacheSync(log *logger.Logger, client client.Reader, appCache *gocache.Cache, controllerName string) CacheSync {
+type CachedAppData struct {
+	ClientIDs           []string
+	AppPathPrefixV1     string
+	AppPathPrefixV2     string
+	AppPathPrefixEvents string
+}
+
+func NewCacheSync(log *logger.Logger, client client.Reader, appCache *gocache.Cache, controllerName, eventingPathPrefixV1, eventingPathPrefixV2, eventingPathPrefixEvents, appNamePlaceholder string) CacheSync {
 	return &cacheSync{
-		client:         client,
-		appCache:       appCache,
-		log:            log,
-		controllerName: controllerName,
+		client:                   client,
+		appCache:                 appCache,
+		log:                      log,
+		controllerName:           controllerName,
+		eventingPathPrefixV1:     eventingPathPrefixV1,
+		eventingPathPrefixV2:     eventingPathPrefixV2,
+		eventingPathPrefixEvents: eventingPathPrefixEvents,
+		appNamePlaceholder:       appNamePlaceholder,
 	}
 }
 
@@ -84,18 +100,36 @@ func (c *cacheSync) syncApplication(application *v1alpha1.Application) error {
 		return nil
 	}
 
-	applicationClientIDs := c.getClientIDsFromResource(application)
-	c.appCache.Set(key, applicationClientIDs, gocache.DefaultExpiration)
+	applicationInfo := c.getAppDataFromResource(application)
+	c.appCache.Set(key, applicationInfo, gocache.DefaultExpiration)
 	c.log.WithContext().
 		With("controller", c.controllerName).
 		With("name", application.Name).
-		Infof("Added/Updated the application in the cache with values %v.", applicationClientIDs)
+		Infof("Added/Updated the application in the cache with values %v.", applicationInfo)
 	return nil
 }
 
-func (c *cacheSync) getClientIDsFromResource(application *v1alpha1.Application) []string {
+func (c *cacheSync) getAppDataFromResource(application *v1alpha1.Application) CachedAppData {
+
+	var appData CachedAppData
+
+	appData.AppPathPrefixV1 = c.getApplicationPrefix(c.eventingPathPrefixV1, application.Name)
+	appData.AppPathPrefixV2 = c.getApplicationPrefix(c.eventingPathPrefixV2, application.Name)
+	appData.AppPathPrefixEvents = c.getApplicationPrefix(c.eventingPathPrefixEvents, application.Name)
+
 	if application.Spec.CompassMetadata == nil {
-		return []string{}
+		appData.ClientIDs = []string{}
+	} else {
+		appData.ClientIDs = make([]string, len(application.Spec.CompassMetadata.Authentication.ClientIds))
+		copy(appData.ClientIDs, application.Spec.CompassMetadata.Authentication.ClientIds)
 	}
-	return application.Spec.CompassMetadata.Authentication.ClientIds
+
+	return appData
+}
+
+func (c *cacheSync) getApplicationPrefix(path string, applicationName string) string {
+	if c.appNamePlaceholder != "" {
+		return strings.ReplaceAll(path, c.appNamePlaceholder, applicationName)
+	}
+	return path
 }
