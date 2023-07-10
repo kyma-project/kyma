@@ -33,16 +33,16 @@ type CachedAppData struct {
 	AppPathPrefixEvents string
 }
 
-func NewCacheSync(log *logger.Logger, client client.Reader, appCache *gocache.Cache, controllerName, eventingPathPrefixV1, eventingPathPrefixV2, eventingPathPrefixEvents, appNamePlaceholder string) CacheSync {
+func NewCacheSync(log *logger.Logger, client client.Reader, appCache *gocache.Cache, controllerName, appNamePlaceholder, eventingPathPrefixV1, eventingPathPrefixV2, eventingPathPrefixEvents string) CacheSync {
 	return &cacheSync{
 		client:                   client,
 		appCache:                 appCache,
 		log:                      log,
 		controllerName:           controllerName,
+		appNamePlaceholder:       appNamePlaceholder,
 		eventingPathPrefixV1:     eventingPathPrefixV1,
 		eventingPathPrefixV2:     eventingPathPrefixV2,
 		eventingPathPrefixEvents: eventingPathPrefixEvents,
-		appNamePlaceholder:       appNamePlaceholder,
 	}
 }
 
