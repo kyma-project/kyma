@@ -4,6 +4,7 @@ helmValues:
     priorityClassName: "kyma-system-priority"
     imagePullPolicy: IfNotPresent
     proxy:
+      tracer: none
       readinessFailureThreshold: 40
       readinessInitialDelaySeconds: 5
       readinessPeriodSeconds: 5
@@ -43,10 +44,6 @@ meshConfig:
     tracing: []
   defaultConfig:
     holdApplicationUntilProxyStarts: true
-    tracing:
-      zipkin:
-        # workaround till https://github.com/istio/istio/issues/45890 is solved
-        address: 127.0.0.1:9411
   enablePrometheusMerge: false
   enableTracing: false
   extensionProviders:
