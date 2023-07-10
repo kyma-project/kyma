@@ -25,6 +25,34 @@ func TestCacheSync(t *testing.T) {
 		require.False(t, found)
 	}
 
+	emptyAppData := CachedAppData{}
+
+	//appNamePlaceholder:       "%%APP_NAME%%",
+	//	eventingPathPrefixV1:     "/%%APP_NAME%%/v1/events",
+	//		eventingPathPrefixV2:     "/%%APP_NAME%%/v2/events",
+	//		eventingPathPrefixEvents: "/%%APP_NAME%%/events",
+
+	appDataNoClients := CachedAppData{
+		ClientIDs:           []string{},
+		AppPathPrefixV1:     "/my-app/v1/events",
+		AppPathPrefixV2:     "/my-app/v2/events",
+		AppPathPrefixEvents: "/my-app/events",
+	}
+
+	appData2Clients := CachedAppData{
+		ClientIDs:           []string{"client-1", "client-2"},
+		AppPathPrefixV1:     "/my-app/v1/events",
+		AppPathPrefixV2:     "/my-app/v2/events",
+		AppPathPrefixEvents: "/my-app/events",
+	}
+
+	appData1Client := CachedAppData{
+		ClientIDs:           []string{"client-1"},
+		AppPathPrefixV1:     "/my-app/v1/events",
+		AppPathPrefixV2:     "/my-app/v2/events",
+		AppPathPrefixEvents: "/my-app/events",
+	}
+
 	tests := []struct {
 		name  string
 		setup setup
@@ -37,12 +65,12 @@ func TestCacheSync(t *testing.T) {
 		{
 			name: "Remove application from cache",
 			setup: func(t *testing.T, applicationName string, fc *fakeClient, appCache *cache.Cache) {
-				appCache.Set(applicationName, []string{}, cache.DefaultExpiration)
+				appCache.Set(applicationName, emptyAppData, cache.DefaultExpiration)
 			},
 			check: notFoundInCache,
 		},
 		{
-			name: "Add new application to cache without compass metadata",
+			name: "Add new application to cache without compass metadata and generate endpoints",
 			setup: func(t *testing.T, applicationName string, fc *fakeClient, appCache *cache.Cache) {
 				require.NoError(t, fc.Create(&v1alpha1.Application{
 					ObjectMeta: v1.ObjectMeta{
@@ -53,13 +81,13 @@ func TestCacheSync(t *testing.T) {
 			check: func(t *testing.T, applicationName string, appCache *cache.Cache) {
 				v, found := appCache.Get(applicationName)
 				require.True(t, found)
-				require.Equal(t, []string{}, v)
+				require.Equal(t, appDataNoClients, v)
 			},
 		},
 		{
 			name: "Overwrite authentication clients in cache",
 			setup: func(t *testing.T, applicationName string, fc *fakeClient, appCache *cache.Cache) {
-				appCache.Set(applicationName, []string{"client-1"}, cache.DefaultExpiration)
+				appCache.Set(applicationName, appData1Client, cache.DefaultExpiration)
 				require.NoError(t, fc.Create(&v1alpha1.Application{
 					ObjectMeta: v1.ObjectMeta{
 						Name: applicationName,
@@ -69,11 +97,11 @@ func TestCacheSync(t *testing.T) {
 			check: func(t *testing.T, applicationName string, appCache *cache.Cache) {
 				v, found := appCache.Get(applicationName)
 				require.True(t, found)
-				require.Equal(t, []string{}, v)
+				require.Equal(t, appDataNoClients, v)
 			},
 		},
 		{
-			name: "Add new application to cache with not authentication clients",
+			name: "Add new application to cache with authentication clients and generate endpoints",
 			setup: func(t *testing.T, applicationName string, fc *fakeClient, appCache *cache.Cache) {
 				require.NoError(t, fc.Create(&v1alpha1.Application{
 					ObjectMeta: v1.ObjectMeta{
@@ -91,7 +119,7 @@ func TestCacheSync(t *testing.T) {
 			check: func(t *testing.T, applicationName string, appCache *cache.Cache) {
 				v, found := appCache.Get(applicationName)
 				require.True(t, found)
-				require.Equal(t, []string{"client-1", "client-2"}, v)
+				require.Equal(t, appData2Clients, v)
 			},
 		},
 		{
@@ -109,6 +137,11 @@ func TestCacheSync(t *testing.T) {
 			},
 			check: notFoundInCache,
 		},
+
+		//appNamePlaceholder:       "%%APP_NAME%%",
+		//	eventingPathPrefixV1:     "/%%APP_NAME%%/v1/events",
+		//		eventingPathPrefixV2:     "/%%APP_NAME%%/v2/events",
+		//		eventingPathPrefixEvents: "/%%APP_NAME%%/events",
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
@@ -123,7 +156,7 @@ func TestCacheSync(t *testing.T) {
 				tc.setup(t, applicationName, fc, appCache)
 			}
 
-			cacheSync := NewCacheSync(log, fc, appCache, "test-controller")
+			cacheSync := NewCacheSync(log, fc, appCache, "test-controller", "%%APP_NAME%%", "/%%APP_NAME%%/v1/events", "/%%APP_NAME%%/v2/events", "/%%APP_NAME%%/events")
 			err = cacheSync.Sync(context.Background(), applicationName)
 			require.NoError(t, err)
 

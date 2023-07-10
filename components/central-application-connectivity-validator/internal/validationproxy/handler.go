@@ -158,15 +158,6 @@ func (ph *proxyHandler) mapRequestToProxy(path string, applicationName string) (
 	return nil, apperrors.NotFound("could not determine destination host, requested resource not found")
 }
 
-// /event-test-compass/v1/events
-
-func (ph *proxyHandler) getApplicationPrefix(path string, applicationName string) string {
-	if ph.appNamePlaceholder != "" {
-		return strings.ReplaceAll(path, ph.appNamePlaceholder, applicationName)
-	}
-	return path
-}
-
 func hasValidSubject(subjects, applicationClientIDs []string, appName string) bool {
 	subjectValidator := newSubjectValidator(applicationClientIDs, appName)
 
