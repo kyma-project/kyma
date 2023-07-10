@@ -44,6 +44,10 @@ func (c *cacheSync) Init(ctx context.Context) error {
 			c.log.WithContext().Infof("No application are present on the cluster")
 		}
 		return err
+	} else {
+		for _, app := range applicationList.Items {
+			c.syncApplication(&app)
+		}
 	}
 	return nil
 }
