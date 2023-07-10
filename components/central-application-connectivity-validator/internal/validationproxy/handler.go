@@ -99,13 +99,13 @@ func (ph *proxyHandler) ProxyAppConnectorRequests(w http.ResponseWriter, r *http
 		return
 	}
 
-	//reverseProxy, err := ph.mapRequestToProxy(r.URL.Path, applicationName)
-	//if err != nil {
-	//	httptools.RespondWithError(ph.log.WithTracing(r.Context()).With("handler", handlerName).With("applicationName", applicationName), w, err)
-	//	return
-	//}
+	reverseProxy, err := ph.mapRequestToProxy(r.URL.Path, applicationName)
+	if err != nil {
+		httptools.RespondWithError(ph.log.WithTracing(r.Context()).With("handler", handlerName).With("applicationName", applicationName), w, err)
+		return
+	}
 
-	ph.legacyEventsProxy.ServeHTTP(w, r)
+	reverseProxy.ServeHTTP(w, r)
 }
 
 func (ph *proxyHandler) getCompassMetadataClientIDs(applicationName string) ([]string, apperrors.AppError) {
@@ -120,6 +120,7 @@ func (ph *proxyHandler) getCompassMetadataClientIDs(applicationName string) ([]s
 func (ph *proxyHandler) getClientIDsFromCache(applicationName string) ([]string, bool) {
 	clientIDs, found := ph.cache.Get(applicationName)
 	if !found {
+		// try to lazy load the application, maybe we are just starting now
 		return []string{}, found
 	}
 	return clientIDs.([]string), found

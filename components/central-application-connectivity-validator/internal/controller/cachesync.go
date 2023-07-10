@@ -2,7 +2,6 @@ package controller
 
 import (
 	"context"
-
 	"github.com/kyma-project/kyma/common/logging/logger"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apis/applicationconnector/v1alpha1"
 	gocache "github.com/patrickmn/go-cache"
@@ -12,6 +11,7 @@ import (
 
 type CacheSync interface {
 	Sync(ctx context.Context, applicationName string) error
+	Init(ctx context.Context) error
 }
 
 type cacheSync struct {
@@ -28,6 +28,24 @@ func NewCacheSync(log *logger.Logger, client client.Reader, appCache *gocache.Ca
 		log:            log,
 		controllerName: controllerName,
 	}
+}
+
+func (c *cacheSync) Init(ctx context.Context) error {
+
+	c.log.WithContext().With("controller", c.controllerName).Infof("Cache initialisation")
+
+	var applicationList v1alpha1.ApplicationList
+
+	if err := c.client.List(ctx, &applicationList); err != nil {
+		err = client.IgnoreNotFound(err)
+		if err != nil {
+			c.log.WithContext().Infof("Unable to read applications")
+		} else {
+			c.log.WithContext().Infof("No application are present on the cluster")
+		}
+		return err
+	}
+	return nil
 }
 
 func (c *cacheSync) Sync(ctx context.Context, applicationName string) error {
