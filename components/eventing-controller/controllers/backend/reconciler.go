@@ -622,6 +622,8 @@ func getSecretStringData(clientID, clientSecret, tokenEndpoint, grantType, publi
 
 func (r *Reconciler) CreateOrUpdatePublisherProxy(ctx context.Context, backend eventingv1alpha1.BackendType) (*appsv1.Deployment, error) {
 	var desiredPublisher *appsv1.Deployment
+	// set backend type here so that the function can be used in eventing-manager
+	r.backendType = backend
 
 	switch backend {
 	case eventingv1alpha1.NatsBackendType:
@@ -632,9 +634,9 @@ func (r *Reconciler) CreateOrUpdatePublisherProxy(ctx context.Context, backend e
 		return nil, fmt.Errorf("unknown EventingBackend type %q", backend)
 	}
 
-	// if err := r.setAsOwnerReference(ctx, desiredPublisher); err != nil {
-	// 	return nil, errors.Wrapf(err, "set owner reference for Event Publisher failed")
-	// }
+	if err := r.setAsOwnerReference(ctx, desiredPublisher); err != nil {
+		return nil, errors.Wrapf(err, "set owner reference for Event Publisher failed")
+	}
 
 	currentPublisher, err := r.getEPPDeployment(ctx)
 	if err != nil {
