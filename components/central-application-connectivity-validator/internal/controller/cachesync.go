@@ -5,15 +5,15 @@ import (
 	"github.com/kyma-project/kyma/common/logging/logger"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apis/applicationconnector/v1alpha1"
 	gocache "github.com/patrickmn/go-cache"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"strings"
 )
 
 type CacheSync interface {
 	Sync(ctx context.Context, applicationName string) error
-	Init(ctx context.Context) error
+	Init(ctx context.Context)
 }
 
 type cacheSync struct {
@@ -47,7 +47,7 @@ func NewCacheSync(log *logger.Logger, client client.Reader, appCache *gocache.Ca
 	}
 }
 
-func (c *cacheSync) Init(ctx context.Context) error {
+func (c *cacheSync) Init(ctx context.Context) {
 
 	c.log.WithContext().With("controller", c.controllerName).Infof("Cache initialisation")
 
@@ -56,19 +56,15 @@ func (c *cacheSync) Init(ctx context.Context) error {
 
 	if apierrors.IsNotFound(err) {
 		c.log.WithContext().Infof("No application are present on the cluster")
-		return nil
 	}
 
 	if err != nil {
-		c.log.WithContext().Infof("Unable to read applications")
-		return err
+		c.log.WithContext().Warnf("Unable to read applications")
 	}
 
 	for _, app := range applicationList.Items {
 		c.syncApplication(&app)
 	}
-
-	return nil
 }
 
 func (c *cacheSync) Sync(ctx context.Context, applicationName string) error {
@@ -89,10 +85,11 @@ func (c *cacheSync) Sync(ctx context.Context, applicationName string) error {
 		}
 		return err
 	}
-	return c.syncApplication(&application)
+	c.syncApplication(&application)
+	return nil
 }
 
-func (c *cacheSync) syncApplication(application *v1alpha1.Application) error {
+func (c *cacheSync) syncApplication(application *v1alpha1.Application) {
 	key := application.Name
 	if !application.ObjectMeta.DeletionTimestamp.IsZero() {
 		c.appCache.Delete(key)
@@ -100,7 +97,7 @@ func (c *cacheSync) syncApplication(application *v1alpha1.Application) error {
 			With("controller", c.controllerName).
 			With("name", application.Name).
 			Infof("Deleted the application from the cache on graceful deletion.")
-		return nil
+		return
 	}
 
 	applicationInfo := c.getAppDataFromResource(application)
@@ -109,22 +106,18 @@ func (c *cacheSync) syncApplication(application *v1alpha1.Application) error {
 		With("controller", c.controllerName).
 		With("name", application.Name).
 		Infof("Added/Updated the application in the cache with values %v.", applicationInfo)
-	return nil
 }
 
 func (c *cacheSync) getAppDataFromResource(application *v1alpha1.Application) CachedAppData {
 
-	var appData CachedAppData
+	appData := CachedAppData{ClientIDs: []string{}}
 
 	appData.AppPathPrefixV1 = c.getApplicationPrefix(c.eventingPathPrefixV1, application.Name)
 	appData.AppPathPrefixV2 = c.getApplicationPrefix(c.eventingPathPrefixV2, application.Name)
 	appData.AppPathPrefixEvents = c.getApplicationPrefix(c.eventingPathPrefixEvents, application.Name)
 
-	if application.Spec.CompassMetadata == nil {
-		appData.ClientIDs = []string{}
-	} else {
-		appData.ClientIDs = make([]string, len(application.Spec.CompassMetadata.Authentication.ClientIds))
-		copy(appData.ClientIDs, application.Spec.CompassMetadata.Authentication.ClientIds)
+	if application.Spec.CompassMetadata != nil {
+		appData.ClientIDs = append(appData.ClientIDs, application.Spec.CompassMetadata.Authentication.ClientIds...)
 	}
 
 	return appData

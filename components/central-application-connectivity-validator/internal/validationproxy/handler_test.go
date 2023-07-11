@@ -28,9 +28,6 @@ const (
 	applicationMetaName = "test-application-meta"
 	applicationID       = "test-application-id"
 
-	appNamePlaceholder             = "%%APP_NAME%%"
-	eventingPathPrefixV1           = "/%%APP_NAME%%/v1/events"
-	eventingPathPrefixV2           = "/%%APP_NAME%%/v2/events"
 	eventingPathPrefixEvents       = "/%%APP_NAME%%/events"
 	eventingDestinationPathPublish = "/publish"
 )
@@ -208,10 +205,6 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			idCache.Set(testCase.application.Name, appData, cache.NoExpiration)
 
 			proxyHandler := NewProxyHandler(
-				appNamePlaceholder,
-				eventingPathPrefixV1,
-				eventingPathPrefixV2,
-				eventingPathPrefixEvents,
 				eventPublisherProxyHost,
 				eventingDestinationPathPublish,
 				idCache,
@@ -302,10 +295,6 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			idCache := cache.New(time.Minute, time.Minute)
 
 			proxyHandler := NewProxyHandler(
-				appNamePlaceholder,
-				eventingPathPrefixV1,
-				eventingPathPrefixV2,
-				eventingPathPrefixEvents,
 				eventingPublisherHost,
 				eventingDestinationPathPublish,
 				idCache,
@@ -345,10 +334,6 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 		idCache.Set(applicationName, appData, cache.NoExpiration)
 
 		proxyHandler := NewProxyHandler(
-			appNamePlaceholder,
-			eventingPathPrefixV1,
-			eventingPathPrefixV2,
-			eventingPathPrefixEvents,
 			eventingPublisherHost,
 			eventingDestinationPathPublish,
 			idCache,
@@ -391,10 +376,6 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 		idCache.Set(applicationName, appData, cache.NoExpiration)
 
 		proxyHandler := NewProxyHandler(
-			appNamePlaceholder,
-			eventingPathPrefixV1,
-			eventingPathPrefixV2,
-			eventingPathPrefixEvents,
 			eventingPublisherHost,
 			eventingDestinationPathPublish,
 			idCache,
@@ -439,10 +420,6 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			t.Run("should proxy requests in V1 to V1 endpoint of EPP when "+testCase.caseDescription, func(t *testing.T) {
 
 				proxyHandlerBEB := NewProxyHandler(
-					appNamePlaceholder,
-					eventingPathPrefixV1,
-					eventingPathPrefixV2,
-					eventingPathPrefixEvents,
 					eventingPublisherHost,
 					eventingDestinationPathPublish,
 					idCache,
@@ -487,10 +464,6 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				eventPublisherProxyHost := strings.TrimPrefix(eventPublisherProxyServer.URL, "http://")
 
 				proxyHandlerBEB := NewProxyHandler(
-					appNamePlaceholder,
-					eventingPathPrefixV1,
-					eventingPathPrefixV2,
-					eventingPathPrefixEvents,
 					eventPublisherProxyHost, // For a BEB enabled cluster requests to /v2 and /events should be forwarded to Event Publisher Proxy
 					eventingDestinationPathPublish,
 					idCache,
@@ -531,10 +504,6 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				eventPublisherProxyServer := httptest.NewServer(eventPublisherProxyHandler)
 				eventPublisherProxyHost := strings.TrimPrefix(eventPublisherProxyServer.URL, "http://")
 				proxyHandlerBEB := NewProxyHandler(
-					appNamePlaceholder,
-					eventingPathPrefixV1,
-					eventingPathPrefixV2,
-					eventingPathPrefixEvents,
 					eventPublisherProxyHost, // For a BEB enabled cluster requests to /v2 and /events should be forwarded to Event Publisher Proxy
 					eventingDestinationPathPublish,
 					idCache,

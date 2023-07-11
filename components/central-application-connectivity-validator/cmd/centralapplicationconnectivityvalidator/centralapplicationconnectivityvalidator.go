@@ -98,10 +98,6 @@ func main() {
 	})
 
 	proxyHandler := validationproxy.NewProxyHandler(
-		options.appNamePlaceholder,
-		options.eventingPathPrefixV1,
-		options.eventingPathPrefixV2,
-		options.eventingPathPrefixEvents,
 		options.eventingPublisherHost,
 		options.eventingDestinationPath,
 		idCache,

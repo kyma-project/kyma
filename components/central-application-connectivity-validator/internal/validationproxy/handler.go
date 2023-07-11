@@ -32,11 +32,7 @@ type Cache interface {
 }
 
 type proxyHandler struct {
-	appNamePlaceholder       string
-	eventingPathPrefixV1     string
-	eventingPathPrefixV2     string
-	eventingPathPrefixEvents string
-	eventingPublisherHost    string
+	eventingPublisherHost string
 
 	legacyEventsProxy *httputil.ReverseProxy
 	cloudEventsProxy  *httputil.ReverseProxy
@@ -48,20 +44,12 @@ type proxyHandler struct {
 }
 
 func NewProxyHandler(
-	appNamePlaceholder string,
-	eventingPathPrefixV1 string,
-	eventingPathPrefixV2 string,
-	eventingPathPrefixEvents string,
 	eventingPublisherHost string,
 	eventingDestinationPath string,
 	cache Cache,
 	log *logger.Logger) *proxyHandler {
 	return &proxyHandler{
-		appNamePlaceholder:       appNamePlaceholder,
-		eventingPathPrefixV1:     eventingPathPrefixV1,
-		eventingPathPrefixV2:     eventingPathPrefixV2,
-		eventingPathPrefixEvents: eventingPathPrefixEvents,
-		eventingPublisherHost:    eventingPublisherHost,
+		eventingPublisherHost: eventingPublisherHost,
 
 		legacyEventsProxy: createReverseProxy(log, eventingPublisherHost, withEmptyRequestHost, withEmptyXFwdClientCert, withHTTPScheme),
 		cloudEventsProxy:  createReverseProxy(log, eventingPublisherHost, withRewriteBaseURL(eventingDestinationPath), withEmptyRequestHost, withEmptyXFwdClientCert, withHTTPScheme),
@@ -121,7 +109,6 @@ func (ph *proxyHandler) getCompassMetadataClientIDs(applicationName string) ([]s
 func (ph *proxyHandler) getClientIDsFromCache(applicationName string) ([]string, bool) {
 	appData, found := ph.cache.Get(applicationName)
 	if !found {
-		// try to lazy load the application, maybe we are just starting now
 		return []string{}, found
 	}
 
