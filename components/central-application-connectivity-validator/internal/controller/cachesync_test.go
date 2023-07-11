@@ -27,10 +27,6 @@ func TestCacheSync(t *testing.T) {
 
 	emptyAppData := CachedAppData{}
 
-	//appNamePlaceholder:       "%%APP_NAME%%",
-	//	eventingPathPrefixV1:     "/%%APP_NAME%%/v1/events",
-	//		eventingPathPrefixV2:     "/%%APP_NAME%%/v2/events",
-	//		eventingPathPrefixEvents: "/%%APP_NAME%%/events",
 
 	appDataNoClients := CachedAppData{
 		ClientIDs:           []string{},
@@ -137,11 +133,6 @@ func TestCacheSync(t *testing.T) {
 			},
 			check: notFoundInCache,
 		},
-
-		//appNamePlaceholder:       "%%APP_NAME%%",
-		//	eventingPathPrefixV1:     "/%%APP_NAME%%/v1/events",
-		//		eventingPathPrefixV2:     "/%%APP_NAME%%/v2/events",
-		//		eventingPathPrefixEvents: "/%%APP_NAME%%/events",
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {

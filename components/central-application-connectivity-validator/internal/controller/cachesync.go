@@ -7,6 +7,7 @@ import (
 	gocache "github.com/patrickmn/go-cache"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"strings"
 )
 
@@ -51,20 +52,22 @@ func (c *cacheSync) Init(ctx context.Context) error {
 	c.log.WithContext().With("controller", c.controllerName).Infof("Cache initialisation")
 
 	var applicationList v1alpha1.ApplicationList
+	err := c.client.List(ctx, &applicationList)
 
-	if err := c.client.List(ctx, &applicationList); err != nil {
-		err = client.IgnoreNotFound(err)
-		if err != nil {
-			c.log.WithContext().Infof("Unable to read applications")
-		} else {
-			c.log.WithContext().Infof("No application are present on the cluster")
-		}
-		return err
-	} else {
-		for _, app := range applicationList.Items {
-			c.syncApplication(&app)
-		}
+	if apierrors.IsNotFound(err) {
+		c.log.WithContext().Infof("No application are present on the cluster")
+		return nil
 	}
+
+	if err != nil {
+		c.log.WithContext().Infof("Unable to read applications")
+		return err
+	}
+
+	for _, app := range applicationList.Items {
+		c.syncApplication(&app)
+	}
+
 	return nil
 }
 
