@@ -15,6 +15,31 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+var (
+	emptyAppData = CachedAppData{}
+
+	appDataNoClients = CachedAppData{
+		ClientIDs:           []string{},
+		AppPathPrefixV1:     "/my-app/v1/events",
+		AppPathPrefixV2:     "/my-app/v2/events",
+		AppPathPrefixEvents: "/my-app/events",
+	}
+
+	appData2Clients = CachedAppData{
+		ClientIDs:           []string{"client-1", "client-2"},
+		AppPathPrefixV1:     "/my-app/v1/events",
+		AppPathPrefixV2:     "/my-app/v2/events",
+		AppPathPrefixEvents: "/my-app/events",
+	}
+
+	appData1Client = CachedAppData{
+		ClientIDs:           []string{"client-1"},
+		AppPathPrefixV1:     "/my-app/v1/events",
+		AppPathPrefixV2:     "/my-app/v2/events",
+		AppPathPrefixEvents: "/my-app/events",
+	}
+)
+
 func TestCacheSync(t *testing.T) {
 	const name = "my-app"
 	type setup func(t *testing.T, applicationName string, fc *fakeClient, cache *cache.Cache)
@@ -23,29 +48,6 @@ func TestCacheSync(t *testing.T) {
 	notFoundInCache := func(t *testing.T, applicationName string, appCache *cache.Cache) {
 		_, found := appCache.Get(applicationName)
 		require.False(t, found)
-	}
-
-	emptyAppData := CachedAppData{}
-
-	appDataNoClients := CachedAppData{
-		ClientIDs:           []string{},
-		AppPathPrefixV1:     "/my-app/v1/events",
-		AppPathPrefixV2:     "/my-app/v2/events",
-		AppPathPrefixEvents: "/my-app/events",
-	}
-
-	appData2Clients := CachedAppData{
-		ClientIDs:           []string{"client-1", "client-2"},
-		AppPathPrefixV1:     "/my-app/v1/events",
-		AppPathPrefixV2:     "/my-app/v2/events",
-		AppPathPrefixEvents: "/my-app/events",
-	}
-
-	appData1Client := CachedAppData{
-		ClientIDs:           []string{"client-1"},
-		AppPathPrefixV1:     "/my-app/v1/events",
-		AppPathPrefixV2:     "/my-app/v2/events",
-		AppPathPrefixEvents: "/my-app/events",
 	}
 
 	tests := []struct {
@@ -163,20 +165,6 @@ func TestCacheInit(t *testing.T) {
 	notFoundInCache := func(t *testing.T, applicationName string, appCache *cache.Cache) {
 		_, found := appCache.Get(applicationName)
 		require.False(t, found)
-	}
-
-	appDataNoClients := CachedAppData{
-		ClientIDs:           []string{},
-		AppPathPrefixV1:     "/my-app/v1/events",
-		AppPathPrefixV2:     "/my-app/v2/events",
-		AppPathPrefixEvents: "/my-app/events",
-	}
-
-	appData2Clients := CachedAppData{
-		ClientIDs:           []string{"client-1", "client-2"},
-		AppPathPrefixV1:     "/my-app/v1/events",
-		AppPathPrefixV2:     "/my-app/v2/events",
-		AppPathPrefixEvents: "/my-app/events",
 	}
 
 	tests := []struct {
