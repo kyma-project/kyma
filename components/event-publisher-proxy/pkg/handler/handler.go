@@ -309,6 +309,12 @@ func (h *Handler) sendEventAndRecordMetrics(ctx context.Context, event *cev2even
 	result, err := h.Sender.Send(ctx, event)
 	duration := time.Since(start)
 	if err != nil {
+		status := 500
+		if result != nil {
+			status = result.HTTPStatus()
+		}
+		h.collector.RecordBackendLatency(duration, status, host)
+		h.collector.RecordBackendRequests(status, host)
 		h.collector.RecordBackendError()
 		return nil, err
 	}
