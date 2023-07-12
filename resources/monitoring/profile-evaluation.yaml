@@ -10,6 +10,10 @@ prometheus:
     retention: 6h
     retentionSize: 1GB
 
+grafana:
+  persistence:
+    enabled: "false"
+
 prometheusOperator:
   resources:
     limits:
