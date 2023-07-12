@@ -250,7 +250,7 @@ func createReverseProxy(log *logger.Logger, destinationHost string, reqOpts ...r
 			}).DialContext,
 			MaxIdleConns:          400,
 			DisableKeepAlives:     false,
-			MaxIdleConnsPerHost:   2,
+			MaxIdleConnsPerHost:   5,
 			MaxConnsPerHost:       40,
 			ForceAttemptHTTP2:     false,
 			IdleConnTimeout:       10 * time.Second,
