@@ -6,7 +6,7 @@ title: Function debugger stops at dependency files
 
 ## Symptom
 
-If you debug your Function in `runtime=nodejs16` and you set a breakpoint in the first line of the main Function, the debugger can stop at dependencies.
+If you debug your Function in `runtime=nodejs18` and you set a breakpoint in the first line of the main Function, the debugger can stop at dependencies.
 
 ## Cause
 

@@ -9,24 +9,18 @@ import (
 	"testing"
 	"time"
 
-	eventmeshsubmatchers "github.com/kyma-project/kyma/components/eventing-controller/testing/eventmeshsub"
-
-	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	eventMeshtypes "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
-
-	"github.com/stretchr/testify/assert"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
-
 	"github.com/onsi/gomega"
 	gomegatypes "github.com/onsi/gomega/types"
-
+	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
+	eventMeshtypes "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
+	eventmeshsubmatchers "github.com/kyma-project/kyma/components/eventing-controller/testing/eventmeshsub"
 )
 
 const (
@@ -705,7 +699,12 @@ func Test_FixingSinkAndApiRule(t *testing.T) {
 			getAPIRuleAssert(ctx, g, &apiRuleUpdated).Should(gomega.And(
 				reconcilertesting.HaveNotEmptyHost(),
 				reconcilertesting.HaveNotEmptyAPIRule(),
-				reconcilertesting.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, sinkPath),
+				reconcilertesting.HaveAPIRuleSpecRules(
+					acceptableMethods,
+					object.OAuthHandlerNameJWT,
+					certsURL,
+					sinkPath,
+				),
 				reconcilertesting.HaveAPIRuleOwnersRefs(givenSubscription.UID),
 			))
 
@@ -891,8 +890,18 @@ func Test_APIRuleReUseAfterUpdatingSink(t *testing.T) {
 	getAPIRuleAssert(ctx, g, apiRule1).Should(gomega.And(
 		reconcilertesting.HaveNotEmptyAPIRule(),
 		reconcilertesting.HaveAPIRuleOwnersRefs(createdSubscription1.UID, createdSubscription2.UID),
-		reconcilertesting.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, "/path1"),
-		reconcilertesting.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, "/path2"),
+		reconcilertesting.HaveAPIRuleSpecRules(
+			acceptableMethods,
+			object.OAuthHandlerNameJWT,
+			certsURL,
+			"/path1",
+		),
+		reconcilertesting.HaveAPIRuleSpecRules(
+			acceptableMethods,
+			object.OAuthHandlerNameJWT,
+			certsURL,
+			"/path2",
+		),
 	))
 
 	// phase 4: check that the unused APIRule is deleted.
@@ -950,8 +959,18 @@ func Test_APIRuleExistsAfterDeletingSub(t *testing.T) {
 	getAPIRuleAssert(ctx, g, apiRule1).Should(gomega.And(
 		reconcilertesting.HaveNotEmptyAPIRule(),
 		reconcilertesting.HaveAPIRuleOwnersRefs(createdSubscription1.UID, createdSubscription2.UID),
-		reconcilertesting.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, "/path1"),
-		reconcilertesting.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, "/path2"),
+		reconcilertesting.HaveAPIRuleSpecRules(
+			acceptableMethods,
+			object.OAuthHandlerNameJWT,
+			certsURL,
+			"/path1",
+		),
+		reconcilertesting.HaveAPIRuleSpecRules(
+			acceptableMethods,
+			object.OAuthHandlerNameJWT,
+			certsURL,
+			"/path2",
+		),
 	))
 	ensureAPIRuleStatusUpdatedWithStatusReady(ctx, t, apiRule1)
 
@@ -968,12 +987,22 @@ func Test_APIRuleExistsAfterDeletingSub(t *testing.T) {
 		reconcilertesting.HaveNotEmptyHost(),
 		reconcilertesting.HaveNotEmptyAPIRule(),
 		reconcilertesting.HaveAPIRuleOwnersRefs(createdSubscription1.UID),
-		reconcilertesting.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, "/path1"),
+		reconcilertesting.HaveAPIRuleSpecRules(
+			acceptableMethods,
+			object.OAuthHandlerNameJWT,
+			certsURL,
+			"/path1",
+		),
 	))
 	// ensure that the deleted Subscription is removed as Owner from the APIRule
 	getAPIRuleAssert(ctx, g, apiRule1).ShouldNot(gomega.And(
 		reconcilertesting.HaveAPIRuleOwnersRefs(createdSubscription1.UID),
-		reconcilertesting.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, "/path2"),
+		reconcilertesting.HaveAPIRuleSpecRules(
+			acceptableMethods,
+			object.OAuthHandlerNameJWT,
+			certsURL,
+			"/path2",
+		),
 	))
 }
 

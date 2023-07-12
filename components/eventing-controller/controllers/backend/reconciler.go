@@ -64,6 +64,7 @@ const (
 	secretKeyClientID     = "client_id"
 	secretKeyClientSecret = "client_secret"
 	secretKeyTokenURL     = "token_url"
+	secretKeyCertsURL     = "certs_url"
 )
 
 var (
@@ -81,6 +82,7 @@ type oauth2Credentials struct {
 	clientID     []byte
 	clientSecret []byte
 	tokenURL     []byte
+	certsURL     []byte
 }
 
 type Reconciler struct {
@@ -322,7 +324,7 @@ func (r *Reconciler) syncOauth2ClientIDAndSecret(ctx context.Context, backendSta
 	}
 	oauth2CredentialsNotFound := k8serrors.IsNotFound(err)
 	oauth2CredentialsChanged := false
-	if err == nil {
+	if err == nil && r.isOauth2CredentialsInitialized() {
 		oauth2CredentialsChanged = !bytes.Equal(r.credentials.clientID, credentials.clientID) ||
 			!bytes.Equal(r.credentials.clientSecret, credentials.clientSecret) ||
 			!bytes.Equal(r.credentials.tokenURL, credentials.tokenURL)
@@ -344,10 +346,11 @@ func (r *Reconciler) syncOauth2ClientIDAndSecret(ctx context.Context, backendSta
 	if oauth2CredentialsNotFound {
 		return err
 	}
-	if oauth2CredentialsChanged {
+	if oauth2CredentialsChanged || !r.isOauth2CredentialsInitialized() {
 		r.credentials.clientID = credentials.clientID
 		r.credentials.clientSecret = credentials.clientSecret
 		r.credentials.tokenURL = credentials.tokenURL
+		r.credentials.certsURL = credentials.certsURL
 	}
 	return nil
 }
@@ -732,7 +735,7 @@ func (r *Reconciler) getOAuth2SecretNamespacedName() types.NamespacedName {
 func (r *Reconciler) getOAuth2ClientCredentials(ctx context.Context) (*oauth2Credentials, error) {
 	var err error
 	var exists bool
-	var clientID, clientSecret, tokenURL []byte
+	var clientID, clientSecret, tokenURL, certsURL []byte
 
 	oauth2Secret := new(v1.Secret)
 	oauth2SecretNamespacedName := r.getOAuth2SecretNamespacedName()
@@ -744,27 +747,51 @@ func (r *Reconciler) getOAuth2ClientCredentials(ctx context.Context) (*oauth2Cre
 			oauth2SecretNamespacedName.Namespace, oauth2SecretNamespacedName.Name)
 		return nil, err
 	}
+
 	if clientID, exists = oauth2Secret.Data[secretKeyClientID]; !exists {
 		err = errors.Errorf("key '%s' not found in secret %s",
 			secretKeyClientID, oauth2SecretNamespacedName.String())
 		return nil, err
 	}
+
 	if clientSecret, exists = oauth2Secret.Data[secretKeyClientSecret]; !exists {
 		err = errors.Errorf("key '%s' not found in secret %s",
 			secretKeyClientSecret, oauth2SecretNamespacedName.String())
 		return nil, err
 	}
+
 	if !featureflags.IsEventingWebhookAuthEnabled() {
 		tokenURL = []byte(r.envCfg.WebhookTokenEndpoint)
-		return &oauth2Credentials{clientID: clientID, clientSecret: clientSecret, tokenURL: tokenURL}, nil
+		certsURL = []byte("")
+		credentials := oauth2Credentials{
+			clientID:     clientID,
+			clientSecret: clientSecret,
+			tokenURL:     tokenURL,
+			certsURL:     certsURL,
+		}
+		return &credentials, nil
 	}
+
 	if tokenURL, exists = oauth2Secret.Data[secretKeyTokenURL]; !exists {
 		err = errors.Errorf("key '%s' not found in secret %s",
 			secretKeyTokenURL, oauth2SecretNamespacedName.String())
 		return nil, err
 	}
 
-	return &oauth2Credentials{clientID: clientID, clientSecret: clientSecret, tokenURL: tokenURL}, nil
+	if certsURL, exists = oauth2Secret.Data[secretKeyCertsURL]; !exists {
+		err = errors.Errorf("key '%s' not found in secret %s",
+			secretKeyCertsURL, oauth2SecretNamespacedName.String())
+		return nil, err
+	}
+
+	credentials := oauth2Credentials{
+		clientID:     clientID,
+		clientSecret: clientSecret,
+		tokenURL:     tokenURL,
+		certsURL:     certsURL,
+	}
+
+	return &credentials, nil
 }
 
 func getDeploymentMapper() handler.EventHandler {
@@ -841,9 +868,10 @@ func (r *Reconciler) stopNATSController() error {
 func (r *Reconciler) startBEBController() error {
 	if !r.bebSubMgrStarted {
 		bebSubMgrParams := subscriptionmanager.Params{
-			subscriptionmanager.ParmaNameClientID:     r.credentials.clientID,
-			subscriptionmanager.ParmaNameClientSecret: r.credentials.clientSecret,
-			subscriptionmanager.ParmaNameTokenURL:     r.credentials.tokenURL,
+			subscriptionmanager.ParamNameClientID:     r.credentials.clientID,
+			subscriptionmanager.ParamNameClientSecret: r.credentials.clientSecret,
+			subscriptionmanager.ParamNameTokenURL:     r.credentials.tokenURL,
+			subscriptionmanager.ParamNameCertsURL:     r.credentials.certsURL,
 		}
 		if err := r.bebSubMgr.Start(r.cfg.DefaultSubscriptionConfig, bebSubMgrParams); err != nil {
 			return xerrors.Errorf("failed to start BEB subscription manager: %v", err)
@@ -970,6 +998,16 @@ func (r *Reconciler) getMutatingAndValidatingWebHookConfig(ctx context.Context) 
 		return nil, nil, pkgerrors.MakeError(errObjectNotFound, err)
 	}
 	return &mutatingWH, &validatingWH, nil
+}
+
+func (r *Reconciler) isOauth2CredentialsInitialized() bool {
+	if featureflags.IsEventingWebhookAuthEnabled() {
+		return len(r.credentials.clientID) > 0 &&
+			len(r.credentials.clientSecret) > 0 &&
+			len(r.credentials.tokenURL) > 0 &&
+			len(r.credentials.certsURL) > 0
+	}
+	return len(r.credentials.clientID) > 0 && len(r.credentials.clientSecret) > 0
 }
 
 func (r *Reconciler) namedLogger() *zap.SugaredLogger {

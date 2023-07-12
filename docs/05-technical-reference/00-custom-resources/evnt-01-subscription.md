@@ -64,13 +64,15 @@ This table lists all the possible parameters of a given resource together with t
 | **backend.&#x200b;emsTypes**  | \[\]object | List of mappings from event type to EventMesh compatible types. Used only with EventMesh as the backend. |
 | **backend.&#x200b;emsTypes.&#x200b;eventMeshType** (required) | string | Event type that is used on the EventMesh backend. |
 | **backend.&#x200b;emsTypes.&#x200b;originalType** (required) | string | Event type that was originally used to subscribe. |
-| **backend.&#x200b;emshash**  | integer | Hash that is used in EventMesh to identify this Subscription. |
+| **backend.&#x200b;emshash**  | integer | Hash used to identify an EventMesh Subscription retrieved from the server without the WebhookAuth config. |
 | **backend.&#x200b;ev2hash**  | integer | Checksum for the Subscription custom resource. |
+| **backend.&#x200b;eventMeshLocalHash**  | integer | Hash used to identify an EventMesh Subscription posted to the server without the WebhookAuth config. |
 | **backend.&#x200b;externalSink**  | string | Webhook URL used by EventMesh to trigger subscribers. |
 | **backend.&#x200b;failedActivation**  | string | Provides the reason if a Subscription failed activation in EventMesh. |
 | **backend.&#x200b;types**  | \[\]object | List of event type to consumer name mappings for the NATS backend. |
 | **backend.&#x200b;types.&#x200b;consumerName**  | string | Name of the JetStream consumer created for the event type. |
 | **backend.&#x200b;types.&#x200b;originalType** (required) | string | Event type that was originally used to subscribe. |
+| **backend.&#x200b;webhookAuthHash**  | integer | Hash used to identify the WebhookAuth of an EventMesh Subscription existing on the server. |
 | **conditions**  | \[\]object | Current state of the Subscription. |
 | **conditions.&#x200b;lastTransitionTime**  | string | Defines the date of the last condition status change. |
 | **conditions.&#x200b;message**  | string | Provides more details about the condition status change. |

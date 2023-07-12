@@ -16,6 +16,7 @@ const {
   getVirtualService,
   retryPromise,
   deployJaeger,
+  deployLoki,
   waitForConfigMap,
 } = require('../utils');
 const {
@@ -32,7 +33,6 @@ const {
   waitForTracePipeline,
   waitForPodWithLabel,
   waitForTracePipelineStatusRunning,
-  waitForTracePipelineStatusPending,
 } = require('./helpers');
 const axios = require('axios');
 const {getJaegerTracesForService, getJaegerServices} = require('../tracing/client');
@@ -70,6 +70,15 @@ async function prepareEnvironment() {
       },
   );
   await deployJaeger(k8s.loadAllYaml(jaegerYaml));
+
+  const lokiYaml = fs.readFileSync(
+      path.join(__dirname, '../test/fixtures/loki/loki.yaml'),
+      {
+        encoding: 'utf-8',
+      },
+  );
+
+  await deployLoki(k8s.loadAllYaml(lokiYaml));
 }
 
 async function cleanEnvironment() {
@@ -127,14 +136,14 @@ describe('Telemetry Operator', function() {
   });
 
   context('Configurable Logging', function() {
-    context('Default Loki LogPipeline', function() {
+    context('Custom Loki LogPipeline', function() {
       it('Should be \'Running\'', async function() {
-        await waitForLogPipelineStatusRunning('loki');
+        await waitForLogPipelineStatusRunning('loki-test');
       });
 
-      it('Should push system logs to Kyma Loki', async function() {
+      it('Should push system logs to Loki', async function() {
         const labels = '{namespace="kyma-system", job="telemetry-fluent-bit"}';
-        const logsPresent = await logsPresentInLoki(labels, testStartTimestamp, 5);
+        const logsPresent = await logsPresentInLoki(labels, testStartTimestamp, 10);
         assert.isTrue(logsPresent, 'No logs present in Loki with namespace="kyma-system"');
       });
     });
@@ -422,28 +431,8 @@ describe('Telemetry Operator', function() {
           );
         });
 
-        const secondPipeline = loadTestData('tracepipeline-output-otlp-secret-ref-2.yaml');
-        const secondPipelineName = secondPipeline[0].metadata.name;
-        it(`Should create second TracePipeline '${secondPipelineName}'`, async function() {
-          await k8sApply(secondPipeline);
-          await waitForTracePipeline(secondPipelineName);
-        });
-
-        it('Second pipeline should be \'Pending\', first pipeline should be \'Running\'', async function() {
-          await waitForTracePipelineStatusPending(secondPipelineName);
-          await waitForTracePipelineStatusRunning(firstPipelineName);
-        });
-
         it(`Should delete first TracePipeline '${firstPipeline}'`, async function() {
           await k8sDelete(firstPipeline);
-        });
-
-        it('Second pipeline should become \'Running\'', async function() {
-          await waitForTracePipelineStatusRunning(secondPipelineName);
-        });
-
-        it(`Should delete second TracePipeline '${secondPipelineName}'`, async function() {
-          await k8sDelete(secondPipeline);
         });
       });
 

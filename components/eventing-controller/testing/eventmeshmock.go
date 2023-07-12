@@ -2,6 +2,7 @@ package testing
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/http/httputil"
@@ -9,12 +10,10 @@ import (
 	"path"
 	"strings"
 
-	"golang.org/x/oauth2"
-
 	"github.com/go-logr/logr"
 	. "github.com/onsi/ginkgo" //nolint:revive,stylecheck // using . import for convenience
 	. "github.com/onsi/gomega" //nolint:revive,stylecheck // using . import for convenience
-
+	"golang.org/x/oauth2"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	// gcp auth etc.
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -30,18 +29,20 @@ const (
 
 // EventMeshMock implements a programmable mock for EventMesh.
 type EventMeshMock struct {
-	Requests          *SafeRequests
-	Subscriptions     *SafeSubscriptions
-	TokenURL          string
-	MessagingURL      string
-	log               logr.Logger
-	AuthResponse      Response
-	GetResponse       ResponseWithName
-	ListResponse      Response
-	CreateResponse    Response
-	DeleteResponse    Response
-	server            *httptest.Server
-	ResponseOverrides *EventMeshMockResponseOverride
+	Requests            *SafeRequests
+	Subscriptions       *SafeSubscriptions
+	TokenURL            string
+	MessagingURL        string
+	log                 logr.Logger
+	AuthResponse        Response
+	GetResponse         ResponseWithName
+	ListResponse        Response
+	CreateResponse      Response
+	UpdateResponse      ResponseUpdateReq
+	UpdateStateResponse ResponseUpdateStateReq
+	DeleteResponse      Response
+	server              *httptest.Server
+	ResponseOverrides   *EventMeshMockResponseOverride
 }
 
 type EventMeshMockResponseOverride struct {
@@ -66,6 +67,8 @@ func NewEventMeshMockResponseOverride() *EventMeshMockResponseOverride {
 	}
 }
 
+type ResponseUpdateReq func(w http.ResponseWriter, key string, webhookAuth *eventmeshtypes.WebhookAuth)
+type ResponseUpdateStateReq func(w http.ResponseWriter, key string, state eventmeshtypes.State)
 type ResponseWithSub func(w http.ResponseWriter, subscription eventmeshtypes.Subscription)
 type ResponseWithName func(w http.ResponseWriter, subscriptionName string)
 type Response func(w http.ResponseWriter)
@@ -80,6 +83,8 @@ func (m *EventMeshMock) Reset() {
 	m.CreateResponse = EventMeshCreateSuccess
 	m.DeleteResponse = EventMeshDeleteResponseSuccess
 	m.ResponseOverrides = NewEventMeshMockResponseOverride()
+	m.UpdateResponse = UpdateSubscriptionResponse(m)
+	m.UpdateStateResponse = UpdateSubscriptionStateResponse(m)
 }
 
 func (m *EventMeshMock) ResetResponseOverrides() {
@@ -135,6 +140,28 @@ func (m *EventMeshMock) Start() string {
 			m.Requests.PutSubscription(r, subscription)
 			m.Subscriptions.PutSubscription(key, &subscription)
 			m.CreateResponse(w)
+		case http.MethodPatch: // mock update WebhookAuth config
+			var subscription eventmeshtypes.Subscription
+			err := json.NewDecoder(r.Body).Decode(&subscription)
+			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+
+			key := r.URL.Path // i.e. Path will be `/messaging/events/subscriptions/<name>`
+			// save request.
+			m.Requests.PutSubscription(r, subscription)
+			m.UpdateResponse(w, key, subscription.WebhookAuth)
+		case http.MethodPut: // mock pause/resume EventMesh subscription
+			var state eventmeshtypes.State
+			if err := json.NewDecoder(r.Body).Decode(&state); err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+
+			// extract get request key from /messaging/events/subscriptions/%s/state
+			key := strings.TrimSuffix(r.URL.Path, "/state")
+			m.UpdateStateResponse(w, key, state)
 		case http.MethodGet:
 			key := r.URL.Path
 			// check if any response override defined for this subscription
@@ -199,6 +226,53 @@ func GetSubscriptionResponse(m *EventMeshMock) ResponseWithName {
 		} else {
 			w.WriteHeader(http.StatusNotFound)
 		}
+	}
+}
+
+// UpdateSubscriptionResponse updates the webhook auth of subscription in the mock.
+func UpdateSubscriptionResponse(m *EventMeshMock) ResponseUpdateReq {
+	return func(w http.ResponseWriter, key string, webhookAuth *eventmeshtypes.WebhookAuth) {
+		subscriptionSaved := m.Subscriptions.GetSubscription(key)
+		if subscriptionSaved != nil {
+			subscriptionSaved.WebhookAuth = webhookAuth
+			m.Subscriptions.PutSubscription(key, subscriptionSaved)
+			w.WriteHeader(http.StatusNoContent)
+			err := json.NewEncoder(w).Encode(*subscriptionSaved)
+			Expect(err).ShouldNot(HaveOccurred())
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}
+}
+
+// UpdateSubscriptionStateResponse updates the EventMesh subscription status in the mock.
+func UpdateSubscriptionStateResponse(m *EventMeshMock) ResponseUpdateStateReq {
+	return func(w http.ResponseWriter, key string, state eventmeshtypes.State) {
+		if subscription := m.Subscriptions.GetSubscription(key); subscription != nil {
+			switch state.Action {
+			case eventmeshtypes.StateActionPause:
+				{
+					subscription.SubscriptionStatus = eventmeshtypes.SubscriptionStatusPaused
+				}
+			case eventmeshtypes.StateActionResume:
+				{
+					subscription.SubscriptionStatus = eventmeshtypes.SubscriptionStatusActive
+				}
+			default:
+				{
+					panic(fmt.Sprintf("EventMesh subscription status is not supported: %#v", state))
+				}
+			}
+
+			m.Subscriptions.PutSubscription(key, subscription)
+			w.WriteHeader(http.StatusAccepted)
+
+			err := json.NewEncoder(w).Encode(*subscription)
+			Expect(err).ShouldNot(HaveOccurred())
+			return
+		}
+
+		w.WriteHeader(http.StatusNotFound)
 	}
 }
 
@@ -270,4 +344,19 @@ func IsEventMeshSubscriptionDelete(r *http.Request) bool {
 // e.g. "/messaging/events/subscriptions/{subscriptionName}" => "{subscriptionName}".
 func GetRestAPIObject(u *url.URL) string {
 	return path.Base(u.Path)
+}
+
+// CountRequests counts the mock API requests using the given HTTP method and URI.
+func (m *EventMeshMock) CountRequests(method, uri string) int {
+	count := 0
+	m.Requests.ReadEach(func(request *http.Request, payload interface{}) {
+		if request.Method != method {
+			return
+		}
+		if request.RequestURI != uri {
+			return
+		}
+		count++
+	})
+	return count
 }

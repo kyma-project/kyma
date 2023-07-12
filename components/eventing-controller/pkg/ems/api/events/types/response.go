@@ -16,6 +16,10 @@ type CreateResponse struct {
 	Href string `json:"href,omitempty"`
 }
 
+type UpdateResponse struct {
+	Response
+}
+
 type DeleteResponse struct {
 	Response
 }

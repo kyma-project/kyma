@@ -7,17 +7,23 @@ central-application-gateway:
   deployment:
     resources:
       limits:
-        cpu: 100m
+        cpu: 500m
         memory: 128Mi
       requests:
-        cpu: 10m
+        cpu: 20m
         memory: 64Mi
+      autoscaling:
+        minReplicas: "2"
+        cpuUsagePercent: "80"
 central-application-connectivity-validator:
   deployment:
     resources:
       limits:
-        cpu: 100m
+        cpu: 500m
         memory: 128Mi
       requests:
-        cpu: 10m
+        cpu: 20m
         memory: 64Mi
+      autoscaling:
+        minReplicas: "2"
+        cpuUsagePercent: "80"
