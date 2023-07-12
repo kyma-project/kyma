@@ -24,7 +24,7 @@ spec:
     spec:
       serviceAccountName: {{ template "gcloud-sqlproxy.serviceAccountName" . }}
       {{- if .Values.priorityClassName }}
-      priorityClassName: "{{ .Values.priorityClassName .Values.priorityClassName }}"
+      priorityClassName: "{{ .Values.priorityClassName }}"
       {{- end }}
       containers:
       - name: sqlproxy
