@@ -1,6 +1,7 @@
 ---
 helmValues:
   global:
+    priorityClassName: "istio-priority-class"
     imagePullPolicy: IfNotPresent
     proxy:
       readinessFailureThreshold: 40
