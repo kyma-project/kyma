@@ -83,6 +83,9 @@ config:
 # Configure node affinity
 affinity: {}
 
+# Configure priorityClassName
+priorityClassName: ""
+
 tests:
   enabled: true
   labels:

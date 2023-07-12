@@ -207,8 +207,8 @@ spec:
       initContainers:
 {{ tpl .Values.deployment.extraInitContainers . | indent 8 }}
       {{- end }}
-      {{- if .Values.global.priorityClassName }}
-      priorityClassName: {{ .Values.global.priorityClassName }}
+      {{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName }}
       {{- end }}
       {{- with .Values.deployment.nodeSelector }}
       nodeSelector:
