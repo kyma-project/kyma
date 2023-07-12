@@ -7,7 +7,7 @@ You learn how Eventing behaves when you create a [Subscription](../../05-technic
 
 ## Prerequisites
 
->**NOTE:** Read about [Istio sidecars in Kyma and why you want them](../../01-overview/main-areas/service-mesh/smsh-03-istio-sidecars-in-kyma.md). Then, check how to [enable automatic Istio sidecar proxy injection](../../04-operation-guides/operations/smsh-01-istio-enable-sidecar-injection.md). For more details, see [Default Istio setup in Kyma](../../01-overview/main-areas/service-mesh/smsh-02-default-istio-setup-in-kyma.md).
+>**NOTE:** Read about [Istio sidecars in Kyma and why you want them](../../01-overview/service-mesh/smsh-03-istio-sidecars-in-kyma.md). Then, check how to [enable automatic Istio sidecar proxy injection](../../04-operation-guides/operations/smsh-01-istio-enable-sidecar-injection.md). For more details, see [Default Istio setup in Kyma](../../01-overview/service-mesh/smsh-02-default-istio-setup-in-kyma.md).
 
 1. Follow the [Prerequisites steps](./) for the Eventing tutorials.
 2. [Create a Function](../../02-get-started/04-trigger-workload-with-event.md#create-a-function).
@@ -48,7 +48,7 @@ You learn how Eventing behaves when you create a [Subscription](../../05-technic
          profile: S
        build:
          profile: local-dev
-     runtime: nodejs16
+     runtime: nodejs18
      source:
        inline:
          source: |-

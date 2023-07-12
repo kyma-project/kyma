@@ -9,4 +9,4 @@ spec:
         - name: stdout-json
   selector:
     matchLabels:
-      service.istio.io/canonical-name: loki
+      service.istio.io/canonical-name: loki-test

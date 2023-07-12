@@ -32,8 +32,6 @@ config:
     service: ory-oathkeeper-proxy.kyma-system.svc.cluster.local
     port: 4455
   serviceBlockList:
-    default:
-      - kubernetes
     istio-system:
       - istio-citadel
       - istio-galley
@@ -85,6 +83,9 @@ config:
 # Configure node affinity
 affinity: {}
 
+# Configure priorityClassName
+priorityClassName: "api-gateway-priority-class"
+
 tests:
   enabled: true
   labels:
@@ -114,9 +115,9 @@ global:
   images:
     api_gateway_controller:
       name: "api-gateway-controller"
-      version: "1.6.0"
+      version: "1.7.1"
       directory: "prod"
     api_gateway_webhook_certificates:
       name: "api-gateway-webhook-certificates"
-      version: "1.6.0"
+      version: "1.7.1"
       directory: "prod"

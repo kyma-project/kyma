@@ -7,9 +7,10 @@ import (
 )
 
 const (
-	ParmaNameClientID     = "client_id"
-	ParmaNameClientSecret = "client_secret"
-	ParmaNameTokenURL     = "token_url"
+	ParamNameClientID     = "client_id"
+	ParamNameClientSecret = "client_secret"
+	ParamNameTokenURL     = "token_url"
+	ParamNameCertsURL     = "certs_url"
 )
 
 type Params map[string]interface{}

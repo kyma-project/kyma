@@ -268,10 +268,29 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 			},
 			wantStatus: 500,
 			wantTEF: `
+				# HELP eventing_epp_backend_duration_milliseconds The duration of sending events to the messaging server in milliseconds
+				# TYPE eventing_epp_backend_duration_milliseconds histogram
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="",le="0.005"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="",le="0.01"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="",le="0.025"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="",le="0.05"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="",le="0.1"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="",le="0.25"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="",le="0.5"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="",le="1"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="",le="2.5"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="",le="5"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="",le="10"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="",le="+Inf"} 1
+				eventing_epp_backend_duration_milliseconds_sum{code="500",destination_service=""} 0
+				eventing_epp_backend_duration_milliseconds_count{code="500",destination_service=""} 1
 				# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
 				# TYPE eventing_epp_backend_errors_total counter
 				eventing_epp_backend_errors_total 1
-			`,
+				# HELP eventing_epp_backend_requests_total The total number of backend requests
+				# TYPE eventing_epp_backend_requests_total counter
+				eventing_epp_backend_requests_total{code="500",destination_service=""} 1
+`,
 		},
 		{
 			name: "Publish binary CloudEvent but backend is full",
@@ -287,9 +306,28 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 			},
 			wantStatus: 507,
 			wantTEF: `
+				# HELP eventing_epp_backend_duration_milliseconds The duration of sending events to the messaging server in milliseconds
+				# TYPE eventing_epp_backend_duration_milliseconds histogram
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="",le="0.005"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="",le="0.01"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="",le="0.025"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="",le="0.05"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="",le="0.1"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="",le="0.25"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="",le="0.5"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="",le="1"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="",le="2.5"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="",le="5"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="",le="10"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="",le="+Inf"} 1
+				eventing_epp_backend_duration_milliseconds_sum{code="500",destination_service=""} 0
+				eventing_epp_backend_duration_milliseconds_count{code="500",destination_service=""} 1
 				# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
 				# TYPE eventing_epp_backend_errors_total counter
 				eventing_epp_backend_errors_total 1
+				# HELP eventing_epp_backend_requests_total The total number of backend requests
+				# TYPE eventing_epp_backend_requests_total counter
+				eventing_epp_backend_requests_total{code="500",destination_service=""} 1
 			`,
 		},
 	}
@@ -398,9 +436,28 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 			givenRequest:           legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
 			wantHTTPStatus:         http.StatusBadGateway,
 			wantTEF: `
-					# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
-					# TYPE eventing_epp_backend_errors_total counter
-					eventing_epp_backend_errors_total 1
+				# HELP eventing_epp_backend_duration_milliseconds The duration of sending events to the messaging server in milliseconds
+				# TYPE eventing_epp_backend_duration_milliseconds histogram
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="FOO",le="0.005"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="FOO",le="0.01"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="FOO",le="0.025"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="FOO",le="0.05"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="FOO",le="0.1"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="FOO",le="0.25"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="FOO",le="0.5"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="FOO",le="1"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="FOO",le="2.5"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="FOO",le="5"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="FOO",le="10"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="FOO",le="+Inf"} 1
+				eventing_epp_backend_duration_milliseconds_sum{code="500",destination_service="FOO"} 0
+				eventing_epp_backend_duration_milliseconds_count{code="500",destination_service="FOO"} 1
+				# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
+				# TYPE eventing_epp_backend_errors_total counter
+				eventing_epp_backend_errors_total 1
+				# HELP eventing_epp_backend_requests_total The total number of backend requests
+				# TYPE eventing_epp_backend_requests_total counter
+				eventing_epp_backend_requests_total{code="500",destination_service="FOO"} 1
 				`,
 		},
 		{
@@ -414,9 +471,28 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 			givenRequest:           legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
 			wantHTTPStatus:         507,
 			wantTEF: `
-					# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
-					# TYPE eventing_epp_backend_errors_total counter
-					eventing_epp_backend_errors_total 1
+				# HELP eventing_epp_backend_duration_milliseconds The duration of sending events to the messaging server in milliseconds
+				# TYPE eventing_epp_backend_duration_milliseconds histogram
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="FOO",le="0.005"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="FOO",le="0.01"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="FOO",le="0.025"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="FOO",le="0.05"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="FOO",le="0.1"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="FOO",le="0.25"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="FOO",le="0.5"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="FOO",le="1"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="FOO",le="2.5"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="FOO",le="5"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="FOO",le="10"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="FOO",le="+Inf"} 1
+				eventing_epp_backend_duration_milliseconds_sum{code="500",destination_service="FOO"} 0
+				eventing_epp_backend_duration_milliseconds_count{code="500",destination_service="FOO"} 1
+				# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
+				# TYPE eventing_epp_backend_errors_total counter
+				eventing_epp_backend_errors_total 1
+				# HELP eventing_epp_backend_requests_total The total number of backend requests
+				# TYPE eventing_epp_backend_requests_total counter
+				eventing_epp_backend_requests_total{code="500",destination_service="FOO"} 1
 				`,
 		},
 		{
@@ -430,9 +506,28 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 			givenRequest:           legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
 			wantHTTPStatus:         500,
 			wantTEF: `
-					# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
-					# TYPE eventing_epp_backend_errors_total counter
-					eventing_epp_backend_errors_total 1
+				# HELP eventing_epp_backend_duration_milliseconds The duration of sending events to the messaging server in milliseconds
+				# TYPE eventing_epp_backend_duration_milliseconds histogram
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="FOO",le="0.005"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="FOO",le="0.01"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="FOO",le="0.025"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="FOO",le="0.05"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="FOO",le="0.1"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="FOO",le="0.25"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="FOO",le="0.5"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="FOO",le="1"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="FOO",le="2.5"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="FOO",le="5"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="FOO",le="10"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="FOO",le="+Inf"} 1
+				eventing_epp_backend_duration_milliseconds_sum{code="500",destination_service="FOO"} 0
+				eventing_epp_backend_duration_milliseconds_count{code="500",destination_service="FOO"} 1
+				# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
+				# TYPE eventing_epp_backend_errors_total counter
+				eventing_epp_backend_errors_total 1
+				# HELP eventing_epp_backend_requests_total The total number of backend requests
+				# TYPE eventing_epp_backend_requests_total counter
+				eventing_epp_backend_requests_total{code="500",destination_service="FOO"} 1
 				`,
 		},
 		{

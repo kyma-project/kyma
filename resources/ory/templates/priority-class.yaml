@@ -1,0 +1,7 @@
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: {{ .Values.priorityClassName }}
+value: 2100000
+globalDefault: false
+description: "Scheduling priority of Ory component. Must not be blocked by unschedulable user workloads."

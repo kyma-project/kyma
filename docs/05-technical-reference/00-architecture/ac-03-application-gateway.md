@@ -9,7 +9,7 @@ which are either unsecured or secured with various security mechanisms and prote
 
 ![Application Gateway Diagram](assets/ac-architecture-proxy-service.svg)
 
-> **NOTE:** See how the [Gateway URL differs](../ac-01-application-gateway-details.md#application-gateway-url) for the [Standalone and Compass modes](../../01-overview/main-areas/application-connectivity/README.md).
+> **NOTE:** See how the [Gateway URL differs](../ac-01-application-gateway-details.md#application-gateway-url) for the [Standalone and Compass modes](../../01-overview/application-connectivity/README.md).
 
 1. A Function calls Application Gateway. 
 2. Application Gateway extracts the Application name and the service name from the path. Using the extracted Application name, Application Gateway finds the respective Application custom resource and obtains the information about the registered external API, such as the API URL and security credentials. 

@@ -1,15 +1,27 @@
 package object
 
 import (
+	"fmt"
 	"net/url"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 
 	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"github.com/kyma-project/kyma/components/eventing-controller/internal/featureflags"
 )
 
-// OAuthHandlerName OAuth handler name supported in Kyma.
-const OAuthHandlerName = "oauth2_introspection"
+const (
+	// OAuthHandlerNameOAuth2Introspection OAuth handler name supported in Kyma for oauth2_introspection.
+	OAuthHandlerNameOAuth2Introspection = "oauth2_introspection"
+
+	// OAuthHandlerNameJWT OAuth handler name supported in Kyma for jwt.
+	OAuthHandlerNameJWT = "jwt"
+
+	// JWKSURLFormat the format of the jwks URL.
+	JWKSURLFormat = `{"jwks_urls":["%s"]}`
+)
 
 // NewAPIRule creates a APIRule object.
 func NewAPIRule(ns, namePrefix string, opts ...Option) *apigatewayv1beta1.APIRule {
@@ -115,11 +127,18 @@ func WithOwnerReference(subs []eventingv1alpha2.Subscription) Option {
 }
 
 // WithRules sets the rules of an APIRule for all Subscriptions for a subscriber.
-func WithRules(subs []eventingv1alpha2.Subscription, svc apigatewayv1beta1.Service, methods ...string) Option {
+func WithRules(certsURL string, subs []eventingv1alpha2.Subscription, svc apigatewayv1beta1.Service,
+	methods ...string) Option {
 	return func(o metav1.Object) {
 		d := o.(*apigatewayv1beta1.APIRule)
-		handler := apigatewayv1beta1.Handler{
-			Name: OAuthHandlerName,
+		var handler apigatewayv1beta1.Handler
+		if featureflags.IsEventingWebhookAuthEnabled() {
+			handler.Name = OAuthHandlerNameJWT
+			handler.Config = &runtime.RawExtension{
+				Raw: []byte(fmt.Sprintf(JWKSURLFormat, certsURL)),
+			}
+		} else {
+			handler.Name = OAuthHandlerNameOAuth2Introspection
 		}
 		authenticator := &apigatewayv1beta1.Authenticator{
 			Handler: &handler,

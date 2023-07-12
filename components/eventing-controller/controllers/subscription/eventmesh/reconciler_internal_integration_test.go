@@ -2,20 +2,19 @@ package eventmesh
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventmesh"
-
-	"github.com/stretchr/testify/assert"
 
 	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	"github.com/pkg/errors"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	k8stypes "k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/record"
@@ -23,15 +22,17 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
-
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
+	"github.com/kyma-project/kyma/components/eventing-controller/internal/featureflags"
 	eventinglogger "github.com/kyma-project/kyma/components/eventing-controller/logger"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventmesh"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventmesh/mocks"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
 	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
@@ -171,6 +172,288 @@ func TestReconciler_Reconcile(t *testing.T) {
 			res, err := reconciler.Reconcile(context.Background(), r)
 			req.Equal(res, tc.wantReconcileResult)
 			req.Equal(err, tc.wantReconcileError)
+		})
+	}
+}
+
+// TestReconciler_APIRuleConfig ensures that the created APIRule is configured correctly
+// whether the Eventing webhook auth is enabled or not.
+func TestReconciler_APIRuleConfig(t *testing.T) {
+	ctx := context.Background()
+
+	credentials := &eventmesh.OAuth2ClientCredentials{
+		CertsURL: "https://domain.com/oauth2/certs",
+	}
+
+	subscription := reconcilertesting.NewSubscription("some-test-sub", "test",
+		reconcilertesting.WithDefaultSource(),
+		reconcilertesting.WithValidSink("test", "some-test-svc"),
+		reconcilertesting.WithFinalizers([]string{eventingv1alpha2.Finalizer}),
+		reconcilertesting.WithEventType(reconcilertesting.OrderCreatedEventType),
+		reconcilertesting.WithConditions(eventingv1alpha2.MakeSubscriptionConditions()),
+		reconcilertesting.WithEmsSubscriptionStatus(string(types.SubscriptionStatusActive)),
+	)
+
+	validator := sink.ValidatorFunc(func(s *eventingv1alpha2.Subscription) error { return nil })
+
+	var testCases = []struct {
+		name                            string
+		givenSubscription               *eventingv1alpha2.Subscription
+		givenReconcilerSetup            func() (*Reconciler, client.Client)
+		givenEventingWebhookAuthEnabled bool
+		wantReconcileResult             ctrl.Result
+		wantReconcileError              error
+		wantHandler                     apigatewayv1beta1.Handler
+	}{
+		{
+			name:              "Eventing webhook auth is not enabled",
+			givenSubscription: subscription,
+			givenReconcilerSetup: func() (*Reconciler, client.Client) {
+				te := setupTestEnvironment(t, subscription)
+				te.credentials = credentials
+				te.backend.On("Initialize", mock.Anything).Return(nil)
+				te.backend.On("SyncSubscription", mock.Anything, mock.Anything, mock.Anything).Return(true, nil)
+				return NewReconciler(ctx, te.fakeClient, te.logger, te.recorder, te.cfg, te.cleaner, te.backend,
+					te.credentials, te.mapper, validator), te.fakeClient
+			},
+			givenEventingWebhookAuthEnabled: false,
+			wantReconcileResult:             ctrl.Result{},
+			wantReconcileError:              nil,
+			wantHandler: apigatewayv1beta1.Handler{
+				Name:   object.OAuthHandlerNameOAuth2Introspection,
+				Config: nil,
+			},
+		},
+		{
+			name:              "Eventing webhook auth is enabled",
+			givenSubscription: subscription,
+			givenReconcilerSetup: func() (*Reconciler, client.Client) {
+				te := setupTestEnvironment(t, subscription)
+				te.credentials = credentials
+				te.backend.On("Initialize", mock.Anything).Return(nil)
+				te.backend.On("SyncSubscription", mock.Anything, mock.Anything, mock.Anything).Return(true, nil)
+				return NewReconciler(ctx, te.fakeClient, te.logger, te.recorder, te.cfg, te.cleaner, te.backend,
+					te.credentials, te.mapper, validator), te.fakeClient
+			},
+			givenEventingWebhookAuthEnabled: true,
+			wantReconcileResult:             ctrl.Result{},
+			wantReconcileError:              nil,
+			wantHandler: apigatewayv1beta1.Handler{
+				Name: object.OAuthHandlerNameJWT,
+				Config: &runtime.RawExtension{
+					Raw: []byte(fmt.Sprintf(object.JWKSURLFormat, credentials.CertsURL)),
+				},
+			},
+		},
+	}
+	for _, testCase := range testCases {
+		tc := testCase
+		t.Run(tc.name, func(t *testing.T) {
+			// given
+			featureflags.SetEventingWebhookAuthEnabled(tc.givenEventingWebhookAuthEnabled)
+			reconciler, cli := tc.givenReconcilerSetup()
+			namespacedName := k8stypes.NamespacedName{
+				Namespace: tc.givenSubscription.Namespace,
+				Name:      tc.givenSubscription.Name,
+			}
+
+			// when
+			res, err := reconciler.Reconcile(context.Background(), ctrl.Request{NamespacedName: namespacedName})
+			require.Equal(t, tc.wantReconcileResult, res)
+			require.Equal(t, tc.wantReconcileError, err)
+
+			sub := &eventingv1alpha2.Subscription{}
+			err = cli.Get(ctx, namespacedName, sub)
+			require.NoError(t, err)
+
+			namespacedName = k8stypes.NamespacedName{
+				Namespace: sub.Namespace,
+				Name:      sub.Status.Backend.APIRuleName,
+			}
+
+			apiRule := &apigatewayv1beta1.APIRule{}
+			err = cli.Get(ctx, namespacedName, apiRule)
+			require.NoError(t, err)
+
+			// then
+			require.Equal(t, tc.wantHandler.Name, apiRule.Spec.Rules[0].AccessStrategies[0].Handler.Name)
+			require.Equal(t, tc.wantHandler.Config, apiRule.Spec.Rules[0].AccessStrategies[0].Handler.Config)
+		})
+	}
+}
+
+// TestReconciler_APIRuleConfig_Upgrade ensures that the created APIRule is configured correctly
+// before and after the upgrade from ory to Eventing webhook auth and vise versa.
+func TestReconciler_APIRuleConfig_Upgrade(t *testing.T) {
+	ctx := context.Background()
+
+	credentials := &eventmesh.OAuth2ClientCredentials{
+		CertsURL: "https://domain.com/oauth2/certs",
+	}
+
+	subscription := reconcilertesting.NewSubscription("some-test-sub", "test",
+		reconcilertesting.WithDefaultSource(),
+		reconcilertesting.WithValidSink("test", "some-test-svc"),
+		reconcilertesting.WithFinalizers([]string{eventingv1alpha2.Finalizer}),
+		reconcilertesting.WithEventType(reconcilertesting.OrderCreatedEventType),
+		reconcilertesting.WithConditions(eventingv1alpha2.MakeSubscriptionConditions()),
+		reconcilertesting.WithEmsSubscriptionStatus(string(types.SubscriptionStatusActive)),
+	)
+
+	validator := sink.ValidatorFunc(func(s *eventingv1alpha2.Subscription) error { return nil })
+
+	var testCases = []struct {
+		name                            string
+		givenSubscription               *eventingv1alpha2.Subscription
+		givenReconcilerSetup            func() (*Reconciler, client.Client)
+		givenEventingWebhookAuthEnabled bool
+		wantReconcileResult             ctrl.Result
+		wantReconcileError              error
+		wantHandlerBeforeUpgrade        apigatewayv1beta1.Handler
+		wantHandlerAfterUpgrade         apigatewayv1beta1.Handler
+	}{
+		{
+			name:              "Eventing webhook auth is not enabled before the upgrade",
+			givenSubscription: subscription,
+			givenReconcilerSetup: func() (*Reconciler, client.Client) {
+				te := setupTestEnvironment(t, subscription)
+				te.credentials = credentials
+				te.backend.On("Initialize", mock.Anything).Return(nil)
+				te.backend.On("SyncSubscription", mock.Anything, mock.Anything, mock.Anything).Return(true, nil)
+				return NewReconciler(ctx, te.fakeClient, te.logger, te.recorder, te.cfg, te.cleaner, te.backend,
+					te.credentials, te.mapper, validator), te.fakeClient
+			},
+			givenEventingWebhookAuthEnabled: false,
+			wantReconcileResult:             ctrl.Result{},
+			wantReconcileError:              nil,
+			wantHandlerBeforeUpgrade: apigatewayv1beta1.Handler{
+				Name:   object.OAuthHandlerNameOAuth2Introspection,
+				Config: nil,
+			},
+			wantHandlerAfterUpgrade: apigatewayv1beta1.Handler{
+				Name: object.OAuthHandlerNameJWT,
+				Config: &runtime.RawExtension{
+					Raw: []byte(fmt.Sprintf(object.JWKSURLFormat, credentials.CertsURL)),
+				},
+			},
+		},
+		{
+			name:              "Eventing webhook auth is enabled before the upgrade",
+			givenSubscription: subscription,
+			givenReconcilerSetup: func() (*Reconciler, client.Client) {
+				te := setupTestEnvironment(t, subscription)
+				te.credentials = credentials
+				te.backend.On("Initialize", mock.Anything).Return(nil)
+				te.backend.On("SyncSubscription", mock.Anything, mock.Anything, mock.Anything).Return(true, nil)
+				return NewReconciler(ctx, te.fakeClient, te.logger, te.recorder, te.cfg, te.cleaner, te.backend,
+					te.credentials, te.mapper, validator), te.fakeClient
+			},
+			givenEventingWebhookAuthEnabled: true,
+			wantReconcileResult:             ctrl.Result{},
+			wantReconcileError:              nil,
+			wantHandlerBeforeUpgrade: apigatewayv1beta1.Handler{
+				Name: object.OAuthHandlerNameJWT,
+				Config: &runtime.RawExtension{
+					Raw: []byte(fmt.Sprintf(object.JWKSURLFormat, credentials.CertsURL)),
+				},
+			},
+			wantHandlerAfterUpgrade: apigatewayv1beta1.Handler{
+				Name:   object.OAuthHandlerNameOAuth2Introspection,
+				Config: nil,
+			},
+		},
+	}
+	for _, testCase := range testCases {
+		tc := testCase
+		t.Run(tc.name, func(t *testing.T) {
+			////
+			// Before the upgrade
+			////
+
+			// given
+			featureflags.SetEventingWebhookAuthEnabled(tc.givenEventingWebhookAuthEnabled)
+			reconciler, cli := tc.givenReconcilerSetup()
+			namespacedName := k8stypes.NamespacedName{
+				Namespace: tc.givenSubscription.Namespace,
+				Name:      tc.givenSubscription.Name,
+			}
+
+			// when
+			res, err := reconciler.Reconcile(context.Background(), ctrl.Request{NamespacedName: namespacedName})
+			require.Equal(t, tc.wantReconcileResult, res)
+			require.Equal(t, tc.wantReconcileError, err)
+
+			sub0 := &eventingv1alpha2.Subscription{}
+			err = cli.Get(ctx, namespacedName, sub0)
+			require.NoError(t, err)
+
+			namespacedName = k8stypes.NamespacedName{
+				Namespace: sub0.Namespace,
+				Name:      sub0.Status.Backend.APIRuleName,
+			}
+
+			apiRule0 := &apigatewayv1beta1.APIRule{}
+			err = cli.Get(ctx, namespacedName, apiRule0)
+			require.NoError(t, err)
+
+			// then
+			require.Equal(
+				t,
+				tc.wantHandlerBeforeUpgrade.Name,
+				apiRule0.Spec.Rules[0].AccessStrategies[0].Handler.Name,
+			)
+			require.Equal(
+				t,
+				tc.wantHandlerBeforeUpgrade.Config,
+				apiRule0.Spec.Rules[0].AccessStrategies[0].Handler.Config,
+			)
+
+			////
+			// Simulate the upgrade
+			////
+
+			// given
+			featureflags.SetEventingWebhookAuthEnabled(!tc.givenEventingWebhookAuthEnabled)
+			namespacedName = k8stypes.NamespacedName{
+				Namespace: tc.givenSubscription.Namespace,
+				Name:      tc.givenSubscription.Name,
+			}
+
+			////
+			// After the upgrade
+			////
+
+			// when
+			res, err = reconciler.Reconcile(context.Background(), ctrl.Request{NamespacedName: namespacedName})
+			require.Equal(t, tc.wantReconcileResult, res)
+			require.Equal(t, tc.wantReconcileError, err)
+
+			sub1 := &eventingv1alpha2.Subscription{}
+			err = cli.Get(ctx, namespacedName, sub1)
+			require.NoError(t, err)
+
+			namespacedName = k8stypes.NamespacedName{
+				Namespace: sub1.Namespace,
+				Name:      sub1.Status.Backend.APIRuleName,
+			}
+
+			apiRule1 := &apigatewayv1beta1.APIRule{}
+			err = cli.Get(ctx, namespacedName, apiRule1)
+			require.NoError(t, err)
+
+			// then
+			require.Equal(t, apiRule0.UID, apiRule1.UID)
+			require.Equal(t, apiRule0.Name, apiRule1.Name)
+			require.Equal(
+				t,
+				tc.wantHandlerAfterUpgrade.Name,
+				apiRule1.Spec.Rules[0].AccessStrategies[0].Handler.Name,
+			)
+			require.Equal(
+				t,
+				tc.wantHandlerAfterUpgrade.Config,
+				apiRule1.Spec.Rules[0].AccessStrategies[0].Handler.Config,
+			)
 		})
 	}
 }
@@ -883,7 +1166,7 @@ func setupTestEnvironment(t *testing.T, objs ...client.Object) *testEnvironment 
 	emptyConfig := env.Config{}
 	credentials := &eventmesh.OAuth2ClientCredentials{}
 	nameMapper := backendutils.NewBEBSubscriptionNameMapper(domain, eventmesh.MaxSubscriptionNameLength)
-	cleaner := cleaner.NewEventMeshCleaner(nil)
+	eventMeshCleaner := cleaner.NewEventMeshCleaner(nil)
 
 	return &testEnvironment{
 		fakeClient:  fakeClient,
@@ -893,7 +1176,7 @@ func setupTestEnvironment(t *testing.T, objs ...client.Object) *testEnvironment 
 		cfg:         emptyConfig,
 		credentials: credentials,
 		mapper:      nameMapper,
-		cleaner:     cleaner,
+		cleaner:     eventMeshCleaner,
 	}
 }
 

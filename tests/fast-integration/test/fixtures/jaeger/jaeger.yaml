@@ -136,6 +136,7 @@ spec:
         - --collector.otlp.enabled=true
         - --log-level=info
         - --memory.max-traces=10000
+        - --query.max-clock-skew-adjustment=1s
         env:
         - name: SPAN_STORAGE_TYPE
           value: memory

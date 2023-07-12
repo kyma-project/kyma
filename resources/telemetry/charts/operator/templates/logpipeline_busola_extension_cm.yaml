@@ -209,7 +209,7 @@ data:
           inputInfo: >-
             Note: If you use a custom output, you put the LogPipeline in unsupported
             mode
-            (https://kyma-project.io/docs/kyma/latest/01-overview/main-areas/observability/obsv-04-telemetry-in-kyma/#unsupported-mode)
+            (https://kyma-project.io/docs/kyma/latest/01-overview/telemetry/telemetry-02-logs/#unsupported-mode)
         - name: HTTP
           path: http
           widget: FormGroup

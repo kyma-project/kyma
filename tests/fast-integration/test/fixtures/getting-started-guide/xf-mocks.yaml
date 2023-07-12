@@ -31,7 +31,7 @@ metadata:
     app: orders-function
     example: orders-function
 spec:
-  runtime: nodejs14
+  runtime: nodejs18
   resourceConfiguration:
     function:
       resources:
