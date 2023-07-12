@@ -80,8 +80,8 @@ spec:
             timeoutSeconds: {{ .Values.deployment.readinessProbe.timeoutSeconds }}
             periodSeconds: {{.Values.deployment.readinessProbe.periodSeconds }}
       serviceAccountName: {{ include "hydra-maester.name" . }}-account
-      {{- if .Values.global.priorityClassName }}
-      priorityClassName: {{ .Values.global.priorityClassName }}
+      {{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName }}
       {{- end }}
       nodeSelector:
       {{- with .Values.deployment.nodeSelector }}

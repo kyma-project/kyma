@@ -83,6 +83,9 @@ config:
 # Configure node affinity
 affinity: {}
 
+# Configure priorityClassName
+priorityClassName: "api-gateway-priority-class"
+
 tests:
   enabled: true
   labels:
