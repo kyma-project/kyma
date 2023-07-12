@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/components/central-application-connectivity-validator/internal/controller"
 	"github.com/kyma-project/kyma/components/central-application-connectivity-validator/internal/httptools"
+	"net"
 	"net/http"
 	"net/http/httputil"
 	"regexp"
@@ -242,19 +243,20 @@ func createReverseProxy(log *logger.Logger, destinationHost string, reqOpts ...r
 			log.WithContext().With("handler", handlerName).Infof("Host responded with status %s", response.Status)
 			return nil
 		},
-		//Transport: &http.Transport{
-		//	DialContext: (&net.Dialer{
-		//		Timeout:   30 * time.Second,
-		//		KeepAlive: 30 * time.Second,
-		//	}).DialContext,
-		//	MaxIdleConns:          200,
-		//	MaxIdleConnsPerHost:   2,
-		//	MaxConnsPerHost:       100,
-		//	ForceAttemptHTTP2:     false,
-		//	IdleConnTimeout:       10 * time.Second,
-		//	TLSHandshakeTimeout:   10 * time.Second,
-		//	ExpectContinueTimeout: 1 * time.Second,
-		//},
+		Transport: &http.Transport{
+			DialContext: (&net.Dialer{
+				Timeout:   30 * time.Second,
+				KeepAlive: 30 * time.Second,
+			}).DialContext,
+			MaxIdleConns:          400,
+			DisableKeepAlives:     false,
+			MaxIdleConnsPerHost:   200,
+			MaxConnsPerHost:       200,
+			ForceAttemptHTTP2:     false,
+			IdleConnTimeout:       10 * time.Second,
+			TLSHandshakeTimeout:   10 * time.Second,
+			ExpectContinueTimeout: 1 * time.Second,
+		},
 	}
 }
 
