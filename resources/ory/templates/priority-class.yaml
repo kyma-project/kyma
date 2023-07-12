@@ -4,4 +4,4 @@ metadata:
   name: {{ .Values.priorityClassName }}
 value: 2000000
 globalDefault: false
-description: "Global (default) scheduling priority of Kyma components. Must not be blocked by unschedulable user workloads."
+description: "Scheduling priority of Ory component. Must not be blocked by unschedulable user workloads."
