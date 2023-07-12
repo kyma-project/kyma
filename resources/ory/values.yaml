@@ -73,7 +73,7 @@ global:
       directory: "prod/external"
 
 # Configure priorityClassName
-priorityClassName: ""
+priorityClassName: "ory-priority-class"
 
 headerRewrite:
   enabled: true

@@ -1,7 +1,6 @@
 ---
 helmValues:
   global:
-    priorityClassName: "kyma-system-priority"
     imagePullPolicy: IfNotPresent
     proxy:
       readinessFailureThreshold: 40
@@ -189,3 +188,5 @@ global:
 
   # This configuration is only temporary and will be removed in kyma version 2.7.x.
   sidecarMigration: false
+
+priorityClassName: "istio-priority-class"

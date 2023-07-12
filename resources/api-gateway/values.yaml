@@ -84,7 +84,7 @@ config:
 affinity: {}
 
 # Configure priorityClassName
-priorityClassName: ""
+priorityClassName: "api-gateway-priority-class"
 
 tests:
   enabled: true
