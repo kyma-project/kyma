@@ -129,7 +129,7 @@ func (h *Handler) handleSendEventAndRecordMetricsLegacy(
 		h.namedLogger().Error(err)
 		httpStatus := http.StatusInternalServerError
 		var pubErr sender.PublishError
-		if ok := errors.As(err, &pubErr); ok {
+		if errors.As(err, &pubErr) {
 			httpStatus = pubErr.Code()
 		}
 		h.LegacyTransformer.WriteCEResponseAsLegacyResponse(writer, httpStatus, event, err.Error())
@@ -263,7 +263,7 @@ func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.R
 	if err != nil {
 		httpStatus := http.StatusInternalServerError
 		var pubErr sender.PublishError
-		if ok := errors.As(err, &pubErr); ok {
+		if errors.As(err, &pubErr) {
 			httpStatus = pubErr.Code()
 		}
 		writer.WriteHeader(httpStatus)
@@ -305,7 +305,7 @@ func (h *Handler) sendEventAndRecordMetrics(ctx context.Context, event *cev2even
 	if err != nil {
 		var pubErr sender.PublishError
 		code := 500
-		if ok := errors.As(err, &pubErr); ok {
+		if errors.As(err, &pubErr) {
 			code = pubErr.Code()
 		}
 		h.collector.RecordBackendLatency(duration, code, host)
