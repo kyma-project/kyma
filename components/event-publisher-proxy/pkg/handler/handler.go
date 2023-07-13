@@ -123,27 +123,25 @@ func (h *Handler) maxBytes(f http.HandlerFunc) http.HandlerFunc {
 // It writes to the user request if any error occurs.
 // Otherwise, returns the result.
 func (h *Handler) handleSendEventAndRecordMetricsLegacy(
-	writer http.ResponseWriter, request *http.Request, event *cev2event.Event) (sender.PublishResult, error) {
-	result, err := h.sendEventAndRecordMetrics(request.Context(), event, h.Sender.URL(), request.Header)
+	writer http.ResponseWriter, request *http.Request, event *cev2event.Event) error {
+	err := h.sendEventAndRecordMetrics(request.Context(), event, h.Sender.URL(), request.Header)
 	if err != nil {
 		h.namedLogger().Error(err)
 		httpStatus := http.StatusInternalServerError
-		if errors.Is(err, sender.ErrInsufficientStorage) {
-			httpStatus = http.StatusInsufficientStorage
-		} else if errors.Is(err, sender.ErrBackendTargetNotFound) {
-			httpStatus = http.StatusBadGateway
+		var pubErr sender.PublishError
+		if ok := errors.As(err, &pubErr); ok {
+			httpStatus = pubErr.Code()
 		}
 		h.LegacyTransformer.WriteCEResponseAsLegacyResponse(writer, httpStatus, event, err.Error())
-		return nil, err
+		return err
 	}
-	h.namedLogger().Debug(result)
-	return result, nil
+	return nil
 }
 
 // handlePublishLegacyEvent handles the publishing of events for Subscription v1alpha2 CRD.
 // It writes to the user request if any error occurs.
 // Otherwise, return the published event.
-func (h *Handler) handlePublishLegacyEvent(writer http.ResponseWriter, publishData *api.PublishRequestData, request *http.Request) (sender.PublishResult, *cev2event.Event) {
+func (h *Handler) handlePublishLegacyEvent(writer http.ResponseWriter, publishData *api.PublishRequestData, request *http.Request) (*cev2event.Event, error) {
 	ceEvent, err := h.LegacyTransformer.TransformPublishRequestToCloudEvent(publishData)
 	if err != nil {
 		legacy.WriteJSONResponse(writer, legacy.ErrorResponse(http.StatusInternalServerError, err))
@@ -154,41 +152,38 @@ func (h *Handler) handlePublishLegacyEvent(writer http.ResponseWriter, publishDa
 	event, err := h.ceBuilder.Build(*ceEvent)
 	if err != nil {
 		legacy.WriteJSONResponse(writer, legacy.ErrorResponseBadRequest(err.Error()))
-		return nil, nil
+		return nil, err
 	}
 
-	result, err := h.handleSendEventAndRecordMetricsLegacy(writer, request, event)
+	err = h.handleSendEventAndRecordMetricsLegacy(writer, request, event)
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
 
-	return result, event
+	return event, err
 }
 
 // handlePublishLegacyEventV1alpha1 handles the publishing of events for Subscription v1alpha1 CRD.
 // It writes to the user request if any error occurs.
 // Otherwise, return the published event.
-func (h *Handler) handlePublishLegacyEventV1alpha1(writer http.ResponseWriter, publishData *api.PublishRequestData, request *http.Request) (sender.PublishResult, *cev2event.Event) {
+func (h *Handler) handlePublishLegacyEventV1alpha1(writer http.ResponseWriter, publishData *api.PublishRequestData, request *http.Request) (*cev2event.Event, error) {
 	event, _ := h.LegacyTransformer.WriteLegacyRequestsToCE(writer, publishData)
 	if event == nil {
 		h.namedLogger().Error("Failed to transform legacy event to CloudEvent, event is nil")
 		return nil, nil
 	}
 
-	result, err := h.handleSendEventAndRecordMetricsLegacy(writer, request, event)
+	err := h.handleSendEventAndRecordMetricsLegacy(writer, request, event)
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
 
-	return result, event
+	return event, err
 }
 
 // publishLegacyEventsAsCE converts an incoming request in legacy event format to a cloudevent and dispatches it using
 // the configured GenericSender.
 func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *http.Request) {
-	var publishedEvent *cev2event.Event
-	var successResult sender.PublishResult
-
 	// extract publish data from request
 	publishRequestData, errResp, _ := h.LegacyTransformer.ExtractPublishRequestData(request)
 	if errResp != nil {
@@ -197,10 +192,10 @@ func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *h
 	}
 
 	// publish event for Subscription
-	successResult, publishedEvent = h.handlePublishLegacyEvent(writer, publishRequestData, request)
+	publishedEvent, err := h.handlePublishLegacyEvent(writer, publishRequestData, request)
 	// if publishedEvent is nil, then it means that the publishing failed
 	// and the response is already returned to the user
-	if publishedEvent == nil {
+	if err != nil {
 		return
 	}
 
@@ -210,17 +205,17 @@ func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *h
 	// i.e. with prefix (`sap.kyma.custom`) and without prefix
 	// this behaviour will be deprecated when we remove support for JetStream with Subscription `exact` typeMatching
 	if h.activeBackend == env.JetStreamBackend {
-		successResult, publishedEvent = h.handlePublishLegacyEventV1alpha1(writer, publishRequestData, request)
+		publishedEvent, err = h.handlePublishLegacyEventV1alpha1(writer, publishRequestData, request)
 		// if publishedEvent is nil, then it means that the publishing failed
 		// and the response is already returned to the user
-		if publishedEvent == nil {
+		if err != nil {
 			return
 		}
 	}
 
 	// return success response to user
 	// change response as per old error codes
-	h.LegacyTransformer.WriteCEResponseAsLegacyResponse(writer, successResult.HTTPStatus(), publishedEvent, string(successResult.ResponseBody()))
+	h.LegacyTransformer.WriteCEResponseAsLegacyResponse(writer, http.StatusNoContent, publishedEvent, "")
 }
 
 // publishCloudEvents validates an incoming cloudevent and dispatches it using
@@ -264,19 +259,18 @@ func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.R
 		event.SetType(eventTypeClean)
 	}
 
-	result, err := h.sendEventAndRecordMetrics(ctx, event, h.Sender.URL(), request.Header)
+	err = h.sendEventAndRecordMetrics(ctx, event, h.Sender.URL(), request.Header)
 	if err != nil {
 		httpStatus := http.StatusInternalServerError
-		if errors.Is(err, sender.ErrInsufficientStorage) {
-			httpStatus = http.StatusInsufficientStorage
+		var pubErr sender.PublishError
+		if ok := errors.As(err, &pubErr); ok {
+			httpStatus = pubErr.Code()
 		}
 		writer.WriteHeader(httpStatus)
 		h.namedLogger().With().Error(err)
 		return
 	}
-	h.namedLogger().With().Debug(result)
-
-	err = writeResponse(writer, result.HTTPStatus(), result.ResponseBody())
+	err = writeResponse(writer, http.StatusNoContent, []byte(""))
 	if err != nil {
 		h.namedLogger().With().Error(err)
 	}
@@ -300,23 +294,24 @@ func extractCloudEventFromRequest(request *http.Request) (*cev2event.Event, erro
 }
 
 // sendEventAndRecordMetrics dispatches an Event and records metrics based on dispatch success.
-func (h *Handler) sendEventAndRecordMetrics(ctx context.Context, event *cev2event.Event, host string, header http.Header) (sender.PublishResult, error) {
+func (h *Handler) sendEventAndRecordMetrics(ctx context.Context, event *cev2event.Event, host string, header http.Header) error {
 	ctx, cancel := context.WithTimeout(ctx, h.RequestTimeout)
 	defer cancel()
 	h.applyDefaults(ctx, event)
 	tracing.AddTracingContextToCEExtensions(header, event)
 	start := time.Now()
-	result, err := h.Sender.Send(ctx, event)
+	err := h.Sender.Send(ctx, event)
 	duration := time.Since(start)
 	if err != nil {
-		status := 500
-		if result != nil {
-			status = result.HTTPStatus()
+		var pubErr sender.PublishError
+		code := 500
+		if ok := errors.As(err, &pubErr); ok {
+			code = pubErr.Code()
 		}
-		h.collector.RecordBackendLatency(duration, status, host)
-		h.collector.RecordBackendRequests(status, host)
+		h.collector.RecordBackendLatency(duration, code, host)
+		h.collector.RecordBackendRequests(code, host)
 		h.collector.RecordBackendError()
-		return nil, err
+		return err
 	}
 	originalEventType := event.Type()
 	originalTypeHeader, ok := event.Extensions()[builder.OriginalTypeHeaderName]
@@ -331,10 +326,10 @@ func (h *Handler) sendEventAndRecordMetrics(ctx context.Context, event *cev2even
 			originalEventType = event.Type()
 		}
 	}
-	h.collector.RecordEventType(originalEventType, event.Source(), result.HTTPStatus())
-	h.collector.RecordBackendLatency(duration, result.HTTPStatus(), host)
-	h.collector.RecordBackendRequests(result.HTTPStatus(), host)
-	return result, nil
+	h.collector.RecordEventType(originalEventType, event.Source(), http.StatusNoContent)
+	h.collector.RecordBackendLatency(duration, http.StatusNoContent, host)
+	h.collector.RecordBackendRequests(http.StatusNoContent, host)
+	return nil
 }
 
 // writeResponse writes the HTTP response given the status code and response body.

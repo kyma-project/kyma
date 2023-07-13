@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"reflect"
 	"testing"
 	"time"
 
@@ -14,6 +13,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/oauth"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender/common"
 	testing2 "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 )
 
@@ -98,7 +98,7 @@ func TestSender_Send_Error(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		want    sender.PublishResult
+		want    sender.PublishError
 		wantErr bool
 	}{
 		{
@@ -128,13 +128,10 @@ func TestSender_Send_Error(t *testing.T) {
 			}
 			ctx, cancel := context.WithTimeout(context.Background(), tt.args.timeout)
 			defer cancel()
-			got, err := s.Send(ctx, tt.args.builder.Build(t))
+			err := s.Send(ctx, tt.args.builder.Build(t))
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Send() error = %v, wantErr %v", err, tt.wantErr)
 				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Send() got = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -151,8 +148,8 @@ func TestSender_Send(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		want    sender.PublishResult
-		wantErr bool
+		want    sender.PublishError
+		wantErr error
 	}{
 		{
 			name: "valid event, backend 400",
@@ -163,11 +160,9 @@ func TestSender_Send(t *testing.T) {
 				ctx:     context.Background(),
 				builder: testing2.NewCloudEventBuilder(),
 			},
-			want: HTTPPublishResult{
-				Status: 400,
-				Body:   []byte{},
+			wantErr: common.BackendPublishError{
+				HttpCode: 400,
 			},
-			wantErr: false,
 		},
 		{
 			name: "valid event",
@@ -178,11 +173,7 @@ func TestSender_Send(t *testing.T) {
 				ctx:     context.Background(),
 				builder: testing2.NewCloudEventBuilder(),
 			},
-			want: HTTPPublishResult{
-				Status: 204,
-				Body:   []byte{},
-			},
-			wantErr: false,
+			wantErr: nil,
 		},
 	}
 	for _, tt := range tests {
@@ -199,14 +190,8 @@ func TestSender_Send(t *testing.T) {
 				Client: server.Client(),
 				Target: target,
 			}
-			got, err := s.Send(tt.args.ctx, tt.args.builder.Build(t))
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Send() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Send() got = %v, want %v", got, tt.want)
-			}
+			err = s.Send(tt.args.ctx, tt.args.builder.Build(t))
+			assert.ErrorIs(t, err, tt.wantErr)
 		})
 	}
 }

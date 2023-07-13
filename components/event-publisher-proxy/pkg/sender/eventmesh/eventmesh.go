@@ -13,6 +13,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/eventmesh"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/health"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender/common"
 )
 
 var _ sender.GenericSender = &Sender{}
@@ -36,27 +37,16 @@ func (s *Sender) URL() string {
 	return s.Target
 }
 
-type HTTPPublishResult struct {
-	Status int
-	Body   []byte
-}
-
-func (h HTTPPublishResult) HTTPStatus() int {
-	return h.Status
-}
-
-func (h HTTPPublishResult) ResponseBody() []byte {
-	return h.Body
-}
-
 func (s *Sender) Checker() *health.ConfigurableChecker {
 	return &health.ConfigurableChecker{}
 }
 
-func (s *Sender) Send(ctx context.Context, event *cev2event.Event) (sender.PublishResult, error) {
+func (s *Sender) Send(ctx context.Context, event *cev2event.Event) sender.PublishError {
 	request, err := s.NewRequestWithTarget(ctx, s.Target)
 	if err != nil {
-		return nil, err
+		e := common.ErrInternalBackendError
+		e.Wrap(err)
+		return e
 	}
 
 	message := binding.ToMessage(event)
@@ -64,19 +54,26 @@ func (s *Sender) Send(ctx context.Context, event *cev2event.Event) (sender.Publi
 
 	err = cloudevents.WriteRequestWithHeaders(ctx, message, request, additionalHeaders)
 	if err != nil {
-		return nil, err
+		e := common.ErrInternalBackendError
+		e.Wrap(err)
+		return e
 	}
 
 	resp, err := s.Client.Do(request)
 	if err != nil {
-		return nil, err
+		e := common.ErrInternalBackendError
+		e.Wrap(err)
+		return e
+	}
+	if resp.StatusCode >= http.StatusOK && resp.StatusCode < http.StatusMultipleChoices {
+		return nil
 	}
 	body, err := io.ReadAll(resp.Body)
 	defer func() { _ = resp.Body.Close() }()
 	if err != nil {
-		return nil, err
+		return common.ErrInternalBackendError
 	}
-	return HTTPPublishResult{Status: resp.StatusCode, Body: body}, nil
+	return common.BackendPublishError{HttpCode: resp.StatusCode, Info: string(body)}
 }
 
 // NewSender returns a new Sender instance with the given target and client.

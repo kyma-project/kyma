@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/builder"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender/common"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/cloudevents/sdk-go/v2/client"
@@ -31,7 +32,6 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics/metricstest"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender/eventmesh"
 	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 )
 
@@ -192,11 +192,7 @@ func TestHandler_publishCloudEvents_v1alpha1(t *testing.T) {
 			name: "Publish structured Cloudevent",
 			fields: fields{
 				Sender: &GenericSenderStub{
-					Err: nil,
-					Result: eventmesh.HTTPPublishResult{
-						Status: 204,
-						Body:   []byte(""),
-					},
+					Err:        nil,
 					BackendURL: "FOO",
 				},
 				collector:        metrics.NewCollector(latency),
@@ -235,11 +231,7 @@ func TestHandler_publishCloudEvents_v1alpha1(t *testing.T) {
 			name: "Publish binary Cloudevent",
 			fields: fields{
 				Sender: &GenericSenderStub{
-					Err: nil,
-					Result: eventmesh.HTTPPublishResult{
-						Status: 204,
-						Body:   []byte(""),
-					},
+					Err:        nil,
 					BackendURL: "FOO",
 				},
 				collector:        metrics.NewCollector(latency),
@@ -321,7 +313,7 @@ func TestHandler_publishCloudEvents_v1alpha1(t *testing.T) {
 			name: "Publish binary CloudEvent but cannot send",
 			fields: fields{
 				Sender: &GenericSenderStub{
-					Err: fmt.Errorf("I cannot send"),
+					Err: common.BackendPublishError{},
 				},
 				collector:        metrics.NewCollector(latency),
 				eventTypeCleaner: &eventtypetest.CleanerStub{},
@@ -360,7 +352,7 @@ func TestHandler_publishCloudEvents_v1alpha1(t *testing.T) {
 			name: "Publish binary CloudEvent but backend is full",
 			fields: fields{
 				Sender: &GenericSenderStub{
-					Err: fmt.Errorf("oh no, i cannot send: %w", sender.ErrInsufficientStorage),
+					Err: common.ErrInsufficientStorage,
 				},
 				collector:        metrics.NewCollector(latency),
 				eventTypeCleaner: &eventtypetest.CleanerStub{},
@@ -368,30 +360,30 @@ func TestHandler_publishCloudEvents_v1alpha1(t *testing.T) {
 			args: args{
 				request: CreateValidBinaryRequestV1Alpha1(t),
 			},
-			wantStatus: 507,
+			wantStatus: http.StatusInsufficientStorage,
 			wantTEF: `
 				# HELP eventing_epp_backend_duration_milliseconds The duration of sending events to the messaging server in milliseconds
 				# TYPE eventing_epp_backend_duration_milliseconds histogram
-				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="",le="0.005"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="",le="0.01"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="",le="0.025"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="",le="0.05"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="",le="0.1"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="",le="0.25"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="",le="0.5"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="",le="1"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="",le="2.5"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="",le="5"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="",le="10"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="500",destination_service="",le="+Inf"} 1
-				eventing_epp_backend_duration_milliseconds_sum{code="500",destination_service=""} 0
-				eventing_epp_backend_duration_milliseconds_count{code="500",destination_service=""} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="507",destination_service="",le="0.005"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="507",destination_service="",le="0.01"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="507",destination_service="",le="0.025"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="507",destination_service="",le="0.05"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="507",destination_service="",le="0.1"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="507",destination_service="",le="0.25"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="507",destination_service="",le="0.5"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="507",destination_service="",le="1"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="507",destination_service="",le="2.5"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="507",destination_service="",le="5"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="507",destination_service="",le="10"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="507",destination_service="",le="+Inf"} 1
+				eventing_epp_backend_duration_milliseconds_sum{code="507",destination_service=""} 0
+				eventing_epp_backend_duration_milliseconds_count{code="507",destination_service=""} 1
 				# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
 				# TYPE eventing_epp_backend_errors_total counter
 				eventing_epp_backend_errors_total 1
 				# HELP eventing_epp_backend_requests_total The total number of backend requests
 				# TYPE eventing_epp_backend_requests_total counter
-				eventing_epp_backend_requests_total{code="500",destination_service=""} 1
+				eventing_epp_backend_requests_total{code="507",destination_service=""} 1
 			`,
 		},
 	}
@@ -493,7 +485,7 @@ func TestHandler_sendEventAndRecordMetrics(t *testing.T) {
 		header http.Header
 	}
 	type wants struct {
-		result                  sender.PublishResult
+		result                  sender.PublishError
 		assertionFunc           assert.ErrorAssertionFunc
 		metricErrors            int
 		metricTotal             int
@@ -542,10 +534,6 @@ func TestHandler_sendEventAndRecordMetrics(t *testing.T) {
 				Sender: &GenericSenderStub{
 					Err:           nil,
 					SleepDuration: 0,
-					Result: eventmesh.HTTPPublishResult{
-						Status: 204,
-						Body:   nil,
-					},
 				},
 				Defaulter: nil,
 				collector: metrics.NewCollector(latency),
@@ -556,10 +544,6 @@ func TestHandler_sendEventAndRecordMetrics(t *testing.T) {
 				event: ceEvent,
 			},
 			wants: wants{
-				result: eventmesh.HTTPPublishResult{
-					Status: 204,
-					Body:   nil,
-				},
 				assertionFunc:    assert.NoError,
 				metricErrors:     0,
 				metricTotal:      1,
@@ -579,10 +563,6 @@ func TestHandler_sendEventAndRecordMetrics(t *testing.T) {
 				Sender: &GenericSenderStub{
 					Err:           nil,
 					SleepDuration: 0,
-					Result: eventmesh.HTTPPublishResult{
-						Status: 204,
-						Body:   nil,
-					},
 				},
 				Defaulter: nil,
 				collector: metrics.NewCollector(latency),
@@ -593,10 +573,6 @@ func TestHandler_sendEventAndRecordMetrics(t *testing.T) {
 				event: &ceEventWithOriginalEventType,
 			},
 			wants: wants{
-				result: eventmesh.HTTPPublishResult{
-					Status: 204,
-					Body:   nil,
-				},
 				assertionFunc:    assert.NoError,
 				metricErrors:     0,
 				metricTotal:      1,
@@ -614,7 +590,7 @@ func TestHandler_sendEventAndRecordMetrics(t *testing.T) {
 			name: "Sending not successful, error returned",
 			fields: fields{
 				Sender: &GenericSenderStub{
-					Err:           errors.New("i failed"),
+					Err:           common.BackendPublishError{},
 					SleepDuration: 5,
 				},
 				Defaulter: nil,
@@ -665,13 +641,12 @@ func TestHandler_sendEventAndRecordMetrics(t *testing.T) {
 			}
 
 			// when
-			got, err := h.sendEventAndRecordMetrics(tt.args.ctx, tt.args.event, tt.args.host, tt.args.header)
+			err := h.sendEventAndRecordMetrics(tt.args.ctx, tt.args.event, tt.args.host, tt.args.header)
 
 			// then
 			if !tt.wants.assertionFunc(t, err, fmt.Sprintf("sendEventAndRecordMetrics(%v, %v, %v)", tt.args.ctx, tt.args.host, tt.args.event)) {
 				return
 			}
-			assert.Equalf(t, tt.wants.result, got, "sendEventAndRecordMetrics(%v, %v, %v)", tt.args.ctx, tt.args.host, tt.args.event)
 			metricstest.EnsureMetricErrors(t, h.collector, tt.wants.metricErrors)
 			metricstest.EnsureMetricTotalRequests(t, h.collector, tt.wants.metricTotal)
 			metricstest.EnsureMetricLatency(t, h.collector, tt.wants.metricLatency)
@@ -685,9 +660,8 @@ func TestHandler_sendEventAndRecordMetrics(t *testing.T) {
 func TestHandler_sendEventAndRecordMetrics_TracingAndDefaults(t *testing.T) {
 	// given
 	stub := &GenericSenderStub{
-		Err:           nil,
 		SleepDuration: 0,
-		Result:        eventmesh.HTTPPublishResult{Status: http.StatusInternalServerError},
+		Err:           common.BackendPublishError{HttpCode: http.StatusInternalServerError},
 	}
 
 	const bucketsFunc = "Buckets"
@@ -716,10 +690,10 @@ func TestHandler_sendEventAndRecordMetrics_TracingAndDefaults(t *testing.T) {
 		"b3flags":        "X-B3-Flags",
 	}
 	// when
-	_, err := h.sendEventAndRecordMetrics(context.Background(), CreateCloudEvent(t), "", header)
+	err := h.sendEventAndRecordMetrics(context.Background(), CreateCloudEvent(t), "", header)
 
 	// then
-	assert.NoError(t, err)
+	assert.Error(t, err)
 	assert.Equal(t, expectedExtensions, stub.ReceivedEvent.Context.GetExtensions())
 }
 
@@ -804,17 +778,16 @@ func CreateInvalidBinaryRequestV1Alpha1(t *testing.T) *http.Request {
 }
 
 type GenericSenderStub struct {
-	Err           error
 	SleepDuration time.Duration
-	Result        sender.PublishResult
+	Err           sender.PublishError
 	ReceivedEvent *cev2event.Event
 	BackendURL    string
 }
 
-func (g *GenericSenderStub) Send(_ context.Context, event *cev2event.Event) (sender.PublishResult, error) {
+func (g *GenericSenderStub) Send(_ context.Context, event *cev2event.Event) sender.PublishError {
 	g.ReceivedEvent = event
 	time.Sleep(g.SleepDuration)
-	return g.Result, g.Err
+	return g.Err
 }
 
 func (g *GenericSenderStub) URL() string {
