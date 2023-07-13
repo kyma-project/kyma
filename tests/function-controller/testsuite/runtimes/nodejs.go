@@ -27,6 +27,39 @@ func BasicNodeJSFunction(msg string, rtm serverlessv1alpha2.Runtime) serverlessv
 	}
 }
 
+func BasicTracingNodeFunction(rtm serverlessv1alpha2.Runtime) serverlessv1alpha2.FunctionSpec {
+	return serverlessv1alpha2.FunctionSpec{
+		//TODO: add nodejs function with calling to ngix
+		Runtime: rtm,
+		Source: serverlessv1alpha2.Source{
+			Inline: &serverlessv1alpha2.InlineSource{
+				Source: `const axios = require("axios")
+
+module.exports = {
+    main: async function (event, context) {
+
+        axios.interceptors.response.use(res => {
+            console.log("axios request headers", res.request._header)
+            return res;
+          }, error => Promise.reject(error));
+
+        console.log("request headers",event.extensions.request.headers)
+        let resp = await axios("https://swapi.dev/api/people/1");
+        return resp.data;
+    }
+}`,
+				Dependencies: `{
+  "name": "sanitise-fn",
+  "version": "0.0.1",
+  "dependencies": {
+    "axios":"0.26.1"
+  }
+}`,
+			},
+		},
+	}
+}
+
 func BasicNodeJSFunctionWithCustomDependency(msg string, rtm serverlessv1alpha2.Runtime) serverlessv1alpha2.FunctionSpec {
 	return serverlessv1alpha2.FunctionSpec{
 		Runtime: rtm,

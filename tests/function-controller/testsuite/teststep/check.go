@@ -1,6 +1,8 @@
 package teststep
 
 import (
+	"io"
+	"net/http"
 	"net/url"
 	"time"
 
@@ -116,5 +118,57 @@ func (d DefaultedFunctionCheck) Cleanup() error {
 }
 
 func (d DefaultedFunctionCheck) OnError() error {
+	return nil
+}
+
+var _ step.Step = &TracingHTTPCheck{}
+
+type TracingHTTPCheck struct {
+	name     string
+	log      *logrus.Entry
+	endpoint string
+	poll     poller.Poller
+}
+
+func NewTracingHTTPCheck(log *logrus.Entry, name string, url *url.URL, poller poller.Poller) *TracingHTTPCheck {
+	return &TracingHTTPCheck{
+		name:     name,
+		log:      log.WithField(step.LogStepKey, name),
+		endpoint: url.String(),
+		poll:     poller.WithLogger(log),
+	}
+
+}
+
+func (t TracingHTTPCheck) Name() string {
+	return t.name
+}
+
+func (t TracingHTTPCheck) Run() error {
+	req, err := http.NewRequest(http.MethodGet, t.endpoint, nil)
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	out, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	println(string(out))
+	return nil
+}
+
+func (t TracingHTTPCheck) Cleanup() error {
+	return nil
+}
+
+func (t TracingHTTPCheck) OnError() error {
 	return nil
 }
