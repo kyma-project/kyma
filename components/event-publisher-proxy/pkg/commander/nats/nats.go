@@ -132,8 +132,22 @@ func (c *Commander) Start() error {
 		applicationLister, c.logger)
 
 	// start handler which blocks until it receives a shutdown signal
-	if err := handler.NewHandler(messageReceiver, messageSender, messageSender, c.envCfg.RequestTimeout, legacyTransformer, c.opts,
-		subscribedProcessor, c.logger, c.metricsCollector, eventTypeCleanerV1, ceBuilder, c.envCfg.EventTypePrefix, env.JetStreamBackend).Start(ctx); err != nil {
+	h := handler.New(
+		messageReceiver,
+		messageSender,
+		messageSender,
+		c.envCfg.RequestTimeout,
+		legacyTransformer,
+		c.opts,
+		subscribedProcessor,
+		c.logger,
+		c.metricsCollector,
+		eventTypeCleanerV1,
+		ceBuilder,
+		c.envCfg.EventTypePrefix,
+		env.JetStreamBackend,
+	)
+	if err := h.Start(ctx); err != nil {
 		return xerrors.Errorf("failed to start handler for %s : %v", natsCommanderName, err)
 	}
 

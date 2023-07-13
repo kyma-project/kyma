@@ -35,10 +35,11 @@ const (
 var _ sender.GenericSender = &Sender{}
 var _ health.Checker = &Sender{}
 
+//nolint:lll // reads better this way
 var (
-	ErrNotConnected        = common.BackendPublishError{HttpCode: http.StatusBadGateway, Info: "no connection to NATS JetStream server"}
-	ErrCannotSendToStream  = common.BackendPublishError{HttpCode: http.StatusGatewayTimeout, Info: "cannot send to stream"}
-	ErrNoSpaceLeftOnDevice = common.BackendPublishError{HttpCode: http.StatusInsufficientStorage, Info: "insufficient resources on target stream"}
+	ErrNotConnected        = common.BackendPublishError{HTTPCode: http.StatusBadGateway, Info: "no connection to NATS JetStream server"}
+	ErrCannotSendToStream  = common.BackendPublishError{HTTPCode: http.StatusGatewayTimeout, Info: "cannot send to stream"}
+	ErrNoSpaceLeftOnDevice = common.BackendPublishError{HTTPCode: http.StatusInsufficientStorage, Info: "insufficient resources on target stream"}
 )
 
 // Sender is responsible for sending messages over HTTP.
@@ -102,12 +103,12 @@ func natsErrorToPublishError(err error) sender.PublishError {
 	}
 
 	var apiErr nats.JetStreamError
-	e := common.BackendPublishError{HttpCode: http.StatusInternalServerError}
+	e := common.BackendPublishError{HTTPCode: http.StatusInternalServerError}
 	if errors.As(err, &apiErr) {
 		if apiErr.APIError().ErrorCode == JSStoreFailedCode {
 			return ErrNoSpaceLeftOnDevice
 		}
-		e.HttpCode = apiErr.APIError().Code
+		e.HTTPCode = apiErr.APIError().Code
 		e.Info = apiErr.APIError().Description
 		e.Wrap(err)
 		return e

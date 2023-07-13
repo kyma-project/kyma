@@ -123,7 +123,7 @@ func (c *Commander) Start() error {
 		applicationLister, c.logger)
 
 	// start handler which blocks until it receives a shutdown signal
-	if err := handler.NewHandler(
+	if err := handler.New(
 		messageReceiver,
 		messageSender,
 		health.NewChecker(),

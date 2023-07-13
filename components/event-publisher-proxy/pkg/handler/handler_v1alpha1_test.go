@@ -661,7 +661,7 @@ func TestHandler_sendEventAndRecordMetrics_TracingAndDefaults(t *testing.T) {
 	// given
 	stub := &GenericSenderStub{
 		SleepDuration: 0,
-		Err:           common.BackendPublishError{HttpCode: http.StatusInternalServerError},
+		Err:           common.BackendPublishError{HTTPCode: http.StatusInternalServerError},
 	}
 
 	const bucketsFunc = "Buckets"

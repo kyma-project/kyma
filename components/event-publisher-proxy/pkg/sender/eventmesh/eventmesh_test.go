@@ -161,7 +161,7 @@ func TestSender_Send(t *testing.T) {
 				builder: testing2.NewCloudEventBuilder(),
 			},
 			wantErr: common.BackendPublishError{
-				HttpCode: 400,
+				HTTPCode: 400,
 			},
 		},
 		{

@@ -73,7 +73,7 @@ func (s *Sender) Send(ctx context.Context, event *cev2event.Event) sender.Publis
 	if err != nil {
 		return common.ErrInternalBackendError
 	}
-	return common.BackendPublishError{HttpCode: resp.StatusCode, Info: string(body)}
+	return common.BackendPublishError{HTTPCode: resp.StatusCode, Info: string(body)}
 }
 
 // NewSender returns a new Sender instance with the given target and client.
