@@ -1,4 +1,4 @@
-const {wait, debug} = require('../utils');
+const {wait, debug} = require('../../utils');
 const {expect} = require('chai');
 const fs = require('fs');
 const os = require('os');
