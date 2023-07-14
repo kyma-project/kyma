@@ -155,8 +155,8 @@ global:
       sha: ""
     k8s_sidecar:
       name: "k8s-sidecar"
-      version: "PR-364"
-      directory: "dev/tpi"
+      version: "1.24.6-8a6ab896"
+      directory: "prod/tpi"
       sha: ""
     oauth2_proxy:
       name: "oauth2-proxy"
