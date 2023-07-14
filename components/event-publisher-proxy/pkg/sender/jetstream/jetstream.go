@@ -27,7 +27,7 @@ import (
 const (
 	JSStoreFailedCode     = 10077
 	natsBackend           = "nats"
-	jestreamHandlerName   = "jetstream-handler"
+	handlerName           = "jetstream-handler"
 	noSpaceLeftErrMessage = "no space left on device"
 )
 
@@ -79,6 +79,7 @@ func (s *Sender) Send(_ context.Context, event *event.Event) sender.PublishError
 
 	msg, err := s.eventToNATSMsg(event)
 	if err != nil {
+		s.namedLogger().Error("error", err)
 		e := common.ErrClientConversionFailed
 		e.Wrap(err)
 		return e
@@ -149,5 +150,5 @@ func (s *Sender) getJsSubjectToPublish(subject string) string {
 }
 
 func (s *Sender) namedLogger() *zap.SugaredLogger {
-	return s.logger.WithContext().Named(jestreamHandlerName).With("backend", natsBackend, "jetstream enabled", true)
+	return s.logger.WithContext().Named(handlerName).With("backend", natsBackend, "jetstream enabled", true)
 }

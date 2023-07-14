@@ -81,7 +81,7 @@ func (c *Commander) Start() error {
 	defer client.CloseIdleConnections()
 
 	// configure message sender
-	messageSender := eventmesh.NewSender(c.envCfg.EventMeshPublishURL, client)
+	messageSender := eventmesh.NewSender(c.envCfg.EventMeshPublishURL, client, c.logger)
 
 	// cluster config
 	k8sConfig := config.GetConfigOrDie()

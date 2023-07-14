@@ -8,7 +8,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/oauth"
@@ -32,8 +34,9 @@ func TestNewHttpMessageSender(t *testing.T) {
 
 	client := oauth.NewClient(context.Background(), &env.EventMeshConfig{})
 	defer client.CloseIdleConnections()
-
-	msgSender := NewSender(eventsEndpoint, client)
+	mockedLogger, err := logger.New("json", "info")
+	require.NoError(t, err)
+	msgSender := NewSender(eventsEndpoint, client, mockedLogger)
 	if msgSender.Target != eventsEndpoint {
 		t.Errorf("Message sender target is misconfigured want: %s but got: %s", eventsEndpoint, msgSender.Target)
 	}
@@ -49,7 +52,9 @@ func TestNewRequestWithTarget(t *testing.T) {
 	client := oauth.NewClient(context.Background(), cfg)
 	defer client.CloseIdleConnections()
 
-	msgSender := NewSender(eventsEndpoint, client)
+	mockedLogger, err := logger.New("json", "info")
+	require.NoError(t, err)
+	msgSender := NewSender(eventsEndpoint, client, mockedLogger)
 
 	type ctxKey struct{}
 	const ctxValue = "testValue"
@@ -122,13 +127,12 @@ func TestSender_Send_Error(t *testing.T) {
 			mux.HandleFunc(eventsEndpoint, hOk.ServeHTTP)
 			mux.HandleFunc(eventsHTTP400Endpoint, hFail.ServeHTTP)
 			server := httptest.NewServer(mux)
-			s := &Sender{
-				Client: server.Client(),
-				Target: tt.fields.Target,
-			}
+			mockedLogger, err := logger.New("json", "info")
+			require.NoError(t, err)
+			s := NewSender(tt.fields.Target, server.Client(), mockedLogger)
 			ctx, cancel := context.WithTimeout(context.Background(), tt.args.timeout)
 			defer cancel()
-			err := s.Send(ctx, tt.args.builder.Build(t))
+			err = s.Send(ctx, tt.args.builder.Build(t))
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Send() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -186,10 +190,9 @@ func TestSender_Send(t *testing.T) {
 			server := httptest.NewServer(mux)
 			target, err := url.JoinPath(server.URL, tt.fields.Target)
 			assert.NoError(t, err)
-			s := &Sender{
-				Client: server.Client(),
-				Target: target,
-			}
+			mockedLogger, err := logger.New("json", "info")
+			require.NoError(t, err)
+			s := NewSender(target, server.Client(), mockedLogger)
 			err = s.Send(tt.args.ctx, tt.args.builder.Build(t))
 			assert.ErrorIs(t, err, tt.wantErr)
 		})
