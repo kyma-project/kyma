@@ -69,8 +69,8 @@ func (p PublishingMetricsCollectorStub) RecordEventType(_, _ string, _ int) {
 func (p PublishingMetricsCollectorStub) RecordRequests(_ int, _ string) {
 }
 
+//nolint:lll // that's how TEF has to look like
 func MakeTEFBackendDuration(code int, service string) string {
-
 	tef := strings.ReplaceAll(`# HELP eventing_epp_backend_duration_milliseconds The duration of sending events to the messaging server in milliseconds
 					# TYPE eventing_epp_backend_duration_milliseconds histogram
 					eventing_epp_backend_duration_milliseconds_bucket{code="%%code%%",destination_service="%%service%%",le="0.005"} 1
@@ -99,6 +99,7 @@ func MakeTEFBackendRequests(code int, service string) string {
 	return strings.ReplaceAll(tef, "%%service%%", service)
 }
 
+//nolint:lll // that's how TEF has to look like
 func MakeTEFBackendErrors() string {
 	return `# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
         # TYPE eventing_epp_backend_errors_total counter
@@ -106,6 +107,7 @@ func MakeTEFBackendErrors() string {
 		`
 }
 
+//nolint:lll // that's how TEF has to look like
 func MakeTEFEventTypePublished(code int, source, eventtype string) string {
 	tef := strings.ReplaceAll(`# HELP eventing_epp_event_type_published_total The total number of events published for a given eventTypeLabel
         # TYPE eventing_epp_event_type_published_total counter
