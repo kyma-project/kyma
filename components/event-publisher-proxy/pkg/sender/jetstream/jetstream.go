@@ -72,8 +72,9 @@ func (s *Sender) Send(_ context.Context, event *event.Event) sender.PublishError
 		return ErrNotConnected
 	}
 
-	jsCtx, jsError := s.connection.JetStream()
-	if jsError != nil {
+	jsCtx, err := s.connection.JetStream()
+	if err != nil {
+		s.namedLogger().Error("error", err)
 		return common.ErrClientNoConnection
 	}
 
