@@ -315,8 +315,6 @@ func (h *Handler) sendEventAndRecordMetrics(ctx context.Context, event *cev2even
 			code = pubErr.Code()
 		}
 		h.collector.RecordBackendLatency(duration, code, host)
-		h.collector.RecordBackendRequests(code, host)
-		h.collector.RecordBackendError()
 		return err
 	}
 	originalEventType := event.Type()
@@ -334,7 +332,6 @@ func (h *Handler) sendEventAndRecordMetrics(ctx context.Context, event *cev2even
 	}
 	h.collector.RecordEventType(originalEventType, event.Source(), http.StatusNoContent)
 	h.collector.RecordBackendLatency(duration, http.StatusNoContent, host)
-	h.collector.RecordBackendRequests(http.StatusNoContent, host)
 	return nil
 }
 

@@ -74,7 +74,6 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 			},
 			wantStatus: 204,
 			wantTEF: metricstest.MakeTEFBackendDuration(204, "FOO") +
-				metricstest.MakeTEFBackendRequests(204, "FOO") +
 				metricstest.MakeTEFEventTypePublished(204, "/default/sap.kyma/id", ""),
 		},
 		{
@@ -92,7 +91,6 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 			},
 			wantStatus: 204,
 			wantTEF: metricstest.MakeTEFBackendDuration(204, "FOO") +
-				metricstest.MakeTEFBackendRequests(204, "FOO") +
 				metricstest.MakeTEFEventTypePublished(204, "/default/sap.kyma/id", ""),
 		},
 		{
@@ -110,7 +108,6 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 			},
 			wantStatus: 204,
 			wantTEF: metricstest.MakeTEFBackendDuration(204, "FOO") +
-				metricstest.MakeTEFBackendRequests(204, "FOO") +
 				metricstest.MakeTEFEventTypePublished(204, "testapp1023", "order.created.v1"),
 		},
 		{
@@ -128,7 +125,6 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 			},
 			wantStatus: 204,
 			wantTEF: metricstest.MakeTEFBackendDuration(204, "FOO") +
-				metricstest.MakeTEFBackendRequests(204, "FOO") +
 				metricstest.MakeTEFEventTypePublished(204, "testapp1023", "order.created.v1"),
 		},
 		{
@@ -169,9 +165,7 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 				request: CreateValidBinaryRequest(t),
 			},
 			wantStatus: 500,
-			wantTEF: metricstest.MakeTEFBackendDuration(500, "") +
-				metricstest.MakeTEFBackendRequests(500, "") +
-				metricstest.MakeTEFBackendErrors(),
+			wantTEF:    metricstest.MakeTEFBackendDuration(500, ""),
 		},
 		{
 			name: "Publish binary CloudEvent but backend is full",
@@ -186,9 +180,7 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 				request: CreateValidBinaryRequest(t),
 			},
 			wantStatus: 507,
-			wantTEF: metricstest.MakeTEFBackendDuration(507, "") +
-				metricstest.MakeTEFBackendRequests(507, "") +
-				metricstest.MakeTEFBackendErrors(),
+			wantTEF:    metricstest.MakeTEFBackendDuration(507, ""),
 		},
 	}
 	for _, tt := range tests {
@@ -256,7 +248,6 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 			givenRequest:           legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
 			wantHTTPStatus:         http.StatusOK,
 			wantTEF: metricstest.MakeTEFBackendDuration(204, "FOO") +
-				metricstest.MakeTEFBackendRequests(204, "FOO") +
 				metricstest.MakeTEFEventTypePublished(204, "testapp", "object.created.v1"),
 		},
 		{
@@ -269,9 +260,7 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 			givenCollector:         metrics.NewCollector(latency),
 			givenRequest:           legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
 			wantHTTPStatus:         http.StatusNotFound,
-			wantTEF: metricstest.MakeTEFBackendDuration(404, "FOO") +
-				metricstest.MakeTEFBackendRequests(404, "FOO") +
-				metricstest.MakeTEFBackendErrors(),
+			wantTEF:                metricstest.MakeTEFBackendDuration(404, "FOO"),
 		},
 		{
 			name: "Send valid legacy event but cannot send to backend due to full storage",
@@ -283,9 +272,7 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 			givenCollector:         metrics.NewCollector(latency),
 			givenRequest:           legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
 			wantHTTPStatus:         507,
-			wantTEF: metricstest.MakeTEFBackendDuration(507, "FOO") +
-				metricstest.MakeTEFBackendRequests(507, "FOO") +
-				metricstest.MakeTEFBackendErrors(),
+			wantTEF:                metricstest.MakeTEFBackendDuration(507, "FOO"),
 		},
 		{
 			name: "Send valid legacy event but cannot send to backend",
@@ -297,9 +284,7 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 			givenCollector:         metrics.NewCollector(latency),
 			givenRequest:           legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
 			wantHTTPStatus:         500,
-			wantTEF: metricstest.MakeTEFBackendDuration(500, "FOO") +
-				metricstest.MakeTEFBackendRequests(500, "FOO") +
-				metricstest.MakeTEFBackendErrors(),
+			wantTEF:                metricstest.MakeTEFBackendDuration(500, "FOO"),
 		},
 		{
 			name: "Send invalid legacy event",

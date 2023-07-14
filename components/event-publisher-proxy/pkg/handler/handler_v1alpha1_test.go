@@ -203,7 +203,6 @@ func TestHandler_publishCloudEvents_v1alpha1(t *testing.T) {
 			},
 			wantStatus: 204,
 			wantTEF: metricstest.MakeTEFBackendDuration(204, "FOO") +
-				metricstest.MakeTEFBackendRequests(204, "FOO") +
 				metricstest.MakeTEFEventTypePublished(204, "/default/sap.kyma/id", ""),
 		},
 		{
@@ -221,7 +220,6 @@ func TestHandler_publishCloudEvents_v1alpha1(t *testing.T) {
 			},
 			wantStatus: 204,
 			wantTEF: metricstest.MakeTEFBackendDuration(204, "FOO") +
-				metricstest.MakeTEFBackendRequests(204, "FOO") +
 				metricstest.MakeTEFEventTypePublished(204, "/default/sap.kyma/id", ""),
 		},
 		{
@@ -279,9 +277,7 @@ func TestHandler_publishCloudEvents_v1alpha1(t *testing.T) {
 				request: CreateValidBinaryRequestV1Alpha1(t),
 			},
 			wantStatus: 500,
-			wantTEF: metricstest.MakeTEFBackendDuration(500, "") +
-				metricstest.MakeTEFBackendRequests(500, "") +
-				metricstest.MakeTEFBackendErrors(),
+			wantTEF:    metricstest.MakeTEFBackendDuration(500, ""),
 		},
 		{
 			name: "Publish binary CloudEvent but backend is full",
@@ -296,9 +292,7 @@ func TestHandler_publishCloudEvents_v1alpha1(t *testing.T) {
 				request: CreateValidBinaryRequestV1Alpha1(t),
 			},
 			wantStatus: http.StatusInsufficientStorage,
-			wantTEF: metricstest.MakeTEFBackendDuration(507, "") +
-				metricstest.MakeTEFBackendRequests(507, "") +
-				metricstest.MakeTEFBackendErrors(),
+			wantTEF:    metricstest.MakeTEFBackendDuration(507, ""),
 		},
 	}
 	for _, tt := range tests {
@@ -544,8 +538,6 @@ func TestHandler_sendEventAndRecordMetrics(t *testing.T) {
 			if !tt.wants.assertionFunc(t, err, fmt.Sprintf("sendEventAndRecordMetrics(%v, %v, %v)", tt.args.ctx, tt.args.host, tt.args.event)) {
 				return
 			}
-			metricstest.EnsureMetricErrors(t, h.collector, tt.wants.metricErrors)
-			metricstest.EnsureMetricTotalRequests(t, h.collector, tt.wants.metricTotal)
 			metricstest.EnsureMetricLatency(t, h.collector, tt.wants.metricLatency)
 			metricstest.EnsureMetricEventTypePublished(t, h.collector, tt.wants.metricPublished)
 			metricstest.EnsureMetricMatchesTextExpositionFormat(t, h.collector, tt.wants.metricLatencyTEF, "eventing_epp_backend_duration_milliseconds")

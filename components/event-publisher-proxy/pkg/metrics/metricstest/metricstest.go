@@ -13,11 +13,6 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics"
 )
 
-// EnsureMetricErrors ensures metric eventing_epp_backend_errors_total exists.
-func EnsureMetricErrors(t *testing.T, collector metrics.PublishingMetricsCollector, count int) {
-	ensureMetricCount(t, collector, metrics.BackendErrorsKey, count)
-}
-
 // EnsureMetricLatency ensures metric eventing_epp_backend_duration_seconds exists.
 func EnsureMetricLatency(t *testing.T, collector metrics.PublishingMetricsCollector, count int) {
 	ensureMetricCount(t, collector, metrics.BackendLatencyKey, count)
@@ -26,11 +21,6 @@ func EnsureMetricLatency(t *testing.T, collector metrics.PublishingMetricsCollec
 // EnsureMetricEventTypePublished ensures metric eventing_epp_event_type_published_total exists.
 func EnsureMetricEventTypePublished(t *testing.T, collector metrics.PublishingMetricsCollector, count int) {
 	ensureMetricCount(t, collector, metrics.EventTypePublishedMetricKey, count)
-}
-
-// EnsureMetricTotalRequests ensures metric eventing_epp_backend_requests_total exists.
-func EnsureMetricTotalRequests(t *testing.T, collector metrics.PublishingMetricsCollector, count int) {
-	ensureMetricCount(t, collector, metrics.BackendRequestsKey, count)
 }
 
 func ensureMetricCount(t *testing.T, collector metrics.PublishingMetricsCollector, metric string, expectedCount int) {
