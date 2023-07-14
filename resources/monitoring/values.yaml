@@ -155,7 +155,7 @@ global:
       sha: ""
     k8s_sidecar:
       name: "k8s-sidecar"
-      version: "1.15.9-1a4f8cec"
+      version: "1.24.6-8a6ab896"
       directory: "prod/tpi"
       sha: ""
     oauth2_proxy:
