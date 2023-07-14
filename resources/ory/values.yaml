@@ -72,6 +72,9 @@ global:
       version: "3.17.3"
       directory: "prod/external"
 
+# Configure priorityClassName
+priorityClassName: "ory-priority-class"
+
 headerRewrite:
   enabled: true
   certificateDataHeader: "Certificate-Data"
