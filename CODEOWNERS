@@ -74,7 +74,7 @@
 /tests/fast-integration/monitoring @kyma-project/observability
 /tests/fast-integration/telemetry-test @kyma-project/observability
 /tests/fast-integration/tracing @kyma-project/observability
-
+/tests/fast-integration/prow @kyma-project/jellyfish
 
 /tests/function-controller @kyma-project/Otters
 /tests/components/api-gateway @kyma-project/goat
