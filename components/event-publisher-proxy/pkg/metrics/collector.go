@@ -13,10 +13,10 @@ import (
 )
 
 const (
-	// HealthKey name of the health metric
+	// HealthKey name of the health metric.
 	HealthKey = "eventing_epp_health"
 	// HealthHelp help text for the Health metric.
-	healthHelp = "The current health of the system. `1` indicates a healthy system."
+	healthHelp = "The current health of the system. `1` indicates a healthy system"
 
 	// BackendLatencyKey name of the backendLatency metric.
 	BackendLatencyKey = "eventing_epp_backend_duration_milliseconds"
