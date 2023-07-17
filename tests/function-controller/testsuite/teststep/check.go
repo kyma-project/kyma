@@ -1,7 +1,6 @@
 package teststep
 
 import (
-	"io"
 	"net/http"
 	"net/url"
 	"time"
@@ -157,11 +156,19 @@ func (t TracingHTTPCheck) Run() error {
 	if err != nil {
 		return err
 	}
-	out, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return err
+
+	if resp.StatusCode != http.StatusOK {
+		return nil
 	}
-	println(string(out))
+
+	headers := make(map[string]string)
+	for name, values := range resp.Header {
+		if len(values) > 0 && (name == "traceparent" || name == "x-b3-traceid" || name == "x-b3-spanid" || name == "x-b3-parentspanid" || name == "x-b3-sampled") {
+			headers[name] = values[0]
+		}
+	}
+
+	println(headers)
 	return nil
 }
 

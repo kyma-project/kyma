@@ -74,6 +74,7 @@ func SimpleFunctionTracingTest(restConfig *rest.Config, cfg testsuite.Config, lo
 			step.NewSerialTestRunner(nodejs18Logger, "NodeJS18 test",
 				teststep.CreateFunction(nodejs18Logger, nodejs18Fn, "Create NodeJS18 Function", runtimes.BasicTracingNodeFunction(serverlessv1alpha2.NodeJs18)),
 				teststep.NewTracingHTTPCheck(nodejs18Logger, "NodeJS18 post update simple check through service", nodejs18Fn.FunctionURL, poll),
+				//TODO add testing logic
 			),
 		),
 	), nil

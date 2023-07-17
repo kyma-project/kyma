@@ -37,14 +37,16 @@ func BasicTracingNodeFunction(rtm serverlessv1alpha2.Runtime) serverlessv1alpha2
 
 module.exports = {
     main: async function (event, context) {
-
+		let response;
         axios.interceptors.response.use(res => {
-            console.log("axios request headers", res.request._header)
+            console.log("axios request headers xb-3", res.request._header)
+			response = res;
             return res;
           }, error => Promise.reject(error));
 
-        console.log("request headers",event.extensions.request.headers)
+        //console.log("request headers",event.extensions.request.headers)
         let resp = await axios("https://swapi.dev/api/people/1");
+		//console.log("chleb chleb ", response.request,_header)
         return resp.data;
     }
 }`,
