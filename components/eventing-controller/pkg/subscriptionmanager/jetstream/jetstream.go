@@ -113,6 +113,7 @@ func (sm *SubscriptionManager) Start(defaultSubsConfig env.DefaultSubscriptionCo
 		recorder,
 		jsCleaner,
 		sink.NewValidator(ctx, client, recorder),
+		sm.metricsCollector,
 	)
 	sm.backendv2 = jetStreamReconciler.Backend
 

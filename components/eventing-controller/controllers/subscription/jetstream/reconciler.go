@@ -2,6 +2,7 @@ package jetstream
 
 import (
 	"context"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
 	"reflect"
 	"time"
 
@@ -46,10 +47,11 @@ type Reconciler struct {
 	cleaner             cleaner.Cleaner
 	sinkValidator       sink.Validator
 	customEventsChannel chan event.GenericEvent
+	collector           *metrics.Collector
 }
 
 func NewReconciler(ctx context.Context, client client.Client, jsBackend jetstream.Backend, logger *logger.Logger,
-	recorder record.EventRecorder, cleaner cleaner.Cleaner, defaultSinkValidator sink.Validator) *Reconciler {
+	recorder record.EventRecorder, cleaner cleaner.Cleaner, defaultSinkValidator sink.Validator, collector *metrics.Collector) *Reconciler {
 	reconciler := &Reconciler{
 		Client:              client,
 		ctx:                 ctx,
@@ -59,6 +61,7 @@ func NewReconciler(ctx context.Context, client client.Client, jsBackend jetstrea
 		cleaner:             cleaner,
 		sinkValidator:       defaultSinkValidator,
 		customEventsChannel: make(chan event.GenericEvent),
+		collector:           collector,
 	}
 	if err := jsBackend.Initialize(reconciler.handleNatsConnClose); err != nil {
 		logger.WithContext().Errorw("Failed to start reconciler", "name", reconcilerName, "error", err)
@@ -207,6 +210,7 @@ func (r *Reconciler) handleSubscriptionDeletion(ctx context.Context,
 			return ctrl.Result{}, deleteSubErr
 		}
 
+		types := subscription.Status.Backend.Types
 		// remove the eventing finalizer from the list and update the subscription.
 		subscription.ObjectMeta.Finalizers = utils.RemoveString(subscription.ObjectMeta.Finalizers,
 			eventingv1alpha2.Finalizer)
@@ -215,6 +219,10 @@ func (r *Reconciler) handleSubscriptionDeletion(ctx context.Context,
 		if err := r.Update(ctx, subscription); err != nil {
 			return ctrl.Result{}, pkgerrors.MakeError(errFailedToUpdateFinalizers, err)
 		}
+		for _, t := range types {
+			r.collector.RemoveSubscriptionStatus(subscription.Name, subscription.Namespace, t.ConsumerName)
+		}
+
 		return ctrl.Result{}, nil
 	}
 	return ctrl.Result{}, nil
@@ -229,6 +237,15 @@ func (r *Reconciler) syncSubscriptionStatus(ctx context.Context,
 	// compile the desired conditions
 	desiredSubscription.Status.Conditions = eventingv1alpha2.GetSubscriptionActiveCondition(desiredSubscription, err)
 
+	// Update metrics
+	for _, consumer := range desiredSubscription.Status.Backend.Types {
+		r.collector.RecordSubscriptionStatus(desiredSubscription.Status.Ready,
+			desiredSubscription.Name,
+			desiredSubscription.Namespace,
+			consumer.ConsumerName,
+		)
+
+	}
 	// Update the subscription
 	return r.updateSubscriptionStatus(ctx, desiredSubscription, log)
 }
