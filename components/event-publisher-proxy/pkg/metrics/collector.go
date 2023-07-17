@@ -144,7 +144,7 @@ func (c *Collector) RecordBackendLatency(duration time.Duration, statusCode int,
 	c.backendLatency.WithLabelValues(fmt.Sprint(statusCode), destSvc).Observe(float64(duration.Milliseconds()))
 }
 
-// RecordEventType updates the health status metric
+// SetHealthStatus updates the health metric.
 func (c *Collector) SetHealthStatus(healthy bool) {
 	var v float64
 	if healthy {
