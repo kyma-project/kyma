@@ -35,19 +35,43 @@ func BasicTracingNodeFunction(rtm serverlessv1alpha2.Runtime) serverlessv1alpha2
 			Inline: &serverlessv1alpha2.InlineSource{
 				Source: `const axios = require("axios")
 
+
 module.exports = {
     main: async function (event, context) {
-		let response;
+        let interceptedHeaders;
         axios.interceptors.response.use(res => {
-            console.log("axios request headers xb-3", res.request._header)
-			response = res;
+            console.log("axios request interceptedHeaders xb-3", res.request._header)
+            interceptedHeaders = res.request._header
             return res;
-          }, error => Promise.reject(error));
 
-        //console.log("request headers",event.extensions.request.headers)
-        let resp = await axios("https://swapi.dev/api/people/1");
-		//console.log("chleb chleb ", response.request,_header)
-        return resp.data;
+        }, error => Promise.reject(error));
+
+
+        await axios("https://swapi.dev/api/people/1");
+
+        let headers = {}
+
+        let newArr = interceptedHeaders.split('\n')
+        newArr.filter( val => {
+            let out = val.split(":")
+            return out.length === 2;
+        }).forEach(item => {
+            let out = item.split(":")
+            headers[out[0]] = out[1].trim()
+        })
+
+
+        console.log("2", headers)
+        let response = {}
+        Object.keys(headers).forEach(function (key) {
+            console.log(key)
+            console.log(key.startsWith("x-b3"))
+            if (key.startsWith("x-b3") || key.startsWith("traceparent")) {
+                response[key] = headers[key]
+            }
+        })
+        return response
+        // return resp.data;
     }
 }`,
 				Dependencies: `{

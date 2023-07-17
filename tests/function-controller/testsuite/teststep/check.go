@@ -1,6 +1,8 @@
 package teststep
 
 import (
+	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"time"
@@ -150,6 +152,7 @@ func (t TracingHTTPCheck) Run() error {
 	}
 
 	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("X-B3-Sampled", "1")
 
 	client := &http.Client{Timeout: 10 * time.Second}
 	resp, err := client.Do(req)
@@ -161,14 +164,11 @@ func (t TracingHTTPCheck) Run() error {
 		return nil
 	}
 
-	headers := make(map[string]string)
-	for name, values := range resp.Header {
-		if len(values) > 0 && (name == "traceparent" || name == "x-b3-traceid" || name == "x-b3-spanid" || name == "x-b3-parentspanid" || name == "x-b3-sampled") {
-			headers[name] = values[0]
-		}
+	out, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
 	}
-
-	println(headers)
+	fmt.Println(string(out))
 	return nil
 }
 

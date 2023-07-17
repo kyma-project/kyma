@@ -126,8 +126,7 @@ func runScenario(scenario testScenario, scenarioName string, logf *logrus.Logger
 		return err
 	}
 
-	runner := step.NewRunner(step.WithCleanupDefault(step.CleanupModeYes), step.WithLogger(logf))
-	//runner := step.NewRunner(step.WithCleanupDefault(cfg.Test.Cleanup), step.WithLogger(logf))
+	runner := step.NewRunner(step.WithCleanupDefault(cfg.Test.Cleanup), step.WithLogger(logf))
 
 	err = runner.Execute(steps)
 	if err != nil {
