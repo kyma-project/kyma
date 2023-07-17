@@ -21,6 +21,8 @@ The metrics follow the [Prometheus naming convention](https://prometheus.io/docs
 | **eventing_ec_nats_delivery_per_subscription_total**      | The total number of dispatched events per subscription                                                                      |
 | **eventing_ec_nats_subscriber_dispatch_duration_seconds** | The duration of sending an incoming NATS message to the subscriber (not including processing the message in the dispatcher) |
 | **eventing_ec_event_type_subscribed_total**               | The total number of eventTypes subscribed using the Subscription CRD                                                        |
+| **eventing_ec_health**                                    | The current health of the system. `1` indicates a healthy system                                                            |
+| **eventing_ec_subscription_status**                       | The status of a subscription. `1` indicates the subscription is marked as ready                                             |
 
 ### Metrics Emitted by NATS Exporter:
 
