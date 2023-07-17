@@ -4,27 +4,28 @@ import (
 	"context"
 	"testing"
 
-	apierr "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
-	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
-	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstream"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstream/mocks"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
-	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
+	apierr "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+
+	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstream"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstream/mocks"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
+	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
 const (
