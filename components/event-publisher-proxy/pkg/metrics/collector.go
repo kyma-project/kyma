@@ -13,9 +13,14 @@ import (
 )
 
 const (
-	// BackendLatencyKey name of the backendLatencyHelp metric.
+	// HealthKey name of the health metric
+	HealthKey = "eventing_epp_health"
+	// HealthHelp help text for the Health metric.
+	healthHelp = "The current health of the system. Will be one if healthy. Undefined when the system is down"
+
+	// BackendLatencyKey name of the backendLatency metric.
 	BackendLatencyKey = "eventing_epp_backend_duration_milliseconds"
-	// backendLatencyHelp help text for the backendLatencyHelp metric.
+	// backendLatencyHelp help text for the backendLatency metric.
 	backendLatencyHelp = "The duration of sending events to the messaging server in milliseconds"
 
 	// durationKey name of the duration metric.
@@ -66,6 +71,8 @@ type Collector struct {
 	requests *prometheus.CounterVec
 
 	eventType *prometheus.CounterVec
+
+	health *prometheus.GaugeVec
 }
 
 // NewCollector creates a new instance of Collector.
@@ -102,7 +109,15 @@ func NewCollector(latency histogram.BucketsProvider) *Collector {
 				Name: RequestsKey,
 				Help: requestsHelp,
 			},
-			[]string{responseCodeLabel, methodLabel, pathLabel}),
+			[]string{responseCodeLabel, methodLabel, pathLabel},
+		),
+		health: prometheus.NewGaugeVec(
+			prometheus.GaugeOpts{
+				Name: HealthKey,
+				Help: healthHelp,
+			},
+			nil,
+		),
 	}
 }
 
@@ -112,6 +127,7 @@ func (c *Collector) Describe(ch chan<- *prometheus.Desc) {
 	c.eventType.Describe(ch)
 	c.requests.Describe(ch)
 	c.duration.Describe(ch)
+	c.health.Describe(ch)
 }
 
 // Collect implements the prometheus.Collector interface Collect method.
@@ -120,11 +136,21 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 	c.eventType.Collect(ch)
 	c.requests.Collect(ch)
 	c.duration.Collect(ch)
+	c.health.Collect(ch)
 }
 
 // RecordLatency records a backendLatencyHelp metric.
 func (c *Collector) RecordBackendLatency(duration time.Duration, statusCode int, destSvc string) {
 	c.backendLatency.WithLabelValues(fmt.Sprint(statusCode), destSvc).Observe(float64(duration.Milliseconds()))
+}
+
+// RecordEventType updates the health status metric
+func (c *Collector) SetHealthStatus(healthy bool) {
+	var v float64
+	if healthy {
+		v = 1
+	}
+	c.health.WithLabelValues().Set(v)
 }
 
 // RecordEventType records an eventType metric.
