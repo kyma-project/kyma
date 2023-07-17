@@ -2,6 +2,7 @@ package jetstream
 
 import (
 	"context"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
 	"reflect"
 	"time"
 

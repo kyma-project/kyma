@@ -100,6 +100,7 @@ func (c *Collector) Describe(ch chan<- *prometheus.Desc) {
 	c.eventTypes.Describe(ch)
 	c.latencyPerSubscriber.Describe(ch)
 	c.health.Describe(ch)
+	c.subscriptionStatus.Describe(ch)
 }
 
 // Collect implements the prometheus.Collector interface Collect method.
@@ -108,6 +109,7 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 	c.eventTypes.Collect(ch)
 	c.latencyPerSubscriber.Collect(ch)
 	c.health.Collect(ch)
+	c.subscriptionStatus.Collect(ch)
 }
 
 // RegisterMetrics registers the metrics.
@@ -116,6 +118,7 @@ func (c *Collector) RegisterMetrics() {
 	metrics.Registry.MustRegister(c.eventTypes)
 	metrics.Registry.MustRegister(c.latencyPerSubscriber)
 	metrics.Registry.MustRegister(c.health)
+	metrics.Registry.MustRegister(c.subscriptionStatus)
 
 	// set health metric to 1. With future updates this can be tied to other health indicators.
 	c.health.WithLabelValues().Set(1)
