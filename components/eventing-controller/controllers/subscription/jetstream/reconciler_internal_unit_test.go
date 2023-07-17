@@ -2,7 +2,6 @@ package jetstream
 
 import (
 	"context"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
 	"testing"
 
 	apierr "k8s.io/apimachinery/pkg/api/errors"
@@ -81,7 +80,15 @@ func Test_Reconcile(t *testing.T) {
 				te.Backend.On("SyncSubscription", mock.Anything).Return(nil)
 				te.Backend.On("GetJetStreamSubjects", mock.Anything, mock.Anything, mock.Anything).Return(
 					[]string{controllertesting.JetStreamSubject})
-				return NewReconciler(ctx, te.Client, te.Backend, te.Logger, te.Recorder, te.Cleaner, happyValidator, collector), te.Backend
+				return NewReconciler(ctx,
+						te.Client,
+						te.Backend,
+						te.Logger,
+						te.Recorder,
+						te.Cleaner,
+						happyValidator,
+						collector),
+					te.Backend
 			},
 			wantReconcileResult: ctrl.Result{},
 			wantReconcileError:  nil,
@@ -92,7 +99,15 @@ func Test_Reconcile(t *testing.T) {
 			givenReconcilerSetup: func() (*Reconciler, *mocks.Backend) {
 				te := setupTestEnvironment(t)
 				te.Backend.On("Initialize", mock.Anything).Return(nil)
-				return NewReconciler(ctx, te.Client, te.Backend, te.Logger, te.Recorder, te.Cleaner, happyValidator, collector), te.Backend
+				return NewReconciler(ctx,
+						te.Client,
+						te.Backend,
+						te.Logger,
+						te.Recorder,
+						te.Cleaner,
+						happyValidator,
+						collector),
+					te.Backend
 			},
 			wantReconcileResult: ctrl.Result{},
 			wantReconcileError:  nil,
@@ -103,7 +118,15 @@ func Test_Reconcile(t *testing.T) {
 			givenReconcilerSetup: func() (*Reconciler, *mocks.Backend) {
 				te := setupTestEnvironment(t, controllertesting.NewSubscription(subscriptionName, namespaceName))
 				te.Backend.On("Initialize", mock.Anything).Return(nil)
-				return NewReconciler(ctx, te.Client, te.Backend, te.Logger, te.Recorder, te.Cleaner, happyValidator, collector), te.Backend
+				return NewReconciler(ctx,
+						te.Client,
+						te.Backend,
+						te.Logger,
+						te.Recorder,
+						te.Cleaner,
+						happyValidator,
+						collector),
+					te.Backend
 			},
 			wantReconcileResult: ctrl.Result{},
 			wantReconcileError:  nil,
@@ -117,7 +140,16 @@ func Test_Reconcile(t *testing.T) {
 				te.Backend.On("SyncSubscription", mock.Anything).Return(backendSyncErr)
 				te.Backend.On("GetJetStreamSubjects", mock.Anything, mock.Anything, mock.Anything).Return(
 					[]string{controllertesting.JetStreamSubject})
-				return NewReconciler(ctx, te.Client, te.Backend, te.Logger, te.Recorder, te.Cleaner, happyValidator, collector), te.Backend
+				return NewReconciler(ctx,
+
+						te.Client,
+						te.Backend,
+						te.Logger,
+						te.Recorder,
+						te.Cleaner,
+						happyValidator,
+						collector),
+					te.Backend
 			},
 			wantReconcileResult: ctrl.Result{},
 			wantReconcileError:  backendSyncErr,
@@ -132,7 +164,15 @@ func Test_Reconcile(t *testing.T) {
 				te.Backend.On("SyncSubscription", mock.Anything).Return(missingSubSyncErr)
 				te.Backend.On("GetJetStreamSubjects", mock.Anything, mock.Anything, mock.Anything).Return(
 					[]string{controllertesting.JetStreamSubject})
-				return NewReconciler(ctx, te.Client, te.Backend, te.Logger, te.Recorder, te.Cleaner, happyValidator, collector), te.Backend
+				return NewReconciler(ctx,
+						te.Client,
+						te.Backend,
+						te.Logger,
+						te.Recorder,
+						te.Cleaner,
+						happyValidator,
+						collector),
+					te.Backend
 			},
 			wantReconcileResult: ctrl.Result{RequeueAfter: requeueDuration},
 			wantReconcileError:  nil,
@@ -144,7 +184,15 @@ func Test_Reconcile(t *testing.T) {
 				te := setupTestEnvironment(t, testSubUnderDeletion)
 				te.Backend.On("Initialize", mock.Anything).Return(nil)
 				te.Backend.On("DeleteSubscription", mock.Anything).Return(backendDeleteErr)
-				return NewReconciler(ctx, te.Client, te.Backend, te.Logger, te.Recorder, te.Cleaner, happyValidator, collector), te.Backend
+				return NewReconciler(ctx,
+						te.Client,
+						te.Backend,
+						te.Logger,
+						te.Recorder,
+						te.Cleaner,
+						happyValidator,
+						collector),
+					te.Backend
 			},
 			wantReconcileResult: ctrl.Result{},
 			wantReconcileError:  errFailedToDeleteSub,
@@ -157,7 +205,15 @@ func Test_Reconcile(t *testing.T) {
 				te.Backend.On("Initialize", mock.Anything).Return(nil)
 				te.Backend.On("GetJetStreamSubjects", mock.Anything, mock.Anything, mock.Anything).Return(
 					[]string{controllertesting.JetStreamSubject})
-				return NewReconciler(ctx, te.Client, te.Backend, te.Logger, te.Recorder, te.Cleaner, unhappyValidator, collector), te.Backend
+				return NewReconciler(ctx,
+						te.Client,
+						te.Backend,
+						te.Logger,
+						te.Recorder,
+						te.Cleaner,
+						unhappyValidator,
+						collector),
+					te.Backend
 			},
 			wantReconcileResult: ctrl.Result{},
 			wantReconcileError:  validatorErr,

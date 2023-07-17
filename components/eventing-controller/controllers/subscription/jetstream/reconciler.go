@@ -2,7 +2,6 @@ package jetstream
 
 import (
 	"context"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
 	"reflect"
 	"time"
 
@@ -50,8 +49,9 @@ type Reconciler struct {
 	collector           *metrics.Collector
 }
 
-func NewReconciler(ctx context.Context, client client.Client, jsBackend jetstream.Backend, logger *logger.Logger,
-	recorder record.EventRecorder, cleaner cleaner.Cleaner, defaultSinkValidator sink.Validator, collector *metrics.Collector) *Reconciler {
+func NewReconciler(ctx context.Context, client client.Client, jsBackend jetstream.Backend,
+	logger *logger.Logger, recorder record.EventRecorder, cleaner cleaner.Cleaner,
+	defaultSinkValidator sink.Validator, collector *metrics.Collector) *Reconciler {
 	reconciler := &Reconciler{
 		Client:              client,
 		ctx:                 ctx,
@@ -244,7 +244,6 @@ func (r *Reconciler) syncSubscriptionStatus(ctx context.Context,
 			desiredSubscription.Namespace,
 			consumer.ConsumerName,
 		)
-
 	}
 	// Update the subscription
 	return r.updateSubscriptionStatus(ctx, desiredSubscription, log)
