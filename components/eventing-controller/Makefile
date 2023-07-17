@@ -151,8 +151,10 @@ lint-thoroughly:
 
 update_metrics_docs:
 	@promlinter list -ojson ../event-publisher-proxy > metrics_epp.json
+	@jq 'sort_by(.Name)'  metrics_epp.json > metrics_epp_sorted.json
 	@promlinter list -ojson ../eventing-controller/ > metrics_ec.json
-	@gomplate -d ec=metrics_ec.json -d epp=metrics_epp.json -f hack/metrics.doc.tpl  | prettier --parser markdown > ../../docs/04-operation-guides/operations/evnt-02-eventing-metrics.md
+	@jq 'sort_by(.Name)'  metrics_ec.json > metrics_ec_sorted.json
+	@gomplate -d ec=metrics_ec_sorted.json -d epp=metrics_epp_sorted.json -f hack/metrics.doc.tpl  | prettier --parser markdown > ../../docs/04-operation-guides/operations/evnt-02-eventing-metrics.md
 
 update_docs: copy-crds
 	go run ../../hack/table-gen/main.go --crd-filename ../../installation/resources/crds/eventing/subscriptions.eventing.kyma-project.io.crd.yaml --md-filename ../../docs/05-technical-reference/00-custom-resources/evnt-01-subscription.md
