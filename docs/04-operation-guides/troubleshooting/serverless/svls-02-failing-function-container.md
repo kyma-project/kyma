@@ -6,7 +6,7 @@ title: Failing Function container
 
 The container suddenly fails when you use the `kyma run function` command with these flags:
 
-- `runtime=nodejs16`
+- `runtime=nodejs18`
 - `debug=true`
 - `hot-deploy=true`
 

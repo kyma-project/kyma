@@ -4,7 +4,6 @@ package handler
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -16,6 +15,8 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy/api"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy/legacytest"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender/common"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender/jetstream"
 
 	eclogger "github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
@@ -32,7 +33,6 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics/metricstest"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender/eventmesh"
 	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 )
 
@@ -63,11 +63,7 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 			name: "Publish structured Cloudevent for Subscription v1alpha1",
 			fields: fields{
 				Sender: &GenericSenderStub{
-					Err: nil,
-					Result: eventmesh.HTTPPublishResult{
-						Status: 204,
-						Body:   []byte(""),
-					},
+					Err:        nil,
 					BackendURL: "FOO",
 				},
 				collector:        metrics.NewCollector(latency),
@@ -77,39 +73,14 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 				request: CreateValidStructuredRequestV1Alpha1(t),
 			},
 			wantStatus: 204,
-			wantTEF: `
-				# HELP eventing_epp_event_type_published_total The total number of events published for a given eventTypeLabel
-				# TYPE eventing_epp_event_type_published_total counter
-				eventing_epp_event_type_published_total{code="204",event_source="/default/sap.kyma/id",event_type=""} 1
-				# HELP eventing_epp_backend_duration_milliseconds The duration of sending events to the messaging server in milliseconds
-				# TYPE eventing_epp_backend_duration_milliseconds histogram
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.005"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.01"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.025"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.05"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.1"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.25"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.5"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="1"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="2.5"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="5"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="10"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="+Inf"} 1
-				eventing_epp_backend_duration_milliseconds_count{code="204",destination_service="FOO"} 1
-				# HELP eventing_epp_backend_requests_total The total number of backend requests
-				# TYPE eventing_epp_backend_requests_total counter
-				eventing_epp_backend_requests_total{code="204",destination_service="FOO"} 1
-			`,
+			wantTEF: metricstest.MakeTEFBackendDuration(204, "FOO") +
+				metricstest.MakeTEFEventTypePublished(204, "/default/sap.kyma/id", ""),
 		},
 		{
 			name: "Publish binary Cloudevent for Subscription v1alpha1",
 			fields: fields{
 				Sender: &GenericSenderStub{
-					Err: nil,
-					Result: eventmesh.HTTPPublishResult{
-						Status: 204,
-						Body:   []byte(""),
-					},
+					Err:        nil,
 					BackendURL: "FOO",
 				},
 				collector:        metrics.NewCollector(latency),
@@ -119,40 +90,14 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 				request: CreateValidBinaryRequestV1Alpha1(t),
 			},
 			wantStatus: 204,
-			wantTEF: `
-				# HELP eventing_epp_event_type_published_total The total number of events published for a given eventTypeLabel
-				# TYPE eventing_epp_event_type_published_total counter
-				eventing_epp_event_type_published_total{code="204",event_source="/default/sap.kyma/id",event_type=""} 1
-				# HELP eventing_epp_backend_duration_milliseconds The duration of sending events to the messaging server in milliseconds
-				# TYPE eventing_epp_backend_duration_milliseconds histogram
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.005"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.01"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.025"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.05"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.1"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.25"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.5"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="1"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="2.5"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="5"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="10"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="+Inf"} 1
-				eventing_epp_backend_duration_milliseconds_sum{destination_service="FOO",code="204"} 0
-				eventing_epp_backend_duration_milliseconds_count{destination_service="FOO",code="204"} 1
-				# HELP eventing_epp_backend_requests_total The total number of backend requests
-				# TYPE eventing_epp_backend_requests_total counter
-				eventing_epp_backend_requests_total{code="204",destination_service="FOO"} 1
-			`,
+			wantTEF: metricstest.MakeTEFBackendDuration(204, "FOO") +
+				metricstest.MakeTEFEventTypePublished(204, "/default/sap.kyma/id", ""),
 		},
 		{
 			name: "Publish structured Cloudevent",
 			fields: fields{
 				Sender: &GenericSenderStub{
-					Err: nil,
-					Result: eventmesh.HTTPPublishResult{
-						Status: 204,
-						Body:   []byte(""),
-					},
+					Err:        nil,
 					BackendURL: "FOO",
 				},
 				collector:        metrics.NewCollector(latency),
@@ -162,39 +107,14 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 				request: CreateValidStructuredRequest(t),
 			},
 			wantStatus: 204,
-			wantTEF: `
-				# HELP eventing_epp_event_type_published_total The total number of events published for a given eventTypeLabel
-				# TYPE eventing_epp_event_type_published_total counter
-				eventing_epp_event_type_published_total{code="204",event_source="testapp1023",event_type="order.created.v1"} 1
-				# HELP eventing_epp_backend_duration_milliseconds The duration of sending events to the messaging server in milliseconds
-				# TYPE eventing_epp_backend_duration_milliseconds histogram
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.005"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.01"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.025"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.05"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.1"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.25"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.5"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="1"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="2.5"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="5"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="10"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="+Inf"} 1
-				eventing_epp_backend_duration_milliseconds_count{code="204",destination_service="FOO"} 1
-				# HELP eventing_epp_backend_requests_total The total number of backend requests
-				# TYPE eventing_epp_backend_requests_total counter
-				eventing_epp_backend_requests_total{code="204",destination_service="FOO"} 1
-			`,
+			wantTEF: metricstest.MakeTEFBackendDuration(204, "FOO") +
+				metricstest.MakeTEFEventTypePublished(204, "testapp1023", "order.created.v1"),
 		},
 		{
 			name: "Publish binary Cloudevent",
 			fields: fields{
 				Sender: &GenericSenderStub{
-					Err: nil,
-					Result: eventmesh.HTTPPublishResult{
-						Status: 204,
-						Body:   []byte(""),
-					},
+					Err:        nil,
 					BackendURL: "FOO",
 				},
 				collector:        metrics.NewCollector(latency),
@@ -204,30 +124,8 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 				request: CreateValidBinaryRequest(t),
 			},
 			wantStatus: 204,
-			wantTEF: `
-				# HELP eventing_epp_event_type_published_total The total number of events published for a given eventTypeLabel
-				# TYPE eventing_epp_event_type_published_total counter
-				eventing_epp_event_type_published_total{code="204",event_source="testapp1023",event_type="order.created.v1"} 1
-				# HELP eventing_epp_backend_duration_milliseconds The duration of sending events to the messaging server in milliseconds
-				# TYPE eventing_epp_backend_duration_milliseconds histogram
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.005"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.01"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.025"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.05"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.1"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.25"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.5"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="1"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="2.5"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="5"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="10"} 1
-				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="+Inf"} 1
-				eventing_epp_backend_duration_milliseconds_sum{destination_service="FOO",code="204"} 0
-				eventing_epp_backend_duration_milliseconds_count{destination_service="FOO",code="204"} 1
-				# HELP eventing_epp_backend_requests_total The total number of backend requests
-				# TYPE eventing_epp_backend_requests_total counter
-				eventing_epp_backend_requests_total{code="204",destination_service="FOO"} 1
-			`,
+			wantTEF: metricstest.MakeTEFBackendDuration(204, "FOO") +
+				metricstest.MakeTEFEventTypePublished(204, "testapp1023", "order.created.v1"),
 		},
 		{
 			name: "Publish invalid structured CloudEvent",
@@ -258,7 +156,7 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 			name: "Publish binary CloudEvent but cannot send",
 			fields: fields{
 				Sender: &GenericSenderStub{
-					Err: fmt.Errorf("I cannot send"),
+					Err: common.BackendPublishError{},
 				},
 				collector:        metrics.NewCollector(latency),
 				eventTypeCleaner: &eventtypetest.CleanerStub{},
@@ -267,17 +165,13 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 				request: CreateValidBinaryRequest(t),
 			},
 			wantStatus: 500,
-			wantTEF: `
-				# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
-				# TYPE eventing_epp_backend_errors_total counter
-				eventing_epp_backend_errors_total 1
-			`,
+			wantTEF:    metricstest.MakeTEFBackendDuration(500, ""),
 		},
 		{
 			name: "Publish binary CloudEvent but backend is full",
 			fields: fields{
 				Sender: &GenericSenderStub{
-					Err: fmt.Errorf("oh no, i cannot send: %w", sender.ErrInsufficientStorage),
+					Err: jetstream.ErrNoSpaceLeftOnDevice,
 				},
 				collector:        metrics.NewCollector(latency),
 				eventTypeCleaner: &eventtypetest.CleanerStub{},
@@ -286,11 +180,7 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 				request: CreateValidBinaryRequest(t),
 			},
 			wantStatus: 507,
-			wantTEF: `
-				# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
-				# TYPE eventing_epp_backend_errors_total counter
-				eventing_epp_backend_errors_total 1
-			`,
+			wantTEF:    metricstest.MakeTEFBackendDuration(507, ""),
 		},
 	}
 	for _, tt := range tests {
@@ -351,96 +241,54 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 		{
 			name: "Send valid legacy event",
 			givenSender: &GenericSenderStub{
-				Result: eventmesh.HTTPPublishResult{
-					Status: 204,
-				},
 				BackendURL: "FOO",
 			},
 			givenLegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", appLister),
 			givenCollector:         metrics.NewCollector(latency),
 			givenRequest:           legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
 			wantHTTPStatus:         http.StatusOK,
-			wantTEF: `
-					# HELP eventing_epp_event_type_published_total The total number of events published for a given eventTypeLabel
-					# TYPE eventing_epp_event_type_published_total counter
-					eventing_epp_event_type_published_total{code="204",event_source="testapp",event_type="object.created.v1"} 1
-
-					# HELP eventing_epp_backend_duration_milliseconds The duration of sending events to the messaging server in milliseconds
-					# TYPE eventing_epp_backend_duration_milliseconds histogram
-					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.005"} 1
-					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.01"} 1
-					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.025"} 1
-					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.05"} 1
-					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.1"} 1
-					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.25"} 1
-					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.5"} 1
-					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="1"} 1
-					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="2.5"} 1
-					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="5"} 1
-					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="10"} 1
-					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="+Inf"} 1
-					eventing_epp_backend_duration_milliseconds_sum{destination_service="FOO",code="204"} 0
-					eventing_epp_backend_duration_milliseconds_count{code="204",destination_service="FOO"} 1
-
-					# HELP eventing_epp_backend_requests_total The total number of backend requests
-					# TYPE eventing_epp_backend_requests_total counter
-					eventing_epp_backend_requests_total{code="204",destination_service="FOO"} 1
-				`,
+			wantTEF: metricstest.MakeTEFBackendDuration(204, "FOO") +
+				metricstest.MakeTEFEventTypePublished(204, "testapp", "object.created.v1"),
 		},
 		{
 			name: "Send valid legacy event but cannot send to backend due to target not found (e.g. stream missing)",
 			givenSender: &GenericSenderStub{
-				Err:        fmt.Errorf("oh no, i cannot send: %w", sender.ErrBackendTargetNotFound),
+				Err:        common.ErrBackendTargetNotFound,
 				BackendURL: "FOO",
 			},
 			givenLegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", appLister),
 			givenCollector:         metrics.NewCollector(latency),
 			givenRequest:           legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
-			wantHTTPStatus:         http.StatusBadGateway,
-			wantTEF: `
-					# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
-					# TYPE eventing_epp_backend_errors_total counter
-					eventing_epp_backend_errors_total 1
-				`,
+			wantHTTPStatus:         http.StatusNotFound,
+			wantTEF:                metricstest.MakeTEFBackendDuration(404, "FOO"),
 		},
 		{
 			name: "Send valid legacy event but cannot send to backend due to full storage",
 			givenSender: &GenericSenderStub{
-				Err:        fmt.Errorf("oh no, i cannot send: %w", sender.ErrInsufficientStorage),
+				Err:        common.ErrInsufficientStorage,
 				BackendURL: "FOO",
 			},
 			givenLegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", appLister),
 			givenCollector:         metrics.NewCollector(latency),
 			givenRequest:           legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
 			wantHTTPStatus:         507,
-			wantTEF: `
-					# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
-					# TYPE eventing_epp_backend_errors_total counter
-					eventing_epp_backend_errors_total 1
-				`,
+			wantTEF:                metricstest.MakeTEFBackendDuration(507, "FOO"),
 		},
 		{
 			name: "Send valid legacy event but cannot send to backend",
 			givenSender: &GenericSenderStub{
-				Err:        fmt.Errorf("i cannot send"),
+				Err:        common.BackendPublishError{},
 				BackendURL: "FOO",
 			},
 			givenLegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", appLister),
 			givenCollector:         metrics.NewCollector(latency),
 			givenRequest:           legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
 			wantHTTPStatus:         500,
-			wantTEF: `
-					# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
-					# TYPE eventing_epp_backend_errors_total counter
-					eventing_epp_backend_errors_total 1
-				`,
+			wantTEF:                metricstest.MakeTEFBackendDuration(500, "FOO"),
 		},
 		{
 			name: "Send invalid legacy event",
 			givenSender: &GenericSenderStub{
-				Result: eventmesh.HTTPPublishResult{
-					Status: 204,
-				},
 				BackendURL: "FOO",
 			},
 			givenLegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", appLister),

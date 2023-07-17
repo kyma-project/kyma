@@ -112,7 +112,7 @@ To deploy Kyma with only specific components, run:
   kyma deploy --components-file {COMPONENTS_FILE_PATH}
   ```
 
-  `{COMPONENTS_FILE_PATH}` is the path to a YAML file containing the desired component list to be installed. In the following example, only eight components are deployed on the cluster:
+  `{COMPONENTS_FILE_PATH}` is the path to a YAML file containing the desired component list to be installed. In the following example, only seven components are deployed on the cluster:
 
   ```yaml
 prerequisites:
@@ -122,7 +122,6 @@ prerequisites:
   - name: "certificates"
     namespace: "istio-system"
 components:
-  - name: "logging"
   - name: "monitoring"
   - name: "eventing"
   ```
@@ -140,3 +139,5 @@ components:
   ```
 
 >**TIP:** To see a complete list of all Kyma components go to the [`components.yaml`](https://github.com/kyma-project/kyma/blob/main/installation/resources/components.yaml) file.
+
+> **NOTE:** To learn how to enable a Kyma module go to [Enable, disable and upgrade a Kyma module](./08-enable-disable-upgrade-kyma-module.md#enable-a-kyma-module).

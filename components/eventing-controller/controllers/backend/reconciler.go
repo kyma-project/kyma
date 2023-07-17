@@ -324,7 +324,7 @@ func (r *Reconciler) syncOauth2ClientIDAndSecret(ctx context.Context, backendSta
 	}
 	oauth2CredentialsNotFound := k8serrors.IsNotFound(err)
 	oauth2CredentialsChanged := false
-	if err == nil {
+	if err == nil && r.isOauth2CredentialsInitialized() {
 		oauth2CredentialsChanged = !bytes.Equal(r.credentials.clientID, credentials.clientID) ||
 			!bytes.Equal(r.credentials.clientSecret, credentials.clientSecret) ||
 			!bytes.Equal(r.credentials.tokenURL, credentials.tokenURL)
@@ -346,7 +346,7 @@ func (r *Reconciler) syncOauth2ClientIDAndSecret(ctx context.Context, backendSta
 	if oauth2CredentialsNotFound {
 		return err
 	}
-	if oauth2CredentialsChanged {
+	if oauth2CredentialsChanged || !r.isOauth2CredentialsInitialized() {
 		r.credentials.clientID = credentials.clientID
 		r.credentials.clientSecret = credentials.clientSecret
 		r.credentials.tokenURL = credentials.tokenURL
@@ -998,6 +998,16 @@ func (r *Reconciler) getMutatingAndValidatingWebHookConfig(ctx context.Context) 
 		return nil, nil, pkgerrors.MakeError(errObjectNotFound, err)
 	}
 	return &mutatingWH, &validatingWH, nil
+}
+
+func (r *Reconciler) isOauth2CredentialsInitialized() bool {
+	if featureflags.IsEventingWebhookAuthEnabled() {
+		return len(r.credentials.clientID) > 0 &&
+			len(r.credentials.clientSecret) > 0 &&
+			len(r.credentials.tokenURL) > 0 &&
+			len(r.credentials.certsURL) > 0
+	}
+	return len(r.credentials.clientID) > 0 && len(r.credentials.clientSecret) > 0
 }
 
 func (r *Reconciler) namedLogger() *zap.SugaredLogger {

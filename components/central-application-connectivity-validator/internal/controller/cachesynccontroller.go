@@ -20,9 +20,9 @@ type controller struct {
 	cacheSync CacheSync
 }
 
-func NewController(log *logger.Logger, client client.Client, appCache *gocache.Cache) Controller {
+func NewController(log *logger.Logger, client client.Client, appCache *gocache.Cache, appNamePlaceholder, eventingPathPrefixV1, eventingPathPrefixV2, eventingPathPrefixEvents string) Controller {
 	return &controller{
-		cacheSync: NewCacheSync(log, client, appCache, "cache_sync_controller"),
+		cacheSync: NewCacheSync(log, client, appCache, "cache_sync_controller", appNamePlaceholder, eventingPathPrefixV1, eventingPathPrefixV2, eventingPathPrefixEvents),
 	}
 }
 
@@ -31,6 +31,9 @@ func (c *controller) Reconcile(ctx context.Context, request reconcile.Request) (
 }
 
 func (c *controller) SetupWithManager(mgr ctrl.Manager) error {
+
+	c.cacheSync.Init(context.Background())
+
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.Application{}).
 		Complete(c)

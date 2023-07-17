@@ -12,9 +12,9 @@ image:
 
 limitRange:
   max:
-    memory: 4Gi
+    memory: 8Gi
   default:
-    memory: 96Mi
+    memory: 256Mi
   defaultRequest:
     memory: 32Mi
 

@@ -144,21 +144,16 @@ func startReconciler() error {
 		return err
 	}
 
-	var metricsPort int
-	metricsPort, err := eventingtesting.GetFreePort()
-	if err != nil {
-		return err
-	}
-
 	syncPeriod := syncPeriod
 	webhookInstallOptions := &jsTestEnsemble.TestEnv.WebhookInstallOptions
 	k8sManager, err := ctrl.NewManager(jsTestEnsemble.Cfg, ctrl.Options{
-		Scheme:             scheme.Scheme,
-		SyncPeriod:         &syncPeriod,
-		Host:               webhookInstallOptions.LocalServingHost,
-		Port:               webhookInstallOptions.LocalServingPort,
-		CertDir:            webhookInstallOptions.LocalServingCertDir,
-		MetricsBindAddress: fmt.Sprintf("localhost:%v", metricsPort),
+		Scheme:                 scheme.Scheme,
+		SyncPeriod:             &syncPeriod,
+		Host:                   webhookInstallOptions.LocalServingHost,
+		Port:                   webhookInstallOptions.LocalServingPort,
+		CertDir:                webhookInstallOptions.LocalServingCertDir,
+		MetricsBindAddress:     "0", // disable
+		HealthProbeBindAddress: "0", // disable
 	})
 	if err != nil {
 		return err
