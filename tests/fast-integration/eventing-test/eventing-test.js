@@ -97,9 +97,9 @@ describe('Eventing tests', function() {
     if (isSKR) {
       return;
     }
-    await waitForPodWithLabelAndCondition(jaegerLabel.key, jaegerLabel.value, kymaSystem, conditionReady.condition,
+    await waitForPodWithLabelAndCondition(jaegerLabel.key, jaegerLabel.value, 'default', conditionReady.condition,
         conditionReady.status);
-    await waitForEndpoint(jaegerEndpoint, kymaSystem);
+    await waitForEndpoint(jaegerEndpoint, 'default');
   });
 
   before('Expose Grafana', async function() {
