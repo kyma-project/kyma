@@ -94,6 +94,7 @@ describe('Eventing tests', function() {
   });
 
   before('Ensure tracing is ready', async function() {
+    console.log('Checking for jaeger in default namespace');
     if (isSKR) {
       return;
     }
