@@ -1,5 +1,5 @@
-FROM python:3.9.17-alpine3.17
-
+# image base on python:3.9.17-alpine3.18 (python:3.9.17, alpine:3.18.2)
+FROM python@sha256:281811c93dbf7b29719709c129230edfa1b10585d720f95c60363a358e49b62c
 
 # Serverless
 LABEL source = git@github.com:kyma-project/kyma.git
