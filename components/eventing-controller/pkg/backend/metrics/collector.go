@@ -151,7 +151,8 @@ func (c *Collector) RecordEventTypes(subscriptionName, subscriptionNamespace, ev
 }
 
 // RecordSubscriptionStatus records an eventing_ec_subscription_status metric.
-func (c *Collector) RecordSubscriptionStatus(isActive bool, subscriptionName, subscriptionNamespace string, consumers []string) {
+func (c *Collector) RecordSubscriptionStatus(isActive bool, subscriptionName,
+	subscriptionNamespace string, consumers []string) {
 	var v float64
 	if isActive {
 		v = 1

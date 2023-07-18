@@ -77,7 +77,8 @@ type SubscriptionManager struct {
 
 // NewSubscriptionManager creates the SubscriptionManager for BEB and initializes it as far as it
 // does not depend on non-common options.
-func NewSubscriptionManager(restCfg *rest.Config, metricsAddr string, resyncPeriod time.Duration, logger *logger.Logger, collector *metrics.Collector) *SubscriptionManager {
+func NewSubscriptionManager(restCfg *rest.Config, metricsAddr string, resyncPeriod time.Duration, logger *logger.Logger,
+	collector *metrics.Collector) *SubscriptionManager {
 	return &SubscriptionManager{
 		envCfg:       env.GetConfig(),
 		restCfg:      restCfg,
