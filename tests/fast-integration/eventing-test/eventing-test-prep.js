@@ -27,6 +27,7 @@ const {
   deployV1Alpha1Subscriptions,
   deployV1Alpha2Subscriptions,
   createK8sNamespace,
+  isUpgradeJob,
 } = require('./utils');
 const {
   eventMeshSecretFilePath,
@@ -58,6 +59,7 @@ describe('Eventing tests preparation', function() {
     debug(`Test namespace: ${testNamespace}`);
     debug(`Kyma version: ${kymaVersion}`);
     debug(`Is SKR cluster: ${isSKR}`);
+    debug(`Is upgrade job: ${isUpgradeJob}`);
     debug(`SKR instance Id: ${skrInstanceId}`);
     debug(`SKR shoot name: ${shootName}`);
   });
@@ -87,7 +89,8 @@ describe('Eventing tests preparation', function() {
   it('Prepare EventMesh secret', async function() {
     // If eventMeshSecretFilePath is specified then create a k8s secret for eventing-backend
     // else skip this step and use existing k8s secret as specified in backendK8sSecretName & backendK8sSecretNamespace
-    if (!eventMeshSecretFilePath) {
+    // For upgrade tests we do not need eventMesh; all tests are done with NATS.
+    if (isUpgradeJob || !eventMeshSecretFilePath) {
       this.skip();
     }
 
@@ -126,7 +129,7 @@ describe('Eventing tests preparation', function() {
   });
 
   it('Should deploy jaeger', async function() {
-    if (isSKR) {
+    if (isSKR || isUpgradeJob) {
       this.skip();
     }
     await deployJaeger(k8s.loadAllYaml(jaegerYaml));
