@@ -60,7 +60,6 @@ module.exports = {
             headers[out[0]] = out[1].trim()
         })
 
-
         console.log("2", headers)
         let response = {}
         Object.keys(headers).forEach(function (key) {
@@ -71,7 +70,6 @@ module.exports = {
             }
         })
         return response
-        // return resp.data;
     }
 }`,
 				Dependencies: `{

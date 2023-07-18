@@ -1,7 +1,7 @@
 package teststep
 
 import (
-	"fmt"
+	"encoding/json"
 	"io"
 	"net/http"
 	"net/url"
@@ -131,6 +131,12 @@ type TracingHTTPCheck struct {
 	poll     poller.Poller
 }
 
+type tracingResponse struct {
+	TraceParent string `json:"traceparent"`
+	TraceID     string `json:"x-b3-traceid"`
+	SpanID      string `json:"x-b3-spanid"`
+}
+
 func NewTracingHTTPCheck(log *logrus.Entry, name string, url *url.URL, poller poller.Poller) *TracingHTTPCheck {
 	return &TracingHTTPCheck{
 		name:     name,
@@ -151,7 +157,6 @@ func (t TracingHTTPCheck) Run() error {
 		return err
 	}
 
-	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("X-B3-Sampled", "1")
 
 	client := &http.Client{Timeout: 10 * time.Second}
@@ -168,7 +173,18 @@ func (t TracingHTTPCheck) Run() error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(string(out))
+
+	trResponse := tracingResponse{}
+	err = json.Unmarshal(out, &trResponse)
+	if err != nil {
+		return err
+	}
+
+	err = t.assertTracingResponse(trResponse)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -177,5 +193,19 @@ func (t TracingHTTPCheck) Cleanup() error {
 }
 
 func (t TracingHTTPCheck) OnError() error {
+	return nil
+}
+
+func (t TracingHTTPCheck) assertTracingResponse(response tracingResponse) error {
+	if response.TraceID == "" {
+		return errors.New("No trace ID")
+	}
+	if response.TraceParent == "" {
+		return errors.New("No TraceParent")
+	}
+	if response.SpanID == "" {
+		return errors.New("No span ID")
+	}
+
 	return nil
 }
