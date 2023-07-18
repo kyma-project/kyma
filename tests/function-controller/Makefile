@@ -15,3 +15,7 @@ serverless-integration:
 .PHONY: git-auth-integration
 git-auth-integration:
 	./run-local.sh git-auth-integration
+
+.PHONY: simple-tracing
+simple-tracing:
+	@echo simple-tracing-not-implememted
