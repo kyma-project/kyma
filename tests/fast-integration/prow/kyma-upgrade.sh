@@ -8,10 +8,7 @@ chmod +x kyma
 kyma_version=$(kyma version --client)
 popd || exit
 kyma provision k3d --ci
-test=$(git tag -l '[0-9]*.[0-9]*.[0-9]*'| sort -r -V | grep '^[^-rc]*$'| head -n1)
-echo "TEST:" $test
-kyma_get_last_release_version_return_version=$(curl --silent --fail --show-error -H "Authorization: token ${BOT_GITHUB_TOKEN}" "https://api.github.com/repos/kyma-project/kyma/releases" | jq -r 'del( .[] | select( (.prerelease == true) or (.draft == true) )) | sort_by(.tag_name | split(".") | map(tonumber)) | .[-1].tag_name')
-echo "old:" $kyma_get_last_release_version_return_version
+kyma_get_last_release_version_return_version=$(git tag -l '[0-9]*.[0-9]*.[0-9]*'| sort -r -V | grep '^[^-rc]*$'| head -n1)
 export KYMA_SOURCE="${kyma_get_last_release_version_return_version:?}"
 kyma deploy --ci --source ${KYMA_SOURCE} --timeout 60m
 git reset --hard
