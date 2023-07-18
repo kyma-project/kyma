@@ -37,38 +37,38 @@ func BasicTracingNodeFunction(rtm serverlessv1alpha2.Runtime) serverlessv1alpha2
 
 module.exports = {
     main: async function (event, context) {
-        let interceptedHeaders;
-        axios.interceptors.response.use(res => {
-            console.log("axios request interceptedHeaders xb-3", res.request._header)
-            interceptedHeaders = res.request._header
-            return res;
+        let resp = await axios("https://swapi.dev/api/people/1");
+        let interceptedHeaders = resp.request._header
+        let tracingHeaders = getTracingHeaders(interceptedHeaders)
+        return tracingHeaders
+    }
+}
 
-        }, error => Promise.reject(error));
-
-        await axios("https://swapi.dev/api/people/1");
-
-        let headers = {}
-
-        let newArr = interceptedHeaders.split('\n')
-        newArr.filter( val => {
+function getTracingHeaders(textHeaders) {
+    tracingHeaders = textHeaders.split('\n')
+        .filter(val => {
             let out = val.split(":")
             return out.length === 2;
-        }).forEach(item => {
-            let out = item.split(":")
-            headers[out[0]] = out[1].trim()
         })
-
-        console.log("2", headers)
-        let response = {}
-        Object.keys(headers).forEach(function (key) {
-            console.log(key)
-            console.log(key.startsWith("x-b3"))
-            if (key.startsWith("x-b3") || key.startsWith("traceparent")) {
-                response[key] = headers[key]
+        .map(item => {
+            let stringHeader = item.split(":")
+            return {
+                key: stringHeader[0],
+                value: stringHeader[1]
             }
         })
-        return response
-    }
+        .filter(item => {
+            return item.key.startsWith("x-b3") || item.key.startsWith("traceparent");
+        })
+        .map(val => {
+            return {
+                [val.key]: val.value
+            }
+        })
+        .reduce((prev, current) => {
+            return Object.assign(prev, current)
+        })
+    return tracingHeaders
 }`,
 				Dependencies: `{
   "name": "sanitise-fn",
