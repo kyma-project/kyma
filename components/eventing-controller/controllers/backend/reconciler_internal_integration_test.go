@@ -170,11 +170,13 @@ var _ = BeforeSuite(func(done Done) {
 	}
 
 	envConfig := env.Config{}
+	backendConfig := env.GetBackendConfig()
 	err = NewReconciler(
 		context.Background(),
 		natsSubMgr,
 		natsConfig,
 		envConfig,
+		backendConfig,
 		bebSubMgr,
 		k8sManager.GetClient(),
 		defaultLogger,

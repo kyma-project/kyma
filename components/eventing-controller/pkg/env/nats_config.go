@@ -9,7 +9,7 @@ import (
 // NATSConfig represents the environment config for the Eventing Controller with Nats.
 type NATSConfig struct {
 	// Following details are for eventing-controller to communicate to Nats
-	URL           string `envconfig:"NATS_URL" required:"true"`
+	URL           string `envconfig:"NATS_URL"`
 	MaxReconnects int
 	ReconnectWait time.Duration
 

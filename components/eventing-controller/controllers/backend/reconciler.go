@@ -119,6 +119,14 @@ func NewReconciler(ctx context.Context, natsSubMgr subscriptionmanager.Manager, 
 	}
 }
 
+func (r *Reconciler) SetNatsConfig(natsConfig env.NATSConfig) {
+	r.natsConfig = natsConfig
+}
+
+func (r *Reconciler) SetBackendConfig(backendCfg env.BackendConfig) {
+	r.cfg = backendCfg
+}
+
 // +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;update;patch;create;delete
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;update;patch;create;delete
 // +kubebuilder:rbac:groups=eventing.kyma-project.io,resources=eventingbackends,verbs=get;list;watch;create;update;patch;delete
@@ -621,6 +629,13 @@ func getSecretStringData(clientID, clientSecret, tokenEndpoint, grantType, publi
 }
 
 func (r *Reconciler) CreateOrUpdatePublisherProxy(ctx context.Context, backend eventingv1alpha1.BackendType) (*appsv1.Deployment, error) {
+	return r.CreateOrUpdatePublisherProxyDeployment(ctx, backend, true)
+}
+
+func (r *Reconciler) CreateOrUpdatePublisherProxyDeployment(
+	ctx context.Context,
+	backend eventingv1alpha1.BackendType,
+	withOwnerReference bool) (*appsv1.Deployment, error) {
 	var desiredPublisher *appsv1.Deployment
 	// set backend type here so that the function can be used in eventing-manager
 	r.backendType = backend
@@ -634,8 +649,10 @@ func (r *Reconciler) CreateOrUpdatePublisherProxy(ctx context.Context, backend e
 		return nil, fmt.Errorf("unknown EventingBackend type %q", backend)
 	}
 
-	if err := r.setAsOwnerReference(ctx, desiredPublisher); err != nil {
-		return nil, errors.Wrapf(err, "set owner reference for Event Publisher failed")
+	if withOwnerReference {
+		if err := r.setAsOwnerReference(ctx, desiredPublisher); err != nil {
+			return nil, errors.Wrapf(err, "set owner reference for Event Publisher failed")
+		}
 	}
 
 	currentPublisher, err := r.getEPPDeployment(ctx)
