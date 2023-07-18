@@ -100,6 +100,7 @@ func (c *SubscriptionManager) Init(mgr manager.Manager) error {
 
 // Start implements the subscriptionmanager.Manager interface and starts the manager.
 func (c *SubscriptionManager) Start(_ env.DefaultSubscriptionConfig, params subscriptionmanager.Params) error {
+	c.collector.ResetSubscriptionStatus()
 	ctx, cancel := context.WithCancel(context.Background())
 	c.cancel = cancel
 

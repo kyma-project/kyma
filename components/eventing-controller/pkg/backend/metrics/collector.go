@@ -192,3 +192,7 @@ func (c *Collector) RemoveSubscriptionStatus(subscriptionName, subscriptionNames
 		})
 	}
 }
+
+func (c *Collector) ResetSubscriptionStatus() {
+	c.subscriptionStatus.Reset()
+}

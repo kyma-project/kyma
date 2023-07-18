@@ -91,6 +91,8 @@ func (sm *SubscriptionManager) Init(mgr manager.Manager) error {
 }
 
 func (sm *SubscriptionManager) Start(defaultSubsConfig env.DefaultSubscriptionConfig, _ subscriptionmanager.Params) error {
+	sm.metricsCollector.ResetSubscriptionStatus()
+
 	ctx, cancel := context.WithCancel(context.Background())
 	sm.cancel = cancel
 
