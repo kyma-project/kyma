@@ -43,7 +43,7 @@ const (
 	PublisherSecretEMSURLKey        = "ems-publish-url"
 	PublisherSecretBEBNamespaceKey  = "beb-namespace"
 
-	configMapName               = "eventing-configmap"
+	configMapName               = "eventing"
 	configMapKeyEventTypePrefix = "eventTypePrefix"
 )
 

@@ -103,8 +103,15 @@ type Reconciler struct {
 	credentials oauth2Credentials
 }
 
-func NewReconciler(ctx context.Context, natsSubMgr subscriptionmanager.Manager, natsConfig env.NATSConfig,
-	envCfg env.Config, backendCfg env.BackendConfig, bebSubMgr subscriptionmanager.Manager, client client.Client, logger *logger.Logger,
+func NewReconciler(
+	ctx context.Context,
+	natsSubMgr subscriptionmanager.Manager,
+	natsConfig env.NATSConfig,
+	envCfg env.Config,
+	backendCfg env.BackendConfig,
+	bebSubMgr subscriptionmanager.Manager,
+	client client.Client,
+	logger *logger.Logger,
 	recorder record.EventRecorder) *Reconciler {
 	return &Reconciler{
 		ctx:        ctx,
