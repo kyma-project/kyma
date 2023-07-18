@@ -7,11 +7,6 @@
 npm install
 npm install function/
 ```
-* Set proper environments variables TODO: check if it's needed
-```bash
-export MOD_NAME=handler
-export FUNC_HANDLER=main
-```
 * Run function from terminal.
 ```bash
 npm start
