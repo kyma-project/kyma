@@ -36,7 +36,7 @@ func SimpleFunctionTracingTest(restConfig *rest.Config, cfg testsuite.Config, lo
 	}
 
 	//python39Logger := logf.WithField(scenarioKey, "python39")
-	//nodejs16Logger := logf.WithField(scenarioKey, "nodejs16")
+	nodejs16Logger := logf.WithField(scenarioKey, "nodejs16")
 	nodejs18Logger := logf.WithField(scenarioKey, "nodejs18")
 
 	genericContainer := shared.Container{
@@ -49,7 +49,7 @@ func SimpleFunctionTracingTest(restConfig *rest.Config, cfg testsuite.Config, lo
 
 	//python39Fn := function.NewFunction("python39", cfg.KubectlProxyEnabled, genericContainer.WithLogger(python39Logger))
 	//
-	//nodejs16Fn := function.NewFunction("nodejs16", cfg.KubectlProxyEnabled, genericContainer.WithLogger(nodejs16Logger))
+	nodejs16Fn := function.NewFunction("nodejs16", cfg.KubectlProxyEnabled, genericContainer.WithLogger(nodejs16Logger))
 
 	nodejs18Fn := function.NewFunction("nodejs18", cfg.KubectlProxyEnabled, genericContainer.WithLogger(nodejs18Logger))
 
@@ -67,14 +67,13 @@ func SimpleFunctionTracingTest(restConfig *rest.Config, cfg testsuite.Config, lo
 			//	teststep.CreateFunction(python39Logger, python39Fn, "Create Python39 Function", runtimes.BasicPythonFunction("Hello From python", serverlessv1alpha2.Python39)),
 			//	teststep.NewHTTPCheck(python39Logger, "Python39 pre update simple check through service", python39Fn.FunctionURL, poll, "Hello From python"),
 			//),
-			//step.NewSerialTestRunner(nodejs16Logger, "NodeJS16 test",
-			//	teststep.CreateFunction(nodejs16Logger, nodejs16Fn, "Create NodeJS16 Function", runtimes.BasicNodeJSFunction("Hello from nodejs16", serverlessv1alpha2.NodeJs16)),
-			//	teststep.NewHTTPCheck(nodejs16Logger, "NodeJS16 pre update simple check through service", nodejs16Fn.FunctionURL, poll, "Hello from nodejs16"),
-			//),
+			step.NewSerialTestRunner(nodejs16Logger, "NodeJS16 test",
+				teststep.CreateFunction(nodejs16Logger, nodejs16Fn, "Create NodeJS16 Function", runtimes.BasicTracingNodeFunction(serverlessv1alpha2.NodeJs16)),
+				teststep.NewTracingHTTPCheck(nodejs16Logger, "NodeJS16 tracing headers check", nodejs16Fn.FunctionURL, poll),
+			),
 			step.NewSerialTestRunner(nodejs18Logger, "NodeJS18 test",
 				teststep.CreateFunction(nodejs18Logger, nodejs18Fn, "Create NodeJS18 Function", runtimes.BasicTracingNodeFunction(serverlessv1alpha2.NodeJs18)),
-				teststep.NewTracingHTTPCheck(nodejs18Logger, "NodeJS18 post update simple check through service", nodejs18Fn.FunctionURL, poll),
-				//TODO add testing logic
+				teststep.NewTracingHTTPCheck(nodejs18Logger, "NodeJS18 tracing headers check", nodejs18Fn.FunctionURL, poll),
 			),
 		),
 	), nil
