@@ -29,7 +29,6 @@ func BasicNodeJSFunction(msg string, rtm serverlessv1alpha2.Runtime) serverlessv
 
 func BasicTracingNodeFunction(rtm serverlessv1alpha2.Runtime) serverlessv1alpha2.FunctionSpec {
 	return serverlessv1alpha2.FunctionSpec{
-		//TODO: add nodejs function with calling to ngix
 		Runtime: rtm,
 		Source: serverlessv1alpha2.Source{
 			Inline: &serverlessv1alpha2.InlineSource{
@@ -45,7 +44,6 @@ module.exports = {
             return res;
 
         }, error => Promise.reject(error));
-
 
         await axios("https://swapi.dev/api/people/1");
 
