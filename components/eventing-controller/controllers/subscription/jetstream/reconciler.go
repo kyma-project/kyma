@@ -2,23 +2,22 @@ package jetstream
 
 import (
 	"context"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
 	"reflect"
 	"time"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
+
 	k8stypes "k8s.io/apimachinery/pkg/types"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
+
+	"github.com/nats-io/nats.go"
 
 	pkgerrors "github.com/kyma-project/kyma/components/eventing-controller/pkg/errors"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
-	"github.com/nats-io/nats.go"
 
 	"github.com/pkg/errors"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
-	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
-	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 	"go.uber.org/zap"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -27,6 +26,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/source"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
+	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
@@ -128,6 +132,19 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return r.handleSubscriptionDeletion(ctx, desiredSubscription, log)
 	}
 
+	defer func() {
+		// Update metrics
+		consumers := []string{}
+		for _, consumer := range desiredSubscription.Status.Backend.Types {
+			consumers = append(consumers, consumer.ConsumerName)
+		}
+		r.collector.RecordSubscriptionStatus(desiredSubscription.Status.Ready,
+			desiredSubscription.Name,
+			desiredSubscription.Namespace,
+			consumers,
+		)
+	}()
+
 	// The object is not being deleted, so if it does not have our finalizer,
 	// then lets add the finalizer and update the object.
 	if !containsFinalizer(desiredSubscription) {
@@ -220,9 +237,11 @@ func (r *Reconciler) handleSubscriptionDeletion(ctx context.Context,
 		if err := r.Update(ctx, subscription); err != nil {
 			return ctrl.Result{}, pkgerrors.MakeError(errFailedToUpdateFinalizers, err)
 		}
+		consumers := []string{}
 		for _, t := range types {
-			r.collector.RemoveSubscriptionStatus(subscription.Name, subscription.Namespace, t.ConsumerName)
+			consumers = append(consumers, t.ConsumerName)
 		}
+		r.collector.RemoveSubscriptionStatus(subscription.Name, subscription.Namespace, consumers)
 
 		return ctrl.Result{}, nil
 	}
@@ -239,13 +258,16 @@ func (r *Reconciler) syncSubscriptionStatus(ctx context.Context,
 	desiredSubscription.Status.Conditions = eventingv1alpha2.GetSubscriptionActiveCondition(desiredSubscription, err)
 
 	// Update metrics
+	consumers := []string{}
 	for _, consumer := range desiredSubscription.Status.Backend.Types {
-		r.collector.RecordSubscriptionStatus(desiredSubscription.Status.Ready,
-			desiredSubscription.Name,
-			desiredSubscription.Namespace,
-			consumer.ConsumerName,
-		)
+		consumers = append(consumers, consumer.ConsumerName)
 	}
+
+	r.collector.RecordSubscriptionStatus(desiredSubscription.Status.Ready,
+		desiredSubscription.Name,
+		desiredSubscription.Namespace,
+		consumers,
+	)
 	// Update the subscription
 	return r.updateSubscriptionStatus(ctx, desiredSubscription, log)
 }

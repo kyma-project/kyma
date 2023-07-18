@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
 
 	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
 
@@ -71,17 +72,19 @@ type SubscriptionManager struct {
 	mgr              manager.Manager
 	eventMeshBackend backendeventmesh.Backend
 	logger           *logger.Logger
+	collector        *metrics.Collector
 }
 
 // NewSubscriptionManager creates the SubscriptionManager for BEB and initializes it as far as it
 // does not depend on non-common options.
-func NewSubscriptionManager(restCfg *rest.Config, metricsAddr string, resyncPeriod time.Duration, logger *logger.Logger) *SubscriptionManager {
+func NewSubscriptionManager(restCfg *rest.Config, metricsAddr string, resyncPeriod time.Duration, logger *logger.Logger, collector *metrics.Collector) *SubscriptionManager {
 	return &SubscriptionManager{
 		envCfg:       env.GetConfig(),
 		restCfg:      restCfg,
 		metricsAddr:  metricsAddr,
 		resyncPeriod: resyncPeriod,
 		logger:       logger,
+		collector:    collector,
 	}
 }
 
@@ -133,6 +136,7 @@ func (c *SubscriptionManager) Start(_ env.DefaultSubscriptionConfig, params subs
 		oauth2credential,
 		nameMapper,
 		sink.NewValidator(ctx, client, recorder),
+		c.collector,
 	)
 	c.eventMeshBackend = eventMeshReconciler.Backend
 	if err := eventMeshReconciler.SetupUnmanaged(c.mgr); err != nil {

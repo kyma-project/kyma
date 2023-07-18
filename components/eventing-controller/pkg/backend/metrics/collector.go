@@ -151,19 +151,43 @@ func (c *Collector) RecordEventTypes(subscriptionName, subscriptionNamespace, ev
 }
 
 // RecordSubscriptionStatus records an eventing_ec_subscription_status metric.
-func (c *Collector) RecordSubscriptionStatus(isActive bool, subscriptionName, subscriptionNamespace, consumer string) {
+func (c *Collector) RecordSubscriptionStatus(isActive bool, subscriptionName, subscriptionNamespace string, consumers []string) {
 	var v float64
 	if isActive {
 		v = 1
 	}
-	c.subscriptionStatus.WithLabelValues(subscriptionName, subscriptionNamespace, consumer).Set(v)
+	if len(consumers) > 0 {
+		for _, con := range consumers {
+			c.subscriptionStatus.With(prometheus.Labels{
+				subscriptionNameLabel:      subscriptionName,
+				subscriptionNamespaceLabel: subscriptionNamespace,
+				consumerNameLabel:          con,
+			}).Set(v)
+		}
+	} else {
+		c.subscriptionStatus.With(prometheus.Labels{
+			subscriptionNameLabel:      subscriptionName,
+			subscriptionNamespaceLabel: subscriptionNamespace,
+			consumerNameLabel:          "",
+		}).Set(v)
+	}
 }
 
-// RecordSubscriptionStatus records an eventing_ec_subscription_status metric.
-func (c *Collector) RemoveSubscriptionStatus(subscriptionName, subscriptionNamespace, consumer string) {
-	c.subscriptionStatus.Delete(prometheus.Labels{
-		subscriptionNameLabel:      subscriptionName,
-		subscriptionNamespaceLabel: subscriptionNamespace,
-		consumerNameLabel:          consumer,
-	})
+// RemoveSubscriptionStatus removes an eventing_ec_subscription_status metric.
+func (c *Collector) RemoveSubscriptionStatus(subscriptionName, subscriptionNamespace string, consumers []string) {
+	if len(consumers) > 0 {
+		for _, con := range consumers {
+			c.subscriptionStatus.Delete(prometheus.Labels{
+				subscriptionNameLabel:      subscriptionName,
+				subscriptionNamespaceLabel: subscriptionNamespace,
+				consumerNameLabel:          con,
+			})
+		}
+	} else {
+		c.subscriptionStatus.Delete(prometheus.Labels{
+			subscriptionNameLabel:      subscriptionName,
+			subscriptionNamespaceLabel: subscriptionNamespace,
+			consumerNameLabel:          "",
+		})
+	}
 }

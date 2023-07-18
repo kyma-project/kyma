@@ -760,6 +760,7 @@ func setupTestEnvironment(t *testing.T, objs ...client.Object) *TestEnvironment 
 		recorder:      recorder,
 		sinkValidator: defaultSinkValidator,
 		cleaner:       jsCleaner,
+		collector:     metrics.NewCollector(),
 	}
 
 	return &TestEnvironment{
