@@ -81,7 +81,7 @@ func (c *Commander) Start() error {
 	defer client.CloseIdleConnections()
 
 	// configure message sender
-	messageSender := eventmesh.NewSender(c.envCfg.EventMeshPublishURL, client)
+	messageSender := eventmesh.NewSender(c.envCfg.EventMeshPublishURL, client, c.logger)
 
 	// cluster config
 	k8sConfig := config.GetConfigOrDie()
@@ -123,7 +123,7 @@ func (c *Commander) Start() error {
 		applicationLister, c.logger)
 
 	// start handler which blocks until it receives a shutdown signal
-	if err := handler.NewHandler(
+	if err := handler.New(
 		messageReceiver,
 		messageSender,
 		health.NewChecker(),

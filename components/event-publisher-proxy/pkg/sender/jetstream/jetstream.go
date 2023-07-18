@@ -21,13 +21,13 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/health"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender/eventmesh"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender/common"
 )
 
 const (
 	JSStoreFailedCode     = 10077
 	natsBackend           = "nats"
-	jestreamHandlerName   = "jetstream-handler"
+	handlerName           = "jetstream-handler"
 	noSpaceLeftErrMessage = "no space left on device"
 )
 
@@ -35,9 +35,11 @@ const (
 var _ sender.GenericSender = &Sender{}
 var _ health.Checker = &Sender{}
 
+//nolint:lll // reads better this way
 var (
-	ErrNotConnected       = errors.New("no connection to NATS JetStream server")
-	ErrCannotSendToStream = errors.New("cannot send to stream")
+	ErrNotConnected        = common.BackendPublishError{HTTPCode: http.StatusBadGateway, Info: "no connection to NATS JetStream server"}
+	ErrCannotSendToStream  = common.BackendPublishError{HTTPCode: http.StatusGatewayTimeout, Info: "cannot send to stream"}
+	ErrNoSpaceLeftOnDevice = common.BackendPublishError{HTTPCode: http.StatusInsufficientStorage, Info: "insufficient resources on target stream"}
 )
 
 // Sender is responsible for sending messages over HTTP.
@@ -58,48 +60,62 @@ func NewSender(ctx context.Context, connection *nats.Conn, envCfg *env.NATSConfi
 	return &Sender{ctx: ctx, connection: connection, envCfg: envCfg, opts: opts, logger: logger}
 }
 
-// ConnectionStatus returns nats.Status for the NATS connection used by the Sender.
+// ConnectionStatus returns nats.code for the NATS connection used by the Sender.
 func (s *Sender) ConnectionStatus() nats.Status {
 	return s.connection.Status()
 }
 
 // Send dispatches the event to the NATS backend in JetStream mode.
 // If the NATS connection is not open, it returns an error.
-func (s *Sender) Send(_ context.Context, event *event.Event) (sender.PublishResult, error) {
+func (s *Sender) Send(_ context.Context, event *event.Event) sender.PublishError {
 	if s.ConnectionStatus() != nats.CONNECTED {
-		return nil, ErrNotConnected
+		return ErrNotConnected
 	}
 
-	jsCtx, jsError := s.connection.JetStream()
-	if jsError != nil {
-		return nil, jsError
+	jsCtx, err := s.connection.JetStream()
+	if err != nil {
+		s.namedLogger().Error("error", err)
+		return common.ErrClientNoConnection
 	}
 
 	msg, err := s.eventToNATSMsg(event)
 	if err != nil {
-		return nil, err
+		s.namedLogger().Error("error", err)
+		e := common.ErrClientConversionFailed
+		e.Wrap(err)
+		return e
 	}
 
 	// send the event
 	_, err = jsCtx.PublishMsg(msg)
 	if err != nil {
 		s.namedLogger().Errorw("Cannot send event to backend", "error", err)
-		if errors.Is(err, nats.ErrNoStreamResponse) {
-			return nil, fmt.Errorf("%w : %v", sender.ErrBackendTargetNotFound, fmt.Errorf("%w, %v", ErrCannotSendToStream, err))
-		}
-
-		var apiErr nats.JetStreamError
-		if ok := errors.As(err, &apiErr); ok {
-			if apiErr.APIError().ErrorCode == JSStoreFailedCode {
-				return nil, fmt.Errorf("%w: %v", sender.ErrInsufficientStorage, err)
-			}
-		}
-		if strings.Contains(err.Error(), noSpaceLeftErrMessage) {
-			return nil, fmt.Errorf("%w: %v", sender.ErrInsufficientStorage, err)
-		}
-		return nil, fmt.Errorf("%w : %v", sender.ErrInternalBackendError, fmt.Errorf("%w, %v", ErrCannotSendToStream, err))
+		return natsErrorToPublishError(err)
 	}
-	return eventmesh.HTTPPublishResult{Status: http.StatusNoContent}, nil
+	return nil
+}
+
+func natsErrorToPublishError(err error) sender.PublishError {
+	if errors.Is(err, nats.ErrNoStreamResponse) {
+		return ErrCannotSendToStream
+	}
+
+	if strings.Contains(err.Error(), noSpaceLeftErrMessage) {
+		return ErrNoSpaceLeftOnDevice
+	}
+
+	var apiErr nats.JetStreamError
+	e := common.BackendPublishError{HTTPCode: http.StatusInternalServerError}
+	if errors.As(err, &apiErr) {
+		if apiErr.APIError().ErrorCode == JSStoreFailedCode {
+			return ErrNoSpaceLeftOnDevice
+		}
+		e.HTTPCode = apiErr.APIError().Code
+		e.Info = apiErr.APIError().Description
+		e.Wrap(err)
+		return e
+	}
+	return common.ErrInternalBackendError
 }
 
 // eventToNATSMsg translates cloud event into the NATS Msg.
@@ -135,5 +151,5 @@ func (s *Sender) getJsSubjectToPublish(subject string) string {
 }
 
 func (s *Sender) namedLogger() *zap.SugaredLogger {
-	return s.logger.WithContext().Named(jestreamHandlerName).With("backend", natsBackend, "jetstream enabled", true)
+	return s.logger.WithContext().Named(handlerName).With("backend", natsBackend, "jetstream enabled", true)
 }

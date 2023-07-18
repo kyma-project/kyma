@@ -95,6 +95,8 @@ initContainers:
     image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.k8s_sidecar) }}"
     imagePullPolicy: {{ .Values.sidecar.imagePullPolicy }}
     env:
+      - name: IGNORE_ALREADY_PROCESSED
+        value: "true"
       - name: METHOD
         value: LIST
       - name: LABEL
@@ -140,6 +142,8 @@ containers:
     image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.k8s_sidecar) }}"
     imagePullPolicy: {{ .Values.sidecar.imagePullPolicy }}
     env:
+      - name: IGNORE_ALREADY_PROCESSED
+        value: "true"
       - name: METHOD
         value: {{ .Values.sidecar.datasources.watchMethod }}
       - name: LABEL
@@ -179,6 +183,8 @@ containers:
     image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.k8s_sidecar) }}"
     imagePullPolicy: {{ .Values.sidecar.imagePullPolicy }}
     env:
+      - name: IGNORE_ALREADY_PROCESSED
+        value: "true"
       - name: METHOD
         value: {{ .Values.sidecar.dashboards.watchMethod }}
       - name: LABEL
