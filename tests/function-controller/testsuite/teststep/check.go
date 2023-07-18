@@ -184,7 +184,7 @@ func (t TracingHTTPCheck) Run() error {
 	if err != nil {
 		return err
 	}
-
+	t.log.Info("headers are okay")
 	return nil
 }
 
