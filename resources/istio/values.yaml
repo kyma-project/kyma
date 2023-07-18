@@ -4,6 +4,7 @@ helmValues:
     priorityClassName: "kyma-system-priority"
     imagePullPolicy: IfNotPresent
     proxy:
+      tracer: none
       readinessFailureThreshold: 40
       readinessInitialDelaySeconds: 5
       readinessPeriodSeconds: 5
