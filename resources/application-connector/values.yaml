@@ -31,8 +31,8 @@ global:
   images:
     central_application_connectivity_validator:
       name: "central-application-connectivity-validator"
-      version: "PR-17795"
-      directory: "dev"
+      version: "v20230719-cc8b4778"
+      directory: "prod"
     central_application_gateway:
       name: "central-application-gateway"
       version: "v20230619-017fa2fc"
