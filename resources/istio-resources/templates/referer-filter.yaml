@@ -2,7 +2,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: EnvoyFilter
 metadata:
   name: kyma-referer
-  namespace: sidecar-enabled
+  namespace: istio-system
 spec:
   configPatches:
     - applyTo: BOOTSTRAP
@@ -13,4 +13,4 @@ spec:
             layers:
               - name: kyma_referer
                 static_layer:
-                  envoy.reloadable_features.http_allow_partial_urls_in_referer: "true"
+                  envoy.reloadable_features.http_allow_partial_urls_in_referer: "false"
