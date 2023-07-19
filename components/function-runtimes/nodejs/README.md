@@ -1,13 +1,13 @@
-## How to run/debug Nodejs function and runtime locally
+## How to locally run and debug the Node.js Function and runtime
 
-* Copy `package.json` from desired nodejs version * 
-* Create directory `function` with `handler.js` and `package.json`
-* Install dependencies from runtime and function:
+* Copy `package.json` from the desired Node.js version
+* Create the `function` directory with `handler.js` and `package.json`
+* Install dependencies from the runtime and Function:
 ```bash
 npm install
 npm install function/
 ```
-* Run function from terminal.
+* Run Function from the terminal.
 ```bash
 npm start
 ```
