@@ -11,7 +11,6 @@ import sys
 
 import tracing
 from ce import Event
-# TODO: Clean
 from tracing import set_req_context
 
 
@@ -67,10 +66,8 @@ if __name__ == "__main__":
 
 def func_with_context(e, function_context):
     ex = e.ceHeaders["extensions"]
-    with tracer.start_as_current_span("userFunction"):
+    with set_req_context(ex["request"]):
         return func(e, function_context)
-        # TODO: Clean
-        # with set_req_context(ex["request"]):
 
 
 @app.get('/healthz')
