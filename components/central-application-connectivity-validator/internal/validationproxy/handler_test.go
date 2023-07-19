@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/kyma-project/kyma/components/central-application-connectivity-validator/internal/controller"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -27,9 +28,6 @@ const (
 	applicationMetaName = "test-application-meta"
 	applicationID       = "test-application-id"
 
-	appNamePlaceholder             = "%%APP_NAME%%"
-	eventingPathPrefixV1           = "/%%APP_NAME%%/v1/events"
-	eventingPathPrefixV2           = "/%%APP_NAME%%/v2/events"
 	eventingPathPrefixEvents       = "/%%APP_NAME%%/events"
 	eventingDestinationPathPublish = "/publish"
 )
@@ -191,18 +189,22 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 
 		for _, testCase := range testCases {
 			// given
-			idCache := cache.New(time.Minute, time.Minute)
-			if testCase.application.Spec.CompassMetadata != nil {
-				idCache.Set(testCase.application.Name, []string{applicationID}, cache.NoExpiration)
-			} else {
-				idCache.Set(testCase.application.Name, []string{}, cache.NoExpiration)
+			appData := controller.CachedAppData{
+				AppPathPrefixV1:     fmt.Sprintf("/%s/v1/events", testCase.application.Name),
+				AppPathPrefixV2:     fmt.Sprintf("/%s/v2/events", testCase.application.Name),
+				AppPathPrefixEvents: fmt.Sprintf("/%s/events", testCase.application.Name),
 			}
 
+			idCache := cache.New(time.Minute, time.Minute)
+			if testCase.application.Spec.CompassMetadata != nil {
+				appData.ClientIDs = []string{applicationID}
+			} else {
+				appData.ClientIDs = []string{}
+			}
+
+			idCache.Set(testCase.application.Name, appData, cache.NoExpiration)
+
 			proxyHandler := NewProxyHandler(
-				appNamePlaceholder,
-				eventingPathPrefixV1,
-				eventingPathPrefixV2,
-				eventingPathPrefixEvents,
 				eventPublisherProxyHost,
 				eventingDestinationPathPublish,
 				idCache,
@@ -293,10 +295,6 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			idCache := cache.New(time.Minute, time.Minute)
 
 			proxyHandler := NewProxyHandler(
-				appNamePlaceholder,
-				eventingPathPrefixV1,
-				eventingPathPrefixV2,
-				eventingPathPrefixEvents,
 				eventingPublisherHost,
 				eventingDestinationPathPublish,
 				idCache,
@@ -325,14 +323,17 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 		certInfoHeader :=
 			`Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=test-application,OU=OrgUnit,O=Organization,L=Waldorf,ST=Waldorf,C=DE";URI=`
 
+		appData := controller.CachedAppData{
+			ClientIDs:           []string{},
+			AppPathPrefixV1:     fmt.Sprintf("/%s/v1/events", applicationName),
+			AppPathPrefixV2:     fmt.Sprintf("/%s/v2/events", applicationName),
+			AppPathPrefixEvents: fmt.Sprintf("/%s/events", applicationName),
+		}
+
 		idCache := cache.New(time.Minute, time.Minute)
-		idCache.Set(applicationName, []string{}, cache.NoExpiration)
+		idCache.Set(applicationName, appData, cache.NoExpiration)
 
 		proxyHandler := NewProxyHandler(
-			appNamePlaceholder,
-			eventingPathPrefixV1,
-			eventingPathPrefixV2,
-			eventingPathPrefixEvents,
 			eventingPublisherHost,
 			eventingDestinationPathPublish,
 			idCache,
@@ -364,13 +365,17 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 
 		// mock cache sync controller that it fills cache
 		idCache := cache.New(time.Minute, time.Minute)
-		idCache.Set(applicationMetaName, []string{applicationID}, cache.NoExpiration)
+
+		appData := controller.CachedAppData{
+			ClientIDs:           []string{applicationID},
+			AppPathPrefixV1:     fmt.Sprintf("/%s/v1/events", applicationName),
+			AppPathPrefixV2:     fmt.Sprintf("/%s/v2/events", applicationName),
+			AppPathPrefixEvents: fmt.Sprintf("/%s/events", applicationName),
+		}
+
+		idCache.Set(applicationName, appData, cache.NoExpiration)
 
 		proxyHandler := NewProxyHandler(
-			appNamePlaceholder,
-			eventingPathPrefixV1,
-			eventingPathPrefixV2,
-			eventingPathPrefixEvents,
 			eventingPublisherHost,
 			eventingDestinationPathPublish,
 			idCache,
@@ -398,19 +403,23 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 		for _, testCase := range testCases {
 			// given
 			idCache := cache.New(time.Minute, time.Minute)
-			if testCase.application.Spec.CompassMetadata != nil {
-				idCache.Set(testCase.application.Name, []string{applicationID}, cache.NoExpiration)
-			} else {
-				idCache.Set(testCase.application.Name, []string{}, cache.NoExpiration)
+
+			appData := controller.CachedAppData{
+				AppPathPrefixV1:     fmt.Sprintf("/%s/v1/events", testCase.application.Name),
+				AppPathPrefixV2:     fmt.Sprintf("/%s/v2/events", testCase.application.Name),
+				AppPathPrefixEvents: fmt.Sprintf("/%s/events", testCase.application.Name),
 			}
+
+			if testCase.application.Spec.CompassMetadata != nil {
+				appData.ClientIDs = []string{applicationID}
+			} else {
+				appData.ClientIDs = []string{}
+			}
+			idCache.Set(testCase.application.Name, appData, cache.NoExpiration)
 
 			t.Run("should proxy requests in V1 to V1 endpoint of EPP when "+testCase.caseDescription, func(t *testing.T) {
 
 				proxyHandlerBEB := NewProxyHandler(
-					appNamePlaceholder,
-					eventingPathPrefixV1,
-					eventingPathPrefixV2,
-					eventingPathPrefixEvents,
 					eventingPublisherHost,
 					eventingDestinationPathPublish,
 					idCache,
@@ -455,10 +464,6 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				eventPublisherProxyHost := strings.TrimPrefix(eventPublisherProxyServer.URL, "http://")
 
 				proxyHandlerBEB := NewProxyHandler(
-					appNamePlaceholder,
-					eventingPathPrefixV1,
-					eventingPathPrefixV2,
-					eventingPathPrefixEvents,
 					eventPublisherProxyHost, // For a BEB enabled cluster requests to /v2 and /events should be forwarded to Event Publisher Proxy
 					eventingDestinationPathPublish,
 					idCache,
@@ -499,10 +504,6 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				eventPublisherProxyServer := httptest.NewServer(eventPublisherProxyHandler)
 				eventPublisherProxyHost := strings.TrimPrefix(eventPublisherProxyServer.URL, "http://")
 				proxyHandlerBEB := NewProxyHandler(
-					appNamePlaceholder,
-					eventingPathPrefixV1,
-					eventingPathPrefixV2,
-					eventingPathPrefixEvents,
 					eventPublisherProxyHost, // For a BEB enabled cluster requests to /v2 and /events should be forwarded to Event Publisher Proxy
 					eventingDestinationPathPublish,
 					idCache,
@@ -541,27 +542,4 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			})
 		}
 	})
-
-}
-
-func TestProxyHandler_ReplaceAppNamePlaceholder(t *testing.T) {
-	log, err := logger.New(logger.TEXT, logger.ERROR)
-	if err != nil {
-		t.Error(err)
-	}
-	idCache := cache.New(time.Minute, time.Minute)
-
-	ph := NewProxyHandler(
-		appNamePlaceholder,
-		eventingPathPrefixV1,
-		eventingPathPrefixV2,
-		eventingPathPrefixEvents,
-		"N/A",
-		"N/A",
-		idCache,
-		log)
-
-	assert.Equal(t, "/commerce-mock/v1/events", ph.getApplicationPrefix(ph.eventingPathPrefixV1, "commerce-mock"))
-	assert.Equal(t, "/commerce-mock/v2/events", ph.getApplicationPrefix(ph.eventingPathPrefixV2, "commerce-mock"))
-	assert.Equal(t, "/commerce-mock/events", ph.getApplicationPrefix(ph.eventingPathPrefixEvents, "commerce-mock"))
 }
