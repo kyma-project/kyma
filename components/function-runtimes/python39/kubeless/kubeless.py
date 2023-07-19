@@ -66,8 +66,10 @@ if __name__ == "__main__":
 
 def func_with_context(e, function_context):
     ex = e.ceHeaders["extensions"]
-    with set_req_context(ex["request"]):
+    with tracer.start_as_current_span("userFunction"):
         return func(e, function_context)
+
+        # with set_req_context(ex["request"]):
 
 
 @app.get('/healthz')
