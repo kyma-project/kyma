@@ -642,7 +642,7 @@ func (r *Reconciler) CreateOrUpdatePublisherProxy(ctx context.Context, backend e
 func (r *Reconciler) CreateOrUpdatePublisherProxyDeployment(
 	ctx context.Context,
 	backend eventingv1alpha1.BackendType,
-	withOwnerReference bool) (*appsv1.Deployment, error) {
+	setOwnerReference bool) (*appsv1.Deployment, error) {
 	var desiredPublisher *appsv1.Deployment
 	// set backend type here so that the function can be used in eventing-manager
 	r.backendType = backend
@@ -656,7 +656,7 @@ func (r *Reconciler) CreateOrUpdatePublisherProxyDeployment(
 		return nil, fmt.Errorf("unknown EventingBackend type %q", backend)
 	}
 
-	if withOwnerReference {
+	if setOwnerReference {
 		if err := r.setAsOwnerReference(ctx, desiredPublisher); err != nil {
 			return nil, errors.Wrapf(err, "set owner reference for Event Publisher failed")
 		}
