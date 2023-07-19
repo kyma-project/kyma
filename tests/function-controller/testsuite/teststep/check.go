@@ -182,7 +182,7 @@ func (t TracingHTTPCheck) Run() error {
 
 	err = t.assertTracingResponse(trResponse)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "Got following headers: %s", out)
 	}
 	t.log.Info("headers are okay")
 	return nil
