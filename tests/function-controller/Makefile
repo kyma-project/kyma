@@ -22,4 +22,4 @@ git-auth-integration: ## Run git authorization integration scenario with kubectl
 
 .PHONY: simple-tracing
 simple-tracing: ## Run simple tracing scenario with kubectl proxy
-	@echo simple-tracing-not-implememted
+	./run-local.sh simple-tracing
