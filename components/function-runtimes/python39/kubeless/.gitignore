@@ -1,2 +1,5 @@
+#For local debugging
 venv
+kubeless
+
 __pycache__
