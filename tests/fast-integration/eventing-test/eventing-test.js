@@ -32,7 +32,6 @@ const {
   backendK8sSecretNamespace,
   timeoutTime,
   slowTime,
-  isSKR,
   testDataConfigMapName,
   eventingNatsSvcName,
   eventingNatsApiRuleAName,
@@ -51,7 +50,6 @@ const {
   getConfigMapWithRetries,
   checkStreamNotReCreated,
   checkConsumerNotReCreated,
-  isUpgradeJob,
   deployEventingSinkFunction,
   eventingUpgradeSinkName,
   waitForEventingSinkFunction,
@@ -60,6 +58,8 @@ const {
   checkFunctionUnreachable,
   publishEventWithRetry,
   debugBanner,
+  isSKR,
+  isUpgradeJob,
   isJSRecreatedTestEnabled,
   isJSAtLeastOnceDeliveryTestEnabled,
 } = require('./utils');
@@ -95,7 +95,7 @@ describe('Eventing tests', function() {
 
   before('Ensure tracing is ready', async function() {
     console.log('Checking for jaeger in default namespace');
-    if (isSKR) {
+    if (isSKR || isUpgradeJob) {
       return;
     }
     await waitForPodWithLabelAndCondition(jaegerLabel.key, jaegerLabel.value, 'default', conditionReady.condition,
@@ -104,6 +104,9 @@ describe('Eventing tests', function() {
   });
 
   before('Expose Grafana', async function() {
+    if (isUpgradeJob) {
+      return;
+    }
     await exposeGrafana();
     this.test.retries(3);
     await waitForPodWithLabelAndCondition( telemetryOperatorLabel.key, telemetryOperatorLabel.value, kymaSystem,
@@ -210,17 +213,20 @@ describe('Eventing tests', function() {
   }
 
   // eventingMonitoringTestSuite - Runs Eventing tests for monitoring
-  function eventingMonitoringTestSuite(backend, isSKR) {
+  function eventingMonitoringTestSuite(backend, isSKR, isUpgradeJob=true) {
+    if (isUpgradeJob) {
+      return;
+    }
     it('Run Eventing Monitoring tests', async function() {
       await eventingMonitoringTest(backend, isSKR, true);
     });
   }
 
   // eventingTracingTestSuite - Runs Eventing tracing tests
-  function eventingTracingTestSuiteV2(isSKR) {
+  function eventingTracingTestSuiteV2(isSKR, isUpgradeJob) {
     // Only run tracing tests on OSS
-    if (isSKR) {
-      debug('Skipping eventing tracing tests on SKR');
+    if (isSKR || isUpgradeJob) {
+      debug('Skipping eventing tracing test');
       return;
     }
 
@@ -455,10 +461,10 @@ describe('Eventing tests', function() {
     eventDeliveryTestSuite(natsBackend);
 
     // Running Eventing tracing tests [v2]
-    eventingTracingTestSuiteV2(isSKR);
+    eventingTracingTestSuiteV2(isSKR, isUpgradeJob);
 
     // Running Eventing monitoring tests.
-    eventingMonitoringTestSuite(natsBackend, isSKR);
+    eventingMonitoringTestSuite(natsBackend, isSKR, isUpgradeJob);
 
     // Running JetStream stream and consumers not re-created by upgrade test.
     jsTestStreamConsumerNotRecreatedTestSuite('post');
@@ -468,6 +474,11 @@ describe('Eventing tests', function() {
   });
 
   context('with BEB backend', function() {
+    // skip backend-switching in upgrade test
+    if (isUpgradeJob) {
+      debug('Skipping backend switching for upgrade test.');
+      return;
+    }
     // skip publishing cloud events for beb backend when event mesh credentials file is missing
     if (getEventMeshNamespace() === undefined) {
       debug('Skipping E2E eventing tests for BEB backend due to missing EVENTMESH_SECRET_FILE');
@@ -485,10 +496,15 @@ describe('Eventing tests', function() {
     eventDeliveryTestSuite(bebBackend);
 
     // Running Eventing monitoring tests.
-    eventingMonitoringTestSuite(bebBackend, isSKR);
+    eventingMonitoringTestSuite(bebBackend, isSKR, isUpgradeJob);
   });
 
   context('with Nats backend switched back from BEB', async function() {
+    // skip backend-switching in upgrade test
+    if (isUpgradeJob) {
+      debug('Skipping backend switching for upgrade test.');
+      return;
+    }
     it('Switch Eventing Backend to Nats', async function() {
       const currentBackend = await getEventingBackend();
       if (currentBackend && currentBackend.toLowerCase() === natsBackend) {
@@ -501,10 +517,10 @@ describe('Eventing tests', function() {
     eventDeliveryTestSuite(natsBackend);
 
     // Running Eventing tracing tests [v2]
-    eventingTracingTestSuiteV2(isSKR);
+    eventingTracingTestSuiteV2(isSKR, isUpgradeJob);
 
     // Running Eventing monitoring tests.
-    eventingMonitoringTestSuite(natsBackend, isSKR);
+    eventingMonitoringTestSuite(natsBackend, isSKR, isUpgradeJob);
 
     // Running stream and consumer not re-created by upgrade test
     jsTestStreamConsumerNotRecreatedTestSuite('pre');
@@ -523,6 +539,9 @@ describe('Eventing tests', function() {
   });
 
   after('Unexpose Grafana', async function() {
+    if (isUpgradeJob) {
+      return;
+    }
     await unexposeGrafana(isSKR);
     this.test.retries(3);
   });

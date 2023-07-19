@@ -4,6 +4,7 @@ helmValues:
     priorityClassName: "kyma-system-priority"
     imagePullPolicy: IfNotPresent
     proxy:
+      tracer: none
       readinessFailureThreshold: 40
       readinessInitialDelaySeconds: 5
       readinessPeriodSeconds: 5
@@ -176,15 +177,15 @@ global:
     # these definitions aren't used by the chart, but they are required by external tool for list generation
     istio_proxyv2:
       name: "proxyv2"
-      version: "1.18.0-distroless"
+      version: "1.18.1-distroless"
       directory: "prod/external/istio"
     istio_pilot:
       name: "pilot"
-      version: "1.18.0-distroless"
+      version: "1.18.1-distroless"
       directory: "prod/external/istio"
     istio_install-cni:
       name: "install-cni"
-      version: "1.18.0-distroless"
+      version: "1.18.1-distroless"
       directory: "prod/external/istio"
 
   # This configuration is only temporary and will be removed in kyma version 2.7.x.
