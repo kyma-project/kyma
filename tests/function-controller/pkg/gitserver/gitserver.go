@@ -3,6 +3,7 @@ package gitserver
 import (
 	"context"
 	"fmt"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/k8s"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
 
@@ -30,7 +31,7 @@ const (
 )
 
 type GitServer struct {
-	deployments  appsclient.DeploymentInterface
+	deployments  k8s.Deployment
 	services     coreclient.ServiceInterface
 	resCli       *resource.Resource
 	istioEnabled bool
@@ -41,9 +42,9 @@ type GitServer struct {
 	log          *logrus.Entry
 }
 
-func New(c shared.Container, name string, image string, port int, deployments appsclient.DeploymentInterface, services coreclient.ServiceInterface, istioEnabled bool) *GitServer {
+func New(c shared.Container, name string, image string, port int32, deployments appsclient.DeploymentInterface, services coreclient.ServiceInterface, istioEnabled bool) *GitServer {
 	return &GitServer{
-		deployments: deployments,
+		deployments: k8s.NewDeployment(name, c.Namespace, image, port, deployments, c.Log),
 		services:    services,
 		resCli: resource.New(c.DynamicCli, schema.GroupVersionResource{
 			Group:    "networking.istio.io",
