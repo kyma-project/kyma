@@ -1,7 +1,7 @@
 ## How to locally run and debug Python Function and runtime
 
 * Create [venv](https://docs.python.org/3/library/venv.html)
-* Active venv:
+* Activate venv:
   ```bash
   source venv/bin/activete
   ```
