@@ -16,9 +16,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/pkg/errors"
-	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/intstr"
 	appsclient "k8s.io/client-go/kubernetes/typed/apps/v1"
 	coreclient "k8s.io/client-go/kubernetes/typed/core/v1"
 
@@ -31,7 +29,7 @@ const (
 
 type GitServer struct {
 	deployment   k8s.Deployment
-	services     coreclient.ServiceInterface
+	services     k8s.Service
 	resCli       *resource.Resource
 	istioEnabled bool
 	name         string
@@ -44,7 +42,7 @@ type GitServer struct {
 func New(c shared.Container, name string, image string, port int32, deployments appsclient.DeploymentInterface, services coreclient.ServiceInterface, istioEnabled bool) *GitServer {
 	return &GitServer{
 		deployment: k8s.NewDeployment(name, c.Namespace, image, port, deployments, c.Log),
-		services:   services,
+		services:   k8s.NewService(name, c.Namespace, port, services, c.Log),
 		resCli: resource.New(c.DynamicCli, schema.GroupVersionResource{
 			Group:    "networking.istio.io",
 			Version:  "v1alpha3",
@@ -64,7 +62,7 @@ func (gs *GitServer) Create() error {
 		return err
 	}
 
-	err = gs.createService()
+	err = gs.services.Create()
 	if err != nil {
 		return err
 	}
@@ -73,31 +71,6 @@ func (gs *GitServer) Create() error {
 		return gs.createDestinationRule()
 	}
 	return nil
-}
-
-func (gs *GitServer) createService() error {
-	service := &v1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: gs.name,
-		},
-		Spec: v1.ServiceSpec{
-			Type: "ClusterIP",
-			Ports: []v1.ServicePort{
-				{
-					Name:       gs.name,
-					Port:       gs.port,
-					Protocol:   "TCP",
-					TargetPort: intstr.FromInt(int(gs.port)),
-				},
-			},
-			Selector: map[string]string{
-				labelKey: gs.name,
-			},
-		},
-	}
-
-	_, err := gs.services.Create(context.Background(), service, metav1.CreateOptions{})
-	return errors.Wrapf(err, "while creating Service %s in namespace %s", gs.name, gs.namespace)
 }
 
 func (gs *GitServer) createDestinationRule() error {
@@ -130,7 +103,7 @@ func (gs *GitServer) Delete() error {
 		errDestRule = gs.resCli.Delete(gs.name)
 	}
 
-	errService := gs.services.Delete(context.Background(), gs.name, metav1.DeleteOptions{})
+	errService := gs.services.Delete(context.Background(), metav1.DeleteOptions{})
 	errDeployment := gs.deployment.Delete(context.Background(), metav1.DeleteOptions{})
 	err := multierror.Append(errDeployment, errService, errDestRule)
 	return err.ErrorOrNil()
@@ -149,17 +122,10 @@ func (gs *GitServer) LogResource() error {
 		gs.log.Info(out)
 	}
 
-	svc, err := gs.services.Get(context.Background(), gs.name, metav1.GetOptions{})
+	err := gs.services.LogResource()
 	if err != nil {
-		return errors.Wrap(err, "while getting service")
+		return errors.Wrap(err, "while logging service status")
 	}
-	// The client doesn't fill service TypeMeta
-	svc.Kind = "service"
-	out, err := helpers.PrettyMarshall(svc)
-	if err != nil {
-		return errors.Wrap(err, "while marshalling service")
-	}
-	gs.log.Info(out)
 
 	err = gs.deployment.LogResource()
 	if err != nil {
