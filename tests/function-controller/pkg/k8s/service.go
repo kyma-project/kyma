@@ -52,7 +52,7 @@ func (s Service) Create() error {
 	}
 
 	_, err := s.coreCli.Create(context.Background(), service, metav1.CreateOptions{})
-	return errors.Wrapf(err, "while creating Service %s in namespace %s", s.name, s.namespace)
+	return errors.Wrapf(err, "while creating service %s in namespace %s", s.name, s.namespace)
 }
 
 func (s Service) Delete(ctx context.Context, options metav1.DeleteOptions) error {
