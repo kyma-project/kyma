@@ -46,7 +46,7 @@ func (s Service) Create() error {
 				},
 			},
 			Selector: map[string]string{
-				labelKey: s.name,
+				componentLabel: s.name,
 			},
 		},
 	}
@@ -56,7 +56,7 @@ func (s Service) Create() error {
 }
 
 func (s Service) Delete(ctx context.Context, options metav1.DeleteOptions) error {
-	return s.coreCli.Delete(ctx, s.name, metav1.DeleteOptions{})
+	return s.coreCli.Delete(ctx, s.name, options)
 }
 
 func (s Service) Get(ctx context.Context, options metav1.GetOptions) (*corev1.Service, error) {

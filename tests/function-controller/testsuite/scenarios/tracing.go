@@ -2,6 +2,8 @@ package scenarios
 
 import (
 	"fmt"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
+	typedappsv1 "k8s.io/client-go/kubernetes/typed/apps/v1"
 	"time"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/function"
@@ -21,6 +23,11 @@ import (
 	"github.com/kyma-project/kyma/tests/function-controller/testsuite/teststep"
 )
 
+const (
+	HTTPAppName  = "http-server"
+	HTTPAppImage = "nginx"
+)
+
 func SimpleFunctionTracingTest(restConfig *rest.Config, cfg testsuite.Config, logf *logrus.Entry) (step.Step, error) {
 	now := time.Now()
 	cfg.Namespace = fmt.Sprintf("%s-%02dh%02dm%02ds", "test-simple-tracing", now.Hour(), now.Minute(), now.Second())
@@ -33,6 +40,11 @@ func SimpleFunctionTracingTest(restConfig *rest.Config, cfg testsuite.Config, lo
 	coreCli, err := typedcorev1.NewForConfig(restConfig)
 	if err != nil {
 		return nil, errors.Wrap(err, "while creating k8s CoreV1Client")
+	}
+
+	appsCli, err := typedappsv1.NewForConfig(restConfig)
+	if err != nil {
+		return nil, errors.Wrapf(err, "while creating k8s apps client")
 	}
 
 	python39Logger := logf.WithField(scenarioKey, "python39")
@@ -55,6 +67,11 @@ func SimpleFunctionTracingTest(restConfig *rest.Config, cfg testsuite.Config, lo
 
 	logf.Infof("Testing function in namespace: %s", cfg.Namespace)
 
+	httpAppURL, err := helpers.GetSvcURL(HTTPAppName, genericContainer.Namespace, false)
+	if err != nil {
+		return nil, errors.Wrap(err, "while creating http application URL")
+	}
+
 	poll := poller.Poller{
 		MaxPollingTime:     cfg.MaxPollingTime,
 		InsecureSkipVerify: cfg.InsecureSkipVerify,
@@ -62,9 +79,10 @@ func SimpleFunctionTracingTest(restConfig *rest.Config, cfg testsuite.Config, lo
 	}
 	return step.NewSerialTestRunner(logf, "Runtime test",
 		teststep.NewNamespaceStep("Create test namespace", coreCli, genericContainer),
+		teststep.NewApplication("Create HTTP basic application", HTTPAppName, HTTPAppImage, int32(80), appsCli.Deployments(genericContainer.Namespace), coreCli.Services(genericContainer.Namespace), genericContainer),
 		step.NewParallelRunner(logf, "Fn tests",
 			step.NewSerialTestRunner(python39Logger, "Python39 test",
-				teststep.CreateFunction(python39Logger, python39Fn, "Create Python39 Function", runtimes.BasicTracingPythonFunction(serverlessv1alpha2.Python39)),
+				teststep.CreateFunction(python39Logger, python39Fn, "Create Python39 Function", runtimes.BasicTracingPythonFunction(serverlessv1alpha2.Python39, httpAppURL.String())),
 				teststep.NewTracingHTTPCheck(python39Logger, "Python39 tracing headers check", python39Fn.FunctionURL, poll),
 			),
 			//step.NewSerialTestRunner(nodejs16Logger, "NodeJS16 test",

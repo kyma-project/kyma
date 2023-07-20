@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	labelKey = "component"
+	componentLabel = "component"
 )
 
 type Deployment struct {
@@ -41,20 +41,20 @@ func (d Deployment) Create() error {
 		ObjectMeta: metav1.ObjectMeta{
 			Name: d.name,
 			Labels: map[string]string{
-				labelKey: d.name,
+				componentLabel: d.name,
 			},
 		},
 		Spec: appsv1.DeploymentSpec{
 			Replicas: &rs,
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{
-					labelKey: d.name,
+					componentLabel: d.name,
 				},
 			},
 			Template: v1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
-						labelKey: d.name,
+						componentLabel: d.name,
 					},
 					Annotations: map[string]string{
 						"sidecar.istio.io/inject": "false",
