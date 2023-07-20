@@ -27,17 +27,20 @@ func BasicNodeJSFunction(msg string, rtm serverlessv1alpha2.Runtime) serverlessv
 	}
 }
 
-func BasicTracingNodeFunction(rtm serverlessv1alpha2.Runtime) serverlessv1alpha2.FunctionSpec {
-	return serverlessv1alpha2.FunctionSpec{
-		Runtime: rtm,
-		Source: serverlessv1alpha2.Source{
-			Inline: &serverlessv1alpha2.InlineSource{
-				Source: `const axios = require("axios")
+func BasicTracingNodeFunction(rtm serverlessv1alpha2.Runtime, externalSvcURL string) serverlessv1alpha2.FunctionSpec {
+	dpd := `{
+  "name": "sanitise-fn",
+  "version": "0.0.1",
+  "dependencies": {
+    "axios":"0.26.1"
+  }
+}`
+	src := fmt.Sprintf(`const axios = require("axios")
 
 
 module.exports = {
     main: async function (event, context) {
-        let resp = await axios("https://swapi.dev/api/people/1");
+        let resp = await axios("%s");
         let interceptedHeaders = resp.request._header
         let tracingHeaders = getTracingHeaders(interceptedHeaders)
         return tracingHeaders
@@ -69,14 +72,13 @@ function getTracingHeaders(textHeaders) {
             return Object.assign(prev, current)
         })
     return tracingHeaders
-}`,
-				Dependencies: `{
-  "name": "sanitise-fn",
-  "version": "0.0.1",
-  "dependencies": {
-    "axios":"0.26.1"
-  }
-}`,
+}`, externalSvcURL)
+	return serverlessv1alpha2.FunctionSpec{
+		Runtime: rtm,
+		Source: serverlessv1alpha2.Source{
+			Inline: &serverlessv1alpha2.InlineSource{
+				Source:       src,
+				Dependencies: dpd,
 			},
 		},
 	}

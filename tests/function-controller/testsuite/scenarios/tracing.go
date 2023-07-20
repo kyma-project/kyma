@@ -48,8 +48,8 @@ func SimpleFunctionTracingTest(restConfig *rest.Config, cfg testsuite.Config, lo
 	}
 
 	python39Logger := logf.WithField(scenarioKey, "python39")
-	//nodejs16Logger := logf.WithField(scenarioKey, "nodejs16")
-	//nodejs18Logger := logf.WithField(scenarioKey, "nodejs18")
+	nodejs16Logger := logf.WithField(scenarioKey, "nodejs16")
+	nodejs18Logger := logf.WithField(scenarioKey, "nodejs18")
 
 	genericContainer := shared.Container{
 		DynamicCli:  dynamicCli,
@@ -61,9 +61,9 @@ func SimpleFunctionTracingTest(restConfig *rest.Config, cfg testsuite.Config, lo
 
 	python39Fn := function.NewFunction("python39", cfg.KubectlProxyEnabled, genericContainer.WithLogger(python39Logger))
 
-	//nodejs16Fn := function.NewFunction("nodejs16", cfg.KubectlProxyEnabled, genericContainer.WithLogger(nodejs16Logger))
-	//
-	//nodejs18Fn := function.NewFunction("nodejs18", cfg.KubectlProxyEnabled, genericContainer.WithLogger(nodejs18Logger))
+	nodejs16Fn := function.NewFunction("nodejs16", cfg.KubectlProxyEnabled, genericContainer.WithLogger(nodejs16Logger))
+
+	nodejs18Fn := function.NewFunction("nodejs18", cfg.KubectlProxyEnabled, genericContainer.WithLogger(nodejs18Logger))
 
 	logf.Infof("Testing function in namespace: %s", cfg.Namespace)
 
@@ -85,14 +85,14 @@ func SimpleFunctionTracingTest(restConfig *rest.Config, cfg testsuite.Config, lo
 				teststep.CreateFunction(python39Logger, python39Fn, "Create Python39 Function", runtimes.BasicTracingPythonFunction(serverlessv1alpha2.Python39, httpAppURL.String())),
 				teststep.NewTracingHTTPCheck(python39Logger, "Python39 tracing headers check", python39Fn.FunctionURL, poll),
 			),
-			//step.NewSerialTestRunner(nodejs16Logger, "NodeJS16 test",
-			//	teststep.CreateFunction(nodejs16Logger, nodejs16Fn, "Create NodeJS16 Function", runtimes.BasicTracingNodeFunction(serverlessv1alpha2.NodeJs16)),
-			//	teststep.NewTracingHTTPCheck(nodejs16Logger, "NodeJS16 tracing headers check", nodejs16Fn.FunctionURL, poll),
-			//),
-			//step.NewSerialTestRunner(nodejs18Logger, "NodeJS18 test",
-			//	teststep.CreateFunction(nodejs18Logger, nodejs18Fn, "Create NodeJS18 Function", runtimes.BasicTracingNodeFunction(serverlessv1alpha2.NodeJs18)),
-			//	teststep.NewTracingHTTPCheck(nodejs18Logger, "NodeJS18 tracing headers check", nodejs18Fn.FunctionURL, poll),
-			//),
+			step.NewSerialTestRunner(nodejs16Logger, "NodeJS16 test",
+				teststep.CreateFunction(nodejs16Logger, nodejs16Fn, "Create NodeJS16 Function", runtimes.BasicTracingNodeFunction(serverlessv1alpha2.NodeJs16, httpAppURL.String())),
+				teststep.NewTracingHTTPCheck(nodejs16Logger, "NodeJS16 tracing headers check", nodejs16Fn.FunctionURL, poll),
+			),
+			step.NewSerialTestRunner(nodejs18Logger, "NodeJS18 test",
+				teststep.CreateFunction(nodejs18Logger, nodejs18Fn, "Create NodeJS18 Function", runtimes.BasicTracingNodeFunction(serverlessv1alpha2.NodeJs18, httpAppURL.String())),
+				teststep.NewTracingHTTPCheck(nodejs18Logger, "NodeJS18 tracing headers check", nodejs18Fn.FunctionURL, poll),
+			),
 		),
 	), nil
 }
