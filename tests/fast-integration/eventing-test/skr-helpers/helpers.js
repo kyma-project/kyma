@@ -1,6 +1,6 @@
 const uuid = require('uuid');
 const {KEBConfig, KEBClient}= require('../kyma-environment-broker');
-const {GardenerClient, GardenerConfig} = require('../gardener');
+const {GardenerClient, GardenerConfig} = require('../../gardener');
 const {KCPWrapper, KCPConfig} = require('../kcp/client');
 const fs = require('fs');
 const os = require('os');
@@ -11,7 +11,7 @@ const gardener = new GardenerClient(GardenerConfig.fromEnv());
 const kcp = new KCPWrapper(KCPConfig.fromEnv());
 const testNS = 'skr-test';
 const DEBUG = process.env.DEBUG === 'true';
-const {initializeK8sClient} = require('../utils/index.js');
+const {initializeK8sClient} = require('../../utils/index.js');
 
 function withInstanceID(instanceID) {
   return function(options) {
