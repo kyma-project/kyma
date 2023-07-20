@@ -35,7 +35,7 @@ func NewDeployment(name, namespace, image string, port int32, apps appsclient.De
 	}
 }
 
-func (d Deployment) createDeployment() error {
+func (d Deployment) Create() error {
 	rs := int32(1)
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -80,7 +80,7 @@ func (d Deployment) createDeployment() error {
 }
 
 func (d Deployment) Delete(ctx context.Context, options metav1.DeleteOptions) error {
-	return d.appsCli.Delete(ctx, d.name, metav1.DeleteOptions{})
+	return d.appsCli.Delete(ctx, d.name, options)
 }
 
 func (d Deployment) Get(ctx context.Context, options metav1.GetOptions) (*appsv1.Deployment, error) {

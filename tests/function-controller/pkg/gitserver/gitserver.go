@@ -16,7 +16,6 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/pkg/errors"
-	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -31,21 +30,21 @@ const (
 )
 
 type GitServer struct {
-	deployments  k8s.Deployment
+	deployment   k8s.Deployment
 	services     coreclient.ServiceInterface
 	resCli       *resource.Resource
 	istioEnabled bool
 	name         string
 	namespace    string
 	image        string
-	port         int
+	port         int32
 	log          *logrus.Entry
 }
 
 func New(c shared.Container, name string, image string, port int32, deployments appsclient.DeploymentInterface, services coreclient.ServiceInterface, istioEnabled bool) *GitServer {
 	return &GitServer{
-		deployments: k8s.NewDeployment(name, c.Namespace, image, port, deployments, c.Log),
-		services:    services,
+		deployment: k8s.NewDeployment(name, c.Namespace, image, port, deployments, c.Log),
+		services:   services,
 		resCli: resource.New(c.DynamicCli, schema.GroupVersionResource{
 			Group:    "networking.istio.io",
 			Version:  "v1alpha3",
@@ -60,7 +59,7 @@ func New(c shared.Container, name string, image string, port int32, deployments 
 }
 
 func (gs *GitServer) Create() error {
-	err := gs.createDeployment()
+	err := gs.deployment.Create()
 	if err != nil {
 		return err
 	}
@@ -76,50 +75,6 @@ func (gs *GitServer) Create() error {
 	return nil
 }
 
-func (gs *GitServer) createDeployment() error {
-	rs := int32(1)
-	deployment := &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: gs.name,
-			Labels: map[string]string{
-				labelKey: gs.name,
-			},
-		},
-		Spec: appsv1.DeploymentSpec{
-			Replicas: &rs,
-			Selector: &metav1.LabelSelector{
-				MatchLabels: map[string]string{
-					labelKey: gs.name,
-				},
-			},
-			Template: v1.PodTemplateSpec{
-				ObjectMeta: metav1.ObjectMeta{
-					Labels: map[string]string{
-						labelKey: gs.name,
-					},
-					Annotations: map[string]string{
-						"sidecar.istio.io/inject": "false",
-					},
-				},
-				Spec: v1.PodSpec{
-					Containers: []v1.Container{
-						{
-							Name:  gs.name,
-							Image: gs.image,
-							Ports: []v1.ContainerPort{
-								{ContainerPort: int32(gs.port)},
-							},
-							ImagePullPolicy: v1.PullAlways,
-						},
-					},
-				},
-			},
-		},
-	}
-	_, err := gs.deployments.Create(context.Background(), deployment, metav1.CreateOptions{})
-	return errors.Wrapf(err, "while creating Deployment %s in namespace %s", gs.name, gs.namespace)
-}
-
 func (gs *GitServer) createService() error {
 	service := &v1.Service{
 		ObjectMeta: metav1.ObjectMeta{
@@ -130,9 +85,9 @@ func (gs *GitServer) createService() error {
 			Ports: []v1.ServicePort{
 				{
 					Name:       gs.name,
-					Port:       int32(gs.port),
+					Port:       gs.port,
 					Protocol:   "TCP",
-					TargetPort: intstr.FromInt(gs.port),
+					TargetPort: intstr.FromInt(int(gs.port)),
 				},
 			},
 			Selector: map[string]string{
@@ -176,7 +131,7 @@ func (gs *GitServer) Delete() error {
 	}
 
 	errService := gs.services.Delete(context.Background(), gs.name, metav1.DeleteOptions{})
-	errDeployment := gs.deployments.Delete(context.Background(), gs.name, metav1.DeleteOptions{})
+	errDeployment := gs.deployment.Delete(context.Background(), metav1.DeleteOptions{})
 	err := multierror.Append(errDeployment, errService, errDestRule)
 	return err.ErrorOrNil()
 }
@@ -206,17 +161,10 @@ func (gs *GitServer) LogResource() error {
 	}
 	gs.log.Info(out)
 
-	deployment, err := gs.deployments.Get(context.Background(), gs.name, metav1.GetOptions{})
+	err = gs.deployment.LogResource()
 	if err != nil {
-		return errors.Wrap(err, "while getting deployment")
+		return errors.Wrap(err, "while logging deployment status")
 	}
-	// The client doesn't fill deployment TypeMeta
-	deployment.Kind = "deployment"
-	out, err = helpers.PrettyMarshall(deployment)
-	if err != nil {
-		return errors.Wrap(err, "while marshalling deployment")
-	}
-	gs.log.Info(out)
 
 	return nil
 }
