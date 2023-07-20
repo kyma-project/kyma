@@ -159,33 +159,56 @@ func (t TracingHTTPCheck) Run() error {
 
 	req.Header.Add("X-B3-Sampled", "1")
 
-	client := &http.Client{Timeout: 10 * time.Second}
-	resp, err := client.Do(req)
+	resp, err := t.doRetrievableHttpCall(req, 5)
 	if err != nil {
-		return err
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		return nil
+		return errors.Wrap(err, "while doing http call")
 	}
 
 	out, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "while reading response body")
 	}
 
 	trResponse := tracingResponse{}
 	err = json.Unmarshal(out, &trResponse)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "while unmarshalling response to json")
 	}
 
 	err = t.assertTracingResponse(trResponse)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "Got following headers: %s", out)
 	}
 	t.log.Info("headers are okay")
 	return nil
+}
+
+func (t TracingHTTPCheck) doRetrievableHttpCall(req *http.Request, retries int) (*http.Response, error) {
+	client := &http.Client{Timeout: 5 * time.Second}
+	var finalResp *http.Response = nil
+
+	var backoff = wait.Backoff{
+		Steps:    retries,
+		Duration: 2 * time.Second,
+		Factor:   1.0,
+	}
+
+	err := retry.OnError(backoff, func(err error) bool {
+		t.log.Warnf("Got error: %s", err.Error())
+		return true
+	}, func() error {
+		resp, err := client.Do(req)
+		if err != nil {
+			return err
+		}
+
+		if resp.StatusCode != http.StatusOK {
+			return errors.Errorf(" expected status code: %d, got: %d", http.StatusOK, resp.StatusCode)
+		}
+		finalResp = resp
+		return nil
+	})
+	return finalResp, errors.Wrap(err, "while trying to call function")
 }
 
 func (t TracingHTTPCheck) Cleanup() error {
