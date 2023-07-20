@@ -3,16 +3,15 @@
 import importlib
 import os
 import queue
+import sys
 import threading
 
 import bottle
 import prometheus_client as prom
-import sys
 
 import tracing
 from ce import Event
 from tracing import set_req_context
-
 
 
 def create_service_name(pod_name: str, service_namespace: str) -> str:
@@ -32,7 +31,8 @@ if module_name == current_mod:
     print('Module cannot be named {} as current module'.format(current_mod), flush=True)
     exit(2)
 
-sys.path.append('/kubeless')
+function_location = os.getenv('FUNCTION_PATH', default='/kubeless')
+sys.path.append(function_location)
 
 mod = importlib.import_module(module_name)
 func_name = os.getenv('FUNC_HANDLER')
@@ -56,13 +56,13 @@ function_context = {
     'memory-limit': os.getenv('FUNC_MEMORY_LIMIT'),
 }
 
-pod_name = os.getenv('HOSTNAME')
-service_namespace = os.getenv('SERVICE_NAMESPACE')
+pod_name = os.getenv('HOSTNAME', default="")
+service_namespace = os.getenv('SERVICE_NAMESPACE', default="")
 service_name = create_service_name(pod_name, service_namespace)
-
 
 if __name__ == "__main__":
     tracer = tracing._setup_tracer(service_name)
+
 
 def func_with_context(e, function_context):
     ex = e.ceHeaders["extensions"]
