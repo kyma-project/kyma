@@ -44,6 +44,8 @@ meshConfig:
     tracing: []
   defaultConfig:
     holdApplicationUntilProxyStarts: true
+    proxyMetadata:
+      BOOTSTRAP_XDS_AGENT: "true"
   enablePrometheusMerge: false
   enableTracing: false
   extensionProviders:
