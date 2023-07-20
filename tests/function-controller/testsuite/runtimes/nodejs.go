@@ -40,7 +40,7 @@ func BasicTracingNodeFunction(rtm serverlessv1alpha2.Runtime, externalSvcURL str
 
 module.exports = {
     main: async function (event, context) {
-        let resp = await axios("%s");
+        let resp = await axios("%s",{timeout: 1000});
         let interceptedHeaders = resp.request._header
         let tracingHeaders = getTracingHeaders(interceptedHeaders)
         return tracingHeaders
