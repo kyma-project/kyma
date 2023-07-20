@@ -5,7 +5,7 @@ import (
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	v1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	coreclient "k8s.io/client-go/kubernetes/typed/core/v1"
@@ -31,13 +31,13 @@ func NewService(name, namespace string, port int32, coreCli coreclient.ServiceIn
 }
 
 func (s Service) Create() error {
-	service := &v1.Service{
+	service := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: s.name,
 		},
-		Spec: v1.ServiceSpec{
+		Spec: corev1.ServiceSpec{
 			Type: "ClusterIP",
-			Ports: []v1.ServicePort{
+			Ports: []corev1.ServicePort{
 				{
 					Name:       s.name,
 					Port:       s.port,
