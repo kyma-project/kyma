@@ -7,9 +7,9 @@ setup-environment:
 	k3d registry create k3d-registry --port 5000
 	k3d cluster create k3d --registry-use k3d-k3d-registry:5000
 	kubectl cluster-info
-	curl -Lo kyma.tar.gz "https://github.com/kyma-project/cli/releases/download/$(curl -s https://api.github.com/repos/kyma-project/cli/releases/latest | grep tag_name | cut -d '"' -f 4)/kyma_Linux_x86_64.tar.gz" \
-	&& mkdir kyma-release && tar -C kyma-release -zxvf kyma.tar.gz && chmod +x kyma-release/kyma && mv kyma-release/kyma /usr/local/bin \
-	&& rm -rf kyma-release kyma.tar.gz
+	CLI_VERSION=$(shell curl -s https://api.github.com/repos/kyma-project/cli/releases/latest | grep tag_name | cut -d '"' -f 4); \
+	curl -Lo kyma.tar.gz https://github.com/kyma-project/cli/releases/download/$$CLI_VERSION/kyma_Linux_x86_64.tar.gz && mkdir kyma-release && tar -C kyma-release -zxvf kyma.tar.gz && chmod +x kyma-release/kyma && mv kyma-release/kyma /usr/local/bin && rm -rf kyma-release kyma.tar.gz
+
 k3d-gateway-tests: setup-environment
 	kyma deploy --ci --components-file ${PROJECT_ROOT}/resources/installation-config/mini-kyma-os.yaml --source=local --workspace ${KYMA_ROOT_CI} --verbose
 	make -f ${PROJECT_ROOT}/Makefile.test-application-gateway test
