@@ -12,18 +12,18 @@ setup-environment:
 
 k3d-gateway-tests: setup-environment
 	kyma deploy --ci --components-file ${PROJECT_ROOT}/resources/installation-config/mini-kyma-os.yaml --source=local --workspace ${KYMA_ROOT_CI} --verbose
-	cd ${PROJECT_ROOT}; \ make -f Makefile.test-application-gateway test
+	cd ${PROJECT_ROOT}; make -f Makefile.test-application-gateway test
 	k3d cluster delete
 
 
 k3d-validator-tests: setup-environment
 	kyma deploy --ci --components-file ${PROJECT_ROOT}/resources/installation-config/mini-kyma-skr.yaml --value global.disableLegacyConnectivity=true --source=local --workspace ${KYMA_ROOT_CI} --verbose
-	cd ${PROJECT_ROOT}; \ make -f Makefile.test-application-conn-validator test
+	cd ${PROJECT_ROOT}; make -f Makefile.test-application-conn-validator test
 	k3d cluster delete
 
 k3d-agent-tests: setup-environment
 	kyma deploy --ci --components-file ${PROJECT_ROOT}/resources/installation-config/mini-kyma-skr.yaml --value global.disableLegacyConnectivity=true --value compassRuntimeAgent.director.proxy.insecureSkipVerify=true --source=local --workspace ${KYMA_ROOT_CI} --verbose
 	kubectl apply -f ${PROJECT_ROOT}/resources/patches/coredns.yaml
 	kubectl -n kube-system delete pods -l k8s-app=kube-dns
-	cd ${PROJECT_ROOT}; \ make -f Makefile.test-compass-runtime-agent test
+	cd ${PROJECT_ROOT}; make -f Makefile.test-compass-runtime-agent test
 	k3d cluster delete
