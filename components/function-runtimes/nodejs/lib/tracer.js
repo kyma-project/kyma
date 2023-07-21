@@ -31,7 +31,7 @@ function setupTracer(serviceName){
 
   const propagator = new CompositePropagator({
     propagators: [
-      new W3CTraceContextPropagator(), 
+      // new W3CTraceContextPropagator(), 
       new B3Propagator({injectEncoding: B3InjectEncoding.MULTI_HEADER})
     ],
   })

@@ -17,6 +17,7 @@ WORKDIR /
 
 USER 1000
 # Tracing propagators are configured based on OTEL_PROPAGATORS env variable https://opentelemetry.io/docs/instrumentation/python/manual/#using-environment-variables
-ENV OTEL_PROPAGATORS=tracecontext,baggage,b3multi
+# ENV OTEL_PROPAGATORS=tracecontext,baggage,b3multi
+ENV OTEL_PROPAGATORS=b3multi
 
 CMD ["python", "/kubeless.py"]
