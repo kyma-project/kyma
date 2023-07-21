@@ -5,7 +5,7 @@ const {
   getEnvOrThrow,
   debug,
   wait,
-} = require('../utils');
+} = require('../../utils');
 const {inspect} = require('util');
 
 class KCPConfig {

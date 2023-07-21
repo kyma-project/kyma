@@ -148,13 +148,14 @@ func getStreamConfig(natsConfig env.NATSConfig) (*nats.StreamConfig, error) {
 	}
 
 	streamConfig := &nats.StreamConfig{
-		Name:      natsConfig.JSStreamName,
-		Storage:   storage,
-		Replicas:  natsConfig.JSStreamReplicas,
-		Retention: retentionPolicy,
-		MaxMsgs:   natsConfig.JSStreamMaxMessages,
-		MaxBytes:  maxBytes.Value(),
-		Discard:   discardPolicy,
+		Name:              natsConfig.JSStreamName,
+		Storage:           storage,
+		Replicas:          natsConfig.JSStreamReplicas,
+		Retention:         retentionPolicy,
+		MaxMsgs:           natsConfig.JSStreamMaxMessages,
+		MaxBytes:          maxBytes.Value(),
+		Discard:           discardPolicy,
+		MaxMsgsPerSubject: natsConfig.JSStreamMaxMsgsPerTopic,
 		// Since one stream is used to store events of all types, the stream has to match all event types, and therefore
 		// we use the wildcard char >. However, to avoid matching internal JetStream and non-Kyma-related subjects, we
 		// use a prefix. This prefix is handled only on the JetStream level (i.e. JetStream handler

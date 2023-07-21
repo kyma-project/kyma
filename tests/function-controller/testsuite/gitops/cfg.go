@@ -10,14 +10,14 @@ type GitopsConfig struct {
 	RepoName             string
 	GitServerImage       string
 	GitServerServiceName string
-	GitServerServicePort int
+	GitServerServicePort int32
 	GitServerRepoName    string
 	Toolbox              shared.Container
 }
 
 const (
-	gitServerServiceName = "gitserver"
-	gitServerServicePort = 80
+	gitServerServiceName       = "gitserver"
+	gitServerServicePort int32 = 80
 )
 
 func NewGitopsConfig(fnName, gitServerImage, gitServerRepoName string, toolbox shared.Container) (GitopsConfig, error) {

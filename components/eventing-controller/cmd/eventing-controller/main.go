@@ -122,7 +122,8 @@ func main() {
 	// Start the backend manager.
 	ctx := context.Background()
 	recorder := mgr.GetEventRecorderFor("backend-controller")
-	backendReconciler := backend.NewReconciler(ctx, natsSubMgr, natsConfig, envConfig, bebSubMgr,
+	backendConfig := env.GetBackendConfig()
+	backendReconciler := backend.NewReconciler(ctx, natsSubMgr, natsConfig, envConfig, backendConfig, bebSubMgr,
 		mgr.GetClient(), ctrLogger, recorder)
 	if err = backendReconciler.SetupWithManager(mgr); err != nil {
 		setupLogger.Fatalw("Failed to start backend controller", "error", err)

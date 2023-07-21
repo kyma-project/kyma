@@ -3,14 +3,14 @@ const {
   deprovisionSKR,
   KEBClient,
   KEBConfig,
-} = require('../../kyma-environment-broker');
+} = require('../kyma-environment-broker');
 
 const {
   getEnvOrThrow,
   debug,
 } = require('../../utils');
 const keb = new KEBClient(KEBConfig.fromEnv());
-const {KCPWrapper, KCPConfig} = require('../../kcp/client');
+const {KCPWrapper, KCPConfig} = require('../kcp/client');
 const {slowTime} = require('../utils');
 
 const instanceId = getEnvOrThrow('INSTANCE_ID');
