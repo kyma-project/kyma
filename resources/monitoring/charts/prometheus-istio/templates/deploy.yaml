@@ -92,7 +92,7 @@ spec:
         {{- end }}
 
         - name: {{ template "prometheus.name" . }}-{{ .Values.server.name }}
-          image: "quay.io/prometheus/prometheus:v2.45.0"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.prometheus) }}"
           imagePullPolicy: "{{ .Values.server.image.pullPolicy }}"
           securityContext:
             {{- toYaml .Values.server.containerSecurityContext | nindent 12 }}
