@@ -40,6 +40,7 @@ import (
 const (
 	reconcilerName  = "jetstream-subscription-reconciler"
 	requeueDuration = 10 * time.Second
+	backendType     = "NATS_Jetstream"
 )
 
 type Reconciler struct {
@@ -134,15 +135,32 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	defer func() {
 		// Update metrics
-		consumers := []string{}
-		for _, consumer := range desiredSubscription.Status.Backend.Types {
-			consumers = append(consumers, consumer.ConsumerName)
+		for _, cc := range currentSubscription.Status.Backend.Types {
+			found := false
+			for _, dc := range desiredSubscription.Status.Backend.Types {
+				if cc.ConsumerName == dc.ConsumerName {
+					found = true
+				}
+			}
+			if !found {
+				r.collector.RemoveSubscriptionStatus(
+					currentSubscription.Name,
+					currentSubscription.Namespace,
+					backendType,
+					cc.ConsumerName,
+					r.Backend.GetConfig().JSStreamName)
+			}
 		}
-		r.collector.RecordSubscriptionStatus(desiredSubscription.Status.Ready,
-			desiredSubscription.Name,
-			desiredSubscription.Namespace,
-			consumers,
-		)
+		for _, dc := range desiredSubscription.Status.Backend.Types {
+			r.collector.RecordSubscriptionStatus(desiredSubscription.Status.Ready,
+				desiredSubscription.Name,
+				desiredSubscription.Namespace,
+				backendType,
+				dc.ConsumerName,
+				r.Backend.GetConfig().JSStreamName,
+			)
+		}
+
 	}()
 
 	// The object is not being deleted, so if it does not have our finalizer,
@@ -237,11 +255,9 @@ func (r *Reconciler) handleSubscriptionDeletion(ctx context.Context,
 		if err := r.Update(ctx, subscription); err != nil {
 			return ctrl.Result{}, pkgerrors.MakeError(errFailedToUpdateFinalizers, err)
 		}
-		consumers := []string{}
 		for _, t := range types {
-			consumers = append(consumers, t.ConsumerName)
+			r.collector.RemoveSubscriptionStatus(subscription.Name, subscription.Namespace, backendType, t.ConsumerName, r.Backend.GetConfig().JSStreamName)
 		}
-		r.collector.RemoveSubscriptionStatus(subscription.Name, subscription.Namespace, consumers)
 
 		return ctrl.Result{}, nil
 	}
@@ -257,17 +273,6 @@ func (r *Reconciler) syncSubscriptionStatus(ctx context.Context,
 	// compile the desired conditions
 	desiredSubscription.Status.Conditions = eventingv1alpha2.GetSubscriptionActiveCondition(desiredSubscription, err)
 
-	// Update metrics
-	consumers := []string{}
-	for _, consumer := range desiredSubscription.Status.Backend.Types {
-		consumers = append(consumers, consumer.ConsumerName)
-	}
-
-	r.collector.RecordSubscriptionStatus(desiredSubscription.Status.Ready,
-		desiredSubscription.Name,
-		desiredSubscription.Namespace,
-		consumers,
-	)
 	// Update the subscription
 	return r.updateSubscriptionStatus(ctx, desiredSubscription, log)
 }

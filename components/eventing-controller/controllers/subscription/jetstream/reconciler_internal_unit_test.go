@@ -25,6 +25,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstream/mocks"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
@@ -81,6 +82,7 @@ func Test_Reconcile(t *testing.T) {
 				te.Backend.On("SyncSubscription", mock.Anything).Return(nil)
 				te.Backend.On("GetJetStreamSubjects", mock.Anything, mock.Anything, mock.Anything).Return(
 					[]string{controllertesting.JetStreamSubject})
+				te.Backend.On("GetConfig", mock.Anything).Return(env.NATSConfig{JSStreamName: "sap"})
 				return NewReconciler(ctx,
 						te.Client,
 						te.Backend,
@@ -141,6 +143,7 @@ func Test_Reconcile(t *testing.T) {
 				te.Backend.On("SyncSubscription", mock.Anything).Return(backendSyncErr)
 				te.Backend.On("GetJetStreamSubjects", mock.Anything, mock.Anything, mock.Anything).Return(
 					[]string{controllertesting.JetStreamSubject})
+				te.Backend.On("GetConfig", mock.Anything).Return(env.NATSConfig{JSStreamName: "sap"})
 				return NewReconciler(ctx,
 
 						te.Client,
@@ -165,6 +168,7 @@ func Test_Reconcile(t *testing.T) {
 				te.Backend.On("SyncSubscription", mock.Anything).Return(missingSubSyncErr)
 				te.Backend.On("GetJetStreamSubjects", mock.Anything, mock.Anything, mock.Anything).Return(
 					[]string{controllertesting.JetStreamSubject})
+				te.Backend.On("GetConfig", mock.Anything).Return(env.NATSConfig{JSStreamName: "sap"})
 				return NewReconciler(ctx,
 						te.Client,
 						te.Backend,
@@ -206,6 +210,7 @@ func Test_Reconcile(t *testing.T) {
 				te.Backend.On("Initialize", mock.Anything).Return(nil)
 				te.Backend.On("GetJetStreamSubjects", mock.Anything, mock.Anything, mock.Anything).Return(
 					[]string{controllertesting.JetStreamSubject})
+				te.Backend.On("GetConfig", mock.Anything).Return(env.NATSConfig{JSStreamName: "sap"})
 				return NewReconciler(ctx,
 						te.Client,
 						te.Backend,

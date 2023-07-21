@@ -1,3 +1,5 @@
+//go:generate mockery --name Backend
+//go:generate mockery --dir ../../../vendor/github.com/nats-io/nats.go --name JetStreamContext
 package jetstream
 
 import (
@@ -6,12 +8,13 @@ import (
 	backendutilsv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 
 	cev2 "github.com/cloudevents/sdk-go/v2"
+	"github.com/nats-io/nats.go"
+
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 	backendmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	"github.com/nats-io/nats.go"
 )
 
 const (
@@ -36,6 +39,9 @@ type Backend interface {
 
 	// GetJetStreamContext returns the current JetStreamContext
 	GetJetStreamContext() nats.JetStreamContext
+
+	// GetConfig returns the backends Configuration
+	GetConfig() env.NATSConfig
 }
 
 type JetStream struct {
@@ -51,6 +57,10 @@ type JetStream struct {
 	metricsCollector  *backendmetrics.Collector
 	cleaner           cleaner.Cleaner
 	subsConfig        env.DefaultSubscriptionConfig
+}
+
+func (js *JetStream) GetConfig() env.NATSConfig {
+	return js.Config
 }
 
 type Subscriber interface {

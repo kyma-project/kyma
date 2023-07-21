@@ -69,6 +69,7 @@ const (
 	reconcilerName              = "eventMesh-subscription-reconciler"
 	timeoutRetryActiveEmsStatus = time.Second * 30
 	requeueAfterDuration        = time.Second * 2
+	backendType                 = "EventMesh"
 )
 
 func NewReconciler(ctx context.Context, client client.Client, logger *logger.Logger, recorder record.EventRecorder,
@@ -130,7 +131,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		r.collector.RecordSubscriptionStatus(sub.Status.Ready,
 			sub.Name,
 			sub.Namespace,
-			nil,
+			backendType,
+			"",
+			"",
 		)
 	}()
 
@@ -271,7 +274,7 @@ func (r *Reconciler) handleDeleteSubscription(ctx context.Context, subscription 
 	removeFinalizer(subscription)
 
 	// update subscription CR with changes
-	defer r.collector.RemoveSubscriptionStatus(subscription.Name, subscription.Namespace, nil)
+	defer r.collector.RemoveSubscriptionStatus(subscription.Name, subscription.Namespace, backendType, "", "")
 	if err := r.updateSubscription(ctx, subscription, logger); err != nil {
 		return ctrl.Result{}, err
 	}
