@@ -12,6 +12,7 @@ setup-environment:
 	curl -Lo kyma.tar.gz https://github.com/kyma-project/cli/releases/download/$$CLI_VERSION/kyma_Linux_x86_64.tar.gz && mkdir kyma-release && tar -C kyma-release -zxvf kyma.tar.gz && chmod +x kyma-release/kyma && mv kyma-release/kyma /usr/local/bin && rm -rf kyma-release kyma.tar.gz
 
 k3d-gateway-tests: setup-environment
+	apk add openssl
 	kyma deploy --ci --components-file ${PROJECT_ROOT}/resources/installation-config/mini-kyma-os.yaml --source=local --workspace ${KYMA_ROOT_CI} --verbose
 	cd ${PROJECT_ROOT}; \
  	make -f Makefile.test-application-gateway test
