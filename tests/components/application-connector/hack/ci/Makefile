@@ -2,6 +2,7 @@ PROJECT_ROOT ?= ../..
 KYMA_ROOT_CI ?= /home/prow/go/src/github.com/kyma-project/kyma
 .PHONY: setup-environment run-gateway-tests run-validator-tests run-agent-test
 
+.ONESHELL:
 setup-environment:
 	set -e
 	k3d registry create k3d-registry --port 5000
@@ -12,13 +13,15 @@ setup-environment:
 
 k3d-gateway-tests: setup-environment
 	kyma deploy --ci --components-file ${PROJECT_ROOT}/resources/installation-config/mini-kyma-os.yaml --source=local --workspace ${KYMA_ROOT_CI} --verbose
-	cd ${PROJECT_ROOT}; make -f Makefile.test-application-gateway test
+	cd ${PROJECT_ROOT}; \
+ 	make -f Makefile.test-application-gateway test
 	k3d cluster delete
 
 
 k3d-validator-tests: setup-environment
 	kyma deploy --ci --components-file ${PROJECT_ROOT}/resources/installation-config/mini-kyma-skr.yaml --value global.disableLegacyConnectivity=true --source=local --workspace ${KYMA_ROOT_CI} --verbose
-	cd ${PROJECT_ROOT}; make -f Makefile.test-application-conn-validator test
+	cd ${PROJECT_ROOT}; \
+ 	make -f Makefile.test-application-conn-validator test
 	k3d cluster delete
 
 k3d-agent-tests: setup-environment
