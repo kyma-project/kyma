@@ -11,18 +11,18 @@ setup-environment:
     && mkdir kyma-release && tar -C kyma-release -zxvf kyma.tar.gz && chmod +x kyma-release/kyma && mv kyma-release/kyma /usr/local/bin \
     && rm -rf kyma-release kyma.tar.gz
 
-run-gateway-tests: setup-environment
+k3d-gateway-tests: setup-environment
 	kyma deploy --ci --components-file ${PROJECT_ROOT}/resources/installation-config/mini-kyma-os.yaml --source=local --workspace ${KYMA_ROOT_CI} --verbose
 	make -f ${PROJECT_ROOT}/Makefile.test-application-gateway test
 	k3d cluster delete
 
 
-run-validator-tests: setup-environment
+k3d-validator-tests: setup-environment
 	kyma deploy --ci --components-file ${PROJECT_ROOT}/resources/installation-config/mini-kyma-skr.yaml --value global.disableLegacyConnectivity=true --source=local --workspace ${KYMA_ROOT_CI} --verbose
 	make -f ${PROJECT_ROOT}/Makefile.test-application-conn-validator test
 	k3d cluster delete
 
-run-agent-tests: setup-environment
+k3d-agent-tests: setup-environment
 	kyma deploy --ci --components-file ${PROJECT_ROOT}/resources/installation-config/mini-kyma-skr.yaml --value global.disableLegacyConnectivity=true --value compassRuntimeAgent.director.proxy.insecureSkipVerify=true --source=local --workspace ${KYMA_ROOT_CI} --verbose
 	kubectl apply -f ${PROJECT_ROOT}/resources/patches/coredns.yaml
 	kubectl -n kube-system delete pods -l k8s-app=kube-dns
