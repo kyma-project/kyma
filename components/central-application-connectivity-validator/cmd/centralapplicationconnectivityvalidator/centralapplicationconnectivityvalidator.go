@@ -72,7 +72,7 @@ func main() {
 		}
 		os.Exit(3)
 	}
-	//trigger pipeline
+
 	log, err := logger.New(format, level)
 	if err != nil {
 		if logErr := logger.LogFatalError("Failed to initialize logger: %s", err.Error()); logErr != nil {

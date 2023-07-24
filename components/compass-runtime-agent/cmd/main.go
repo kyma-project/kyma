@@ -74,7 +74,7 @@ func main() {
 	log.Info("Setting up manager")
 	mgr, err := manager.New(cfg, manager.Options{SyncPeriod: &options.ControllerSyncPeriod})
 	exitOnError(err, "Failed to set up overall controller manager")
-	//trigger pipeline
+
 	// Setup Scheme for all resources
 	log.Info("Setting up scheme")
 	err = apis.AddToScheme(mgr.GetScheme())

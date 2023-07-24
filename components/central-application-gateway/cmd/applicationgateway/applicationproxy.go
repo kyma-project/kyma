@@ -41,7 +41,7 @@ func main() {
 	log.SetFormatter(formatter)
 
 	log.Info("Starting Application Gateway.")
-	//trigger new pipeline
+
 	options := parseArgs()
 	log.Infof("Options: %s", options)
 
