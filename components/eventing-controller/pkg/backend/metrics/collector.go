@@ -169,7 +169,8 @@ func (c *Collector) RecordSubscriptionStatus(isActive bool, subscriptionName,
 }
 
 // RemoveSubscriptionStatus removes an eventing_ec_subscription_status metric.
-func (c *Collector) RemoveSubscriptionStatus(subscriptionName, subscriptionNamespace, backendType, consumer, streamName string) {
+func (c *Collector) RemoveSubscriptionStatus(subscriptionName, subscriptionNamespace,
+	backendType, consumer, streamName string) {
 	c.subscriptionStatus.Delete(prometheus.Labels{
 		subscriptionNameLabel:      subscriptionName,
 		subscriptionNamespaceLabel: subscriptionNamespace,

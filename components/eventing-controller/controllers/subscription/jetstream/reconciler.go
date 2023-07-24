@@ -160,7 +160,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 				r.Backend.GetConfig().JSStreamName,
 			)
 		}
-
 	}()
 
 	// The object is not being deleted, so if it does not have our finalizer,
@@ -256,7 +255,13 @@ func (r *Reconciler) handleSubscriptionDeletion(ctx context.Context,
 			return ctrl.Result{}, pkgerrors.MakeError(errFailedToUpdateFinalizers, err)
 		}
 		for _, t := range types {
-			r.collector.RemoveSubscriptionStatus(subscription.Name, subscription.Namespace, backendType, t.ConsumerName, r.Backend.GetConfig().JSStreamName)
+			r.collector.RemoveSubscriptionStatus(
+				subscription.Name,
+				subscription.Namespace,
+				backendType,
+				t.ConsumerName,
+				r.Backend.GetConfig().JSStreamName,
+			)
 		}
 
 		return ctrl.Result{}, nil
