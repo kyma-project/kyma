@@ -72,8 +72,6 @@ config:
 
   # Configure node tolerations.
   tolerations: []
-  annotations:
-    sidecar.istio.io/inject: "false"
 
   # Port configuration
   ports:
