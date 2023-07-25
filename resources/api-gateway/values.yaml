@@ -24,6 +24,7 @@ deployment:
       type: RuntimeDefault
 
 config:
+  injectIstioSidecar: "false"
   reconciliation:
     # In seconds
     defaultPeriod: 3600
