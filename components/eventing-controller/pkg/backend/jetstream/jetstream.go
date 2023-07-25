@@ -128,6 +128,29 @@ func (js *JetStream) DeleteSubscription(subscription *eventingv1alpha2.Subscript
 	return nil
 }
 
+func (js *JetStream) DeleteSubscriptionOnly(subscription *eventingv1alpha2.Subscription) error {
+	js.namedLogger().Infow(
+		"Delete JetStream subscription only",
+		"namespace", subscription.Namespace,
+		"name", subscription.Name,
+	)
+
+	if err := js.checkJetStreamConnection(); err != nil {
+		return err
+	}
+
+	for key, jsSub := range js.subscriptions {
+		if !isJsSubAssociatedWithKymaSub(key, subscription) {
+			continue
+		}
+		if err := js.deleteSubscriptionFromJetStreamOnly(jsSub, key); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // GetJetStreamSubjects returns a list of subjects appended with prefix if needed.
 func (js *JetStream) GetJetStreamSubjects(source string, subjects []string,
 	typeMatching eventingv1alpha2.TypeMatching) []string {
@@ -425,6 +448,19 @@ func (js *JetStream) deleteSubscriptionFromJetStream(jsSub Subscriber, jsSubKey 
 		return consDelErr
 	}
 
+	delete(js.subscriptions, jsSubKey)
+	return nil
+}
+
+// deleteSubscriptionFromJetStreamOnly deletes the subscription from NATS server and from in-memory db.
+// Note: The consumer will not be deleted, meaning there should be no message loss.
+func (js *JetStream) deleteSubscriptionFromJetStreamOnly(jsSub Subscriber, jsSubKey SubscriptionSubjectIdentifier) error {
+	if jsSub.IsValid() {
+		// The Unsubscribe function should not delete the consumer because it was added manually.
+		if err := jsSub.Unsubscribe(); err != nil {
+			return utils.MakeSubscriptionError(ErrFailedUnsubscribe, err, jsSub)
+		}
+	}
 	delete(js.subscriptions, jsSubKey)
 	return nil
 }

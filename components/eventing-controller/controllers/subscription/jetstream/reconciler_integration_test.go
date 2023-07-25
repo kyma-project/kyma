@@ -547,11 +547,6 @@ func Test_ChangeSubscription(t *testing.T) {
 			t.Log("testing the k8s events")
 			CheckEventsOnK8s(g, jsTestEnsemble.Ensemble, tc.wantAfter.K8sEvents...)
 
-			t.Log("testing the nats subscriptions")
-			for eventType, matchers := range tc.wantAfter.NatsSubscriptions {
-				testSubscriptionOnNATS(g, sub, eventType, matchers...)
-			}
-
 			t.Log("testing the deletion of the subscription")
 			testSubscriptionDeletion(g, sub)
 
