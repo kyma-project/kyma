@@ -94,12 +94,13 @@ describe('Eventing tests', function() {
   });
 
   before('Ensure tracing is ready', async function() {
+    console.log('Checking for jaeger in default namespace');
     if (isSKR || isUpgradeJob) {
       return;
     }
-    await waitForPodWithLabelAndCondition(jaegerLabel.key, jaegerLabel.value, kymaSystem, conditionReady.condition,
+    await waitForPodWithLabelAndCondition(jaegerLabel.key, jaegerLabel.value, 'default', conditionReady.condition,
         conditionReady.status);
-    await waitForEndpoint(jaegerEndpoint, kymaSystem);
+    await waitForEndpoint(jaegerEndpoint, 'default');
   });
 
   before('Expose Grafana', async function() {
