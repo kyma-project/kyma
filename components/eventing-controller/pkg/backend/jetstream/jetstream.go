@@ -454,7 +454,8 @@ func (js *JetStream) deleteSubscriptionFromJetStream(jsSub Subscriber, jsSubKey 
 
 // deleteSubscriptionFromJetStreamOnly deletes the subscription from NATS server and from in-memory db.
 // Note: The consumer will not be deleted, meaning there should be no message loss.
-func (js *JetStream) deleteSubscriptionFromJetStreamOnly(jsSub Subscriber, jsSubKey SubscriptionSubjectIdentifier) error {
+func (js *JetStream) deleteSubscriptionFromJetStreamOnly(jsSub Subscriber,
+	jsSubKey SubscriptionSubjectIdentifier) error {
 	if jsSub.IsValid() {
 		// The Unsubscribe function should not delete the consumer because it was added manually.
 		if err := jsSub.Unsubscribe(); err != nil {
