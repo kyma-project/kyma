@@ -21,7 +21,7 @@ from opentelemetry.trace.propagation import _SPAN_KEY
 
 import os
 
-# Tracing propagators are configured based on OTEL_PROPAGATORS env variable set in deockerfile
+# Tracing propagators are configured based on OTEL_PROPAGATORS env variable set in dockerfile
 # https://opentelemetry.io/docs/instrumentation/python/manual/#using-environment-variables
 def _setup_tracer(service_name: str) -> trace.Tracer:
 
