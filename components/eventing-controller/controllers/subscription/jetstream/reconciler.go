@@ -179,27 +179,27 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	return ctrl.Result{}, r.syncSubscriptionStatus(ctx, desiredSubscription, nil, log)
 }
 
-func (r *Reconciler) updateSubscriptionMetrics(currentSubscription, desiredSubscription *eventingv1alpha2.Subscription) {
-	for _, cc := range currentSubscription.Status.Backend.Types {
+func (r *Reconciler) updateSubscriptionMetrics(current, desired *eventingv1alpha2.Subscription) {
+	for _, cc := range current.Status.Backend.Types {
 		found := false
-		for _, dc := range desiredSubscription.Status.Backend.Types {
+		for _, dc := range desired.Status.Backend.Types {
 			if cc.ConsumerName == dc.ConsumerName {
 				found = true
 			}
 		}
 		if !found {
 			r.collector.RemoveSubscriptionStatus(
-				currentSubscription.Name,
-				currentSubscription.Namespace,
+				current.Name,
+				current.Namespace,
 				backendType,
 				cc.ConsumerName,
 				r.Backend.GetConfig().JSStreamName)
 		}
 	}
-	for _, dc := range desiredSubscription.Status.Backend.Types {
-		r.collector.RecordSubscriptionStatus(desiredSubscription.Status.Ready,
-			desiredSubscription.Name,
-			desiredSubscription.Namespace,
+	for _, dc := range desired.Status.Backend.Types {
+		r.collector.RecordSubscriptionStatus(desired.Status.Ready,
+			desired.Name,
+			desired.Namespace,
 			backendType,
 			dc.ConsumerName,
 			r.Backend.GetConfig().JSStreamName,
