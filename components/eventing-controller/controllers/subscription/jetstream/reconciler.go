@@ -140,9 +140,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	// Check for valid sink
 	if err := r.sinkValidator.Validate(desiredSubscription); err != nil {
-		if deleteErr := r.Backend.DeleteSubscriptionOnly(desiredSubscription); deleteErr != nil {
+		if deleteErr := r.Backend.DeleteSubscriptionsOnly(desiredSubscription); deleteErr != nil {
 			r.namedLogger().Errorw(
-				"Failed to delete JetStream subscription",
+				"Failed to delete JetStream subscriptions",
 				"namespace", desiredSubscription.Namespace,
 				"name", desiredSubscription.Name,
 				"error", deleteErr,

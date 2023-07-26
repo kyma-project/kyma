@@ -44,8 +44,8 @@ func (_m *Backend) DeleteSubscription(subscription *v1alpha2.Subscription) error
 	return r0
 }
 
-// DeleteSubscriptionOnly provides a mock function with given fields: subscription
-func (_m *Backend) DeleteSubscriptionOnly(subscription *v1alpha2.Subscription) error {
+// DeleteSubscriptionsOnly provides a mock function with given fields: subscription
+func (_m *Backend) DeleteSubscriptionsOnly(subscription *v1alpha2.Subscription) error {
 	ret := _m.Called(subscription)
 
 	var r0 error

@@ -128,9 +128,9 @@ func (js *JetStream) DeleteSubscription(subscription *eventingv1alpha2.Subscript
 	return nil
 }
 
-func (js *JetStream) DeleteSubscriptionOnly(subscription *eventingv1alpha2.Subscription) error {
+func (js *JetStream) DeleteSubscriptionsOnly(subscription *eventingv1alpha2.Subscription) error {
 	js.namedLogger().Infow(
-		"Delete JetStream subscription only",
+		"Delete JetStream subscriptions",
 		"namespace", subscription.Namespace,
 		"name", subscription.Name,
 	)

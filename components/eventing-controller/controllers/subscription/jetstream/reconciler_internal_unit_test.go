@@ -153,7 +153,7 @@ func Test_Reconcile(t *testing.T) {
 			givenReconcilerSetup: func() (*Reconciler, *mocks.Backend) {
 				te := setupTestEnvironment(t, testSub)
 				te.Backend.On("Initialize", mock.Anything).Return(nil)
-				te.Backend.On("DeleteSubscriptionOnly", mock.Anything).Return(nil)
+				te.Backend.On("DeleteSubscriptionsOnly", mock.Anything).Return(nil)
 				te.Backend.On("GetJetStreamSubjects", mock.Anything, mock.Anything, mock.Anything).Return(
 					[]string{controllertesting.JetStreamSubject})
 				return NewReconciler(ctx, te.Client, te.Backend, te.Logger, te.Recorder, te.Cleaner, unhappyValidator), te.Backend
