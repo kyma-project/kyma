@@ -330,7 +330,7 @@ func Test_CreateSubscription(t *testing.T) {
 	}
 }
 
-// TestChangeSubscription tests if existing subscriptions are reconciled properly after getting changed.
+// Test_ChangeSubscription tests if existing subscriptions are reconciled properly after getting changed.
 func Test_ChangeSubscription(t *testing.T) {
 	t.Parallel()
 	var testCases = []struct {
@@ -341,12 +341,11 @@ func Test_ChangeSubscription(t *testing.T) {
 		wantAfter             Want
 	}{
 		{
-			// Ensure subscriptions on NATS are not added when adding
-			// a Subscription filter and providing an invalid sink to prevent event-loss.
-			// The reason for this is that the dispatcher will retry only for a finite number and then give up.
-			// Since the sink is invalid, the dispatcher cannot dispatch the event
-			// and will stop if the maximum number of retries is reached.
-			name: "Disallow the creation of a NATS subscription with an invalid sink",
+			// Ensure subscriptions on NATS are deleted if Kyma subscription is updated with an invalid sink.
+			// The reason for this is that the dispatcher will retry sending for some time then give up.
+			// Since the sink is invalid, the dispatcher cannot dispatch the event and will stop
+			// if the maximum number of retries is reached.
+			name: "Delete NATS subscriptions if Kyma subscription is updated with an invalid sink",
 			givenSubscriptionOpts: []eventingtesting.SubscriptionOpt{
 				eventingtesting.WithTypeMatchingExact(),
 				eventingtesting.WithSourceAndType(eventingtesting.EventSource, NewCleanEventType("0")),
@@ -376,6 +375,7 @@ func Test_ChangeSubscription(t *testing.T) {
 			},
 			changeSubscription: func(subscription *eventingv1alpha2.Subscription) {
 				eventingtesting.AddEventType(NewCleanEventType("1"), subscription)
+				eventingtesting.AddEventType(NewCleanEventType("2"), subscription)
 
 				// induce an error by making the sink invalid
 				subscription.Spec.Sink = eventingtesting.ValidSinkURL(subscription.Namespace, "invalid")
@@ -387,18 +387,16 @@ func Test_ChangeSubscription(t *testing.T) {
 					eventingtesting.HaveTypes([]string{
 						NewCleanEventType("0"),
 						NewCleanEventType("1"),
+						NewCleanEventType("2"),
 					}),
 				},
 				K8sEvents: nil,
 				// ensure that each filter results in a NATS consumer
 				NatsSubscriptions: map[string][]gomegatypes.GomegaMatcher{
-					NewCleanEventType("0"): {
-						BeExistingSubscription(),
-					},
-					// the newly added filter is not synced to NATS as the sink is invalid
-					NewCleanEventType("1"): {
-						gomega.Not(BeExistingSubscription()),
-					},
+					// all filters must not exist as NATS subscriptions
+					NewCleanEventType("0"): {gomega.Not(BeExistingSubscription())},
+					NewCleanEventType("1"): {gomega.Not(BeExistingSubscription())},
+					NewCleanEventType("2"): {gomega.Not(BeExistingSubscription())},
 				},
 			},
 		},
@@ -546,6 +544,11 @@ func Test_ChangeSubscription(t *testing.T) {
 
 			t.Log("testing the k8s events")
 			CheckEventsOnK8s(g, jsTestEnsemble.Ensemble, tc.wantAfter.K8sEvents...)
+
+			t.Log("testing the nats subscriptions")
+			for eventType, matchers := range tc.wantAfter.NatsSubscriptions {
+				testSubscriptionOnNATS(g, sub, eventType, matchers...)
+			}
 
 			t.Log("testing the deletion of the subscription")
 			testSubscriptionDeletion(g, sub)
