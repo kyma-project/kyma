@@ -126,16 +126,13 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return r.handleDeleteSubscription(ctx, sub, log)
 	}
 
-	defer func() {
-		// Update metrics
-		r.collector.RecordSubscriptionStatus(sub.Status.Ready,
-			sub.Name,
-			sub.Namespace,
-			backendType,
-			"",
-			"",
-		)
-	}()
+	defer r.collector.RecordSubscriptionStatus(sub.Status.Ready,
+		sub.Name,
+		sub.Namespace,
+		backendType,
+		"",
+		"",
+	)
 
 	// sync the initial Subscription status
 	r.syncInitialStatus(sub)
@@ -274,11 +271,11 @@ func (r *Reconciler) handleDeleteSubscription(ctx context.Context, subscription 
 	removeFinalizer(subscription)
 
 	// update subscription CR with changes
-	defer r.collector.RemoveSubscriptionStatus(subscription.Name, subscription.Namespace, backendType, "", "")
 	if err := r.updateSubscription(ctx, subscription, logger); err != nil {
 		return ctrl.Result{}, err
 	}
 
+	r.collector.RemoveSubscriptionStatus(subscription.Name, subscription.Namespace, backendType, "", "")
 	return ctrl.Result{Requeue: false}, nil
 }
 

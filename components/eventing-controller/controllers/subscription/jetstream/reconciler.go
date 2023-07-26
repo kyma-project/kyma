@@ -133,34 +133,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return r.handleSubscriptionDeletion(ctx, desiredSubscription, log)
 	}
 
-	defer func() {
-		// Update metrics
-		for _, cc := range currentSubscription.Status.Backend.Types {
-			found := false
-			for _, dc := range desiredSubscription.Status.Backend.Types {
-				if cc.ConsumerName == dc.ConsumerName {
-					found = true
-				}
-			}
-			if !found {
-				r.collector.RemoveSubscriptionStatus(
-					currentSubscription.Name,
-					currentSubscription.Namespace,
-					backendType,
-					cc.ConsumerName,
-					r.Backend.GetConfig().JSStreamName)
-			}
-		}
-		for _, dc := range desiredSubscription.Status.Backend.Types {
-			r.collector.RecordSubscriptionStatus(desiredSubscription.Status.Ready,
-				desiredSubscription.Name,
-				desiredSubscription.Namespace,
-				backendType,
-				dc.ConsumerName,
-				r.Backend.GetConfig().JSStreamName,
-			)
-		}
-	}()
+	defer r.updateSubscriptionMetrics(currentSubscription, desiredSubscription)
 
 	// The object is not being deleted, so if it does not have our finalizer,
 	// then lets add the finalizer and update the object.
@@ -206,6 +179,34 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	return ctrl.Result{}, r.syncSubscriptionStatus(ctx, desiredSubscription, nil, log)
 }
 
+func (r *Reconciler) updateSubscriptionMetrics(currentSubscription, desiredSubscription *eventingv1alpha2.Subscription) {
+	for _, cc := range currentSubscription.Status.Backend.Types {
+		found := false
+		for _, dc := range desiredSubscription.Status.Backend.Types {
+			if cc.ConsumerName == dc.ConsumerName {
+				found = true
+			}
+		}
+		if !found {
+			r.collector.RemoveSubscriptionStatus(
+				currentSubscription.Name,
+				currentSubscription.Namespace,
+				backendType,
+				cc.ConsumerName,
+				r.Backend.GetConfig().JSStreamName)
+		}
+	}
+	for _, dc := range desiredSubscription.Status.Backend.Types {
+		r.collector.RecordSubscriptionStatus(desiredSubscription.Status.Ready,
+			desiredSubscription.Name,
+			desiredSubscription.Namespace,
+			backendType,
+			dc.ConsumerName,
+			r.Backend.GetConfig().JSStreamName,
+		)
+	}
+}
+
 // handleNatsConnClose is called by NATS when the connection to the NATS server is closed. When it
 // is called, the reconnect-attempts have exceeded the defined value.
 // It forces reconciling the subscription to make sure the subscription is marked as not ready, until
@@ -233,39 +234,42 @@ func (r *Reconciler) enqueueReconciliationForSubscriptions(subs []eventingv1alph
 // handleSubscriptionDeletion deletes the JetStream subscription and removes its finalizer if it is set.
 func (r *Reconciler) handleSubscriptionDeletion(ctx context.Context,
 	subscription *eventingv1alpha2.Subscription, log *zap.SugaredLogger) (ctrl.Result, error) {
+
 	// delete the JetStream subscription/consumer
-	if utils.ContainsString(subscription.ObjectMeta.Finalizers, eventingv1alpha2.Finalizer) {
-		if err := r.Backend.DeleteSubscription(subscription); err != nil {
-			deleteSubErr := pkgerrors.MakeError(errFailedToDeleteSub, err)
-			// if failed to delete the external dependency here, return with error
-			// so that it can be retried
-			if syncErr := r.syncSubscriptionStatus(ctx, subscription, deleteSubErr, log); syncErr != nil {
-				return ctrl.Result{}, syncErr
-			}
-			return ctrl.Result{}, deleteSubErr
-		}
-
-		types := subscription.Status.Backend.Types
-		// remove the eventing finalizer from the list and update the subscription.
-		subscription.ObjectMeta.Finalizers = utils.RemoveString(subscription.ObjectMeta.Finalizers,
-			eventingv1alpha2.Finalizer)
-
-		// update the subscription's finalizers in k8s
-		if err := r.Update(ctx, subscription); err != nil {
-			return ctrl.Result{}, pkgerrors.MakeError(errFailedToUpdateFinalizers, err)
-		}
-		for _, t := range types {
-			r.collector.RemoveSubscriptionStatus(
-				subscription.Name,
-				subscription.Namespace,
-				backendType,
-				t.ConsumerName,
-				r.Backend.GetConfig().JSStreamName,
-			)
-		}
-
+	if !utils.ContainsString(subscription.ObjectMeta.Finalizers, eventingv1alpha2.Finalizer) {
 		return ctrl.Result{}, nil
 	}
+
+	if err := r.Backend.DeleteSubscription(subscription); err != nil {
+		deleteSubErr := pkgerrors.MakeError(errFailedToDeleteSub, err)
+		// if failed to delete the external dependency here, return with error
+		// so that it can be retried
+		if syncErr := r.syncSubscriptionStatus(ctx, subscription, deleteSubErr, log); syncErr != nil {
+			return ctrl.Result{}, syncErr
+		}
+		return ctrl.Result{}, deleteSubErr
+	}
+
+	types := subscription.Status.Backend.Types
+	// remove the eventing finalizer from the list and update the subscription.
+	subscription.ObjectMeta.Finalizers = utils.RemoveString(subscription.ObjectMeta.Finalizers,
+		eventingv1alpha2.Finalizer)
+
+	// update the subscription's finalizers in k8s
+	if err := r.Update(ctx, subscription); err != nil {
+		return ctrl.Result{}, pkgerrors.MakeError(errFailedToUpdateFinalizers, err)
+	}
+
+	for _, t := range types {
+		r.collector.RemoveSubscriptionStatus(
+			subscription.Name,
+			subscription.Namespace,
+			backendType,
+			t.ConsumerName,
+			r.Backend.GetConfig().JSStreamName,
+		)
+	}
+
 	return ctrl.Result{}, nil
 }
 
