@@ -1,8 +1,11 @@
 package teststep
 
 import (
+	"context"
 	"encoding/json"
 	"io"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"net/http"
 	"net/url"
 	"time"
@@ -230,5 +233,62 @@ func (t TracingHTTPCheck) assertTracingResponse(response tracingResponse) error 
 		return errors.New("No span ID")
 	}
 
+	return nil
+}
+
+type APIGatewayFunctionCheck struct {
+	name      string
+	fn        *function.Function
+	client    *v1.CoreV1Client
+	namespace string
+}
+
+func NewAPIGatewayFunctionCheck(name string, fn *function.Function, coreV1 *v1.CoreV1Client, ns string) *APIGatewayFunctionCheck {
+	return &APIGatewayFunctionCheck{
+		name:      name,
+		fn:        fn,
+		client:    coreV1,
+		namespace: ns,
+	}
+}
+
+func (d APIGatewayFunctionCheck) Name() string {
+	return d.name
+}
+
+func (d APIGatewayFunctionCheck) Run() error {
+	pods, err := d.client.Pods(d.namespace).List(context.Background(), metav1.ListOptions{})
+	if err != nil {
+		return errors.Wrap(err, "while trying to get pods")
+	}
+	podSelector := pods.Items[2]
+
+	svc, err := d.client.Services(d.namespace).Get(context.Background(), d.name, metav1.GetOptions{})
+	if err != nil {
+		return errors.Wrap(err, "while trying to get service")
+	}
+
+	for k, v := range podSelector.ObjectMeta.Labels {
+		if val, exists := svc.Spec.Selector[k]; exists {
+			if val == v {
+				delete(svc.Spec.Selector, k)
+			} else {
+				return errors.Errorf("Expected %s but got %s", v, val)
+			}
+		}
+	}
+
+	if len(svc.Spec.Selector) != 0 {
+		return errors.New("The labels are no matching")
+	}
+
+	return nil
+}
+
+func (d APIGatewayFunctionCheck) Cleanup() error {
+	return nil
+}
+
+func (d APIGatewayFunctionCheck) OnError() error {
 	return nil
 }
