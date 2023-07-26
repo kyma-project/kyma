@@ -47,8 +47,6 @@ metadata:
   name: {{ include "api-gateway.fullname" . }}-certifates-cronjob
   labels:
     app: {{ include "api-gateway.name" . }}-certifates-cronjob
-  annotations:
-    sidecar.istio.io/inject: "false"
 spec:
   # Run cronjob two times per week on Sunday and on Thursday
   schedule: "0 0 * * 0,4"
@@ -56,7 +54,7 @@ spec:
     spec:
       template:
         metadata:
-          annotations:
+          labels:
             sidecar.istio.io/inject: "false"
         spec:
           restartPolicy: Never
