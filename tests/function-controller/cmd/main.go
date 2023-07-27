@@ -60,13 +60,13 @@ type scenario struct {
 }
 
 var availableScenarios = map[string][]scenario{
-	//"serverless-integration": {
-	//	{displayName: "simple", scenario: scenarios.SimpleFunctionTest},
-	//	{displayName: "gitops", scenario: scenarios.GitopsSteps},
-	//},
-	//"git-auth-integration": {{displayName: "gitauth", scenario: scenarios.GitAuthTestSteps}},
-	//"simple-tracing":       {{displayName: "tracing", scenario: scenarios.SimpleFunctionTracingTest}},
-	"simple-api-gateway": {{displayName: "api-gateway", scenario: scenarios.SimpleFunctionAPIGatewayTest}},
+	"serverless-integration": {
+		{displayName: "simple", scenario: scenarios.SimpleFunctionTest},
+		{displayName: "gitops", scenario: scenarios.GitopsSteps},
+	},
+	"git-auth-integration": {{displayName: "gitauth", scenario: scenarios.GitAuthTestSteps}},
+	"simple-tracing":       {{displayName: "tracing", scenario: scenarios.SimpleFunctionTracingTest}},
+	"simple-api-gateway":   {{displayName: "api-gateway", scenario: scenarios.SimpleFunctionAPIGatewayTest}},
 }
 
 type config struct {
