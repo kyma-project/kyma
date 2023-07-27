@@ -382,9 +382,25 @@ alertmanager:
   clusterPeers: []
 
 ## Monitors ConfigMap changes and POSTs to a URL
-## Ref: https://github.com/jimmidyson/configmap-reload
+## Ref: https://github.com/prometheus-operator/prometheus-operator/tree/main/cmd/prometheus-config-reloader
 ##
 configmapReload:
+  ## URL for configmap-reload to use for reloads
+  ##
+  reloadUrl: ""
+
+  ## env sets environment variables to pass to the container. Can be set as name/value pairs,
+  ## read from secrets or configmaps.
+  env: []
+    # - name: SOMEVAR
+    #   value: somevalue
+    # - name: PASSWORD
+    #   valueFrom:
+    #     secretKeyRef:
+    #       name: mysecret
+    #       key: password
+    #       optional: false
+    
   prometheus:
     ## If false, the configmap-reload container will not be deployed
     ##
@@ -397,8 +413,10 @@ configmapReload:
     ## configmap-reload container image
     ##
     image:
-      repository: jimmidyson/configmap-reload
-      tag: v0.5.0
+      repository: quay.io/prometheus-operator/prometheus-config-reloader
+      tag: v0.66.0
+      # When digest is set to a non-empty value, images will be pulled by digest (regardless of tag value).
+      digest: ""
       pullPolicy: IfNotPresent
 
     # containerPort: 9533
@@ -409,7 +427,9 @@ configmapReload:
     ## Additional configmap-reload volume directories
     ##
     extraVolumeDirs: []
-
+    ## Additional configmap-reload volume mounts
+    ##
+    extraVolumeMounts: []
 
     ## Additional configmap-reload mounts
     ##
@@ -437,49 +457,6 @@ configmapReload:
         memory: 25Mi
       requests:
         memory: 10Mi
-
-  alertmanager:
-    ## If false, the configmap-reload container will not be deployed
-    ##
-    enabled: true
-
-    ## configmap-reload container name
-    ##
-    name: configmap-reload
-
-    ## configmap-reload container image
-    ##
-    image:
-      repository: jimmidyson/configmap-reload
-      tag: v0.5.0
-      pullPolicy: IfNotPresent
-
-    # containerPort: 9533
-
-    ## Additional configmap-reload container arguments
-    ##
-    extraArgs: {}
-    ## Additional configmap-reload volume directories
-    ##
-    extraVolumeDirs: []
-
-
-    ## Additional configmap-reload mounts
-    ##
-    extraConfigmapMounts: []
-      # - name: prometheus-alerts
-      #   mountPath: /etc/alerts.d
-      #   subPath: ""
-      #   configMap: prometheus-alerts
-      #   readOnly: true
-
-    ## Security context to be added to configmap-reload container
-    containerSecurityContext: {}
-
-    ## configmap-reload resource requests and limits
-    ## Ref: http://kubernetes.io/docs/user-guide/compute-resources/
-    ##
-    resources: {}
 
 kubeStateMetrics:
   ## If false, kube-state-metrics sub-chart will not be installed
