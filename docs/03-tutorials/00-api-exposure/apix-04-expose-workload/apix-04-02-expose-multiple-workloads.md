@@ -41,7 +41,7 @@ This tutorial shows how to expose multiple workloads on different paths by defin
 
 Follow the instructions to expose the instance of the HttpBin service and the sample Function on different paths at the `spec.rules` level without a root service defined.
 
-1. To expose the instance of the HttpBin service and the instance of the sample Function, create an API Rule CR in your Namespace. Run:
+1. To expose the instance of the HttpBin service and the instance of the sample Function, create an APIRule CR in your Namespace. Run:
 
    ```bash
    cat <<EOF | kubectl apply -f -
@@ -91,7 +91,7 @@ A service can be also defined at the root level. Such a definition is applied to
 
 Follow the instructions to expose the instance of the HttpBin service and the sample Function on different paths with a service defined at the root level.
 
-1. To expose the instance of the HttpBin service and the instance of the sample Function, create an API Rule CR in your Namespace. Run:
+1. To expose the instance of the HttpBin service and the instance of the sample Function, create an APIRule CR in your Namespace. Run:
 
    ```bash
    cat <<EOF | kubectl apply -f -

@@ -1,5 +1,5 @@
 ---
-title: No access to OAuth2 protected API Rules
+title: No access to OAuth2 protected APIRules
 ---
 
 ## Symptom
