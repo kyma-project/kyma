@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"net/http"
@@ -236,19 +237,25 @@ func (t TracingHTTPCheck) assertTracingResponse(response tracingResponse) error 
 	return nil
 }
 
+const (
+	resourceLabel = "serverless.kyma-project.io/resource"
+)
+
 type APIGatewayFunctionCheck struct {
 	name      string
 	fn        *function.Function
 	client    *v1.CoreV1Client
 	namespace string
+	runtime   string
 }
 
-func NewAPIGatewayFunctionCheck(name string, fn *function.Function, coreV1 *v1.CoreV1Client, ns string) *APIGatewayFunctionCheck {
+func NewAPIGatewayFunctionCheck(name string, fn *function.Function, coreV1 *v1.CoreV1Client, ns string, rt string) *APIGatewayFunctionCheck {
 	return &APIGatewayFunctionCheck{
 		name:      name,
 		fn:        fn,
 		client:    coreV1,
 		namespace: ns,
+		runtime:   rt,
 	}
 }
 
@@ -257,15 +264,23 @@ func (d APIGatewayFunctionCheck) Name() string {
 }
 
 func (d APIGatewayFunctionCheck) Run() error {
-	pods, err := d.client.Pods(d.namespace).List(context.Background(), metav1.ListOptions{})
-	if err != nil {
-		return errors.Wrap(err, "while trying to get pods")
-	}
-	podSelector := pods.Items[2]
 
 	svc, err := d.client.Services(d.namespace).Get(context.Background(), d.name, metav1.GetOptions{})
 	if err != nil {
 		return errors.Wrap(err, "while trying to get service")
+	}
+
+	pods, err := d.client.Pods(d.namespace).List(context.Background(), metav1.ListOptions{LabelSelector: resourceLabel})
+	if err != nil {
+		return errors.Wrap(err, "while trying to get pods")
+	}
+
+	var podSelector corev1.Pod
+
+	for _, element := range pods.Items {
+		if element.Spec.Containers[0].Env[0].Value == d.runtime {
+			podSelector = element
+		}
 	}
 
 	for k, v := range podSelector.ObjectMeta.Labels {
@@ -279,7 +294,7 @@ func (d APIGatewayFunctionCheck) Run() error {
 	}
 
 	if len(svc.Spec.Selector) != 0 {
-		return errors.New("The labels are no matching")
+		return errors.New("The labels are not matching")
 	}
 
 	return nil

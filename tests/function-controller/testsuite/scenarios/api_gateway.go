@@ -21,6 +21,12 @@ import (
 	"github.com/kyma-project/kyma/tests/function-controller/testsuite/teststep"
 )
 
+const (
+	nodejs16 = "nodejs16"
+	nodejs18 = "nodejs18"
+	python39 = "python39"
+)
+
 func SimpleFunctionAPIGatewayTest(restConfig *rest.Config, cfg testsuite.Config, logf *logrus.Entry) (step.Step, error) {
 	now := time.Now()
 	cfg.Namespace = fmt.Sprintf("%s-%02dh%02dm%02ds", "test-simple-api-gateway", now.Hour(), now.Minute(), now.Second())
@@ -70,11 +76,11 @@ func SimpleFunctionAPIGatewayTest(restConfig *rest.Config, cfg testsuite.Config,
 			//),
 			step.NewSerialTestRunner(nodejs16Logger, "NodeJS16 test",
 				teststep.CreateFunction(nodejs16Logger, nodejs16Fn, "Create NodeJS16 Function", runtimes.BasicNodeJSFunction("Hello from nodejs16", serverlessv1alpha2.NodeJs16)),
-				teststep.NewAPIGatewayFunctionCheck("nodejs16", nodejs16Fn, coreCli, genericContainer.Namespace),
+				teststep.NewAPIGatewayFunctionCheck("nodejs16", nodejs16Fn, coreCli, genericContainer.Namespace, nodejs16),
 			),
 			step.NewSerialTestRunner(nodejs18Logger, "NodeJS18 test",
 				teststep.CreateFunction(nodejs18Logger, nodejs18Fn, "Create NodeJS18 Function", runtimes.BasicNodeJSFunction("Hello from nodejs18", serverlessv1alpha2.NodeJs18)),
-				teststep.NewAPIGatewayFunctionCheck("nodejs18", nodejs18Fn, coreCli, genericContainer.Namespace),
+				teststep.NewAPIGatewayFunctionCheck("nodejs18", nodejs18Fn, coreCli, genericContainer.Namespace, nodejs18),
 			),
 		),
 	), nil
