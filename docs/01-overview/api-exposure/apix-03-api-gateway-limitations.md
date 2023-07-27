@@ -4,7 +4,7 @@ title: API Gateway limitations
 
 ## Controller limitations
 
-The API Rule controller is not a critical component of the Kyma networking infrastructure since it relies on Istio and Ory Custom Resources to provide routing capabilities. In terms of persistence, the controller depends on API Rules stored in the Kubernetes cluster. No other persistence solution is present.
+The APIRule controller is not a critical component of the Kyma networking infrastructure since it relies on Istio and Ory Custom Resources to provide routing capabilities. In terms of persistence, the controller depends on APIRules stored in the Kubernetes cluster. No other persistence solution is present.
 
 In terms of the resource configuration, the following requirements are set on the API Gateway controller:
 
@@ -13,9 +13,9 @@ In terms of the resource configuration, the following requirements are set on th
 | Limits   | 100m | 128Mi  |
 | Requests | 10m  | 64Mi   |
 
-## Limitations in terms of the number of created API Rules
+## Limitations in terms of the number of created APIRules
 
-The number of created API Rules is not limited. 
+The number of created APIRules is not limited. 
 
 ## Dependencies
 
