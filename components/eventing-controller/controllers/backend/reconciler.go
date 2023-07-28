@@ -103,10 +103,16 @@ type Reconciler struct {
 	credentials oauth2Credentials
 }
 
-func NewReconciler(ctx context.Context, natsSubMgr subscriptionmanager.Manager, natsConfig env.NATSConfig,
-	envCfg env.Config, bebSubMgr subscriptionmanager.Manager, client client.Client, logger *logger.Logger,
+func NewReconciler(
+	ctx context.Context,
+	natsSubMgr subscriptionmanager.Manager,
+	natsConfig env.NATSConfig,
+	envCfg env.Config,
+	backendCfg env.BackendConfig,
+	bebSubMgr subscriptionmanager.Manager,
+	client client.Client,
+	logger *logger.Logger,
 	recorder record.EventRecorder) *Reconciler {
-	cfg := env.GetBackendConfig()
 	return &Reconciler{
 		ctx:        ctx,
 		natsSubMgr: natsSubMgr,
@@ -116,8 +122,16 @@ func NewReconciler(ctx context.Context, natsSubMgr subscriptionmanager.Manager, 
 		Client:     client,
 		logger:     logger,
 		record:     recorder,
-		cfg:        cfg,
+		cfg:        backendCfg,
 	}
+}
+
+func (r *Reconciler) SetNatsConfig(natsConfig env.NATSConfig) {
+	r.natsConfig = natsConfig
+}
+
+func (r *Reconciler) SetBackendConfig(backendCfg env.BackendConfig) {
+	r.cfg = backendCfg
 }
 
 // +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;update;patch;create;delete
@@ -622,7 +636,16 @@ func getSecretStringData(clientID, clientSecret, tokenEndpoint, grantType, publi
 }
 
 func (r *Reconciler) CreateOrUpdatePublisherProxy(ctx context.Context, backend eventingv1alpha1.BackendType) (*appsv1.Deployment, error) {
+	return r.CreateOrUpdatePublisherProxyDeployment(ctx, backend, true)
+}
+
+func (r *Reconciler) CreateOrUpdatePublisherProxyDeployment(
+	ctx context.Context,
+	backend eventingv1alpha1.BackendType,
+	setOwnerReference bool) (*appsv1.Deployment, error) {
 	var desiredPublisher *appsv1.Deployment
+	// set backend type here so that the function can be used in eventing-manager
+	r.backendType = backend
 
 	switch backend {
 	case eventingv1alpha1.NatsBackendType:
@@ -633,8 +656,10 @@ func (r *Reconciler) CreateOrUpdatePublisherProxy(ctx context.Context, backend e
 		return nil, fmt.Errorf("unknown EventingBackend type %q", backend)
 	}
 
-	if err := r.setAsOwnerReference(ctx, desiredPublisher); err != nil {
-		return nil, errors.Wrapf(err, "set owner reference for Event Publisher failed")
+	if setOwnerReference {
+		if err := r.setAsOwnerReference(ctx, desiredPublisher); err != nil {
+			return nil, errors.Wrapf(err, "set owner reference for Event Publisher failed")
+		}
 	}
 
 	currentPublisher, err := r.getEPPDeployment(ctx)

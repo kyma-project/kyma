@@ -17,8 +17,12 @@ rules:
   - prometheuses
   - prometheuses/status
   - prometheuses/finalizers
+  - prometheusagents
+  - prometheusagents/finalizers
+  - prometheusagents/status
   - thanosrulers
   - thanosrulers/finalizers
+  - scrapeconfigs
   - servicemonitors
   - podmonitors
   - probes

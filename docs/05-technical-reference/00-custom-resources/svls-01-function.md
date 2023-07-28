@@ -2,8 +2,6 @@
 title: Function
 ---
 
->**WARNING:** The current API version is `serverless.kyma-project.io/v1alpha2`. The `serverless.kyma-project.io/v1alpha1` version is still supported but deprecated. For the v1alpha1 version, see the [previous Function documentation](https://github.com/kyma-project/kyma/blob/release-2.5/docs/05-technical-reference/00-custom-resources/svls-01-function.md).
-
 The `functions.serverless.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to manage Functions within Kyma. To get the up-to-date CRD and show the output in the YAML format, run this command:
 
 ```bash

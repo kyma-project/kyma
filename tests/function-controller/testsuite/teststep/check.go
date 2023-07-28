@@ -1,6 +1,9 @@
 package teststep
 
 import (
+	"encoding/json"
+	"io"
+	"net/http"
 	"net/url"
 	"time"
 
@@ -116,5 +119,116 @@ func (d DefaultedFunctionCheck) Cleanup() error {
 }
 
 func (d DefaultedFunctionCheck) OnError() error {
+	return nil
+}
+
+var _ step.Step = &TracingHTTPCheck{}
+
+type TracingHTTPCheck struct {
+	name     string
+	log      *logrus.Entry
+	endpoint string
+	poll     poller.Poller
+}
+
+type tracingResponse struct {
+	TraceParent string `json:"traceparent"`
+	TraceID     string `json:"x-b3-traceid"`
+	SpanID      string `json:"x-b3-spanid"`
+}
+
+func NewTracingHTTPCheck(log *logrus.Entry, name string, url *url.URL, poller poller.Poller) *TracingHTTPCheck {
+	return &TracingHTTPCheck{
+		name:     name,
+		log:      log.WithField(step.LogStepKey, name),
+		endpoint: url.String(),
+		poll:     poller.WithLogger(log),
+	}
+
+}
+
+func (t TracingHTTPCheck) Name() string {
+	return t.name
+}
+
+func (t TracingHTTPCheck) Run() error {
+	req, err := http.NewRequest(http.MethodGet, t.endpoint, nil)
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("X-B3-Sampled", "1")
+
+	resp, err := t.doRetrievableHttpCall(req, 5)
+	if err != nil {
+		return errors.Wrap(err, "while doing http call")
+	}
+
+	out, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return errors.Wrap(err, "while reading response body")
+	}
+
+	trResponse := tracingResponse{}
+	err = json.Unmarshal(out, &trResponse)
+	if err != nil {
+		return errors.Wrapf(err, "while unmarshalling response to json")
+	}
+
+	err = t.assertTracingResponse(trResponse)
+	if err != nil {
+		return errors.Wrapf(err, "Got following headers: %s", out)
+	}
+	t.log.Info("headers are okay")
+	return nil
+}
+
+func (t TracingHTTPCheck) doRetrievableHttpCall(req *http.Request, retries int) (*http.Response, error) {
+	client := &http.Client{Timeout: 5 * time.Second}
+	var finalResp *http.Response = nil
+
+	var backoff = wait.Backoff{
+		Steps:    retries,
+		Duration: 2 * time.Second,
+		Factor:   1.0,
+	}
+
+	err := retry.OnError(backoff, func(err error) bool {
+		t.log.Warnf("Got error: %s", err.Error())
+		return true
+	}, func() error {
+		resp, err := client.Do(req)
+		if err != nil {
+			return err
+		}
+
+		if resp.StatusCode != http.StatusOK {
+			return errors.Errorf(" expected status code: %d, got: %d", http.StatusOK, resp.StatusCode)
+		}
+		finalResp = resp
+		return nil
+	})
+	return finalResp, errors.Wrap(err, "while trying to call function")
+}
+
+func (t TracingHTTPCheck) Cleanup() error {
+	return nil
+}
+
+func (t TracingHTTPCheck) OnError() error {
+	return nil
+}
+
+func (t TracingHTTPCheck) assertTracingResponse(response tracingResponse) error {
+	if response.TraceID == "" {
+		return errors.New("No trace ID")
+	}
+	if response.TraceParent == "" {
+		return errors.New("No TraceParent")
+	}
+	if response.SpanID == "" {
+		return errors.New("No span ID")
+	}
+
 	return nil
 }

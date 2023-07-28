@@ -24,6 +24,7 @@ deployment:
       type: RuntimeDefault
 
 config:
+  injectIstioSidecar: false
   reconciliation:
     # In seconds
     defaultPeriod: 3600
@@ -72,8 +73,6 @@ config:
 
   # Configure node tolerations.
   tolerations: []
-  annotations:
-    sidecar.istio.io/inject: "false"
 
   # Port configuration
   ports:

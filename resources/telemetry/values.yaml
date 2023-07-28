@@ -16,7 +16,7 @@ global:
       directory: "prod/tpi"
     fluent_bit:
       name: "fluent-bit"
-      version: "2.1.4-52bb9772"
+      version: "2.1.7-bcac7090"
       directory: "prod/tpi"
   log:
     level: "info"

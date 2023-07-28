@@ -4,13 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
-
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
 
 	"github.com/stretchr/testify/require"
 
@@ -22,7 +21,6 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
 	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 )
 
@@ -39,14 +37,14 @@ func TestJetStreamMessageSender(t *testing.T) {
 			name:                      "send in jetstream mode should not succeed if stream doesn't exist",
 			givenStream:               false,
 			givenNATSConnectionClosed: false,
-			wantErr:                   sender.ErrBackendTargetNotFound,
+			wantErr:                   ErrCannotSendToStream,
 		},
 		{
 			name:                      "send in jetstream mode should not succeed if stream is full",
 			givenStream:               true,
 			givenStreamMaxBytes:       1,
 			givenNATSConnectionClosed: false,
-			wantErr:                   sender.ErrInsufficientStorage,
+			wantErr:                   ErrNoSpaceLeftOnDevice,
 		},
 		{
 			name:                      "send in jetstream mode should succeed if NATS connection is open and the stream exists",
@@ -54,7 +52,6 @@ func TestJetStreamMessageSender(t *testing.T) {
 			givenStreamMaxBytes:       5000,
 			givenNATSConnectionClosed: false,
 			wantErr:                   nil,
-			wantStatusCode:            http.StatusNoContent,
 		},
 		{
 			name:                      "send in jetstream mode should fail if NATS connection is not open",
@@ -92,15 +89,12 @@ func TestJetStreamMessageSender(t *testing.T) {
 			}
 
 			// act
-			status, err := sender.Send(ctx, ce)
+			err := sender.Send(ctx, ce)
 
 			testEnv.Logger.WithContext().Errorf("err: %v", err)
 
 			// assert
 			assert.ErrorIs(t, err, tc.wantErr)
-			if tc.wantErr == nil {
-				assert.Equal(t, tc.wantStatusCode, status.HTTPStatus())
-			}
 		})
 	}
 }

@@ -20,7 +20,6 @@ metadata:
     app.kubernetes.io/name: tracing-jaeger-collector
     app.kubernetes.io/part-of: jaeger
   name: tracing-jaeger-collector
-  namespace: kyma-system
 spec:
   ports:
   - name: otlp-grpc
@@ -50,7 +49,6 @@ metadata:
     app.kubernetes.io/name: tracing-jaeger-query
     app.kubernetes.io/part-of: jaeger
   name: tracing-jaeger-query
-  namespace: kyma-system
 spec:
   ports:
   - name: http-query
@@ -86,7 +84,7 @@ data:
       - name: Jaeger
         type: jaeger
         access: proxy
-        url: http://tracing-jaeger-query.kyma-system:16686
+        url: http://tracing-jaeger-query.default:16686
         editable: true
 ---
 apiVersion: apps/v1
@@ -100,7 +98,7 @@ metadata:
     app.kubernetes.io/name: tracing-jaeger
     app.kubernetes.io/part-of: jaeger
   name: tracing-jaeger
-  namespace: kyma-system
+  namespace: default
 spec:
   progressDeadlineSeconds: 600
   replicas: 1
@@ -193,7 +191,7 @@ spec:
   output:
     otlp:
       endpoint:
-        value: http://tracing-jaeger-collector.kyma-system.svc.cluster.local:4317
+        value: http://tracing-jaeger-collector.default.svc.cluster.local:4317
 ---
 apiVersion: security.istio.io/v1beta1
 kind: PeerAuthentication

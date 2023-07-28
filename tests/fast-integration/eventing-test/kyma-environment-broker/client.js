@@ -1,7 +1,7 @@
 const axios = require('axios');
 const fs = require('fs');
-const {debug, getEnvOrThrow} = require('../utils');
-const {OAuthCredentials, OAuthToken} = require('../lib/oauth');
+const {debug, getEnvOrThrow} = require('../../utils');
+const {OAuthCredentials, OAuthToken} = require('../../lib/oauth');
 
 const SCOPES = ['broker:write'];
 const KYMA_SERVICE_ID = '47c9dcbf-ff30-448e-ab36-d3bad66ba281';

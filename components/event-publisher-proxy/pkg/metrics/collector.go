@@ -13,20 +13,15 @@ import (
 )
 
 const (
-	// BackendErrorsKey name of the backendErrors metric.
-	BackendErrorsKey = "eventing_epp_backend_errors_total"
-	// backendErrorsHelp help text for the backendErrors metric.
-	backendErrorsHelp = "The total number of backend errors while sending events to the messaging server"
+	// HealthKey name of the health metric.
+	HealthKey = "eventing_epp_health"
+	// HealthHelp help text for the Health metric.
+	healthHelp = "The current health of the system. `1` indicates a healthy system"
 
-	// BackendLatencyKey name of the backendLatencyHelp metric.
+	// BackendLatencyKey name of the backendLatency metric.
 	BackendLatencyKey = "eventing_epp_backend_duration_milliseconds"
-	// backendLatencyHelp help text for the backendLatencyHelp metric.
+	// backendLatencyHelp help text for the backendLatency metric.
 	backendLatencyHelp = "The duration of sending events to the messaging server in milliseconds"
-
-	// BackendRequestsKey name of the eventRequests metric.
-	BackendRequestsKey = "eventing_epp_backend_requests_total"
-	// backendRequestsHelp help text for event backendRequests metric.
-	backendRequestsHelp = "The total number of backend requests"
 
 	// durationKey name of the duration metric.
 	durationKey = "eventing_epp_requests_duration_milliseconds"
@@ -61,10 +56,8 @@ const (
 // for recording epp specific metrics.
 type PublishingMetricsCollector interface {
 	prometheus.Collector
-	RecordBackendError()
 	RecordBackendLatency(duration time.Duration, statusCode int, destSvc string)
 	RecordEventType(eventType, eventSource string, statusCode int)
-	RecordBackendRequests(statusCode int, destSvc string)
 	MetricsMiddleware() mux.MiddlewareFunc
 }
 
@@ -72,26 +65,19 @@ var _ PublishingMetricsCollector = &Collector{}
 
 // Collector implements the prometheus.Collector interface.
 type Collector struct {
-	backendErrors   *prometheus.CounterVec
-	backendLatency  *prometheus.HistogramVec
-	backendRequests *prometheus.CounterVec
+	backendLatency *prometheus.HistogramVec
 
 	duration *prometheus.HistogramVec
 	requests *prometheus.CounterVec
 
 	eventType *prometheus.CounterVec
+
+	health *prometheus.GaugeVec
 }
 
 // NewCollector creates a new instance of Collector.
 func NewCollector(latency histogram.BucketsProvider) *Collector {
 	return &Collector{
-		backendErrors: prometheus.NewCounterVec(
-			prometheus.CounterOpts{
-				Name: BackendErrorsKey,
-				Help: backendErrorsHelp,
-			},
-			[]string{},
-		),
 		//nolint:promlinter // we follow the same pattern as istio. so a millisecond unit if fine here
 		backendLatency: prometheus.NewHistogramVec(
 			prometheus.HistogramOpts{
@@ -101,14 +87,6 @@ func NewCollector(latency histogram.BucketsProvider) *Collector {
 			},
 			[]string{responseCodeLabel, destSvcLabel},
 		),
-		backendRequests: prometheus.NewCounterVec(
-			prometheus.CounterOpts{
-				Name: BackendRequestsKey,
-				Help: backendRequestsHelp,
-			},
-			[]string{responseCodeLabel, destSvcLabel},
-		),
-
 		eventType: prometheus.NewCounterVec(
 			prometheus.CounterOpts{
 				Name: EventTypePublishedMetricKey,
@@ -131,33 +109,34 @@ func NewCollector(latency histogram.BucketsProvider) *Collector {
 				Name: RequestsKey,
 				Help: requestsHelp,
 			},
-			[]string{responseCodeLabel, methodLabel, pathLabel}),
+			[]string{responseCodeLabel, methodLabel, pathLabel},
+		),
+		health: prometheus.NewGaugeVec(
+			prometheus.GaugeOpts{
+				Name: HealthKey,
+				Help: healthHelp,
+			},
+			nil,
+		),
 	}
 }
 
 // Describe implements the prometheus.Collector interface Describe method.
 func (c *Collector) Describe(ch chan<- *prometheus.Desc) {
-	c.backendErrors.Describe(ch)
 	c.backendLatency.Describe(ch)
-	c.backendRequests.Describe(ch)
 	c.eventType.Describe(ch)
 	c.requests.Describe(ch)
 	c.duration.Describe(ch)
+	c.health.Describe(ch)
 }
 
 // Collect implements the prometheus.Collector interface Collect method.
 func (c *Collector) Collect(ch chan<- prometheus.Metric) {
-	c.backendErrors.Collect(ch)
 	c.backendLatency.Collect(ch)
-	c.backendRequests.Collect(ch)
 	c.eventType.Collect(ch)
 	c.requests.Collect(ch)
 	c.duration.Collect(ch)
-}
-
-// RecordBackendError records an error while sending to the eventing backend.
-func (c *Collector) RecordBackendError() {
-	c.backendErrors.WithLabelValues().Inc()
+	c.health.Collect(ch)
 }
 
 // RecordLatency records a backendLatencyHelp metric.
@@ -165,14 +144,18 @@ func (c *Collector) RecordBackendLatency(duration time.Duration, statusCode int,
 	c.backendLatency.WithLabelValues(fmt.Sprint(statusCode), destSvc).Observe(float64(duration.Milliseconds()))
 }
 
+// SetHealthStatus updates the health metric.
+func (c *Collector) SetHealthStatus(healthy bool) {
+	var v float64
+	if healthy {
+		v = 1
+	}
+	c.health.WithLabelValues().Set(v)
+}
+
 // RecordEventType records an eventType metric.
 func (c *Collector) RecordEventType(eventType, eventSource string, statusCode int) {
 	c.eventType.WithLabelValues(eventType, eventSource, fmt.Sprint(statusCode)).Inc()
-}
-
-// RecordRequests records an eventRequests metric.
-func (c *Collector) RecordBackendRequests(statusCode int, destSvc string) {
-	c.backendRequests.WithLabelValues(fmt.Sprint(statusCode), destSvc).Inc()
 }
 
 // MetricsMiddleware returns a http.Handler that can be used as middleware in gorilla.mux to track
