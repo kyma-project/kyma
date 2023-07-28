@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"net/http"
@@ -238,8 +239,10 @@ func (t TracingHTTPCheck) assertTracingResponse(response tracingResponse) error 
 }
 
 const (
-	resourceLabel     = "serverless.kyma-project.io/resource=deployment"
-	functionNameLabel = "serverless.kyma-project.io/function-name="
+	resourceLabel     = "serverless.kyma-project.io/resource"
+	functionNameLabel = "serverless.kyma-project.io/function-name"
+	manageByLabel     = "serverless.kyma-project.io/managed-by"
+	uuidLabel         = "serverless.kyma-project.io/uuid"
 )
 
 type APIGatewayFunctionCheck struct {
@@ -271,19 +274,23 @@ func (d APIGatewayFunctionCheck) Run() error {
 		return errors.Wrap(err, "while trying to get service")
 	}
 
-	pod, err := d.client.Pods(d.namespace).List(context.Background(), metav1.ListOptions{LabelSelector: fmt.Sprintf("%s,%s=%s", resourceLabel, functionNameLabel, d.name)})
+	pod, err := d.client.Pods(d.namespace).List(context.Background(), metav1.ListOptions{LabelSelector: fmt.Sprintf("%s=deployment,%s=%s", resourceLabel, functionNameLabel, d.name)})
 	if err != nil {
 		return errors.Wrap(err, "while trying to get pod")
 	}
 
-	for k, v := range pod.Items[0].ObjectMeta.Labels {
-		if val, exists := svc.Spec.Selector[k]; exists {
-			if val == v {
-				delete(svc.Spec.Selector, k)
-			} else {
-				return errors.Errorf("Expected %s but got %s", v, val)
-			}
-		}
+	err = checkIfRequiredLabelsExists(svc.Spec.Selector, true)
+	if err != nil {
+		return errors.Wrap(err, " in service")
+	}
+	err = checkIfRequiredLabelsExists(pod.Items[0].ObjectMeta.Labels, false)
+	if err != nil {
+		return errors.Wrap(err, " in pod")
+	}
+
+	err = checkIfContractIsFulfilled(pod.Items[0], *svc)
+	if err != nil {
+		return errors.Wrap(err, " while checking labels")
 	}
 
 	if len(svc.Spec.Selector) != 0 {
@@ -298,5 +305,35 @@ func (d APIGatewayFunctionCheck) Cleanup() error {
 }
 
 func (d APIGatewayFunctionCheck) OnError() error {
+	return nil
+}
+
+func checkIfContractIsFulfilled(pod corev1.Pod, service corev1.Service) error {
+	for k, v := range pod.Labels {
+		if val, exists := service.Spec.Selector[k]; exists {
+			if val == v {
+				delete(service.Spec.Selector, k)
+			} else {
+				return errors.Errorf("Expected %s but got %s", v, val)
+			}
+		}
+	}
+	return nil
+}
+
+func checkIfRequiredLabelsExists(labels map[string]string, isService bool) error {
+	requiredLabels := []string{resourceLabel, functionNameLabel, manageByLabel, uuidLabel}
+
+	if isService {
+		if len(labels) != 4 {
+			return errors.New(fmt.Sprintf("Service has got %s istead of 4 labels", len(labels)))
+		}
+	}
+
+	for _, label := range requiredLabels {
+		if _, exists := labels[label]; !exists {
+			return errors.New(fmt.Sprintf("Label %s is missing", label))
+		}
+	}
 	return nil
 }
