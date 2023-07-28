@@ -74,20 +74,6 @@ const apiRuleOAuthObj = k8s.loadAllYaml(
 const defaultRetryDelayMs = 1000;
 const defaultRetries = 5;
 
-const retryWithDelay = (operation, delay, retries) => new Promise((resolve, reject) => {
-  return operation()
-      .then(resolve)
-      .catch((reason) => {
-        if (retries > 0) {
-          return wait(delay)
-              .then(retryWithDelay.bind(null, operation, delay, retries - 1))
-              .then(resolve)
-              .catch(reject);
-        }
-        return reject(reason);
-      });
-});
-
 async function testHttpbinAllowResponse() {
   const vs = await waitForVirtualService(httpbinNamespace, httpbinAllowService);
   const host = vs.spec.hosts[0];
@@ -182,10 +168,10 @@ async function getOAuthToken(domain) {
 }
 
 async function ensureApiExposureFixture() {
-  await retryWithDelay( (r)=> k8sApply([istioTestNamespaceObj]), defaultRetryDelayMs, defaultRetries);
-  await retryWithDelay( (r)=> k8sApply(httpbinDeploymentObj, httpbinNamespace), defaultRetryDelayMs, defaultRetries);
-  await retryWithDelay( (r)=> k8sApply([apiRuleAllowObj], httpbinNamespace), defaultRetryDelayMs, defaultRetries);
-  await retryWithDelay( (r)=> k8sApply(apiRuleOAuthObj, httpbinNamespace), defaultRetryDelayMs, defaultRetries);
+  await retryPromise( (r)=> k8sApply([istioTestNamespaceObj]), defaultRetryDelayMs, defaultRetries);
+  await retryPromise( (r)=> k8sApply(httpbinDeploymentObj, httpbinNamespace), defaultRetryDelayMs, defaultRetries);
+  await retryPromise( (r)=> k8sApply([apiRuleAllowObj], httpbinNamespace), defaultRetryDelayMs, defaultRetries);
+  await retryPromise( (r)=> k8sApply(apiRuleOAuthObj, httpbinNamespace), defaultRetryDelayMs, defaultRetries);
   await waitForDeployment('httpbin', httpbinNamespace);
   const apiRulePath = `/apis/gateway.kyma-project.io/v1alpha1/namespaces/${httpbinNamespace}/apirules`;
   await waitForK8sObject(apiRulePath, {}, (_type, _apiObj, watchObj) => {
