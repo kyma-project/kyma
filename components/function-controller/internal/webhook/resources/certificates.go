@@ -29,31 +29,40 @@ const (
 	FunctionCRDName = "functions.serverless.kyma-project.io"
 )
 
-func SetupCertificates(ctx context.Context, secretName, secretNamespace, serviceName string, logger *zap.SugaredLogger) error {
+type Result int
+
+const (
+	NoResult Result = iota
+	Updated  Result = iota
+)
+
+const TimeToExpire = 10 * 24 * time.Hour
+
+func SetupCertificates(ctx context.Context, secretName, secretNamespace, serviceName string, logger *zap.SugaredLogger) (Result, error) {
 	// We are going to talk to the API server _before_ we start the manager.
 	// Since the default manager client reads from cache, we will get an error.
 	// So, we create a "serverClient" that would read from the API directly.
 	// We only use it here, this only runs at start up, so it shouldn't be to much for the API
 	serverClient, err := ctrlclient.New(ctrl.GetConfigOrDie(), ctrlclient.Options{})
 	if err != nil {
-		return errors.Wrap(err, "failed to create a server client")
+		return NoResult, errors.Wrap(err, "failed to create a server client")
 	}
 	if err := apiextensionsv1.AddToScheme(serverClient.Scheme()); err != nil {
-		return errors.Wrap(err, "while adding apiextensions.v1 schema to k8s client")
+		return NoResult, errors.Wrap(err, "while adding apiextensions.v1 schema to k8s client")
 	}
-
-	if err := EnsureWebhookSecret(ctx, serverClient, secretName, secretNamespace, serviceName, logger); err != nil {
-		return errors.Wrap(err, "failed to ensure webhook secret")
+	result, err := EnsureWebhookSecret(ctx, serverClient, secretName, secretNamespace, serviceName, logger)
+	if err != nil {
+		return NoResult, errors.Wrap(err, "failed to ensure webhook secret")
 	}
-	return nil
+	return result, nil
 }
 
-func EnsureWebhookSecret(ctx context.Context, client ctrlclient.Client, secretName, secretNamespace, serviceName string, log *zap.SugaredLogger) error {
+func EnsureWebhookSecret(ctx context.Context, client ctrlclient.Client, secretName, secretNamespace, serviceName string, log *zap.SugaredLogger) (Result, error) {
 	secret := &corev1.Secret{}
 	log.Info("ensuring webhook secret")
 	err := client.Get(ctx, types.NamespacedName{Name: secretName, Namespace: secretNamespace}, secret)
 	if err != nil && !apiErrors.IsNotFound(err) {
-		return errors.Wrap(err, "failed to get webhook secret")
+		return NoResult, errors.Wrap(err, "failed to get webhook secret")
 	}
 
 	if apiErrors.IsNotFound(err) {
@@ -62,27 +71,28 @@ func EnsureWebhookSecret(ctx context.Context, client ctrlclient.Client, secretNa
 	}
 
 	log.Info("updating pre-exiting webhook secret")
-	if err := updateSecret(ctx, client, log, secret, serviceName); err != nil {
-		return errors.Wrap(err, "failed to update secret")
+	result, err := updateSecret(ctx, client, log, secret, serviceName)
+	if err != nil {
+		return NoResult, errors.Wrap(err, "failed to update secret")
 	}
-	return nil
+	return result, nil
 }
 
-func createSecret(ctx context.Context, client ctrlclient.Client, name, namespace, serviceName string) error {
+func createSecret(ctx context.Context, client ctrlclient.Client, name, namespace, serviceName string) (Result, error) {
 	secret, err := buildSecret(name, namespace, serviceName)
 	if err != nil {
-		return errors.Wrap(err, "failed to create secret object")
+		return NoResult, errors.Wrap(err, "failed to create secret object")
 	}
 	if err := client.Create(ctx, secret); err != nil {
-		return errors.Wrap(err, "failed to create secret")
+		return NoResult, errors.Wrap(err, "failed to create secret")
 	}
-	return nil
+	return Updated, nil
 }
 
-func updateSecret(ctx context.Context, client ctrlclient.Client, log *zap.SugaredLogger, secret *corev1.Secret, serviceName string) error {
+func updateSecret(ctx context.Context, client ctrlclient.Client, log *zap.SugaredLogger, secret *corev1.Secret, serviceName string) (Result, error) {
 	valid, err := isValidSecret(secret)
 	if valid {
-		return nil
+		return NoResult, nil
 	}
 	if err != nil {
 		log.Error(err, "invalid certificate")
@@ -90,14 +100,14 @@ func updateSecret(ctx context.Context, client ctrlclient.Client, log *zap.Sugare
 
 	newSecret, err := buildSecret(secret.Name, secret.Namespace, serviceName)
 	if err != nil {
-		return errors.Wrap(err, "failed to create secret object")
+		return NoResult, errors.Wrap(err, "failed to create secret object")
 	}
 
 	secret.Data = newSecret.Data
 	if err := client.Update(ctx, secret); err != nil {
-		return errors.Wrap(err, "failed to update secret")
+		return NoResult, errors.Wrap(err, "failed to update secret")
 	}
-	return nil
+	return Updated, nil
 }
 
 func isValidSecret(s *corev1.Secret) (bool, error) {
@@ -125,7 +135,7 @@ func verifyCertificate(c []byte) error {
 		return errors.Wrap(err, "failed to parse root certificate data")
 	}
 	// make sure the certificate is valid for the next 10 days. Otherwise it will be recreated.
-	_, err = certificate[0].Verify(x509.VerifyOptions{CurrentTime: time.Now().Add(10 * 24 * time.Hour), Roots: root})
+	_, err = certificate[0].Verify(x509.VerifyOptions{CurrentTime: time.Now().Add(TimeToExpire), Roots: root})
 	if err != nil {
 		return errors.Wrap(err, "certificate verification failed")
 	}

@@ -31,7 +31,7 @@ Follow these steps:
     metadata:
       name: scaled-function
     spec:
-      runtime: nodejs16
+      runtime: nodejs18
       replicas: 1
       source:
         inline:
@@ -81,7 +81,7 @@ Follow these steps:
     metadata:
       name: scaled-function
     spec:
-      runtime: nodejs16
+      runtime: nodejs18
       replicas: 1
       source:
         inline:
@@ -150,7 +150,7 @@ Follow these steps:
     metadata:
       name: scaled-function
     spec:
-      runtime: nodejs16
+      runtime: nodejs18
       replicas: 1
       source:
         inline:

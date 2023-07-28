@@ -30,14 +30,14 @@ global:
   images:
     k8s_tools:
       name: "k8s-tools"
-      version: "v20230518-2bc1b552"
+      version: "v20230626-ce139c33"
       directory: "prod/tpi"
     ## Google Cloud SQL Proxy image
     ## ref: https://cloud.google.com/sql/docs/mysql/sql-proxy
     ## ref: https://cloud.google.com/sql/docs/postgres/sql-proxy
     gce_proxy:
       name: "gce-proxy"
-      version: "v1.33.6-1bdccf0a"
+      version: "v1.33.8-afb993b8"
       directory: "prod/tpi/cloudsql-docker"
     hydra:
       name: "hydra"
@@ -61,7 +61,7 @@ global:
       directory: "prod/external/oryd"
     postgres:
       name: "postgres"
-      version: "v20230427-11.19-alpine3.17"
+      version: "11.20-alpine3.18"
       directory: "prod/external"
     postgres_exporter:
       name: "postgres-exporter"
@@ -71,6 +71,9 @@ global:
       name: "alpine"
       version: "3.17.3"
       directory: "prod/external"
+
+# Configure priorityClassName
+priorityClassName: "ory-priority-class"
 
 headerRewrite:
   enabled: true
@@ -218,9 +221,9 @@ oathkeeper:
         proxy:
           port: 4455
           timeout:
-            read: 120s
-            write: 120s
-            idle: 120s
+            read: 60m
+            write: 60m
+            idle: 60m
         api:
           port: 4456
   deployment:

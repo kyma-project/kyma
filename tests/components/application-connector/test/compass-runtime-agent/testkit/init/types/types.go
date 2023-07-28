@@ -26,7 +26,7 @@ type CompassConfigurator interface {
 
 //go:generate mockery --name=DeploymentConfigurator
 type DeploymentConfigurator interface {
-	Do(caSecretName, clusterCertSecretName, runtimeAgentConfigSecretName string) (RollbackFunc, error)
+	Do(caSecretName, clusterCertSecretName, runtimeAgentConfigSecretName, controllerSyncPeriodTime string) (RollbackFunc, error)
 }
 
 //go:generate mockery --name=CertificateSecretConfigurator

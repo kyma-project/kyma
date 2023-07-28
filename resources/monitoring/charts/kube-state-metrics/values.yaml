@@ -2,7 +2,7 @@
 prometheusScrape: false
 image:
   repository: registry.k8s.io/kube-state-metrics/kube-state-metrics
-  tag: v2.5.0
+  tag: v2.9.2
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []

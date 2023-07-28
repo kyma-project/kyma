@@ -1,19 +1,22 @@
 package testing
 
 import (
+	"fmt"
 	"reflect"
 	"strconv"
 
-	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
-	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	. "github.com/onsi/gomega"         //nolint:revive,stylecheck // using . import for convenience
 	. "github.com/onsi/gomega/gstruct" //nolint:revive,stylecheck // using . import for convenience
 	gomegatypes "github.com/onsi/gomega/types"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 
+	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
 )
 
 //
@@ -54,20 +57,48 @@ func HaveNotEmptyHost() gomegatypes.GomegaMatcher {
 	}, BeTrue())
 }
 
-func HaveAPIRuleSpecRules(ruleMethods []string, accessStrategy, path string) gomegatypes.GomegaMatcher {
+func HaveAPIRuleSpecRules(ruleMethods []string, accessStrategy, certsURL, path string) gomegatypes.GomegaMatcher {
+	handler := apigatewayv1beta1.Handler{
+		Name: accessStrategy,
+		Config: &runtime.RawExtension{
+			Raw: []byte(fmt.Sprintf(object.JWKSURLFormat, certsURL)),
+		},
+	}
+	authenticator := &apigatewayv1beta1.Authenticator{
+		Handler: &handler,
+	}
 	return WithTransform(func(a apigatewayv1beta1.APIRule) []apigatewayv1beta1.Rule {
 		return a.Spec.Rules
 	}, ContainElement(
 		MatchFields(IgnoreExtras|IgnoreMissing, Fields{
 			"Methods":          ConsistOf(ruleMethods),
-			"AccessStrategies": ConsistOf(haveAPIRuleAccessStrategies(accessStrategy)),
+			"AccessStrategies": ConsistOf(haveAPIRuleAccessStrategies(authenticator)),
 			"Gateway":          Equal(constants.ClusterLocalAPIGateway),
 			"Path":             Equal(path),
 		}),
 	))
 }
 
-func haveAPIRuleAccessStrategies(accessStrategy string) gomegatypes.GomegaMatcher {
+func haveAPIRuleAccessStrategies(authenticator *apigatewayv1beta1.Authenticator) gomegatypes.GomegaMatcher {
+	return WithTransform(func(a *apigatewayv1beta1.Authenticator) *apigatewayv1beta1.Authenticator {
+		return a
+	}, Equal(authenticator))
+}
+
+func HaveAPIRuleSpecRulesWithOry(ruleMethods []string, accessStrategy, path string) gomegatypes.GomegaMatcher {
+	return WithTransform(func(a apigatewayv1beta1.APIRule) []apigatewayv1beta1.Rule {
+		return a.Spec.Rules
+	}, ContainElement(
+		MatchFields(IgnoreExtras|IgnoreMissing, Fields{
+			"Methods":          ConsistOf(ruleMethods),
+			"AccessStrategies": ConsistOf(haveAPIRuleAccessStrategiesWithOry(accessStrategy)),
+			"Gateway":          Equal(constants.ClusterLocalAPIGateway),
+			"Path":             Equal(path),
+		}),
+	))
+}
+
+func haveAPIRuleAccessStrategiesWithOry(accessStrategy string) gomegatypes.GomegaMatcher {
 	return WithTransform(func(a *apigatewayv1beta1.Authenticator) string {
 		return a.Name
 	}, Equal(accessStrategy))
@@ -278,4 +309,28 @@ func HaveEvent(event corev1.Event) gomegatypes.GomegaMatcher {
 			"Message": Equal(event.Message),
 			"Type":    Equal(event.Type),
 		})))
+}
+
+func HaveNonZeroEv2Hash() gomegatypes.GomegaMatcher {
+	return WithTransform(func(s *eventingv1alpha2.Subscription) int64 {
+		return s.Status.Backend.Ev2hash
+	}, Not(BeZero()))
+}
+
+func HaveNonZeroEventMeshHash() gomegatypes.GomegaMatcher {
+	return WithTransform(func(s *eventingv1alpha2.Subscription) int64 {
+		return s.Status.Backend.EventMeshHash
+	}, Not(BeZero()))
+}
+
+func HaveNonZeroEventMeshLocalHash() gomegatypes.GomegaMatcher {
+	return WithTransform(func(s *eventingv1alpha2.Subscription) int64 {
+		return s.Status.Backend.EventMeshLocalHash
+	}, Not(BeZero()))
+}
+
+func HaveNonZeroWebhookAuthHash() gomegatypes.GomegaMatcher {
+	return WithTransform(func(s *eventingv1alpha2.Subscription) int64 {
+		return s.Status.Backend.WebhookAuthHash
+	}, Not(BeZero()))
 }

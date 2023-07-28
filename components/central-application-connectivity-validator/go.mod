@@ -8,11 +8,11 @@ require (
 	github.com/kyma-project/kyma/components/central-application-gateway v0.0.0-20230130154909-4c81ab2cee61
 	github.com/oklog/run v1.1.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
-	github.com/stretchr/testify v1.8.2
+	github.com/stretchr/testify v1.8.4
 	github.com/vrischmann/envconfig v1.3.0
 	go.uber.org/zap v1.24.0
-	k8s.io/apimachinery v0.27.2
-	k8s.io/client-go v0.26.3
+	k8s.io/apimachinery v0.27.4
+	k8s.io/client-go v0.26.7
 	sigs.k8s.io/controller-runtime v0.14.6
 )
 
@@ -66,7 +66,7 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/api v0.26.3 // indirect
+	k8s.io/api v0.26.7 // indirect
 	k8s.io/apiextensions-apiserver v0.26.1 // indirect
 	k8s.io/component-base v0.26.1 // indirect
 	k8s.io/klog/v2 v2.90.1 // indirect

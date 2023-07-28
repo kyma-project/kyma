@@ -75,13 +75,20 @@ set-up-local-env:
 ENVTEST_ASSETS_DIR=$(PROJECT_DIR)/testbin/$(shell uname)
 test-local: go-test; ## Run tests.
 
-setup-envtest:
-	mkdir -p ${ENVTEST_ASSETS_DIR}
-	test -f ${ENVTEST_ASSETS_DIR}/setup-envtest.sh || curl -sSLo ${ENVTEST_ASSETS_DIR}/setup-envtest.sh https://raw.githubusercontent.com/kubernetes-sigs/controller-runtime/v0.8.3/hack/setup-envtest.sh
-	source ${ENVTEST_ASSETS_DIR}/setup-envtest.sh; fetch_envtest_tools $(ENVTEST_ASSETS_DIR)
+ENVTEST ?= $(LOCALBIN)/setup-envtest
+
+## Location to install dependencies to
+LOCALBIN ?= $(shell pwd)/bin
+$(LOCALBIN):
+	mkdir -p $(LOCALBIN)
+
+.PHONY: setup-envtest
+setup-envtest: $(ENVTEST) ## Download envtest-setup locally if necessary.
+$(ENVTEST): $(LOCALBIN)
+	test -s $(LOCALBIN)/setup-envtest || GOBIN=$(LOCALBIN) go install sigs.k8s.io/controller-runtime/tools/setup-envtest@latest
 
 go-test: manifests-local generate-local setup-envtest
-	KUBEBUILDER_ASSETS=${ENVTEST_ASSETS_DIR}/bin go test ./... -coverprofile cover.out
+	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir $(LOCALBIN) -p path)" go test ./... -coverprofile cover.out
 
 check-code: check-imports fmt-local vet-local lint ## Run various linters and other code checks. Use before committing
 
@@ -144,8 +151,10 @@ lint-thoroughly:
 
 update_metrics_docs:
 	@promlinter list -ojson ../event-publisher-proxy > metrics_epp.json
+	@jq 'sort_by(.Name)'  metrics_epp.json > metrics_epp_sorted.json
 	@promlinter list -ojson ../eventing-controller/ > metrics_ec.json
-	@gomplate -d ec=metrics_ec.json -d epp=metrics_epp.json -f hack/metrics.doc.tpl  | prettier --parser markdown > ../../docs/04-operation-guides/operations/evnt-02-eventing-metrics.md
+	@jq 'sort_by(.Name)'  metrics_ec.json > metrics_ec_sorted.json
+	@gomplate -d ec=metrics_ec_sorted.json -d epp=metrics_epp_sorted.json -f hack/metrics.doc.tpl  | prettier --parser markdown > ../../docs/04-operation-guides/operations/evnt-02-eventing-metrics.md
 
 update_docs: copy-crds
 	go run ../../hack/table-gen/main.go --crd-filename ../../installation/resources/crds/eventing/subscriptions.eventing.kyma-project.io.crd.yaml --md-filename ../../docs/05-technical-reference/00-custom-resources/evnt-01-subscription.md

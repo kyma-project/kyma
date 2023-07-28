@@ -41,7 +41,6 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 	}
 
 	python39Logger := logf.WithField(scenarioKey, "python39")
-	nodejs14Logger := logf.WithField(scenarioKey, "nodejs14")
 	nodejs16Logger := logf.WithField(scenarioKey, "nodejs16")
 	nodejs18Logger := logf.WithField(scenarioKey, "nodejs18")
 
@@ -55,19 +54,17 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 
 	python39Fn := function.NewFunction("python39", cfg.KubectlProxyEnabled, genericContainer.WithLogger(python39Logger))
 
-	nodeJS14Fn := function.NewFunction("nodejs14", cfg.KubectlProxyEnabled, genericContainer.WithLogger(nodejs14Logger))
-
 	nodejs16Fn := function.NewFunction("nodejs16", cfg.KubectlProxyEnabled, genericContainer.WithLogger(nodejs16Logger))
 
 	nodejs18Fn := function.NewFunction("nodejs18", cfg.KubectlProxyEnabled, genericContainer.WithLogger(nodejs18Logger))
 
-	cm := configmap.NewConfigMap("test-serverless-configmap", genericContainer.WithLogger(nodejs14Logger))
+	cm := configmap.NewConfigMap("test-serverless-configmap", genericContainer.WithLogger(nodejs18Logger))
 	cmEnvKey := "CM_ENV_KEY"
 	cmEnvValue := "Value taken as env from ConfigMap"
 	cmData := map[string]string{
 		cmEnvKey: cmEnvValue,
 	}
-	sec := secret.NewSecret("test-serverless-secret", genericContainer.WithLogger(nodejs14Logger))
+	sec := secret.NewSecret("test-serverless-secret", genericContainer.WithLogger(nodejs18Logger))
 	secEnvKey := "SECRET_ENV_KEY"
 	secEnvValue := "Value taken as env from Secret"
 	secretData := map[string]string{
@@ -97,14 +94,6 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 				teststep.UpdateFunction(python39Logger, python39Fn, "Update Python39 Function", runtimes.BasicPythonFunctionWithCustomDependency("Hello From updated python", serverlessv1alpha2.Python39)),
 				teststep.NewHTTPCheck(python39Logger, "Python39 post update simple check through service", python39Fn.FunctionURL, poll, "Hello From updated python"),
 			),
-			step.NewSerialTestRunner(nodejs14Logger, "NodeJS14 test",
-				teststep.CreateConfigMap(nodejs14Logger, cm, "Create Test ConfigMap", cmData),
-				teststep.CreateSecret(nodejs14Logger, sec, "Create Test Secret", secretData),
-				teststep.CreateFunction(nodejs14Logger, nodeJS14Fn, "Create NodeJS14 Function", runtimes.NodeJSFunctionWithEnvFromConfigMapAndSecret(cm.Name(), cmEnvKey, sec.Name(), secEnvKey, serverlessv1alpha2.NodeJs14)),
-				teststep.NewHTTPCheck(nodejs14Logger, "NodeJS14 pre update simple check through service", nodeJS14Fn.FunctionURL, poll, fmt.Sprintf("%s-%s", cmEnvValue, secEnvValue)),
-				teststep.UpdateFunction(nodejs14Logger, nodeJS14Fn, "Update NodeJS14 Function", runtimes.BasicNodeJSFunctionWithCustomDependency("Hello From updated nodejs14", serverlessv1alpha2.NodeJs14)),
-				teststep.NewHTTPCheck(nodejs14Logger, "NodeJS14 post update simple check through service", nodeJS14Fn.FunctionURL, poll, "Hello From updated nodejs14"),
-			),
 			step.NewSerialTestRunner(nodejs16Logger, "NodeJS16 test",
 				teststep.CreateFunction(nodejs16Logger, nodejs16Fn, "Create NodeJS16 Function", runtimes.BasicNodeJSFunction("Hello from nodejs16", serverlessv1alpha2.NodeJs16)),
 				teststep.NewHTTPCheck(nodejs16Logger, "NodeJS16 pre update simple check through service", nodejs16Fn.FunctionURL, poll, "Hello from nodejs16"),
@@ -112,8 +101,10 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 				teststep.NewHTTPCheck(nodejs16Logger, "NodeJS16 post update simple check through service", nodejs16Fn.FunctionURL, poll, "Hello from updated nodejs16"),
 			),
 			step.NewSerialTestRunner(nodejs18Logger, "NodeJS18 test",
-				teststep.CreateFunction(nodejs18Logger, nodejs18Fn, "Create NodeJS18 Function", runtimes.BasicNodeJSFunction("Hello from nodejs18", serverlessv1alpha2.NodeJs18)),
-				teststep.NewHTTPCheck(nodejs18Logger, "NodeJS18 pre update simple check through service", nodejs18Fn.FunctionURL, poll, "Hello from nodejs18"),
+				teststep.CreateConfigMap(nodejs18Logger, cm, "Create Test ConfigMap", cmData),
+				teststep.CreateSecret(nodejs18Logger, sec, "Create Test Secret", secretData),
+				teststep.CreateFunction(nodejs18Logger, nodejs18Fn, "Create NodeJS18 Function", runtimes.NodeJSFunctionWithEnvFromConfigMapAndSecret(cm.Name(), cmEnvKey, sec.Name(), secEnvKey, serverlessv1alpha2.NodeJs18)),
+				teststep.NewHTTPCheck(nodejs18Logger, "NodeJS18 pre update simple check through service", nodejs18Fn.FunctionURL, poll, fmt.Sprintf("%s-%s", cmEnvValue, secEnvValue)),
 				teststep.UpdateFunction(nodejs18Logger, nodejs18Fn, "Update NodeJS18 Function", runtimes.BasicNodeJSFunctionWithCustomDependency("Hello from updated nodejs18", serverlessv1alpha2.NodeJs18)),
 				teststep.NewHTTPCheck(nodejs18Logger, "NodeJS18 post update simple check through service", nodejs18Fn.FunctionURL, poll, "Hello from updated nodejs18"),
 			),

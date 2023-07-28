@@ -8,7 +8,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/commander"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/commander/beb"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/commander/eventmesh"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/commander/nats"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics/latency"
@@ -16,8 +16,8 @@ import (
 )
 
 const (
-	backendBEB  = "beb"
-	backendNATS = "nats"
+	backendEventMesh = "beb"
+	backendNATS      = "nats"
 )
 
 type Config struct {
@@ -58,12 +58,13 @@ func main() {
 	// metrics collector
 	metricsCollector := metrics.NewCollector(latency.NewBucketsProvider())
 	prometheus.MustRegister(metricsCollector)
+	metricsCollector.SetHealthStatus(true)
 
 	// Instantiate configured commander.
 	var c commander.Commander
 	switch cfg.Backend {
-	case backendBEB:
-		c = beb.NewCommander(opts, metricsCollector, logger)
+	case backendEventMesh:
+		c = eventmesh.NewCommander(opts, metricsCollector, logger)
 	case backendNATS:
 		c = nats.NewCommander(opts, metricsCollector, logger)
 	default:

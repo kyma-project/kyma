@@ -33,6 +33,9 @@ securityContext:
     drop:
       - ALL
 
+highPriorityClassName: "telemetry-priority-class-high"
+priorityClassName: "telemetry-priority-class"
+
 livenessProbe:
   httpGet:
     path: /healthz
@@ -69,10 +72,10 @@ fluentbit:
 resources:
   limits:
     cpu: 100m
-    memory: 256Mi
+    memory: 384Mi
   requests:
     cpu: 5m
-    memory: 20Mi
+    memory: 100Mi
 
 terminationGracePeriodSeconds: 10
 
@@ -128,20 +131,3 @@ tolerations: []
 
 affinity: {}
 
-traceCollector:
-  resources:
-    limits:
-      cpu: 1
-      memory: 1Gi
-    requests:
-      cpu: 25m
-      memory: 32Mi
-
-metricGateway:
-  resources:
-    limits:
-      cpu: 1
-      memory: 1Gi
-    requests:
-      cpu: 25m
-      memory: 32Mi

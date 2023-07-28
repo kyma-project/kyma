@@ -26,7 +26,6 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
-	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
@@ -64,10 +63,7 @@ var (
 // TestAPIs prepares ginkgo to run the test suite.
 func TestAPIs(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecsWithDefaultAndCustomReporters(t,
-		"Eventing Backend Controller Suite",
-		[]Reporter{printer.NewlineReporter{}},
-	)
+	RunSpecs(t, "Eventing Backend Controller Suite")
 }
 
 // Prepare the test suite.
@@ -160,8 +156,9 @@ var _ = BeforeSuite(func(done Done) {
 	k8sManager, err := ctrl.NewManager(cfg, ctrl.Options{
 		Scheme:                  scheme.Scheme,
 		SyncPeriod:              &syncPeriod,
-		MetricsBindAddress:      "localhost:7071",
 		GracefulShutdownTimeout: &shutdownTimeout,
+		MetricsBindAddress:      "0", // disable
+		HealthProbeBindAddress:  "0", // disable
 	})
 	Expect(err).To(BeNil())
 
@@ -171,10 +168,14 @@ var _ = BeforeSuite(func(done Done) {
 		JSStreamName:    reconcilertesting.JSStreamName,
 	}
 
+	envConfig := env.Config{}
+	backendConfig := env.GetBackendConfig()
 	err = NewReconciler(
 		context.Background(),
 		natsSubMgr,
 		natsConfig,
+		envConfig,
+		backendConfig,
 		bebSubMgr,
 		k8sManager.GetClient(),
 		defaultLogger,
@@ -298,6 +299,12 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 					reconcilertesting.HaveBEBSecretNameAndNamespace(bebSecret1name, kymaSystemNamespace),
 					reconcilertesting.HaveEventingBackendNotReady(),
 				))
+
+			// should not have called bebSubMgr.Stop() as nothing was created on EventMesh before, and
+			// the cache for secret is empty. Triggering bebSubMgr.Stop() would delete all subscriptions on EventMesh
+			// even on controller restart.
+			Expect(bebSubMgr.StopCalledWithCleanup).Should(BeFalse())
+			Expect(bebSubMgr.StopCalledWithoutCleanup).Should(BeFalse())
 		})
 		It("Should mark eventing as ready when publisher proxy is ready", func() {
 			ctx := context.Background()
@@ -634,7 +641,7 @@ func ensurePublisherProxyIsReady(ctx context.Context) {
 	Expect(err).ShouldNot(HaveOccurred())
 }
 
-// getCurrentBackendType gets the backend type depending on the beb secret.
+// getCurrentBackendType gets the backend type depending on the eventmesh secret.
 func getCurrentBackendType(ctx context.Context) string {
 	backendType := eventingv1alpha1.NatsBackendType
 	if bebSecretExists(ctx) {
@@ -668,8 +675,8 @@ func createOAuth2Secret(ctx context.Context, clientID, clientSecret []byte) {
 			Namespace: deployment.ControllerNamespace,
 		},
 		Data: map[string][]byte{
-			"client_id":     clientID,
-			"client_secret": clientSecret,
+			secretKeyClientID:     clientID,
+			secretKeyClientSecret: clientSecret,
 		},
 	}
 	err := k8sClient.Create(ctx, sec)

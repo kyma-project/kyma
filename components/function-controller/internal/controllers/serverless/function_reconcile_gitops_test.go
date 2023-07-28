@@ -319,7 +319,7 @@ func TestGitOpsWithContinuousGitCheckout(t *testing.T) {
 				instance: *function,
 			}
 
-			expectedImage := s.buildImageAddress("registry.kyma.local")
+			expectedImage := s.buildImageAddress("localhost:32132")
 			g.Expect(deployment).To(gomega.Not(gomega.BeNil()))
 			g.Expect(deployment).To(haveSpecificContainer0Image(expectedImage))
 			g.Expect(deployment).To(haveLabelLen(7))
@@ -566,7 +566,7 @@ func TestGitOpsWithoutContinuousGitCheckout(t *testing.T) {
 				instance: *function,
 			}
 
-			expectedImage := s.buildImageAddress("registry.kyma.local")
+			expectedImage := s.buildImageAddress("localhost:32132")
 			g.Expect(deployment).To(gomega.Not(gomega.BeNil()))
 			g.Expect(deployment).To(haveSpecificContainer0Image(expectedImage))
 			g.Expect(deployment).To(haveLabelLen(7))
@@ -689,7 +689,7 @@ func TestGitOpsWithoutContinuousGitCheckout(t *testing.T) {
 func TestGitOps_GitErrorHandling(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
-	rtm := serverlessv1alpha2.NodeJs14
+	rtm := serverlessv1alpha2.NodeJs18
 
 	resourceClient, testEnv := setUpTestEnv(g)
 	defer tearDownTestEnv(g, testEnv)
@@ -771,7 +771,7 @@ func TestGitOps_GitErrorHandling(t *testing.T) {
 func Test_stateFnGitCheckSources(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
-	rtm := serverlessv1alpha2.NodeJs14
+	rtm := serverlessv1alpha2.NodeJs18
 
 	resourceClient, testEnv := setUpTestEnv(g)
 	defer tearDownTestEnv(g, testEnv)

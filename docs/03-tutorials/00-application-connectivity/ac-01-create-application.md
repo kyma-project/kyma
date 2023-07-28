@@ -12,7 +12,7 @@ Before you start, export the name of your application as an environment variable
 export APP_NAME={YOUR_APP_NAME}
 ```
 
->**NOTE:** Read about [Istio sidecars in Kyma and why you want them](../../01-overview/main-areas/service-mesh/smsh-03-istio-sidecars-in-kyma.md). Then, check how to [enable automatic Istio sidecar proxy injection](../../04-operation-guides/operations/smsh-01-istio-enable-sidecar-injection.md). For more details, see [Default Istio setup in Kyma](../../01-overview/main-areas/service-mesh/smsh-02-default-istio-setup-in-kyma.md).
+>**NOTE:** Read about [Istio sidecars in Kyma and why you want them](../../01-overview/service-mesh/smsh-03-istio-sidecars-in-kyma.md). Then, check how to [enable automatic Istio sidecar proxy injection](../../04-operation-guides/operations/smsh-01-istio-enable-sidecar-injection.md). For more details, see [Default Istio setup in Kyma](../../01-overview/service-mesh/smsh-02-default-istio-setup-in-kyma.md).
 
 ## Create an Application
 

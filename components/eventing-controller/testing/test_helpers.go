@@ -5,23 +5,25 @@ import (
 	"net"
 	"net/http"
 
-	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/dynamic"
 	dynamicfake "k8s.io/client-go/dynamic/fake"
 
+	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
+
 	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
-	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+
+	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
 
 const (
@@ -32,6 +34,8 @@ const (
 	OrderCreatedCleanEvent   = "order.cre-ä+ted.v2"
 	EventSourceUnclean       = "s>o>*u*r>c.e"
 	EventSourceClean         = "source"
+
+	EventMeshProtocol = "BEB"
 
 	EventMeshNamespaceNS        = "/default/ns"
 	EventMeshNamespace          = "/default/kyma/id"
@@ -126,9 +130,9 @@ func WithStatusCleanEventTypes(cleanEventTypes []string) SubscriptionV1alpha1Opt
 	}
 }
 
-func WithV1alpha1ProtocolBEB() SubscriptionV1alpha1Opt {
+func WithV1alpha1ProtocolEventMesh() SubscriptionV1alpha1Opt {
 	return func(s *eventingv1alpha1.Subscription) {
-		s.Spec.Protocol = "BEB"
+		s.Spec.Protocol = EventMeshProtocol
 	}
 }
 
@@ -142,11 +146,11 @@ func WithV1alpha1ProtocolSettings(p *eventingv1alpha1.ProtocolSettings) Subscrip
 func AddV1alpha1Filter(eventSource, eventType string, subscription *eventingv1alpha1.Subscription) {
 	if subscription.Spec.Filter == nil {
 		subscription.Spec.Filter = &eventingv1alpha1.BEBFilters{
-			Filters: []*eventingv1alpha1.BEBFilter{},
+			Filters: []*eventingv1alpha1.EventMeshFilter{},
 		}
 	}
 
-	filter := &eventingv1alpha1.BEBFilter{
+	filter := &eventingv1alpha1.EventMeshFilter{
 		EventSource: &eventingv1alpha1.Filter{
 			Type:     "exact",
 			Property: "source",
@@ -175,7 +179,7 @@ func WithV1alpha1Filter(eventSource, eventType string) SubscriptionV1alpha1Opt {
 func WithV1alpha1EmptyFilter() SubscriptionV1alpha1Opt {
 	return func(subscription *eventingv1alpha1.Subscription) {
 		subscription.Spec.Filter = &eventingv1alpha1.BEBFilters{
-			Filters: []*eventingv1alpha1.BEBFilter{},
+			Filters: []*eventingv1alpha1.EventMeshFilter{},
 		}
 	}
 }
@@ -399,7 +403,7 @@ func WithService(name, host string) APIRuleOption {
 
 func WithPath() APIRuleOption {
 	return func(r *apigatewayv1beta1.APIRule) {
-		handlerOAuth := object.OAuthHandlerName
+		handlerOAuth := object.OAuthHandlerNameOAuth2Introspection
 		handler := apigatewayv1beta1.Handler{
 			Name: handlerOAuth,
 		}
@@ -452,7 +456,7 @@ func NewSubscription(name, namespace string, opts ...SubscriptionOpt) *eventingv
 	return newSub
 }
 
-func NewBEBSubscription(name, contentMode string, webhookURL string, events types.Events,
+func NewEventMeshSubscription(name, contentMode string, webhookURL string, events types.Events,
 	webhookAuth *types.WebhookAuth) *types.Subscription {
 	return &types.Subscription{
 		Name:            name,
@@ -473,7 +477,7 @@ func NewSampleEventMeshSubscription() *types.Subscription {
 		},
 	}
 
-	return NewBEBSubscription("ev2subs1", types.ContentModeStructured, "https://webhook.xxx.com",
+	return NewEventMeshSubscription("ev2subs1", types.ContentModeStructured, "https://webhook.xxx.com",
 		eventType, nil)
 }
 
@@ -541,16 +545,16 @@ func WithStatusJSBackendTypes(types []eventingv1alpha2.JetStreamTypes) Subscript
 
 func WithEmsSubscriptionStatus(status string) SubscriptionOpt {
 	return func(sub *eventingv1alpha2.Subscription) {
-		sub.Status.Backend.EmsSubscriptionStatus = &eventingv1alpha2.EmsSubscriptionStatus{
+		sub.Status.Backend.EventMeshSubscriptionStatus = &eventingv1alpha2.EventMeshSubscriptionStatus{
 			Status: status,
 		}
 	}
 }
 
-func WithWebhookAuthForBEB() SubscriptionOpt {
+func WithWebhookAuthForEventMesh() SubscriptionOpt {
 	return func(s *eventingv1alpha2.Subscription) {
 		s.Spec.Config = map[string]string{
-			eventingv1alpha2.Protocol:                        "BEB",
+			eventingv1alpha2.Protocol:                        EventMeshProtocol,
 			eventingv1alpha2.ProtocolSettingsContentMode:     "BINARY",
 			eventingv1alpha2.ProtocolSettingsExemptHandshake: "true",
 			eventingv1alpha2.ProtocolSettingsQos:             "AT_LEAST_ONCE",
@@ -591,12 +595,12 @@ func WithInvalidWebhookAuthGrantType() SubscriptionOpt {
 	}
 }
 
-func WithProtocolBEB() SubscriptionOpt {
+func WithProtocolEventMesh() SubscriptionOpt {
 	return func(s *eventingv1alpha2.Subscription) {
 		if s.Spec.Config == nil {
 			s.Spec.Config = map[string]string{}
 		}
-		s.Spec.Config[eventingv1alpha2.Protocol] = "BEB"
+		s.Spec.Config[eventingv1alpha2.Protocol] = EventMeshProtocol
 	}
 }
 
@@ -621,7 +625,7 @@ func WithExactTypeMatching() SubscriptionOpt {
 	return WithTypeMatching(eventingv1alpha2.TypeMatchingExact)
 }
 
-// WithStandardTypeMatching is a SubscriptionOpt for creating a Subscription with an standard type matching.
+// WithStandardTypeMatching is a SubscriptionOpt for creating a Subscription with a standard type matching.
 func WithStandardTypeMatching() SubscriptionOpt {
 	return WithTypeMatching(eventingv1alpha2.TypeMatchingStandard)
 }

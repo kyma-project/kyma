@@ -18,46 +18,6 @@ ci-compass:
 	npm install
 	npm run test-compass
 
-.PHONY: ci-skr
-ci-skr:
-	npm install
-	npm run test-skr
-
-.PHONY: ci-skr-own-cluster
-ci-skr-own-cluster:
-	npm install
-	npm run test-skr-own-cluster
-
-.PHONY: ci-skr-provision
-ci-skr-provision:
-	npm install
-	npm run test-skr-provision
-
-.PHONY: ci-skr-deprovision
-ci-skr-deprovision:
-	npm install
-	npm run test-skr-deprovision
-
-.PHONY: ci-skr-nightly
-ci-skr-nightly:
-	npm install
-	npm run nightly-skr
-
-.PHONY: ci-test-skr-nightly
-ci-test-skr-nightly:
-	npm install
-	npm run test-nightly-skr
-
-.PHONY: ci-skr-aws-upgrade-integration
-ci-skr-aws-upgrade-integration:
-	npm install
-	npm run test-skr-aws-upgrade-integration
-
-.PHONY: ci-skr-svcat-migration
-ci-skr-svcat-migration:
-	npm install
-	npm run test-skr-svcat-migration
-
 .PHONY: ci-pre-upgrade
 ci-pre-upgrade:
 	npm install

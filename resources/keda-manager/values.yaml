@@ -4,17 +4,17 @@ global:
   images:
     keda_manager:
       name: "keda-manager"
-      version: "v20230516-35a38a26"
+      version: "v20230719-22acef2b"
       directory: "prod"
     keda:
       name: "keda"
-      version: "2.10.1"
+      version: "2.11.1"
       directory: "prod/external/ghcr.io/kedacore"
     keda_admission_webhooks:
       name: "keda-admission-webhooks"
-      version: "2.10.1"
+      version: "2.11.1"
       directory: "prod/external/ghcr.io/kedacore"
     keda_metrics_apiserver:
       name: "keda-metrics-apiserver"
-      version: "2.10.1"
+      version: "2.11.1"
       directory: "prod/external/ghcr.io/kedacore"

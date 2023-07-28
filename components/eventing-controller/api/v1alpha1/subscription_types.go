@@ -75,7 +75,7 @@ type Filter struct {
 }
 
 // Defines the BEB filter element as a combination of two CE filter elements.
-type BEBFilter struct {
+type EventMeshFilter struct {
 	// Defines the source of the CE filter.
 	EventSource *Filter `json:"eventSource"`
 
@@ -83,7 +83,7 @@ type BEBFilter struct {
 	EventType *Filter `json:"eventType"`
 }
 
-func (bf *BEBFilter) hash() (uint64, error) {
+func (bf *EventMeshFilter) hash() (uint64, error) {
 	return hashstructure.Hash(bf, hashstructure.FormatV2, nil)
 }
 
@@ -94,7 +94,7 @@ type BEBFilters struct {
 	// +optional
 	Dialect string `json:"dialect,omitempty"`
 
-	Filters []*BEBFilter `json:"filters"`
+	Filters []*EventMeshFilter `json:"filters"`
 }
 
 // Deduplicate returns a deduplicated copy of BEBFilters.

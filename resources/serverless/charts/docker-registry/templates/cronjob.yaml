@@ -3,6 +3,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: {{ template "docker-registry.name" . }}-image-gc
+  namespace: {{ .Release.Namespace }}
 spec:
   # Not using a common time slice to avoid load spikes.
   schedule: "42 * * * *"

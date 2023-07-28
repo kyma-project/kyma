@@ -94,14 +94,17 @@ func main() {
 	logWithCtx.Info("setting up webhook certificates and webhook secret")
 	// we need to ensure the certificates and the webhook secret as early as possible
 	// because the webhook server needs to read it from disk to start.
-	if err := resources.SetupCertificates(
-		context.Background(),
-		cfg.SecretName,
-		cfg.SystemNamespace,
-		cfg.ServiceName,
-		logWithCtx.Named("setup-certificates")); err != nil {
+	result, err := resources.SetupCertificates(context.Background(), cfg.SecretName, cfg.SystemNamespace, cfg.ServiceName,
+		logWithCtx.Named("setup-certificates"))
+	if err != nil {
 		logWithCtx.Error(err, "failed to setup certificates and webhook secret")
 		os.Exit(1)
+	}
+	if result == resources.Updated {
+		setupLog.Info("certificate updated successfully, restarting")
+		//This is not an elegant solution, but the webhook need to reconfigure itself to use updated certificate.
+		//Cert-watcher from controller-runtime should refresh the certificate, but it doesn't work.
+		os.Exit(0)
 	}
 
 	logWithCtx.Info("setting up webhook server")

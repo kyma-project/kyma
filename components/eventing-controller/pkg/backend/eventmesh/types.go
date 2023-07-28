@@ -21,6 +21,8 @@ func (e *HTTPStatusError) Is(target error) bool {
 type OAuth2ClientCredentials struct {
 	ClientID     string
 	ClientSecret string
+	TokenURL     string
+	CertsURL     string
 }
 
 type Response struct {

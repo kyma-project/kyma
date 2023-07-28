@@ -5,20 +5,20 @@ global:
   images:
     eventing_controller:
       name: eventing-controller
-      version: PR-17450
+      version: PR-17839
       directory: dev
       pullPolicy: "IfNotPresent"
     publisher_proxy:
       name: event-publisher-proxy
-      version: v20230503-d232ed76
-      directory: prod
+      version: PR-17835
+      directory: dev
     certHandler:
       name: eventing-webhook-certificates
-      version: v20230502-386f07fc
+      version: 1.7.0
       directory: prod
     nats:
       name: nats
-      version: v20230418-2.9.16-alpine3.17
+      version: v20230620-2.9.18-alpine3.18
       directory: prod/external
     nats_config_reloader:
       name: natsio/nats-server-config-reloader

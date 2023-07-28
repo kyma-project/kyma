@@ -5,8 +5,8 @@ global:
   images:
     compass_runtime_agent:
       name: "compass-runtime-agent"
-      version: "PR-17528"
-      directory: "dev"
+      version: "v20230724-3559a1b6"
+      directory: "prod"
   istio:
     gateway:
       name: kyma-gateway
@@ -19,7 +19,7 @@ compassRuntimeAgent:
   image:
     pullPolicy: IfNotPresent
   sync:
-    controllerSyncPeriod: 15s
+    controllerSyncPeriod: 180s
     minimalConfigSyncTime: 15s
   resources:
     systemNamespace: "kyma-system"

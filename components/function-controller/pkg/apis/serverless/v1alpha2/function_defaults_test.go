@@ -59,7 +59,7 @@ func TestSetDefaults(t *testing.T) {
 		"Should do nothing": {
 			givenFunc: Function{
 				Spec: FunctionSpec{
-					Runtime: NodeJs14,
+					Runtime: NodeJs18,
 					ResourceConfiguration: &ResourceConfiguration{
 						Function: ResourceRequirementsBuilder{}.Limits("150m", "158Mi").Requests("90m", "84Mi").Build(),
 						Build:    ResourceRequirementsBuilder{}.Limits("400m", "321Mi").Requests("374m", "300Mi").Build(),
@@ -71,7 +71,7 @@ func TestSetDefaults(t *testing.T) {
 				},
 			},
 			expectedFunc: Function{Spec: FunctionSpec{
-				Runtime: NodeJs14,
+				Runtime: NodeJs18,
 				ResourceConfiguration: &ResourceConfiguration{
 					Function: ResourceRequirementsBuilder{}.Limits("150m", "158Mi").Requests("90m", "84Mi").Build(),
 					Build:    ResourceRequirementsBuilder{}.Limits("400m", "321Mi").Requests("374m", "300Mi").Build(),
@@ -239,7 +239,7 @@ func TestSetDefaults(t *testing.T) {
 					},
 				},
 				Spec: FunctionSpec{
-					Runtime: NodeJs14,
+					Runtime: NodeJs18,
 				},
 			},
 			expectedFunc: Function{
@@ -249,7 +249,7 @@ func TestSetDefaults(t *testing.T) {
 						BuildResourcesPresetLabel:    "slow",
 					},
 				}, Spec: FunctionSpec{
-					Runtime: NodeJs14,
+					Runtime: NodeJs18,
 					ResourceConfiguration: &ResourceConfiguration{
 						Function: SRuntimeResourcesBuilder.Build(),
 						Build:    slowBuildResourcesBuilder.Build(),
@@ -262,7 +262,7 @@ func TestSetDefaults(t *testing.T) {
 			givenFunc: Function{
 				ObjectMeta: v1.ObjectMeta{},
 				Spec: FunctionSpec{
-					Runtime: NodeJs14,
+					Runtime: NodeJs18,
 					ResourceConfiguration: &ResourceConfiguration{
 						Build: &ResourceRequirements{
 							Profile: "slow",
@@ -275,7 +275,7 @@ func TestSetDefaults(t *testing.T) {
 			},
 			expectedFunc: Function{
 				ObjectMeta: v1.ObjectMeta{}, Spec: FunctionSpec{
-					Runtime: NodeJs14,
+					Runtime: NodeJs18,
 					ResourceConfiguration: &ResourceConfiguration{
 						Function: SRuntimeResourcesBuilder.Profile("S").Build(),
 						Build:    slowBuildResourcesBuilder.Profile("slow").Build(),
@@ -293,7 +293,7 @@ func TestSetDefaults(t *testing.T) {
 					},
 				},
 				Spec: FunctionSpec{
-					Runtime: NodeJs14,
+					Runtime: NodeJs18,
 					ResourceConfiguration: &ResourceConfiguration{
 						Function: ResourceRequirementsBuilder{}.Requests("15m", "15Mi").Build(),
 						Build:    ResourceRequirementsBuilder{}.Requests("250m", "250Mi").Build(),
@@ -310,7 +310,7 @@ func TestSetDefaults(t *testing.T) {
 						BuildResourcesPresetLabel:    "slow",
 					},
 				}, Spec: FunctionSpec{
-					Runtime: NodeJs14,
+					Runtime: NodeJs18,
 					ResourceConfiguration: &ResourceConfiguration{
 						Function: SRuntimeResourcesBuilder.Build(),
 						Build:    slowBuildResourcesBuilder.Build(),
@@ -327,7 +327,7 @@ func TestSetDefaults(t *testing.T) {
 			givenFunc: Function{
 				ObjectMeta: v1.ObjectMeta{},
 				Spec: FunctionSpec{
-					Runtime: NodeJs14,
+					Runtime: NodeJs18,
 					ResourceConfiguration: &ResourceConfiguration{
 						Function: ResourceRequirementsBuilder{}.Requests("15m", "15Mi").Profile("S").Build(),
 						Build:    ResourceRequirementsBuilder{}.Requests("250m", "250Mi").Profile("slow").Build(),
@@ -338,7 +338,7 @@ func TestSetDefaults(t *testing.T) {
 			expectedFunc: Function{
 				ObjectMeta: v1.ObjectMeta{},
 				Spec: FunctionSpec{
-					Runtime: NodeJs14,
+					Runtime: NodeJs18,
 					ResourceConfiguration: &ResourceConfiguration{
 						Function: SRuntimeResourcesBuilder.Profile("S").Build(),
 						Build:    slowBuildResourcesBuilder.Profile("slow").Build(),

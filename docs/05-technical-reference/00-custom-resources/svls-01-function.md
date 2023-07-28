@@ -2,8 +2,6 @@
 title: Function
 ---
 
->**WARNING:** The current API version is `serverless.kyma-project.io/v1alpha2`. The `serverless.kyma-project.io/v1alpha1` version is still supported but deprecated. For the v1alpha1 version, see the [previous Function documentation](https://github.com/kyma-project/kyma/blob/release-2.5/docs/05-technical-reference/00-custom-resources/svls-01-function.md).
-
 The `functions.serverless.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to manage Functions within Kyma. To get the up-to-date CRD and show the output in the YAML format, run this command:
 
 ```bash
@@ -23,7 +21,7 @@ metadata:
   labels:
     app: my-test-function
 spec:
-  runtime: nodejs16
+  runtime: nodejs18
   source:
     inline:
       dependencies: |
@@ -104,7 +102,7 @@ spec:
       auth:
         type: basic
         secretName: secret-name
-  runtime: "nodejs16"
+  runtime: "nodejs18"
 ```
 
 ## Custom resource parameters
@@ -115,80 +113,58 @@ spec:
 
 | Parameter | Type | Description |
 | ---- | ----------- | ---- |
-| **annotations**  | map\[string\]string | Annotations will be used in Deployment's PodTemplate and will be applied on the function's runtime Pod. |
-| **env**  | \[\]object | Env specifies an array of key-value pairs to be used as environment variables for the Function. You can define values as static strings or reference values from ConfigMaps or Secrets. |
-| **env.&#x200b;name** (required) | string | Name of the environment variable. Must be a C_IDENTIFIER. |
-| **env.&#x200b;value**  | string | Variable references $(VAR_NAME) are expanded using the previously defined environment variables in the container and any service environment variables. If a variable cannot be resolved, the reference in the input string will be unchanged. Double $ are reduced to a single $, which allows for escaping the $(VAR_NAME) syntax: i.e. "$(VAR_NAME)" will produce the string literal "$(VAR_NAME)". Escaped references will never be expanded, regardless of whether the variable exists or not. Defaults to "". |
-| **env.&#x200b;valueFrom**  | object | Source for the environment variable's value. Cannot be used if value is not empty. |
-| **env.&#x200b;valueFrom.&#x200b;configMapKeyRef**  | object | Selects a key of a ConfigMap. |
-| **env.&#x200b;valueFrom.&#x200b;configMapKeyRef.&#x200b;key** (required) | string | The key to select. |
-| **env.&#x200b;valueFrom.&#x200b;configMapKeyRef.&#x200b;name**  | string | Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid? |
-| **env.&#x200b;valueFrom.&#x200b;configMapKeyRef.&#x200b;optional**  | boolean | Specify whether the ConfigMap or its key must be defined |
-| **env.&#x200b;valueFrom.&#x200b;fieldRef**  | object | Selects a field of the pod: supports metadata.name, metadata.namespace, `metadata.labels['<KEY>']`, `metadata.annotations['<KEY>']`, spec.nodeName, spec.serviceAccountName, status.hostIP, status.podIP, status.podIPs. |
-| **env.&#x200b;valueFrom.&#x200b;fieldRef.&#x200b;apiVersion**  | string | Version of the schema the FieldPath is written in terms of, defaults to "v1". |
-| **env.&#x200b;valueFrom.&#x200b;fieldRef.&#x200b;fieldPath** (required) | string | Path of the field to select in the specified API version. |
-| **env.&#x200b;valueFrom.&#x200b;resourceFieldRef**  | object | Selects a resource of the container: only resources limits and requests (limits.cpu, limits.memory, limits.ephemeral-storage, requests.cpu, requests.memory and requests.ephemeral-storage) are currently supported. |
-| **env.&#x200b;valueFrom.&#x200b;resourceFieldRef.&#x200b;containerName**  | string | Container name: required for volumes, optional for env vars |
-| **env.&#x200b;valueFrom.&#x200b;resourceFieldRef.&#x200b;divisor**  | \{integer or string\} | Specifies the output format of the exposed resources, defaults to "1" |
-| **env.&#x200b;valueFrom.&#x200b;resourceFieldRef.&#x200b;resource** (required) | string | Required: resource to select |
-| **env.&#x200b;valueFrom.&#x200b;secretKeyRef**  | object | Selects a key of a secret in the pod's namespace |
-| **env.&#x200b;valueFrom.&#x200b;secretKeyRef.&#x200b;key** (required) | string | The key of the secret to select from.  Must be a valid secret key. |
-| **env.&#x200b;valueFrom.&#x200b;secretKeyRef.&#x200b;name**  | string | Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid? |
-| **env.&#x200b;valueFrom.&#x200b;secretKeyRef.&#x200b;optional**  | boolean | Specify whether the Secret or its key must be defined |
-| **labels**  | map\[string\]string | Labels will be used in Deployment's PodTemplate and will be applied on the function's runtime Pod. |
-| **replicas**  | integer | Replicas defines the exact number of Function's Pods to run at a time. If ScaleConfig is configured, or if Function is targeted by an external scaler, then the Replicas field is used by the relevant HorizontalPodAutoscaler to control the number of active replicas. |
-| **resourceConfiguration**  | object | ResourceConfiguration specifies resources requested by Function and build Job. |
-| **resourceConfiguration.&#x200b;build**  | object | Build specifies resources requested by the build Job's Pod. |
-| **resourceConfiguration.&#x200b;build.&#x200b;profile**  | string | Profile defines name of predefined set of values of resource. Can't be used at the same time with Resources. |
-| **resourceConfiguration.&#x200b;build.&#x200b;resources**  | object | Resources defines amount of resources available for the Pod to use. Can't be used at the same time with Profile. |
-| **resourceConfiguration.&#x200b;build.&#x200b;resources.&#x200b;limits**  | map\[string\]\{integer or string\} | Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
-| **resourceConfiguration.&#x200b;build.&#x200b;resources.&#x200b;requests**  | map\[string\]\{integer or string\} | Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
-| **resourceConfiguration.&#x200b;function**  | object | Function specifies resources requested by the Function's Pod. |
-| **resourceConfiguration.&#x200b;function.&#x200b;profile**  | string | Profile defines name of predefined set of values of resource. Can't be used at the same time with Resources. |
-| **resourceConfiguration.&#x200b;function.&#x200b;resources**  | object | Resources defines amount of resources available for the Pod to use. Can't be used at the same time with Profile. |
-| **resourceConfiguration.&#x200b;function.&#x200b;resources.&#x200b;limits**  | map\[string\]\{integer or string\} | Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
-| **resourceConfiguration.&#x200b;function.&#x200b;resources.&#x200b;requests**  | map\[string\]\{integer or string\} | Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
-| **runtime** (required) | string | Runtime specifies the runtime of the Function. The available values are `nodejs16`, `nodejs18`, and `python39`. |
-| **runtimeImageOverride**  | string | RuntimeImageOverride specifies the runtimes image which must be used instead of the default one. |
-| **scaleConfig**  | object | ScaleConfig defines minimum and maximum number of Function's Pods to run at a time. When it is configured, a HorizontalPodAutoscaler will be deployed and will control the Replicas field to scale Function based on the CPU utilisation. |
-| **scaleConfig.&#x200b;maxReplicas** (required) | integer | MaxReplicas defines the maximum number of Function's Pods to run at a time. |
-| **scaleConfig.&#x200b;minReplicas** (required) | integer | MinReplicas defines the minimum number of Function's Pods to run at a time. |
-| **secretMounts**  | \[\]object | SecretMounts specifies Secrets to mount into the Function's container filesystem. |
-| **secretMounts.&#x200b;mountPath** (required) | string | MountPath specifies path within the container at which the Secret should be mounted. |
-| **secretMounts.&#x200b;secretName** (required) | string | SecretName specifies name of the Secret in the Function's Namespace to use. |
-| **source** (required) | object | Source contains the Function's specification. |
-| **source.&#x200b;gitRepository**  | object | GitRepository defines Function as git-sourced. Can't be used at the same time with Inline. |
-| **source.&#x200b;gitRepository.&#x200b;auth**  | object | Auth specifies that you must authenticate to the Git repository. Required for SSH. |
-| **source.&#x200b;gitRepository.&#x200b;auth.&#x200b;secretName** (required) | string | SecretName specifies the name of the Secret with credentials used by the Function Controller to authenticate to the Git repository in order to fetch the Function's source code and dependencies. This Secret must be stored in the same Namespace as the Function CR. |
-| **source.&#x200b;gitRepository.&#x200b;auth.&#x200b;type** (required) | string | Type defines if you must authenticate to the repository with a password or token (`basic`), or an SSH key (`key`). For SSH, this parameter must be set to `key`. |
-| **source.&#x200b;gitRepository.&#x200b;baseDir**  | string | BaseDir specifies the relative path to the Git directory that contains the source code from which the Function is built. |
-| **source.&#x200b;gitRepository.&#x200b;reference**  | string | Reference specifies either the branch name, tag or the commit revision from which the Function Controller automatically fetches the changes in the Function's code and dependencies. |
-| **source.&#x200b;gitRepository.&#x200b;url** (required) | string | URL provides the address to the Git repository with the Function's code and dependencies. Depending on whether the repository is public or private and what authentication method is used to access it, the URL must start with the `http(s)`, `git`, or `ssh` prefix. |
-| **source.&#x200b;inline**  | object | Inline defines Function as the inline Function. Can't be used at the same time with GitRepository. |
-| **source.&#x200b;inline.&#x200b;dependencies**  | string | Dependencies specifies the Function's dependencies. |
-| **source.&#x200b;inline.&#x200b;source** (required) | string | Source provides the Function's full source code. |
-| **template**  | object | Deprecated: `.spec.Labels` and `.spec.Annotations` should be used to annotate/label function's pods. |
-| **template.&#x200b;annotations**  | map\[string\]string | Deprecated: `.spec.Annotations` should be used to annotate function's pods. |
-| **template.&#x200b;labels**  | map\[string\]string | Deprecated: `.spec.Labels` should be used to label function's pods. |
+| **annotations**  | map\[string\]string | Defines annotations used in Deployment's PodTemplate and applied on the Function's runtime Pod. |
+| **env**  | \[\]object | Specifies an array of key-value pairs to be used as environment variables for the Function. You can define values as static strings or reference values from ConfigMaps or Secrets. For configuration details, see the [official Kubernetes documentation](https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/). |
+| **labels**  | map\[string\]string | Defines labels used in Deployment's PodTemplate and applied on the Function's runtime Pod. |
+| **replicas**  | integer | Defines the exact number of Function's Pods to run at a time. If **ScaleConfig** is configured, or if the Function is targeted by an external scaler, then the **Replicas** field is used by the relevant HorizontalPodAutoscaler to control the number of active replicas. |
+| **resourceConfiguration**  | object | Specifies resources requested by the Function and the build Job. |
+| **resourceConfiguration.&#x200b;build**  | object | Specifies resources requested by the build Job's Pod. |
+| **resourceConfiguration.&#x200b;build.&#x200b;profile**  | string | Defines the name of the predefined set of values of the resource. Can't be used together with **Resources**. |
+| **resourceConfiguration.&#x200b;build.&#x200b;resources**  | object | Defines the amount of resources available for the Pod. Can't be used together with **Profile**. For configuration details, see the [official Kubernetes documentation](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/). |
+| **resourceConfiguration.&#x200b;function**  | object | Specifies resources requested by the Function's Pod. |
+| **resourceConfiguration.&#x200b;function.&#x200b;profile**  | string | Defines the name of the predefined set of values of the resource. Can't be used together with **Resources**. |
+| **resourceConfiguration.&#x200b;function.&#x200b;resources**  | object | Defines the amount of resources available for the Pod. Can't be used together with **Profile**. For configuration details, see the [official Kubernetes documentation](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/). |
+| **runtime** (required) | string | Specifies the runtime of the Function. The available values are `nodejs16` - deprecated, `nodejs18`, and `python39`. |
+| **runtimeImageOverride**  | string | Specifies the runtime image used instead of the default one. |
+| **scaleConfig**  | object | Defines the minimum and maximum number of Function's Pods to run at a time. When it is configured, a HorizontalPodAutoscaler will be deployed and will control the **Replicas** field to scale the Function based on the CPU utilisation. |
+| **scaleConfig.&#x200b;maxReplicas** (required) | integer | Defines the maximum number of Function's Pods to run at a time. |
+| **scaleConfig.&#x200b;minReplicas** (required) | integer | Defines the minimum number of Function's Pods to run at a time. |
+| **secretMounts**  | \[\]object | Specifies Secrets to mount into the Function's container filesystem. |
+| **secretMounts.&#x200b;mountPath** (required) | string | Specifies the path within the container where the Secret should be mounted. |
+| **secretMounts.&#x200b;secretName** (required) | string | Specifies the name of the Secret in the Function's Namespace. |
+| **source** (required) | object | Contains the Function's source code configuration. |
+| **source.&#x200b;gitRepository**  | object | Defines the Function as git-sourced. Can't be used together with **Inline**. |
+| **source.&#x200b;gitRepository.&#x200b;auth**  | object | Specifies the authentication method. Required for SSH. |
+| **source.&#x200b;gitRepository.&#x200b;auth.&#x200b;secretName** (required) | string | Specifies the name of the Secret with credentials used by the Function Controller to authenticate to the Git repository in order to fetch the Function's source code and dependencies. This Secret must be stored in the same Namespace as the Function CR. |
+| **source.&#x200b;gitRepository.&#x200b;auth.&#x200b;type** (required) | string | Defines the repository authentication method. The value is either `basic` if you use a password or token, or `key` if you use an SSH key. |
+| **source.&#x200b;gitRepository.&#x200b;baseDir**  | string | Specifies the relative path to the Git directory that contains the source code from which the Function is built. |
+| **source.&#x200b;gitRepository.&#x200b;reference**  | string | Specifies either the branch name, tag or commit revision from which the Function Controller automatically fetches the changes in the Function's code and dependencies. |
+| **source.&#x200b;gitRepository.&#x200b;url** (required) | string | Specifies the URL of the Git repository with the Function's code and dependencies. Depending on whether the repository is public or private and what authentication method is used to access it, the URL must start with the `http(s)`, `git`, or `ssh` prefix. |
+| **source.&#x200b;inline**  | object | Defines the Function as the inline Function. Can't be used together with **GitRepository**. |
+| **source.&#x200b;inline.&#x200b;dependencies**  | string | Specifies the Function's dependencies. |
+| **source.&#x200b;inline.&#x200b;source** (required) | string | Specifies the Function's full source code. |
+| **template**  | object | Deprecated: Use **Labels** and **Annotations** to label and/or annotate Function's Pods. |
+| **template.&#x200b;annotations**  | map\[string\]string | Deprecated: Use **FunctionSpec.Annotations** to annotate Function's Pods. |
+| **template.&#x200b;labels**  | map\[string\]string | Deprecated: Use **FunctionSpec.Labels**  to label Function's Pods. |
 
 **Status:**
 
 | Parameter | Type | Description |
 | ---- | ----------- | ---- |
-| **baseDir**  | string | BaseDir specifies the relative path to the Git directory that contains the source code from which the Function is built. |
-| **commit**  | string | Commit hash used to build function |
-| **conditions**  | \[\]object | An array of conditions describing the status of the parser |
-| **conditions.&#x200b;lastTransitionTime**  | string | Last time the condition transitioned from one status to another. |
-| **conditions.&#x200b;message**  | string | A human-readable message indicating details about the transition. |
-| **conditions.&#x200b;reason**  | string | The reason for the condition's last transition. |
-| **conditions.&#x200b;status** (required) | string | Status of the condition, one of True, False, Unknown. |
-| **conditions.&#x200b;type**  | string | Type of function condition. |
-| **podSelector**  | string | Pod selector used to match pods in function deployment |
-| **reference**  | string | Reference specifies either the branch name, tag or the commit revision from which the Function Controller automatically fetches the changes in the Function's code and dependencies. |
-| **replicas**  | integer | Total number of non-terminated pods targeted by this function |
-| **runtime**  | string | Runtime type of function |
-| **runtimeImage**  | string | Runtime image version used to build and run function pods |
-| **runtimeImageOverride**  | string | Deprecated: RuntimeImageOverride exists for historical compatibility and should be removed with v1alpha3 version. RuntimeImage has the override image if it isn't empty. |
+| **baseDir**  | string | Specifies the relative path to the Git directory that contains the source code from which the Function is built. |
+| **commit**  | string | Specifies the commit hash used to build the Function. |
+| **conditions**  | \[\]object | Specifies an array of conditions describing the status of the parser. |
+| **conditions.&#x200b;lastTransitionTime**  | string | Specifies the last time the condition transitioned from one status to another. |
+| **conditions.&#x200b;message**  | string | Provides a human-readable message indicating details about the transition. |
+| **conditions.&#x200b;reason**  | string | Specifies the reason for the condition's last transition. |
+| **conditions.&#x200b;status** (required) | string | Specifies the status of the condition. The value is either `True`, `False`, or `Unknown`. |
+| **conditions.&#x200b;type**  | string | Specifies the type of the Function's condition. |
+| **podSelector**  | string | Specifies the Pod selector used to match Pods in the Function's Deployment. |
+| **reference**  | string | Specifies either the branch name, tag or commit revision from which the Function Controller automatically fetches the changes in the Function's code and dependencies. |
+| **replicas**  | integer | Specifies the total number of non-terminated Pods targeted by this Function. |
+| **runtime**  | string | Specifies the **Runtime** type of the Function. |
+| **runtimeImage**  | string | Specifies the image version used to build and run the Function's Pods. |
+| **runtimeImageOverride**  | string | Deprecated: Specifies the runtime image version which overrides the **RuntimeImage** status parameter. **RuntimeImageOverride** exists for historical compatibility and should be removed with v1alpha3 version. |
 
 <!-- TABLE-END -->
 
@@ -200,7 +176,7 @@ Processing of a Function CR can succeed, continue, or fail for one of these reas
 | -------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `ConfigMapCreated`               | `ConfigurationReady` | A new ConfigMap was created based on the Function CR definition.                                                                                              |
 | `ConfigMapUpdated`               | `ConfigurationReady` | The existing ConfigMap was updated after changes in the Function CR name, its source code or dependencies.                                                    |
-| `SourceUpdated`                  | `ConfigurationReady` | The Function Controller managed to fetch changes in the Functions's source code and configuration from the Git repository (`type: git`).                |
+| `SourceUpdated`                  | `ConfigurationReady` | The Function Controller managed to fetch changes in the Functions's source code and configuration from the Git repository.                |
 | `SourceUpdateFailed`             | `ConfigurationReady` | The Function Controller failed to fetch changes in the Functions's source code and configuration from the Git repository.                            |
 | `JobFailed`                      | `BuildReady`         | The image with the Function's configuration could not be created due to an error.                                                                             |
 | `JobCreated`                     | `BuildReady`         | The Kubernetes Job resource that builds the Function image was created.                                                                                       |
@@ -215,6 +191,7 @@ Processing of a Function CR can succeed, continue, or fail for one of these reas
 | `DeploymentReady`                | `Running`            | The Function was deployed and is ready.                                                                                                                       |
 | `ServiceCreated`                 | `Running`            | A new Service referencing the Function's Deployment was created.                                                                                              |
 | `ServiceUpdated`                 | `Running`            | The existing Service was updated after applying required changes.                                                                                             |
+| `ServiceFailed`                  | `Running`            | The Function's service could not be created or updated.                                                                                             |
 | `HorizontalPodAutoscalerCreated` | `Running`            | A new Horizontal Pod Scaler referencing the Function's Deployment was created.                                                                                  |
 | `HorizontalPodAutoscalerUpdated` | `Running`            | The existing Horizontal Pod Scaler was updated after applying required changes.                                                                                 |
 | `MinimumReplicasUnavailable`     | `Running`            | Insufficient number of available Replicas. The Function is unhealthy.                                                                                                       |

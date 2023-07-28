@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"strconv"
 
-	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
-	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/mitchellh/hashstructure/v2"
 	"github.com/pkg/errors"
+
+	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
+	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
+	"github.com/kyma-project/kyma/components/eventing-controller/internal/featureflags"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 )
 
 // eventMeshSubscriptionNameMapper maps a Kyma subscription to an ID that can be used on the EventMesh backend,
@@ -52,6 +54,14 @@ func shortenNameAndAppendHash(name string, hash string, maxLength int) string {
 
 func GetHash(subscription *types.Subscription) (int64, error) {
 	hash, err := hashstructure.Hash(subscription, hashstructure.FormatV2, nil)
+	if err != nil {
+		return 0, err
+	}
+	return int64(hash), nil
+}
+
+func GetWebhookAuthHash(webhookAuth *types.WebhookAuth) (int64, error) {
+	hash, err := hashstructure.Hash(webhookAuth, hashstructure.FormatV2, nil)
 	if err != nil {
 		return 0, err
 	}
@@ -209,6 +219,15 @@ func GetCleanedEventMeshSubscription(subscription *types.Subscription) *types.Su
 }
 
 func IsEventMeshSubModified(subscription *types.Subscription, hash int64) (bool, error) {
+	if featureflags.IsEventingWebhookAuthEnabled() {
+		cleanedEventMeshSub := GetCleanedEventMeshSubscription(subscription)
+		newHash, err := GetHash(cleanedEventMeshSub)
+		if err != nil {
+			return false, err
+		}
+		return newHash != hash, nil
+	}
+
 	// generate has of new subscription
 	newHash, err := GetHash(subscription)
 	if err != nil {

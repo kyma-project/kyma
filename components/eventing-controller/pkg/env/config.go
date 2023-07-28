@@ -58,6 +58,9 @@ type Config struct {
 	// EventTypePrefix prefix for the EventType
 	// note: eventType format is <prefix>.<application>.<event>.<version>
 	EventTypePrefix string `envconfig:"EVENT_TYPE_PREFIX" required:"true"`
+
+	// EventingWebhookAuthEnabled enable/disable the Eventing webhook auth feature flag.
+	EventingWebhookAuthEnabled bool `envconfig:"EVENTING_WEBHOOK_AUTH_ENABLED" required:"false" default:"false"`
 }
 
 func GetConfig() Config {

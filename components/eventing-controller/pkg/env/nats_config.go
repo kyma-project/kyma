@@ -39,6 +39,7 @@ type NATSConfig struct {
 	JSStreamRetentionPolicy string `envconfig:"JS_STREAM_RETENTION_POLICY" default:"interest"`
 	JSStreamMaxMessages     int64  `envconfig:"JS_STREAM_MAX_MSGS" default:"-1"`
 	JSStreamMaxBytes        string `envconfig:"JS_STREAM_MAX_BYTES" default:"-1"`
+	JSStreamMaxMsgsPerTopic int64  `envconfig:"JS_STREAM_MAX_MSGS_PER_TOPIC" default:"-1"`
 	// JSStreamDiscardPolicy specifies which events to discard from the stream in case limits are reached
 	//  new: reject new messages for the stream
 	//  old: discard old messages from the stream to make room for new messages
