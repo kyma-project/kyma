@@ -3,8 +3,8 @@ package teststep
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"net/http"
@@ -238,7 +238,8 @@ func (t TracingHTTPCheck) assertTracingResponse(response tracingResponse) error 
 }
 
 const (
-	resourceLabel = "serverless.kyma-project.io/resource"
+	resourceLabel     = "serverless.kyma-project.io/resource=deployment"
+	functionNameLabel = "serverless.kyma-project.io/function-name="
 )
 
 type APIGatewayFunctionCheck struct {
@@ -270,20 +271,12 @@ func (d APIGatewayFunctionCheck) Run() error {
 		return errors.Wrap(err, "while trying to get service")
 	}
 
-	pods, err := d.client.Pods(d.namespace).List(context.Background(), metav1.ListOptions{LabelSelector: resourceLabel})
+	pod, err := d.client.Pods(d.namespace).List(context.Background(), metav1.ListOptions{LabelSelector: fmt.Sprintf("%s,%s=%s", resourceLabel, functionNameLabel, d.name)})
 	if err != nil {
-		return errors.Wrap(err, "while trying to get pods")
+		return errors.Wrap(err, "while trying to get pod")
 	}
 
-	var podSelector corev1.Pod
-
-	for _, element := range pods.Items {
-		if element.Spec.Containers[0].Env[0].Value == d.runtime {
-			podSelector = element
-		}
-	}
-
-	for k, v := range podSelector.ObjectMeta.Labels {
+	for k, v := range pod.Items[0].ObjectMeta.Labels {
 		if val, exists := svc.Spec.Selector[k]; exists {
 			if val == v {
 				delete(svc.Spec.Selector, k)
