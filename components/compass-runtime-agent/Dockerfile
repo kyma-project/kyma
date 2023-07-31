@@ -1,4 +1,4 @@
-FROM europe-docker.pkg.dev/kyma-project/prod/external/golang:1.20.5-alpine3.18 as builder
+FROM europe-docker.pkg.dev/kyma-project/prod/external/golang:1.20.6-alpine3.18 as builder
 
 ARG DOCK_PKG_DIR=/compass-runtime-agent
 WORKDIR $DOCK_PKG_DIR
