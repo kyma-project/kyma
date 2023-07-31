@@ -3,7 +3,7 @@ package teststep
 import (
 	"context"
 	"encoding/json"
-	errors2 "errors"
+	goerrors "errors"
 	"fmt"
 	"io"
 	corev1 "k8s.io/api/core/v1"
@@ -318,7 +318,7 @@ func checkIfContractIsFulfilled(pod corev1.Pod, service corev1.Service) error {
 				delete(service.Spec.Selector, k)
 			} else {
 				err := errors.Errorf("Expected %s but got %s", v, val)
-				errJoined = errors2.Join(err)
+				errJoined = goerrors.Join(err)
 			}
 		}
 	}
@@ -335,11 +335,11 @@ func checkIfRequiredLabelsExists(labels map[string]string, isService bool) error
 	}
 
 	var errJoined error
-	
+
 	for _, label := range requiredLabels {
 		if _, exists := labels[label]; !exists {
 			err := errors.New(fmt.Sprintf("Label %s is missing", label))
-			errJoined = errors2.Join(err)
+			errJoined = goerrors.Join(err)
 		}
 	}
 	return errJoined
