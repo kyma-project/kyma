@@ -6,4 +6,4 @@ spec:
   output:
     otlp:
       endpoint:
-        value: http://tracing-jaeger-collector.kyma-system.svc.cluster.local:4317
+        value: http://tracing-jaeger-collector.default.svc.cluster.local:4317

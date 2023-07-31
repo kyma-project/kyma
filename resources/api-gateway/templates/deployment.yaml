@@ -20,10 +20,6 @@ spec:
         control-plane: controller-manager
         kyma-project.io/component: controller
 {{ include "api-gateway.labels" . | indent 8 }}
-      {{- with .Values.config.annotations }}
-      annotations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
     spec:
       volumes:
       - name: cert
@@ -92,6 +88,6 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
     {{- end }}
-    {{- if .Values.global.priorityClassName }}
-      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName }}
     {{- end }}

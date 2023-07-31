@@ -58,6 +58,7 @@ func main() {
 	// metrics collector
 	metricsCollector := metrics.NewCollector(latency.NewBucketsProvider())
 	prometheus.MustRegister(metricsCollector)
+	metricsCollector.SetHealthStatus(true)
 
 	// Instantiate configured commander.
 	var c commander.Commander
