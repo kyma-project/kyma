@@ -11,7 +11,7 @@ When you complete this tutorial, you get a Function that:
 
 >**NOTE:** To learn more about securing your Function, see the [Expose and secure a workload with OAuth2](../00-api-exposure/apix-05-expose-and-secure-a-workload/apix-05-01-expose-and-secure-workload-oauth2.md) or [Expose and secure a workload with JWT](../00-api-exposure/apix-05-expose-and-secure-a-workload/apix-05-03-expose-and-secure-workload-jwt.md) tutorials.
 
->**TIP:** Read also about [Function’s specification](../../05-technical-reference/svls-08-function-specification.md) if you are interested in its signature, `event` and `context` objects, and custom HTTP responses the Function returns.
+>**TIP:** Read also about [Function’s specification](../../05-technical-reference/svls-07-function-specification.md) if you are interested in its signature, `event` and `context` objects, and custom HTTP responses the Function returns.
 
 ## Prerequisites
 
