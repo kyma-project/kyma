@@ -42,6 +42,7 @@ spec:
           - "--proxyTimeout={{ .Values.deployment.args.proxyTimeout }}"
           - "--proxyCacheTTL={{ .Values.deployment.args.proxyCacheTTL }}"
           - "--requestLogging={{ .Values.deployment.args.requestLogging }}"
+          - "--logLevel={{ .Values.deployment.args.logLevel }}"
         readinessProbe:
           httpGet:
             path: /v1/health

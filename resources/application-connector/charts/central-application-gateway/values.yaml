@@ -10,6 +10,7 @@ deployment:
     proxyTimeout: 10
     proxyCacheTTL: 120
     requestLogging: false
+    logLevel: info
   resources:
     limits:
       cpu: 500m
