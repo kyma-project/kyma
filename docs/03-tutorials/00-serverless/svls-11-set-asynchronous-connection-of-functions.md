@@ -86,14 +86,14 @@ This tutorial shows only one possible use case. There are many more use cases on
    >**NOTE:** The event object provides convenience functions to build and publish events. To send the event, build the Cloud Event. To learn more, read [Function's specification](../../05-technical-reference/svls-07-function-specification.md#event-object-sdk). In addition, your **eventOut.source** key must point to `“kyma”` to use Kyma in-cluster Eventing.
    >**NOTE:** There is a `require('axios')` line even though the Function code is not using it directly. This is needed for the auto-instrumentation to properly handle the outgoing requests sent using the `publishCloudEvent` method (which uses `axios` library under the hood). Without the `axios` import the Function still works, but the published events are not reflected in the trace backend.
 
-1. Apply your emitter Function:
+4. Apply your emitter Function:
 
     ```bash
     kyma apply function
     ```
    Your Function is now built and deployed in Kyma runtime. Kyma exposes it through the APIRule. The incoming payloads are processed by your emitter Function. It then sends the sanitized content to the workload that subscribes to the selected event type. In our case, it's the receiver Function.
 
-2. Test the first Function. Send the payload and see if your HTTP traffic is accepted:
+5. Test the first Function. Send the payload and see if your HTTP traffic is accepted:
 
       ```bash
       export KYMA_DOMAIN={KYMA_DOMAIN_VARIABLE}
