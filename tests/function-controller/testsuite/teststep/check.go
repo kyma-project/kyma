@@ -3,6 +3,7 @@ package teststep
 import (
 	"context"
 	"encoding/json"
+	errors2 "errors"
 	"fmt"
 	"io"
 	corev1 "k8s.io/api/core/v1"
@@ -281,11 +282,11 @@ func (d APIGatewayFunctionCheck) Run() error {
 
 	err = checkIfRequiredLabelsExists(svc.Spec.Selector, true)
 	if err != nil {
-		return errors.Wrap(err, " in service")
+		return errors.Wrap(err, " while checking the service labels")
 	}
 	err = checkIfRequiredLabelsExists(pod.Items[0].ObjectMeta.Labels, false)
 	if err != nil {
-		return errors.Wrap(err, " in pod")
+		return errors.Wrap(err, " while checking the pod labels")
 	}
 
 	err = checkIfContractIsFulfilled(pod.Items[0], *svc)
@@ -309,16 +310,19 @@ func (d APIGatewayFunctionCheck) OnError() error {
 }
 
 func checkIfContractIsFulfilled(pod corev1.Pod, service corev1.Service) error {
+	var errJoined error
+
 	for k, v := range pod.Labels {
 		if val, exists := service.Spec.Selector[k]; exists {
 			if val == v {
 				delete(service.Spec.Selector, k)
 			} else {
-				return errors.Errorf("Expected %s but got %s", v, val)
+				err := errors.Errorf("Expected %s but got %s", v, val)
+				errJoined = errors2.Join(err)
 			}
 		}
 	}
-	return nil
+	return errJoined
 }
 
 func checkIfRequiredLabelsExists(labels map[string]string, isService bool) error {
@@ -330,10 +334,13 @@ func checkIfRequiredLabelsExists(labels map[string]string, isService bool) error
 		}
 	}
 
+	var errJoined error
+	
 	for _, label := range requiredLabels {
 		if _, exists := labels[label]; !exists {
-			return errors.New(fmt.Sprintf("Label %s is missing", label))
+			err := errors.New(fmt.Sprintf("Label %s is missing", label))
+			errJoined = errors2.Join(err)
 		}
 	}
-	return nil
+	return errJoined
 }
