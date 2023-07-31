@@ -36,17 +36,17 @@ create-resources:
 	kubectl label namespace $(NAMESPACE) istio-injection=enabled --overwrite
 
 	@helm template resources/charts/gateway-test/charts/mock-app \
-        --set global.namespace=$(NAMESPACE) \
-        --set mockServiceName=$(MOCK_SERVICE_NAME) \
-        --values resources/charts/gateway-test/values.yaml \
-    | kubectl apply -f -
+		--set global.namespace=$(NAMESPACE) \
+		--set mockServiceName=$(MOCK_SERVICE_NAME) \
+		--values resources/charts/gateway-test/values.yaml \
+		| kubectl apply -f -
 	kubectl rollout status deployment mock-application -n test --timeout=90s
 
 	helm template resources/charts/gateway-test/charts/test \
 		--set namespace=$(NAMESPACE) \
 		--set mockServiceName=$(MOCK_SERVICE_NAME) \
 		--values resources/charts/gateway-test/values.yaml \
-    | kubectl apply -f -
+		| kubectl apply -f -
 
 clean-gateway-test:
 	helm template resources/charts/gateway-test --set namespace=$(NAMESPACE) | kubectl delete -f -
