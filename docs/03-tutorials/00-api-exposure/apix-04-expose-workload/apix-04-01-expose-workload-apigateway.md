@@ -31,7 +31,7 @@ This tutorial shows how to expose an unsecured instance of the HttpBin service o
     </summary>
 
     ```bash
-    export DOMAIN_TO_EXPOSE_WORKLOADS={KYMA_DOMAIN_NAME}
+    export DOMAIN_TO_EXPOSE_WORKLOADS=local.kyma.dev
     export GATEWAY=kyma-system/kyma-gateway
     ```
     </details>
