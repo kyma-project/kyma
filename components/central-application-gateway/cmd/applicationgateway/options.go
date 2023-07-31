@@ -49,7 +49,7 @@ func parseArgs() (opts options) {
 
 func (o options) String() string {
 	return fmt.Sprintf("--externalAPIPort=%d --proxyPort=%d --proxyPortCompass=%d --applicationSecretsNamespace=%s --requestTimeout=%d --proxyTimeout=%d"+
-		" --requestLogging=%t --proxyCacheTTL=%d --kubeConfig=%s --apiServerURL=%s --requestLogging=%s",
+		" --requestLogging=%t --proxyCacheTTL=%d --kubeConfig=%s --apiServerURL=%s --logLevel=%s",
 		o.externalAPIPort, o.proxyPort, o.proxyPortCompass, o.applicationSecretsNamespace, o.requestTimeout, o.proxyTimeout,
 		o.requestLogging, o.proxyCacheTTL, o.kubeConfig, o.apiServerURL, o.logLevel)
 }
