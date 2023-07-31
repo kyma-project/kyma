@@ -92,7 +92,7 @@ You created the `lastorder` Function, and subscribed to the `order.received.v1` 
        http://localhost:3000/myapp/v1/events
    ```
 
-   > **NOTE:** If you want to use a Function to publish a CloudEvent, see the [Event object SDK specification](../../05-technical-reference/svls-08-function-specification.md#event-object-sdk).
+   > **NOTE:** If you want to use a Function to publish a CloudEvent, see the [Event object SDK specification](../../05-technical-reference/svls-07-function-specification.md#event-object-sdk).
 
 ## Verify the legacy event delivery
 
