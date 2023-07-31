@@ -43,6 +43,8 @@ func main() {
 	log.Info("Starting Application Gateway.")
 
 	options := parseArgs()
+
+	log.SetLevel(options.logLevel)
 	log.Infof("Options: %s", options)
 
 	k8sConfig, err := clientcmd.BuildConfigFromFlags(options.apiServerURL, options.kubeConfig)
@@ -61,8 +63,7 @@ func main() {
 		options.applicationSecretsNamespace,
 	)
 	if err != nil {
-		log.Errorf("Unable to create ServiceDefinitionService: '%s'", err.Error())
-		os.Exit(1)
+		log.Fatalf("Unable to create ServiceDefinitionService: '%s'", err.Error())
 	}
 
 	internalHandler := newInternalHandler(serviceDefinitionService, options)
@@ -144,7 +145,7 @@ func addInterruptSignalToRunGroup(g *run.Group) {
 	})
 }
 
-func newInternalHandler(serviceDefinitionService metadata.ServiceDefinitionService, options *options) http.Handler {
+func newInternalHandler(serviceDefinitionService metadata.ServiceDefinitionService, options options) http.Handler {
 	authStrategyFactory := newAuthenticationStrategyFactory(options.proxyTimeout)
 	csrfCl := newCSRFClient(options.proxyTimeout)
 	csrfTokenStrategyFactory := csrfStrategy.NewTokenStrategyFactory(csrfCl)
@@ -152,7 +153,7 @@ func newInternalHandler(serviceDefinitionService metadata.ServiceDefinitionServi
 	return proxy.New(serviceDefinitionService, authStrategyFactory, csrfTokenStrategyFactory, getProxyConfig(options))
 }
 
-func newInternalHandlerForCompass(serviceDefinitionService metadata.ServiceDefinitionService, options *options) http.Handler {
+func newInternalHandlerForCompass(serviceDefinitionService metadata.ServiceDefinitionService, options options) http.Handler {
 	authStrategyFactory := newAuthenticationStrategyFactory(options.proxyTimeout)
 	csrfCl := newCSRFClient(options.proxyTimeout)
 	csrfTokenStrategyFactory := csrfStrategy.NewTokenStrategyFactory(csrfCl)
@@ -160,7 +161,7 @@ func newInternalHandlerForCompass(serviceDefinitionService metadata.ServiceDefin
 	return proxy.NewForCompass(serviceDefinitionService, authStrategyFactory, csrfTokenStrategyFactory, getProxyConfig(options))
 }
 
-func getProxyConfig(options *options) proxy.Config {
+func getProxyConfig(options options) proxy.Config {
 	return proxy.Config{
 		ProxyTimeout:  options.proxyTimeout,
 		ProxyCacheTTL: options.proxyCacheTTL,
