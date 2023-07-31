@@ -30,7 +30,7 @@ type Backend interface {
 	DeleteSubscription(subscription *eventingv1alpha2.Subscription) error
 
 	// DeleteSubscriptionsOnly should delete the JetStream subscriptions only.
-	// The JetStream consumers should not be deleted.
+	// The corresponding JetStream consumers of the subscriptions must not be deleted.
 	DeleteSubscriptionsOnly(subscription *eventingv1alpha2.Subscription) error
 
 	// GetJetStreamSubjects returns a list of subjects appended with stream name and source as prefix if needed
