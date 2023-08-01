@@ -18,8 +18,9 @@ First, create a sample Function that prints out the received event to console:
 1. Go to **Namespaces** and select the default Namespace.
 2. Go to **Workloads** > **Functions** and click **Create Function +**.
 3. Name the Function `lastorder`.
-4. From the **Language** dropdown, choose `nodejs`.
-5. In the **Source** section, replace its source with the following code:
+4. From the **Language** dropdown, choose `JavaScript`.
+5. From the **Runtime** dropdown, choose one of the available `nodejs`.
+6. In the **Source** section, replace its source with the following code:
     ```js
     module.exports = {
       main: async function (event, context) {
@@ -28,8 +29,8 @@ First, create a sample Function that prints out the received event to console:
       } 
     }
     ```
-6. Click **Create**.
-7. Wait a few seconds for the Function to have status `RUNNING`.
+7. Click **Create**.
+8. Wait a few seconds for the Function to have the status `RUNNING`.
 
   </details>
   <details>
