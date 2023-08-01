@@ -66,6 +66,7 @@ var availableScenarios = map[string][]scenario{
 	},
 	"git-auth-integration": {{displayName: "gitauth", scenario: scenarios.GitAuthTestSteps}},
 	"simple-tracing":       {{displayName: "tracing", scenario: scenarios.SimpleFunctionTracingTest}},
+	"simple-api-gateway":   {{displayName: "api-gateway", scenario: scenarios.SimpleFunctionAPIGatewayTest}},
 }
 
 type config struct {
