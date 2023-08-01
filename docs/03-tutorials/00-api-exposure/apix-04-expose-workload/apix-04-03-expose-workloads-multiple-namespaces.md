@@ -22,30 +22,30 @@ This tutorial shows how to expose service endpoints in multiple Namespaces using
   
 3. Depending on whether you use your custom domain or a Kyma domain, export the necessary values as environment variables:
   
-<div tabs name="export-values">
+  <div tabs name="export-values">
 
-  <details>
-  <summary>
-  Custom domain
-  </summary>
-    
-  ```bash
-  export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
-  export GATEWAY=$NAMESPACE_APIRULE/httpbin-gateway
-  ```
-  </details>
+    <details>
+    <summary>
+    Custom domain
+    </summary>
+      
+    ```bash
+    export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
+    export GATEWAY=$NAMESPACE_APIRULE/httpbin-gateway
+    ```
+    </details>
 
-  <details>
-  <summary>
-  Kyma domain
-  </summary>
+    <details>
+    <summary>
+    Kyma domain
+    </summary>
 
-  ```bash
-  export DOMAIN_TO_EXPOSE_WORKLOADS={KYMA_DOMAIN_NAME}
-  export GATEWAY=kyma-system/kyma-gateway
-  ```
-  </details>
-</div> 
+    ```bash
+    export DOMAIN_TO_EXPOSE_WORKLOADS={KYMA_DOMAIN_NAME}
+    export GATEWAY=kyma-system/kyma-gateway
+    ```
+    </details>
+  </div> 
 
 ## Expose and access your workloads in multiple Namespaces
 

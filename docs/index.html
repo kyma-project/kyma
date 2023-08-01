@@ -41,7 +41,14 @@
           
           // remove title metadata section
           hook.beforeEach(function (markdown) {
-            return markdown.replaceAll(/---.*\ntitle: (.*)\n---.*\n/gm, "# $1");
+            markdown = markdown.replaceAll(/---.*\ntitle: (.*)\n---.*\n/gm, "# $1");
+            markdown = markdown.replace(/(<div tabs.*>)((.|\n)*?)(<\/div>)/gm,function(match,g1,g2,g3,g4){
+              let tab = g2.replace(/<details>(.|\n)*?<summary>(\n|\s)*(.*)(.|\n)*?\n.*<\/summary>((.|\n)*?).*<\/details>/gm,
+                "#### **$3**\n$5\n");
+              return '<!-- tabs:start -->\n'+tab+'<!-- tabs:end -->\n'
+            })
+            console.log(markdown)
+            return markdown
           });
           
           // replace aliases with absolute urls for images
@@ -64,6 +71,7 @@
   <!-- Docsify v4 -->
   <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
   <script src="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/js/docsify-themeable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify-tabs@1"></script>
 
   <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/search.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/zoom-image.min.js"></script>
