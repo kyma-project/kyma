@@ -41,7 +41,7 @@
           
           // remove title metadata section
           hook.beforeEach(function (markdown) {
-            return markdown.replaceAll(/---.*\ntitle:.*\n---.*\n/gm, "");
+            return markdown.replaceAll(/---.*\ntitle: (.*)\n---.*\n/gm, "# $1");
           });
           
           // replace aliases with absolute urls for images
