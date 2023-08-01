@@ -19,7 +19,7 @@ First, let's create the Function and apply it.
 3. Click on **Create Function**.
 4. Name the Function `hello-world`.
 5. From the **Language** dropdown, choose `JavaScript`.
-6. From the **Runtime** dropdown choose one of the available `nodejs`.
+6. From the **Runtime** dropdown, choose one of the available `nodejs`.
 7. Paste the following source code:
 ```javascript
 module.exports = {
