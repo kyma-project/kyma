@@ -43,7 +43,7 @@
           hook.beforeEach(function (markdown) {
             markdown = markdown.replaceAll(/---.*\ntitle: (.*)\n---.*\n/gm, "# $1");
             markdown = markdown.replace(/(<div tabs.*>)((.|\n)*?)(<\/div>)/gm,function(match,g1,g2,g3,g4){
-              let tab = g2.replace(/<details>(.|\n)*?<summary>(\n|\s)*(.*)(.|\n)*?\n.*<\/summary>((.|\n)*?).*<\/details>/gm,
+              let tab = g2.replace(/<details.*?>(.|\n)*?<summary.*?>(\n|\s)*(.*)(.|\n)*?\n.*<\/summary>((.|\n)*?).*<\/details>/gm,
                 "#### **$3**\n$5\n");
               return '<!-- tabs:start -->\n'+tab+'<!-- tabs:end -->\n'
             })
