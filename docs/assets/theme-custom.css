@@ -1,0 +1,18 @@
+:root {
+    /* Theme */
+    --theme-hue       : 210;
+    --theme-saturation: 100%;
+    --theme-lightness : 45%;
+    --theme-color     : hsl(var(--theme-hue), var(--theme-saturation), var(--theme-lightness));
+
+    /* Cover */
+    /* --cover-background-color     : hsl(var(--theme-hue), var(--theme-saturation), 85%); */
+
+  }
+h1#sap-btp-kyma-runtime span {
+    font-size: 48px;
+}
+h1#sap-btp-kyma-runtime {
+    color: #0a6ed1;
+    font-weight: bold;
+}

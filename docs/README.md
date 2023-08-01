@@ -3,7 +3,7 @@
 Kyma is an opinionated set of Kubernetes-based modular building blocks, including all necessary capabilities to develop and run enterprise-grade cloud-native applications.
 It is the open path to the SAP ecosystem supporting business scenarios end-to-end.
 
-![overview](./assets/modular-kyma.png)
+![overview](assets/modular-kyma.png)
 
 Kyma is an actively maintained open-source project supported by SAP. The Kyma project is also a foundation of SAP BTP, Kyma runtime which is a part of SAP Business Technology Platform (BTP). You can use Kyma modules in your own Kubernetes cluster, or try the managed version from SAP BTP with a ready-to-use Kubernetes cluster powered by Gardener. 
 
@@ -17,19 +17,17 @@ With the modular approach, Kyma components become modules, each providing one fu
 
 The Kyma project is currently in the transition phase. Some components are already independent modules, but others are still part of the big Kyma release and are installed with the `kyma deploy` command. With each successive release, fewer components will be available within preconfigured Kyma, but more and more will be offered as independent modules.
 
-You can enable modules at any time. Give them a try! If you decide that some of them are not needed for your use case, you can disable them and free the resources. Learn how to [enable, disable, and upgrade a module](./04-operation-guides/operations/08-enable-disable-upgrade-kyma-module.md).
-
 The table of Kyma modules:
 
 > **NOTE:** The entries marked with "*" are still components that will be modularized soon.
 
 | Module | Purpose |
 |---|---|
-| [BTP Operator](https://docs.kyma-project.io//?basePath=https://raw.githubusercontent.com/kyma-project/btp-manager/main/&homepage=docs/user/README.md&sidebar=true&loadSidebar=docs/user/_sidebar.md&browser-tab-title=BTP%20Operator%20Documentation#/docs/user/README) | Within the BTP Operator module, BTP Manager installs SAP BTP Service Operator that allows you to consume SAP BTP services from your Kubernetes cluster using Kubernetes-native tools. |
-| [Keda](https://docs.kyma-project.io//?basePath=https://raw.githubusercontent.com/kyma-project/keda-manager/main/&homepage=docs/user/README.md&sidebar=true&loadSidebar=docs/user/_sidebar.md&browser-tab-title=Keda%20module%20Documentation#/docs/user/README) | The Keda module comes with Keda Manager, an extension to Kyma that allows you to install [KEDA (Kubernetes Event Driven Autoscaler)](https://keda.sh/). |
+| [BTP Operator](/btp-manager/README.md) | Within the BTP Operator module, BTP Manager installs SAP BTP Service Operator that allows you to consume SAP BTP services from your Kubernetes cluster using Kubernetes-native tools. |
+| [Keda](/keda-manager/user/README.md) | The Keda module comes with Keda Manager, an extension to Kyma that allows you to install [KEDA (Kubernetes Event Driven Autoscaler)](https://keda.sh/). |
 | [Istio*](https://github.com/kyma-project/istio) | Istio is a service mesh with the Kyma-specific configuration. |
-| [Serverless*](https://github.com/kyma-project/serverless-manager) | With the Serverless module, you can define simple code snippets (Functions) with minimal implementation effort. |
-| [Telemetry*](https://github.com/kyma-project/telemetry-manager) | Enable telemetry agents to easily collect application logs and distributed traces for your application and dispatch them to backends.|
+| [Serverless*](/serverless-manager/user/README.md) | With the Serverless module, you can define simple code snippets (Functions) with minimal implementation effort. |
+| [Telemetry*](/telemetry-manager/user/README.md) | Enable telemetry agents to easily collect application logs and distributed traces for your application and dispatch them to backends.|
 | [Eventing*](https://github.com/kyma-project/eventing-manager) | Eventing provides functionality to publish and subscribe to CloudEvents. <br> At the moment, the SAP Event Mesh default plan and NATS (provided by the NATS module) are supported. |
 | [NATS*](https://github.com/kyma-project/nats-manager) | NATS deploys a NATS cluster within the Kyma cluster. You can use it as a backend for Kyma Eventing. |
 | [Application Connector*](https://github.com/kyma-project/application-connector-manager) | Application Connector allows you to connect with external solutions. No matter if you want to integrate an on-premise or a cloud system, the integration process doesn't change, which allows you to avoid any configuration or network-related problems. | 
