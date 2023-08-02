@@ -6,7 +6,7 @@ This tutorial shows how you can create a simple "Hello World" Function in Node.j
 
 >**TIP:** Serverless also allows you to store the Function's code and dependencies as sources in a Git repository. To learn more, read how to [Create a Git Function](./svls-02-create-git-function.md).
 
->**TIP:** Read about [Function’s specification](../../05-technical-reference/svls-08-function-specification.md) if you are interested in its signature, `event` and `context` objects, and custom HTTP responses the Function returns.
+>**TIP:** Read about [Function’s specification](../../05-technical-reference/svls-07-function-specification.md) if you are interested in its signature, `event` and `context` objects, and custom HTTP responses the Function returns.
 
 >**NOTE:** Read about [Istio sidecars in Kyma and why you want them](../../01-overview/service-mesh/smsh-03-istio-sidecars-in-kyma.md). Then, check how to [enable automatic Istio sidecar proxy injection](../../04-operation-guides/operations/smsh-01-istio-enable-sidecar-injection.md). For more details, see [Default Istio setup in Kyma](../../01-overview/service-mesh/smsh-02-default-istio-setup-in-kyma.md).
 

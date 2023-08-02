@@ -8,7 +8,7 @@ global:
       directory: "prod"
     telemetry_operator:
       name: "telemetry-manager"
-      version: "v20230721-165417ad"
+      version: "v20230728-bd026443"
       directory: "prod"
     telemetry_otel_collector:
       name: "otel-collector"
@@ -16,7 +16,7 @@ global:
       directory: "prod/tpi"
     fluent_bit:
       name: "fluent-bit"
-      version: "2.1.4-52bb9772"
+      version: "2.1.7-bcac7090"
       directory: "prod/tpi"
   log:
     level: "info"

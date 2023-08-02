@@ -31,11 +31,11 @@ global:
   images:
     central_application_connectivity_validator:
       name: "central-application-connectivity-validator"
-      version: "PR-17795"
-      directory: "dev"
+      version: "v20230724-03904880"
+      directory: "prod"
     central_application_gateway:
       name: "central-application-gateway"
-      version: "v20230619-017fa2fc"
+      version: "v20230724-ce05f398"
       directory: "prod"
     busybox:
       name: "busybox"

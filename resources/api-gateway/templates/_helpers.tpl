@@ -38,6 +38,7 @@ Common labels
 app.kubernetes.io/name: {{ include "api-gateway.name" . }}
 helm.sh/chart: {{ include "api-gateway.chart" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
+sidecar.istio.io/inject: "{{ .Values.config.injectIstioSidecar }}"
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}

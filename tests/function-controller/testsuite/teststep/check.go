@@ -1,8 +1,14 @@
 package teststep
 
 import (
+	"context"
 	"encoding/json"
+	goerrors "errors"
+	"fmt"
 	"io"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"net/http"
 	"net/url"
 	"time"
@@ -231,4 +237,110 @@ func (t TracingHTTPCheck) assertTracingResponse(response tracingResponse) error 
 	}
 
 	return nil
+}
+
+const (
+	resourceLabel     = "serverless.kyma-project.io/resource"
+	functionNameLabel = "serverless.kyma-project.io/function-name"
+	manageByLabel     = "serverless.kyma-project.io/managed-by"
+	uuidLabel         = "serverless.kyma-project.io/uuid"
+)
+
+type APIGatewayFunctionCheck struct {
+	name      string
+	fn        *function.Function
+	client    *v1.CoreV1Client
+	namespace string
+	runtime   string
+}
+
+func NewAPIGatewayFunctionCheck(name string, fn *function.Function, coreV1 *v1.CoreV1Client, ns string, rt string) *APIGatewayFunctionCheck {
+	return &APIGatewayFunctionCheck{
+		name:      name,
+		fn:        fn,
+		client:    coreV1,
+		namespace: ns,
+		runtime:   rt,
+	}
+}
+
+func (d APIGatewayFunctionCheck) Name() string {
+	return d.name
+}
+
+func (d APIGatewayFunctionCheck) Run() error {
+
+	svc, err := d.client.Services(d.namespace).Get(context.Background(), d.name, metav1.GetOptions{})
+	if err != nil {
+		return errors.Wrap(err, "while trying to get service")
+	}
+
+	pod, err := d.client.Pods(d.namespace).List(context.Background(), metav1.ListOptions{LabelSelector: fmt.Sprintf("%s=deployment,%s=%s", resourceLabel, functionNameLabel, d.name)})
+	if err != nil {
+		return errors.Wrap(err, "while trying to get pod")
+	}
+
+	err = checkIfRequiredLabelsExists(svc.Spec.Selector, true)
+	if err != nil {
+		return errors.Wrap(err, " while checking the service labels")
+	}
+	err = checkIfRequiredLabelsExists(pod.Items[0].ObjectMeta.Labels, false)
+	if err != nil {
+		return errors.Wrap(err, " while checking the pod labels")
+	}
+
+	err = checkIfContractIsFulfilled(pod.Items[0], *svc)
+	if err != nil {
+		return errors.Wrap(err, " while checking labels")
+	}
+
+	if len(svc.Spec.Selector) != 0 {
+		return errors.New("The labels are not matching")
+	}
+
+	return nil
+}
+
+func (d APIGatewayFunctionCheck) Cleanup() error {
+	return nil
+}
+
+func (d APIGatewayFunctionCheck) OnError() error {
+	return nil
+}
+
+func checkIfContractIsFulfilled(pod corev1.Pod, service corev1.Service) error {
+	var errJoined error
+
+	for k, v := range pod.Labels {
+		if val, exists := service.Spec.Selector[k]; exists {
+			if val == v {
+				delete(service.Spec.Selector, k)
+			} else {
+				err := errors.Errorf("Expected %s but got %s", v, val)
+				errJoined = goerrors.Join(err)
+			}
+		}
+	}
+	return errJoined
+}
+
+func checkIfRequiredLabelsExists(labels map[string]string, isService bool) error {
+	requiredLabels := []string{resourceLabel, functionNameLabel, manageByLabel, uuidLabel}
+
+	if isService {
+		if len(labels) != 4 {
+			return errors.New(fmt.Sprintf("Service has got %s istead of 4 labels", len(labels)))
+		}
+	}
+
+	var errJoined error
+
+	for _, label := range requiredLabels {
+		if _, exists := labels[label]; !exists {
+			err := errors.New(fmt.Sprintf("Label %s is missing", label))
+			errJoined = goerrors.Join(err)
+		}
+	}
+	return errJoined
 }
