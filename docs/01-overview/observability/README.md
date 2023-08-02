@@ -4,7 +4,7 @@ title: What is Observability in Kyma?
 
 Out of the box, Kyma provides tools to collect and ship telemetry data using the [Telemetry Module](../telemetry/README.md). Of course, you'll want to view and analyze the data you're collecting. This is where observability tools come in.
 
-## Data Collection
+### Data Collection
 
 Kyma collects telemetry data with the following in-cluster components:
 
@@ -16,7 +16,7 @@ The collected telemetry data are exposed so that you can view and analyze them w
 
 > **NOTE:** Kyma's [telemetry component](../telemetry/README.md) supports providing your own output configuration for your application's logs and traces. With this, you can connect your own observability systems inside or outside the Kyma cluster with the Kyma backend.
 
-## Data analysis
+### Data analysis
 
 You can use the following in-cluster components to observe your applications' telemetry data:
 
