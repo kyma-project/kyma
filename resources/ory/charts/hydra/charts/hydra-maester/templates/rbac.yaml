@@ -29,30 +29,3 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: {{ include "hydra-maester.name" . }}-role
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: {{ include "hydra-maester.name" . }}-sync-clients
-  namespace: {{ .Release.Namespace }}
-rules:
-  - apiGroups: ["apps"]
-    resources: ["deployments"]
-    verbs: ["list", "patch", "get", "watch"]
-    resourceNames:
-      - {{ include "hydra-maester.getHydraName" . }}
-      - {{ include "hydra-maester.fullname" . }}
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: {{ include "hydra-maester.name" . }}-sync-clients
-  namespace: {{ .Release.Namespace }}
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: {{ include "hydra-maester.name" . }}-sync-clients
-subjects:
-  - kind: ServiceAccount
-    name: {{ include "hydra-maester.name" . }}-account
-    namespace: {{ .Release.Namespace }}
