@@ -3,7 +3,6 @@ package scenarios
 import (
 	"fmt"
 	"github.com/pkg/errors"
-	typedappsv1 "k8s.io/client-go/kubernetes/typed/apps/v1"
 	"time"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/function"
@@ -41,11 +40,6 @@ func SimpleFunctionAPIGatewayTest(restConfig *rest.Config, cfg testsuite.Config,
 		return nil, errors.Wrap(err, "while creating k8s CoreV1Client")
 	}
 
-	appsCli, err := typedappsv1.NewForConfig(restConfig)
-	if err != nil {
-		return nil, errors.Wrapf(err, "while creating k8s apps client")
-	}
-
 	python39Logger := logf.WithField(scenarioKey, "python39")
 	nodejs16Logger := logf.WithField(scenarioKey, "nodejs16")
 	nodejs18Logger := logf.WithField(scenarioKey, "nodejs18")
@@ -68,7 +62,6 @@ func SimpleFunctionAPIGatewayTest(restConfig *rest.Config, cfg testsuite.Config,
 
 	return step.NewSerialTestRunner(logf, "Runtime test",
 		teststep.NewNamespaceStep("Create test namespace", coreCli, genericContainer),
-		teststep.NewApplication("Create HTTP basic application", HTTPAppName, HTTPAppImage, int32(80), appsCli.Deployments(genericContainer.Namespace), coreCli.Services(genericContainer.Namespace), genericContainer),
 		step.NewParallelRunner(logf, "Fn tests",
 			step.NewSerialTestRunner(python39Logger, "Python39 test",
 				teststep.CreateFunction(python39Logger, python39Fn, "Create Python39 Function", runtimes.BasicPythonFunction("Hello from python39", serverlessv1alpha2.Python39)),
