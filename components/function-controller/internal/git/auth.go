@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	git2go "github.com/libgit2/git2go/v31"
+	git2go "github.com/libgit2/git2go/v34"
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/ssh"
 )
@@ -97,9 +97,9 @@ func authBasicCallback(username, password string) func(url, username string, all
 	}
 }
 
-func sshCheckCallback() func(cert *git2go.Certificate, valid bool, hostname string) git2go.ErrorCode {
-	return func(cert *git2go.Certificate, valid bool, hostname string) git2go.ErrorCode {
-		return git2go.ErrOk
+func sshCheckCallback() func(cert *git2go.Certificate, valid bool, hostname string) error {
+	return func(cert *git2go.Certificate, valid bool, hostname string) error {
+		return nil
 	}
 }
 

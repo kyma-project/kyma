@@ -191,6 +191,10 @@ LOCALBIN ?= $(shell pwd)/bin
 $(LOCALBIN):
 	mkdir -p $(LOCALBIN)
 
+#TODO: configure libgit2
+
+libgit2:
+
 ########## Envtest ###########
 ENVTEST ?= $(LOCALBIN)/setup-envtest
 
