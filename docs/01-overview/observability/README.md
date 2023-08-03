@@ -21,13 +21,13 @@ The collected telemetry data are exposed so that you can view and analyze them w
 You can use the following in-cluster components to observe your applications' telemetry data:
 
 - [Prometheus](https://prometheus.io/docs/introduction), a lightweight backend for metrics.
-> **NOTE:** The Prometheus integration has been [deprecated](https://kyma-project.io/blog/2022/12/9/monitoring-deprecation) and is planned to be removed.
+> **NOTE:** The Prometheus integration has been [deprecated](https://blogs.sap.com/2022/12/09/deprecation-of-prometheus-grafana-based-monitoring-in-sap-btp-kyma-runtime/) and is planned to be removed.
 - [Grafana](https://grafana.com/docs/guides/getting_started/) to provide a dashboard and a query editor to visualize metrics collected from Prometheus.
-> **NOTE:** The Grafana integration has been [deprecated](https://kyma-project.io/blog/2022/12/9/monitoring-deprecation) and is planned to be removed.
+> **NOTE:** The Grafana integration has been [deprecated](https://blogs.sap.com/2022/12/09/deprecation-of-prometheus-grafana-based-monitoring-in-sap-btp-kyma-runtime/) and is planned to be removed.
 
 # Monitoring
 
-> **NOTE:** Prometheus and Grafana are [deprecated](https://kyma-project.io/blog/2022/12/9/monitoring-deprecation) and are planned to be removed. If you want to install a custom stack, take a look at [Install a custom kube-prometheus-stack in Kyma](https://github.com/kyma-project/examples/tree/main/prometheus).
+> **NOTE:** Prometheus and Grafana are [deprecated](https://blogs.sap.com/2022/12/09/deprecation-of-prometheus-grafana-based-monitoring-in-sap-btp-kyma-runtime/) and are planned to be removed. If you want to install a custom stack, take a look at [Install a custom kube-prometheus-stack in Kyma](https://github.com/kyma-project/examples/tree/main/prometheus).
 
 ## Overview
 

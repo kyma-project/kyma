@@ -12,7 +12,7 @@ The following documents describe charts and configurable parameters in Kyma:
 
 - [Application Connector chart](ac-01-application-connector-chart.md)
 - [Ory limitations](apix-01-ory-limitations.md)
-- [ORY chart](/05-technical-reference/00-configuration-parameters/apix-02-ory-chart.md)
+- [ORY chart](apix-02-ory-chart.md)
 - [Observability charts](obsv-01-configpara-observability.md)
 - [Connection with Compass](ra-01-connection-with-compass.md)
 - [Cluster Users chart](sec-01-cluster-users.md)
