@@ -9,3 +9,5 @@
   * [Keda](/keda-manager/user/README.md)
   * [Serverless](/serverless-manager/user/README.md)
   * [Telemetry](/telemetry-manager/user/README.md)
+* [Glossary](/glossary.md)
+* [Migration Guide 2.16-2.17](/migration-guide-2.16-2.17.md)

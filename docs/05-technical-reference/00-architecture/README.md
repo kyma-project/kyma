@@ -16,7 +16,7 @@ In this section you can learn more about technicalities behind each main area: t
 
 # Eventing
 
-* [Eventing Architectur](evnt-01-architecture.md)
+* [Eventing Architecture](evnt-01-architecture.md)
 
 # Observability
 
