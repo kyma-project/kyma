@@ -28,7 +28,8 @@ spec:
   preserveUnknownFields: false
   versions:
   - deprecated: true
-    deprecationWarning: Since Kyma 2.5.X, APIRule in version v1alpha1 has been deprecated. Consider using v1beta1.
+    deprecationWarning: Since Kyma 2.5.X, APIRule in version v1alpha1 has been deprecated.
+      Consider using v1beta1.
     name: v1alpha1
     schema:
       openAPIV3Schema:
@@ -54,38 +55,41 @@ spec:
                 pattern: ^[0-9a-z-_]+(\/[0-9a-z-_]+|(\.[0-9a-z-_]+)*)$
                 type: string
               rules:
-                description: Represents the array of Oathkeeper access rules to be applied.
+                description: Represents the array of Oathkeeper access rules to be
+                  applied.
                 items:
                   properties:
                     accessStrategies:
-                      description: Specifies the list of access strategies.
-                        All strategies listed in [Oathkeeper documentation](https://www.ory.sh/docs/oathkeeper/pipeline/authn) 
+                      description: Specifies the list of access strategies. All strategies
+                        listed in [Oathkeeper documentation](https://www.ory.sh/docs/oathkeeper/pipeline/authn)
                         are supported.
                       items:
-                        description: Represents a handler that authenticates
-                          provided credentials. See the corresponding type in the
-                          oathkeeper-maester project.
+                        description: Represents a handler that authenticates provided
+                          credentials. See the corresponding type in the oathkeeper-maester
+                          project. provided credentials. See the corresponding type
+                          in the oathkeeper-maester project.
                         properties:
                           config:
-                            description: Configures the handler. Configuration
-                              keys vary per handler.
+                            description: Configures the handler. Configuration keys
+                              vary per handler.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
                             properties:
                               jwks_urls:
-                                description: Specifies the array of URLs from which Ory Oathkeeper can retrieve 
-                                  JSON Web Keys for validating JSON Web Token.
+                                description: Specifies the array of URLs from which Ory Oathkeeper can retrieve JSON Web Keys for validating JSON Web Token.
+                                  Must start with either "http://", "https://" or "file://".
                                 type: array
                                 items:
                                   type: string
-                                  pattern: ^(https://|file://).*$
+                                  pattern: ^(http://|https://|file://).*$
                               trusted_issuers:
-                                description: If the **trusted_issuers** field is set, the JWT must contain a value for the claim `iss` 
+                                description: If the **trusted_issuers** field is set, the JWT must contain a value for the claim `iss`
                                   that matches exactly (case-sensitive) one of the values of **trusted_issuers**.
+                                  Must start with either "http://", "https://" or "file://".
                                 type: array
                                 items:
                                   type: string
-                                  pattern: ^(https://|file://).*$
+                                  pattern: ^(http://|https://|file://).*$
                           handler:
                             description: Specifies the name of the handler.
                             type: string
@@ -95,21 +99,23 @@ spec:
                       minItems: 1
                       type: array
                     methods:
-                      description: Represents the list of allowed HTTP request methods available for the **spec.rules.path**.
+                      description: Represents the list of allowed HTTP request methods
+                        available for the **spec.rules.path**.
                       items:
                         type: string
                       minItems: 1
                       type: array
                     mutators:
-                      description: Specifies the list of [Oathkeeper mutators](https://www.ory.sh/docs/oathkeeper/pipeline/mutator).
+                      description: Specifies the list of [Ory Oathkeeper](https://www.ory.sh/docs/oathkeeper/pipeline/mutator)
+                        mutators.
                       items:
                         description: Mutator represents a handler that transforms
                           the HTTP request before forwarding it. See the corresponding
                           in the oathkeeper-maester project.
                         properties:
                           config:
-                            description: Configures the handler. Configuration
-                              keys vary per handler.
+                            description: Configures the handler. Configuration keys
+                              vary per handler.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
                           handler:
@@ -134,7 +140,8 @@ spec:
                 description: Describes the service to expose.
                 properties:
                   external:
-                    description: Defines if the service is internal (in cluster) or external.
+                    description: Specifies if the service is internal (in cluster) or
+                      external.
                     type: boolean
                   host:
                     description: Specifies the URL of the exposed service.
@@ -233,7 +240,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: Defines the desired state of APIRule.
+            description: Defines the desired state of ApiRule.
             properties:
               gateway:
                 description: Specifies the Istio Gateway to be used.
@@ -246,37 +253,40 @@ spec:
                 pattern: ^([a-zA-Z0-9][a-zA-Z0-9-_]*\.)*[a-zA-Z0-9]*[a-zA-Z0-9-_]*[[a-zA-Z0-9]+$
                 type: string
               rules:
-                description: Represents the array of Oathkeeper access rules to be applied.
+                description: Represents the array of Oathkeeper access rules to be
+                  applied.
                 items:
                   properties:
                     accessStrategies:
-                      description: Specifies the list of access strategies. 
-                        All strategies listed in [Oathkeeper documentation](https://www.ory.sh/docs/oathkeeper/pipeline/authn) 
+                      description: Specifies the list of access strategies. All strategies
+                        listed in [Oathkeeper documentation](https://www.ory.sh/docs/oathkeeper/pipeline/authn)
                         are supported.
                       items:
-                        description: Represents a handler that authenticates
-                          provided credentials. See the corresponding type in the
-                          oathkeeper-maester project.
+                        description: Represents a handler that authenticates provided
+                          credentials. See the corresponding type in the oathkeeper-maester
+                          project.
                         properties:
                           config:
-                            description: Configures the handler. Configuration
-                              keys vary per handler.
+                            description: Configures the handler. Configuration keys
+                              vary per handler.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
                             properties:
                               jwks_urls:
                                 description: Specifies the array of URLs from which Ory Oathkeeper can retrieve JSON Web Keys for validating JSON Web Token.
+                                  Must start with either "http://", "https://" or "file://".
                                 type: array
                                 items:
                                   type: string
-                                  pattern: ^(https://|file://).*$
+                                  pattern: ^(http://|https://|file://).*$
                               trusted_issuers:
                                 description: If the **trusted_issuers** field is set, the JWT must contain a value for the claim `iss` 
                                   that matches exactly (case-sensitive) one of the values of **trusted_issuers**.
+                                  Must start with either "http://", "https://" or "file://".
                                 type: array
                                 items:
                                   type: string
-                                  pattern: ^(https://|file://).*$
+                                  pattern: ^(http://|https://|file://).*$
                           handler:
                             description: Specifies the name of the handler.
                             type: string
@@ -286,21 +296,23 @@ spec:
                       minItems: 1
                       type: array
                     methods:
-                      description: Represents the list of allowed HTTP request methods available for the **spec.rules.path**.
+                      description: Represents the list of allowed HTTP request methods
+                        available for the **spec.rules.path**.
                       items:
                         type: string
                       minItems: 1
                       type: array
                     mutators:
-                      description: Specifies the list of [Ory Oathkeeper](https://www.ory.sh/docs/oathkeeper/pipeline/mutator) mutators.
+                      description: Specifies the list of [Ory Oathkeeper](https://www.ory.sh/docs/oathkeeper/pipeline/mutator)
+                        mutators.
                       items:
                         description: Mutator represents a handler that transforms
                           the HTTP request before forwarding it. See the corresponding
                           in the oathkeeper-maester project.
                         properties:
                           config:
-                            description: Configures the handler. Configuration
-                              keys vary per handler.
+                            description: Configures the handler. Configuration keys
+                              vary per handler.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
                           handler:
@@ -315,22 +327,24 @@ spec:
                       pattern: ^([0-9a-zA-Z./*()?!\\_-]+)
                       type: string
                     service:
-                      description: Describes the service to expose. Overwrites
-                        the **spec** level service if defined.
+                      description: Describes the service to expose. Overwrites the
+                        **spec** level service if defined.
                       properties:
                         external:
-                          description: Specifies if the service is internal (in cluster) or external.
+                          description: Specifies if the service is internal (in cluster)
+                            or external.
                           type: boolean
                         name:
                           description: Specifies the name of the exposed service.
                           type: string
                         namespace:
-                          description: Specifies the Namespace of the exposed service. If not defined, it defaults
-                            to the APIRule Namespace.
+                          description: Specifies the Namespace of the exposed service.
+                            If not defined, it defaults to the APIRule Namespace.
                           pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
                           type: string
                         port:
-                          description: Specifies the communication port of the exposed service.
+                          description: Specifies the communication port of the exposed
+                            service.
                           format: int32
                           maximum: 65535
                           minimum: 1
@@ -339,6 +353,12 @@ spec:
                       - name
                       - port
                       type: object
+                    timeout:
+                      description: Timeout for HTTP requests in seconds. The timeout
+                        can be configured up to 3900 seconds (65 minutes).
+                      maximum: 3900
+                      minimum: 1
+                      type: integer
                   required:
                   - accessStrategies
                   - methods
@@ -350,19 +370,19 @@ spec:
                 description: Describes the service to expose.
                 properties:
                   external:
-                    description: Specifies if the service is internal (in cluster) or
-                      external.
+                    description: Specifies if the service is internal (in cluster)
+                      or external.
                     type: boolean
                   name:
                     description: Specifies the name of the exposed service.
                     type: string
                   namespace:
-                    description: Specifies the Namespace of the exposed service. If not defined, it defaults
-                      to the APIRule Namespace.
+                    description: Specifies the Namespace of the exposed service. If
+                      not defined, it defaults to the APIRule Namespace.
                     pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
                     type: string
                   port:
-                    description: Specifies the port of the exposed service.
+                    description: Specifies the communication port of the exposed service.
                     format: int32
                     maximum: 65535
                     minimum: 1
@@ -371,6 +391,12 @@ spec:
                 - name
                 - port
                 type: object
+              timeout:
+                description: Timeout for HTTP requests in seconds. The timeout can
+                  be configured up to 3900 seconds (65 minutes).
+                maximum: 3900
+                minimum: 1
+                type: integer
             required:
             - gateway
             - host
@@ -409,6 +435,14 @@ spec:
                     description: Explains the status of the Istio Authorization Policy subresource.
                     type: string
                 type: object
+              lastProcessedTime:
+                description: Indicates the timestamp when the API Gateway controller last processed APIRule.
+                format: date-time
+                type: string
+              observedGeneration:
+                description: Specifies the generation of the resource that was observed by the API Gateway controller.
+                format: int64
+                type: integer
               requestAuthenticationStatus:
                 description: Describes the status of the Istio Request Authentication subresource.
                 properties:
@@ -419,14 +453,6 @@ spec:
                     description: Explains the status of the Istio Request Authentication subresource.
                     type: string
                 type: object
-              lastProcessedTime:
-                description: Indicates the timestamp when the API Gateway controller last processed APIRule.
-                format: date-time
-                type: string
-              observedGeneration:
-                description: Specifies the generation of the resource that was observed by the API Gateway controller.
-                format: int64
-                type: integer
               virtualServiceStatus:
                 description: Describes the status of Istio VirtualService.
                 properties:
