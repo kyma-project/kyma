@@ -1,5 +1,6 @@
 * [Home](/)
-* [Operations Guides - operations](README.md)
+* [Operation Guides](/04-operation-guides/README.md)
+* [Operations](README.md)
   * [Install Kyma CLI](/04-operation-guides/operations/01-install-kyma-CLI.md)
   * [Install Kyma](/04-operation-guides/operations/02-install-kyma.md)
   * [Change Kyma settings](/04-operation-guides/operations/03-change-kyma-config-values.md)

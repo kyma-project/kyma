@@ -37,18 +37,3 @@ Supported integration scenarios are neutral to the vendor of the target system; 
 ## Components
 
 ![Components](./assets/general-components.drawio.svg)
-
-### Telemetry Operator
-
-The module ships the Telemetry Operator as its heart component. The operator implements the Kubernetes controller pattern and manages the whole lifecycle of all other components covered in the module. The operator watches for LogPipeline, TracePipeline, and, in the future, MetricPipeline resources created by the user. With these, the user describes in a declarative way what data of a signal type to collect and where to ship it.
-If the operator detects a configuration, it will on demand roll out the relevant collector components.
-You can find more details about the operator on the [operator](./telemetry-01-operator.md) page.
-
-### Log Collector
-
-The Log Collector is based on a [Fluent Bit](https://fluentbit.io/) installation running as a [DaemonSet](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/). It reads all containers' logs in the runtime and ships them according to a LogPipeline configuration. More details can be found in the detailed section about [Logs](./telemetry-02-logs.md).
-
-### Trace Collector
-
-The Trace Collector is based on a [OTel Collector](https://opentelemetry.io/docs/collector/) [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/). It provides an [OTLP-based](https://opentelemetry.io/docs/reference/specification/protocol/) endpoint where applications can push the trace signals. According to a TracePipeline configuration, the collector will process and ship the trace data to a target system. More details can be found in the detailed section about [Traces](./telemetry-03-traces.md).
-

@@ -4,7 +4,7 @@ title: What is API Exposure in Kyma?
 
 The API exposure in Kyma is based on the API Gateway component that aims to provide a set of functionalities that allow developers to expose, secure, and manage their APIs in an easy way. The main element of the API Gateway is the API Gateway Controller, which exposes services in Kyma.
 
-## API Gateway
+# API Gateway
 
 To make your service accessible outside the Kyma cluster, expose it using Kyma API Gateway Controller, which listens for the custom resource (CR) objects that follow the `apirules.gateway.kyma-project.io` CustomResourceDefinition (CRD). Creating a valid CR triggers API Gateway Controller to create an Istio VirtualService. Optionally, you can specify the **rules** attribute of the CR to secure the exposed service with Oathkeeper Access Rules.
 
@@ -14,9 +14,9 @@ API Gateway Controller allows you to secure the exposed services using JWT token
 
 > **NOTE:** To learn more, read about the [Kyma OAuth2 server](../../04-operation-guides/security/sec-05-customization-operation.md).
 
-## API Gateway limitations
+# API Gateway limitations
 
-### Controller limitations
+## Controller limitations
 
 The APIRule controller is not a critical component of the Kyma networking infrastructure since it relies on Istio and Ory Custom Resources to provide routing capabilities. In terms of persistence, the controller depends on APIRules stored in the Kubernetes cluster. No other persistence solution is present.
 
@@ -27,15 +27,15 @@ In terms of the resource configuration, the following requirements are set on th
 | Limits   | 100m | 128Mi  |
 | Requests | 10m  | 64Mi   |
 
-### Limitations in terms of the number of created APIRules
+## Limitations in terms of the number of created APIRules
 
 The number of created APIRules is not limited. 
 
-### Dependencies
+## Dependencies
 
 API Gateway depends on Istio and Ory to provide its routing capabilities. In the case of the `allow` access strategy, only a Virtual Service Custom Resource is created. With any other access strategy, both Virtual Service and Oathkeeper Rule Custom Resource are created.
 
-## Useful links
+# Useful links
 
 If you're interested in learning more about API Exposure in Kyma, follow these links to:
 
