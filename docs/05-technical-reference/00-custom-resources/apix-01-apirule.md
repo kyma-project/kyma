@@ -103,13 +103,13 @@ The following tables list all the possible parameters of a given resource togeth
 | **rules.&#x200b;service.&#x200b;name** (required) | string | Specifies the name of the exposed service. |
 | **rules.&#x200b;service.&#x200b;namespace**  | string | Specifies the Namespace of the exposed service. If not defined, it defaults to the APIRule Namespace. |
 | **rules.&#x200b;service.&#x200b;port** (required) | integer | Specifies the communication port of the exposed service. |
-| **rules.&#x200b;timeout**  | integer | Timeout for HTTP requests in seconds. The timeout can be configured up to 3900 seconds (65 minutes). |
+| **rules.&#x200b;timeout**  | integer | Specifies the timeout, in seconds, for HTTP requests made to spec.rules.path. The maximum timeout is limited to 3900 seconds (65 minutes). Timeout definitions set at this level take precedence over any timeout defined at the spec.timeout level. |
 | **service**  | object | Describes the service to expose. |
 | **service.&#x200b;external**  | boolean | Specifies if the service is internal (in cluster) or external. |
 | **service.&#x200b;name** (required) | string | Specifies the name of the exposed service. |
 | **service.&#x200b;namespace**  | string | Specifies the Namespace of the exposed service. If not defined, it defaults to the APIRule Namespace. |
 | **service.&#x200b;port** (required) | integer | Specifies the communication port of the exposed service. |
-| **timeout**  | integer | Timeout for HTTP requests in seconds. The timeout can be configured up to 3900 seconds (65 minutes). |
+| **timeout**  | integer | Specifies the timeout for HTTP requests in seconds for all Oathkeeper access rules, but can be overridden for each rule. The maximum timeout is limited to 3900 seconds (65 minutes). If no timeout is specified, the default timeout of 180 seconds applies. |
 
 **Status:**
 

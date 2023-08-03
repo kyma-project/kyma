@@ -353,8 +353,10 @@ spec:
                       - port
                       type: object
                     timeout:
-                      description: Timeout for HTTP requests in seconds. The timeout
-                        can be configured up to 3900 seconds (65 minutes).
+                      description: Specifies the timeout, in seconds, for
+                        HTTP requests made to spec.rules.path. The maximum timeout is limited
+                        to 3900 seconds (65 minutes). Timeout definitions set at this level
+                        take precedence over any timeout defined at the spec.timeout level.
                       maximum: 3900
                       minimum: 1
                       type: integer
@@ -391,8 +393,10 @@ spec:
                 - port
                 type: object
               timeout:
-                description: Timeout for HTTP requests in seconds. The timeout can
-                  be configured up to 3900 seconds (65 minutes).
+                description: Specifies the timeout for HTTP requests in seconds for
+                  all Oathkeeper access rules, but can be overridden for each rule.
+                  The maximum timeout is limited to 3900 seconds (65 minutes).
+                  If no timeout is specified, the default timeout of 180 seconds applies.
                 maximum: 3900
                 minimum: 1
                 type: integer
