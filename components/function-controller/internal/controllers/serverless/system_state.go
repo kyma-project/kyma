@@ -606,7 +606,7 @@ func (s *systemState) buildService() corev1.Service {
 				Port:       80,
 				Protocol:   corev1.ProtocolTCP,
 			}},
-			Selector: s.deploymentSelectorLabels(),
+			// Selector: s.deploymentSelectorLabels(),
 		},
 	}
 }
