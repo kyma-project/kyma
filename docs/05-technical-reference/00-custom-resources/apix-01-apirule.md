@@ -88,6 +88,7 @@ The following tables list all the possible parameters of a given resource togeth
 | **gateway** (required) | string | Specifies the Istio Gateway to be used. |
 | **host** (required) | string | Specifies the URL of the exposed service. |
 | **rules** (required) | \[\]object | Represents the array of Oathkeeper access rules to be applied. |
+| **timeout** | integer | Specifies the timeout for HTTP requests in seconds for all Oathkeeper access rules, but can be overridden for each rule. The maximum timeout is limited to 3900 seconds (65 minutes). </br> If no timeout is specified, the default timeout of 180 seconds applies.
 | **rules.&#x200b;accessStrategies** (required) | \[\]object | Specifies the list of access strategies. All strategies listed in [Oathkeeper documentation](https://www.ory.sh/docs/oathkeeper/pipeline/authn) are supported. |
 | **rules.&#x200b;accessStrategies.&#x200b;config**  | object | Configures the handler. Configuration keys vary per handler. |
 | **rules.&#x200b;accessStrategies.&#x200b;config.&#x200b;jwks_urls**  | \[\]string | Specifies the array of URLs from which Ory Oathkeeper can retrieve JSON Web Keys for validating JSON Web Token. |
@@ -103,6 +104,7 @@ The following tables list all the possible parameters of a given resource togeth
 | **rules.&#x200b;service.&#x200b;name** (required) | string | Specifies the name of the exposed service. |
 | **rules.&#x200b;service.&#x200b;namespace**  | string | Specifies the Namespace of the exposed service. If not defined, it defaults to the APIRule Namespace. |
 | **rules.&#x200b;service.&#x200b;port** (required) | integer | Specifies the communication port of the exposed service. |
+| **rules.&#x200b;timeout** | integer | Specifies the timeout, in seconds, for HTTP requests made to **spec.rules.path**. The maximum timeout is limited to 3900 seconds (65 minutes). Timeout definitions set at this level take precedence over any timeout defined at the **spec.timeout** level. |
 | **service**  | object | Describes the service to expose. |
 | **service.&#x200b;external**  | boolean | Specifies if the service is internal (in cluster) or external. |
 | **service.&#x200b;name** (required) | string | Specifies the name of the exposed service. |
