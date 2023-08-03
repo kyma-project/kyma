@@ -51,4 +51,3 @@ The Log Collector is based on a [Fluent Bit](https://fluentbit.io/) installation
 ### Trace Collector
 
 The Trace Collector is based on a [OTel Collector](https://opentelemetry.io/docs/collector/) [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/). It provides an [OTLP-based](https://opentelemetry.io/docs/reference/specification/protocol/) endpoint where applications can push the trace signals. According to a TracePipeline configuration, the collector will process and ship the trace data to a target system. More details can be found in the detailed section about [Traces](./telemetry-03-traces.md).
-
