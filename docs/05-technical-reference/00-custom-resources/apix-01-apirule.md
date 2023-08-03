@@ -88,7 +88,7 @@ The following tables list all the possible parameters of a given resource togeth
 | **gateway** (required) | string | Specifies the Istio Gateway to be used. |
 | **host** (required) | string | Specifies the URL of the exposed service. |
 | **rules** (required) | \[\]object | Represents the array of Oathkeeper access rules to be applied. |
-| **timeout** | integer | Specifies the timeout for HTTP requests in seconds for all Oathkeeper access rules, but can be overridden for each rule. The maximum timeout is limited to 3900 seconds (65 minutes). </br> If no timeout is specified, the default timeout of 180 seconds applies.
+| **timeout** | integer | Specifies the timeout for HTTP requests in seconds for all Oathkeeper access rules, but can be overridden for each rule. The maximum timeout is limited to 3900 seconds (65 minutes). </br> If no timeout is specified, the default timeout of 180 seconds applies. |
 | **rules.&#x200b;accessStrategies** (required) | \[\]object | Specifies the list of access strategies. All strategies listed in [Oathkeeper documentation](https://www.ory.sh/docs/oathkeeper/pipeline/authn) are supported. |
 | **rules.&#x200b;accessStrategies.&#x200b;config**  | object | Configures the handler. Configuration keys vary per handler. |
 | **rules.&#x200b;accessStrategies.&#x200b;config.&#x200b;jwks_urls**  | \[\]string | Specifies the array of URLs from which Ory Oathkeeper can retrieve JSON Web Keys for validating JSON Web Token. |
