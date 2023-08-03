@@ -66,8 +66,7 @@ spec:
                       items:
                         description: Represents a handler that authenticates provided
                           credentials. See the corresponding type in the oathkeeper-maester
-                          project. provided credentials. See the corresponding type
-                          in the oathkeeper-maester project.
+                          project.
                         properties:
                           config:
                             description: Configures the handler. Configuration keys
