@@ -95,3 +95,24 @@ kyma-pypi-test==1.0.0`
 		},
 	}
 }
+
+func BasicCloudEventPythonFunction(runtime serverlessv1alpha2.Runtime) serverlessv1alpha2.FunctionSpec {
+
+	dpd := `requests>=2.31.0`
+
+	src := `import json
+
+def main(event, context):
+    txtEventData = json.dumps(event.data)
+    return txtEventData`
+
+	return serverlessv1alpha2.FunctionSpec{
+		Runtime: runtime,
+		Source: serverlessv1alpha2.Source{
+			Inline: &serverlessv1alpha2.InlineSource{
+				Source:       src,
+				Dependencies: dpd,
+			},
+		},
+	}
+}
