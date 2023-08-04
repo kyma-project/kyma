@@ -5,10 +5,12 @@ import (
 	"encoding/json"
 	goerrors "errors"
 	"fmt"
+	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"io"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
+	"log"
 	"net/http"
 	"net/url"
 	"time"
@@ -343,4 +345,71 @@ func checkIfRequiredLabelsExists(labels map[string]string, isService bool) error
 		}
 	}
 	return errJoined
+}
+
+var _ step.Step = &CloudEventCheck{}
+
+type CloudEventCheck struct {
+	//TODO: review and refactor
+	name     string
+	log      *logrus.Entry
+	endpoint string
+	poll     poller.Poller
+}
+
+func NewCloudEventCheck(log *logrus.Entry, name string, url *url.URL, poller poller.Poller) *CloudEventCheck {
+	return &CloudEventCheck{
+		name:     name,
+		log:      log.WithField(step.LogStepKey, name),
+		endpoint: url.String(),
+		poll:     poller.WithLogger(log),
+	}
+}
+
+func (ce CloudEventCheck) Name() string {
+	return ce.name
+}
+
+func (ce CloudEventCheck) Run() error {
+	//TODO: implement this test (i.e. we could send data and receive error with the same data for assertion)
+	c, err := cloudevents.NewClientHTTP()
+	if err != nil {
+		log.Fatalf("failed to create cloud events client, %v", err)
+	}
+
+	event := cloudevents.NewEvent()
+	event.SetSource("example/uri")
+	event.SetType("example.type")
+	event.SetData(cloudevents.ApplicationJSON, map[string]string{"hello": "world"})
+
+	ctx := cloudevents.ContextWithTarget(context.Background() /*ce.endpoint*/, "http://localhost:8080/")
+	//ctx = cloudevents.WithEncodingStructured(ctx)
+
+	if result := c.Send(ctx, event); cloudevents.IsUndelivered(result) {
+		log.Fatalf("failed to send, %v", result)
+	} else {
+		log.Printf("sent: %v", event)
+		log.Printf("result: %v", result)
+	}
+
+	//err = ce.assertResponse(//response.error)
+	//if err != nil {
+	//	return errors.Wrapf(err, "Got following headers: %s", out)
+	//}
+	//ce.log.Info("cloud event data are okay")
+	return nil
+}
+
+func (ce CloudEventCheck) Cleanup() error {
+	return nil
+}
+
+func (ce CloudEventCheck) OnError() error {
+	return nil
+}
+
+func (ce CloudEventCheck) assertResponse(response tracingResponse) error {
+	//TODO: implement this
+
+	return nil
 }

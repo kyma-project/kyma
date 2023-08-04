@@ -68,6 +68,7 @@ var availableScenarios = map[string][]scenario{
 	"serverless-contract-tests": {
 		{displayName: "tracing", scenario: scenarios.SimpleFunctionTracingTest},
 		{displayName: "api-gateway", scenario: scenarios.SimpleFunctionAPIGatewayTest},
+		{displayName: "cloud-events", scenario: scenarios.SimpleFunctionCloudEventsTest},
 	},
 }
 
