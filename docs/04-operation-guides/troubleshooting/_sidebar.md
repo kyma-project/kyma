@@ -1,5 +1,5 @@
 * [Home](/)
-* [Operation Guides](..README.md)
+* [Operation Guides](../README.md)
 * [Troubleshooting](README.md)
   * [API Exposure](api-exposure/README.md)
   * [Eventing](eventing/README.md)

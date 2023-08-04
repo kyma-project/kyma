@@ -3,14 +3,3 @@ title: Application Connectivity - tutorials
 ---
 
 Browse the tutorials for Application Connectivity to learn how to use it step-by-step in different scenarios.
-
-* [Create a new Application](ac-01-create-application.md)
-* [Register a service](ac-03-register-manage-services.md)
-* [Register a secured API](ac-04-register-secured-api.md)
-* [Call a registered external service from Kyma](ac-05-call-registered-service-from-kyma.md)
-* [Disable TLS certificate verification](ac-11-disable-tls-certificate-verification.md)
-* [Establish a secure connection with Compass](ra-01-establish-secure-connection-with-compass.md)
-* [Maintain a secure connection with Compass](ra-02-maintain-secure-connection-with-compass.md)
-* [Revoke a client certificate (RA)](ra-03-revoke-client-certificate.md)
-* [Configure Runtime Agent with Compass](ra-04-configure-runtime-agent-with-compass.md)
-* [Reconnect Runtime Agent with Compass](ra-05-reconnect-runtime-agent-with-compass.md)
