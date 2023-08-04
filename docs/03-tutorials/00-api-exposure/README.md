@@ -4,8 +4,6 @@ title: API Exposure - tutorials
 
 Browse the tutorials for API Exposure to learn how to use it step-by-step in different scenarios.
 
-## API Exposure
-
 * [Create workload](apix-01-create-workload.md)
 * [Custom domain](apix-02-setup-custom-domain-for-workload.md)
 * [Expose a workload](apix-04-expose-workload/apix-04-01-expose-workload-apigateway.md)

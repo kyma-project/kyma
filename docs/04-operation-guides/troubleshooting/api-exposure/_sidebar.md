@@ -12,7 +12,7 @@
     * [Could not resolve host](/04-operation-guides/troubleshooting/api-exposure/apix-02-dns-mgt/apix-02-02-dns-mgt-could-not-resolve-host.md)
     * [Resource ignored by the controller](/04-operation-guides/troubleshooting/api-exposure/apix-02-dns-mgt/apix-02-03-dns-mgt-resource-ignored.md)
   * [Certificate management - Issuer not created](/04-operation-guides/troubleshooting/api-exposure/apix-03-cert-mgt-issuer-not-created.md)
-  * [Kyma Gateway - not reachable](/04-operation-guides/troubleshooting/api-exposure/apix-04-gateway-not-reachable.md)
+  * [Kyma Gateway - not reachable](/04-operation-guides/troubleshooting/api-exposure//04-operation-guides/troubleshooting/api-exposure/apix-04-gateway-not-reachable.md)
   * [Pods stuck in `Pending/Failed/Unknown` state after an upgrade](/04-operation-guides/troubleshooting/api-exposure/apix-05-upgrade-sidecar-proxy.md)
   * [Issues when creating an APIRule - various reasons](/04-operation-guides/troubleshooting/api-exposure/apix-06-api-rule-troubleshooting.md)
   
