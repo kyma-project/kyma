@@ -101,10 +101,11 @@ func BasicCloudEventPythonFunction(runtime serverlessv1alpha2.Runtime) serverles
 	dpd := `requests>=2.31.0`
 
 	src := `import json
+import bottle
 
 def main(event, context):
-    txtEventData = json.dumps(event.data)
-    return txtEventData`
+    txtEventData = json.dumps(event)
+    return bottle.HTTPError(500, "makapaka")`
 
 	return serverlessv1alpha2.FunctionSpec{
 		Runtime: runtime,
