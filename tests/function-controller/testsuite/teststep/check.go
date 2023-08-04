@@ -382,7 +382,7 @@ func (ce CloudEventCheck) Run() error {
 	event.SetType("example.type")
 	event.SetData(cloudevents.ApplicationJSON, map[string]string{"hello": "world"})
 
-	ctx := cloudevents.ContextWithTarget(context.Background() /*ce.endpoint*/, "http://localhost:8080/")
+	ctx := cloudevents.ContextWithTarget(context.Background(), ce.endpoint) //, "http://localhost:8080/")
 	//ctx = cloudevents.WithEncodingStructured(ctx)
 
 	if result := c.Send(ctx, event); cloudevents.IsUndelivered(result) {
