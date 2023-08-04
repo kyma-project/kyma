@@ -1,4 +1,4 @@
-FROM eu.gcr.io/kyma-project/external/golang:1.19.0-alpine3.16 as builder
+FROM europe-docker.pkg.dev/kyma-project/prod/external/golang:1.20.6-alpine3.18 as builder
 
 WORKDIR /mock-app/
 
