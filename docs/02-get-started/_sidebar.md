@@ -1,4 +1,4 @@
-* [Home](../README.md)
+* [Home](/)
 * [Get Started](README.md)
   * [Quick install](01-quick-install.md)
   * [Deploy and expose a Function](02-deploy-expose-function.md)
