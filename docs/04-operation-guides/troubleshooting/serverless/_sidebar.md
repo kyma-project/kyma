@@ -1,0 +1,10 @@
+* [Home](/)
+* [Operation Guides](/04-operation-guides/README.md)
+* [Troubleshooting](/04-operation-guides/troubleshooting/README.md)
+* [Serverless](/04-operation-guides/troubleshooting/serverless/README.md)
+  * [Failure to build Functions](/04-operation-guides/troubleshooting/serverless/svls-01-cannot-build-functions.md)
+  * [Failing Function container](/04-operation-guides/troubleshooting/serverless/svls-02-failing-function-container.md)
+  * [Function debugger stops at dependency files](/04-operation-guides/troubleshooting/serverless/svls-03-function-debugger-in-strange-location.md)
+  * [Functions failing to build on k3d](/04-operation-guides/troubleshooting/serverless/svls-04-function-build-failing-on-k3d.md)
+  * [Serverless periodically restarting](/04-operation-guides/troubleshooting/serverless/svls-05-serverless-periodically-restarting.md)
+  

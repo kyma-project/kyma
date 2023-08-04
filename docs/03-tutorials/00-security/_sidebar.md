@@ -1,0 +1,6 @@
+* [Home](/)
+* [Developer Tutorials](/03-tutorials/README.md)
+* [Security](/03-tutorials/00-security/README.md)
+  * [Set up or update a custom domain TLS certificate in Kyma](/03-tutorials/00-security/sec-01-tls-certificates-security.md)
+  * [Prepare self-signed root CA and client certificates](/03-tutorials/00-security/sec-02-mtls-selfsign-client-certicate.md)
+  * [Set up a custom identity provider](/03-tutorials/00-security/sec-03-set-up-idp.md)

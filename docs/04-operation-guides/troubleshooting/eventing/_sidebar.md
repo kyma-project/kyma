@@ -1,0 +1,10 @@
+* [Home](/)
+* [Operation Guides](/04-operation-guides/README.md)
+* [Troubleshooting](/04-operation-guides/troubleshooting/README.md)
+* [Eventing](/04-operation-guides/troubleshooting/eventing/README.md)
+  * [Kyma Eventing - Basic Diagnostics](/04-operation-guides/troubleshooting/eventing/evnt-01-eventing-troubleshooting.md)
+  * [NATS JetStream backend troubleshooting](/04-operation-guides/troubleshooting/eventing/evnt-02-jetstream-troubleshooting.md)
+  * [Subscriber receives irrelevant events](/04-operation-guides/troubleshooting/eventing/evnt-03-type-collision.md)
+  * [Eventing backend stopped receiving events due to full storage](/04-operation-guides/troubleshooting/eventing/evnt-04-free-jetstream-storage.md)
+  * [Published events are pending in the stream](/04-operation-guides/troubleshooting/eventing/evnt-05-fix-pending-messages.md)
+  
