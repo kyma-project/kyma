@@ -47,6 +47,20 @@ func (_m *Backend) DeleteSubscription(subscription *v1alpha2.Subscription) error
 	return r0
 }
 
+// DeleteSubscriptionsOnly provides a mock function with given fields: subscription
+func (_m *Backend) DeleteSubscriptionsOnly(subscription *v1alpha2.Subscription) error {
+	ret := _m.Called(subscription)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*v1alpha2.Subscription) error); ok {
+		r0 = rf(subscription)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // GetConfig provides a mock function with given fields:
 func (_m *Backend) GetConfig() env.NATSConfig {
 	ret := _m.Called()

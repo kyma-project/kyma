@@ -208,6 +208,7 @@ func Test_Reconcile(t *testing.T) {
 			givenReconcilerSetup: func() (*Reconciler, *mocks.Backend) {
 				te := setupTestEnvironment(t, testSub)
 				te.Backend.On("Initialize", mock.Anything).Return(nil)
+				te.Backend.On("DeleteSubscriptionsOnly", mock.Anything).Return(nil)
 				te.Backend.On("GetJetStreamSubjects", mock.Anything, mock.Anything, mock.Anything).Return(
 					[]string{controllertesting.JetStreamSubject})
 				te.Backend.On("GetConfig", mock.Anything).Return(env.NATSConfig{JSStreamName: "sap"})

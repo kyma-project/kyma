@@ -21,6 +21,7 @@ const (
 	separator = "/"
 )
 
+//go:generate mockery --name Backend
 type Backend interface {
 	// Initialize should initialize the communication layer with the messaging backend system
 	Initialize(connCloseHandler backendutilsv2.ConnClosedHandler) error
@@ -30,6 +31,10 @@ type Backend interface {
 
 	// DeleteSubscription should delete the corresponding subscriber data of messaging backend
 	DeleteSubscription(subscription *eventingv1alpha2.Subscription) error
+
+	// DeleteSubscriptionsOnly should delete the JetStream subscriptions only.
+	// The corresponding JetStream consumers of the subscriptions must not be deleted.
+	DeleteSubscriptionsOnly(subscription *eventingv1alpha2.Subscription) error
 
 	// GetJetStreamSubjects returns a list of subjects appended with stream name and source as prefix if needed
 	GetJetStreamSubjects(source string, subjects []string, typeMatching eventingv1alpha2.TypeMatching) []string
