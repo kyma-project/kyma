@@ -302,8 +302,7 @@ spec:
                       minItems: 1
                       type: array
                     mutators:
-                      description: Specifies the list of [Ory Oathkeeper](https://www.ory.sh/docs/oathkeeper/pipeline/mutator)
-                        mutators.
+                      description: Specifies the list of [Ory Oathkeeper mutators](https://www.ory.sh/docs/oathkeeper/pipeline/mutator).
                       items:
                         description: Mutator represents a handler that transforms
                           the HTTP request before forwarding it. See the corresponding
@@ -354,7 +353,7 @@ spec:
                       type: object
                     timeout:
                       description: Specifies the timeout, in seconds, for
-                        HTTP requests made to spec.rules.path. The maximum timeout is limited
+                        HTTP requests made to **spec.rules.path**. The maximum timeout is limited
                         to 3900 seconds (65 minutes). Timeout definitions set at this level
                         take precedence over any timeout defined at the **spec.timeout** level.
                       maximum: 3900
