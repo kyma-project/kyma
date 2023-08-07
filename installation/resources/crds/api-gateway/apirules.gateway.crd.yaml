@@ -76,7 +76,7 @@ spec:
                             properties:
                               jwks_urls:
                                 description: Specifies the array of URLs from which Ory Oathkeeper can retrieve JSON Web Keys for validating JSON Web Token.
-                                  Must start with either "http://", "https://" or "file://".
+                                  The value must begin with either `http://`, `https://`, or `file://`.
                                 type: array
                                 items:
                                   type: string
