@@ -215,10 +215,6 @@ containers:
         value: '{{ template "fullname" . }}-function'
       targetCPUUtilizationPercentage:
         value: "50"
-      # Deprecated as of kyma 2.8
-      # TODO : remove this ENV in 2.10 (two version compatibility rule for open source)
-      functionJaegerServiceEndpoint:
-        value: "http://tracing-jaeger-collector.kyma-system.svc.cluster.local:14268/api/traces"
       functionTraceCollectorEndpoint:
         value: "http://telemetry-otlp-traces.kyma-system.svc.cluster.local:4318/v1/traces"
       functionPublisherProxyAddress:
