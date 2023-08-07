@@ -145,7 +145,7 @@ The following tables list all the possible parameters of a given resource togeth
 | **rules** (required) | \[\]object | Represents the array of Oathkeeper access rules to be applied. |
 | **rules.&#x200b;accessStrategies** (required) | \[\]object | Specifies the list of access strategies. All strategies listed in [Oathkeeper documentation](https://www.ory.sh/docs/oathkeeper/pipeline/authn) are supported. |
 | **rules.&#x200b;accessStrategies.&#x200b;config**  | object | Configures the handler. Configuration keys vary per handler. |
-| **rules.&#x200b;accessStrategies.&#x200b;config.&#x200b;jwks_urls**  | \[\]string | Specifies the array of URLs from which Ory Oathkeeper can retrieve JSON Web Keys for validating JSON Web Token. Must start with either "http://", "https://" or "file://". |
+| **rules.&#x200b;accessStrategies.&#x200b;config.&#x200b;jwks_urls**  | \[\]string | Specifies the array of URLs from which Ory Oathkeeper can retrieve JSON Web Keys for validating JSON Web Token. The value must begin with either `http://`, `https://`, or `file://`. |
 | **rules.&#x200b;accessStrategies.&#x200b;config.&#x200b;trusted_issuers**  | \[\]string | If the **trusted_issuers** field is set, the JWT must contain a value for the claim `iss` that matches exactly (case-sensitive) one of the values of **trusted_issuers**. The value must begin with either `http://`, `https://`, or `file://`. |
 | **rules.&#x200b;accessStrategies.&#x200b;handler** (required) | string | Specifies the name of the handler. |
 | **rules.&#x200b;methods** (required) | \[\]string | Represents the list of allowed HTTP request methods available for the **spec.rules.path**. |
