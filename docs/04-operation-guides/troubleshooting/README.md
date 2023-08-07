@@ -8,7 +8,7 @@ If you can't find a solution, don't hesitate to create a [GitHub](https://github
 
 See the full list of Kyma troubleshooting guides:
 
-## Troubleshooting guides
+### General troubleshooting guides
 
 - [Component doesn't work after successful installation](./01-component-installation-fails.md)
 - [Local Kyma deployment fails with pending Pods](./01-deplyoment-fails-pending-pods.md)
@@ -18,7 +18,7 @@ See the full list of Kyma troubleshooting guides:
 - [Kyma resource is misconfigured](./01-resources-misconfigured.md)
 - [Cannot create a volume snapshot](./01-volume-backup.md)
 
-## API Exposure
+### API Exposure
   
 - Cannot connect to a service exposed by an APIRule
   - [Basic diagnostics](./api-exposure/apix-01-cannot-connect-to-service/apix-01-01-apigateway-connect-api-rule.md)
@@ -34,7 +34,7 @@ See the full list of Kyma troubleshooting guides:
 - [Pods stuck in `Pending/Failed/Unknown` state after an upgrade](./api-exposure/apix-05-upgrade-sidecar-proxy.md)
 - [Issues when creating an APIRule - various reasons](./api-exposure/apix-06-api-rule-troubleshooting.md)
 
-## Eventing
+### Eventing
 
 - [Kyma Eventing - Basic Diagnostics](./eventing/evnt-01-eventing-troubleshooting.md)
 - [NATS JetStream backend troubleshooting](./eventing/evnt-02-jetstream-troubleshooting.md)
@@ -42,16 +42,17 @@ See the full list of Kyma troubleshooting guides:
 - [Eventing backend stopped receiving events due to full storage](./eventing/evnt-04-free-jetstream-storage.md)
 - [Published events are pending in the stream](./eventing/evnt-05-fix-pending-messages.md)
 
-## Observability
+### Observability
+
 - [Prometheus Istio Server restarting or in crashback loop](./observability/obsv-01-troubleshoot-prometheus-istio-server-crash-oom.md)
 - [Component doesn't work after successful installation](./observability/obsv-02-troubleshoot-trace-backend-shows-few-traces.md)
 
-## Security
+### Security
   
 - [Issues with certificates on Gardener](./security/sec-01-certificates-gardener.md)
 - [No access to OAuth2 protected APIRules](./security/sec-02-oauth2-protected-apirules.md)
 
-## Serverless
+### Serverless
 
 - [Failure to build Functions](./serverless/svls-01-cannot-build-functions.md)
 - [Failing Function container](./serverless/svls-02-failing-function-container.md)
@@ -59,7 +60,7 @@ See the full list of Kyma troubleshooting guides:
 - [Functions failing to build on k3d](./serverless/svls-04-function-build-failing-on-k3d.md)
 - [Serverless periodically restarting](./serverless/svls-05-serverless-periodically-restarting.md)
 
-## Service Mesh
+### Service Mesh
 
 - [Can't access a Kyma endpoint (503 status code)](./service-mesh/smsh-01-503-no-access.md)
 - [Connection refused errors](./service-mesh/smsh-02-connection-refused.md)

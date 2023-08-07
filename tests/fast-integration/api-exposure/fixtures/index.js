@@ -71,6 +71,9 @@ const apiRuleOAuthObj = k8s.loadAllYaml(
     apiRuleOAuthYaml,
 );
 
+const defaultRetryDelayMs = 1000;
+const defaultRetries = 5;
+
 async function testHttpbinAllowResponse() {
   const vs = await waitForVirtualService(httpbinNamespace, httpbinAllowService);
   const host = vs.spec.hosts[0];
@@ -165,10 +168,10 @@ async function getOAuthToken(domain) {
 }
 
 async function ensureApiExposureFixture() {
-  await k8sApply([istioTestNamespaceObj]);
-  await k8sApply(httpbinDeploymentObj, httpbinNamespace);
-  await k8sApply([apiRuleAllowObj], httpbinNamespace);
-  await k8sApply(apiRuleOAuthObj, httpbinNamespace);
+  await retryPromise( (r)=> k8sApply([istioTestNamespaceObj]), defaultRetryDelayMs, defaultRetries);
+  await retryPromise( (r)=> k8sApply(httpbinDeploymentObj, httpbinNamespace), defaultRetryDelayMs, defaultRetries);
+  await retryPromise( (r)=> k8sApply([apiRuleAllowObj], httpbinNamespace), defaultRetryDelayMs, defaultRetries);
+  await retryPromise( (r)=> k8sApply(apiRuleOAuthObj, httpbinNamespace), defaultRetryDelayMs, defaultRetries);
   await waitForDeployment('httpbin', httpbinNamespace);
   const apiRulePath = `/apis/gateway.kyma-project.io/v1alpha1/namespaces/${httpbinNamespace}/apirules`;
   await waitForK8sObject(apiRulePath, {}, (_type, _apiObj, watchObj) => {

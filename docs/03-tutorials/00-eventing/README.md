@@ -4,7 +4,7 @@ title: Eventing - tutorials
 
 Browse the tutorials for Eventing to learn how to use it step-by-step in different scenarios.
 
-## Prerequisites
+### Prerequisites
 
 To perform the steps described in the Eventing tutorials, you need the following: 
 

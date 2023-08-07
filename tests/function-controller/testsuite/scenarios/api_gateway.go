@@ -40,9 +40,9 @@ func SimpleFunctionAPIGatewayTest(restConfig *rest.Config, cfg testsuite.Config,
 		return nil, errors.Wrap(err, "while creating k8s CoreV1Client")
 	}
 
-	python39Logger := logf.WithField(scenarioKey, "python39")
-	nodejs16Logger := logf.WithField(scenarioKey, "nodejs16")
-	nodejs18Logger := logf.WithField(scenarioKey, "nodejs18")
+	python39Logger := logf.WithField(runtimeKey, "python39")
+	nodejs16Logger := logf.WithField(runtimeKey, "nodejs16")
+	nodejs18Logger := logf.WithField(runtimeKey, "nodejs18")
 
 	genericContainer := shared.Container{
 		DynamicCli:  dynamicCli,

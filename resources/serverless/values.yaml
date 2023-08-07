@@ -81,8 +81,8 @@ global:
       directory: "prod"
     function_controller:
       name: "function-controller"
-      version: "v20230628-61d97068"
-      directory: "prod"
+      version: "PR-17927"
+      directory: "dev"
     function_webhook:
       name: "function-webhook"
       version: "v20230628-61d97068"

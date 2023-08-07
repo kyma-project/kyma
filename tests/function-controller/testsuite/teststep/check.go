@@ -330,7 +330,7 @@ func checkIfRequiredLabelsExists(labels map[string]string, isService bool) error
 
 	if isService {
 		if len(labels) != 4 {
-			return errors.New(fmt.Sprintf("Service has got %s istead of 4 labels", len(labels)))
+			return errors.New(fmt.Sprintf("Service has got %d instead of 4 labels", len(labels)))
 		}
 	}
 

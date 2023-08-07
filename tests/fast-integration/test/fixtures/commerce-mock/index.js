@@ -666,7 +666,7 @@ async function cleanCompassResourcesSKR(client, appName, scenarioName, runtimeID
 }
 
 async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace, testSubscriptionV1Alpha2=false) {
-  await k8sApply(applicationObjs);
+  await retryPromise( (r)=> k8sApply(applicationObjs), 1000, 10);
   const mockHost = await provisionCommerceMockResources(
       'commerce',
       mockNamespace,
@@ -678,11 +678,11 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
   await waitForFunction('lastorder', targetNamespace);
 
   const sink = `http://lastorder.${targetNamespace}.svc.cluster.local`;
-  await k8sApply([eventingSubscription(
+  await retryPromise( (r)=> k8sApply([eventingSubscription(
       eventTypeOrderReceived,
       sink,
       orderReceivedSubName,
-      targetNamespace)]);
+      targetNamespace)]), 1000, 10);
   await waitForSubscription(orderReceivedSubName, targetNamespace);
   await waitForSubscription('order-created', targetNamespace);
 
@@ -696,7 +696,7 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
         targetNamespace,
     );
     // apply to kyma cluster
-    await k8sApply([orderCompletedV1Alpha2Sub]);
+    await retryPromise( (r)=> k8sApply([orderCompletedV1Alpha2Sub]), 1000, 10);
     await waitForSubscription('order-completed', targetNamespace, 'v1alpha2');
 
     // create a subscription with unclean event type and source
@@ -709,7 +709,7 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
         targetNamespace,
     );
     // apply to kyma cluster
-    await k8sApply([uncleanTypeAndSourceV1Alpha2Sub]);
+    await retryPromise( (r)=> k8sApply([uncleanTypeAndSourceV1Alpha2Sub]), 1000, 10);
     await waitForSubscription(uncleanSubName, targetNamespace, 'v1alpha2');
 
     // create a subscription with unclean event type and source
@@ -723,7 +723,7 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
         'exact',
     );
     // apply to kyma cluster
-    await k8sApply([typeMatchingExactV1Alpha2Sub]);
+    await retryPromise( (r)=> k8sApply([typeMatchingExactV1Alpha2Sub]), 1000, 10);
     await waitForSubscription(exactSubName, targetNamespace, 'v1alpha2');
   }
 
@@ -731,17 +731,18 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
 }
 
 async function provisionCommerceMockResources(appName, mockNamespace, targetNamespace, functionObjs = lastorderObjs) {
-  await k8sApply([namespaceObj(mockNamespace), namespaceObj(targetNamespace)]);
-  await k8sApply(prepareCommerceObjs(mockNamespace));
-  await k8sApply(functionObjs, targetNamespace, true);
+  await retryPromise( (r)=> k8sApply([namespaceObj(mockNamespace), namespaceObj(targetNamespace)]),
+      1000, 10);
+  await retryPromise( (r)=> k8sApply(prepareCommerceObjs(mockNamespace)), 1000, 10);
+  await retryPromise( (r)=> k8sApply(functionObjs, targetNamespace, true), 1000, 10);
   await waitForFunction('lastorder', targetNamespace);
-  await k8sApply([
+  await retryPromise( (r)=> k8sApply([
     eventingSubscription(
         `sap.kyma.custom.${appName}.order.created.v1`,
         `http://lastorder.${targetNamespace}.svc.cluster.local`,
         'order-created',
         targetNamespace),
-  ]);
+  ]), 1000, 10);
   await waitForDeployment('commerce-mock', mockNamespace, 120 * 1000);
   await deployJaeger(k8s.loadAllYaml(jaegerYaml));
   await deployLoki(k8s.loadAllYaml(lokiYaml));
