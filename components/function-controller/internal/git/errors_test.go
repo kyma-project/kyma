@@ -3,7 +3,7 @@ package git
 import (
 	"testing"
 
-	git2go "github.com/libgit2/git2go/v31"
+	git2go "github.com/libgit2/git2go/v34"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 )
