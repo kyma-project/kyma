@@ -28,6 +28,7 @@ func InitializeScenarioTargetNamespaceSidecar(ctx *godog.ScenarioContext) {
 	ctx.Step(`^Httpbin deployment is deployed and ready in "([^"]*)" namespace$`, installedCase.waitForHttpBinInTargetNamespace)
 	ctx.Step(`^there should be no pods with Istio sidecar in "([^"]*)" namespace$`, installedCase.targetNamespacePodsShouldNotHaveSidecar)
 	ctx.Step(`^there should be some pods with Istio sidecar in "([^"]*)" namespace$`, installedCase.targetNamespacePodsShouldHaveSidecar)
+	ctx.Step(`^Pods in namespace "([^"]*)" should have proxy sidecar$`, installedCase.targetNamespacePodsShouldHaveSidecar)
 	ctx.Step(`^there is (\d+) Httpbin deployment in "([^"]*)" namespace$`, installedCase.thereIsNHttpbinPod)
 	ctx.Step(`^there "([^"]*)" be Istio sidecar in httpbin pod in "([^"]*)" namespace$`, installedCase.httpBinPodShouldHaveSidecar)
 	ctx.Step(`^Httpbin deployment is deleted from "([^"]*)" namespace$`, installedCase.deleteHttpBinInTargetNamespace)
@@ -56,15 +57,15 @@ func (i *istioInstalledCase) targetNamespacePodsShouldHaveSidecar(targetNamespac
 	if err != nil {
 		return err
 	}
-	var proxies []string
 	for _, pod := range pods.Items {
+		hasProxy := false
 		if !metav1.HasAnnotation(pod.ObjectMeta, "sidecar.istio.io/inject") {
 			for _, container := range pod.Spec.Containers {
 				if container.Name == proxyName {
-					proxies = append(proxies, pod.Name)
+					hasProxy = true
 				}
 			}
-			if len(proxies) == 0 {
+			if !hasProxy {
 				return fmt.Errorf("istio sidecars should be deployed in %s", targetNamespace)
 			}
 		}

@@ -15,7 +15,7 @@ Feature: Istio sidecar injection works properly in target namespace
     And "sidecar-enable" namespace is labeled with "istio-injection" "enabled"
     And Httpbin deployment is created in "sidecar-enable" namespace
     And Httpbin deployment is deployed and ready in "sidecar-enable" namespace
-    Then there should be some pods with Istio sidecar in "sidecar-enable" namespace
+    Then Pods in namespace "sidecar-enabled" should have proxy sidecar
     And "sidecar-enable" namespace is deleted
 
   Scenario: Kyma-system namespace contains pods with sidecar
