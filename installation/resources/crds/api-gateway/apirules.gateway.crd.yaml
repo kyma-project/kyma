@@ -105,8 +105,7 @@ spec:
                       minItems: 1
                       type: array
                     mutators:
-                      description: Specifies the list of [Ory Oathkeeper](https://www.ory.sh/docs/oathkeeper/pipeline/mutator)
-                        mutators.
+                      description: Specifies the list of [Ory Oathkeeper mutators](https://www.ory.sh/docs/oathkeeper/pipeline/mutator).
                       items:
                         description: Mutator represents a handler that transforms
                           the HTTP request before forwarding it. See the corresponding
@@ -281,7 +280,7 @@ spec:
                               trusted_issuers:
                                 description: If the **trusted_issuers** field is set, the JWT must contain a value for the claim `iss` 
                                   that matches exactly (case-sensitive) one of the values of **trusted_issuers**.
-                                  Must start with either "http://", "https://" or "file://".
+                                  The value must begin with either `http://`, `https://`, or `file://`.
                                 type: array
                                 items:
                                   type: string
