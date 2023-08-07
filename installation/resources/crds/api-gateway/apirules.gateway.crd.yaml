@@ -84,7 +84,7 @@ spec:
                               trusted_issuers:
                                 description: If the **trusted_issuers** field is set, the JWT must contain a value for the claim `iss`
                                   that matches exactly (case-sensitive) one of the values of **trusted_issuers**.
-                                  Must start with either "http://", "https://" or "file://".
+                                  The value must begin with either `http://`, `https://`, or `file://`.
                                 type: array
                                 items:
                                   type: string
@@ -239,7 +239,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: Defines the desired state of ApiRule.
+            description: Defines the desired state of APIRule.
             properties:
               gateway:
                 description: Specifies the Istio Gateway to be used.
@@ -273,7 +273,7 @@ spec:
                             properties:
                               jwks_urls:
                                 description: Specifies the array of URLs from which Ory Oathkeeper can retrieve JSON Web Keys for validating JSON Web Token.
-                                  Must start with either "http://", "https://" or "file://".
+                                  The value must begin with either `http://`, `https://`, or `file://`.
                                 type: array
                                 items:
                                   type: string
@@ -356,7 +356,7 @@ spec:
                       description: Specifies the timeout, in seconds, for
                         HTTP requests made to spec.rules.path. The maximum timeout is limited
                         to 3900 seconds (65 minutes). Timeout definitions set at this level
-                        take precedence over any timeout defined at the spec.timeout level.
+                        take precedence over any timeout defined at the **spec.timeout** level.
                       maximum: 3900
                       minimum: 1
                       type: integer
@@ -393,8 +393,8 @@ spec:
                 - port
                 type: object
               timeout:
-                description: Specifies the timeout for HTTP requests in seconds for
-                  all Oathkeeper access rules, but can be overridden for each rule.
+                description: Specifies the timeout, in seconds, for HTTP requests for all Oathkeeper access rules. 
+                  However, this value can be overridden for each individual rule.
                   The maximum timeout is limited to 3900 seconds (65 minutes).
                   If no timeout is specified, the default timeout of 180 seconds applies.
                 maximum: 3900
