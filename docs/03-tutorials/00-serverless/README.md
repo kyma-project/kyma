@@ -2,7 +2,7 @@
 title: Serverless - tutorials
 ---
 
-### Overview - Its all about custom resources
+### Overview - It's all about custom resources
 
 Kyma Serverless introduces a [Function](../../05-technical-reference/00-custom-resources/svls-01-function.md) CustomResourceDefinition (CRD) as an extension to the Kubernetes API server.
 Defining a Function in Kyma essentially means creating a new instance of the Function custom resource (CR). However, the content of the Function CR specification may become quite long. It consists of the code (or git reference to the code), dependencies, runtime specification, build-time specification, etc. Additionally, there are other CRs that are relevant for a Function developer - i.e. [APIRule](../../05-technical-reference/00-custom-resources/apix-01-apirule.md) (defining how Function is exposed to the outside world), [Subscription](../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) (defining which CloudEvents should trigger Function) and others.
