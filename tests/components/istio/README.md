@@ -5,7 +5,7 @@ Istio component tests use the [cucumber/godog](https://github.com/cucumber/godog
 ## Prerequisites
 
 - Kubernetes installed and kubeconfig configured to point to this cluster
-- Istio component installed on cluster ([example component file](https://github.com/kyma-project/test-infra/blob/main/prow/scripts/cluster-integration/kyma-integration-k3d-istio-components.yaml))
+- Kyma installed on cluster with minimal set [components](https://github.com/kyma-project/test-infra/blob/main/prow/scripts/cluster-integration/kyma-integration-k3d-istio-components.yaml))
 - Environment variables exported (the only required environment variable is `KYMA_PROFILE`)
 
 ### Environment variables
