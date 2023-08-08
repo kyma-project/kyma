@@ -27,7 +27,7 @@ func InitializeScenarioTargetNamespaceSidecar(ctx *godog.ScenarioContext) {
 	ctx.Step(`^Httpbin deployment is created in "([^"]*)" namespace$`, installedCase.deployHttpBinInTargetNamespace)
 	ctx.Step(`^Httpbin deployment is deployed and ready in "([^"]*)" namespace$`, installedCase.waitForHttpBinInTargetNamespace)
 	ctx.Step(`^there should be no pods with Istio sidecar in "([^"]*)" namespace$`, installedCase.targetNamespacePodsShouldNotHaveSidecar)
-	ctx.Step(`^Pods in namespace "([^"]*)" should have proxy sidecar$`, installedCase.targetNamespacePodsShouldHaveSidecar)
+	ctx.Step(`^there should be "([^"]*)" pods with Istio sidecar in "([^"]*)" namespace$`, installedCase.targetNamespacePodsShouldHaveSidecar)
 	ctx.Step(`^there is (\d+) Httpbin deployment in "([^"]*)" namespace$`, installedCase.thereIsNHttpbinPod)
 	ctx.Step(`^there "([^"]*)" be Istio sidecar in httpbin pod in "([^"]*)" namespace$`, installedCase.httpBinPodShouldHaveSidecar)
 	ctx.Step(`^Httpbin deployment is deleted from "([^"]*)" namespace$`, installedCase.deleteHttpBinInTargetNamespace)
@@ -51,24 +51,45 @@ func (i *istioInstalledCase) httpBinPodShouldHaveSidecar(shouldHave string, targ
 	return nil
 }
 
-func (i *istioInstalledCase) targetNamespacePodsShouldHaveSidecar(targetNamespace string) error {
-	pods, err := k8sClient.CoreV1().Pods(targetNamespace).List(context.Background(), metav1.ListOptions{})
+func (i *istioInstalledCase) targetNamespacePodsShouldHaveSidecar(someOrAll string, targetNamespace string) error {
+	const (
+		all  = "all"
+		some = "some"
+	)
+
+	podList, err := k8sClient.CoreV1().Pods(targetNamespace).List(context.Background(), metav1.ListOptions{})
 	if err != nil {
 		return err
 	}
-	for _, pod := range pods.Items {
-		hasProxy := false
-		if !metav1.HasAnnotation(pod.ObjectMeta, "sidecar.istio.io/inject") {
-			for _, container := range pod.Spec.Containers {
-				if container.Name == proxyName {
-					hasProxy = true
-				}
-			}
-			if !hasProxy {
-				return fmt.Errorf("istio sidecars should be deployed in %s", targetNamespace)
+
+	proxyCounter := 0
+	for _, pod := range podList.Items {
+		if metav1.HasAnnotation(pod.ObjectMeta, "sidecar.istio.io/inject") {
+			continue
+		}
+		for _, container := range pod.Spec.Containers {
+			if container.Name == proxyName {
+				println(" has proxy")
+				proxyCounter++
 			}
 		}
+
 	}
+
+	switch someOrAll {
+	case all:
+		if proxyCounter < len(podList.Items) {
+			return fmt.Errorf("not all pods have proxy in %s namespace", targetNamespace)
+		}
+	case some:
+		if proxyCounter == 0 {
+			return fmt.Errorf("sidecars not found in %s namespace", targetNamespace)
+		}
+	default:
+		return fmt.Errorf("you have to choose between %s and %s when defining feature file", all, some)
+
+	}
+
 	return nil
 }
 
