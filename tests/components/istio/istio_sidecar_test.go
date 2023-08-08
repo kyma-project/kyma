@@ -73,7 +73,6 @@ func (i *istioInstalledCase) targetNamespacePodsShouldHaveSidecar(someOrAll stri
 				proxyCounter++
 			}
 		}
-
 	}
 
 	switch someOrAll {
