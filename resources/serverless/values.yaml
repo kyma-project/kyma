@@ -81,15 +81,15 @@ global:
       directory: "prod"
     function_controller:
       name: "function-controller"
-      version: "PR-17917"
+      version: "PR-17942"
       directory: "dev"
     function_webhook:
       name: "function-webhook"
-      version: "PR-17917"
+      version: "PR-17942"
       directory: "dev"
     function_build_init:
       name: "function-build-init"
-      version: "PR-17917"
+      version: "PR-17942"
       directory: "dev"
     function_registry_gc:
       name: "function-registry-gc"
@@ -215,10 +215,6 @@ containers:
         value: '{{ template "fullname" . }}-function'
       targetCPUUtilizationPercentage:
         value: "50"
-      # Deprecated as of kyma 2.8
-      # TODO : remove this ENV in 2.10 (two version compatibility rule for open source)
-      functionJaegerServiceEndpoint:
-        value: "http://tracing-jaeger-collector.kyma-system.svc.cluster.local:14268/api/traces"
       functionTraceCollectorEndpoint:
         value: "http://telemetry-otlp-traces.kyma-system.svc.cluster.local:4318/v1/traces"
       functionPublisherProxyAddress:
