@@ -32,12 +32,14 @@ import (
 
 	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
+
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	eventmeshreconciler "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/eventmesh"
 	"github.com/kyma-project/kyma/components/eventing-controller/internal/featureflags"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 	backendeventmesh "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventmesh"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
 	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"
@@ -141,6 +143,7 @@ func setupSuite() error {
 		CertsURL:     certsURL,
 	}
 	emTestEnsemble.envConfig = getEnvConfig()
+	col := metrics.NewCollector()
 	testReconciler := eventmeshreconciler.NewReconciler(
 		context.Background(),
 		k8sManager.GetClient(),
@@ -152,6 +155,7 @@ func setupSuite() error {
 		credentials,
 		emTestEnsemble.nameMapper,
 		sinkValidator,
+		col,
 	)
 
 	if err = testReconciler.SetupUnmanaged(k8sManager); err != nil {

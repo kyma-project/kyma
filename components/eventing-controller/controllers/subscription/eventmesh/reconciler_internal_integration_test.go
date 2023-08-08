@@ -28,6 +28,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventmesh"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventmesh/mocks"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
 	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
@@ -47,6 +48,7 @@ const (
 func TestReconciler_Reconcile(t *testing.T) {
 	ctx := context.Background()
 	req := require.New(t)
+	col := metrics.NewCollector()
 
 	// A subscription with the correct Finalizer, conditions and status ready for reconciliation with the backend.
 	testSub := reconcilertesting.NewSubscription("sub1", "test",
@@ -95,7 +97,17 @@ func TestReconciler_Reconcile(t *testing.T) {
 				te := setupTestEnvironment(t, testSub)
 				te.backend.On("Initialize", mock.Anything).Return(nil)
 				te.backend.On("SyncSubscription", mock.Anything, mock.Anything, mock.Anything).Return(true, nil)
-				return NewReconciler(ctx, te.fakeClient, te.logger, te.recorder, te.cfg, te.cleaner, te.backend, te.credentials, te.mapper, happyValidator)
+				return NewReconciler(ctx,
+					te.fakeClient,
+					te.logger,
+					te.recorder,
+					te.cfg,
+					te.cleaner,
+					te.backend,
+					te.credentials,
+					te.mapper,
+					happyValidator,
+					col)
 			},
 			wantReconcileResult: ctrl.Result{},
 			wantReconcileError:  nil,
@@ -106,7 +118,17 @@ func TestReconciler_Reconcile(t *testing.T) {
 			givenReconcilerSetup: func() *Reconciler {
 				te := setupTestEnvironment(t)
 				te.backend.On("Initialize", mock.Anything).Return(nil)
-				return NewReconciler(ctx, te.fakeClient, te.logger, te.recorder, te.cfg, te.cleaner, te.backend, te.credentials, te.mapper, unhappyValidator)
+				return NewReconciler(ctx,
+					te.fakeClient,
+					te.logger,
+					te.recorder,
+					te.cfg,
+					te.cleaner,
+					te.backend,
+					te.credentials,
+					te.mapper,
+					unhappyValidator,
+					col)
 			},
 			wantReconcileResult: ctrl.Result{},
 			wantReconcileError:  nil,
@@ -118,7 +140,17 @@ func TestReconciler_Reconcile(t *testing.T) {
 				te := setupTestEnvironment(t, testSub)
 				te.backend.On("Initialize", mock.Anything).Return(nil)
 				te.backend.On("SyncSubscription", mock.Anything, mock.Anything, mock.Anything).Return(false, backendSyncErr)
-				return NewReconciler(ctx, te.fakeClient, te.logger, te.recorder, te.cfg, te.cleaner, te.backend, te.credentials, te.mapper, happyValidator)
+				return NewReconciler(ctx,
+					te.fakeClient,
+					te.logger,
+					te.recorder,
+					te.cfg,
+					te.cleaner,
+					te.backend,
+					te.credentials,
+					te.mapper,
+					happyValidator,
+					col)
 			},
 			wantReconcileResult: ctrl.Result{},
 			wantReconcileError:  backendSyncErr,
@@ -130,7 +162,17 @@ func TestReconciler_Reconcile(t *testing.T) {
 				te := setupTestEnvironment(t, testSubUnderDeletion)
 				te.backend.On("Initialize", mock.Anything).Return(nil)
 				te.backend.On("DeleteSubscription", mock.Anything).Return(backendDeleteErr)
-				return NewReconciler(ctx, te.fakeClient, te.logger, te.recorder, te.cfg, te.cleaner, te.backend, te.credentials, te.mapper, happyValidator)
+				return NewReconciler(ctx,
+					te.fakeClient,
+					te.logger,
+					te.recorder,
+					te.cfg,
+					te.cleaner,
+					te.backend,
+					te.credentials,
+					te.mapper,
+					happyValidator,
+					col)
 			},
 			wantReconcileResult: ctrl.Result{},
 			wantReconcileError:  backendDeleteErr,
@@ -141,7 +183,17 @@ func TestReconciler_Reconcile(t *testing.T) {
 			givenReconcilerSetup: func() *Reconciler {
 				te := setupTestEnvironment(t, testSub)
 				te.backend.On("Initialize", mock.Anything).Return(nil)
-				return NewReconciler(ctx, te.fakeClient, te.logger, te.recorder, te.cfg, te.cleaner, te.backend, te.credentials, te.mapper, unhappyValidator)
+				return NewReconciler(ctx,
+					te.fakeClient,
+					te.logger,
+					te.recorder,
+					te.cfg,
+					te.cleaner,
+					te.backend,
+					te.credentials,
+					te.mapper,
+					unhappyValidator,
+					col)
 			},
 			wantReconcileResult: ctrl.Result{},
 			wantReconcileError:  validatorErr,
@@ -153,7 +205,17 @@ func TestReconciler_Reconcile(t *testing.T) {
 				te := setupTestEnvironment(t, testSubPaused)
 				te.backend.On("Initialize", mock.Anything).Return(nil)
 				te.backend.On("SyncSubscription", mock.Anything, mock.Anything, mock.Anything).Return(true, nil)
-				return NewReconciler(ctx, te.fakeClient, te.logger, te.recorder, te.cfg, te.cleaner, te.backend, te.credentials, te.mapper, happyValidator)
+				return NewReconciler(ctx,
+					te.fakeClient,
+					te.logger,
+					te.recorder,
+					te.cfg,
+					te.cleaner,
+					te.backend,
+					te.credentials,
+					te.mapper,
+					happyValidator,
+					col)
 			},
 			wantReconcileResult: ctrl.Result{
 				RequeueAfter: requeueAfterDuration,
@@ -196,6 +258,8 @@ func TestReconciler_APIRuleConfig(t *testing.T) {
 
 	validator := sink.ValidatorFunc(func(s *eventingv1alpha2.Subscription) error { return nil })
 
+	col := metrics.NewCollector()
+
 	var testCases = []struct {
 		name                            string
 		givenSubscription               *eventingv1alpha2.Subscription
@@ -213,8 +277,18 @@ func TestReconciler_APIRuleConfig(t *testing.T) {
 				te.credentials = credentials
 				te.backend.On("Initialize", mock.Anything).Return(nil)
 				te.backend.On("SyncSubscription", mock.Anything, mock.Anything, mock.Anything).Return(true, nil)
-				return NewReconciler(ctx, te.fakeClient, te.logger, te.recorder, te.cfg, te.cleaner, te.backend,
-					te.credentials, te.mapper, validator), te.fakeClient
+				return NewReconciler(ctx,
+						te.fakeClient,
+						te.logger,
+						te.recorder,
+						te.cfg,
+						te.cleaner,
+						te.backend,
+						te.credentials,
+						te.mapper,
+						validator,
+						col),
+					te.fakeClient
 			},
 			givenEventingWebhookAuthEnabled: false,
 			wantReconcileResult:             ctrl.Result{},
@@ -232,8 +306,18 @@ func TestReconciler_APIRuleConfig(t *testing.T) {
 				te.credentials = credentials
 				te.backend.On("Initialize", mock.Anything).Return(nil)
 				te.backend.On("SyncSubscription", mock.Anything, mock.Anything, mock.Anything).Return(true, nil)
-				return NewReconciler(ctx, te.fakeClient, te.logger, te.recorder, te.cfg, te.cleaner, te.backend,
-					te.credentials, te.mapper, validator), te.fakeClient
+				return NewReconciler(ctx,
+						te.fakeClient,
+						te.logger,
+						te.recorder,
+						te.cfg,
+						te.cleaner,
+						te.backend,
+						te.credentials,
+						te.mapper,
+						validator,
+						col),
+					te.fakeClient
 			},
 			givenEventingWebhookAuthEnabled: true,
 			wantReconcileResult:             ctrl.Result{},
@@ -301,6 +385,7 @@ func TestReconciler_APIRuleConfig_Upgrade(t *testing.T) {
 	)
 
 	validator := sink.ValidatorFunc(func(s *eventingv1alpha2.Subscription) error { return nil })
+	col := metrics.NewCollector()
 
 	var testCases = []struct {
 		name                            string
@@ -320,8 +405,18 @@ func TestReconciler_APIRuleConfig_Upgrade(t *testing.T) {
 				te.credentials = credentials
 				te.backend.On("Initialize", mock.Anything).Return(nil)
 				te.backend.On("SyncSubscription", mock.Anything, mock.Anything, mock.Anything).Return(true, nil)
-				return NewReconciler(ctx, te.fakeClient, te.logger, te.recorder, te.cfg, te.cleaner, te.backend,
-					te.credentials, te.mapper, validator), te.fakeClient
+				return NewReconciler(ctx,
+						te.fakeClient,
+						te.logger,
+						te.recorder,
+						te.cfg,
+						te.cleaner,
+						te.backend,
+						te.credentials,
+						te.mapper,
+						validator,
+						col),
+					te.fakeClient
 			},
 			givenEventingWebhookAuthEnabled: false,
 			wantReconcileResult:             ctrl.Result{},
@@ -345,8 +440,18 @@ func TestReconciler_APIRuleConfig_Upgrade(t *testing.T) {
 				te.credentials = credentials
 				te.backend.On("Initialize", mock.Anything).Return(nil)
 				te.backend.On("SyncSubscription", mock.Anything, mock.Anything, mock.Anything).Return(true, nil)
-				return NewReconciler(ctx, te.fakeClient, te.logger, te.recorder, te.cfg, te.cleaner, te.backend,
-					te.credentials, te.mapper, validator), te.fakeClient
+				return NewReconciler(ctx,
+						te.fakeClient,
+						te.logger,
+						te.recorder,
+						te.cfg,
+						te.cleaner,
+						te.backend,
+						te.credentials,
+						te.mapper,
+						validator,
+						col),
+					te.fakeClient
 			},
 			givenEventingWebhookAuthEnabled: true,
 			wantReconcileResult:             ctrl.Result{},
