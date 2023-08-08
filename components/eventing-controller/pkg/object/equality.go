@@ -3,15 +3,14 @@ package object
 import (
 	"reflect"
 
-	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
-
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/conversion"
 
 	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
-
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 )
 
 // Semantic can do semantic deep equality checks for API objects. Fields which
@@ -35,8 +34,7 @@ func apiRuleEqual(a1, a2 *apigatewayv1beta1.APIRule) bool {
 	if !reflect.DeepEqual(a1.Labels, a2.Labels) {
 		return false
 	}
-
-	if !reflect.DeepEqual(a1.OwnerReferences, a2.OwnerReferences) {
+	if !ownerReferencesDeepEqual(a1.OwnerReferences, a2.OwnerReferences) {
 		return false
 	}
 	if !reflect.DeepEqual(a1.Spec.Service.Name, a2.Spec.Service.Name) {
@@ -53,6 +51,28 @@ func apiRuleEqual(a1, a2 *apigatewayv1beta1.APIRule) bool {
 	}
 	if !reflect.DeepEqual(a1.Spec.Gateway, a2.Spec.Gateway) {
 		return false
+	}
+
+	return true
+}
+
+func ownerReferencesDeepEqual(ors1, ors2 []v1.OwnerReference) bool {
+	if len(ors1) != len(ors2) {
+		return false
+	}
+
+	var found bool
+	for _, or1 := range ors1 {
+		found = false
+		for _, or2 := range ors2 {
+			if reflect.DeepEqual(or1, or2) {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return false
+		}
 	}
 
 	return true

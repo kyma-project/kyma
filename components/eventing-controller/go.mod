@@ -13,7 +13,7 @@ require (
 	github.com/kyma-project/kyma/common/logging v0.0.0-20230616102347-ad6927dc28d5
 	github.com/kyma-project/kyma/components/application-operator v0.0.0-20230127165033-ec8e43477eca
 	github.com/mitchellh/hashstructure/v2 v2.0.2
-	github.com/nats-io/nats-server/v2 v2.9.19
+	github.com/nats-io/nats-server/v2 v2.9.20
 	github.com/nats-io/nats.go v1.27.1
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.27.8

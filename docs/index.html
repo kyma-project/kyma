@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="description" content="Description">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="./assets/apple-touch-icon.png?" />
+  <link rel="mask-icon" color="#2872dd" href="./assets/safari-pinned-tab.svg?" />
+  <link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32x32.png?" />
+  <link rel="icon" type="image/png" sizes="16x16" href="./assets/favicon-16x16.png?" />
+  <link rel="stylesheet" media="(prefers-color-scheme: dark)"
+    href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple-dark.css">
+  <link rel="stylesheet" media="(prefers-color-scheme: light)"
+    href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple.css">
+  <link rel="stylesheet" href="assets/theme-custom.css">
+</head>
+
+<body>
+  <div id="app"></div>
+  <script>
+    window.$docsify = {
+      search: 'auto',
+      name: '',
+      repo: '',
+      loadSidebar: true,
+      subMaxLevel: 2,
+      relativePath: true,
+      themeColor: 'blue',
+      // basePath: 'https://raw.githubusercontent.com/pbochynski/kyma/main/docs/',
+      alias: {
+        '/btp-manager/(.*)': 'https://raw.githubusercontent.com/kyma-project/btp-manager/main/docs/$1',
+        '/keda-manager/(.*)': 'https://raw.githubusercontent.com/kyma-project/keda-manager/main/docs/$1',
+        '/serverless-manager/(.*)': 'https://raw.githubusercontent.com/pbochynski/serverless-manager/grego952-move-technical-docs/docs/$1',
+        '/telemetry-manager/(.*)': 'https://raw.githubusercontent.com/pbochynski/telemetry-manager/docsify/docs/$1',
+      },
+      plugins: [
+        function noAliasesForImages(hook, vm) {
+          
+          // remove title metadata section
+          hook.beforeEach(function (markdown) {
+            markdown = markdown.replaceAll(/---.*\ntitle: (.*)\n---.*\n/gm, "# $1");
+            markdown = markdown.replace(/(<div tabs.*>)((.|\n)*?)(<\/div>)/gm,function(match,g1,g2,g3,g4){
+              let tab = g2.replace(/<details.*?>(.|\n)*?<summary.*?>(\n|\s)*(.*)(.|\n)*?\n.*<\/summary>((.|\n)*?).*<\/details>/gm,
+                "#### **$3**\n$5\n");
+              return '<!-- tabs:start -->\n'+tab+'<!-- tabs:end -->\n'
+            })
+            console.log(markdown)
+            return markdown
+          });
+          
+          // replace aliases with absolute urls for images
+          hook.afterEach(function (html) {
+            let path = vm.route.path.split('/')
+            if (path.length > 1 && path[1]) {
+              let alias = vm.config.alias[`/${path[1]}/(.*)`]
+              if (alias) {
+                let url = alias.replaceAll('$1', '')
+                html = html.replaceAll(`<img src="${vm.config.nameLink}${path[1]}/`, `<img src="${url}`);
+              }
+            }
+            return html;
+          });
+
+        }]
+
+    }
+  </script>
+  <!-- Docsify v4 -->
+  <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/js/docsify-themeable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify-tabs@1"></script>
+
+  <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/search.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/zoom-image.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-bash.min.js"></script>
+
+</body>
+
+</html>

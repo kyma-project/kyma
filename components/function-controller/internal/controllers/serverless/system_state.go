@@ -56,6 +56,14 @@ func (s *systemState) functionLabels() map[string]string {
 	return labels.Merge(functionLabels, internalLabels)
 }
 
+func (s *systemState) functionAnnotations() map[string]string {
+	return map[string]string{
+		"prometheus.io/port": "80",
+		"prometheus.io/path": "/metrics",
+		"prometheus.io/scrape": "true",
+	}
+}
+
 func (s *systemState) buildImageAddress(registryAddress string) string {
 	var imageTag string
 	isGitType := s.instance.TypeOf(serverlessv1alpha2.FunctionTypeGit)
@@ -390,7 +398,6 @@ func (s *systemState) specialDeploymentAnnotations() map[string]string {
 
 type buildDeploymentArgs struct {
 	DockerPullAddress      string
-	JaegerServiceEndpoint  string
 	TraceCollectorEndpoint string
 	PublisherProxyAddress  string
 	ImagePullAccountName   string
@@ -408,7 +415,6 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 
 	deploymentEnvs := buildDeploymentEnvs(
 		s.instance.GetNamespace(),
-		cfg.JaegerServiceEndpoint,
 		cfg.TraceCollectorEndpoint,
 		cfg.PublisherProxyAddress,
 	)
@@ -598,6 +604,7 @@ func (s *systemState) buildService() corev1.Service {
 			Name:      s.instance.GetName(),
 			Namespace: s.instance.GetNamespace(),
 			Labels:    s.functionLabels(),
+			Annotations: s.functionAnnotations(),
 		},
 		Spec: corev1.ServiceSpec{
 			Ports: []corev1.ServicePort{{

@@ -24,7 +24,7 @@ If you're interested in learning more about the Serverless area, follow these li
 
   - [Function](../../05-technical-reference/00-custom-resources/svls-01-function.md) custom resource
   - [`config.yaml` file](../../05-technical-reference/svls-06-function-configuration-file.md) in Kyma CLI
-  - [Function specification details](../../05-technical-reference/svls-08-function-specification.md)
+  - [Function specification details](../../05-technical-reference/svls-07-function-specification.md)
 
 - Understand technicalities behind Serverless implementation:
 
@@ -32,5 +32,5 @@ If you're interested in learning more about the Serverless area, follow these li
   - [Switching registries](../../05-technical-reference/svls-03-switching-registries.md)
   - [Git source type](../../05-technical-reference/svls-04-git-source-type.md)
   - [Exposing Functions](../../05-technical-reference/svls-05-exposing-functions.md)
-  - [Available presets](../../05-technical-reference/svls-09-available-presets.md)
+  - [Available presets](../../05-technical-reference/svls-08-available-presets.md)
   - [Environment variables in Functions](../../05-technical-reference/00-configuration-parameters/svls-02-environment-variables.md)

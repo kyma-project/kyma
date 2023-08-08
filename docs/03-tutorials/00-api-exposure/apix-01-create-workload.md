@@ -15,74 +15,75 @@ This tutorial explains how to create a sample HttpBin service deployment and a s
    ```
 2. Deploy an instance of the HttpBin service or a sample Function.
    
-<div tabs name="create">
+  <div tabs name="create">
 
-  <details>
-  <summary>
-  HttpBin
-  </summary>
+    <details>
+    <summary>
+    HttpBin
+    </summary>
 
-  To deploy an instance of the HttpBin service in your Namespace using the [sample code](https://raw.githubusercontent.com/istio/istio/master/samples/httpbin/httpbin.yaml), run:
+    To deploy an instance of the HttpBin service in your Namespace using the [sample code](https://raw.githubusercontent.com/istio/istio/master/samples/httpbin/httpbin.yaml), run:
 
-   ```shell
-   kubectl -n $NAMESPACE create -f https://raw.githubusercontent.com/istio/istio/master/samples/httpbin/httpbin.yaml
-   ```
+    ```shell
+    kubectl -n $NAMESPACE create -f https://raw.githubusercontent.com/istio/istio/master/samples/httpbin/httpbin.yaml
+    ```
 
-  </details>
+    </details>
 
-  <details>
-  <summary>
-  Function
-  </summary>
+    <details>
+    <summary>
+    Function
+    </summary>
 
-  To create a Function in your Namespace using the [sample code](https://raw.githubusercontent.com/kyma-project/kyma/main/docs/03-tutorials/00-api-exposure/assets/function.yaml), run:
+    To create a Function in your Namespace using the [sample code](https://raw.githubusercontent.com/kyma-project/kyma/main/docs/03-tutorials/00-api-exposure/assets/function.yaml), run:
 
-   ```shell
-   kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/kyma-project/kyma/main/docs/03-tutorials/00-api-exposure/assets/function.yaml
-   ```
+    ```shell
+    kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/kyma-project/kyma/main/docs/03-tutorials/00-api-exposure/assets/function.yaml
+    ```
 
-  </details>
-</div>
+    </details>
+  </div>
 
 3. Verify if an instance of the HttpBin service or a sample Function is successfully created.
    
-<div tabs name="verify">
+  <div tabs name="verify">
 
-<details>
-  <summary>
-  HttpBin
-  </summary>
+    <details>
+    <summary>
+    HttpBin
+    </summary>
 
-  * To verify if an instance of the HttpBin service is created, run:
+    To verify if an instance of the HttpBin service is created, run:
 
-    ```shell
-      kubectl get pods -l app=httpbin -n $NAMESPACE
-    ```
-  * You should get a result similar to this one:
-  
-    ```shell
-      NAME             READY    STATUS     RESTARTS    AGE
-      httpbin-test     2/2      Running    0           96s
-    ```
+      ```shell
+        kubectl get pods -l app=httpbin -n $NAMESPACE
+      ```
+    
+    You should get a result similar to this one:
+    
+      ```shell
+        NAME             READY    STATUS     RESTARTS    AGE
+        httpbin-test     2/2      Running    0           96s
+      ```
 
-  </details>
+    </details>
 
-  <details>
-  <summary>
-  Function
-  </summary>
+    <details>
+    <summary>
+    Function
+    </summary>
 
-  * To verify if a Function is created, run:
+    To verify if a Function is created, run:
 
-    ```shell
-      kubectl get functions $NAME -n $NAMESPACE
-    ```
+      ```shell
+        kubectl get functions $NAME -n $NAMESPACE
+      ```
 
-  * You should get a result similar to this one:
-  
-    ```shell
-      NAME            CONFIGURED   BUILT     RUNNING   RUNTIME    VERSION   AGE
-      test-function   True         True      True      nodejs18   1         96s
-    ```
-  </details>
-</div>
+    You should get a result similar to this one:
+    
+      ```shell
+        NAME            CONFIGURED   BUILT     RUNNING   RUNTIME    VERSION   AGE
+        test-function   True         True      True      nodejs18   1         96s
+      ```
+    </details>
+  </div>

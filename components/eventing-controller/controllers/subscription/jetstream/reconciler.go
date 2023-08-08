@@ -5,19 +5,19 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
+
 	k8stypes "k8s.io/apimachinery/pkg/types"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
+
+	"github.com/nats-io/nats.go"
 
 	pkgerrors "github.com/kyma-project/kyma/components/eventing-controller/pkg/errors"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
-	"github.com/nats-io/nats.go"
 
 	"github.com/pkg/errors"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
-	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
-	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 	"go.uber.org/zap"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -27,6 +27,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
+	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
+
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	jetstream "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstream"
@@ -35,6 +40,7 @@ import (
 const (
 	reconcilerName  = "jetstream-subscription-reconciler"
 	requeueDuration = 10 * time.Second
+	backendType     = "NATS_Jetstream"
 )
 
 type Reconciler struct {
@@ -46,10 +52,12 @@ type Reconciler struct {
 	cleaner             cleaner.Cleaner
 	sinkValidator       sink.Validator
 	customEventsChannel chan event.GenericEvent
+	collector           *metrics.Collector
 }
 
-func NewReconciler(ctx context.Context, client client.Client, jsBackend jetstream.Backend, logger *logger.Logger,
-	recorder record.EventRecorder, cleaner cleaner.Cleaner, defaultSinkValidator sink.Validator) *Reconciler {
+func NewReconciler(ctx context.Context, client client.Client, jsBackend jetstream.Backend,
+	logger *logger.Logger, recorder record.EventRecorder, cleaner cleaner.Cleaner,
+	defaultSinkValidator sink.Validator, collector *metrics.Collector) *Reconciler {
 	reconciler := &Reconciler{
 		Client:              client,
 		ctx:                 ctx,
@@ -59,6 +67,7 @@ func NewReconciler(ctx context.Context, client client.Client, jsBackend jetstrea
 		cleaner:             cleaner,
 		sinkValidator:       defaultSinkValidator,
 		customEventsChannel: make(chan event.GenericEvent),
+		collector:           collector,
 	}
 	if err := jsBackend.Initialize(reconciler.handleNatsConnClose); err != nil {
 		logger.WithContext().Errorw("Failed to start reconciler", "name", reconcilerName, "error", err)
@@ -124,6 +133,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return r.handleSubscriptionDeletion(ctx, desiredSubscription, log)
 	}
 
+	defer r.updateSubscriptionMetrics(currentSubscription, desiredSubscription)
+
 	// The object is not being deleted, so if it does not have our finalizer,
 	// then lets add the finalizer and update the object.
 	if !containsFinalizer(desiredSubscription) {
@@ -140,6 +151,16 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	// Check for valid sink
 	if err := r.sinkValidator.Validate(desiredSubscription); err != nil {
+		if deleteErr := r.Backend.DeleteSubscriptionsOnly(desiredSubscription); deleteErr != nil {
+			r.namedLogger().Errorw(
+				"Failed to delete JetStream subscriptions",
+				"namespace", desiredSubscription.Namespace,
+				"name", desiredSubscription.Name,
+				"error", deleteErr,
+			)
+			return ctrl.Result{}, deleteErr
+		}
+
 		// No point in reconciling as the sink is invalid,
 		// return latest error to requeue the reconciliation request
 		if syncErr := r.syncSubscriptionStatus(ctx, desiredSubscription, err, log); syncErr != nil {
@@ -166,6 +187,34 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	// Update Subscription status
 	return ctrl.Result{}, r.syncSubscriptionStatus(ctx, desiredSubscription, nil, log)
+}
+
+func (r *Reconciler) updateSubscriptionMetrics(current, desired *eventingv1alpha2.Subscription) {
+	for _, cc := range current.Status.Backend.Types {
+		found := false
+		for _, dc := range desired.Status.Backend.Types {
+			if cc.ConsumerName == dc.ConsumerName {
+				found = true
+			}
+		}
+		if !found {
+			r.collector.RemoveSubscriptionStatus(
+				current.Name,
+				current.Namespace,
+				backendType,
+				cc.ConsumerName,
+				r.Backend.GetConfig().JSStreamName)
+		}
+	}
+	for _, dc := range desired.Status.Backend.Types {
+		r.collector.RecordSubscriptionStatus(desired.Status.Ready,
+			desired.Name,
+			desired.Namespace,
+			backendType,
+			dc.ConsumerName,
+			r.Backend.GetConfig().JSStreamName,
+		)
+	}
 }
 
 // handleNatsConnClose is called by NATS when the connection to the NATS server is closed. When it
@@ -195,28 +244,42 @@ func (r *Reconciler) enqueueReconciliationForSubscriptions(subs []eventingv1alph
 // handleSubscriptionDeletion deletes the JetStream subscription and removes its finalizer if it is set.
 func (r *Reconciler) handleSubscriptionDeletion(ctx context.Context,
 	subscription *eventingv1alpha2.Subscription, log *zap.SugaredLogger) (ctrl.Result, error) {
+
 	// delete the JetStream subscription/consumer
-	if utils.ContainsString(subscription.ObjectMeta.Finalizers, eventingv1alpha2.Finalizer) {
-		if err := r.Backend.DeleteSubscription(subscription); err != nil {
-			deleteSubErr := pkgerrors.MakeError(errFailedToDeleteSub, err)
-			// if failed to delete the external dependency here, return with error
-			// so that it can be retried
-			if syncErr := r.syncSubscriptionStatus(ctx, subscription, deleteSubErr, log); syncErr != nil {
-				return ctrl.Result{}, syncErr
-			}
-			return ctrl.Result{}, deleteSubErr
-		}
-
-		// remove the eventing finalizer from the list and update the subscription.
-		subscription.ObjectMeta.Finalizers = utils.RemoveString(subscription.ObjectMeta.Finalizers,
-			eventingv1alpha2.Finalizer)
-
-		// update the subscription's finalizers in k8s
-		if err := r.Update(ctx, subscription); err != nil {
-			return ctrl.Result{}, pkgerrors.MakeError(errFailedToUpdateFinalizers, err)
-		}
+	if !utils.ContainsString(subscription.ObjectMeta.Finalizers, eventingv1alpha2.Finalizer) {
 		return ctrl.Result{}, nil
 	}
+
+	if err := r.Backend.DeleteSubscription(subscription); err != nil {
+		deleteSubErr := pkgerrors.MakeError(errFailedToDeleteSub, err)
+		// if failed to delete the external dependency here, return with error
+		// so that it can be retried
+		if syncErr := r.syncSubscriptionStatus(ctx, subscription, deleteSubErr, log); syncErr != nil {
+			return ctrl.Result{}, syncErr
+		}
+		return ctrl.Result{}, deleteSubErr
+	}
+
+	types := subscription.Status.Backend.Types
+	// remove the eventing finalizer from the list and update the subscription.
+	subscription.ObjectMeta.Finalizers = utils.RemoveString(subscription.ObjectMeta.Finalizers,
+		eventingv1alpha2.Finalizer)
+
+	// update the subscription's finalizers in k8s
+	if err := r.Update(ctx, subscription); err != nil {
+		return ctrl.Result{}, pkgerrors.MakeError(errFailedToUpdateFinalizers, err)
+	}
+
+	for _, t := range types {
+		r.collector.RemoveSubscriptionStatus(
+			subscription.Name,
+			subscription.Namespace,
+			backendType,
+			t.ConsumerName,
+			r.Backend.GetConfig().JSStreamName,
+		)
+	}
+
 	return ctrl.Result{}, nil
 }
 

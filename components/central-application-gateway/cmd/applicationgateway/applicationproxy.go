@@ -10,7 +10,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf"
 	csrfClient "github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf/client"
 	csrfStrategy "github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf/strategy"
@@ -22,6 +21,7 @@ import (
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/proxy"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/httptools"
 	"github.com/oklog/run"
 	log "github.com/sirupsen/logrus"

@@ -2,16 +2,18 @@ package validationproxy
 
 import (
 	"crypto/x509/pkix"
+	"github.com/gorilla/mux"
+	"github.com/kyma-project/kyma/components/central-application-connectivity-validator/internal/controller"
+	"github.com/kyma-project/kyma/components/central-application-connectivity-validator/internal/httptools"
+	"net"
 	"net/http"
 	"net/http/httputil"
 	"regexp"
 	"strings"
 	"time"
 
-	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/common/logging/logger"
 	"github.com/kyma-project/kyma/components/central-application-connectivity-validator/internal/apperrors"
-	"github.com/kyma-project/kyma/components/central-application-connectivity-validator/internal/httptools"
 )
 
 const (
@@ -30,41 +32,31 @@ type Cache interface {
 }
 
 type proxyHandler struct {
-	appNamePlaceholder       string
-	eventingPathPrefixV1     string
-	eventingPathPrefixV2     string
-	eventingPathPrefixEvents string
-	eventingPublisherHost    string
+	eventingPublisherHost string
 
 	legacyEventsProxy *httputil.ReverseProxy
 	cloudEventsProxy  *httputil.ReverseProxy
 
-	log *logger.Logger
+	log          *logger.Logger
+	subjectRegex *regexp.Regexp
 
 	cache Cache
 }
 
 func NewProxyHandler(
-	appNamePlaceholder string,
-	eventingPathPrefixV1 string,
-	eventingPathPrefixV2 string,
-	eventingPathPrefixEvents string,
 	eventingPublisherHost string,
 	eventingDestinationPath string,
 	cache Cache,
 	log *logger.Logger) *proxyHandler {
 	return &proxyHandler{
-		appNamePlaceholder:       appNamePlaceholder,
-		eventingPathPrefixV1:     eventingPathPrefixV1,
-		eventingPathPrefixV2:     eventingPathPrefixV2,
-		eventingPathPrefixEvents: eventingPathPrefixEvents,
-		eventingPublisherHost:    eventingPublisherHost,
+		eventingPublisherHost: eventingPublisherHost,
 
 		legacyEventsProxy: createReverseProxy(log, eventingPublisherHost, withEmptyRequestHost, withEmptyXFwdClientCert, withHTTPScheme),
 		cloudEventsProxy:  createReverseProxy(log, eventingPublisherHost, withRewriteBaseURL(eventingDestinationPath), withEmptyRequestHost, withEmptyXFwdClientCert, withHTTPScheme),
 
-		cache: cache,
-		log:   log,
+		cache:        cache,
+		log:          log,
+		subjectRegex: regexp.MustCompile(`Subject="(.*?)"`),
 	}
 }
 
@@ -89,7 +81,7 @@ func (ph *proxyHandler) ProxyAppConnectorRequests(w http.ResponseWriter, r *http
 		return
 	}
 
-	subjects := extractSubjects(certInfoData)
+	subjects := ph.extractSubjects(certInfoData)
 
 	if !hasValidSubject(subjects, applicationClientIDs, applicationName) {
 		httptools.RespondWithError(ph.log.WithTracing(r.Context()).With("handler", handlerName).With("applicationName", applicationName), w, apperrors.Forbidden("no valid subject found"))
@@ -108,43 +100,49 @@ func (ph *proxyHandler) ProxyAppConnectorRequests(w http.ResponseWriter, r *http
 func (ph *proxyHandler) getCompassMetadataClientIDs(applicationName string) ([]string, apperrors.AppError) {
 	applicationClientIDs, found := ph.getClientIDsFromCache(applicationName)
 	if !found {
-		err := apperrors.NotFound("application with name %s is not found in the cache. Please retry", applicationName)
+		err := apperrors.NotFound("application data for name %s is not found in the cache. Please retry", applicationName)
 		return nil, err
 	}
 	return applicationClientIDs, nil
 }
 
 func (ph *proxyHandler) getClientIDsFromCache(applicationName string) ([]string, bool) {
-	clientIDs, found := ph.cache.Get(applicationName)
+	appData, found := ph.cache.Get(applicationName)
 	if !found {
 		return []string{}, found
 	}
-	return clientIDs.([]string), found
+
+	appInfo := appData.(controller.CachedAppData)
+
+	return appInfo.ClientIDs, found
 }
 
 func (ph *proxyHandler) mapRequestToProxy(path string, applicationName string) (*httputil.ReverseProxy, apperrors.AppError) {
+
+	appData, found := ph.cache.Get(applicationName)
+
+	if !found {
+		return nil, apperrors.NotFound("application data for name %s is not found in the cache. Please retry", applicationName)
+	}
+
+	appInfo := appData.(controller.CachedAppData)
+
 	switch {
+
 	// legacy-events reaching /{application}/v1/events are routed to /{application}/v1/events endpoint of event-publisher-proxy
-	case strings.HasPrefix(path, ph.getApplicationPrefix(ph.eventingPathPrefixV1, applicationName)):
+	case strings.HasPrefix(path, appInfo.AppPathPrefixV1):
 		return ph.legacyEventsProxy, nil
 
 	// cloud-events reaching /{application}/v2/events or /{application}/events are routed to /publish endpoint of event-publisher-proxy
-	case strings.HasPrefix(path, ph.getApplicationPrefix(ph.eventingPathPrefixV2, applicationName)):
+	case strings.HasPrefix(path, appInfo.AppPathPrefixV2):
 		return ph.cloudEventsProxy, nil
 
 	// cloud-events reaching /{application}/events are routed to /publish endpoint of event-publisher-proxy
-	case strings.HasPrefix(path, ph.getApplicationPrefix(ph.eventingPathPrefixEvents, applicationName)):
+	case strings.HasPrefix(path, appInfo.AppPathPrefixEvents):
 		return ph.cloudEventsProxy, nil
 	}
 
 	return nil, apperrors.NotFound("could not determine destination host, requested resource not found")
-}
-
-func (ph *proxyHandler) getApplicationPrefix(path string, applicationName string) string {
-	if ph.appNamePlaceholder != "" {
-		return strings.ReplaceAll(path, ph.appNamePlaceholder, applicationName)
-	}
-	return path
 }
 
 func hasValidSubject(subjects, applicationClientIDs []string, appName string) bool {
@@ -180,11 +178,10 @@ func newSubjectValidator(applicationClientIDs []string, appName string) func(sub
 	}
 }
 
-func extractSubjects(certInfoData string) []string {
+func (ph *proxyHandler) extractSubjects(certInfoData string) []string {
 	var subjects []string
 
-	subjectRegex := regexp.MustCompile(`Subject="(.*?)"`)
-	subjectMatches := subjectRegex.FindAllStringSubmatch(certInfoData, -1)
+	subjectMatches := ph.subjectRegex.FindAllStringSubmatch(certInfoData, -1)
 
 	for _, subjectMatch := range subjectMatches {
 		subject := get(subjectMatch, 1)
@@ -232,6 +229,7 @@ func extractSubject(subject string) map[string]string {
 }
 
 func createReverseProxy(log *logger.Logger, destinationHost string, reqOpts ...requestOption) *httputil.ReverseProxy {
+
 	return &httputil.ReverseProxy{
 		Director: func(request *http.Request) {
 			request.URL.Host = destinationHost
@@ -244,6 +242,20 @@ func createReverseProxy(log *logger.Logger, destinationHost string, reqOpts ...r
 		ModifyResponse: func(response *http.Response) error {
 			log.WithContext().With("handler", handlerName).Infof("Host responded with status %s", response.Status)
 			return nil
+		},
+		Transport: &http.Transport{
+			DialContext: (&net.Dialer{
+				Timeout:   30 * time.Second,
+				KeepAlive: 30 * time.Second,
+			}).DialContext,
+			MaxIdleConns:          400,
+			DisableKeepAlives:     false,
+			MaxIdleConnsPerHost:   200,
+			MaxConnsPerHost:       200,
+			ForceAttemptHTTP2:     false,
+			IdleConnTimeout:       10 * time.Second,
+			TLSHandshakeTimeout:   10 * time.Second,
+			ExpectContinueTimeout: 1 * time.Second,
 		},
 	}
 }

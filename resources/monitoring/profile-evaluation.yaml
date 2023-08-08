@@ -3,7 +3,7 @@ prometheus:
     resources:
       limits:
         cpu: 600m
-        memory: 2000Mi
+        memory: 4Gi
       requests:
         cpu: 75m
         memory: 1000Mi
@@ -13,3 +13,13 @@ prometheus:
 grafana:
   persistence:
     enabled: "false"
+
+prometheusOperator:
+  resources:
+    limits:
+      memory: 1Gi
+
+kube-state-metrics:
+  resources:
+    limit:
+      memory: 256Mi

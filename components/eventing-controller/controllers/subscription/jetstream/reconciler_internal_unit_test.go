@@ -4,27 +4,29 @@ import (
 	"context"
 	"testing"
 
-	apierr "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
-	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
-	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstream"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstream/mocks"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
-	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
+	apierr "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+
+	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstream"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstream/mocks"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
 const (
@@ -62,6 +64,7 @@ func Test_Reconcile(t *testing.T) {
 	validatorErr := errors.New("invalid sink")
 	happyValidator := sink.ValidatorFunc(func(s *eventingv1alpha2.Subscription) error { return nil })
 	unhappyValidator := sink.ValidatorFunc(func(s *eventingv1alpha2.Subscription) error { return validatorErr })
+	collector := metrics.NewCollector()
 
 	var testCases = []struct {
 		name                 string
@@ -79,7 +82,16 @@ func Test_Reconcile(t *testing.T) {
 				te.Backend.On("SyncSubscription", mock.Anything).Return(nil)
 				te.Backend.On("GetJetStreamSubjects", mock.Anything, mock.Anything, mock.Anything).Return(
 					[]string{controllertesting.JetStreamSubject})
-				return NewReconciler(ctx, te.Client, te.Backend, te.Logger, te.Recorder, te.Cleaner, happyValidator), te.Backend
+				te.Backend.On("GetConfig", mock.Anything).Return(env.NATSConfig{JSStreamName: "sap"})
+				return NewReconciler(ctx,
+						te.Client,
+						te.Backend,
+						te.Logger,
+						te.Recorder,
+						te.Cleaner,
+						happyValidator,
+						collector),
+					te.Backend
 			},
 			wantReconcileResult: ctrl.Result{},
 			wantReconcileError:  nil,
@@ -90,7 +102,15 @@ func Test_Reconcile(t *testing.T) {
 			givenReconcilerSetup: func() (*Reconciler, *mocks.Backend) {
 				te := setupTestEnvironment(t)
 				te.Backend.On("Initialize", mock.Anything).Return(nil)
-				return NewReconciler(ctx, te.Client, te.Backend, te.Logger, te.Recorder, te.Cleaner, happyValidator), te.Backend
+				return NewReconciler(ctx,
+						te.Client,
+						te.Backend,
+						te.Logger,
+						te.Recorder,
+						te.Cleaner,
+						happyValidator,
+						collector),
+					te.Backend
 			},
 			wantReconcileResult: ctrl.Result{},
 			wantReconcileError:  nil,
@@ -101,7 +121,15 @@ func Test_Reconcile(t *testing.T) {
 			givenReconcilerSetup: func() (*Reconciler, *mocks.Backend) {
 				te := setupTestEnvironment(t, controllertesting.NewSubscription(subscriptionName, namespaceName))
 				te.Backend.On("Initialize", mock.Anything).Return(nil)
-				return NewReconciler(ctx, te.Client, te.Backend, te.Logger, te.Recorder, te.Cleaner, happyValidator), te.Backend
+				return NewReconciler(ctx,
+						te.Client,
+						te.Backend,
+						te.Logger,
+						te.Recorder,
+						te.Cleaner,
+						happyValidator,
+						collector),
+					te.Backend
 			},
 			wantReconcileResult: ctrl.Result{},
 			wantReconcileError:  nil,
@@ -115,7 +143,17 @@ func Test_Reconcile(t *testing.T) {
 				te.Backend.On("SyncSubscription", mock.Anything).Return(backendSyncErr)
 				te.Backend.On("GetJetStreamSubjects", mock.Anything, mock.Anything, mock.Anything).Return(
 					[]string{controllertesting.JetStreamSubject})
-				return NewReconciler(ctx, te.Client, te.Backend, te.Logger, te.Recorder, te.Cleaner, happyValidator), te.Backend
+				te.Backend.On("GetConfig", mock.Anything).Return(env.NATSConfig{JSStreamName: "sap"})
+				return NewReconciler(ctx,
+
+						te.Client,
+						te.Backend,
+						te.Logger,
+						te.Recorder,
+						te.Cleaner,
+						happyValidator,
+						collector),
+					te.Backend
 			},
 			wantReconcileResult: ctrl.Result{},
 			wantReconcileError:  backendSyncErr,
@@ -130,7 +168,16 @@ func Test_Reconcile(t *testing.T) {
 				te.Backend.On("SyncSubscription", mock.Anything).Return(missingSubSyncErr)
 				te.Backend.On("GetJetStreamSubjects", mock.Anything, mock.Anything, mock.Anything).Return(
 					[]string{controllertesting.JetStreamSubject})
-				return NewReconciler(ctx, te.Client, te.Backend, te.Logger, te.Recorder, te.Cleaner, happyValidator), te.Backend
+				te.Backend.On("GetConfig", mock.Anything).Return(env.NATSConfig{JSStreamName: "sap"})
+				return NewReconciler(ctx,
+						te.Client,
+						te.Backend,
+						te.Logger,
+						te.Recorder,
+						te.Cleaner,
+						happyValidator,
+						collector),
+					te.Backend
 			},
 			wantReconcileResult: ctrl.Result{RequeueAfter: requeueDuration},
 			wantReconcileError:  nil,
@@ -142,7 +189,15 @@ func Test_Reconcile(t *testing.T) {
 				te := setupTestEnvironment(t, testSubUnderDeletion)
 				te.Backend.On("Initialize", mock.Anything).Return(nil)
 				te.Backend.On("DeleteSubscription", mock.Anything).Return(backendDeleteErr)
-				return NewReconciler(ctx, te.Client, te.Backend, te.Logger, te.Recorder, te.Cleaner, happyValidator), te.Backend
+				return NewReconciler(ctx,
+						te.Client,
+						te.Backend,
+						te.Logger,
+						te.Recorder,
+						te.Cleaner,
+						happyValidator,
+						collector),
+					te.Backend
 			},
 			wantReconcileResult: ctrl.Result{},
 			wantReconcileError:  errFailedToDeleteSub,
@@ -153,9 +208,19 @@ func Test_Reconcile(t *testing.T) {
 			givenReconcilerSetup: func() (*Reconciler, *mocks.Backend) {
 				te := setupTestEnvironment(t, testSub)
 				te.Backend.On("Initialize", mock.Anything).Return(nil)
+				te.Backend.On("DeleteSubscriptionsOnly", mock.Anything).Return(nil)
 				te.Backend.On("GetJetStreamSubjects", mock.Anything, mock.Anything, mock.Anything).Return(
 					[]string{controllertesting.JetStreamSubject})
-				return NewReconciler(ctx, te.Client, te.Backend, te.Logger, te.Recorder, te.Cleaner, unhappyValidator), te.Backend
+				te.Backend.On("GetConfig", mock.Anything).Return(env.NATSConfig{JSStreamName: "sap"})
+				return NewReconciler(ctx,
+						te.Client,
+						te.Backend,
+						te.Logger,
+						te.Recorder,
+						te.Cleaner,
+						unhappyValidator,
+						collector),
+					te.Backend
 			},
 			wantReconcileResult: ctrl.Result{},
 			wantReconcileError:  validatorErr,
@@ -701,6 +766,7 @@ func setupTestEnvironment(t *testing.T, objs ...client.Object) *TestEnvironment 
 		recorder:      recorder,
 		sinkValidator: defaultSinkValidator,
 		cleaner:       jsCleaner,
+		collector:     metrics.NewCollector(),
 	}
 
 	return &TestEnvironment{

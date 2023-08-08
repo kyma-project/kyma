@@ -2,7 +2,7 @@ const {
   KEBConfig,
   KEBClient,
   provisionSKR,
-} = require('../../kyma-environment-broker');
+} = require('../kyma-environment-broker');
 const {GardenerConfig, GardenerClient} = require('../../gardener');
 const {
   debug,
@@ -11,10 +11,10 @@ const {
 const {
   KCPConfig,
   KCPWrapper,
-} = require('../../kcp/client');
+} = require('../kcp/client');
 const {
   saveKubeconfig,
-} = require('../../skr-test/helpers');
+} = require('../skr-helpers/helpers');
 const {slowTime} = require('../utils');
 
 describe('SKR eventing test', function() {

@@ -35,8 +35,8 @@ This tutorial shows how to expose an unsecured instance of the HttpBin service o
     export GATEWAY=kyma-system/kyma-gateway
     ```
     </details>
-  </div>   
-   
+  </div>
+
 ## Expose and access your workload
 
 Follow these steps:

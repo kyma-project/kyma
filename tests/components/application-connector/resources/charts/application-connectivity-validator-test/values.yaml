@@ -9,7 +9,7 @@ global:
   images:
     validatorTest:
       name: "connectivity-validator-test"
-      version: "v20230222-59da7511"
-      directory: "prod"
+      version: "PR-17914"
+      directory: "dev"
       
   namespace: "test"

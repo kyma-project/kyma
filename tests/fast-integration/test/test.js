@@ -10,7 +10,7 @@ const {createIstioAccessLogResource} = require('../logging/client.js');
 const {cleanMockTestFixture} = require('./fixtures/commerce-mock');
 const {ensureCommerceMockLocalTestFixture} = require('../test/fixtures/commerce-mock');
 const {tracingTests} = require('../tracing');
-const {error} = require('../utils');
+const {error, sleep} = require('../utils');
 
 describe('Executing Standard Testsuite:', function() {
   this.timeout(10 * 60 * 1000);
@@ -20,6 +20,7 @@ describe('Executing Standard Testsuite:', function() {
   const testNamespace = 'test';
 
   before('CommerceMock test fixture should be ready', async function() {
+    await sleep(30000);
     await ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace).catch((err) => {
       error(err);
       return ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace);

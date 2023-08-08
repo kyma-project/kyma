@@ -18,6 +18,7 @@ import (
 	recerrors "github.com/kyma-project/kyma/components/eventing-controller/controllers/errors"
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
@@ -57,6 +58,7 @@ type Reconciler struct {
 	// nameMapper is used to map the Kyma subscription name to a subscription name on EventMesh.
 	nameMapper    backendutils.NameMapper
 	sinkValidator sink.Validator
+	collector     *metrics.Collector
 }
 
 const (
@@ -67,11 +69,13 @@ const (
 	reconcilerName              = "eventMesh-subscription-reconciler"
 	timeoutRetryActiveEmsStatus = time.Second * 30
 	requeueAfterDuration        = time.Second * 2
+	backendType                 = "EventMesh"
 )
 
 func NewReconciler(ctx context.Context, client client.Client, logger *logger.Logger, recorder record.EventRecorder,
 	cfg env.Config, cleaner cleaner.Cleaner, eventMeshBackend eventmesh.Backend,
-	credential *eventmesh.OAuth2ClientCredentials, mapper backendutils.NameMapper, validator sink.Validator) *Reconciler {
+	credential *eventmesh.OAuth2ClientCredentials, mapper backendutils.NameMapper, validator sink.Validator,
+	collector *metrics.Collector) *Reconciler {
 	if err := eventMeshBackend.Initialize(cfg); err != nil {
 		logger.WithContext().Errorw("Failed to start reconciler", "name",
 			reconcilerName, "error", err)
@@ -88,6 +92,7 @@ func NewReconciler(ctx context.Context, client client.Client, logger *logger.Log
 		oauth2credentials: credential,
 		nameMapper:        mapper,
 		sinkValidator:     validator,
+		collector:         collector,
 	}
 }
 
@@ -120,6 +125,14 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	if isInDeletion(sub) {
 		return r.handleDeleteSubscription(ctx, sub, log)
 	}
+
+	defer r.collector.RecordSubscriptionStatus(sub.Status.Ready,
+		sub.Name,
+		sub.Namespace,
+		backendType,
+		"",
+		"",
+	)
 
 	// sync the initial Subscription status
 	r.syncInitialStatus(sub)
@@ -262,6 +275,7 @@ func (r *Reconciler) handleDeleteSubscription(ctx context.Context, subscription 
 		return ctrl.Result{}, err
 	}
 
+	r.collector.RemoveSubscriptionStatus(subscription.Name, subscription.Namespace, backendType, "", "")
 	return ctrl.Result{Requeue: false}, nil
 }
 

@@ -4,15 +4,16 @@ import (
 	"net/http"
 	"testing"
 
-	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/stretchr/testify/require"
-
-	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/utils/pointer"
 
+	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
@@ -600,6 +601,134 @@ func TestPublisherProxyDeploymentEqual(t *testing.T) {
 			if publisherProxyDeploymentEqual(tc.getPublisher1(), tc.getPublisher2()) != tc.expectedResult {
 				t.Errorf("expected output to be %t", tc.expectedResult)
 			}
+		})
+	}
+}
+
+func Test_ownerReferencesDeepEqual(t *testing.T) {
+	ownerReference := func(version, kind, name, uid string, controller, block *bool) metav1.OwnerReference {
+		return metav1.OwnerReference{
+			APIVersion:         version,
+			Kind:               kind,
+			Name:               name,
+			UID:                types.UID(uid),
+			Controller:         controller,
+			BlockOwnerDeletion: block,
+		}
+	}
+
+	tests := []struct {
+		name                  string
+		givenOwnerReferences1 []metav1.OwnerReference
+		givenOwnerReferences2 []metav1.OwnerReference
+		wantEqual             bool
+	}{
+		{
+			name:                  "both OwnerReferences are nil",
+			givenOwnerReferences1: nil,
+			givenOwnerReferences2: nil,
+			wantEqual:             true,
+		},
+		{
+			name:                  "both OwnerReferences are empty",
+			givenOwnerReferences1: []metav1.OwnerReference{},
+			givenOwnerReferences2: []metav1.OwnerReference{},
+			wantEqual:             true,
+		},
+		{
+			name: "same OwnerReferences and same order",
+			givenOwnerReferences1: []metav1.OwnerReference{
+				ownerReference("v-0", "k-0", "n-0", "u-0", pointer.Bool(false), pointer.Bool(false)),
+				ownerReference("v-1", "k-1", "n-1", "u-1", pointer.Bool(false), pointer.Bool(false)),
+				ownerReference("v-2", "k-2", "n-2", "u-2", pointer.Bool(false), pointer.Bool(false)),
+			},
+			givenOwnerReferences2: []metav1.OwnerReference{
+				ownerReference("v-0", "k-0", "n-0", "u-0", pointer.Bool(false), pointer.Bool(false)),
+				ownerReference("v-1", "k-1", "n-1", "u-1", pointer.Bool(false), pointer.Bool(false)),
+				ownerReference("v-2", "k-2", "n-2", "u-2", pointer.Bool(false), pointer.Bool(false)),
+			},
+			wantEqual: true,
+		},
+		{
+			name: "same OwnerReferences but different order",
+			givenOwnerReferences1: []metav1.OwnerReference{
+				ownerReference("v-0", "k-0", "n-0", "u-0", pointer.Bool(false), pointer.Bool(false)),
+				ownerReference("v-1", "k-1", "n-1", "u-1", pointer.Bool(false), pointer.Bool(false)),
+				ownerReference("v-2", "k-2", "n-2", "u-2", pointer.Bool(false), pointer.Bool(false)),
+			},
+			givenOwnerReferences2: []metav1.OwnerReference{
+				ownerReference("v-2", "k-2", "n-2", "u-2", pointer.Bool(false), pointer.Bool(false)),
+				ownerReference("v-0", "k-0", "n-0", "u-0", pointer.Bool(false), pointer.Bool(false)),
+				ownerReference("v-1", "k-1", "n-1", "u-1", pointer.Bool(false), pointer.Bool(false)),
+			},
+			wantEqual: true,
+		},
+		{
+			name: "different OwnerReference APIVersion",
+			givenOwnerReferences1: []metav1.OwnerReference{
+				ownerReference("v-0", "k-0", "n-0", "u-0", pointer.Bool(false), pointer.Bool(false)),
+			},
+			givenOwnerReferences2: []metav1.OwnerReference{
+				ownerReference("v-1", "k-0", "n-0", "u-0", pointer.Bool(false), pointer.Bool(false)),
+			},
+			wantEqual: false,
+		},
+		{
+			name: "different OwnerReference Kind",
+			givenOwnerReferences1: []metav1.OwnerReference{
+				ownerReference("v-0", "k-0", "n-0", "u-0", pointer.Bool(false), pointer.Bool(false)),
+			},
+			givenOwnerReferences2: []metav1.OwnerReference{
+				ownerReference("v-0", "k-1", "n-0", "u-0", pointer.Bool(false), pointer.Bool(false)),
+			},
+			wantEqual: false,
+		},
+		{
+			name: "different OwnerReference Name",
+			givenOwnerReferences1: []metav1.OwnerReference{
+				ownerReference("v-0", "k-0", "n-0", "u-0", pointer.Bool(false), pointer.Bool(false)),
+			},
+			givenOwnerReferences2: []metav1.OwnerReference{
+				ownerReference("v-0", "k-0", "n-1", "u-0", pointer.Bool(false), pointer.Bool(false)),
+			},
+			wantEqual: false,
+		},
+		{
+			name: "different OwnerReference UID",
+			givenOwnerReferences1: []metav1.OwnerReference{
+				ownerReference("v-0", "k-0", "n-0", "u-0", pointer.Bool(false), pointer.Bool(false)),
+			},
+			givenOwnerReferences2: []metav1.OwnerReference{
+				ownerReference("v-0", "k-0", "n-0", "u-1", pointer.Bool(false), pointer.Bool(false)),
+			},
+			wantEqual: false,
+		},
+		{
+			name: "different OwnerReference Controller",
+			givenOwnerReferences1: []metav1.OwnerReference{
+				ownerReference("v-0", "k-0", "n-0", "u-0", pointer.Bool(false), pointer.Bool(false)),
+			},
+			givenOwnerReferences2: []metav1.OwnerReference{
+				ownerReference("v-0", "k-0", "n-0", "u-0", pointer.Bool(true), pointer.Bool(false)),
+			},
+			wantEqual: false,
+		},
+		{
+			name: "different OwnerReference BlockOwnerDeletion",
+			givenOwnerReferences1: []metav1.OwnerReference{
+				ownerReference("v-0", "k-0", "n-0", "u-0", pointer.Bool(false), pointer.Bool(false)),
+			},
+			givenOwnerReferences2: []metav1.OwnerReference{
+				ownerReference("v-0", "k-0", "n-0", "u-0", pointer.Bool(false), pointer.Bool(true)),
+			},
+			wantEqual: false,
+		},
+	}
+
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			require.Equal(t, tc.wantEqual, ownerReferencesDeepEqual(tc.givenOwnerReferences1, tc.givenOwnerReferences2))
 		})
 	}
 }

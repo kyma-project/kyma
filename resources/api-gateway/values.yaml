@@ -24,6 +24,7 @@ deployment:
       type: RuntimeDefault
 
 config:
+  injectIstioSidecar: false
   reconciliation:
     # In seconds
     defaultPeriod: 3600
@@ -72,8 +73,6 @@ config:
 
   # Configure node tolerations.
   tolerations: []
-  annotations:
-    sidecar.istio.io/inject: "false"
 
   # Port configuration
   ports:
@@ -115,9 +114,9 @@ global:
   images:
     api_gateway_controller:
       name: "api-gateway-controller"
-      version: "1.7.1"
+      version: "1.8.0"
       directory: "prod"
     api_gateway_webhook_certificates:
       name: "api-gateway-webhook-certificates"
-      version: "1.7.1"
+      version: "1.8.0"
       directory: "prod"

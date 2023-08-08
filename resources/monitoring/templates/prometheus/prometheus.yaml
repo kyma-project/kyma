@@ -37,7 +37,7 @@ spec:
 {{ toYaml .Values.prometheus.prometheusSpec.apiserverConfig | indent 4}}
 {{- end }}
 {{- if .Values.global.images.prometheus }}
-  image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.prometheus) }}
+  image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.prometheus) }}"
   version: {{ .Values.global.images.prometheus.version }}
   {{- if .Values.global.images.prometheus.sha }}
   sha: {{ .Values.global.images.prometheus.sha }}

@@ -30,7 +30,6 @@ func (cs *CompassRuntimeAgentSuite) TestApplication() {
 	compassAppName := expectedAppName + random.RandomString(10)
 
 	correctState := false
-	//Random edit to trigger pipelines
 	//Create Application in Director
 	applicationID, err := cs.directorClient.RegisterApplication(compassAppName, "Test Application for testing Compass Runtime Agent")
 	cs.Require().NoError(err)

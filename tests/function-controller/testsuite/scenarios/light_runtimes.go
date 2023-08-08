@@ -24,7 +24,7 @@ import (
 	"github.com/kyma-project/kyma/tests/function-controller/testsuite/teststep"
 )
 
-const scenarioKey = "scenario"
+const runtimeKey = "runtime"
 
 func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *logrus.Entry) (step.Step, error) {
 	now := time.Now()
@@ -40,9 +40,9 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 		return nil, errors.Wrap(err, "while creating k8s CoreV1Client")
 	}
 
-	python39Logger := logf.WithField(scenarioKey, "python39")
-	nodejs16Logger := logf.WithField(scenarioKey, "nodejs16")
-	nodejs18Logger := logf.WithField(scenarioKey, "nodejs18")
+	python39Logger := logf.WithField(runtimeKey, "python39")
+	nodejs16Logger := logf.WithField(runtimeKey, "nodejs16")
+	nodejs18Logger := logf.WithField(runtimeKey, "nodejs18")
 
 	genericContainer := shared.Container{
 		DynamicCli:  dynamicCli,

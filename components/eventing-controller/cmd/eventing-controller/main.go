@@ -70,7 +70,11 @@ func main() {
 	envConfig := env.GetConfig()
 	featureflags.SetEventingWebhookAuthEnabled(envConfig.EventingWebhookAuthEnabled)
 
-	bebSubMgr := eventmesh.NewSubscriptionManager(restCfg, opts.MetricsAddr, opts.ReconcilePeriod, ctrLogger)
+	bebSubMgr := eventmesh.NewSubscriptionManager(restCfg,
+		opts.MetricsAddr,
+		opts.ReconcilePeriod,
+		ctrLogger,
+		metricsCollector)
 	if err = eventmesh.AddToScheme(scheme); err != nil {
 		setupLogger.Fatalw("Failed to start subscription manager", "backend", v1alpha1.BEBBackendType, "error", err)
 	}
@@ -118,7 +122,8 @@ func main() {
 	// Start the backend manager.
 	ctx := context.Background()
 	recorder := mgr.GetEventRecorderFor("backend-controller")
-	backendReconciler := backend.NewReconciler(ctx, natsSubMgr, natsConfig, envConfig, bebSubMgr,
+	backendConfig := env.GetBackendConfig()
+	backendReconciler := backend.NewReconciler(ctx, natsSubMgr, natsConfig, envConfig, backendConfig, bebSubMgr,
 		mgr.GetClient(), ctrLogger, recorder)
 	if err = backendReconciler.SetupWithManager(mgr); err != nil {
 		setupLogger.Fatalw("Failed to start backend controller", "error", err)
