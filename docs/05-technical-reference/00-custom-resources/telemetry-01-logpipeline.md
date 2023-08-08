@@ -78,7 +78,7 @@ For details, see the [LogPipeline specification file](https://github.com/kyma-pr
 | **files.&#x200b;content**  | string |  |
 | **files.&#x200b;name**  | string |  |
 | **filters**  | \[\]object | Describes a filtering option on the logs of the pipeline. |
-| **filters.&#x200b;custom**  | string | Custom filter definition in the Fluent Bit syntax. Note: If you use a `custom` filter, you put the LogPipeline in unsupported mode. |
+| **filters.&#x200b;custom**  | string | Custom filter definition in the Fluent Bit syntax. Caution: If you use a `custom` filter, you put the LogPipeline in unsupported mode. |
 | **input**  | object | Defines where to collect logs, including selector mechanisms. |
 | **input.&#x200b;application**  | object | Configures in more detail from which containers application logs are enabled as input. |
 | **input.&#x200b;application.&#x200b;containers**  | object | Describes whether application logs from specific containers are selected. The options are mutually exclusive. |
@@ -91,7 +91,7 @@ For details, see the [LogPipeline specification file](https://github.com/kyma-pr
 | **input.&#x200b;application.&#x200b;namespaces.&#x200b;include**  | \[\]string | Include only the container logs of the specified Namespace names. |
 | **input.&#x200b;application.&#x200b;namespaces.&#x200b;system**  | boolean | Set to `true` if collecting from all Namespaces must also include the system Namespaces like kube-system, istio-system, and kyma-system. |
 | **output**  | object | [Fluent Bit output](https://docs.fluentbit.io/manual/pipeline/outputs) where you want to push the logs. Only one output can be specified. |
-| **output.&#x200b;custom**  | string | Defines a custom output in the Fluent Bit syntax. Note: If you use a `custom` output, you put the LogPipeline in unsupported mode. |
+| **output.&#x200b;custom**  | string | Defines a custom output in the Fluent Bit syntax. Caution: If you use a `custom` output, you put the LogPipeline in unsupported mode. |
 | **output.&#x200b;grafana-loki**  | object | Configures an output to the Kyma-internal Loki instance. [Fluent Bit grafana-loki output](https://grafana.com/docs/loki/v2.2.x/clients/fluentbit/). **Note:** This output is considered legacy and is only provided for backward compatibility with the [deprecated](https://kyma-project.io/blog/2022/11/2/loki-deprecation/) in-cluster Loki instance. It might not be compatible with the latest Loki versions. For integration with a custom Loki installation use the `custom` output with the name `loki` instead, see also [Installing a custom Loki stack in Kyma](https://github.com/kyma-project/examples/tree/main/loki). |
 | **output.&#x200b;grafana-loki.&#x200b;labels**  | map\[string\]string | Labels to set for each log record. |
 | **output.&#x200b;grafana-loki.&#x200b;removeKeys**  | \[\]string | Attributes to be removed from a log record. |
