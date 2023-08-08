@@ -45,6 +45,7 @@ Supported integration scenarios are neutral to the vendor of the target system.
 
 Kyma's Telemetry module ships Telemetry Manager as its core component. Telemetry Manager is a Kubernetes [operator](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/) that implements the Kubernetes controller pattern and manages the whole lifecycle of all other components covered in the Telemetry module. Telemetry Manager watches for the user-created Kubernetes resources: LogPipeline, TracePipeline, and, in the future, MetricPipeline. In these resources, you specify what data of a signal type to collect and where to ship it.
 If Telemetry Manager detects a configuration, it rolls out the relevant components on demand.
+
 For more information, see [Telemetry Manager](./telemetry-01-operator.md).
 
 ### Log Collector
@@ -56,4 +57,5 @@ For more information, see [Logs](./telemetry-02-logs.md).
 ### Trace Collector
 
 The Trace Collector is based on an [OTel Collector](https://opentelemetry.io/docs/collector/) [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/). It provides an [OTLP-based](https://opentelemetry.io/docs/reference/specification/protocol/) endpoint to which applications can push the trace signals. According to a TracePipeline configuration, the gateway processes and ships the trace data to a target system.
-For details, see [Traces](./telemetry-03-traces.md).
+
+For more information, see [Traces](./telemetry-03-traces.md).
