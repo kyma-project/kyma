@@ -81,15 +81,15 @@ global:
       directory: "prod"
     function_controller:
       name: "function-controller"
-      version: "PR-17917"
+      version: "PR-17942"
       directory: "dev"
     function_webhook:
       name: "function-webhook"
-      version: "PR-17917"
+      version: "PR-17942"
       directory: "dev"
     function_build_init:
       name: "function-build-init"
-      version: "PR-17917"
+      version: "PR-17942"
       directory: "dev"
     function_registry_gc:
       name: "function-registry-gc"
