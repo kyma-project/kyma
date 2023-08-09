@@ -42,8 +42,6 @@ spec:
           - "--eventingDestinationPath=/{{ .Values.eventPublisherProxy.publishCEEndpoint }}"
           - "--eventingPathPrefixEvents=/%%APP_NAME%%/events"
           - "--appNamePlaceholder=%%APP_NAME%%"
-          - "--cacheExpirationSeconds={{ .Values.deployment.args.cacheExpirationSeconds }}"
-          - "--cacheCleanupIntervalSeconds={{ .Values.deployment.args.cacheCleanupIntervalSeconds }}"
         env:
           - name: APP_LOG_FORMAT
             value: {{ .Values.global.log.format | quote }}
