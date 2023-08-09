@@ -15,7 +15,7 @@ Feature: Istio sidecar injection works properly in target namespace
     And "sidecar-enable" namespace is labeled with "istio-injection" "enabled"
     And Httpbin deployment is created in "sidecar-enable" namespace
     And Httpbin deployment is deployed and ready in "sidecar-enable" namespace
-    Then there should be "all" pods with Istio sidecar in "sidecar-enable" namespace
+    Then there "should" be Istio sidecar in httpbin pod in "sidecar-enable" namespace
     And "sidecar-enable" namespace is deleted
 
   Scenario: Kyma-system namespace contains pods with sidecar
@@ -23,7 +23,7 @@ Feature: Istio sidecar injection works properly in target namespace
     And Httpbin deployment is created in "kyma-system" namespace
     And Httpbin deployment is deployed and ready in "kyma-system" namespace
     Then there "should" be Istio sidecar in httpbin pod in "kyma-system" namespace
-    Then Httpbin deployment is deleted from "kyma-system" namespace
+    And Httpbin deployment is deleted from "kyma-system" namespace
 
   Scenario: Kube-system namespace does not contain pods with sidecar
     Given Istio component is installed
