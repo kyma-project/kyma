@@ -50,7 +50,6 @@ See the full list of Kyma troubleshooting guides:
 ### Security
   
 - [Issues with certificates on Gardener](./security/sec-01-certificates-gardener.md)
-- [No access to OAuth2 protected APIRules](./security/sec-02-oauth2-protected-apirules.md)
 
 ### Serverless
 
