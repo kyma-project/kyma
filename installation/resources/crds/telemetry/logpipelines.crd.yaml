@@ -62,7 +62,7 @@ spec:
                   properties:
                     custom:
                       description: 'Custom filter definition in the Fluent Bit syntax.
-                        Caution: If you use a `custom` filter, you put the LogPipeline
+                        Note: If you use a `custom` filter, you put the LogPipeline
                         in unsupported mode.'
                       type: string
                   type: object

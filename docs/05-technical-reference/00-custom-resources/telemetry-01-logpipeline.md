@@ -78,7 +78,7 @@ For details, see the [LogPipeline specification file](https://github.com/kyma-pr
 | **files.&#x200b;content**  | string |  |
 | **files.&#x200b;name**  | string |  |
 | **filters**  | \[\]object | Describes a filtering option on the logs of the pipeline. |
-| **filters.&#x200b;custom**  | string | Custom filter definition in the Fluent Bit syntax. Caution: If you use a `custom` filter, you put the LogPipeline in unsupported mode. |
+| **filters.&#x200b;custom**  | string | Custom filter definition in the Fluent Bit syntax. Note: If you use a `custom` filter, you put the LogPipeline in unsupported mode. |
 | **input**  | object | Defines where to collect logs, including selector mechanisms. |
 | **input.&#x200b;application**  | object | Configures in more detail from which containers application logs are enabled as input. |
 | **input.&#x200b;application.&#x200b;containers**  | object | Describes whether application logs from specific containers are selected. The options are mutually exclusive. |
