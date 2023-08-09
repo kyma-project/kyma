@@ -5,6 +5,8 @@
         "pattern": "^/",
         "replacement": "{{BASEURL}}/"
       }
-    ]
+    ],
+    "timeout": "20s",
+    "retryCount": 5,
+    "fallbackRetryDelay": "30s"
   }
-  
