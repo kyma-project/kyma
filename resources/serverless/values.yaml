@@ -127,9 +127,9 @@ images:
 
 deployment:
   replicas: 1
-  labels: {}
-  annotations: {}
-  extraProperties: {}
+  labels: { }
+  annotations: { }
+  extraProperties: { }
   livenessProbe:
     successThreshold: 1
     failureThreshold: 3
@@ -144,7 +144,7 @@ deployment:
     periodSeconds: 30
 
 pod:
-  labels: {}
+  labels: { }
   annotations:
     sidecar.istio.io/inject: "false"
     prometheus.io/scrape: "false"
@@ -182,12 +182,12 @@ containers:
       privileged: false
       allowPrivilegeEscalation: false
       capabilities:
-        drop: ["ALL"]
+        drop: [ "ALL" ]
       procMount: default # Optional. The default is false if the entry is not there.
       readOnlyRootFilesystem: true # Mandatory
     healthz:
       port: "8090"
-    extraProperties: {}
+    extraProperties: { }
     configuration:
       data:
         logLevel: "info"
@@ -231,7 +231,7 @@ containers:
 services:
   manager:
     type: ClusterIP
-    labels: {}
+    labels: { }
     annotations:
       prometheus.io/scrape: "true"
       prometheus.io/port: "8080"
@@ -249,8 +249,8 @@ metrics:
       targerPort: 8080
       protocol: TCP
   pod:
-    labels: {}
-    annotations: {}
+    labels: { }
+    annotations: { }
 
 backendModule:
   enabled: true
@@ -294,7 +294,7 @@ docker-registry:
           - key: password
             path: password.txt
     - name: htpasswd-data
-      emptyDir: {}
+      emptyDir: { }
   rollme: "{{ randAlphaNum 5}}"
   registryHTTPSecret: "{{ randAlphaNum 16 | b64enc }}"
 
