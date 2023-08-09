@@ -30,7 +30,7 @@ global:
   images:
     k8s_tools:
       name: "k8s-tools"
-      version: "v20230626-ce139c33"
+      version: "v20230809-6a330b54"
       directory: "prod/tpi"
     ## Google Cloud SQL Proxy image
     ## ref: https://cloud.google.com/sql/docs/mysql/sql-proxy
