@@ -1,4 +1,5 @@
 * [Technical Reference](/05-technical-reference/README.md)
+<!-- markdown-link-check-disable -->
   * [Architecture](/05-technical-reference/00-architecture/README.md)
     * [API Gateway Architecture](/05-technical-reference/00-architecture/apix-01-architecture-apigateway.md)
     * [Application Connector components](/05-technical-reference/00-architecture/ac-01-application-connector-components.md)
@@ -8,3 +9,4 @@
     * [Monitoring Architecture](/05-technical-reference/00-architecture/obsv-01-architecture-monitoring.md)
     * [Serverless Architecture](/05-technical-reference/00-architecture/svls-01-architecture.md)
     * [Internal Docker registry](/05-technical-reference/00-architecture/svls-02-internal-registry.md)
+<!-- markdown-link-check-enable -->

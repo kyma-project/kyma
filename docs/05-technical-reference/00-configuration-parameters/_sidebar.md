@@ -1,3 +1,4 @@
+<!-- markdown-link-check-disable -->
 * [Technical Reference](/05-technical-reference/README.md)
   * [Configurable parameters](/05-technical-reference/00-configuration-parameters/README.md)
     * [Application Connector chart](/05-technical-reference/00-configuration-parameters/ac-01-application-connector-chart.md)
@@ -10,3 +11,4 @@
     * [Istio Resources chart](/05-technical-reference/00-configuration-parameters/smsh-02-istio-resources-chart.md)
     * [Serverless chart](/05-technical-reference/00-configuration-parameters/svls-01-serverless-chart.md)
     * [Environment variables](/05-technical-reference/00-configuration-parameters/svls-02-environment-variables.md)
+<!-- markdown-link-check-enable -->

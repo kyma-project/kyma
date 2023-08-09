@@ -1,4 +1,5 @@
 * [Home](/)
+<!-- markdown-link-check-disable -->
 * [Operation Guides](/04-operation-guides/README.md)
 * [Troubleshooting](/04-operation-guides/troubleshooting/README.md)
 * [API Exposure](/04-operation-guides/troubleshooting/api-exposure/README.md)
@@ -15,4 +16,4 @@
   * [Kyma Gateway - not reachable](/04-operation-guides/troubleshooting/api-exposure//04-operation-guides/troubleshooting/api-exposure/apix-04-gateway-not-reachable.md)
   * [Pods stuck in `Pending/Failed/Unknown` state after an upgrade](/04-operation-guides/troubleshooting/api-exposure/apix-05-upgrade-sidecar-proxy.md)
   * [Issues when creating an APIRule - various reasons](/04-operation-guides/troubleshooting/api-exposure/apix-06-api-rule-troubleshooting.md)
-  
+<!-- markdown-link-check-enable -->

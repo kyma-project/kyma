@@ -13,7 +13,7 @@ Kyma Eventing provides several Grafana Dashboard with various [metrics](./evnt-0
    ```bash
    kubectl -n kyma-system port-forward svc/monitoring-grafana 8081:80
    ```
-
+<!-- markdown-link-check-disable-next-line -->
 2. Access the Grafana Dashboard on [localhost:8081](http://localhost:8081).
 
 3. Select the Grafana Dashboard with the desired information about Kyma Eventing:

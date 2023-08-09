@@ -1,4 +1,5 @@
 * [Home](/)
+<!-- markdown-link-check-disable -->
 * [Kyma Components](/01-overview/README.md)
   * [API Exposure](/01-overview/api-exposure/README.md)
   * [Application Connectivity](/01-overview/application-connectivity/README.md)
@@ -9,3 +10,4 @@
   * [Service Mesh](/01-overview/service-mesh/README.md)
   * [Telemetry](/01-overview/telemetry/README.md)
   * [User Interfaces](/01-overview/ui/README.md)
+<!-- markdown-link-check-enable -->

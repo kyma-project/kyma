@@ -18,6 +18,7 @@ To do that, we'll use the Grafana dashboard that comes with Kyma.
     ```bash
     kubectl -n kyma-system port-forward svc/monitoring-grafana 3000:80
     ```
+<!-- markdown-link-check-disable-next-line -->
 2. In your browser, go to [`http://localhost:3000`](http://localhost:3000) to open Grafana dashboard.
 
 ## View the metrics

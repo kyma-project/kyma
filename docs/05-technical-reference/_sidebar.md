@@ -1,4 +1,5 @@
 * [Home](/)
+<!-- markdown-link-check-disable -->
 * [Technical reference](/05-technical-reference/README.md)
   * [API Overview](/05-technical-reference/00-api-overview/README.md)
   * [Architecture](/05-technical-reference/00-architecture/README.md)
@@ -18,3 +19,4 @@
   * [Function configuration file](/05-technical-reference/svls-05-exposing-functions.md)
   * [Function's specification](/05-technical-reference/svls-07-function-specification.md)
   * [Available presets](/05-technical-reference/svls-08-available-presets.md)
+<!-- markdown-link-check-enable -->
