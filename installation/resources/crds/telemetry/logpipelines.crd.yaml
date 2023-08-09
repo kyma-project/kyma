@@ -130,7 +130,7 @@ spec:
                 properties:
                   custom:
                     description: 'Defines a custom output in the Fluent Bit syntax.
-                      Caution: If you use a `custom` output, you put the LogPipeline
+                      Note: If you use a `custom` output, you put the LogPipeline
                       in unsupported mode.'
                     type: string
                   grafana-loki:
