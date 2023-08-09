@@ -20,7 +20,7 @@ First, let's create the Function and apply it.
 4. Name the Function `hello-world`.
 5. From the **Language** dropdown, choose `JavaScript`.
 6. From the **Runtime** dropdown, choose one of the available `nodejs`.
-7. Keep the sample function code.
+7. Keep the sample Function code.
 8. Click **Create**.
   </details>
   <details>
