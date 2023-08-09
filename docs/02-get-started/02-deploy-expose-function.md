@@ -20,17 +20,8 @@ First, let's create the Function and apply it.
 4. Name the Function `hello-world`.
 5. From the **Language** dropdown, choose `JavaScript`.
 6. From the **Runtime** dropdown, choose one of the available `nodejs`.
-7. Paste the following source code:
-```javascript
-module.exports = {
-  main: async function (event, context) {
-    const message = `Hello Serverless`
-    console.log(message);
-    return message;
-  }
-}
-```
-7. Click **Create**.
+7. Keep the sample function code.
+8. Click **Create**.
   </details>
   <details>
   <summary label="kubectl">
@@ -53,7 +44,10 @@ spec:
       source: |
         module.exports = {
           main: function(event, context) {
-            return 'Hello Serverless'
+            const message = `Hello World` +
+              ` from the Kyma Function ${context['function-name']}` +
+              ` running on ${context.runtime}!`;
+            return message;
           }
         }
 EOF
@@ -182,7 +176,7 @@ Run:
 curl https://hello-world.$CLUSTER_DOMAIN
 ```
 
-The operation was successful if the call returns `Hello Serverless`.
+The operation was successful if the call returns `Hello World from the Kyma Function hello-world running on nodejs18!`.
 
   </details>
 </div>
