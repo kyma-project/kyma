@@ -1,0 +1,10 @@
+{
+    "replacementPatterns": [
+      {
+        "_comment": "a replacement rule for all the in-repository references",
+        "pattern": "^/",
+        "replacement": "{{BASEURL}}/"
+      }
+    ]
+  }
+  
