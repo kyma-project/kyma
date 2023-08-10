@@ -3,13 +3,12 @@ package proxy
 import (
 	"context"
 	"errors"
+	"go.uber.org/zap"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"strconv"
 	"strings"
-
-	log "github.com/sirupsen/logrus"
 
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
@@ -37,13 +36,17 @@ func makeProxy(
 func newProxy(targetURL string, requestParameters *authorization.RequestParameters, serviceName string, transport http.RoundTripper) (*httputil.ReverseProxy, apperrors.AppError) {
 	target, err := url.Parse(targetURL)
 	if err != nil {
-		log.Errorf("failed to parse target url '%s': '%s'", targetURL, err.Error())
+		zap.L().Error("failed to parse target URL",
+			zap.String("targetURL", targetURL),
+			zap.Error(err))
 		return nil, apperrors.Internal("failed to parse target url '%s': '%s'", targetURL, err.Error())
 	}
 
 	targetQuery := target.RawQuery
 	director := func(req *http.Request) {
-		log.Infof("Proxy call for service '%s' to '%s'", serviceName, targetURL)
+		zap.L().Info("Proxy call for service",
+			zap.String("serviceName", serviceName),
+			zap.String("targetURL", targetURL))
 
 		req.URL.Scheme = target.Scheme
 		req.URL.Host = target.Host
@@ -65,9 +68,23 @@ func newProxy(targetURL string, requestParameters *authorization.RequestParamete
 			setCustomHeaders(req.Header, requestParameters.Headers)
 		}
 
-		log.Infof("Modified request url : '%s', schema : '%s', path : '%s'", req.URL.String(), req.URL.Scheme, req.URL.Path)
+		zap.L().Info("modified request URL",
+			zap.String("url", req.URL.String()),
+			zap.String("schema", req.URL.Scheme),
+			zap.String("path", req.URL.Path))
 	}
+
+	log := zap.L().Sugar()
+
 	errorHandler := func(rw http.ResponseWriter, req *http.Request, err error) {
+		log.With(
+			"error", err,
+			"requestID", req.Context().Value(httptools.ContextUUID),
+			"method", req.Method,
+			"host", req.Host,
+			"url", req.URL.RequestURI(),
+			"proto", req.Proto,
+		).Info("Request failed")
 		codeRewriter(rw, err)
 	}
 
@@ -112,6 +129,9 @@ func responseModifier(
 	urlRewriter func(gatewayURL, target, loc *url.URL) *url.URL,
 ) func(*http.Response) error {
 	return func(resp *http.Response) error {
+		log := zap.L().Sugar()
+		_ = httptools.LogResponse(log, resp)
+
 		if resp.StatusCode >= 500 && resp.StatusCode < 600 {
 			resp.Header.Set("Target-System-Status", strconv.Itoa(resp.StatusCode))
 			resp.StatusCode = http.StatusBadGateway
@@ -170,9 +190,9 @@ func urlRewriter(gatewayURL, target, loc *url.URL) *url.URL {
 }
 
 func codeRewriter(rw http.ResponseWriter, err error) {
-
 	if errors.Is(err, context.DeadlineExceeded) {
-		log.Infof("%s: HTTP status code was rewritten to 504", err)
+		zap.L().Info("HTTP status code rewritten to 504",
+			zap.Error(err))
 		rw.WriteHeader(http.StatusGatewayTimeout)
 		return
 	}
