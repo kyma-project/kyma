@@ -1,5 +1,5 @@
-* [Technical Reference](/05-technical-reference/README.md)
 <!-- markdown-link-check-disable -->
+* [Technical Reference](/05-technical-reference/README.md)
   * [Architecture](/05-technical-reference/00-architecture/README.md)
     * [API Gateway Architecture](/05-technical-reference/00-architecture/apix-01-architecture-apigateway.md)
     * [Application Connector components](/05-technical-reference/00-architecture/ac-01-application-connector-components.md)
