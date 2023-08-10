@@ -190,6 +190,7 @@ func markAllV1Alpha2SubscriptionsAsNotReady(dynamicClient dynamic.Interface, log
 
 		desiredSub := sub.DuplicateWithStatusDefaults()
 		desiredSub.Status.Ready = false
+		desiredSub.Status.Backend.CopyHashes(sub.Status.Backend)
 		if err = backendutils.UpdateSubscriptionStatus(ctx, dynamicClient, desiredSub); err != nil {
 			logger.Errorw("Failed to update subscription status", "namespace", sub.Namespace, "name", sub.Name, "error", err)
 		}

@@ -8,7 +8,7 @@ spec:
   selector:
     matchLabels: {{- include "controller.selectorLabels" . | nindent 6 }}
   strategy:
-    type: RollingUpdate
+    type: Recreate
   template:
     metadata:
       labels: {{- include "controller.selectorLabels" . | nindent 8 }}

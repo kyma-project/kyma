@@ -87,3 +87,11 @@ type EventMeshTypes struct {
 	// Event type that is used on the EventMesh backend.
 	EventMeshType string `json:"eventMeshType"`
 }
+
+// CopyHashes copies the precomputed hashes from the given backend.
+func (b *Backend) CopyHashes(src Backend) {
+	b.Ev2hash = src.Ev2hash
+	b.EventMeshHash = src.EventMeshHash
+	b.WebhookAuthHash = src.WebhookAuthHash
+	b.EventMeshLocalHash = src.EventMeshLocalHash
+}

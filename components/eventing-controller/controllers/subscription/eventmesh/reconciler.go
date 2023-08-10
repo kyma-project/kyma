@@ -45,6 +45,8 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 )
 
+type syncConditionWebhookCallStatusFunc func(subscription *eventingv1alpha2.Subscription)
+
 // Reconciler reconciles a Subscription object.
 type Reconciler struct {
 	ctx context.Context
@@ -56,9 +58,10 @@ type Reconciler struct {
 	cleaner           cleaner.Cleaner
 	oauth2credentials *eventmesh.OAuth2ClientCredentials
 	// nameMapper is used to map the Kyma subscription name to a subscription name on EventMesh.
-	nameMapper    backendutils.NameMapper
-	sinkValidator sink.Validator
-	collector     *metrics.Collector
+	nameMapper                     backendutils.NameMapper
+	sinkValidator                  sink.Validator
+	collector                      *metrics.Collector
+	syncConditionWebhookCallStatus syncConditionWebhookCallStatusFunc
 }
 
 const (
@@ -82,17 +85,18 @@ func NewReconciler(ctx context.Context, client client.Client, logger *logger.Log
 		panic(err)
 	}
 	return &Reconciler{
-		ctx:               ctx,
-		Client:            client,
-		logger:            logger,
-		recorder:          recorder,
-		Backend:           eventMeshBackend,
-		Domain:            cfg.Domain,
-		cleaner:           cleaner,
-		oauth2credentials: credential,
-		nameMapper:        mapper,
-		sinkValidator:     validator,
-		collector:         collector,
+		ctx:                            ctx,
+		Client:                         client,
+		logger:                         logger,
+		recorder:                       recorder,
+		Backend:                        eventMeshBackend,
+		Domain:                         cfg.Domain,
+		cleaner:                        cleaner,
+		oauth2credentials:              credential,
+		nameMapper:                     mapper,
+		sinkValidator:                  validator,
+		collector:                      collector,
+		syncConditionWebhookCallStatus: syncConditionWebhookCallStatus,
 	}
 }
 
@@ -265,7 +269,7 @@ func (r *Reconciler) handleDeleteSubscription(ctx context.Context, subscription 
 	// update condition in subscription status
 	condition := eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionSubscribed,
 		eventingv1alpha2.ConditionReasonSubscriptionDeleted, corev1.ConditionFalse, "")
-	r.replaceStatusCondition(subscription, condition)
+	replaceStatusCondition(subscription, condition)
 
 	// remove finalizers from subscription
 	removeFinalizer(subscription)
@@ -320,7 +324,7 @@ func (r *Reconciler) syncConditionSubscribed(subscription *eventingv1alpha2.Subs
 		condition = eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionSubscribed, eventingv1alpha2.ConditionReasonSubscriptionCreationFailed, corev1.ConditionFalse, message)
 	}
 
-	r.replaceStatusCondition(subscription, condition)
+	replaceStatusCondition(subscription, condition)
 }
 
 // syncConditionSubscriptionActive syncs the condition ConditionSubscribed.
@@ -330,33 +334,29 @@ func (r *Reconciler) syncConditionSubscriptionActive(subscription *eventingv1alp
 		corev1.ConditionTrue,
 		"")
 	if !isActive {
-		logger.Debugw("Waiting for subscription to be active",
-			"name",
-			subscription.Name,
-			"status",
-			subscription.Status.Backend.EventMeshSubscriptionStatus.Status)
-
+		logger.Debugw("Waiting for subscription to be active", "name", subscription.Name)
 		message := "Waiting for subscription to be active"
 		condition = eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionSubscriptionActive,
 			eventingv1alpha2.ConditionReasonSubscriptionNotActive,
 			corev1.ConditionFalse,
 			message)
 	}
-	r.replaceStatusCondition(subscription, condition)
+	replaceStatusCondition(subscription, condition)
 }
 
 // syncConditionWebhookCallStatus syncs the condition WebhookCallStatus
 // checks if the last webhook call returned an error.
-func (r *Reconciler) syncConditionWebhookCallStatus(subscription *eventingv1alpha2.Subscription) {
-	condition := eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionWebhookCallStatus, eventingv1alpha2.ConditionReasonWebhookCallStatus, corev1.ConditionFalse, "")
-	if isWebhookCallError, err := r.checkLastFailedDelivery(subscription); err != nil {
+func syncConditionWebhookCallStatus(subscription *eventingv1alpha2.Subscription) {
+	condition := eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionWebhookCallStatus,
+		eventingv1alpha2.ConditionReasonWebhookCallStatus, corev1.ConditionFalse, "")
+	if isWebhookCallError, err := checkLastFailedDelivery(subscription); err != nil {
 		condition.Message = err.Error()
 	} else if isWebhookCallError {
 		condition.Message = subscription.Status.Backend.EventMeshSubscriptionStatus.LastFailedDeliveryReason
 	} else {
 		condition.Status = corev1.ConditionTrue
 	}
-	r.replaceStatusCondition(subscription, condition)
+	replaceStatusCondition(subscription, condition)
 }
 
 // syncAPIRule validate the given subscription sink URL and sync its APIRule.
@@ -658,6 +658,7 @@ func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha2.Subscripti
 	}
 
 	if len(subscription.Status.Conditions) == 0 {
+		expectedStatus.Backend.CopyHashes(subscription.Status.Backend)
 		subscription.Status = expectedStatus
 	} else {
 		requiredConditions := getRequiredConditions(subscription.Status.Conditions, expectedStatus.Conditions)
@@ -695,7 +696,8 @@ func getRequiredConditions(subscriptionConditions, expectedConditions []eventing
 
 // replaceStatusCondition replaces the given condition on the subscription. Also it sets the readiness in the status.
 // So make sure you always use this method then changing a condition.
-func (r *Reconciler) replaceStatusCondition(subscription *eventingv1alpha2.Subscription, condition eventingv1alpha2.Condition) bool {
+func replaceStatusCondition(subscription *eventingv1alpha2.Subscription,
+	condition eventingv1alpha2.Condition) bool {
 	// the subscription is ready if all conditions are fulfilled
 	isReady := true
 
@@ -795,7 +797,7 @@ func (r *Reconciler) checkStatusActive(subscription *eventingv1alpha2.Subscripti
 }
 
 // checkLastFailedDelivery checks if LastFailedDelivery exists and if it happened after LastSuccessfulDelivery.
-func (r *Reconciler) checkLastFailedDelivery(subscription *eventingv1alpha2.Subscription) (bool, error) {
+func checkLastFailedDelivery(subscription *eventingv1alpha2.Subscription) (bool, error) {
 	// Check if LastFailedDelivery exists.
 	lastFailed := subscription.Status.Backend.EventMeshSubscriptionStatus.LastFailedDelivery
 	if len(lastFailed) == 0 {

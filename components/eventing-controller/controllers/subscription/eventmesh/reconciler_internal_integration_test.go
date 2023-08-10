@@ -563,6 +563,110 @@ func TestReconciler_APIRuleConfig_Upgrade(t *testing.T) {
 	}
 }
 
+// TestReconciler_PreserveBackendHashes ensures that the precomputed EventMesh hashes in the Kyma subscription
+// is preserved after reconciliation.
+func TestReconciler_PreserveBackendHashes(t *testing.T) {
+	ctx := context.Background()
+	collector := metrics.NewCollector()
+	validator := sink.ValidatorFunc(func(s *eventingv1alpha2.Subscription) error { return nil })
+
+	var testCases = []struct {
+		name                   string
+		givenSubscription      *eventingv1alpha2.Subscription
+		givenReconcilerSetup   func(*eventingv1alpha2.Subscription) (*Reconciler, client.Client)
+		wantEv2Hash            int64
+		wantEventMeshHash      int64
+		wantWebhookAuthHash    int64
+		wantEventMeshLocalHash int64
+		wantReconcileError     error
+	}{
+		{
+			name: "Preserve hashes if conditions are empty",
+			givenSubscription: func() *eventingv1alpha2.Subscription {
+				return reconcilertesting.NewSubscription("some-test-sub-0", "test",
+					reconcilertesting.WithValidSink("test", "some-test-svc-0"),
+					reconcilertesting.WithConditions(nil),
+					reconcilertesting.WithBackend(eventingv1alpha2.Backend{
+						Ev2hash:            int64(4118518533334734626),
+						EventMeshHash:      int64(4748405436686967274),
+						WebhookAuthHash:    int64(4118518533334734627),
+						EventMeshLocalHash: int64(4883494500014499539),
+					}),
+				)
+			}(),
+			givenReconcilerSetup: func(s *eventingv1alpha2.Subscription) (*Reconciler, client.Client) {
+				te := setupTestEnvironment(t, s)
+				te.backend.On("Initialize", mock.Anything).Return(nil)
+				te.backend.On("SyncSubscription", mock.Anything, mock.Anything, mock.Anything).Return(true, nil)
+				return NewReconciler(ctx, te.fakeClient, te.logger, te.recorder, te.cfg, te.cleaner,
+					te.backend, te.credentials, te.mapper, validator, collector), te.fakeClient
+			},
+			wantEv2Hash:            int64(4118518533334734626),
+			wantEventMeshHash:      int64(4748405436686967274),
+			wantWebhookAuthHash:    int64(4118518533334734627),
+			wantEventMeshLocalHash: int64(4883494500014499539),
+			wantReconcileError:     nil,
+		},
+		{
+			name: "Preserve hashes if conditions are not empty",
+			givenSubscription: func() *eventingv1alpha2.Subscription {
+				return reconcilertesting.NewSubscription("some-test-sub-1", "test",
+					reconcilertesting.WithValidSink("test", "some-test-svc-1"),
+					reconcilertesting.WithConditions(eventingv1alpha2.MakeSubscriptionConditions()),
+					reconcilertesting.WithBackend(eventingv1alpha2.Backend{
+						Ev2hash:            int64(2118518533334734626),
+						EventMeshHash:      int64(2748405436686967274),
+						WebhookAuthHash:    int64(2118518533334734627),
+						EventMeshLocalHash: int64(2883494500014499539),
+					}),
+				)
+			}(),
+			givenReconcilerSetup: func(s *eventingv1alpha2.Subscription) (*Reconciler, client.Client) {
+				te := setupTestEnvironment(t, s)
+				te.backend.On("Initialize", mock.Anything).Return(nil)
+				te.backend.On("SyncSubscription", mock.Anything, mock.Anything, mock.Anything).Return(true, nil)
+				return NewReconciler(ctx, te.fakeClient, te.logger, te.recorder, te.cfg, te.cleaner,
+					te.backend, te.credentials, te.mapper, validator, collector), te.fakeClient
+			},
+			wantEv2Hash:            int64(2118518533334734626),
+			wantEventMeshHash:      int64(2748405436686967274),
+			wantWebhookAuthHash:    int64(2118518533334734627),
+			wantEventMeshLocalHash: int64(2883494500014499539),
+			wantReconcileError:     nil,
+		},
+	}
+	featureFlagValues := []bool{true, false}
+	for _, testCase := range testCases {
+		for _, value := range featureFlagValues {
+			tc := testCase
+			flag := value
+			t.Run(fmt.Sprintf("%s [EventingWebhookAuthEnabled=%v]", tc.name, flag), func(t *testing.T) {
+				// given
+				featureflags.SetEventingWebhookAuthEnabled(flag)
+				reconciler, cli := tc.givenReconcilerSetup(tc.givenSubscription)
+				reconciler.syncConditionWebhookCallStatus = func(subscription *eventingv1alpha2.Subscription) {}
+				namespacedName := k8stypes.NamespacedName{
+					Namespace: tc.givenSubscription.Namespace,
+					Name:      tc.givenSubscription.Name,
+				}
+
+				// when
+				_, err := reconciler.Reconcile(context.Background(), ctrl.Request{NamespacedName: namespacedName})
+				require.Equal(t, tc.wantReconcileError, err)
+
+				// then
+				sub := &eventingv1alpha2.Subscription{}
+				err = cli.Get(ctx, namespacedName, sub)
+				require.NoError(t, err)
+				require.Equal(t, tc.wantEv2Hash, sub.Status.Backend.Ev2hash)
+				require.Equal(t, tc.wantEventMeshHash, sub.Status.Backend.EventMeshHash)
+				require.Equal(t, tc.wantWebhookAuthHash, sub.Status.Backend.WebhookAuthHash)
+				require.Equal(t, tc.wantEventMeshLocalHash, sub.Status.Backend.EventMeshLocalHash)
+			})
+		}
+	}
+}
+
 func Test_replaceStatusCondition(t *testing.T) {
 	var testCases = []struct {
 		name              string
@@ -620,13 +724,11 @@ func Test_replaceStatusCondition(t *testing.T) {
 		},
 	}
 
-	r := Reconciler{}
-
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
 			sub := tt.giveSubscription
 			condition := tt.giveCondition
-			statusChanged := r.replaceStatusCondition(sub, condition)
+			statusChanged := replaceStatusCondition(sub, condition)
 			assert.Equal(t, tt.wantStatusChanged, statusChanged)
 			assert.Contains(t, sub.Status.Conditions, condition)
 			assert.Equal(t, tt.wantReady, sub.Status.Ready)
@@ -775,7 +877,11 @@ func Test_syncConditionSubscribed(t *testing.T) {
 	}
 
 	r := Reconciler{
-		nameMapper: backendutils.NewBEBSubscriptionNameMapper(domain, eventmesh.MaxSubscriptionNameLength),
+		nameMapper: backendutils.NewBEBSubscriptionNameMapper(
+			domain,
+			eventmesh.MaxSubscriptionNameLength,
+		),
+		syncConditionWebhookCallStatus: syncConditionWebhookCallStatus,
 	}
 
 	for _, tc := range testCases {
@@ -1027,7 +1133,8 @@ func Test_syncConditionWebhookCallStatus(t *testing.T) {
 	}
 
 	r := Reconciler{
-		logger: logger,
+		logger:                         logger,
+		syncConditionWebhookCallStatus: syncConditionWebhookCallStatus,
 	}
 
 	for _, tc := range testCases {
@@ -1223,18 +1330,9 @@ func Test_checkLastFailedDelivery(t *testing.T) {
 		},
 	}
 
-	logger, err := eventinglogger.New(string(kymalogger.JSON), string(kymalogger.INFO))
-	if err != nil {
-		t.Fatalf(`failed to initiate logger, %v`, err)
-	}
-
-	r := Reconciler{
-		logger: logger,
-	}
-
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			result, err := r.checkLastFailedDelivery(tc.givenSubscription)
+			result, err := checkLastFailedDelivery(tc.givenSubscription)
 			assert.Equal(t, tc.wantResult, result)
 			if tc.wantError == nil {
 				assert.NoError(t, err)
