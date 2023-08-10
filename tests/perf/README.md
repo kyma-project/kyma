@@ -114,7 +114,7 @@ The **options** variable defines the execution behavior of the test implementati
 - **tags** defines custom tags to add metadata to test execution.
 
 > **NOTE:** Read [this](https://docs.k6.io/docs/options) document for more details on the available options and the test execution behavior.
-
+<!-- markdown-link-check-disable-next-line -->
 The test result is stored in InfluxDB and in Grafana that is deployed on a Kyma load generator cluster. You can access the result [here](https://grafana.perf.kyma-project.io/d/ReuNR5Aik/kyma-performance-test-results?orgId=1).
 
 ## Usage
