@@ -27,8 +27,6 @@ type Subscriptions []Subscription
 
 type WebhookAuth struct {
 	Type         AuthType  `json:"type,omitempty"`
-	User         string    `json:"user,omitempty"`
-	Password     string    `json:"password,omitempty"`
 	GrantType    GrantType `json:"grantType,omitempty"`
 	ClientID     string    `json:"clientId,omitempty"`
 	ClientSecret string    `json:"clientSecret,omitempty"`

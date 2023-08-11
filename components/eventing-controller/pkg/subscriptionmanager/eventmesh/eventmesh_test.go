@@ -177,6 +177,18 @@ func Test_markAllV1Alpha2SubscriptionsAsNotReady(t *testing.T) {
 		controllertesting.WithStatus(true),
 	)
 
+	// set hashes
+	const (
+		ev2Hash            = int64(6118518533334734626)
+		eventMeshHash      = int64(6748405436686967274)
+		webhookAuthHash    = int64(6118518533334734627)
+		eventMeshLocalHash = int64(6883494500014499539)
+	)
+	subscription.Status.Backend.Ev2hash = ev2Hash
+	subscription.Status.Backend.EventMeshHash = eventMeshHash
+	subscription.Status.Backend.WebhookAuthHash = webhookAuthHash
+	subscription.Status.Backend.EventMeshLocalHash = eventMeshLocalHash
+
 	// create logger
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	require.NoError(t, err)
@@ -204,6 +216,12 @@ func Test_markAllV1Alpha2SubscriptionsAsNotReady(t *testing.T) {
 	gotSub, err = controllertesting.ToSubscription(unstructuredSub)
 	require.NoError(t, err)
 	require.Equal(t, false, gotSub.Status.Ready)
+
+	// ensure hashes are preserved
+	require.Equal(t, ev2Hash, gotSub.Status.Backend.Ev2hash)
+	require.Equal(t, eventMeshHash, gotSub.Status.Backend.EventMeshHash)
+	require.Equal(t, webhookAuthHash, gotSub.Status.Backend.WebhookAuthHash)
+	require.Equal(t, eventMeshLocalHash, gotSub.Status.Backend.EventMeshLocalHash)
 }
 
 func startBEBMock() *controllertesting.EventMeshMock {
