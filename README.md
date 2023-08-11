@@ -9,7 +9,7 @@
 
 ## Overview
 
-**Kyma** `/kee-ma/` is an application runtime that provides you a flexible and easy way to connect, extend, and customize your applications in the cloud-native world of Kubernetes. 
+**Kyma** `/kee-ma/` is an application runtime that provides you a flexible and easy way to connect, extend, and customize your applications in the cloud-native world of Kubernetes.
 
 Out of the box, Kyma offers various functionalities, such as:  
 
@@ -136,7 +136,6 @@ If you would like to join us and work together on the Kyma project, there are so
   - Understanding the Architecture Base Pattern
   - Understanding the Service Mesh concept
   - Basic Markdown editing
-
 
 ### Basic Kyma knowledge
 
