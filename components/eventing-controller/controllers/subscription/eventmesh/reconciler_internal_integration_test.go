@@ -570,6 +570,13 @@ func TestReconciler_PreserveBackendHashes(t *testing.T) {
 	collector := metrics.NewCollector()
 	validator := sink.ValidatorFunc(func(s *eventingv1alpha2.Subscription) error { return nil })
 
+	const (
+		ev2hash            = int64(118518533334734626)
+		eventMeshHash      = int64(748405436686967274)
+		webhookAuthHash    = int64(118518533334734627)
+		eventMeshLocalHash = int64(883494500014499539)
+	)
+
 	var testCases = []struct {
 		name                   string
 		givenSubscription      *eventingv1alpha2.Subscription
@@ -587,10 +594,10 @@ func TestReconciler_PreserveBackendHashes(t *testing.T) {
 					reconcilertesting.WithValidSink("test", "some-test-svc-0"),
 					reconcilertesting.WithConditions(nil),
 					reconcilertesting.WithBackend(eventingv1alpha2.Backend{
-						Ev2hash:            int64(4118518533334734626),
-						EventMeshHash:      int64(4748405436686967274),
-						WebhookAuthHash:    int64(4118518533334734627),
-						EventMeshLocalHash: int64(4883494500014499539),
+						Ev2hash:            ev2hash,
+						EventMeshHash:      eventMeshHash,
+						WebhookAuthHash:    webhookAuthHash,
+						EventMeshLocalHash: eventMeshLocalHash,
 					}),
 				)
 			}(),
@@ -601,10 +608,10 @@ func TestReconciler_PreserveBackendHashes(t *testing.T) {
 				return NewReconciler(ctx, te.fakeClient, te.logger, te.recorder, te.cfg, te.cleaner,
 					te.backend, te.credentials, te.mapper, validator, collector), te.fakeClient
 			},
-			wantEv2Hash:            int64(4118518533334734626),
-			wantEventMeshHash:      int64(4748405436686967274),
-			wantWebhookAuthHash:    int64(4118518533334734627),
-			wantEventMeshLocalHash: int64(4883494500014499539),
+			wantEv2Hash:            ev2hash,
+			wantEventMeshHash:      eventMeshHash,
+			wantWebhookAuthHash:    webhookAuthHash,
+			wantEventMeshLocalHash: eventMeshLocalHash,
 			wantReconcileError:     nil,
 		},
 		{
@@ -614,10 +621,10 @@ func TestReconciler_PreserveBackendHashes(t *testing.T) {
 					reconcilertesting.WithValidSink("test", "some-test-svc-1"),
 					reconcilertesting.WithConditions(eventingv1alpha2.MakeSubscriptionConditions()),
 					reconcilertesting.WithBackend(eventingv1alpha2.Backend{
-						Ev2hash:            int64(2118518533334734626),
-						EventMeshHash:      int64(2748405436686967274),
-						WebhookAuthHash:    int64(2118518533334734627),
-						EventMeshLocalHash: int64(2883494500014499539),
+						Ev2hash:            ev2hash,
+						EventMeshHash:      eventMeshHash,
+						WebhookAuthHash:    webhookAuthHash,
+						EventMeshLocalHash: eventMeshLocalHash,
 					}),
 				)
 			}(),
@@ -628,10 +635,10 @@ func TestReconciler_PreserveBackendHashes(t *testing.T) {
 				return NewReconciler(ctx, te.fakeClient, te.logger, te.recorder, te.cfg, te.cleaner,
 					te.backend, te.credentials, te.mapper, validator, collector), te.fakeClient
 			},
-			wantEv2Hash:            int64(2118518533334734626),
-			wantEventMeshHash:      int64(2748405436686967274),
-			wantWebhookAuthHash:    int64(2118518533334734627),
-			wantEventMeshLocalHash: int64(2883494500014499539),
+			wantEv2Hash:            ev2hash,
+			wantEventMeshHash:      eventMeshHash,
+			wantWebhookAuthHash:    webhookAuthHash,
+			wantEventMeshLocalHash: eventMeshLocalHash,
 			wantReconcileError:     nil,
 		},
 	}
