@@ -18,7 +18,7 @@ Use the following tools to set up the project:
 
 To run integration tests, follow these instructions:
 
-1. Install [Kyma](https://kyma-project.io/docs/kyma/latest/04-operation-guides/operations/02-install-kyma).
+1. Install [Kyma](https://kyma-project.io/#/04-operation-guides/operations/02-install-kyma).
 2. Build the test image directly on the Docker engine of the Minikube node without pushing it to a registry. Run:
 
    ```bash

@@ -799,7 +799,7 @@ kyma:
   authProxy:
     enabled: true
     replicaCount: 1
-    configDocsLink: "https://kyma-project.io/docs/kyma/latest/04-operation-guides/security/sec-06-access-expose-grafana"
+    configDocsLink: "https://kyma-project.io/#/04-operation-guides/security/sec-06-access-expose-grafana"
     config:
       clientId: "dummy"
       clientSecret: "dummy"

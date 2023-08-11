@@ -8,7 +8,7 @@ Trace backend shows fewer traces than you would like to see.
 
 ## Cause
 
-By [default](https://kyma-project.io/docs/kyma/latest/01-overview/telemetry/telemetry-03-traces#istio), only 1% of the requests are sent to the trace backend for trace recording.
+By [default](../../../01-overview/telemetry/telemetry-03-traces.md#istio), only 1% of the requests are sent to the trace backend for trace recording.
 
 ## Remedy
 

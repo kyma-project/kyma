@@ -60,7 +60,7 @@ async function assertGrafanaRedirectsExist() {
 }
 
 async function assertGrafanaRedirects() {
-  let res = await checkGrafanaRedirect('https://kyma-project.io/docs', 403);
+  let res = await checkGrafanaRedirect('https://kyma-project.io', 403);
   assert.isTrue(res, 'Grafana redirect to kyma docs does not work!');
 
   await createBasicProxySecret();

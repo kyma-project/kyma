@@ -341,7 +341,7 @@ spec:
                 type: array
               unsupportedMode:
                 description: Is active when the LogPipeline uses a `custom` output
-                  or filter; see [unsupported mode](https://kyma-project.io/docs/kyma/main/01-overview/telemetry/telemetry-02-logs#unsupported-mode).
+                  or filter; see [unsupported mode](https://kyma-project.io/#/telemetry-manager/user/02-logs?id=unsupported-mode).
                 type: boolean
             type: object
         type: object

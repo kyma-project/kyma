@@ -394,7 +394,7 @@ data:
     urlPath: functions
     scope: namespace
     description: >-
-      {{"{{[Function](https://kyma-project.io/docs/kyma/latest/05-technical-reference/00-custom-resources/svls-01-function/#documentation-content/)}}"}}
+      {{"{{[Function](https://kyma-project.io/#/05-technical-reference/00-custom-resources/svls-01-function#documentation-content/)}}"}}
       is a simple code snippet that you can run without provisioning or managing
       servers.
   list: |-
