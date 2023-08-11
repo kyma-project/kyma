@@ -192,3 +192,6 @@ global:
 
   # This configuration is only temporary and will be removed in kyma version 2.7.x.
   sidecarMigration: false
+
+  #Istio operator image registered for scanning
+  istioOperatorImage: "europe-docker.pkg.dev/kyma-project/prod/istio-manager:1.0.0"
