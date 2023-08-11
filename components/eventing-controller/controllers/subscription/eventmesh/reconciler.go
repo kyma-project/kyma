@@ -334,7 +334,8 @@ func (r *Reconciler) syncConditionSubscriptionActive(subscription *eventingv1alp
 		corev1.ConditionTrue,
 		"")
 	if !isActive {
-		logger.Debugw("Waiting for subscription to be active", "name", subscription.Name)
+		logger.Infow("Waiting for subscription to be active", "name", subscription.Name,
+			"status", subscription.Status.Backend.EventMeshSubscriptionStatus)
 		message := "Waiting for subscription to be active"
 		condition = eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionSubscriptionActive,
 			eventingv1alpha2.ConditionReasonSubscriptionNotActive,
