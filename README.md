@@ -148,6 +148,7 @@ These are the sources you can get the basic Kyma knowledge from:
 ### Open job positions
 
 Kyma team is located mostly in Poland and Germany. See the open job positions for both locations:
+
 - [Gliwice, Poland](https://jobs.sap.com/search/?createNewAlert=false&q=%23kymaopensource&optionsFacetsDD_department=&optionsFacetsDD_customfield3=&optionsFacetsDD_country=&locationsearch=)
 - [Munich, Germany](https://jobs.sap.com/search/?createNewAlert=false&q=%23kyma&optionsFacetsDD_department=&optionsFacetsDD_customfield3=&optionsFacetsDD_country=&locationsearch=munich)
 
