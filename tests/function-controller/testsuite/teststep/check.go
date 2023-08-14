@@ -372,12 +372,12 @@ type CloudEventCheck struct {
 	encoding cloudevents.Encoding
 }
 
-func NewCloudEventCheck(encoding cloudevents.Encoding, log *logrus.Entry, name string, url *url.URL) *CloudEventCheck {
+func NewCloudEventCheck(log *logrus.Entry, name string, encoding cloudevents.Encoding, target *url.URL) *CloudEventCheck {
 	return &CloudEventCheck{
 		encoding: encoding,
 		name:     name,
 		log:      log.WithField(step.LogStepKey, name),
-		endpoint: url.String(),
+		endpoint: target.String(),
 	}
 }
 

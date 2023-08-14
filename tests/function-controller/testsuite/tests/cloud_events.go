@@ -41,9 +41,9 @@ func SimpleFunctionCloudEventsTest(restConfig *rest.Config, cfg testsuite.Config
 		return nil, errors.Wrapf(err, "while creating k8s apps client")
 	}
 
-	python39Logger := logf.WithField(scenarioKey, "python39")
+	//python39Logger := logf.WithField(scenarioKey, "python39")
 	//nodejs16Logger := logf.WithField(scenarioKey, "nodejs16")
-	//nodejs18Logger := logf.WithField(scenarioKey, "nodejs18")
+	nodejs18Logger := logf.WithField(scenarioKey, "nodejs18")
 
 	genericContainer := shared.Container{
 		DynamicCli:  dynamicCli,
@@ -53,9 +53,9 @@ func SimpleFunctionCloudEventsTest(restConfig *rest.Config, cfg testsuite.Config
 		Log:         logf,
 	}
 
-	python39Fn := function.NewFunction("python39", cfg.KubectlProxyEnabled, genericContainer.WithLogger(python39Logger))
+	//python39Fn := function.NewFunction("python39", cfg.KubectlProxyEnabled, genericContainer.WithLogger(python39Logger))
 	//nodejs16Fn := function.NewFunction("nodejs16", cfg.KubectlProxyEnabled, genericContainer.WithLogger(nodejs16Logger))
-	//nodejs18Fn := function.NewFunction("nodejs18", cfg.KubectlProxyEnabled, genericContainer.WithLogger(nodejs18Logger))
+	nodejs18Fn := function.NewFunction("nodejs18", cfg.KubectlProxyEnabled, genericContainer.WithLogger(nodejs18Logger))
 
 	logf.Infof("Testing function in namespace: %s", cfg.Namespace)
 
@@ -63,18 +63,18 @@ func SimpleFunctionCloudEventsTest(restConfig *rest.Config, cfg testsuite.Config
 		teststep.NewNamespaceStep("Create test namespace", coreCli, genericContainer),
 		teststep.NewApplication("Create HTTP basic application", HTTPAppName, HTTPAppImage, int32(80), appsCli.Deployments(genericContainer.Namespace), coreCli.Services(genericContainer.Namespace), genericContainer),
 		step.NewParallelRunner(logf, "Fn tests",
-			step.NewSerialTestRunner(python39Logger, "Python39 test",
-				teststep.CreateFunction(python39Logger, python39Fn, "Create Python39 Function", runtimes.BasicCloudEventPythonFunction(serverlessv1alpha2.Python39)),
-				teststep.NewCloudEventCheck(cloudevents.EncodingStructured, python39Logger, "Python39 cloud event structured check", python39Fn.FunctionURL),
-			),
+			//step.NewSerialTestRunner(python39Logger, "Python39 test",
+			//	teststep.CreateFunction(python39Logger, python39Fn, "Create Python39 Function", runtimes.BasicCloudEventPythonFunction(serverlessv1alpha2.Python39)),
+			//	teststep.NewCloudEventCheck(cloudevents.EncodingStructured, python39Logger, "Python39 cloud event structured check", python39Fn.FunctionURL),
+			//),
 			//step.NewSerialTestRunner(nodejs16Logger, "NodeJS16 test",
-			//	teststep.CreateFunction(nodejs16Logger, nodejs16Fn, "Create NodeJS16 Function", runtimes.BasicTracingNodeFunction(serverlessv1alpha2.NodeJs16, httpAppURL.String())),
-			//	teststep.NewTracingHTTPCheck(nodejs16Logger, "NodeJS16 tracing headers check", nodejs16Fn.FunctionURL, poll),
+			//	teststep.CreateFunction(nodejs16Logger, nodejs16Fn, "Create NodeJS16 Function", runtimes.NodeJSFunctionWithCloudEvent(serverlessv1alpha2.NodeJs18)),
+			//	teststep.NewCloudEventCheck(cloudevents.EncodingStructured, nodejs16Logger, "Python39 cloud event structured check", python39Fn.FunctionURL),
 			//),
-			//step.NewSerialTestRunner(nodejs18Logger, "NodeJS18 test",
-			//	teststep.CreateFunction(nodejs18Logger, nodejs18Fn, "Create NodeJS18 Function", runtimes.BasicTracingNodeFunction(serverlessv1alpha2.NodeJs18, httpAppURL.String())),
-			//	teststep.NewTracingHTTPCheck(nodejs18Logger, "NodeJS18 tracing headers check", nodejs18Fn.FunctionURL, poll),
-			//),
+			step.NewSerialTestRunner(nodejs18Logger, "NodeJS18 test",
+				teststep.CreateFunction(nodejs18Logger, nodejs18Fn, "Create NodeJS18 Function", runtimes.NodeJSFunctionWithCloudEvent(serverlessv1alpha2.NodeJs18)),
+				teststep.NewCloudEventCheck(nodejs18Logger, "NodeJS18 cloud event structured check", cloudevents.EncodingStructured, nodejs18Fn.FunctionURL),
+			),
 		),
 	), nil
 }
