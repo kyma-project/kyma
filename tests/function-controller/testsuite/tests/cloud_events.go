@@ -74,6 +74,7 @@ func SimpleFunctionCloudEventsTest(restConfig *rest.Config, cfg testsuite.Config
 			step.NewSerialTestRunner(nodejs18Logger, "NodeJS18 test",
 				teststep.CreateFunction(nodejs18Logger, nodejs18Fn, "Create NodeJS18 Function", runtimes.NodeJSFunctionWithCloudEvent(serverlessv1alpha2.NodeJs18)),
 				teststep.NewCloudEventCheck(nodejs18Logger, "NodeJS18 cloud event structured check", cloudevents.EncodingStructured, nodejs18Fn.FunctionURL),
+				teststep.NewCloudEventCheck(nodejs18Logger, "NodeJS18 cloud event binary check", cloudevents.EncodingBinary, nodejs18Fn.FunctionURL),
 			),
 		),
 	), nil

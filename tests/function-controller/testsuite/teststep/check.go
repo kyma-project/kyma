@@ -390,24 +390,28 @@ func (ce CloudEventCheck) Run() error {
 	if err != nil {
 		return errors.Wrap(err, "while creating cloud event client")
 	}
-	data := cloudEventData{Hello: "World"}
 
 	event := cloudevents.NewEvent()
 	event.SetSource("example/uri")
 	event.SetType("example.type")
-	err = event.SetData(cloudevents.ApplicationJSON, data)
-	if err != nil {
-		return errors.Wrap(err, "while setting cloud event data")
-	}
 
+	data := cloudEventData{}
 	ctx := cloudevents.ContextWithTarget(context.Background(), ce.endpoint)
 	switch ce.encoding {
 	case cloudevents.EncodingStructured:
 		ctx = cloudevents.WithEncodingStructured(ctx)
+		data.Hello = "Structured"
 	case cloudevents.EncodingBinary:
+		data.Hello = "Binary"
 		ctx = cloudevents.WithEncodingBinary(ctx)
+	default:
+		return errors.Errorf("Encoding not supported: %s", ce.encoding)
 	}
 
+	err = event.SetData(cloudevents.ApplicationJSON, data)
+	if err != nil {
+		return errors.Wrap(err, "while setting cloud event data")
+	}
 	result := c.Send(ctx, event)
 	if cloudevents.IsUndelivered(result) {
 		return errors.Wrap(result, "while sending cloud event")
@@ -454,7 +458,6 @@ func (ce CloudEventCheck) OnError() error {
 }
 
 func (ce CloudEventCheck) assertResponse(response cloudEventResponse, expectedData cloudEventData) error {
-
 	if expectedData.Hello != response.Data.Hello {
 		return errors.Errorf("Expected %s, got %s in cloud event data", expectedData.Hello, response.Data.Hello)
 	}
