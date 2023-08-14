@@ -1,14 +1,15 @@
 ---
-title: Telemetry Operator
+title: Telemetry Manager
 ---
 
 ## Module lifecycle
 
-The module on its own ships a single component only, namely the Telemetry Operator. The operator implements the Kubernetes controller pattern and manages the whole lifecycle of all other components relevant to this module. The operator watches for the Kubernetes LogPipeline, TracePipeline, and, in the future, MetricPipeline resources created by the user. With these, the user describes in a declarative way what data of a signal type to collect and where to ship it.
-If the operator detects a configuration, it will roll out the relevant collector components on demand.
+Kyma's Telemetry module ships Telemetry Manager as its core component. Telemetry Manager is a Kubernetes [operator](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/) that is described by a custom resource of type Telemetry. Telemetry Manager implements the Kubernetes controller pattern and manages the whole lifecycle of all other components covered in the Telemetry module.
+Telemetry Manager watches for the user-created Kubernetes resources: LogPipeline, TracePipeline, and, in the future, MetricPipeline. In these resources, you specify what data of a signal type to collect and where to ship it.
+If Telemetry Manager detects a configuration, it rolls out the relevant components on demand.
 
-![Operator](./assets/operator-lifecycle.drawio.svg)
+![Manager](./assets/manager-lifecycle.drawio.svg)
 
 ## Configuration
 
-At the moment, the operator has no configuration options. As part of the [modularization](https://github.com/kyma-project/kyma/issues/16301) efforts, it is planned to introduce a dedicated module resource to watch the module's status and to provide advanced configuration options for the managed components.
+At the moment, you cannot configure Telemetry Manager. As part of the [modularization](https://github.com/kyma-project/kyma/issues/16301) efforts, is planned to support configuration in the specification of the related Telemetry resource.
