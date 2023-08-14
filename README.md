@@ -1,7 +1,7 @@
 <p align="center">
  <img src="https://raw.githubusercontent.com/kyma-project/kyma/main/logo.png" width="235">
 </p>
-
+[![REUSE status](https://api.reuse.software/badge/github.com/kyma-project/kyma)](https://api.reuse.software/info/github.com/kyma-project/kyma)
 [![Go Report Card](https://goreportcard.com/badge/github.com/kyma-project/kyma)](https://goreportcard.com/report/github.com/kyma-project/kyma)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/2168/badge)](https://bestpractices.coreinfrastructure.org/projects/2168)
 [![Slack](https://img.shields.io/badge/slack-@kyma--community-yellow.svg)](http://slack.kyma-project.io)
