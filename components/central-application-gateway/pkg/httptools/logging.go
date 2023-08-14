@@ -8,7 +8,9 @@ import (
 	"time"
 )
 
-const ContextUUID = "context-uuid"
+type ContextKey string
+
+const ContextUUID ContextKey = "context-uuid"
 
 var LoggingOn = false
 
