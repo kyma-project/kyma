@@ -6,7 +6,6 @@ import (
 
 type FunctionConfig struct {
 	PublisherProxyAddress                       string        `envconfig:"optional"`
-	JaegerServiceEndpoint                       string        `envconfig:"optional"`
 	TraceCollectorEndpoint                      string        `envconfig:"optional"`
 	ImageRegistryDefaultDockerConfigSecretName  string        `envconfig:"default=serverless-registry-config-default"`
 	ImageRegistryExternalDockerConfigSecretName string        `envconfig:"default=serverless-registry-config"`

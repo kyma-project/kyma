@@ -77,32 +77,32 @@ global:
   images:
     k8s_tools:
       name: "tpi/k8s-tools"
-      version: "v20230626-ce139c33"
+      version: "v20230809-6a330b54"
       directory: "prod"
     function_controller:
       name: "function-controller"
-      version: "v20230628-61d97068"
-      directory: "prod"
+      version: "PR-17942"
+      directory: "dev"
     function_webhook:
       name: "function-webhook"
-      version: "v20230628-61d97068"
-      directory: "prod"
+      version: "PR-17942"
+      directory: "dev"
     function_build_init:
       name: "function-build-init"
-      version: "v20230628-61d97068"
-      directory: "prod"
+      version: "PR-17942"
+      directory: "dev"
     function_registry_gc:
       name: "function-registry-gc"
       version: "v20230628-61d97068"
       directory: "prod"
     function_runtime_nodejs16:
       name: "function-runtime-nodejs16"
-      version: "v20230720-e1268109"
-      directory: "prod"
+      version: "PR-17917"
+      directory: "dev"
     function_runtime_nodejs18:
       name: "function-runtime-nodejs18"
-      version: "v20230720-e1268109"
-      directory: "prod"
+      version: "PR-17917"
+      directory: "dev"
     function_runtime_python39:
       name: "function-runtime-python39"
       version: "v20230720-e1268109"
@@ -215,10 +215,6 @@ containers:
         value: '{{ template "fullname" . }}-function'
       targetCPUUtilizationPercentage:
         value: "50"
-      # Deprecated as of kyma 2.8
-      # TODO : remove this ENV in 2.10 (two version compatibility rule for open source)
-      functionJaegerServiceEndpoint:
-        value: "http://tracing-jaeger-collector.kyma-system.svc.cluster.local:14268/api/traces"
       functionTraceCollectorEndpoint:
         value: "http://telemetry-otlp-traces.kyma-system.svc.cluster.local:4318/v1/traces"
       functionPublisherProxyAddress:

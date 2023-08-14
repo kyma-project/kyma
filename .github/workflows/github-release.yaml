@@ -7,7 +7,7 @@ jobs:
     environment:
       name: release
     container:
-      image: europe-docker.pkg.dev/kyma-project/prod/test-infra/githubrelease:v20230726-936b8ee7
+      image: europe-docker.pkg.dev/kyma-project/prod/test-infra/githubrelease:v20230731-ca8ffad9
     steps:
       - name: Checkout code
         uses: actions/checkout@v3

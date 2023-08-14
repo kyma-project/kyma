@@ -195,6 +195,7 @@ func startReconciler() error {
 		recorder,
 		cleaner,
 		sink.NewValidator(ctx, k8sClient, recorder),
+		metricsCollector,
 	)
 
 	if err := jsTestEnsemble.Reconciler.SetupUnmanaged(k8sManager); err != nil {

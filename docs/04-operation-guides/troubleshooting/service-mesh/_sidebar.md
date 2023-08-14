@@ -1,0 +1,8 @@
+* [Home](/)
+* [Operation Guides](../../README.md)
+* [Troubleshooting](../README.md)
+* [Service Mesh](README.md)
+  * [Can't access a Kyma endpoint (503 status code)](smsh-01-503-no-access.md)
+  * [Connection refused errors](smsh-02-connection-refused.md)
+  * [Issues with Istio sidecar injection](smsh-03-istio-no-sidecar.md)
+  * [Incompatible Istio sidecar version after Kyma upgrade](smsh-04-istio-sidecar-version.md)

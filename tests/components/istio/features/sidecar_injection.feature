@@ -15,14 +15,13 @@ Feature: Istio sidecar injection works properly in target namespace
     And "sidecar-enable" namespace is labeled with "istio-injection" "enabled"
     And Httpbin deployment is created in "sidecar-enable" namespace
     And Httpbin deployment is deployed and ready in "sidecar-enable" namespace
-    Then there should be some pods with Istio sidecar in "sidecar-enable" namespace
+    Then there "should" be Istio sidecar in httpbin pod in "sidecar-enable" namespace
     And "sidecar-enable" namespace is deleted
 
   Scenario: Kyma-system namespace contains pods with sidecar
     Given Istio component is installed
-    Then there should be some pods with Istio sidecar in "kyma-system" namespace
-    Given Httpbin deployment is created in "kyma-system" namespace
-    When Httpbin deployment is deployed and ready in "kyma-system" namespace
+    And Httpbin deployment is created in "kyma-system" namespace
+    And Httpbin deployment is deployed and ready in "kyma-system" namespace
     Then there "should" be Istio sidecar in httpbin pod in "kyma-system" namespace
     And Httpbin deployment is deleted from "kyma-system" namespace
 

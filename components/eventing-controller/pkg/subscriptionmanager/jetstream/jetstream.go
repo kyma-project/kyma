@@ -91,6 +91,8 @@ func (sm *SubscriptionManager) Init(mgr manager.Manager) error {
 }
 
 func (sm *SubscriptionManager) Start(defaultSubsConfig env.DefaultSubscriptionConfig, _ subscriptionmanager.Params) error {
+	sm.metricsCollector.ResetSubscriptionStatus()
+
 	ctx, cancel := context.WithCancel(context.Background())
 	sm.cancel = cancel
 
@@ -113,6 +115,7 @@ func (sm *SubscriptionManager) Start(defaultSubsConfig env.DefaultSubscriptionCo
 		recorder,
 		jsCleaner,
 		sink.NewValidator(ctx, client, recorder),
+		sm.metricsCollector,
 	)
 	sm.backendv2 = jetStreamReconciler.Backend
 

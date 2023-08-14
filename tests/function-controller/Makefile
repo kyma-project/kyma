@@ -20,6 +20,6 @@ serverless-integration: ## Run serverless integration scenario with kubectl prox
 git-auth-integration: ## Run git authorization integration scenario with kubectl proxy
 	./run-local.sh git-auth-integration
 
-.PHONY: simple-tracing
-simple-tracing: ## Run simple tracing scenario with kubectl proxy
-	./run-local.sh simple-tracing
+.PHONY: serverless-contract-tests
+serverless-contract-tests: ## Run serverless contract tests with kubectl proxy
+	./run-local.sh serverless-contract-tests

@@ -9,7 +9,6 @@ import (
 
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
-	"golang.org/x/xerrors"
 	admissionv1 "k8s.io/api/admissionregistration/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
@@ -323,7 +322,7 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 	// CreateOrUpdate status of the CR
 	err = r.syncBackendStatus(ctx, backendStatus, publisherDeploy)
 	if err != nil {
-		return ctrl.Result{}, xerrors.Errorf("failed to create/update %s EventingBackend status: %v", r.backendType, err)
+		return ctrl.Result{}, errors.Errorf("failed to create/update %s EventingBackend status: %v", r.backendType, err)
 	}
 
 	return ctrl.Result{}, nil
@@ -441,7 +440,7 @@ func (r *Reconciler) updateStatusAndEmitEvent(ctx context.Context, currentBacken
 	desiredBackend.Status = *newBackendStatus
 
 	if err := r.Client.Status().Update(ctx, desiredBackend); err != nil {
-		return xerrors.Errorf("failed to update %s EventingBackend status: %v", r.backendType, err)
+		return errors.Errorf("failed to update %s EventingBackend status: %v", r.backendType, err)
 	}
 
 	// emit event
@@ -560,7 +559,7 @@ func (r *Reconciler) SyncPublisherProxySecret(ctx context.Context, secret *v1.Se
 	// Update secret
 	desiredSecret.ResourceVersion = currentSecret.ResourceVersion
 	if err := r.Update(ctx, desiredSecret); err != nil {
-		return nil, xerrors.Errorf("failed to update Event Publisher secret: %v", err)
+		return nil, errors.Errorf("failed to update Event Publisher secret: %v", err)
 	}
 
 	return desiredSecret, nil
@@ -871,7 +870,7 @@ func (r *Reconciler) createNATSSecret(ctx context.Context) error {
 func (r *Reconciler) startNATSController() error {
 	if !r.natsSubMgrStarted {
 		if err := r.natsSubMgr.Start(r.cfg.DefaultSubscriptionConfig, subscriptionmanager.Params{}); err != nil {
-			return xerrors.Errorf("failed to start NATS subscription manager: %v", err)
+			return errors.Errorf("failed to start NATS subscription manager: %v", err)
 		}
 		r.natsSubMgrStarted = true
 		r.namedLogger().Info("NATS subscription manager was started")
@@ -882,7 +881,7 @@ func (r *Reconciler) startNATSController() error {
 func (r *Reconciler) stopNATSController() error {
 	if r.natsSubMgrStarted {
 		if err := r.natsSubMgr.Stop(true); err != nil {
-			return xerrors.Errorf("failed to stop NATS subscription manager: %v", err)
+			return errors.Errorf("failed to stop NATS subscription manager: %v", err)
 		}
 		r.natsSubMgrStarted = false
 		r.namedLogger().Info("NATS subscription manager was stopped")
@@ -899,7 +898,7 @@ func (r *Reconciler) startBEBController() error {
 			subscriptionmanager.ParamNameCertsURL:     r.credentials.certsURL,
 		}
 		if err := r.bebSubMgr.Start(r.cfg.DefaultSubscriptionConfig, bebSubMgrParams); err != nil {
-			return xerrors.Errorf("failed to start BEB subscription manager: %v", err)
+			return errors.Errorf("failed to start BEB subscription manager: %v", err)
 		}
 		r.bebSubMgrStarted = true
 		r.namedLogger().Info("BEB subscription manager was started")
@@ -910,7 +909,7 @@ func (r *Reconciler) startBEBController() error {
 func (r *Reconciler) stopBEBController() error {
 	if r.bebSubMgrStarted {
 		if err := r.bebSubMgr.Stop(true); err != nil {
-			return xerrors.Errorf("failed to stop BEB subscription manager: %v", err)
+			return errors.Errorf("failed to stop BEB subscription manager: %v", err)
 		}
 		r.bebSubMgrStarted = false
 		r.namedLogger().Info("BEB subscription manager was stopped")

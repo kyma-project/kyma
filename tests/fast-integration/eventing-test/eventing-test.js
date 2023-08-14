@@ -162,6 +162,12 @@ describe('Eventing tests', function() {
     });
 
     it('Cloud Events [structured] with v1alpha1 subscription should be delivered to eventing-sink ', async function() {
+      if (backend === bebBackend) {
+        debug(`Skip test for backend ${bebBackend}`);
+        this.skip();
+        return;
+      }
+
       let eventSource = 'eventing-test';
       if (backend === bebBackend) {
         eventSource = getEventMeshNamespace();
@@ -187,6 +193,12 @@ describe('Eventing tests', function() {
     });
 
     it('Cloud Events [structured] with v1alpha2 subscription should be delivered to eventing-sink ', async function() {
+      if (backend === bebBackend) {
+        debug(`Skip test for backend ${bebBackend}`);
+        this.skip();
+        return;
+      }
+
       for (let i=0; i < subscriptionsTypes.length; i++) {
         debugBanner(`Testing Cloud Events [structured] [v1alpha2] ${subscriptionsTypes[i].type}`);
         await checkEventDelivery(clusterHost, 'structured', subscriptionsTypes[i].type, subscriptionsTypes[i].source);

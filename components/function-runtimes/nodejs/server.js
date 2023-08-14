@@ -6,6 +6,7 @@ const process = require("process");
 const morgan = require("morgan");
 
 const { setupTracer, startNewSpan } = require('./lib/tracer')
+const { getMetrics, setupMetrics, createFunctionDurationHistogram, createFunctionCallsTotalCounter, createFunctionFailuresTotalCounter  } = require('./lib/metrics')
 
 
 // To catch unhandled exceptions thrown by user code async callbacks,
@@ -22,11 +23,17 @@ const defaultFunctioneName = serviceName.substring(0, serviceName.lastIndexOf("-
 const functionName = process.env.FUNC_NAME || defaultFunctioneName;
 const bodySizeLimit = Number(process.env.REQ_MB_LIMIT || '1');
 const funcPort = Number(process.env.FUNC_PORT || '8080');
-const tracer = setupTracer([serviceName, serviceNamespace].join('.'));
+
+const otelServiceName = [serviceName, serviceNamespace].join('.')
+const tracer = setupTracer(otelServiceName);
+setupMetrics(otelServiceName);
+
+const callsTotalCounter = createFunctionCallsTotalCounter(otelServiceName);
+const failuresTotalCounter = createFunctionFailuresTotalCounter(otelServiceName);
+const durationHistogram = createFunctionDurationHistogram(otelServiceName);
 
 //require express must be called AFTER tracer was setup!!!!!!
 const express = require("express");
-const { type } = require('os');
 const app = express();
 
 
@@ -66,11 +73,19 @@ app.use(bodyParser.raw({limit: `${bodySizeLimit}mb`, type: () => true}))
 app.use(helper.handleTimeOut);
 
 app.get("/healthz", (req, res) => {
-    res.status(200).send("")
+    res.status(200).send("OK")
 })
 
+app.get("/metrics", (req, res) => {
+    getMetrics(req, res)
+})
+
+app.get('/favicon.ico', (req, res) => res.status(204));
+
 // Generic route -- all http requests go to the user function.
-app.all("*", (req, res) => {
+app.all("*", (req, res, next) => {
+
+
     res.header('Access-Control-Allow-Origin', '*');
     if (req.method === 'OPTIONS') {
         // CORS preflight support (Allow any method or header requested)
@@ -78,8 +93,12 @@ app.all("*", (req, res) => {
         res.header('Access-Control-Allow-Headers', req.headers['access-control-request-headers']);
         res.end();
     } else {
+    
+        callsTotalCounter.add(1)
+        const startTime = new Date().getTime()
 
         if (!userFunction) {
+            failuresTotalCounter.add(1)
             res.status(500).send("User function not loaded");
             return;
         }
@@ -135,6 +154,7 @@ app.all("*", (req, res) => {
                 })
                 .catch((err) => {
                     helper.handleError(err, span, sendResponse)
+                    failuresTotalCounter.add(1);
                 })
                 .finally(()=>{
                     span.end();
@@ -144,9 +164,14 @@ app.all("*", (req, res) => {
             }
         } catch (err) {
             helper.handleError(err, span, sendResponse)
+            failuresTotalCounter.add(1);
         } finally {
             span.end();
         }
+
+        const endTime = new Date().getTime()
+        const executionTime = endTime - startTime;
+        durationHistogram.record(executionTime);
     }
 });
 

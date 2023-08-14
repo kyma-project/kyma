@@ -18,19 +18,10 @@ First, let's create the Function and apply it.
 2. Go to **Workloads** > **Functions**.
 3. Click on **Create Function**.
 4. Name the Function `hello-world`.
-5. From the **Language** dropdown, choose `nodejs`.
-6. From the **Runtime** dropdown choose one of the available `nodejs`.
-7. Paste the following source code:
-```javascript
-module.exports = {
-  main: async function (event, context) {
-    const message = `Hello Serverless`
-    console.log(message);
-    return message;
-  }
-}
-```
-7. Click **Create**.
+5. From the **Language** dropdown, choose `JavaScript`.
+6. From the **Runtime** dropdown, choose one of the available `nodejs`.
+7. Keep the sample Function code.
+8. Click **Create**.
   </details>
   <details>
   <summary label="kubectl">
@@ -53,7 +44,10 @@ spec:
       source: |
         module.exports = {
           main: function(event, context) {
-            return 'Hello Serverless'
+            const message = `Hello World` +
+              ` from the Kyma Function ${context['function-name']}` +
+              ` running on ${context.runtime}!`;
+            return message;
           }
         }
 EOF
@@ -169,7 +163,7 @@ This opens the Function's external address as a new page.
 
 > **NOTE:** Alternatively, from the left navigation go to **API Rules**, and click on the **Host** URL there.
 
-The operation was successful if the page says `Hello Serverless`.
+The operation was successful if the page says `Hello World from the Kyma Function hello-world running on nodejs18!`.
   </details>
   <details>
   <summary label="kubectl">
@@ -182,7 +176,7 @@ Run:
 curl https://hello-world.$CLUSTER_DOMAIN
 ```
 
-The operation was successful if the call returns `Hello Serverless`.
+The operation was successful if the call returns `Hello World from the Kyma Function hello-world running on nodejs18!`.
 
   </details>
 </div>

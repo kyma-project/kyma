@@ -16,6 +16,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/internal/featureflags"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
@@ -52,8 +53,54 @@ func TestGetSecretForPublisher(t *testing.T) {
 		expectedError  error
 	}{
 		{
-			name:          "with valid message and namespace data",
-			messagingData: []byte("[{		\"broker\": {			\"type\": \"sapmgw\"		},		\"oa2\": {			\"clientid\": \"clientid\",			\"clientsecret\": \"clientsecret\",			\"granttype\": \"client_credentials\",			\"tokenendpoint\": \"https://token\"		},		\"protocol\": [\"amqp10ws\"],		\"uri\": \"wss://amqp\"	}, {		\"broker\": {			\"type\": \"sapmgw\"		},		\"oa2\": {			\"clientid\": \"clientid\",			\"clientsecret\": \"clientsecret\",			\"granttype\": \"client_credentials\",			\"tokenendpoint\": \"https://token\"		},		\"protocol\": [\"amqp10ws\"],		\"uri\": \"wss://amqp\"	},	{		\"broker\": {			\"type\": \"saprestmgw\"		},		\"oa2\": {			\"clientid\": \"rest-clientid\",			\"clientsecret\": \"rest-client-secret\",			\"granttype\": \"client_credentials\",			\"tokenendpoint\": \"https://rest-token\"		},		\"protocol\": [\"httprest\"],		\"uri\": \"https://rest-messaging\"	}]"),
+			name: "with valid message and namespace data",
+			messagingData: []byte(`[
+									  {
+										"broker": {
+										  "type": "sapmgw"
+										},
+										"oa2": {
+										  "clientid": "clientid",
+										  "clientsecret": "clientsecret",
+										  "granttype": "client_credentials",
+										  "tokenendpoint": "https://token"
+										},
+										"protocol": [
+										  "amqp10ws"
+										],
+										"uri": "wss://amqp"
+									  },
+									  {
+										"broker": {
+										  "type": "sapmgw"
+										},
+										"oa2": {
+										  "clientid": "clientid",
+										  "clientsecret": "clientsecret",
+										  "granttype": "client_credentials",
+										  "tokenendpoint": "https://token"
+										},
+										"protocol": [
+										  "amqp10ws"
+										],
+										"uri": "wss://amqp"
+									  },
+									  {
+										"broker": {
+										  "type": "saprestmgw"
+										},
+										"oa2": {
+										  "clientid": "rest-clientid",
+										  "clientsecret": "rest-client-secret",
+										  "granttype": "client_credentials",
+										  "tokenendpoint": "https://rest-token"
+										},
+										"protocol": [
+										  "httprest"
+										],
+										"uri": "https://rest-messaging"
+									  }
+									] `),
 			namespaceData: []byte("valid/namespace"),
 			expectedSecret: corev1.Secret{
 				ObjectMeta: metav1.ObjectMeta{
@@ -79,8 +126,54 @@ func TestGetSecretForPublisher(t *testing.T) {
 			expectedError: errors.New("message is missing from BEB secret"),
 		},
 		{
-			name:          "with empty namespace data",
-			messagingData: []byte("[{		\"broker\": {			\"type\": \"sapmgw\"		},		\"oa2\": {			\"clientid\": \"clientid\",			\"clientsecret\": \"clientsecret\",			\"granttype\": \"client_credentials\",			\"tokenendpoint\": \"https://token\"		},		\"protocol\": [\"amqp10ws\"],		\"uri\": \"wss://amqp\"	}, {		\"broker\": {			\"type\": \"sapmgw\"		},		\"oa2\": {			\"clientid\": \"clientid\",			\"clientsecret\": \"clientsecret\",			\"granttype\": \"client_credentials\",			\"tokenendpoint\": \"https://token\"		},		\"protocol\": [\"amqp10ws\"],		\"uri\": \"wss://amqp\"	},	{		\"broker\": {			\"type\": \"saprestmgw\"		},		\"oa2\": {			\"clientid\": \"rest-clientid\",			\"clientsecret\": \"rest-client-secret\",			\"granttype\": \"client_credentials\",			\"tokenendpoint\": \"https://rest-token\"		},		\"protocol\": [\"httprest\"],		\"uri\": \"https://rest-messaging\"	}]"),
+			name: "with empty namespace data",
+			messagingData: []byte(`[
+									  {
+										"broker": {
+										  "type": "sapmgw"
+										},
+										"oa2": {
+										  "clientid": "clientid",
+										  "clientsecret": "clientsecret",
+										  "granttype": "client_credentials",
+										  "tokenendpoint": "https://token"
+										},
+										"protocol": [
+										  "amqp10ws"
+										],
+										"uri": "wss://amqp"
+									  },
+									  {
+										"broker": {
+										  "type": "sapmgw"
+										},
+										"oa2": {
+										  "clientid": "clientid",
+										  "clientsecret": "clientsecret",
+										  "granttype": "client_credentials",
+										  "tokenendpoint": "https://token"
+										},
+										"protocol": [
+										  "amqp10ws"
+										],
+										"uri": "wss://amqp"
+									  },
+									  {
+										"broker": {
+										  "type": "saprestmgw"
+										},
+										"oa2": {
+										  "clientid": "rest-clientid",
+										  "clientsecret": "rest-client-secret",
+										  "granttype": "client_credentials",
+										  "tokenendpoint": "https://rest-token"
+										},
+										"protocol": [
+										  "httprest"
+										],
+										"uri": "https://rest-messaging"
+									  }
+									]`),
 			expectedError: errors.New("namespace is missing from BEB secret"),
 		},
 	}
