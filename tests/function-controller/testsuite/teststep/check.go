@@ -347,6 +347,21 @@ func checkIfRequiredLabelsExists(labels map[string]string, isService bool) error
 	return errJoined
 }
 
+type cloudEventResponse struct {
+	CeType             string         `json:"ce-type"`
+	CeSource           string         `json:"ce-source"`
+	CeEventTypeVersion string         `json:"ce-eventtypeversion"`
+	CeSpecVersion      string         `json:"ce-specversion"`
+	CeID               string         `json:"ce-id"`
+	CeTime             string         `json:"ce-time"`
+	CeDataContentType  string         `json:"ce-datacontenttype"`
+	Data               cloudEventData `json:"data"`
+}
+
+type cloudEventData struct {
+	Hello string `json:"hello"`
+}
+
 var _ step.Step = &CloudEventCheck{}
 
 type CloudEventCheck struct {
@@ -354,15 +369,15 @@ type CloudEventCheck struct {
 	name     string
 	log      *logrus.Entry
 	endpoint string
-	poll     poller.Poller
+	encoding cloudevents.Encoding
 }
 
-func NewCloudEventCheck(log *logrus.Entry, name string, url *url.URL, poller poller.Poller) *CloudEventCheck {
+func NewCloudEventCheck(encoding cloudevents.Encoding, log *logrus.Entry, name string, url *url.URL) *CloudEventCheck {
 	return &CloudEventCheck{
+		encoding: encoding,
 		name:     name,
 		log:      log.WithField(step.LogStepKey, name),
 		endpoint: url.String(),
-		poll:     poller.WithLogger(log),
 	}
 }
 
@@ -371,32 +386,62 @@ func (ce CloudEventCheck) Name() string {
 }
 
 func (ce CloudEventCheck) Run() error {
-	//TODO: implement this test (i.e. we could send data and receive error with the same data for assertion)
 	c, err := cloudevents.NewClientHTTP()
 	if err != nil {
-		log.Fatalf("failed to create cloud events client, %v", err)
+		return errors.Wrap(err, "while creating cloud event client")
 	}
+	data := cloudEventData{Hello: "World"}
 
 	event := cloudevents.NewEvent()
 	event.SetSource("example/uri")
 	event.SetType("example.type")
-	event.SetData(cloudevents.ApplicationJSON, map[string]string{"hello": "world"})
-
-	ctx := cloudevents.ContextWithTarget(context.Background(), ce.endpoint) //, "http://localhost:8080/")
-	//ctx = cloudevents.WithEncodingStructured(ctx)
-
-	if result := c.Send(ctx, event); cloudevents.IsUndelivered(result) {
-		log.Fatalf("failed to send, %v", result)
-	} else {
-		log.Printf("sent: %v", event)
-		log.Printf("result: %v", result)
+	err = event.SetData(cloudevents.ApplicationJSON, data)
+	if err != nil {
+		return errors.Wrap(err, "while setting cloud event data")
 	}
 
-	//err = ce.assertResponse(//response.error)
-	//if err != nil {
-	//	return errors.Wrapf(err, "Got following headers: %s", out)
-	//}
-	//ce.log.Info("cloud event data are okay")
+	ctx := cloudevents.ContextWithTarget(context.Background(), ce.endpoint)
+	switch ce.encoding {
+	case cloudevents.EncodingStructured:
+		ctx = cloudevents.WithEncodingStructured(ctx)
+	case cloudevents.EncodingBinary:
+		ctx = cloudevents.WithEncodingBinary(ctx)
+	}
+
+	result := c.Send(ctx, event)
+	if cloudevents.IsUndelivered(result) {
+		return errors.Wrap(result, "while sending cloud event")
+	}
+	log.Printf("sent: %v", event)
+	log.Printf("result: %v", result)
+
+	req := &http.Request{}
+	fnURL, err := url.Parse(ce.endpoint)
+	if err != nil {
+		return errors.Wrap(err, "while parsing function url")
+	}
+	req.URL = fnURL
+
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return errors.Wrap(err, "while doing GET request to function")
+	}
+	out, err := io.ReadAll(res.Body)
+	if err != nil {
+		return errors.Wrap(err, "while reading response body")
+	}
+	fmt.Println("GET response:\n", string(out))
+
+	ceResp := cloudEventResponse{}
+	err = json.Unmarshal(out, &ceResp)
+	if err != nil {
+		return errors.Wrap(err, "while unmarshalling response")
+	}
+	err = ce.assertResponse(ceResp, data)
+	if err != nil {
+		return errors.Wrapf(err, "while validating cloud event: %s", out)
+	}
+	ce.log.Info("cloud event data are okay")
 	return nil
 }
 
@@ -408,8 +453,10 @@ func (ce CloudEventCheck) OnError() error {
 	return nil
 }
 
-func (ce CloudEventCheck) assertResponse(response tracingResponse) error {
-	//TODO: implement this
+func (ce CloudEventCheck) assertResponse(response cloudEventResponse, expectedData cloudEventData) error {
 
+	if expectedData.Hello != response.Data.Hello {
+		return errors.Errorf("Expected %s, got %s in cloud event data", expectedData.Hello, response.Data.Hello)
+	}
 	return nil
 }
