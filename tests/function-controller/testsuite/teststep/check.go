@@ -11,7 +11,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
-	"log"
 	"net/http"
 	"net/url"
 	"time"
@@ -427,6 +426,14 @@ func (ce CloudEventCheck) Run() error {
 	return nil
 }
 
+func (ce CloudEventCheck) Cleanup() error {
+	return nil
+}
+
+func (ce CloudEventCheck) OnError() error {
+	return nil
+}
+
 func (ce CloudEventCheck) createCECtx() (context.Context, string, error) {
 	ceCtx := cloudevents.ContextWithTarget(context.Background(), ce.endpoint)
 	var data = ""
@@ -461,8 +468,6 @@ func (ce CloudEventCheck) sentCloudEvent(ceCtx context.Context, expResp cloudEve
 	if cloudevents.IsUndelivered(result) {
 		return errors.Wrap(result, "while sending cloud event")
 	}
-	log.Printf("sent: %v", event)
-	log.Printf("result: %v", result)
 	return nil
 }
 
@@ -490,14 +495,6 @@ func (ce CloudEventCheck) getCloudEventFromFunction() (cloudEventResponse, error
 		return cloudEventResponse{}, errors.Wrap(err, "while unmarshalling response")
 	}
 	return ceResp, nil
-}
-
-func (ce CloudEventCheck) Cleanup() error {
-	return nil
-}
-
-func (ce CloudEventCheck) OnError() error {
-	return nil
 }
 
 func (ce CloudEventCheck) assertResponse(response cloudEventResponse, expectedResponse cloudEventResponse) error {
