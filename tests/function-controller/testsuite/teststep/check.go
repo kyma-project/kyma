@@ -377,7 +377,6 @@ type cloudEventData struct {
 var _ step.Step = &CloudEventCheck{}
 
 type CloudEventCheck struct {
-	//TODO: review and refactor
 	name     string
 	log      *logrus.Entry
 	endpoint string
@@ -398,49 +397,23 @@ func (ce CloudEventCheck) Name() string {
 }
 
 func (ce CloudEventCheck) Run() error {
-	c, err := cloudevents.NewClientHTTP()
-	if err != nil {
-		return errors.Wrap(err, "while creating cloud event client")
-	}
-
-	event := cloudevents.NewEvent()
-
-	data := cloudEventData{}
-	ctx := cloudevents.ContextWithTarget(context.Background(), ce.endpoint)
-	switch ce.encoding {
-	case cloudevents.EncodingStructured:
-		ctx = cloudevents.WithEncodingStructured(ctx)
-		data.Hello = "Structured"
-	case cloudevents.EncodingBinary:
-		data.Hello = "Binary"
-		ctx = cloudevents.WithEncodingBinary(ctx)
-	default:
-		return errors.Errorf("Encoding not supported: %s", ce.encoding)
-	}
-
-	err = event.SetData(cloudevents.ApplicationJSON, data)
-	if err != nil {
-		return errors.Wrap(err, "while setting cloud event data")
-	}
 	expResp := cloudEventResponse{
 		CeType:             fmt.Sprintf("test-%s", ce.encoding),
 		CeSource:           "contract-test",
 		CeSpecVersion:      cloudevents.VersionV1,
 		CeEventTypeVersion: "v1alpha2",
 		CeDataContentType:  "",
-		Data:               data,
 	}
-	event.SetSource(expResp.CeSource)
-	event.SetType(expResp.CeType)
-	event.SetSpecVersion(expResp.CeSpecVersion)
-	event.SetExtension("eventtypeversion", expResp.CeEventTypeVersion)
+	ceCtx, data, err := ce.createCECtx()
+	if err != nil {
+		return err
+	}
+	expResp.Data = cloudEventData{Hello: data}
 
-	result := c.Send(ctx, event)
-	if cloudevents.IsUndelivered(result) {
-		return errors.Wrap(result, "while sending cloud event")
+	err = ce.sentCloudEvent(ceCtx, expResp)
+	if err != nil {
+		return errors.Wrap(err, "while setting cloud event data")
 	}
-	log.Printf("sent: %v", event)
-	log.Printf("result: %v", result)
 
 	ceResp, err := ce.getCloudEventFromFunction()
 	if err != nil {
@@ -448,9 +421,48 @@ func (ce CloudEventCheck) Run() error {
 	}
 	err = ce.assertResponse(ceResp, expResp)
 	if err != nil {
-		return errors.Wrapf(err, "while validating cloud event: %s", out)
+		return errors.Wrapf(err, "while validating cloud event")
 	}
 	ce.log.Info("cloud event is okay")
+	return nil
+}
+
+func (ce CloudEventCheck) createCECtx() (context.Context, string, error) {
+	ceCtx := cloudevents.ContextWithTarget(context.Background(), ce.endpoint)
+	var data = ""
+	switch ce.encoding {
+	case cloudevents.EncodingStructured:
+		ceCtx = cloudevents.WithEncodingStructured(ceCtx)
+		data = "structured"
+	case cloudevents.EncodingBinary:
+		ceCtx = cloudevents.WithEncodingBinary(ceCtx)
+		data = "binary"
+	default:
+		return nil, "", errors.Errorf("Encoding not supported: %s", ce.encoding)
+	}
+	return ceCtx, data, nil
+}
+func (ce CloudEventCheck) sentCloudEvent(ceCtx context.Context, expResp cloudEventResponse) error {
+	c, err := cloudevents.NewClientHTTP()
+	if err != nil {
+		return errors.Wrap(err, "while creating cloud event client")
+	}
+	event := cloudevents.NewEvent()
+	err = event.SetData(cloudevents.ApplicationJSON, expResp.Data)
+	if err != nil {
+		return errors.Wrap(err, "while setting data on cloud event")
+	}
+	event.SetSource(expResp.CeSource)
+	event.SetType(expResp.CeType)
+	event.SetSpecVersion(expResp.CeSpecVersion)
+	event.SetExtension("eventtypeversion", expResp.CeEventTypeVersion)
+
+	result := c.Send(ceCtx, event)
+	if cloudevents.IsUndelivered(result) {
+		return errors.Wrap(result, "while sending cloud event")
+	}
+	log.Printf("sent: %v", event)
+	log.Printf("result: %v", result)
 	return nil
 }
 
