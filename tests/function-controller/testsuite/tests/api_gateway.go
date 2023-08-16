@@ -26,7 +26,7 @@ const (
 	python39 = "python39"
 )
 
-func SimpleFunctionAPIGatewayTest(restConfig *rest.Config, cfg testsuite.Config, logf *logrus.Entry) (step.Step, error) {
+func FunctionAPIGatewayTest(restConfig *rest.Config, cfg testsuite.Config, logf *logrus.Entry) (step.Step, error) {
 	now := time.Now()
 	cfg.Namespace = fmt.Sprintf("%s-%02dh%02dm%02ds", "test-simple-api-gateway", now.Hour(), now.Minute(), now.Second())
 
