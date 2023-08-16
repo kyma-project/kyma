@@ -23,7 +23,7 @@ import (
 	"github.com/kyma-project/kyma/tests/function-controller/testsuite/teststep"
 )
 
-func SimpleFunctionCloudEventsTest(restConfig *rest.Config, cfg testsuite.Config, logf *logrus.Entry) (step.Step, error) {
+func FunctionCloudEventsTest(restConfig *rest.Config, cfg testsuite.Config, logf *logrus.Entry) (step.Step, error) {
 	now := time.Now()
 	cfg.Namespace = fmt.Sprintf("%s-%02dh%02dm%02ds", "test-simple-cloud-events", now.Hour(), now.Minute(), now.Second())
 
