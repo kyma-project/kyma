@@ -6,6 +6,7 @@ import (
 	goerrors "errors"
 	"fmt"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
+	"github.com/google/uuid"
 	"io"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -347,14 +348,25 @@ func checkIfRequiredLabelsExists(labels map[string]string, isService bool) error
 	return errJoined
 }
 
+/*
+*
+https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md
+*/
 type cloudEventResponse struct {
-	CeType             string         `json:"ce-type"`
-	CeSource           string         `json:"ce-source"`
+	// Required
+	CeType string `json:"ce-type"`
+	// Required
+	CeSource string `json:"ce-source"`
+	// Required
+	CeSpecVersion string `json:"ce-specversion"`
+	// Required
+	CeID string `json:"ce-id"`
+	// Optional
+	CeTime string `json:"ce-time"`
+	// Optional
+	CeDataContentType string `json:"ce-datacontenttype"`
+	// Extension field, optional.
 	CeEventTypeVersion string         `json:"ce-eventtypeversion"`
-	CeSpecVersion      string         `json:"ce-specversion"`
-	CeID               string         `json:"ce-id"`
-	CeTime             string         `json:"ce-time"`
-	CeDataContentType  string         `json:"ce-datacontenttype"`
 	Data               cloudEventData `json:"data"`
 }
 
@@ -392,8 +404,6 @@ func (ce CloudEventCheck) Run() error {
 	}
 
 	event := cloudevents.NewEvent()
-	event.SetSource("example/uri")
-	event.SetType("example.type")
 
 	data := cloudEventData{}
 	ctx := cloudevents.ContextWithTarget(context.Background(), ce.endpoint)
@@ -412,6 +422,19 @@ func (ce CloudEventCheck) Run() error {
 	if err != nil {
 		return errors.Wrap(err, "while setting cloud event data")
 	}
+	expResp := cloudEventResponse{
+		CeType:             fmt.Sprintf("test-%s", ce.encoding),
+		CeSource:           "contract-test",
+		CeSpecVersion:      cloudevents.VersionV1,
+		CeEventTypeVersion: "v1alpha2",
+		CeDataContentType:  "",
+		Data:               data,
+	}
+	event.SetSource(expResp.CeSource)
+	event.SetType(expResp.CeType)
+	event.SetSpecVersion(expResp.CeSpecVersion)
+	event.SetExtension("eventtypeversion", expResp.CeEventTypeVersion)
+
 	result := c.Send(ctx, event)
 	if cloudevents.IsUndelivered(result) {
 		return errors.Wrap(result, "while sending cloud event")
@@ -419,34 +442,42 @@ func (ce CloudEventCheck) Run() error {
 	log.Printf("sent: %v", event)
 	log.Printf("result: %v", result)
 
+	ceResp, err := ce.getCloudEventFromFunction()
+	if err != nil {
+		return errors.Wrap(err, "while fetching cloud event from function")
+	}
+	err = ce.assertResponse(ceResp, expResp)
+	if err != nil {
+		return errors.Wrapf(err, "while validating cloud event: %s", out)
+	}
+	ce.log.Info("cloud event is okay")
+	return nil
+}
+
+func (ce CloudEventCheck) getCloudEventFromFunction() (cloudEventResponse, error) {
 	req := &http.Request{}
 	fnURL, err := url.Parse(ce.endpoint)
 	if err != nil {
-		return errors.Wrap(err, "while parsing function url")
+		return cloudEventResponse{}, errors.Wrap(err, "while parsing function url")
 	}
 	req.URL = fnURL
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return errors.Wrap(err, "while doing GET request to function")
+		return cloudEventResponse{}, errors.Wrap(err, "while doing GET request to function")
 	}
 	out, err := io.ReadAll(res.Body)
 	if err != nil {
-		return errors.Wrap(err, "while reading response body")
+		return cloudEventResponse{}, errors.Wrap(err, "while reading response body")
 	}
 	fmt.Println("GET response:\n", string(out))
 
 	ceResp := cloudEventResponse{}
 	err = json.Unmarshal(out, &ceResp)
 	if err != nil {
-		return errors.Wrap(err, "while unmarshalling response")
+		return cloudEventResponse{}, errors.Wrap(err, "while unmarshalling response")
 	}
-	err = ce.assertResponse(ceResp, data)
-	if err != nil {
-		return errors.Wrapf(err, "while validating cloud event: %s", out)
-	}
-	ce.log.Info("cloud event data are okay")
-	return nil
+	return ceResp, nil
 }
 
 func (ce CloudEventCheck) Cleanup() error {
@@ -457,9 +488,38 @@ func (ce CloudEventCheck) OnError() error {
 	return nil
 }
 
-func (ce CloudEventCheck) assertResponse(response cloudEventResponse, expectedData cloudEventData) error {
-	if expectedData.Hello != response.Data.Hello {
-		return errors.Errorf("Expected %s, got %s in cloud event data", expectedData.Hello, response.Data.Hello)
+func (ce CloudEventCheck) assertResponse(response cloudEventResponse, expectedResponse cloudEventResponse) error {
+	var errJoined error
+
+	if expectedResponse.Data.Hello != response.Data.Hello {
+		err := errors.Errorf("Expected %s, got %s in cloud event data", expectedResponse.Data.Hello, response.Data.Hello)
+		errJoined = goerrors.Join(err)
 	}
-	return nil
+
+	_, err := time.Parse(time.RFC3339, response.CeTime)
+	if err != nil {
+		errJoined = goerrors.Join(errors.Wrap(err, "while validating date"))
+	}
+
+	if response.CeSource != expectedResponse.CeSource {
+		errJoined = goerrors.Join(errors.Errorf("expected source %s, got: %s", expectedResponse.CeSource, response.CeSource))
+	}
+
+	if response.CeType != expectedResponse.CeType {
+		errJoined = goerrors.Join(errors.Errorf("expected type %s, got: %s", expectedResponse.CeType, response.CeType))
+	}
+
+	if response.CeSpecVersion != expectedResponse.CeSpecVersion {
+		errJoined = goerrors.Join(errors.Errorf("expected spec version %s, got: %s", expectedResponse.CeSpecVersion, response.CeSpecVersion))
+	}
+
+	if response.CeEventTypeVersion != expectedResponse.CeEventTypeVersion {
+		errJoined = goerrors.Join(errors.Errorf("expected event type version %s, got: %s", expectedResponse.CeEventTypeVersion, response.CeEventTypeVersion))
+	}
+
+	_, err = uuid.Parse(response.CeID)
+	if err != nil {
+		errJoined = goerrors.Join(errors.Errorf("expected UUID, got: %s", response.CeID))
+	}
+	return errJoined
 }

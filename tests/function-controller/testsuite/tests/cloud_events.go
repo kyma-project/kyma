@@ -3,6 +3,7 @@ package scenarios
 import (
 	"fmt"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/app"
 	typedappsv1 "k8s.io/client-go/kubernetes/typed/apps/v1"
 	"time"
 
@@ -61,7 +62,7 @@ func SimpleFunctionCloudEventsTest(restConfig *rest.Config, cfg testsuite.Config
 
 	return step.NewSerialTestRunner(logf, "Runtime test",
 		teststep.NewNamespaceStep("Create test namespace", coreCli, genericContainer),
-		teststep.NewApplication("Create HTTP basic application", HTTPAppName, HTTPAppImage, int32(80), appsCli.Deployments(genericContainer.Namespace), coreCli.Services(genericContainer.Namespace), genericContainer),
+		app.NewApplication("Create HTTP basic application", HTTPAppName, HTTPAppImage, int32(80), appsCli.Deployments(genericContainer.Namespace), coreCli.Services(genericContainer.Namespace), genericContainer),
 		step.NewParallelRunner(logf, "Fn tests",
 			//step.NewSerialTestRunner(python39Logger, "Python39 test",
 			//	teststep.CreateFunction(python39Logger, python39Fn, "Create Python39 Function", runtimes.BasicCloudEventPythonFunction(serverlessv1alpha2.Python39)),
