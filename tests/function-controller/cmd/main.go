@@ -93,7 +93,7 @@ func main() {
 	scenarioName := os.Args[1]
 	logf.Printf("Scenario: %s", scenarioName)
 	os.Args = os.Args[1:]
-	pickedSuites, exists := availableScenarios[scenarioName]
+	pickedScenario, exists := availableScenarios[scenarioName]
 	if !exists {
 		logf.Errorf("Scenario %s not exist", scenarioName)
 		os.Exit(2)
@@ -113,7 +113,7 @@ func main() {
 	rand.Seed(time.Now().UnixNano())
 
 	g, _ := errgroup.WithContext(context.Background())
-	for _, ts := range pickedSuites {
+	for _, ts := range pickedScenario {
 		if suite != nil && ts.name != *suite {
 			logf.Infof("Skip test suite suite: %s", ts.name)
 			continue
