@@ -3,7 +3,7 @@ package testsuite
 import (
 	"fmt"
 	"github.com/kyma-project/kyma/tests/function-controller/internal"
-	"github.com/kyma-project/kyma/tests/function-controller/internal/check"
+	"github.com/kyma-project/kyma/tests/function-controller/internal/assertion"
 	"github.com/kyma-project/kyma/tests/function-controller/internal/executor"
 	"github.com/kyma-project/kyma/tests/function-controller/internal/resources/app"
 	"github.com/kyma-project/kyma/tests/function-controller/internal/resources/function"
@@ -81,15 +81,15 @@ func FunctionTracingTest(restConfig *rest.Config, cfg internal.Config, logf *log
 		executor.NewParallelRunner(logf, "Fn tests",
 			executor.NewSerialTestRunner(python39Logger, "Python39 test",
 				function.CreateFunction(python39Logger, python39Fn, "Create Python39 Function", runtimes.BasicTracingPythonFunction(serverlessv1alpha2.Python39, httpAppURL.String())),
-				check.NewTracingHTTPCheck(python39Logger, "Python39 tracing headers check", python39Fn.FunctionURL, poll),
+				assertion.TracingHTTPCheck(python39Logger, "Python39 tracing headers check", python39Fn.FunctionURL, poll),
 			),
 			executor.NewSerialTestRunner(nodejs16Logger, "NodeJS16 test",
 				function.CreateFunction(nodejs16Logger, nodejs16Fn, "Create NodeJS16 Function", runtimes.BasicTracingNodeFunction(serverlessv1alpha2.NodeJs16, httpAppURL.String())),
-				check.NewTracingHTTPCheck(nodejs16Logger, "NodeJS16 tracing headers check", nodejs16Fn.FunctionURL, poll),
+				assertion.TracingHTTPCheck(nodejs16Logger, "NodeJS16 tracing headers check", nodejs16Fn.FunctionURL, poll),
 			),
 			executor.NewSerialTestRunner(nodejs18Logger, "NodeJS18 test",
 				function.CreateFunction(nodejs18Logger, nodejs18Fn, "Create NodeJS18 Function", runtimes.BasicTracingNodeFunction(serverlessv1alpha2.NodeJs18, httpAppURL.String())),
-				check.NewTracingHTTPCheck(nodejs18Logger, "NodeJS18 tracing headers check", nodejs18Fn.FunctionURL, poll),
+				assertion.TracingHTTPCheck(nodejs18Logger, "NodeJS18 tracing headers check", nodejs18Fn.FunctionURL, poll),
 			),
 		),
 	), nil

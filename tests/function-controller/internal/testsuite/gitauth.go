@@ -4,7 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"github.com/kyma-project/kyma/tests/function-controller/internal"
-	"github.com/kyma-project/kyma/tests/function-controller/internal/check"
+	"github.com/kyma-project/kyma/tests/function-controller/internal/assertion"
 	"github.com/kyma-project/kyma/tests/function-controller/internal/executor"
 	"github.com/kyma-project/kyma/tests/function-controller/internal/resources/function"
 	"github.com/kyma-project/kyma/tests/function-controller/internal/resources/namespace"
@@ -149,7 +149,7 @@ func gitAuthFunctionTestSteps(genericContainer utils.Container, tr testRepo, pol
 				tr.runtime,
 				tr.auth),
 		),
-		check.NewHTTPCheck(
+		assertion.NewHTTPCheck(
 			genericContainer.Log,
 			"Git Function simple check through gateway",
 			testFn.FunctionURL,

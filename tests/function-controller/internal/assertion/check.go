@@ -1,4 +1,4 @@
-package check
+package assertion
 
 import (
 	"context"
@@ -129,9 +129,9 @@ func (d DefaultedFunctionCheck) OnError() error {
 	return nil
 }
 
-var _ executor.Step = &TracingHTTPCheck{}
+var _ executor.Step = &tracingHTTPCheck{}
 
-type TracingHTTPCheck struct {
+type tracingHTTPCheck struct {
 	name     string
 	log      *logrus.Entry
 	endpoint string
@@ -144,8 +144,8 @@ type tracingResponse struct {
 	SpanID      string `json:"x-b3-spanid"`
 }
 
-func NewTracingHTTPCheck(log *logrus.Entry, name string, url *url.URL, poller utils.Poller) *TracingHTTPCheck {
-	return &TracingHTTPCheck{
+func TracingHTTPCheck(log *logrus.Entry, name string, url *url.URL, poller utils.Poller) *tracingHTTPCheck {
+	return &tracingHTTPCheck{
 		name:     name,
 		log:      log.WithField(executor.LogStepKey, name),
 		endpoint: url.String(),
@@ -154,11 +154,11 @@ func NewTracingHTTPCheck(log *logrus.Entry, name string, url *url.URL, poller ut
 
 }
 
-func (t TracingHTTPCheck) Name() string {
+func (t tracingHTTPCheck) Name() string {
 	return t.name
 }
 
-func (t TracingHTTPCheck) Run() error {
+func (t tracingHTTPCheck) Run() error {
 	req, err := http.NewRequest(http.MethodGet, t.endpoint, nil)
 	if err != nil {
 		return err
@@ -190,7 +190,7 @@ func (t TracingHTTPCheck) Run() error {
 	return nil
 }
 
-func (t TracingHTTPCheck) doRetrievableHttpCall(req *http.Request, retries int) (*http.Response, error) {
+func (t tracingHTTPCheck) doRetrievableHttpCall(req *http.Request, retries int) (*http.Response, error) {
 	client := &http.Client{Timeout: 5 * time.Second}
 	var finalResp *http.Response = nil
 
@@ -218,15 +218,15 @@ func (t TracingHTTPCheck) doRetrievableHttpCall(req *http.Request, retries int) 
 	return finalResp, errors.Wrap(err, "while trying to call function")
 }
 
-func (t TracingHTTPCheck) Cleanup() error {
+func (t tracingHTTPCheck) Cleanup() error {
 	return nil
 }
 
-func (t TracingHTTPCheck) OnError() error {
+func (t tracingHTTPCheck) OnError() error {
 	return nil
 }
 
-func (t TracingHTTPCheck) assertTracingResponse(response tracingResponse) error {
+func (t tracingHTTPCheck) assertTracingResponse(response tracingResponse) error {
 	if response.TraceID == "" {
 		return errors.New("No trace ID")
 	}
@@ -247,7 +247,7 @@ const (
 	uuidLabel         = "serverless.kyma-project.io/uuid"
 )
 
-type APIGatewayFunctionCheck struct {
+type apiGatewayFunctionCheck struct {
 	name      string
 	fn        *function.Function
 	client    *v1.CoreV1Client
@@ -255,8 +255,8 @@ type APIGatewayFunctionCheck struct {
 	runtime   string
 }
 
-func NewAPIGatewayFunctionCheck(name string, fn *function.Function, coreV1 *v1.CoreV1Client, ns string, rt string) *APIGatewayFunctionCheck {
-	return &APIGatewayFunctionCheck{
+func APIGatewayFunctionCheck(name string, fn *function.Function, coreV1 *v1.CoreV1Client, ns string, rt string) *apiGatewayFunctionCheck {
+	return &apiGatewayFunctionCheck{
 		name:      name,
 		fn:        fn,
 		client:    coreV1,
@@ -265,11 +265,11 @@ func NewAPIGatewayFunctionCheck(name string, fn *function.Function, coreV1 *v1.C
 	}
 }
 
-func (d APIGatewayFunctionCheck) Name() string {
+func (d apiGatewayFunctionCheck) Name() string {
 	return d.name
 }
 
-func (d APIGatewayFunctionCheck) Run() error {
+func (d apiGatewayFunctionCheck) Run() error {
 
 	svc, err := d.client.Services(d.namespace).Get(context.Background(), d.name, metav1.GetOptions{})
 	if err != nil {
@@ -302,11 +302,11 @@ func (d APIGatewayFunctionCheck) Run() error {
 	return nil
 }
 
-func (d APIGatewayFunctionCheck) Cleanup() error {
+func (d apiGatewayFunctionCheck) Cleanup() error {
 	return nil
 }
 
-func (d APIGatewayFunctionCheck) OnError() error {
+func (d apiGatewayFunctionCheck) OnError() error {
 	return nil
 }
 
@@ -372,17 +372,17 @@ type cloudEventData struct {
 	Hello string `json:"hello"`
 }
 
-var _ executor.Step = &CloudEventCheck{}
+var _ executor.Step = &cloudEventCheck{}
 
-type CloudEventCheck struct {
+type cloudEventCheck struct {
 	name     string
 	log      *logrus.Entry
 	endpoint string
 	encoding cloudevents.Encoding
 }
 
-func NewCloudEventCheck(log *logrus.Entry, name string, encoding cloudevents.Encoding, target *url.URL) *CloudEventCheck {
-	return &CloudEventCheck{
+func CloudEventCheck(log *logrus.Entry, name string, encoding cloudevents.Encoding, target *url.URL) *cloudEventCheck {
+	return &cloudEventCheck{
 		encoding: encoding,
 		name:     name,
 		log:      log.WithField(executor.LogStepKey, name),
@@ -390,11 +390,11 @@ func NewCloudEventCheck(log *logrus.Entry, name string, encoding cloudevents.Enc
 	}
 }
 
-func (ce CloudEventCheck) Name() string {
+func (ce cloudEventCheck) Name() string {
 	return ce.name
 }
 
-func (ce CloudEventCheck) Run() error {
+func (ce cloudEventCheck) Run() error {
 	expResp := cloudEventResponse{
 		CeType:             fmt.Sprintf("test-%s", ce.encoding),
 		CeSource:           "contract-test",
@@ -425,15 +425,15 @@ func (ce CloudEventCheck) Run() error {
 	return nil
 }
 
-func (ce CloudEventCheck) Cleanup() error {
+func (ce cloudEventCheck) Cleanup() error {
 	return nil
 }
 
-func (ce CloudEventCheck) OnError() error {
+func (ce cloudEventCheck) OnError() error {
 	return nil
 }
 
-func (ce CloudEventCheck) createCECtx() (context.Context, string, error) {
+func (ce cloudEventCheck) createCECtx() (context.Context, string, error) {
 	ceCtx := cloudevents.ContextWithTarget(context.Background(), ce.endpoint)
 	var data = ""
 	switch ce.encoding {
@@ -448,7 +448,7 @@ func (ce CloudEventCheck) createCECtx() (context.Context, string, error) {
 	}
 	return ceCtx, data, nil
 }
-func (ce CloudEventCheck) sentCloudEvent(ceCtx context.Context, expResp cloudEventResponse) error {
+func (ce cloudEventCheck) sentCloudEvent(ceCtx context.Context, expResp cloudEventResponse) error {
 	c, err := cloudevents.NewClientHTTP()
 	if err != nil {
 		return errors.Wrap(err, "while creating cloud event client")
@@ -470,7 +470,7 @@ func (ce CloudEventCheck) sentCloudEvent(ceCtx context.Context, expResp cloudEve
 	return nil
 }
 
-func (ce CloudEventCheck) getCloudEventFromFunction() (cloudEventResponse, error) {
+func (ce cloudEventCheck) getCloudEventFromFunction() (cloudEventResponse, error) {
 	req := &http.Request{}
 	fnURL, err := url.Parse(ce.endpoint)
 	if err != nil {
@@ -496,7 +496,7 @@ func (ce CloudEventCheck) getCloudEventFromFunction() (cloudEventResponse, error
 	return ceResp, nil
 }
 
-func (ce CloudEventCheck) assertResponse(response cloudEventResponse, expectedResponse cloudEventResponse) error {
+func (ce cloudEventCheck) assertResponse(response cloudEventResponse, expectedResponse cloudEventResponse) error {
 	var errJoined error
 
 	if expectedResponse.Data.Hello != response.Data.Hello {

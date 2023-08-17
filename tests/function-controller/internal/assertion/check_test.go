@@ -1,4 +1,4 @@
-package check
+package assertion
 
 import (
 	cloudevents "github.com/cloudevents/sdk-go/v2"
@@ -28,7 +28,7 @@ func TestCloudEventCheckLocally(t *testing.T) {
 			}
 
 			//WHEN
-			check := NewCloudEventCheck(log, "test", tc.Encoding, fnURL)
+			check := CloudEventCheck(log, "test", tc.Encoding, fnURL)
 
 			//THEN
 			err = check.Run()

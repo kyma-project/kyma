@@ -3,7 +3,7 @@ package testsuite
 import (
 	"fmt"
 	"github.com/kyma-project/kyma/tests/function-controller/internal"
-	"github.com/kyma-project/kyma/tests/function-controller/internal/check"
+	"github.com/kyma-project/kyma/tests/function-controller/internal/assertion"
 	"github.com/kyma-project/kyma/tests/function-controller/internal/executor"
 	"github.com/kyma-project/kyma/tests/function-controller/internal/resources/function"
 	"github.com/kyma-project/kyma/tests/function-controller/internal/resources/git"
@@ -66,8 +66,8 @@ func GitopsSteps(restConfig *rest.Config, cfg internal.Config, logf *logrus.Entr
 		namespace.NewNamespaceStep("Create test namespace", coreCli, genericContainer),
 		git.NewGitServer(gitCfg, "Start in-cluster Git Server", appsCli.Deployments(genericContainer.Namespace), coreCli.Services(genericContainer.Namespace), cfg.KubectlProxyEnabled, cfg.IstioEnabled),
 		function.CreateFunction(logf, gitFn, "Create Git Function", runtimes.GitopsFunction(gitCfg.GetGitServerInClusterURL(), "/", "master", serverlessv1alpha2.NodeJs18, nil)),
-		check.NewDefaultedFunctionCheck("Check if Git Function has correct default values", gitFn),
-		check.NewHTTPCheck(logf, "Git Function pre update simple check through service", gitFn.FunctionURL, poll, "GITOPS 1"),
+		assertion.NewDefaultedFunctionCheck("Check if Git Function has correct default values", gitFn),
+		assertion.NewHTTPCheck(logf, "Git Function pre update simple check through service", gitFn.FunctionURL, poll, "GITOPS 1"),
 		git.NewCommitChanges(logf, "Commit changes to Git Function", gitCfg.GetGitServerURL(cfg.KubectlProxyEnabled)),
-		check.NewHTTPCheck(logf, "Git Function post update simple check through service", gitFn.FunctionURL, poll, "GITOPS 2")), nil
+		assertion.NewHTTPCheck(logf, "Git Function post update simple check through service", gitFn.FunctionURL, poll, "GITOPS 2")), nil
 }

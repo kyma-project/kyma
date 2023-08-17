@@ -3,7 +3,7 @@ package testsuite
 import (
 	"fmt"
 	"github.com/kyma-project/kyma/tests/function-controller/internal"
-	"github.com/kyma-project/kyma/tests/function-controller/internal/check"
+	"github.com/kyma-project/kyma/tests/function-controller/internal/assertion"
 	"github.com/kyma-project/kyma/tests/function-controller/internal/executor"
 	"github.com/kyma-project/kyma/tests/function-controller/internal/resources/configmap"
 	"github.com/kyma-project/kyma/tests/function-controller/internal/resources/function"
@@ -87,23 +87,23 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg internal.Config, logf *logr
 		executor.NewParallelRunner(logf, "Fn tests",
 			executor.NewSerialTestRunner(python39Logger, "Python39 test",
 				function.CreateFunction(python39Logger, python39Fn, "Create Python39 Function", runtimes.BasicPythonFunction("Hello From python", serverlessv1alpha2.Python39)),
-				check.NewHTTPCheck(python39Logger, "Python39 pre update simple check through service", python39Fn.FunctionURL, poll, "Hello From python"),
+				assertion.NewHTTPCheck(python39Logger, "Python39 pre update simple check through service", python39Fn.FunctionURL, poll, "Hello From python"),
 				function.UpdateFunction(python39Logger, python39Fn, "Update Python39 Function", runtimes.BasicPythonFunctionWithCustomDependency("Hello From updated python", serverlessv1alpha2.Python39)),
-				check.NewHTTPCheck(python39Logger, "Python39 post update simple check through service", python39Fn.FunctionURL, poll, "Hello From updated python"),
+				assertion.NewHTTPCheck(python39Logger, "Python39 post update simple check through service", python39Fn.FunctionURL, poll, "Hello From updated python"),
 			),
 			executor.NewSerialTestRunner(nodejs16Logger, "NodeJS16 test",
 				function.CreateFunction(nodejs16Logger, nodejs16Fn, "Create NodeJS16 Function", runtimes.BasicNodeJSFunction("Hello from nodejs16", serverlessv1alpha2.NodeJs16)),
-				check.NewHTTPCheck(nodejs16Logger, "NodeJS16 pre update simple check through service", nodejs16Fn.FunctionURL, poll, "Hello from nodejs16"),
+				assertion.NewHTTPCheck(nodejs16Logger, "NodeJS16 pre update simple check through service", nodejs16Fn.FunctionURL, poll, "Hello from nodejs16"),
 				function.UpdateFunction(nodejs16Logger, nodejs16Fn, "Update NodeJS16 Function", runtimes.BasicNodeJSFunctionWithCustomDependency("Hello from updated nodejs16", serverlessv1alpha2.NodeJs16)),
-				check.NewHTTPCheck(nodejs16Logger, "NodeJS16 post update simple check through service", nodejs16Fn.FunctionURL, poll, "Hello from updated nodejs16"),
+				assertion.NewHTTPCheck(nodejs16Logger, "NodeJS16 post update simple check through service", nodejs16Fn.FunctionURL, poll, "Hello from updated nodejs16"),
 			),
 			executor.NewSerialTestRunner(nodejs18Logger, "NodeJS18 test",
 				configmap.CreateConfigMap(nodejs18Logger, cm, "Create Test ConfigMap", cmData),
 				secret.CreateSecret(nodejs18Logger, sec, "Create Test Secret", secretData),
 				function.CreateFunction(nodejs18Logger, nodejs18Fn, "Create NodeJS18 Function", runtimes.NodeJSFunctionWithEnvFromConfigMapAndSecret(cm.Name(), cmEnvKey, sec.Name(), secEnvKey, serverlessv1alpha2.NodeJs18)),
-				check.NewHTTPCheck(nodejs18Logger, "NodeJS18 pre update simple check through service", nodejs18Fn.FunctionURL, poll, fmt.Sprintf("%s-%s", cmEnvValue, secEnvValue)),
+				assertion.NewHTTPCheck(nodejs18Logger, "NodeJS18 pre update simple check through service", nodejs18Fn.FunctionURL, poll, fmt.Sprintf("%s-%s", cmEnvValue, secEnvValue)),
 				function.UpdateFunction(nodejs18Logger, nodejs18Fn, "Update NodeJS18 Function", runtimes.BasicNodeJSFunctionWithCustomDependency("Hello from updated nodejs18", serverlessv1alpha2.NodeJs18)),
-				check.NewHTTPCheck(nodejs18Logger, "NodeJS18 post update simple check through service", nodejs18Fn.FunctionURL, poll, "Hello from updated nodejs18"),
+				assertion.NewHTTPCheck(nodejs18Logger, "NodeJS18 post update simple check through service", nodejs18Fn.FunctionURL, poll, "Hello from updated nodejs18"),
 			),
 		),
 	), nil

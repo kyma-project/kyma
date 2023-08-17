@@ -3,7 +3,7 @@ package testsuite
 import (
 	"fmt"
 	"github.com/kyma-project/kyma/tests/function-controller/internal"
-	"github.com/kyma-project/kyma/tests/function-controller/internal/check"
+	"github.com/kyma-project/kyma/tests/function-controller/internal/assertion"
 	"github.com/kyma-project/kyma/tests/function-controller/internal/executor"
 	"github.com/kyma-project/kyma/tests/function-controller/internal/resources/function"
 	"github.com/kyma-project/kyma/tests/function-controller/internal/resources/namespace"
@@ -64,15 +64,15 @@ func FunctionAPIGatewayTest(restConfig *rest.Config, cfg internal.Config, logf *
 		executor.NewParallelRunner(logf, "Fn tests",
 			executor.NewSerialTestRunner(python39Logger, "Python39 test",
 				function.CreateFunction(python39Logger, python39Fn, "Create Python39 Function", runtimes.BasicPythonFunction("Hello from python39", serverlessv1alpha2.Python39)),
-				check.NewAPIGatewayFunctionCheck("python39", python39Fn, coreCli, genericContainer.Namespace, python39),
+				assertion.APIGatewayFunctionCheck("python39", python39Fn, coreCli, genericContainer.Namespace, python39),
 			),
 			executor.NewSerialTestRunner(nodejs16Logger, "NodeJS16 test",
 				function.CreateFunction(nodejs16Logger, nodejs16Fn, "Create NodeJS16 Function", runtimes.BasicNodeJSFunction("Hello from nodejs16", serverlessv1alpha2.NodeJs16)),
-				check.NewAPIGatewayFunctionCheck("nodejs16", nodejs16Fn, coreCli, genericContainer.Namespace, nodejs16),
+				assertion.APIGatewayFunctionCheck("nodejs16", nodejs16Fn, coreCli, genericContainer.Namespace, nodejs16),
 			),
 			executor.NewSerialTestRunner(nodejs18Logger, "NodeJS18 test",
 				function.CreateFunction(nodejs18Logger, nodejs18Fn, "Create NodeJS18 Function", runtimes.BasicNodeJSFunction("Hello from nodejs18", serverlessv1alpha2.NodeJs18)),
-				check.NewAPIGatewayFunctionCheck("nodejs18", nodejs18Fn, coreCli, genericContainer.Namespace, nodejs18),
+				assertion.APIGatewayFunctionCheck("nodejs18", nodejs18Fn, coreCli, genericContainer.Namespace, nodejs18),
 			),
 		),
 	), nil

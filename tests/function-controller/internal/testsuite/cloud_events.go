@@ -4,7 +4,7 @@ import (
 	"fmt"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/kyma-project/kyma/tests/function-controller/internal"
-	"github.com/kyma-project/kyma/tests/function-controller/internal/check"
+	"github.com/kyma-project/kyma/tests/function-controller/internal/assertion"
 	"github.com/kyma-project/kyma/tests/function-controller/internal/executor"
 	"github.com/kyma-project/kyma/tests/function-controller/internal/resources/app"
 	"github.com/kyma-project/kyma/tests/function-controller/internal/resources/function"
@@ -65,17 +65,17 @@ func FunctionCloudEventsTest(restConfig *rest.Config, cfg internal.Config, logf 
 		executor.NewParallelRunner(logf, "Fn tests",
 			//step.NewSerialTestRunner(python39Logger, "Python39 test",
 			//	namespace.CreateFunction(python39Logger, python39Fn, "Create Python39 Function", runtimes.BasicCloudEventPythonFunction(serverlessv1alpha2.Python39)),
-			//	namespace.NewCloudEventCheck(cloudevents.EncodingStructured, python39Logger, "Python39 cloud event structured check", python39Fn.FunctionURL),
+			//	namespace.CloudEventCheck(cloudevents.EncodingStructured, python39Logger, "Python39 cloud event structured check", python39Fn.FunctionURL),
 			//),
 			executor.NewSerialTestRunner(nodejs16Logger, "NodeJS16 test",
 				function.CreateFunction(nodejs16Logger, nodejs16Fn, "Create NodeJS16 Function", runtimes.NodeJSFunctionWithCloudEvent(serverlessv1alpha2.NodeJs18)),
-				check.NewCloudEventCheck(nodejs16Logger, "NodeJS16 cloud event structured check", cloudevents.EncodingStructured, nodejs16Fn.FunctionURL),
-				check.NewCloudEventCheck(nodejs16Logger, "NodeJS16 cloud event binary check", cloudevents.EncodingBinary, nodejs16Fn.FunctionURL),
+				assertion.CloudEventCheck(nodejs16Logger, "NodeJS16 cloud event structured check", cloudevents.EncodingStructured, nodejs16Fn.FunctionURL),
+				assertion.CloudEventCheck(nodejs16Logger, "NodeJS16 cloud event binary check", cloudevents.EncodingBinary, nodejs16Fn.FunctionURL),
 			),
 			executor.NewSerialTestRunner(nodejs18Logger, "NodeJS18 test",
 				function.CreateFunction(nodejs18Logger, nodejs18Fn, "Create NodeJS18 Function", runtimes.NodeJSFunctionWithCloudEvent(serverlessv1alpha2.NodeJs18)),
-				check.NewCloudEventCheck(nodejs18Logger, "NodeJS18 cloud event structured check", cloudevents.EncodingStructured, nodejs18Fn.FunctionURL),
-				check.NewCloudEventCheck(nodejs18Logger, "NodeJS18 cloud event binary check", cloudevents.EncodingBinary, nodejs18Fn.FunctionURL),
+				assertion.CloudEventCheck(nodejs18Logger, "NodeJS18 cloud event structured check", cloudevents.EncodingStructured, nodejs18Fn.FunctionURL),
+				assertion.CloudEventCheck(nodejs18Logger, "NodeJS18 cloud event binary check", cloudevents.EncodingBinary, nodejs18Fn.FunctionURL),
 			),
 		),
 	), nil
