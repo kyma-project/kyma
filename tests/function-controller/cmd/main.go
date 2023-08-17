@@ -69,6 +69,7 @@ var availableScenarios = map[string][]testSuite{
 	"serverless-contract-tests": {
 		{name: "tracing", test: tests.FunctionTracingTest},
 		{name: "api-gateway", test: tests.FunctionAPIGatewayTest},
+		{name: "cloud-events", test: tests.FunctionCloudEventsTest},
 	},
 }
 

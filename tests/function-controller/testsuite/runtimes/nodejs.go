@@ -153,3 +153,53 @@ func NodeJSFunctionWithEnvFromConfigMapAndSecret(configMapName, cmEnvKey, secret
 		},
 	}
 }
+
+func NodeJSFunctionWithCloudEvent(rtm serverlessv1alpha2.Runtime) serverlessv1alpha2.FunctionSpec {
+	src := `let cloudevent = {}
+
+module.exports = {
+    main: async function (event, context) {
+        switch (event.extensions.request.method) {
+            case "POST":
+                return handlePost(event)
+            case "GET":
+                return handleGet()
+            default:
+                event.extensions.response.statusCode = 405
+                return ""
+        }
+    }
+}
+
+function handlePost(event) {
+    Object.keys(event).filter((val) => {
+        return val.startsWith("ce-")
+    }).forEach((item) => {
+        cloudevent[item] = event[item]
+    })
+    cloudevent.data = event.data
+    return ""
+}
+
+function handleGet() {
+    return cloudevent
+}
+`
+	return serverlessv1alpha2.FunctionSpec{
+		Runtime: rtm,
+		Source: serverlessv1alpha2.Source{
+			Inline: &serverlessv1alpha2.InlineSource{
+				Source:       src,
+				Dependencies: `{ "name": "cloudevent", "version": "0.0.1", "dependencies": {} }`,
+			},
+		},
+		ResourceConfiguration: &serverlessv1alpha2.ResourceConfiguration{
+			Function: &serverlessv1alpha2.ResourceRequirements{
+				Profile: "M",
+			},
+			Build: &serverlessv1alpha2.ResourceRequirements{
+				Profile: "normal",
+			},
+		},
+	}
+}

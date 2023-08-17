@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	goerrors "errors"
 	"fmt"
+	cloudevents "github.com/cloudevents/sdk-go/v2"
+	"github.com/google/uuid"
 	"io"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -341,6 +343,192 @@ func checkIfRequiredLabelsExists(labels map[string]string, isService bool) error
 			err := errors.New(fmt.Sprintf("Label %s is missing", label))
 			errJoined = goerrors.Join(err)
 		}
+	}
+	return errJoined
+}
+
+/*
+*
+https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md
+*/
+type cloudEventResponse struct {
+	// Required
+	CeType string `json:"ce-type"`
+	// Required
+	CeSource string `json:"ce-source"`
+	// Required
+	CeSpecVersion string `json:"ce-specversion"`
+	// Required
+	CeID string `json:"ce-id"`
+	// Optional
+	CeTime string `json:"ce-time"`
+	// Optional
+	CeDataContentType string `json:"ce-datacontenttype"`
+	// Extension field, optional.
+	CeEventTypeVersion string         `json:"ce-eventtypeversion"`
+	Data               cloudEventData `json:"data"`
+}
+
+type cloudEventData struct {
+	Hello string `json:"hello"`
+}
+
+var _ step.Step = &CloudEventCheck{}
+
+type CloudEventCheck struct {
+	name     string
+	log      *logrus.Entry
+	endpoint string
+	encoding cloudevents.Encoding
+}
+
+func NewCloudEventCheck(log *logrus.Entry, name string, encoding cloudevents.Encoding, target *url.URL) *CloudEventCheck {
+	return &CloudEventCheck{
+		encoding: encoding,
+		name:     name,
+		log:      log.WithField(step.LogStepKey, name),
+		endpoint: target.String(),
+	}
+}
+
+func (ce CloudEventCheck) Name() string {
+	return ce.name
+}
+
+func (ce CloudEventCheck) Run() error {
+	expResp := cloudEventResponse{
+		CeType:             fmt.Sprintf("test-%s", ce.encoding),
+		CeSource:           "contract-test",
+		CeSpecVersion:      cloudevents.VersionV1,
+		CeEventTypeVersion: "v1alpha2",
+		CeDataContentType:  "",
+	}
+	ceCtx, data, err := ce.createCECtx()
+	if err != nil {
+		return err
+	}
+	expResp.Data = cloudEventData{Hello: data}
+
+	err = ce.sentCloudEvent(ceCtx, expResp)
+	if err != nil {
+		return errors.Wrap(err, "while setting cloud event data")
+	}
+
+	ceResp, err := ce.getCloudEventFromFunction()
+	if err != nil {
+		return errors.Wrap(err, "while fetching cloud event from function")
+	}
+	err = ce.assertResponse(ceResp, expResp)
+	if err != nil {
+		return errors.Wrapf(err, "while validating cloud event")
+	}
+	ce.log.Info("cloud event is okay")
+	return nil
+}
+
+func (ce CloudEventCheck) Cleanup() error {
+	return nil
+}
+
+func (ce CloudEventCheck) OnError() error {
+	return nil
+}
+
+func (ce CloudEventCheck) createCECtx() (context.Context, string, error) {
+	ceCtx := cloudevents.ContextWithTarget(context.Background(), ce.endpoint)
+	var data = ""
+	switch ce.encoding {
+	case cloudevents.EncodingStructured:
+		ceCtx = cloudevents.WithEncodingStructured(ceCtx)
+		data = "structured"
+	case cloudevents.EncodingBinary:
+		ceCtx = cloudevents.WithEncodingBinary(ceCtx)
+		data = "binary"
+	default:
+		return nil, "", errors.Errorf("Encoding not supported: %s", ce.encoding)
+	}
+	return ceCtx, data, nil
+}
+func (ce CloudEventCheck) sentCloudEvent(ceCtx context.Context, expResp cloudEventResponse) error {
+	c, err := cloudevents.NewClientHTTP()
+	if err != nil {
+		return errors.Wrap(err, "while creating cloud event client")
+	}
+	event := cloudevents.NewEvent()
+	err = event.SetData(cloudevents.ApplicationJSON, expResp.Data)
+	if err != nil {
+		return errors.Wrap(err, "while setting data on cloud event")
+	}
+	event.SetSource(expResp.CeSource)
+	event.SetType(expResp.CeType)
+	event.SetSpecVersion(expResp.CeSpecVersion)
+	event.SetExtension("eventtypeversion", expResp.CeEventTypeVersion)
+
+	result := c.Send(ceCtx, event)
+	if cloudevents.IsUndelivered(result) {
+		return errors.Wrap(result, "while sending cloud event")
+	}
+	return nil
+}
+
+func (ce CloudEventCheck) getCloudEventFromFunction() (cloudEventResponse, error) {
+	req := &http.Request{}
+	fnURL, err := url.Parse(ce.endpoint)
+	if err != nil {
+		return cloudEventResponse{}, errors.Wrap(err, "while parsing function url")
+	}
+	req.URL = fnURL
+
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return cloudEventResponse{}, errors.Wrap(err, "while doing GET request to function")
+	}
+	out, err := io.ReadAll(res.Body)
+	if err != nil {
+		return cloudEventResponse{}, errors.Wrap(err, "while reading response body")
+	}
+	fmt.Println("GET response:\n", string(out))
+
+	ceResp := cloudEventResponse{}
+	err = json.Unmarshal(out, &ceResp)
+	if err != nil {
+		return cloudEventResponse{}, errors.Wrap(err, "while unmarshalling response")
+	}
+	return ceResp, nil
+}
+
+func (ce CloudEventCheck) assertResponse(response cloudEventResponse, expectedResponse cloudEventResponse) error {
+	var errJoined error
+
+	if expectedResponse.Data.Hello != response.Data.Hello {
+		err := errors.Errorf("Expected %s, got %s in cloud event data", expectedResponse.Data.Hello, response.Data.Hello)
+		errJoined = goerrors.Join(err)
+	}
+
+	_, err := time.Parse(time.RFC3339, response.CeTime)
+	if err != nil {
+		errJoined = goerrors.Join(errors.Wrap(err, "while validating date"))
+	}
+
+	if response.CeSource != expectedResponse.CeSource {
+		errJoined = goerrors.Join(errors.Errorf("expected source %s, got: %s", expectedResponse.CeSource, response.CeSource))
+	}
+
+	if response.CeType != expectedResponse.CeType {
+		errJoined = goerrors.Join(errors.Errorf("expected type %s, got: %s", expectedResponse.CeType, response.CeType))
+	}
+
+	if response.CeSpecVersion != expectedResponse.CeSpecVersion {
+		errJoined = goerrors.Join(errors.Errorf("expected spec version %s, got: %s", expectedResponse.CeSpecVersion, response.CeSpecVersion))
+	}
+
+	if response.CeEventTypeVersion != expectedResponse.CeEventTypeVersion {
+		errJoined = goerrors.Join(errors.Errorf("expected event type version %s, got: %s", expectedResponse.CeEventTypeVersion, response.CeEventTypeVersion))
+	}
+
+	_, err = uuid.Parse(response.CeID)
+	if err != nil {
+		errJoined = goerrors.Join(errors.Errorf("expected UUID, got: %s", response.CeID))
 	}
 	return errJoined
 }
