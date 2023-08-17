@@ -8,8 +8,7 @@ The project is a test scenario for the Function Controller. It creates a sample 
 
 Use the following tools to set up the project:
 
-- [Go v1.13](https://golang.org)
-- [Docker](https://www.docker.com/)
+- [Go v1.19](https://golang.org)
 - [Kyma CLI](https://github.com/kyma-project/cli)
 
 ## Usage
@@ -19,40 +18,16 @@ Use the following tools to set up the project:
 To run integration tests, follow these instructions:
 
 1. Install [Kyma](https://kyma-project.io/#/04-operation-guides/operations/02-install-kyma).
-2. Build the test image directly on the Docker engine of the Minikube node without pushing it to a registry. Run:
+2. Enable kubectl proxy:
 
    ```bash
-   eval $(minikube docker-env)
-   make build-image
+   kubectl proxy
    ```
 
-   Alternatively, build the image and push it to a registry, such as Docker Hub.
-
-3. Edit the TestDefinition CR and update its `.spec.template.spec.containers[0].image` field to `function-controller-test:latest` using this command:
-
+3. Run test with given scenario. You can also specify test suite to run. If not specified, all test suites are run within scenario.
    ```bash
-   kubectl edit testdefinitions.testing.kyma-project.io -n kyma-system function-controller
+   go run cmd/main.go {scenario} --test-suite {test-suite}
    ```
-
-4. Run the integration test. The command creates a test suite with a name in a form of `test-{ID}`. Run:
-
-   ```bash
-   kyma test run serverless
-   ```
-
-5. Get the test result using this command:
-
-   ```bash
-   kubectl logs -n kyma-system oct-tp-test-{ID}-function-controller-0 tests
-   ```
-
-### Build a production version
-
-To build the production Docker image, run this command:
-
-```bash
-make build-image
-```
 
 ### Environment variables
 

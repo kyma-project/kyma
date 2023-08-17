@@ -189,6 +189,10 @@ global:
       name: "install-cni"
       version: "1.18.2-distroless"
       directory: "prod/external/istio"
+    istio_operator_image:
+      name: "istio-manager"
+      version: "1.0.0"
+      directory: "prod"
 
   # This configuration is only temporary and will be removed in kyma version 2.7.x.
   sidecarMigration: false

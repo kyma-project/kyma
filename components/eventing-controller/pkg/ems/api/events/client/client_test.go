@@ -42,8 +42,6 @@ func Test_Client_Update(t *testing.T) {
 		WebhookURL:      "www.kyma-project.io",
 		WebhookAuth: &types.WebhookAuth{
 			Type:         "abc",
-			User:         "test",
-			Password:     "test123",
 			GrantType:    "test",
 			ClientID:     "123456",
 			ClientSecret: "qwerty",
@@ -52,8 +50,6 @@ func Test_Client_Update(t *testing.T) {
 	}
 	givenUpdateWebhook := &types.WebhookAuth{
 		Type:         "abc",
-		User:         "test",
-		Password:     "test123changed",
 		GrantType:    "test",
 		ClientID:     "123456changed",
 		ClientSecret: "qwertychanged",
