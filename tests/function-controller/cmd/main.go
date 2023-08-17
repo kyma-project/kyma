@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
+	"github.com/kyma-project/kyma/tests/function-controller/testsuite/tests"
 	"math/rand"
 	"os"
 	"os/user"
@@ -18,7 +20,6 @@ import (
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/step"
 	"github.com/kyma-project/kyma/tests/function-controller/testsuite"
-	"github.com/kyma-project/kyma/tests/function-controller/testsuite/scenarios"
 )
 
 func loadRestConfig(context string) (*rest.Config, error) {
@@ -54,20 +55,20 @@ func loadRestConfigWithContext(apiServerURL string, loader clientcmd.ClientConfi
 		}).ClientConfig()
 }
 
-type scenario struct {
-	displayName string
-	scenario    testScenario
+type testSuite struct {
+	name string
+	test test
 }
 
-var availableScenarios = map[string][]scenario{
+var availableScenarios = map[string][]testSuite{
 	"serverless-integration": {
-		{displayName: "simple", scenario: scenarios.SimpleFunctionTest},
-		{displayName: "gitops", scenario: scenarios.GitopsSteps},
+		{name: "simple", test: tests.SimpleFunctionTest},
+		{name: "gitops", test: tests.GitopsSteps},
 	},
-	"git-auth-integration": {{displayName: "gitauth", scenario: scenarios.GitAuthTestSteps}},
+	"git-auth-integration": {{name: "gitauth", test: tests.GitAuthTestSteps}},
 	"serverless-contract-tests": {
-		{displayName: "tracing", scenario: scenarios.SimpleFunctionTracingTest},
-		{displayName: "api-gateway", scenario: scenarios.SimpleFunctionAPIGatewayTest},
+		{name: "tracing", test: tests.FunctionTracingTest},
+		{name: "api-gateway", test: tests.FunctionAPIGatewayTest},
 	},
 }
 
@@ -82,7 +83,7 @@ func main() {
 
 	if len(os.Args) < 2 {
 		logf.Errorf("Scenario not specified. Specify it as the first argument")
-		os.Exit(2)
+		os.Exit(1)
 	}
 
 	cfg, err := loadConfig("APP")
@@ -92,38 +93,47 @@ func main() {
 	scenarioName := os.Args[1]
 	logf.Printf("Scenario: %s", scenarioName)
 	os.Args = os.Args[1:]
-	pickedScenarios, exists := availableScenarios[scenarioName]
+	pickedScenario, exists := availableScenarios[scenarioName]
 	if !exists {
 		logf.Errorf("Scenario %s not exist", scenarioName)
-		os.Exit(1)
+		os.Exit(2)
 	}
 
 	restConfig, err := loadRestConfig("")
 	if err != nil {
 		logf.Errorf("Unable to get rest config: %s", err.Error())
-		os.Exit(1)
+		os.Exit(3)
 	}
 
+	suite := flag.String("test-suite", "", "Choose test-suite to run from scenario")
+	flag.Parse()
+	if suite != nil && *suite == "" {
+		suite = nil
+	}
 	rand.Seed(time.Now().UnixNano())
 
 	g, _ := errgroup.WithContext(context.Background())
-	for _, scenario := range pickedScenarios {
+	for _, ts := range pickedScenario {
+		if suite != nil && ts.name != *suite {
+			logf.Infof("Skip test suite suite: %s", ts.name)
+			continue
+		}
 		// https://eli.thegreenplace.net/2019/go-internals-capturing-loop-variables-in-closures/
-		scenarioDisplayName := fmt.Sprintf("%s-%s", scenarioName, scenario.displayName)
-		func(scenario testScenario, name string) {
+		testName := fmt.Sprintf("%s-%s", scenarioName, ts.name)
+		func(ts test, name string) {
 			g.Go(func() error {
-				return runScenario(scenario, name, logf, cfg, restConfig)
+				return runTestSuite(ts, name, logf, cfg, restConfig)
 			})
-		}(scenario.scenario, scenarioDisplayName)
+		}(ts.test, testName)
 	}
 	failOnError(g.Wait(), logf)
 }
 
-type testScenario func(*rest.Config, testsuite.Config, *logrus.Entry) (step.Step, error)
+type test func(*rest.Config, testsuite.Config, *logrus.Entry) (step.Step, error)
 
-func runScenario(scenario testScenario, scenarioName string, logf *logrus.Logger, cfg config, restConfig *rest.Config) error {
-	scenarioLogger := logf.WithField("scenario", scenarioName)
-	steps, err := scenario(restConfig, cfg.Test, scenarioLogger)
+func runTestSuite(testToRun test, testSuiteName string, logf *logrus.Logger, cfg config, restConfig *rest.Config) error {
+	testSuiteLogger := logf.WithField("test", testSuiteName)
+	steps, err := testToRun(restConfig, cfg.Test, testSuiteLogger)
 	if err != nil {
 		logf.Error(err)
 		return err
@@ -133,10 +143,10 @@ func runScenario(scenario testScenario, scenarioName string, logf *logrus.Logger
 
 	err = runner.Execute(steps)
 	if err != nil {
-		scenarioLogger.Error(err)
+		testSuiteLogger.Error(err)
 		return err
 	}
-	scenarioLogger.Infof("Scenario succeeded: %s", scenarioName)
+	testSuiteLogger.Infof("Test suite succeeded: %s", testSuiteName)
 	return nil
 }
 
