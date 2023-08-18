@@ -34,7 +34,15 @@ type CachedAppData struct {
 	AppPathPrefixEvents string
 }
 
-func NewCacheSync(log *logger.Logger, client client.Reader, appCache *gocache.Cache, controllerName, appNamePlaceholder, eventingPathPrefixV1, eventingPathPrefixV2, eventingPathPrefixEvents string) CacheSync {
+func NewCacheSync(
+	log *logger.Logger,
+	client client.Reader,
+	appCache *gocache.Cache,
+	controllerName,
+	appNamePlaceholder,
+	eventingPathPrefixV1,
+	eventingPathPrefixV2,
+	eventingPathPrefixEvents string) CacheSync {
 	return &cacheSync{
 		client:                   client,
 		appCache:                 appCache,
@@ -91,7 +99,7 @@ func (c *cacheSync) Sync(ctx context.Context, applicationName string) error {
 
 func (c *cacheSync) syncApplication(application *v1alpha1.Application) {
 	key := application.Name
-	if !application.ObjectMeta.DeletionTimestamp.IsZero() {
+	if !application.DeletionTimestamp.IsZero() {
 		c.appCache.Delete(key)
 		c.log.WithContext().
 			With("controller", c.controllerName).

@@ -4,8 +4,6 @@ deployment:
   args:
     proxyPort: &proxyPort 8080
     externalAPIPort: &externalAPIPort 8081
-    cacheExpirationSeconds: 90
-    cacheCleanupIntervalSeconds: 15
   resources:
     limits:
       cpu: 500m
