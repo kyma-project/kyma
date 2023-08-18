@@ -12,8 +12,6 @@
       "--eventingDestinationPath=/anything/rewrite",
       "--eventingPathPrefixEvents=/%%APP_NAME%%/events",
       "--appNamePlaceholder=%%APP_NAME%%",
-      "--cacheExpirationSeconds=90",
-      "--cacheCleanupIntervalSeconds=15"
     ]
   },
   {

@@ -87,8 +87,8 @@ func main() {
 	log.WithContext().With("options", options).Info("Starting Validation Proxy.")
 
 	idCache := cache.New(
-		time.Duration(options.cacheExpirationSeconds)*time.Second,
-		time.Duration(options.cacheCleanupIntervalSeconds)*time.Second,
+		cache.NoExpiration,
+		cache.NoExpiration,
 	)
 	idCache.OnEvicted(func(key string, i interface{}) {
 		log.WithContext().
@@ -127,7 +127,14 @@ func main() {
 		log.WithContext().Error("Unable to start manager: %s", err.Error())
 		os.Exit(1)
 	}
-	if err = controller.NewController(log, mgr.GetClient(), idCache, options.appNamePlaceholder, options.eventingPathPrefixV1, options.eventingPathPrefixV2, options.eventingPathPrefixEvents).SetupWithManager(mgr); err != nil {
+	if err = controller.NewController(
+		log,
+		mgr.GetClient(),
+		idCache,
+		options.appNamePlaceholder,
+		options.eventingPathPrefixV1,
+		options.eventingPathPrefixV2,
+		options.eventingPathPrefixEvents).SetupWithManager(mgr); err != nil {
 		log.WithContext().Error("Unable to create reconciler: %s", err.Error())
 		os.Exit(1)
 	}

@@ -64,14 +64,13 @@ func TestOptionsValidation(t *testing.T) {
 			},
 		},
 		{
-			name:  "syncPeriod greater than cacheExpirationSeconds",
-			valid: false,
+			name:  "syncPeriod is set",
+			valid: true,
 			args: args{
 				appNamePlaceholder:       "%%APP_NAME%%",
 				eventingPathPrefixV1:     "/%%APP_NAME%%/v1/events",
 				eventingPathPrefixV2:     "/%%APP_NAME%%/v2/events",
 				eventingPathPrefixEvents: "/%%APP_NAME%%/events",
-				cacheExpirationSeconds:   120,
 				syncPeriod:               121 * time.Second,
 			},
 		},
