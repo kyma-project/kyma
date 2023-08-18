@@ -43,12 +43,22 @@ type proxyHandler struct {
 	cache Cache
 }
 
+type option func(*proxyHandler)
+
+func WithCEProxyTransport(t http.RoundTripper) func(*proxyHandler) {
+	return func(p *proxyHandler) {
+		p.cloudEventsProxy.Transport = t
+	}
+}
+
 func NewProxyHandler(
 	eventingPublisherHost string,
 	eventingDestinationPath string,
 	cache Cache,
-	log *logger.Logger) *proxyHandler {
-	return &proxyHandler{
+	log *logger.Logger,
+	ops ...option) ProxyHandler {
+
+	out := proxyHandler{
 		eventingPublisherHost: eventingPublisherHost,
 
 		legacyEventsProxy: createReverseProxy(log, eventingPublisherHost, withEmptyRequestHost, withEmptyXFwdClientCert, withHTTPScheme),
@@ -58,6 +68,12 @@ func NewProxyHandler(
 		log:          log,
 		subjectRegex: regexp.MustCompile(`Subject="(.*?)"`),
 	}
+
+	for _, f := range ops {
+		f(&out)
+	}
+
+	return &out
 }
 
 func (ph *proxyHandler) ProxyAppConnectorRequests(w http.ResponseWriter, r *http.Request) {
