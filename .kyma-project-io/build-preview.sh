@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Script for build preview of this repo like in https://kyma-project.io/docs/ on every PR.
+# Script for build preview of this repo like in https://kyma-project.io on every PR.
 # For more information, please contact with: @m00g3n @pPrecel
 
 set -eo pipefail

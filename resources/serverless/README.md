@@ -12,4 +12,4 @@ This project contains the chart for the Function Controller.
 
 ## Details
 
-To learn how Serverless is used in Kyma, see its [official documentation](https://kyma-project.io/docs/kyma/latest/01-overview/serverless/).
+To learn how Serverless is used in Kyma, see its [official documentation](https://kyma-project.io/#/01-overview/serverless/README).

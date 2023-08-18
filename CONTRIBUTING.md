@@ -27,7 +27,7 @@ Follow these steps:
     git clone git@github.com:{GitHubUsername}/kyma.git $GOPATH/src/github.com/kyma-project/kyma
     ```
 
-    Follow the steps described in the [`git-workflow.md`](https://kyma-project.io/community/contributing/03-git-workflow/) document to configure your fork.
+    Follow the steps described in the [`git-workflow.md`](https://github.com/kyma-project/community/blob/main/docs/contributing/03-git-workflow.md) document to configure your fork.
 
 3. Build the project.
 
