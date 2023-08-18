@@ -17,11 +17,11 @@ const (
 	backendValueNats = "NATS"
 )
 
-// Backend returns the selected backend based on the environment variable
+// Backend returns the selected backend based on the environment variable.
 // "BACKEND". "NATS" is the default value in case of an empty variable.
 func Backend() (string, error) {
 	backend := strings.ToUpper(os.Getenv(backendKey))
-
+	// validate the backend
 	switch backend {
 	case backendValueBEB:
 		return backendValueBEB, nil
