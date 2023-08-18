@@ -209,7 +209,7 @@ data:
           inputInfo: >-
             Note: If you use a custom output, you put the LogPipeline in unsupported
             mode
-            (https://kyma-project.io/#/telemetry-manager/user/02-logs?id=unsupported-mode)
+            (https://kyma-project.io/docs/kyma/latest/01-overview/telemetry/telemetry-02-logs/#unsupported-mode)
         - name: HTTP
           path: http
           widget: FormGroup
@@ -296,7 +296,7 @@ data:
     urlPath: logpipelines
     scope: cluster
     description: >-
-      {{"{{[LogPipeline](https://kyma-project.io/#/05-technical-reference/00-custom-resources/telemetry-01-logpipeline)}}"}} configures log selection, filters, and outputs.
+      {{"{{[LogPipeline](https://kyma-project.io/docs/kyma/latest/05-technical-reference/00-custom-resources/telemetry-01-logpipeline)}}"}} configures log selection, filters, and outputs.
   list: |-
     - source: >-
         $each(spec.output, function($v, $k) {$v.url.value or
