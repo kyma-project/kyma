@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"strconv"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -97,6 +98,11 @@ func responseModifier(
 	urlRewriter func(gatewayURL, target, loc *url.URL) *url.URL,
 ) func(*http.Response) error {
 	return func(resp *http.Response) error {
+		if resp.StatusCode >= 500 && resp.StatusCode < 600 {
+			resp.Header.Set("Target-System-Status", strconv.Itoa(resp.StatusCode))
+			resp.StatusCode = http.StatusBadGateway
+		}
+
 		if (resp.StatusCode < 300 || resp.StatusCode >= 400) &&
 			resp.StatusCode != http.StatusCreated {
 			return nil
