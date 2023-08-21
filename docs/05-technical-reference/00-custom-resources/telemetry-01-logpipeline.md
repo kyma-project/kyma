@@ -148,6 +148,6 @@ For details, see the [LogPipeline specification file](https://github.com/kyma-pr
 | **conditions.&#x200b;lastTransitionTime**  | string | An array of conditions describing the status of the pipeline. |
 | **conditions.&#x200b;reason**  | string | An array of conditions describing the status of the pipeline. |
 | **conditions.&#x200b;type**  | string | The possible transition types are:<br>- `Running`: The instance is ready and usable.<br>- `Pending`: The pipeline is being activated. |
-| **unsupportedMode**  | boolean | Is active when the LogPipeline uses a `custom` output or filter; see [unsupported mode](https://kyma-project.io/docs/kyma/main/01-overview/telemetry/telemetry-02-logs#unsupported-mode). |
+| **unsupportedMode**  | boolean | Is active when the LogPipeline uses a `custom` output or filter; see [unsupported mode](https://kyma-project.io/#/telemetry-manager/user/02-logs?id=unsupported-mode). |
 
 <!-- TABLE-END -->

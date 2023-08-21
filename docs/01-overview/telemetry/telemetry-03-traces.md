@@ -36,18 +36,18 @@ The telemetry module provides an in-cluster central deployment of an [OTel Colle
 The OTel Collector comes with a [concept](https://opentelemetry.io/docs/collector/configuration/) of pipelines consisting of receivers, processors, and exporters with which you can flexibly plug pipelines together. Kyma's TracePipeline provides a hardened setup of an OTel Collector and also abstracts the underlying pipeline concept. The benefits of having that abstraction in place are:
 - Supportability - all features are tested and supported
 - Migratability - smooth migration experiences when switching underlying technologies or architectures
-- Native Kubernetes support - API provided by Kyma allows for an easy integration with Secrets, for example, served by the SAP BTP Operator; The Telemetry Operator takes care of the full lifecycle
+- Native Kubernetes support - API provided by Kyma allows for an easy integration with Secrets, for example, served by the [SAP BTP Service Operator](https://github.com/SAP/sap-btp-service-operator#readme). Telemetry Manager takes care of the full lifecycle.
 - Focus - the user doesn't need to understand underlying concepts
 
 The downside is that only a limited set of features is available. Here, you can opt out at any time by bringing your own collector setup. The current feature set focuses on providing the full configurability of backends integrated by OTLP. As a next step, meaningful filter options will be provided. Especially head and tail-based sampling configurations.
 
-### Telemetry Operator
-The TracePipeline resource is managed by the Telemetry Operator, a typical Kubernetes operator responsible for managing the custom parts of the OTel Collector configuration.
+### Telemetry Manager
+The TracePipeline resource is managed by Telemetry Manager, a typical Kubernetes [operator](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/) responsible for managing the custom parts of the OTel Collector configuration.
 
-![Operator resources](./assets/tracing-resources.drawio.svg)
+![Tracing resources](./assets/tracing-resources.drawio.svg)
 
-The Telemetry Operator watches all TracePipeline resources and related Secrets. Whenever the configuration changes, it validates the configuration and generates a new configuration for the OTel Collector, where a ConfigMap for the configuration is generated. Furthermore, referenced Secrets are copied into one Secret that is mounted to the Collector as well.
-Furthermore, the operator manages the full lifecycle of the OTel Collector Deployment itself. With that, it only gets deployed when there is an actual TracePipeline defined. At anytime, you can opt out of using the tracing feature by not specifying a TracePipeline.
+Telemetry Manager watches all TracePipeline resources and related Secrets. Whenever the configuration changes, it validates the configuration and generates a new configuration for OTel Collector, where a ConfigMap for the configuration is generated. Referenced Secrets are copied into one Secret that is mounted to the OTel Collector as well.
+Furthermore, the manager takes care of the full lifecycle of the OTel Collector Deployment itself. Only if there is a TracePipeline defined, the collector is deployed. At anytime, you can opt out of using the tracing feature by not specifying a TracePipeline.
 
 ## Setting up a TracePipeline
 
@@ -233,7 +233,8 @@ stringData:
 
 ### Step 6: Rotate the Secret
 
-As used in the previous step, a Secret referenced with the **secretKeyRef** construct can be rotated manually or automatically. For automatic rotation, update the Secret's actual values and keep the Secret's keys stable. TracePipeline watches the referenced Secrets and detects changes, so the Secret rotation takes immediate effect. When using a Secret owned by the [SAP BTP Operator](https://github.com/SAP/sap-btp-service-operator), you can configure `credentialsRotationPolicy` with a specific `rotationFrequency` to achieve an automated rotation.
+Telemetry Manager continuously watches the Secret referenced with the **secretKeyRef** construct. You can update the Secret’s values, and Telemetry Manager detects the changes and applies the new Secret to the setup.
+If you use a Secret owned by the [SAP BTP Service Operator](https://github.com/SAP/sap-btp-service-operator), you can configure an automated rotation using a `credentialsRotationPolicy` with a specific `rotationFrequency` and don’t have to intervene manually.
 
 ## Kyma Components with tracing capabilities
 

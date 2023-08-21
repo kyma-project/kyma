@@ -80,7 +80,7 @@ Application resiliency is an important topic within traffic management. Traditio
 
 ## Sidecar proxy behavior during Kyma upgrade
 
-For Kyma upgrades, it's a priority to have full compatibility of existing workloads with the upgraded version of Istio. To ensure that the newest version of sidecar proxy is injected into the Pods, the upgrade performs a `rollout restart` of the workloads whenever possible. To learn more about exceptions when it's impossible to restart workloads, read the troubleshooting guide [Pods stuck in `Pending/Failed/Unknown` state after upgrade](https://kyma-project.io/docs/kyma/latest/04-operation-guides/troubleshooting/api-exposure/apix-05-upgrade-sidecar-proxy/#cause).
+For Kyma upgrades, it's a priority to have full compatibility of existing workloads with the upgraded version of Istio. To ensure that the newest version of sidecar proxy is injected into the Pods, the upgrade performs a `rollout restart` of the workloads whenever possible. To learn more about exceptions when it's impossible to restart workloads, read the troubleshooting guide [Pods stuck in `Pending/Failed/Unknown` state after upgrade](https://kyma-project.io/#/04-operation-guides/troubleshooting/api-exposure/apix-05-upgrade-sidecar-proxy).
 
 # Istio limitations
 

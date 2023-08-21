@@ -39,4 +39,4 @@ When creating a ServiceMonitor resource, follow this naming convention:
 | Dashboard |`dashboard-configmap.yaml`|`dashboard-configmap.yaml`|Name of the file which contains the dashboard's specification.|
 | Dashboard| `{chart_name}-dashboard` for the main chart dashboard,`{chart_name}-{sub_chart_name}-dashboard` for the sub-chart | `backup-dashboard`, `eventing-nats-dashboard` |  Name of the resource in the **metadata** section of the file.|
 
-For details on observing metrics, creating dashboards, and setting alerting rules, see [these](https://kyma-project.io/docs/kyma/latest/03-tutorials/00-observability/) tutorials.
+For details on observing metrics, creating dashboards, and setting alerting rules, see [these tutorials](https://kyma-project.io/#/03-tutorials/00-observability).
