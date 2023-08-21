@@ -8,6 +8,7 @@ import threading
 
 import bottle
 import prometheus_client as prom
+from bottle import error
 
 import tracing
 from ce import Event
@@ -67,7 +68,10 @@ if __name__ == "__main__":
 def func_with_context(e, function_context):
     ex = e.ceHeaders["extensions"]
     with set_req_context(ex["request"]):
-        return func(e, function_context)
+        try:
+            return func(e, function_context)
+        except Exception as e:
+            return e
 
 
 @app.get('/healthz')
@@ -106,6 +110,8 @@ def handler():
                 return bottle.HTTPError(408, "Timeout while processing the function")
             else:
                 t.join()
+                if isinstance(res, Exception):
+                    raise res
                 return res
 
 
