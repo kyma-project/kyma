@@ -68,6 +68,7 @@ var availableScenarios = map[string][]testSuite{
 	"serverless-contract-tests": {
 		{name: "tracing", test: testsuite.FunctionTracingTest},
 		{name: "api-gateway", test: testsuite.FunctionAPIGatewayTest},
+		{name: "cloud-events", test: testsuite.FunctionCloudEventsTest},
 	},
 }
 
@@ -95,13 +96,13 @@ func main() {
 	pickedScenario, exists := availableScenarios[scenarioName]
 	if !exists {
 		logf.Errorf("Scenario %s not exist", scenarioName)
-		os.Exit(2)
+		os.Exit(1)
 	}
 
 	restConfig, err := loadRestConfig("")
 	if err != nil {
 		logf.Errorf("Unable to get rest config: %s", err.Error())
-		os.Exit(3)
+		os.Exit(1)
 	}
 
 	suite := flag.String("test-suite", "", "Choose test-suite to run from scenario")
