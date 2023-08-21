@@ -41,7 +41,7 @@ func FunctionCloudEventsTest(restConfig *rest.Config, cfg internal.Config, logf 
 		return nil, errors.Wrapf(err, "while creating k8s apps client")
 	}
 
-	//python39Logger := logf.WithField(runtimeKey, "python39")
+	python39Logger := logf.WithField(runtimeKey, "python39")
 	nodejs16Logger := logf.WithField(runtimeKey, "nodejs16")
 	nodejs18Logger := logf.WithField(runtimeKey, "nodejs18")
 
@@ -53,7 +53,7 @@ func FunctionCloudEventsTest(restConfig *rest.Config, cfg internal.Config, logf 
 		Log:         logf,
 	}
 
-	//python39Fn := function.NewFunction("python39", cfg.KubectlProxyEnabled, genericContainer.WithLogger(python39Logger))
+	python39Fn := function.NewFunction("python39", cfg.KubectlProxyEnabled, genericContainer.WithLogger(python39Logger))
 	nodejs16Fn := function.NewFunction("nodejs16", cfg.KubectlProxyEnabled, genericContainer.WithLogger(nodejs16Logger))
 	nodejs18Fn := function.NewFunction("nodejs18", cfg.KubectlProxyEnabled, genericContainer.WithLogger(nodejs18Logger))
 
@@ -63,10 +63,10 @@ func FunctionCloudEventsTest(restConfig *rest.Config, cfg internal.Config, logf 
 		namespace.NewNamespaceStep("Create test namespace", coreCli, genericContainer),
 		app.NewApplication("Create HTTP basic application", HTTPAppName, HTTPAppImage, int32(80), appsCli.Deployments(genericContainer.Namespace), coreCli.Services(genericContainer.Namespace), genericContainer),
 		executor.NewParallelRunner(logf, "Fn tests",
-			//step.NewSerialTestRunner(python39Logger, "Python39 test",
-			//	namespace.CreateFunction(python39Logger, python39Fn, "Create Python39 Function", runtimes.BasicCloudEventPythonFunction(serverlessv1alpha2.Python39)),
-			//	namespace.CloudEventCheck(cloudevents.EncodingStructured, python39Logger, "Python39 cloud event structured check", python39Fn.FunctionURL),
-			//),
+			executor.NewSerialTestRunner(python39Logger, "Python39 test",
+				function.CreateFunction(python39Logger, python39Fn, "Create Python39 Function", runtimes.PythonCloudEvent(serverlessv1alpha2.Python39)),
+				assertion.CloudEventCheck(python39Logger, "Python39 cloud event structured check", cloudevents.EncodingStructured, python39Fn.FunctionURL),
+				assertion.CloudEventCheck(python39Logger, "Python39 cloud event binary check", cloudevents.EncodingBinary, python39Fn.FunctionURL)),
 			executor.NewSerialTestRunner(nodejs16Logger, "NodeJS16 test",
 				function.CreateFunction(nodejs16Logger, nodejs16Fn, "Create NodeJS16 Function", runtimes.NodeJSFunctionWithCloudEvent(serverlessv1alpha2.NodeJs18)),
 				assertion.CloudEventCheck(nodejs16Logger, "NodeJS16 cloud event structured check", cloudevents.EncodingStructured, nodejs16Fn.FunctionURL),
