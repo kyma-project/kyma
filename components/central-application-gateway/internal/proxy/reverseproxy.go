@@ -3,12 +3,13 @@ package proxy
 import (
 	"context"
 	"errors"
-	"go.uber.org/zap"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"strconv"
 	"strings"
+
+	"go.uber.org/zap"
 
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"

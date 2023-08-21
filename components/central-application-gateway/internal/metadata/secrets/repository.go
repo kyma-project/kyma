@@ -3,6 +3,7 @@ package secrets
 
 import (
 	"context"
+
 	"go.uber.org/zap"
 
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"

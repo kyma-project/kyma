@@ -2,8 +2,9 @@ package authorization
 
 import (
 	"fmt"
-	"go.uber.org/zap"
 	"net/http"
+
+	"go.uber.org/zap"
 
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/clientcert"

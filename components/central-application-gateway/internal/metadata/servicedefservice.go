@@ -3,6 +3,7 @@ package metadata
 
 import (
 	"fmt"
+
 	"go.uber.org/zap"
 
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/applications"

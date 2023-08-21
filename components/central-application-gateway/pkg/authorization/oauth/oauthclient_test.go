@@ -3,11 +3,12 @@ package oauth
 import (
 	"encoding/base64"
 	"encoding/json"
-	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
 
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/httpconsts"
 
