@@ -4,7 +4,9 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/kyma-project/kyma/tests/function-controller/testsuite/tests"
+	"github.com/kyma-project/kyma/tests/function-controller/internal"
+	"github.com/kyma-project/kyma/tests/function-controller/internal/executor"
+	"github.com/kyma-project/kyma/tests/function-controller/internal/testsuite"
 	"math/rand"
 	"os"
 	"os/user"
@@ -17,9 +19,6 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
-
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/step"
-	"github.com/kyma-project/kyma/tests/function-controller/testsuite"
 )
 
 func loadRestConfig(context string) (*rest.Config, error) {
@@ -62,19 +61,19 @@ type testSuite struct {
 
 var availableScenarios = map[string][]testSuite{
 	"serverless-integration": {
-		{name: "simple", test: tests.SimpleFunctionTest},
-		{name: "gitops", test: tests.GitopsSteps},
+		{name: "simple", test: testsuite.SimpleFunctionTest},
+		{name: "gitops", test: testsuite.GitopsSteps},
 	},
-	"git-auth-integration": {{name: "gitauth", test: tests.GitAuthTestSteps}},
+	"git-auth-integration": {{name: "gitauth", test: testsuite.GitAuthTestSteps}},
 	"serverless-contract-tests": {
-		{name: "tracing", test: tests.FunctionTracingTest},
-		{name: "api-gateway", test: tests.FunctionAPIGatewayTest},
-		{name: "cloud-events", test: tests.FunctionCloudEventsTest},
+		{name: "tracing", test: testsuite.FunctionTracingTest},
+		{name: "api-gateway", test: testsuite.FunctionAPIGatewayTest},
+		{name: "cloud-events", test: testsuite.FunctionCloudEventsTest},
 	},
 }
 
 type config struct {
-	Test testsuite.Config
+	Test internal.Config
 }
 
 func main() {
@@ -97,13 +96,13 @@ func main() {
 	pickedScenario, exists := availableScenarios[scenarioName]
 	if !exists {
 		logf.Errorf("Scenario %s not exist", scenarioName)
-		os.Exit(2)
+		os.Exit(1)
 	}
 
 	restConfig, err := loadRestConfig("")
 	if err != nil {
 		logf.Errorf("Unable to get rest config: %s", err.Error())
-		os.Exit(3)
+		os.Exit(1)
 	}
 
 	suite := flag.String("test-suite", "", "Choose test-suite to run from scenario")
@@ -130,7 +129,7 @@ func main() {
 	failOnError(g.Wait(), logf)
 }
 
-type test func(*rest.Config, testsuite.Config, *logrus.Entry) (step.Step, error)
+type test func(*rest.Config, internal.Config, *logrus.Entry) (executor.Step, error)
 
 func runTestSuite(testToRun test, testSuiteName string, logf *logrus.Logger, cfg config, restConfig *rest.Config) error {
 	testSuiteLogger := logf.WithField("test", testSuiteName)
@@ -140,7 +139,7 @@ func runTestSuite(testToRun test, testSuiteName string, logf *logrus.Logger, cfg
 		return err
 	}
 
-	runner := step.NewRunner(step.WithCleanupDefault(cfg.Test.Cleanup), step.WithLogger(logf))
+	runner := executor.NewRunner(executor.WithCleanupDefault(cfg.Test.Cleanup), executor.WithLogger(logf))
 
 	err = runner.Execute(steps)
 	if err != nil {
