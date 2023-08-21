@@ -35,17 +35,19 @@ const (
 )
 
 func main() {
-	setupLogger, err := zap.NewProduction()
-	if err != nil {
-		panic(err)
-	}
+	setupLogger := zap.Must(zap.NewProduction())
+	defer setupLogger.Sync()
 
 	setupLogger.Info("Starting Application Gateway")
 
 	options := parseArgs(setupLogger)
 
-	log, err := zap.NewProduction(zap.IncreaseLevel(options.logLevel))
+	logCfg := zap.NewProductionConfig()
+	logCfg.Level.SetLevel(*options.logLevel)
+
+	log, err := logCfg.Build()
 	zap.ReplaceGlobals(log)
+	defer log.Sync()
 
 	if err != nil {
 		setupLogger.Fatal("Couldn't initiate logger", zap.Error(err))
@@ -74,12 +76,9 @@ func main() {
 	internalHandlerForCompass := newInternalHandlerForCompass(serviceDefinitionService, options)
 	externalHandler := externalapi.NewHandler()
 
-	if options.requestLogging {
-		httptools.LoggingOn = true
-		internalHandler = httptools.RequestLogger("Internal handler: ", internalHandler)
-		internalHandlerForCompass = httptools.RequestLogger("Internal handler: ", internalHandlerForCompass)
-		externalHandler = httptools.RequestLogger("External handler: ", externalHandler)
-	}
+	internalHandler = httptools.RequestLogger("Internal handler: ", internalHandler)
+	internalHandlerForCompass = httptools.RequestLogger("Internal handler: ", internalHandlerForCompass)
+	externalHandler = httptools.RequestLogger("External handler: ", externalHandler)
 
 	externalSrv := &http.Server{
 		Addr:         ":" + strconv.Itoa(options.externalAPIPort),
