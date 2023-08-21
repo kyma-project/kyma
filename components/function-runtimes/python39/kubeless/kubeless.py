@@ -8,7 +8,6 @@ import threading
 
 import bottle
 import prometheus_client as prom
-from bottle import error
 
 import tracing
 from ce import Event
@@ -86,7 +85,7 @@ def metrics():
 
 
 @app.error(500)
-def exception_handler():
+def exception_handler(err):
     return 'Internal server error'
 
 
