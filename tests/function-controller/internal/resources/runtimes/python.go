@@ -97,26 +97,21 @@ kyma-pypi-test==1.0.0`
 }
 
 func PythonCloudEvent(runtime serverlessv1alpha2.Runtime) serverlessv1alpha2.FunctionSpec {
-	dpd := `opentelemetry-instrumentation==0.37b0
-opentelemetry-instrumentation-requests==0.37b0
-requests>=2.31.0`
+	dpd := ``
 
-	src := fmt.Sprintf(`import json
+	src := `import json
 
-import requests
-from opentelemetry.instrumentation.requests import RequestsInstrumentor
-
+event_data = None
 
 def main(event, context):
-    RequestsInstrumentor().instrument()
-    response = requests.get('%s', timeout=1)
-    headers = response.request.headers
-    tracingHeaders = {}
-    for key, value in headers.items():
-        if key.startswith("x-b3") or key.startswith("traceparent"):
-            tracingHeaders[key] = value
-    txtHeaders = json.dumps(tracingHeaders)
-    return txtHeaders`, "")
+    global event_data
+    req = event.ceHeaders['extensions']['request']
+
+    if req.method == 'GET':
+        return json.dumps(event_data)
+    event_data = event.ceHeaders
+    event_data.pop('extensions')
+    return ""`
 
 	return serverlessv1alpha2.FunctionSpec{
 		Runtime: runtime,
