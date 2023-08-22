@@ -137,7 +137,7 @@ spec:
                     description: Configures an output to the Kyma-internal Loki instance.
                       [Fluent Bit grafana-loki output](https://grafana.com/docs/loki/v2.2.x/clients/fluentbit/).
                       **Note:** This output is considered legacy and is only provided
-                      for backward compatibility with the [deprecated](https://kyma-project.io/blog/2022/11/2/loki-deprecation/)
+                      for backward compatibility with the [deprecated](https://github.com/kyma-project/website/blob/main/content/blog-posts/2023-01-17-release-notes-2.10/index.md#deprecation-of-monitoring)
                       in-cluster Loki instance. It might not be compatible with the
                       latest Loki versions. For integration with a custom Loki installation
                       use the `custom` output with the name `loki` instead, see also
