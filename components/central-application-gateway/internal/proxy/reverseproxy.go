@@ -19,7 +19,16 @@ import (
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/httptools"
 )
 
-func makeProxy(targetURL string, requestParameters *authorization.RequestParameters, serviceName string, skipTLSVerify bool, authorizationStrategy authorization.Strategy, csrfTokenStrategy csrf.TokenStrategy, clientCertificate clientcert.ClientCertificate, timeout int) (*httputil.ReverseProxy, apperrors.AppError) {
+func makeProxy(
+	targetURL string,
+	requestParameters *authorization.RequestParameters,
+	serviceName string,
+	skipTLSVerify bool,
+	authorizationStrategy authorization.Strategy,
+	csrfTokenStrategy csrf.TokenStrategy,
+	clientCertificate clientcert.ClientCertificate,
+	timeout int,
+) (*httputil.ReverseProxy, apperrors.AppError) {
 	roundTripper := httptools.NewRoundTripper(httptools.WithTLSSkipVerify(skipTLSVerify), httptools.WithGetClientCertificate(clientCertificate.GetClientCertificate))
 	retryableRoundTripper := NewRetryableRoundTripper(roundTripper, authorizationStrategy, csrfTokenStrategy, clientCertificate, timeout, skipTLSVerify)
 	return newProxy(targetURL, requestParameters, serviceName, retryableRoundTripper)
@@ -61,7 +70,12 @@ func newProxy(targetURL string, requestParameters *authorization.RequestParamete
 	errorHandler := func(rw http.ResponseWriter, req *http.Request, err error) {
 		codeRewriter(rw, err)
 	}
-	return &httputil.ReverseProxy{Director: director, Transport: transport, ErrorHandler: errorHandler}, nil
+
+	return &httputil.ReverseProxy{
+		Director:     director,
+		Transport:    transport,
+		ErrorHandler: errorHandler,
+	}, nil
 }
 
 func joinPaths(a, b string) string {
