@@ -34,15 +34,14 @@ spec:
         imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
         args:
           - "/app/applicationgateway"
+          - "--applicationSecretsNamespace={{ .Values.global.systemNamespace }}"
+          - "--externalAPIPort={{ .Values.deployment.args.externalAPIPort }}"
+          - "--logLevel={{ .Values.deployment.args.logLevel }}"
+          - "--proxyCacheTTL={{ .Values.deployment.args.proxyCacheTTL }}"
           - "--proxyPort={{ .Values.deployment.args.proxyPort }}"
           - "--proxyPortCompass={{ .Values.deployment.args.proxyPortCompass }}"
-          - "--externalAPIPort={{ .Values.deployment.args.externalAPIPort }}"
-          - "--applicationSecretsNamespace={{ .Values.global.systemNamespace }}"
-          - "--requestTimeout={{ .Values.deployment.args.requestTimeout }}"
           - "--proxyTimeout={{ .Values.deployment.args.proxyTimeout }}"
-          - "--proxyCacheTTL={{ .Values.deployment.args.proxyCacheTTL }}"
-          - "--requestLogging={{ .Values.deployment.args.requestLogging }}"
-          - "--logLevel={{ .Values.deployment.args.logLevel }}"
+          - "--requestTimeout={{ .Values.deployment.args.requestTimeout }}"
         readinessProbe:
           httpGet:
             path: /v1/health
