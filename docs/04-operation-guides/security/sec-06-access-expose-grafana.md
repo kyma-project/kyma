@@ -1,7 +1,8 @@
 ---
 title: Access and Expose Grafana
 ---
->  - To replace [deprecated](https://kyma-project.io/blog/2022/12/9/monitoring-deprecation) Prometheus and Grafana, take a look at [Install a custom kube-prometheus-stack in Kyma](https://github.com/kyma-project/examples/tree/main/prometheus).
+
+> **TIP:** To replace [deprecated](https://kyma-project.io/blog/2022/12/9/monitoring-deprecation) Prometheus and Grafana, take a look at [Install a custom kube-prometheus-stack in Kyma](https://github.com/kyma-project/examples/tree/main/prometheus).
 
 By default, Kyma does not expose Grafana. However, you can still access them using port forwarding. If you want to expose Grafana, use an identity provider of your choice.
 
