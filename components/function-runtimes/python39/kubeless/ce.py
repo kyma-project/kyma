@@ -1,10 +1,13 @@
-import requests
-import bottle
 import io
-import os
 import json
+import os
+
+import bottle
+import requests
+from cloudevents.http import from_http
 
 publisher_proxy_address = os.getenv('PUBLISHER_PROXY_ADDRESS')
+
 
 class PicklableBottleRequest(bottle.BaseRequest):
     '''Bottle request that can be pickled (serialized).
@@ -40,28 +43,54 @@ class PicklableBottleRequest(bottle.BaseRequest):
         setattr(self, 'environ', env)
 
 
-class Event:
-    ceHeaders = dict()
-    tracer = None
+def resolve_data_type(event_data):
+    if type(event_data) is dict:
+        return 'application/json'
+    elif type(event_data) is str:
+        return 'text/plain'
 
+
+def build_cloud_event_attributes(req, data):
+    event = from_http(req.headers, data)
+    ceHeaders = {
+        'data': event.data,
+        'ce-type': event['type'],
+        'ce-source': event['source'],
+        'ce-eventtypeversion': event['eventtypeversion'],
+        'ce-specversion': event['specversion'],
+        'ce-id': event['id'],
+        'ce-time': event['time'],
+    }
+    return ceHeaders
+
+
+def has_ce_headers(headers):
+    has = 'ce-type' in headers and 'ce-source' in headers
+    return has
+
+
+def is_cloud_event(req):
+    return req.get_header('content-type') == 'application/cloudevents+json' or has_ce_headers(req.headers)
+
+
+class Event:
     def __init__(self, req, tracer):
+        self.ceHeaders = dict()
+        self.tracer = tracer
+        self.req = req
         data = req.body.read()
         picklable_req = PicklableBottleRequest(data, req.environ.copy())
-        if req.get_header('content-type') == 'application/json':
-            data = req.json
-
-        self.req = req
-        self.tracer = tracer
-        self.ceHeaders = {
-            'data': data,
-            'ce-type': req.get_header('ce-type'),
-            'ce-source': req.get_header('ce-source'),
-            'ce-eventtypeversion': req.get_header('ce-eventtypeversion'),
-            'ce-specversion': req.get_header('ce-specversion'),
-            'ce-id': req.get_header('ce-id'),
-            'ce-time': req.get_header('ce-time'),
+        self.ceHeaders.update({
             'extensions': {'request': picklable_req}
-        }
+        })
+
+        if is_cloud_event(req):
+            ce_headers = build_cloud_event_attributes(req, data)
+            self.ceHeaders.update(ce_headers)
+        else:
+            if req.get_header('content-type') == 'application/json':
+                data = req.json
+                self.ceHeaders.update({'data': data})
 
     def __getitem__(self, item):
         return self.ceHeaders[item]
@@ -72,17 +101,11 @@ class Event:
     def publishCloudEvent(self, data):
         return requests.post(
             publisher_proxy_address,
-            data = json.dumps(data, default=str),
-            headers = {"Content-Type": "application/cloudevents+json"}
-            )
-    
-    def resolveDataType(self, event_data):
-        if type(event_data) is dict:
-            return 'application/json'
-        elif type(event_data) is str:
-            return 'text/plain'
+            data=json.dumps(data, default=str),
+            headers={"Content-Type": "application/cloudevents+json"}
+        )
 
-    def buildResponseCloudEvent(self, event_id, event_type, event_data):
+    def build_response_cloud_event(self, event_id, event_type, event_data):
         return {
             'type': event_type,
             'source': self.ceHeaders['ce-source'],
@@ -90,6 +113,5 @@ class Event:
             'specversion': self.ceHeaders['ce-specversion'],
             'id': event_id,
             'data': event_data,
-            'datacontenttype': self.resolveDataType(event_data)
+            'datacontenttype': resolve_data_type(event_data)
         }
-

@@ -105,8 +105,8 @@ global:
       directory: "dev"
     function_runtime_python39:
       name: "function-runtime-python39"
-      version: "v20230720-e1268109"
-      directory: "prod"
+      version: "PR-18008"
+      directory: "dev"
     kaniko_executor:
       name: "tpi/kaniko-executor"
       version: "1.9.1-406380b9"

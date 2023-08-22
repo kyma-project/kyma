@@ -95,3 +95,31 @@ kyma-pypi-test==1.0.0`
 		},
 	}
 }
+
+func PythonCloudEvent(runtime serverlessv1alpha2.Runtime) serverlessv1alpha2.FunctionSpec {
+	dpd := ``
+
+	src := `import json
+
+event_data = None
+
+def main(event, context):
+    global event_data
+    req = event.ceHeaders['extensions']['request']
+
+    if req.method == 'GET':
+        return json.dumps(event_data)
+    event_data = event.ceHeaders
+    event_data.pop('extensions')
+    return ""`
+
+	return serverlessv1alpha2.FunctionSpec{
+		Runtime: runtime,
+		Source: serverlessv1alpha2.Source{
+			Inline: &serverlessv1alpha2.InlineSource{
+				Source:       src,
+				Dependencies: dpd,
+			},
+		},
+	}
+}
