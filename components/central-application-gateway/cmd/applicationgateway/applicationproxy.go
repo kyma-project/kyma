@@ -109,11 +109,17 @@ func main() {
 		ReadTimeout: time.Duration(options.requestTimeout) * time.Second,
 	}
 
+	debugSrv := &http.Server{
+		Addr:    ":" + strconv.Itoa(options.debugPort),
+		Handler: logCfg.Level,
+	}
+
 	var g run.Group
 
 	addHttpServerToRunGroup("external-api", &g, externalSrv)
 	addHttpServerToRunGroup("proxy-kyma-os", &g, internalSrv)
 	addHttpServerToRunGroup("proxy-kyma-mps", &g, internalSrvCompass)
+	addHttpServerToRunGroup("debug-settings", &g, debugSrv)
 	addInterruptSignalToRunGroup(&g)
 
 	err = g.Run()

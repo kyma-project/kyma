@@ -10,6 +10,7 @@ import (
 type options struct {
 	apiServerURL                string
 	applicationSecretsNamespace string
+	debugPort                   int
 	externalAPIPort             int
 	kubeConfig                  string
 	logLevel                    *zapcore.Level
@@ -23,6 +24,7 @@ type options struct {
 func parseArgs(log *zap.Logger) (opts options) {
 	flag.StringVar(&opts.apiServerURL, "apiServerURL", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
 	flag.StringVar(&opts.applicationSecretsNamespace, "applicationSecretsNamespace", "kyma-system", "Namespace where Application secrets used by the Application Gateway exist")
+	flag.IntVar(&opts.debugPort, "debugPort", 3000, "Port for debug settings (ie logging level)")
 	flag.IntVar(&opts.externalAPIPort, "externalAPIPort", 8081, "External API port.")
 	flag.StringVar(&opts.kubeConfig, "kubeConfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
 	opts.logLevel = zap.LevelFlag("logLevel", zap.InfoLevel, "Log level: panic | fatal | error | warn | info | debug. Can't be lower than info")
@@ -43,6 +45,7 @@ func (o options) Log(log *zap.Logger) {
 	log.Info("Parsed flags",
 		zap.String("-apiServerURL", o.apiServerURL),
 		zap.String("-applicationSecretsNamespace", o.applicationSecretsNamespace),
+		zap.Int("-debugPort", o.debugPort),
 		zap.Int("-externalAPIPort", o.externalAPIPort),
 		zap.String("-kubeConfig", o.kubeConfig),
 		zap.String("-logLevel", o.logLevel.String()),
