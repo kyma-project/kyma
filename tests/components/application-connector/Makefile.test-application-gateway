@@ -1,3 +1,5 @@
+# -*- mode: makefile -*-
+
 NAMESPACE ?= test
 GOPATH ?= $(shell go env GOPATH)
 
