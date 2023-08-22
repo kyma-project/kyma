@@ -4,11 +4,11 @@ package applications
 import (
 	"context"
 	"fmt"
+	"go.uber.org/zap"
 	"strings"
 
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/normalization"
-	log "github.com/sirupsen/logrus"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -131,12 +131,15 @@ func (r *repository) getApplication(appName string) (*v1alpha1.Application, appe
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			message := fmt.Sprintf("Application: %s not found.", appName)
-			log.Warn(message)
+			zap.L().Warn(message,
+				zap.String("appName", appName))
 			return nil, apperrors.NotFound(message)
 		}
 
-		message := fmt.Sprintf("failed to get Application '%s' : %s", appName, err.Error())
-		log.Error(message)
+		message := fmt.Sprintf("failed to get Application '%s' : %s", appName, err)
+		zap.L().Error(message,
+			zap.String("appName", appName),
+			zap.Error(err))
 		return nil, apperrors.Internal(message)
 	}
 

@@ -1,6 +1,7 @@
 package strategy
 
 import (
+	"go.uber.org/zap"
 	"net/http"
 
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf"
@@ -8,7 +9,6 @@ import (
 
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization"
-	log "github.com/sirupsen/logrus"
 )
 
 func NewTokenStrategyFactory(csrfClient csrf.Client) csrf.TokenStrategyFactory {
@@ -36,7 +36,8 @@ func (s *strategy) AddCSRFToken(apiRequest *http.Request, skipTLSVerify bool) ap
 
 	tokenResponse, err := s.csrfClient.GetTokenEndpointResponse(s.csrfTokenURL, s.authorizationStrategy, skipTLSVerify)
 	if err != nil {
-		log.Errorf("failed to get CSRF token : '%s'", err)
+		zap.L().Error("failed to get CSRF token",
+			zap.Error(err))
 		return err
 	}
 
