@@ -23,6 +23,9 @@ spec:
     - port: {{ .Values.service.proxy.portCompass }}
       protocol: TCP
       name: http-proxy-mps
+    - port: {{ .Values.service.proxy.portDebug }}
+      protocol: TCP
+      name: http-debug-port
   selector:
     app: {{ .Chart.Name }}
     release: {{ .Release.Name }}
