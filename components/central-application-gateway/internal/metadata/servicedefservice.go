@@ -80,7 +80,7 @@ func handleError(err apperrors.AppError, notFoundMessage, internalErrorMEssage s
 	if err.Code() == apperrors.CodeNotFound {
 		return apperrors.NotFound(notFoundMessage)
 	}
-	zap.L().Error(internalErrorMEssage) // TODO: Reconsider this
+	zap.L().Error(internalErrorMEssage)
 
 	if err.Code() == apperrors.CodeWrongInput {
 		return apperrors.WrongInput(internalErrorMEssage)

@@ -74,17 +74,17 @@ func newProxy(targetURL string, requestParameters *authorization.RequestParamete
 			zap.String("path", req.URL.Path))
 	}
 
-	log := zap.L().Sugar()
+	log := zap.L()
 
 	errorHandler := func(rw http.ResponseWriter, req *http.Request, err error) {
-		log.With(
-			"error", err,
-			"requestID", req.Context().Value(httptools.ContextUUID),
-			"method", req.Method,
-			"host", req.Host,
-			"url", req.URL.RequestURI(),
-			"proto", req.Proto,
-		).Info("Request failed")
+		log.Warn("Request failed",
+			zap.Error(err),
+			zap.Any("requestID", req.Context().Value(httptools.ContextUUID)),
+			zap.String("method", req.Method),
+			zap.String("host", req.Host),
+			zap.String("url", req.URL.RequestURI()),
+			zap.String("proto", req.Proto),
+		)
 		codeRewriter(rw, err)
 	}
 
@@ -191,7 +191,7 @@ func urlRewriter(gatewayURL, target, loc *url.URL) *url.URL {
 
 func codeRewriter(rw http.ResponseWriter, err error) {
 	if errors.Is(err, context.DeadlineExceeded) {
-		zap.L().Info("HTTP status code rewritten to 504",
+		zap.L().Warn("HTTP status code rewritten to 504",
 			zap.Error(err))
 		rw.WriteHeader(http.StatusGatewayTimeout)
 		return
