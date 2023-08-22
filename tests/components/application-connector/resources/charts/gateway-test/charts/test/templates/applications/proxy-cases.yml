@@ -36,3 +36,21 @@ spec:
         - type: API
           targetUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/code/203"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/proxy-cases/code-203"
+    - displayName: code 500
+      name: code 500
+      providerDisplayName: code 500
+      description: Should return 502
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/code/500"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/proxy-cases/code-500"
+    - displayName: code 503
+      name: code 503
+      providerDisplayName: code 503
+      description: Should return 502
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/code/503"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/proxy-cases/code-503"
