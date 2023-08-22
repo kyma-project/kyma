@@ -2,10 +2,11 @@ package httptools
 
 import (
 	"context"
-	"go.uber.org/zap"
-	"k8s.io/apimachinery/pkg/util/uuid"
 	"net/http"
 	"time"
+
+	"go.uber.org/zap"
+	"k8s.io/apimachinery/pkg/util/uuid"
 )
 
 type ContextKey string

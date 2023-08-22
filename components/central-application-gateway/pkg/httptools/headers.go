@@ -1,8 +1,9 @@
 package httptools
 
 import (
-	"go.uber.org/zap"
 	"net/http"
+
+	"go.uber.org/zap"
 )
 
 // SetHeaders modifies request headers setting additional entries from customHeaders

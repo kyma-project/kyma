@@ -36,7 +36,12 @@ const (
 
 func main() {
 	setupLogger := zap.Must(zap.NewProduction())
-	defer setupLogger.Sync()
+	defer func(setupLogger *zap.Logger) {
+		err := setupLogger.Sync()
+		if err != nil {
+			panic(err)
+		}
+	}(setupLogger)
 
 	setupLogger.Info("Starting Application Gateway")
 
@@ -47,7 +52,12 @@ func main() {
 
 	log, err := logCfg.Build()
 	zap.ReplaceGlobals(log)
-	defer log.Sync()
+	defer func(log *zap.Logger) {
+		err := log.Sync()
+		if err != nil {
+			panic(err)
+		}
+	}(log)
 
 	if err != nil {
 		setupLogger.Fatal("Couldn't initiate logger", zap.Error(err))
