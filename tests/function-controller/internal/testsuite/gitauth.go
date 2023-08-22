@@ -85,26 +85,28 @@ func GitAuthTestSteps(restConfig *rest.Config, cfg internal.Config, logf *logrus
 		DataKey:            internal.TestDataKey,
 	}
 
-	var testCases []testRepo
-	testCases = append(testCases, getAzureDevopsTestcase(testCfg))
+	azureTC := getAzureDevopsTestcase(testCfg)
+	azureSecret := secret.NewSecret(azureTC.auth.SecretName, genericContainer)
+	azureFn := function.NewFunction(azureTC.name, cfg.KubectlProxyEnabled, genericContainer)
 
-	githubTestcase, err := getGithubTestcase(testCfg)
+	githubTC, err := getGithubTestcase(testCfg)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while setting github testcase")
 	}
-	testCases = append(testCases, githubTestcase)
+	githubSecret := secret.NewSecret(githubTC.auth.SecretName, genericContainer)
+	githubFn := function.NewFunction(githubTC.name, cfg.KubectlProxyEnabled, genericContainer)
 
-	steps := []executor.Step{}
-	for _, testCase := range testCases {
-		testSteps, err := gitAuthFunctionTestSteps(genericContainer, testCase, poll, cfg.KubectlProxyEnabled)
-		if err != nil {
-			return nil, errors.Wrapf(err, "while generated test case steps")
-		}
-		steps = append(steps, testSteps)
-	}
 	return executor.NewSerialTestRunner(logf, "Test Git function authentication",
 		namespace.NewNamespaceStep("Create test namespace", coreCli, genericContainer),
-		executor.NewParallelRunner(logf, "fn_tests", steps...)), nil
+		executor.NewParallelRunner(logf, "Providers tests",
+			executor.NewSerialTestRunner(genericContainer.Log, fmt.Sprintf("%s Function auth test", azureTC.provider),
+				secret.CreateSecret(genericContainer.Log, azureSecret, "Create Azure Auth Secret", azureTC.secretData),
+				function.CreateFunction(genericContainer.Log, azureFn, "Create Azure Function", runtimes.GitopsFunction(azureTC.url, azureTC.baseDir, azureTC.reference, azureTC.runtime, azureTC.auth)),
+				assertion.NewHTTPCheck(genericContainer.Log, "Git Function simple check through gateway", azureFn.FunctionURL, poll, azureTC.expectedResponse)),
+			executor.NewSerialTestRunner(genericContainer.Log, fmt.Sprintf("%s Function auth test", githubTC.provider),
+				secret.CreateSecret(genericContainer.Log, githubSecret, "Create Github Auth Secret", githubTC.secretData),
+				function.CreateFunction(genericContainer.Log, githubFn, "Create Github Function", runtimes.GitopsFunction(githubTC.url, githubTC.baseDir, githubTC.reference, githubTC.runtime, githubTC.auth)),
+				assertion.NewHTTPCheck(genericContainer.Log, "Git Function simple check through gateway", githubFn.FunctionURL, poll, githubTC.expectedResponse)))), nil
 }
 
 func setupSharedContainer(restConfig *rest.Config, cfg internal.Config, logf *logrus.Entry) (utils.Container, error) {
@@ -123,37 +125,6 @@ func setupSharedContainer(restConfig *rest.Config, cfg internal.Config, logf *lo
 		Verbose:     cfg.Verbose,
 		Log:         logf,
 	}, nil
-}
-
-func gitAuthFunctionTestSteps(genericContainer utils.Container, tr testRepo, poll utils.Poller, useProxy bool) (executor.Step, error) {
-	genericContainer.Log.Infof("Testing Git Function in namespace: %s", genericContainer.Namespace)
-
-	sc := secret.NewSecret(tr.auth.SecretName, genericContainer)
-
-	testFn := function.NewFunction(tr.name, useProxy, genericContainer)
-
-	return executor.NewSerialTestRunner(genericContainer.Log, fmt.Sprintf("%s Function auth test", tr.provider),
-		secret.CreateSecret(
-			genericContainer.Log,
-			sc,
-			fmt.Sprintf("Create %s Auth Secret", tr.provider),
-			tr.secretData),
-		function.CreateFunction(
-			genericContainer.Log,
-			testFn,
-			fmt.Sprintf("Create %s Function", tr.provider),
-			runtimes.GitopsFunction(
-				tr.url,
-				tr.baseDir,
-				tr.reference,
-				tr.runtime,
-				tr.auth),
-		),
-		assertion.NewHTTPCheck(
-			genericContainer.Log,
-			"Git Function simple check through gateway",
-			testFn.FunctionURL,
-			poll, tr.expectedResponse)), nil
 }
 
 func createBasicAuthSecretData(basicAuth BasicAuth) map[string]string {
