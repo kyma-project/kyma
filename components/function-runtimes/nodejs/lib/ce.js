@@ -96,12 +96,12 @@ function buildCloudEventAttributes(req) {
     const receivedEvent = HTTP.toEvent({ headers: req.headers, body: req.body });  
     return {
         'ce-type': receivedEvent.type,
-        'ce-source': receivedEvent.source,
+        // 'ce-source': receivedEvent.source,
         'ce-eventtypeversion': receivedEvent.eventtypeversion,
         'ce-specversion': receivedEvent.specversion,
-        'ce-id': receivedEvent.id,
+        // 'ce-id': receivedEvent.id,
         'ce-time': receivedEvent.time,
-        'ce-datacontenttype': receivedEvent.datacontenttype,
+        // 'ce-datacontenttype': receivedEvent.datacontenttype,
         'data': receivedEvent.data
     };
 }
