@@ -9,7 +9,7 @@ override VERIFY_IGNORE := /vendor\|/automock\|/pkg/apis/serverless/v1alpha2/zz_g
 # Image URL to use all building/pushing image targets
 IMG ?= $(APP_NAME):latest
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
-CRD_OPTIONS ?= "crd:trivialVersions=true,crdVersions=v1"
+#CRD_OPTIONS ?= "crd:trivialVersions=true,crdVersions=v1"
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
@@ -31,11 +31,11 @@ test-local:
 	@go tool cover -func=/tmp/artifacts/cover.out | grep total | awk '{print $$3}'
 
 # Generate manifests e.g. CRD, RBAC etc.
-CONTROLLER_GEN_VERSION=v0.6.2
+CONTROLLER_GEN_VERSION=v0.9.2
 
 .PHONY: manifests
 manifests: controller-gen-local generate-local
-	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=serverless webhook paths="./..." \
+	$(CONTROLLER_GEN) rbac:roleName=serverless crd webhook paths="./..." \
 		object:headerFile=hack/boilerplate.go.txt \
 		output:crd:artifacts:config=config/crd/bases \
 		output:rbac:artifacts:config=config/rbac \
@@ -43,7 +43,7 @@ manifests: controller-gen-local generate-local
 	kustomize build config/crd > config/crd/crd-serverless.yaml
 	cp config/crd/crd-serverless.yaml ../../installation/resources/crds/serverless/
 	cp config/crd/crd-serverless.yaml ../../resources/serverless/templates/crds.yaml
-	(cd ../../hack/table-gen && make serverless-docs )
+	#(cd ../../hack/table-gen && make serverless-docs )
 
 # Generate code
 .PHONY: generate-local

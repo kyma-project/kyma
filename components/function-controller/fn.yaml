@@ -1,0 +1,23 @@
+apiVersion: serverless.kyma-project.io/v1alpha2
+kind: Function
+metadata:
+  name: function-001-v2
+spec:
+  runtime: python39
+  source:
+    inline:
+      dependencies: ""
+      source: |-
+        def main(event, context):
+            return "hello world"
+  labels:
+    test: aaa
+    dasdas: ocie
+#    serverless.kyma-project.io/dasd: a
+#    serverless.kyma-project.io/dupa: a
+#    serverless.kyma-project.io/dasda: d
+    serverless.kyma-project.ia: d
+#    serverless.kyma-project.io/dadsa/dasd: d
+#    serverless.kyma-project.io/d: d
+#    serverless.kyma-project.iodasd: dasd
+#    serverless.kyma-project.io/dasdas: dsaada
