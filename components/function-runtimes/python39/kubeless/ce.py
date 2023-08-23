@@ -54,9 +54,9 @@ def build_cloud_event_attributes(req, data):
     event = from_http(req.headers, data)
     ceHeaders = {
         'data': event.data,
-        'ce-type': event['type'],
+        # 'ce-type': event['type'],
         'ce-source': event['source'],
-        'ce-eventtypeversion': event['eventtypeversion'],
+        # 'ce-eventtypeversion': event['eventtypeversion'],
         'ce-specversion': event['specversion'],
         'ce-id': event['id'],
         'ce-time': event['time'],
