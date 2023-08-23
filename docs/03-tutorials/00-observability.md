@@ -6,7 +6,7 @@ title: Observability
 
 The following instructions describe the complete monitoring flow for your services in Kyma. You get the gist of monitoring applications, such as Prometheus, Grafana, and Alertmanager. You learn how and where you can observe and visualize your service metrics to monitor them for any alerting values.
 
-Kyma comes with a Prometheus stack ([deprecated](https://kyma-project.io/blog/2022/12/9/monitoring-deprecation)), which is designed and sized to monitor Kyma's system components. We recommend to set up an additional Prometheus stack to monitor your custom metrics.
+Kyma comes with a Prometheus stack ([deprecated](https://github.com/kyma-project/website/blob/main/content/blog-posts/2022-12-09-monitoring-deprecation/index.md)), which is designed and sized to monitor Kyma's system components. We recommend to set up an additional Prometheus stack to monitor your custom metrics.
 
 All the tutorials use the [`monitoring-custom-metrics`](https://github.com/kyma-project/examples/tree/main/prometheus/monitoring-custom-metrics) example and one of its services called `sample-metrics-8081`. This service exposes the `cpu_temperature_celsius` custom metric on the `/metrics` endpoint. This custom metric is the central element of the whole tutorial set. The metric value simulates the current processor temperature and changes randomly from 60 to 90 degrees Celsius. The alerting threshold in these tutorials is 75 degrees Celsius. If the temperature exceeds this value, the Grafana dashboard, PrometheusRule, and Alertmanager notifications you create inform you about this.
 

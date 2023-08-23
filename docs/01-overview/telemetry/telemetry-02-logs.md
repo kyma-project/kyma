@@ -77,7 +77,7 @@ In the following steps, you can see how to set up a typical LogPipeline. For an 
 
     - **http**, which sends the data to the specified HTTP destination. The output is designed to integrate with a [Fluentd HTTP Input](https://docs.fluentd.org/input/http), which opens up a huge ecosystem of integration possibilities.
     - **grafana-loki**, which sends the data to the Kyma-internal Loki instance.
-      > **NOTE:** This output is considered legacy and is only provided for backward compatibility with the [deprecated](https://kyma-project.io/blog/2022/11/2/loki-deprecation/) in-cluster Loki instance. It might not be compatible with the latest Loki versions. For integration with a custom Loki installation, use the `custom` output with the name `loki` instead. See also [Installing a custom Loki stack in Kyma](https://github.com/kyma-project/examples/tree/main/loki).
+      > **NOTE:** This output is considered legacy and is only provided for backward compatibility with the [deprecated](https://github.com/kyma-project/website/blob/main/content/blog-posts/2022-11-02-loki-deprecation/index.md) in-cluster Loki instance. It might not be compatible with the latest Loki versions. For integration with a custom Loki installation, use the `custom` output with the name `loki` instead. See also [Installing a custom Loki stack in Kyma](https://github.com/kyma-project/examples/tree/main/loki).
     - **custom**, which supports the configuration of any destination in the Fluent Bit configuration syntax.
       > **CAUTION:** If you use a `custom` output, you put the LogPipeline in the [unsupported mode](#unsupported-mode).
 
