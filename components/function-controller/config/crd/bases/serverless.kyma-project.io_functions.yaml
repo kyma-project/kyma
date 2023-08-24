@@ -67,6 +67,9 @@ spec:
                 description: Defines annotations used in Deployment's PodTemplate
                   and applied on the Function's runtime Pod.
                 type: object
+                x-kubernetes-validations:
+                - message: Labels has key starting with serverless.kyma-project.io/
+                  rule: '!(self.exists(e, e.matches(''serverless.kyma-project.io/*'')))'
               env:
                 description: Specifies an array of key-value pairs to be used as environment
                   variables for the Function. You can define values as static strings
@@ -186,7 +189,7 @@ spec:
                   on the Function's runtime Pod.
                 type: object
                 x-kubernetes-validations:
-                - message: Labels has restricted values
+                - message: Labels has key starting with serverless.kyma-project.io/
                   rule: '!(self.exists(e, e.matches(''serverless.kyma-project.io/*'')))'
               replicas:
                 default: 1
@@ -240,6 +243,10 @@ spec:
                             type: object
                         type: object
                     type: object
+                    x-kubernetes-validations:
+                    - message: Profile or resolurces
+                      rule: has(self.profile) && !has(self.resources) || !has(self.profile)
+                        && has(self.resources)
                   function:
                     description: Specifies resources requested by the Function's Pod.
                     properties:

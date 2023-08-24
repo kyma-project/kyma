@@ -130,6 +130,7 @@ type ScaleConfig struct {
 type ResourceConfiguration struct {
 	// Specifies resources requested by the build Job's Pod.
 	// +optional
+	// +kubebuilder:validation:XValidation:message="Profile or resources",rule="has(self.profile) && !has(self.resources) || !has(self.profile) && has(self.resources)"
 	Build *ResourceRequirements `json:"build,omitempty"`
 
 	// Specifies resources requested by the Function's Pod.
@@ -196,11 +197,12 @@ type FunctionSpec struct {
 
 	// Defines labels used in Deployment's PodTemplate and applied on the Function's runtime Pod.
 	// +optional
-	// +kubebuilder:validation:XValidation:message="Labels has restricted values",rule="!(self.exists(e, e.matches('serverless.kyma-project.io/*')))"
+	// +kubebuilder:validation:XValidation:message="Labels has key starting with serverless.kyma-project.io/",rule="!(self.exists(e, e.matches('serverless.kyma-project.io/*')))"
 	Labels map[string]string `json:"labels,omitempty"`
 
 	// Defines annotations used in Deployment's PodTemplate and applied on the Function's runtime Pod.
 	// +optional
+	// +kubebuilder:validation:XValidation:message="Labels has key starting with serverless.kyma-project.io/",rule="!(self.exists(e, e.matches('serverless.kyma-project.io/*')))"
 	Annotations map[string]string `json:"annotations,omitempty"`
 }
 

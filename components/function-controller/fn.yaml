@@ -10,6 +10,16 @@ spec:
       source: |-
         def main(event, context):
             return "hello world"
+  resourceConfiguration:
+    build:
+      profile: XL
+      resources:
+        limits:
+          cpu: 100m
+          memory: 100Mi
+        requests:
+          cpu: 50m
+          memory: 50Mi
   labels:
     test: aaa
     dasdas: ocie
