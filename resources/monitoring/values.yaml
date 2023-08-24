@@ -122,7 +122,7 @@ global:
       sha: ""
     alertmanager:
       name: "alertmanager"
-      version: "v0.25.0-39347158"
+      version: "v0.25.0-2d77572a"
       directory: "prod/tpi"
       sha: ""
     prometheus:
@@ -136,26 +136,26 @@ global:
       directory: "prod/external/prom"
     node_exporter:
       name: "node-exporter"
-      version: "1.6.0-39347158"
+      version: "1.6.0-2d77572a"
       directory: "prod/tpi"
     kube_state_metrics:
       name: "kube-state-metrics"
-      version: "2.9.2-39347158"
+      version: "2.9.2-2d77572a"
       directory: "prod/tpi"
       sha: ""
     grafana:
       name: "grafana"
-      version: "7.5.17-39347158"
+      version: "7.5.17-2d77572a"
       directory: "prod/tpi"
       sha: ""
     k8s_sidecar:
       name: "k8s-sidecar"
-      version: "1.24.6-8a6ab896"
+      version: "1.24.6-2d77572a"
       directory: "prod/tpi"
       sha: ""
     oauth2_proxy:
       name: "oauth2-proxy"
-      version: "7.4.0-39347158"
+      version: "7.4.0-2d77572a"
       directory: "prod/tpi"
       sha: ""
 

@@ -860,3 +860,10 @@ func WithMaxInFlightMessages(maxInFlight string) SubscriptionOpt {
 		sub.Spec.Config[eventingv1alpha2.MaxInFlightMessages] = maxInFlight
 	}
 }
+
+// WithBackend is a SubscriptionOpt that sets the status with the Backend value.
+func WithBackend(backend eventingv1alpha2.Backend) SubscriptionOpt {
+	return func(sub *eventingv1alpha2.Subscription) {
+		sub.Status.Backend = backend
+	}
+}

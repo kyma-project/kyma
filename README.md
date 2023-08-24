@@ -13,11 +13,11 @@
 
 Out of the box, Kyma offers various functionalities, such as:  
 
-- [Serverless](https://kyma-project.io/docs/kyma/latest/01-overview/serverless/) development platform to run lightweight Functions in a cost-efficient and scalable way
-- [System connectivity](https://kyma-project.io/docs/kyma/latest/01-overview/application-connectivity/) that provides endpoint to securely register Events and APIs of external applications
-- [Eventing](https://kyma-project.io/docs/kyma/latest/01-overview/eventing/) that provides messaging channel to receive events, enrich them, and trigger business flows using Functions or services
-- [Service Mesh](https://kyma-project.io/docs/kyma/latest/01-overview/service-mesh/) for service-to-service communication and proxying
-- [Service Management](https://kyma-project.io/docs/kyma/latest/01-overview/service-management/smgt-01-overview/) to use the built-in cloud services from such cloud providers as GCP, Azure, and AWS
+- [Serverless](https://kyma-project.io/#/01-overview/serverless/README) development platform to run lightweight Functions in a cost-efficient and scalable way
+- [System connectivity](https://kyma-project.io/#/01-overview/application-connectivity/README) that provides endpoint to securely register Events and APIs of external applications
+- [Eventing](https://kyma-project.io/#/01-overview/eventing/README) that provides messaging channel to receive events, enrich them, and trigger business flows using Functions or services
+- [Service Mesh](https://kyma-project.io/#/01-overview/service-mesh/README) for service-to-service communication and proxying
+- [Service Management](https://kyma-project.io/#/01-overview/service-management/README) to use the built-in cloud services from such cloud providers as GCP, Azure, and AWS
 - Secure API exposure
 - In-cluster observability
 - CLI supported by the intuitive UI through which you can connect your application to a Kubernetes cluster
@@ -32,9 +32,9 @@ Go to the [Kyma project website](https://kyma-project.io/) to learn more about o
 
 ## Installation
 
-Install Kyma locally or on a cluster. See the [Installation guides](https://kyma-project.io/docs/kyma/latest/04-operation-guides/operations/02-install-kyma/) for details.
+Install Kyma locally or on a cluster. See the [Installation guides](https://kyma-project.io/#/04-operation-guides/operations/02-install-kyma) for details.
 
-> **NOTE:** Make sure to install the latest Kyma version and keep it up to date by [upgrading Kyma](https://kyma-project.io/docs/kyma/latest/04-operation-guides/operations/05-upgrade-kyma/).
+> **NOTE:** Make sure to install the latest Kyma version and keep it up to date by [upgrading Kyma](https://kyma-project.io/#/04-operation-guides/operations/05-upgrade-kyma).
 
 ## Usage
 
@@ -143,7 +143,7 @@ If you would like to join us and work together on the Kyma project, there are so
 These are the sources you can get the basic Kyma knowledge from:
 
 - [Official Kyma documentation](https://kyma-project.io/)
-- [Getting Started guide](https://kyma-project.io/docs/kyma/latest/02-get-started/)
+- [Getting Started guide](https://kyma-project.io/#/02-get-started/README)
 - Kyma project [Youtube channel](https://www.youtube.com/watch?v=wqQflgmyboY&list=PLmZLSvJAm8FabPF4hLjScx-dDl84NK3l5)
 
 ### Open job positions

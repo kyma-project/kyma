@@ -34,4 +34,4 @@ To run the these tests, apply the following steps:
 5. Edit the [test job spec](./fixtures/serverless-benchmark-job.yaml) to set `USE_LOCAL_MYSQL` to `true`. You can also use `CUSTOM_FUNCTIONS` to test specific Functions instead of testing the full list.
 6. Apply the test job. Each test run creates a data point for each defined Function.
 
-7. Once the first test run is done, you can [access Grafana](https://kyma-project.io/docs/kyma/latest/04-operation-guides/security/sec-06-access-expose-grafana/) and find the `Serverless Controller Benchmarks` dashboard to check the data.
+7. Once the first test run is done, you can [access Grafana](https://kyma-project.io/#/04-operation-guides/security/sec-06-access-expose-grafana) and find the `Serverless Controller Benchmarks` dashboard to check the data.

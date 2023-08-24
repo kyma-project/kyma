@@ -12,7 +12,7 @@ The Function Controller requires the following components to be installed:
 ## Development
 
 To develop the Function Controller, you need:
-- [libgit2-dev](https://libgit2.org/) (v1.1)
+- [libgit2-dev](https://libgit2.org/) (v1.5)
 - [controller-gen](https://github.com/kubernetes-sigs/controller-tools/releases/tag/v0.6.2) (v0.6.2)
 - [kustomize](https://github.com/kubernetes-sigs/kustomize/releases/tag/kustomize%2Fv4.5.7) (v4.5.7)
 
@@ -93,7 +93,7 @@ Build and install the libgit2 binary required by the Function Controller on macO
    ```bash
    github.com/libgit2/git2go/v31 v31.4.14
    ```
-2. Go to the [git2go page](https://github.com/libgit2/git2go#git2go) to check which version of libgit2 you must use. For example, for git2go v31, use libigit2 in version 1.1.
+2. Go to the [git2go page](https://github.com/libgit2/git2go#git2go) to check which version of libgit2 you must use. For example, for git2go v34, use libigit2 in version 1.5.
    
 3. Clone the `libgit2` repository:
 

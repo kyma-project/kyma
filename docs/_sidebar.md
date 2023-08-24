@@ -5,7 +5,7 @@
 * [Operation Guides](/04-operation-guides/README.md)
 * [Technical Reference](05-technical-reference/README.md)
 * Modules
-  * [BTP Operator](/btp-manager/README.md)
+  * [BTP Operator](/btp-manager/user/README.md)
   * [Keda](/keda-manager/user/README.md)
   * [Serverless](/serverless-manager/user/README.md)
   * [Telemetry](/telemetry-manager/user/README.md)

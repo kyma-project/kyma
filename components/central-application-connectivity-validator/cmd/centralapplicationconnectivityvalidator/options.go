@@ -3,27 +3,23 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/vrischmann/envconfig"
+	"k8s.io/client-go/tools/clientcmd"
 	"os"
 	"strings"
 	"time"
-
-	"k8s.io/client-go/tools/clientcmd"
-
-	"github.com/vrischmann/envconfig"
 )
 
 type args struct {
-	proxyPort                   int
-	externalAPIPort             int
-	eventingPathPrefixV1        string
-	eventingPathPrefixV2        string
-	eventingPublisherHost       string
-	eventingPathPrefixEvents    string
-	eventingDestinationPath     string
-	appNamePlaceholder          string
-	cacheExpirationSeconds      int
-	cacheCleanupIntervalSeconds int
-	syncPeriod                  time.Duration
+	proxyPort                int
+	externalAPIPort          int
+	eventingPathPrefixV1     string
+	eventingPathPrefixV2     string
+	eventingPublisherHost    string
+	eventingPathPrefixEvents string
+	eventingDestinationPath  string
+	appNamePlaceholder       string
+	syncPeriod               time.Duration
 }
 
 type config struct {
@@ -45,8 +41,6 @@ func parseOptions() (*options, error) {
 	eventingDestinationPath := flag.String("eventingDestinationPath", "/publish", "Path of the destination of the requests to the Eventing")
 	eventingPathPrefixEvents := flag.String("eventingPathPrefixEvents", "/events", "Prefix of paths that is directed to the Cloud Events based Eventing")
 	appNamePlaceholder := flag.String("appNamePlaceholder", "%%APP_NAME%%", "Path URL placeholder used for an application name")
-	cacheExpirationSeconds := flag.Int("cacheExpirationSeconds", 90, "Expiration time for client IDs stored in cache expressed in seconds")
-	cacheCleanupIntervalSeconds := flag.Int("cacheCleanupIntervalSeconds", 20, "Clean up interval controls how often the client IDs stored in cache are removed")
 	syncPeriod := flag.Duration("syncPeriod", 45*time.Second, "Sync period in seconds how often controller should periodically reconcile Application resource.")
 
 	flag.Parse()
@@ -58,17 +52,15 @@ func parseOptions() (*options, error) {
 
 	return &options{
 		args: args{
-			proxyPort:                   *proxyPort,
-			externalAPIPort:             *externalAPIPort,
-			eventingPathPrefixV1:        *eventingPathPrefixV1,
-			eventingPathPrefixV2:        *eventingPathPrefixV2,
-			eventingPublisherHost:       *eventingPublisherHost,
-			eventingPathPrefixEvents:    *eventingPathPrefixEvents,
-			eventingDestinationPath:     *eventingDestinationPath,
-			appNamePlaceholder:          *appNamePlaceholder,
-			cacheExpirationSeconds:      *cacheExpirationSeconds,
-			cacheCleanupIntervalSeconds: *cacheCleanupIntervalSeconds,
-			syncPeriod:                  *syncPeriod,
+			proxyPort:                *proxyPort,
+			externalAPIPort:          *externalAPIPort,
+			eventingPathPrefixV1:     *eventingPathPrefixV1,
+			eventingPathPrefixV2:     *eventingPathPrefixV2,
+			eventingPublisherHost:    *eventingPublisherHost,
+			eventingPathPrefixEvents: *eventingPathPrefixEvents,
+			eventingDestinationPath:  *eventingDestinationPath,
+			appNamePlaceholder:       *appNamePlaceholder,
+			syncPeriod:               *syncPeriod,
 		},
 		config: c,
 	}, nil
@@ -80,13 +72,11 @@ func (o *options) String() string {
 		"--eventingPathPrefixEvents=%s --eventingPublisherHost=%s "+
 		"--eventingDestinationPath=%s "+
 		"--appNamePlaceholder=%s "+
-		"--cacheExpirationSeconds=%d --cacheCleanupIntervalSeconds=%d "+
 		"--syncPeriod=%d APP_LOG_FORMAT=%s APP_LOG_LEVEL=%s KUBECONFIG=%s",
 		o.proxyPort, o.externalAPIPort,
 		o.eventingPathPrefixV1, o.eventingPathPrefixV2, o.eventingPathPrefixEvents,
 		o.eventingPublisherHost, o.eventingDestinationPath,
 		o.appNamePlaceholder,
-		o.cacheExpirationSeconds, o.cacheCleanupIntervalSeconds,
 		o.syncPeriod, o.LogFormat, o.LogLevel, os.Getenv(clientcmd.RecommendedConfigPathEnvVar))
 }
 
@@ -102,9 +92,6 @@ func (o *options) validate() error {
 	}
 	if !strings.Contains(o.eventingPathPrefixEvents, o.appNamePlaceholder) {
 		return fmt.Errorf("eventingPathPrefixEvents '%s' should contain appNamePlaceholder '%s'", o.eventingPathPrefixEvents, o.appNamePlaceholder)
-	}
-	if o.syncPeriod > time.Duration(o.cacheExpirationSeconds)*time.Second {
-		return fmt.Errorf("syncPeriod '%v' greater than cacheExpirationSeconds '%v' will cause unwanted cache eviction", o.syncPeriod, o.cacheExpirationSeconds)
 	}
 	return nil
 }

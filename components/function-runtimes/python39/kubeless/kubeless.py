@@ -67,7 +67,10 @@ if __name__ == "__main__":
 def func_with_context(e, function_context):
     ex = e.ceHeaders["extensions"]
     with set_req_context(ex["request"]):
-        return func(e, function_context)
+        try:
+            return func(e, function_context)
+        except Exception as e:
+            return e
 
 
 @app.get('/healthz')
@@ -82,7 +85,7 @@ def metrics():
 
 
 @app.error(500)
-def exception_handler():
+def exception_handler(err):
     return 'Internal server error'
 
 
@@ -106,6 +109,8 @@ def handler():
                 return bottle.HTTPError(408, "Timeout while processing the function")
             else:
                 t.join()
+                if isinstance(res, Exception):
+                    raise res
                 return res
 
 

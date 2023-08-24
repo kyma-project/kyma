@@ -27,7 +27,6 @@ func InitializeScenarioTargetNamespaceSidecar(ctx *godog.ScenarioContext) {
 	ctx.Step(`^Httpbin deployment is created in "([^"]*)" namespace$`, installedCase.deployHttpBinInTargetNamespace)
 	ctx.Step(`^Httpbin deployment is deployed and ready in "([^"]*)" namespace$`, installedCase.waitForHttpBinInTargetNamespace)
 	ctx.Step(`^there should be no pods with Istio sidecar in "([^"]*)" namespace$`, installedCase.targetNamespacePodsShouldNotHaveSidecar)
-	ctx.Step(`^there should be some pods with Istio sidecar in "([^"]*)" namespace$`, installedCase.targetNamespacePodsShouldHaveSidecar)
 	ctx.Step(`^there is (\d+) Httpbin deployment in "([^"]*)" namespace$`, installedCase.thereIsNHttpbinPod)
 	ctx.Step(`^there "([^"]*)" be Istio sidecar in httpbin pod in "([^"]*)" namespace$`, installedCase.httpBinPodShouldHaveSidecar)
 	ctx.Step(`^Httpbin deployment is deleted from "([^"]*)" namespace$`, installedCase.deleteHttpBinInTargetNamespace)
@@ -48,27 +47,6 @@ func (i *istioInstalledCase) httpBinPodShouldHaveSidecar(shouldHave string, targ
 		}
 	}
 
-	return nil
-}
-
-func (i *istioInstalledCase) targetNamespacePodsShouldHaveSidecar(targetNamespace string) error {
-	pods, err := k8sClient.CoreV1().Pods(targetNamespace).List(context.Background(), metav1.ListOptions{})
-	if err != nil {
-		return err
-	}
-	var proxies []string
-	for _, pod := range pods.Items {
-		if !metav1.HasAnnotation(pod.ObjectMeta, "sidecar.istio.io/inject") {
-			for _, container := range pod.Spec.Containers {
-				if container.Name == proxyName {
-					proxies = append(proxies, pod.Name)
-				}
-			}
-			if len(proxies) == 0 {
-				return fmt.Errorf("istio sidecars should be deployed in %s", targetNamespace)
-			}
-		}
-	}
 	return nil
 }
 

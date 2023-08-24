@@ -113,7 +113,7 @@ Invocation of endpoints with duplicate names results in a `400 Bad Request` fail
 ### Status codes for errors returned by Application Gateway
 
 - `404 Not Found` - returned when the Application specified in the path doesn't exist.
-- `400 Bad Request` - returned when an Application, service, or entry for the [Compass mode](https://kyma-project.io/docs/kyma/latest/01-overview/application-connectivity/) is not specified in the path.
+- `400 Bad Request` - returned when an Application, service, or entry for the [Compass mode](https://kyma-project.io/#/01-overview/application-connectivity/README) is not specified in the path.
 - `504 Gateway Timeout` - returned when a call to the target API times out.
 
 ## Development

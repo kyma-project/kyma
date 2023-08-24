@@ -41,7 +41,6 @@ func stateFnCheckDeployments(ctx context.Context, r *reconciler, s *systemState)
 
 	args := buildDeploymentArgs{
 		DockerPullAddress:      r.cfg.docker.PullAddress,
-		JaegerServiceEndpoint:  r.cfg.fn.JaegerServiceEndpoint,
 		TraceCollectorEndpoint: r.cfg.fn.TraceCollectorEndpoint,
 		PublisherProxyAddress:  r.cfg.fn.PublisherProxyAddress,
 		ImagePullAccountName:   r.cfg.fn.ImagePullAccountName,
