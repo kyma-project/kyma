@@ -505,6 +505,7 @@ function createStructuredCloudEventRequestBody(eventId, eventType, eventSource, 
     type: eventType,
     eventId: eventId,
     eventType: eventType, // passing unclean event type as payload
+    data: '{"foo":"bar"}',
   };
   return reqBody;
 }
