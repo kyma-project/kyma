@@ -1,4 +1,4 @@
----
+{{- if .Values.global.jetstream.enabled }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -306,3 +306,4 @@ spec:
         storageClassName: {{ .Values.nats.jetstream.fileStorage.storageClassName | quote }}
         {{- end }}
   {{- end }}
+{{- end }}

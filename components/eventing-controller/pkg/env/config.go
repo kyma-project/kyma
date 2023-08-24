@@ -61,6 +61,9 @@ type Config struct {
 
 	// EventingWebhookAuthEnabled enable/disable the Eventing webhook auth feature flag.
 	EventingWebhookAuthEnabled bool `envconfig:"EVENTING_WEBHOOK_AUTH_ENABLED" required:"false" default:"false"`
+
+	// NATSProvisioningEnabled enable/disable the NATS resources provisioning feature flag.
+	NATSProvisioningEnabled bool `envconfig:"NATS_PROVISIONING_ENABLED" required:"false" default:"true"`
 }
 
 func GetConfig() Config {

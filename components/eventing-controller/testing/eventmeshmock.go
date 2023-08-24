@@ -15,6 +15,7 @@ import (
 	. "github.com/onsi/gomega" //nolint:revive,stylecheck // using . import for convenience
 	"golang.org/x/oauth2"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
+
 	// gcp auth etc.
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 
