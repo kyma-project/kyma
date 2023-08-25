@@ -9,7 +9,7 @@ require (
 	github.com/go-logr/logr v1.2.4
 	github.com/go-logr/zapr v1.2.4
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/kyma-incubator/api-gateway v0.0.0-20220819093753-296e6704d413
+	github.com/kyma-project/api-gateway v0.0.0-20230808112956-29d8ce01f138
 	github.com/kyma-project/kyma/common/logging v0.0.0-20230616102347-ad6927dc28d5
 	github.com/kyma-project/kyma/components/application-operator v0.0.0-20230127165033-ec8e43477eca
 	github.com/mitchellh/hashstructure/v2 v2.0.2
@@ -104,6 +104,5 @@ replace (
 )
 
 replace (
-	github.com/kyma-incubator/api-gateway => github.com/kyma-project/api-gateway v0.0.0-20220819093753-296e6704d413
 	k8s.io/utils => k8s.io/utils v0.0.0-20221012122500-cfd413dd9e85
 )
