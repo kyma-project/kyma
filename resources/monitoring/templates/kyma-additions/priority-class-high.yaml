@@ -4,4 +4,4 @@ metadata:
   name: {{ .Values.global.monitoringHighPriorityClassName }}
 value: 2100000
 globalDefault: false
-description: "Global scheduling priority of Telemetry DaemonSet components. Must not be blocked by unschedulable non-daemonset workloads."
+description: "Global scheduling priority of Monitoring DaemonSet components. Must not be blocked by unschedulable non-daemonset workloads."
