@@ -102,5 +102,3 @@ replace (
 	k8s.io/client-go => k8s.io/client-go v0.25.11
 	k8s.io/component-base => k8s.io/component-base v0.25.11
 )
-
-replace k8s.io/utils => k8s.io/utils v0.0.0-20221012122500-cfd413dd9e85
