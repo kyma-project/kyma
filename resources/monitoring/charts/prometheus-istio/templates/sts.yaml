@@ -39,8 +39,8 @@ spec:
         {{ toYaml .Values.server.podLabels | nindent 8 }}
         {{- end}}
     spec:
-{{- if or .Values.server.priorityClassName .Values.global.priorityClassName }}
-      priorityClassName: "{{ coalesce .Values.server.priorityClassName .Values.global.priorityClassName }}"
+{{- if or .Values.server.priorityClassName .Values.global.monitoringPriorityClassName }}
+      priorityClassName: "{{ coalesce .Values.server.priorityClassName .Values.global.monitoringPriorityClassName }}"
 {{- end }}
 {{- if .Values.server.schedulerName }}
       schedulerName: "{{ .Values.server.schedulerName }}"
