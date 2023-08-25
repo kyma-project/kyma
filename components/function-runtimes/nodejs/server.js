@@ -123,9 +123,6 @@ app.all("*", (req, res, next) => {
                     res.status(status);
                 } 
                 switch (typeof body) {
-                    case 'string':
-                        res.end(body);
-                        break;
                     case 'object':
                         res.json(body); // includes res.end(), null also handled
                         break;
@@ -133,7 +130,8 @@ app.all("*", (req, res, next) => {
                         res.end();
                         break;
                     default:
-                        res.end(JSON.stringify(result));
+                        res.end(body);
+                        break;
                 }
                 // res.send(body);
             } else if(status){
