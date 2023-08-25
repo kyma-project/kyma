@@ -114,6 +114,7 @@ type ResourceRequirements struct {
 	// Can't be used together with **Profile**.
 	// For configuration details, see the [official Kubernetes documentation](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/).
 	// +optional
+	// +kubebuilder:validation:XValidation:message="Limit for CPU",rule="has(self.resources.requests) && 'cpu' in has(self.resources.requests)"
 	Resources *v1.ResourceRequirements `json:"resources,omitempty"`
 }
 
@@ -135,6 +136,7 @@ type ResourceConfiguration struct {
 
 	// Specifies resources requested by the Function's Pod.
 	// +optional
+	// +kubebuilder:validation:XValidation:message="Profile or resources",rule="has(self.profile) && !has(self.resources) || !has(self.profile) && has(self.resources)"
 	Function *ResourceRequirements `json:"function,omitempty"`
 }
 

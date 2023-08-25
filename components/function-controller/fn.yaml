@@ -12,7 +12,7 @@ spec:
             return "hello world"
   resourceConfiguration:
     build:
-      profile: XL
+#      profile: XL
       resources:
         limits:
           cpu: 100m
