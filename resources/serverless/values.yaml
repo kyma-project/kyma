@@ -97,16 +97,16 @@ global:
       directory: "prod"
     function_runtime_nodejs16:
       name: "function-runtime-nodejs16"
-      version: "PR-18048"
-      directory: "dev"
+      version: "v20230825-6cba36eb"
+      directory: "prod"
     function_runtime_nodejs18:
       name: "function-runtime-nodejs18"
-      version: "PR-18048"
-      directory: "dev"
+      version: "v20230825-6cba36eb"
+      directory: "prod"
     function_runtime_python39:
       name: "function-runtime-python39"
-      version: "PR-18046"
-      directory: "dev"
+      version: "v20230825-e258ba7e"
+      directory: "prod"
     kaniko_executor:
       name: "tpi/kaniko-executor"
       version: "1.9.1-406380b9"
