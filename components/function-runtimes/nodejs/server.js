@@ -131,7 +131,6 @@ app.all("*", (req, res, next) => {
                         break;
                     default:
                         res.end(body);
-                        break;
                 }
                 // res.send(body);
             } else if(status){
