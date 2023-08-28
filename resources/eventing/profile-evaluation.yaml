@@ -19,6 +19,7 @@ controller:
       cpu: 1m
       memory: 32Mi
   publisherProxy:
+    replicas: 1
     resources:
       limits:
         cpu: 10m
@@ -37,7 +38,7 @@ nats:
     jetstream:
       memStorage:
         enabled: true
-        size: 1Gi
+        size: 64Mi
     resources:
       limits:
         cpu: 20m

@@ -81,31 +81,31 @@ global:
       directory: "prod"
     function_controller:
       name: "function-controller"
-      version: "PR-17942"
-      directory: "dev"
+      version: "v20230824-a02c92c2"
+      directory: "prod"
     function_webhook:
       name: "function-webhook"
-      version: "PR-17942"
-      directory: "dev"
+      version: "v20230824-a02c92c2"
+      directory: "prod"
     function_build_init:
       name: "function-build-init"
-      version: "PR-17942"
-      directory: "dev"
+      version: "v20230824-a02c92c2"
+      directory: "prod"
     function_registry_gc:
       name: "function-registry-gc"
       version: "v20230628-61d97068"
       directory: "prod"
     function_runtime_nodejs16:
       name: "function-runtime-nodejs16"
-      version: "PR-17917"
-      directory: "dev"
+      version: "v20230825-7f960fef"
+      directory: "prod"
     function_runtime_nodejs18:
       name: "function-runtime-nodejs18"
-      version: "PR-17917"
-      directory: "dev"
+      version: "v20230825-7f960fef"
+      directory: "prod"
     function_runtime_python39:
       name: "function-runtime-python39"
-      version: "v20230720-e1268109"
+      version: "v20230825-e258ba7e"
       directory: "prod"
     kaniko_executor:
       name: "tpi/kaniko-executor"
@@ -172,8 +172,8 @@ containers:
   manager:
     resources:
       limits:
-        cpu: 500m
-        memory: 160Mi
+        cpu: 600m
+        memory: 1Gi
       requests:
         cpu: 10m
         memory: 32Mi

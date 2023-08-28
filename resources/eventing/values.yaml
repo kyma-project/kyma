@@ -5,12 +5,12 @@ global:
   images:
     eventing_controller:
       name: eventing-controller
-      version: PR-17959
-      directory: dev
+      version: v20230824-c2e2e731
+      directory: prod
       pullPolicy: "IfNotPresent"
     publisher_proxy:
       name: event-publisher-proxy
-      version: v20230721-270f870c
+      version: v20230824-01c828ca
       directory: prod
     certHandler:
       name: eventing-webhook-certificates
@@ -22,11 +22,11 @@ global:
       directory: prod/external
     nats_config_reloader:
       name: natsio/nats-server-config-reloader
-      version: 0.10.1
+      version: 0.12.0
       directory: prod/external
     prometheus_nats_exporter:
       name: natsio/prometheus-nats-exporter
-      version: 0.11.0
+      version: 0.12.0
       directory: prod/external
 
   jetstream:
@@ -39,6 +39,8 @@ global:
     # podManagementPolicy controls how pods are created during initial scale up,
     # when replacing pods on nodes, or when scaling down.
     podManagementPolicy: Parallel
+
+  priorityClassName: "eventing-priority-class"
 
   # secretName defines optionally another name than the default secret name
   secretName: ""

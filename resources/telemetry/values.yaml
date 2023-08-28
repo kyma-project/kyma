@@ -4,19 +4,19 @@ global:
   images:
     directory_size_exporter:
       name: "directory-size-exporter"
-      version: "v20230607-7cc7ffbf"
+      version: "v20230824-2d68935f"
       directory: "prod"
     telemetry_operator:
       name: "telemetry-manager"
-      version: "v20230818-0aadd5f3"
+      version: "v20230825-38957505"
       directory: "prod"
     telemetry_otel_collector:
       name: "otel-collector"
-      version: "0.81.0-aee4f05f"
+      version: "0.83.0-da21e9f9"
       directory: "prod/tpi"
     fluent_bit:
       name: "fluent-bit"
-      version: "2.1.7-bcac7090"
+      version: "2.1.8-da21e9f9"
       directory: "prod/tpi"
   log:
     level: "info"

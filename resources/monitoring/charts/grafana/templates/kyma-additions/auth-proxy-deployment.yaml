@@ -34,8 +34,8 @@ spec:
         configMap:
           name: {{ .Release.Name }}-auth-proxy-{{ template "grafana.name" . }}-templates
       serviceAccountName: {{ .Release.Name }}-auth-proxy-{{ template "grafana.name" . }}
-      {{- if or .Values.priorityClassName .Values.global.priorityClassName }}
-      priorityClassName: {{ coalesce .Values.priorityClassName .Values.global.priorityClassName }}
+      {{- if or .Values.priorityClassName .Values.global.monitoringPriorityClassName }}
+      priorityClassName: {{ coalesce .Values.priorityClassName .Values.global.monitoringPriorityClassName }}
       {{- end }}
       {{- if .Values.kyma.authProxy.securityContext }}
       securityContext:

@@ -104,7 +104,7 @@ jetstream:
   maxBytes: -1
 
 eventingWebhookAuth:
-  enabled: false
+  enabled: true
   secret:
     name: eventing-webhook-auth
     namespace: kyma-system

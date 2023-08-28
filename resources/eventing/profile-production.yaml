@@ -13,19 +13,20 @@ controller:
     maxMessages: -1
   resources:
     limits:
-      cpu: 1000m
+      cpu: 500m
       memory: 512Mi
     requests:
       cpu: 10m
-      memory: 256Mi
+      memory: 64Mi
   publisherProxy:
+    replicas: 1
     resources:
       limits:
         cpu: 500m
         memory: 512Mi
       requests:
         cpu: 10m
-        memory: 256Mi
+        memory: 64Mi
 
 nats:
   cluster:
@@ -44,7 +45,7 @@ nats:
         memory: 1Gi
       requests:
         cpu: 10m
-        memory: 512Mi
+        memory: 64Mi
     logging:
       debug: false
       trace: false

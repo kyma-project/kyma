@@ -21,8 +21,8 @@ spec:
     spec:
       serviceAccountName: {{ include "operator.serviceAccountName" . }}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
-      {{- if or .Values.priorityClassName .Values.global.priorityClassName }}
-      priorityClassName: {{ coalesce .Values.priorityClassName .Values.global.priorityClassName }}
+      {{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName }}
       {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
@@ -44,8 +44,8 @@ spec:
             - --fluent-bit-exporter-image={{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.directory_size_exporter) }}
             - --validating-webhook-enabled={{ .Values.webhook.enabled }}
             - --enable-telemetry-manager-module=false
-{{- if or .Values.highPriorityClassName .Values.global.highPriorityClassName }}
-            - --fluent-bit-priority-class-name={{ coalesce .Values.highPriorityClassName .Values.global.highPriorityClassName }}
+{{- if .Values.highPriorityClassName }}
+            - --fluent-bit-priority-class-name={{ .Values.highPriorityClassName }}
 {{- end }}
 {{- if not .Values.controllers.logging.enabled }}
             - --enable-logging=false
@@ -55,15 +55,15 @@ spec:
 {{- else }}
             - --enable-tracing=true
             - --trace-collector-image={{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.telemetry_otel_collector) }}
-{{- if or .Values.priorityClassName .Values.global.priorityClassName }}
-            - --trace-collector-priority-class={{ coalesce .Values.priorityClassName .Values.global.priorityClassName }}
+{{- if .Values.priorityClassName }}
+            - --trace-collector-priority-class={{ .Values.priorityClassName }}
 {{- end }}
 {{- end }}
 {{- if not .Values.controllers.metrics.enabled }}
             - --enable-metrics=false
 {{- else }}
-{{- if or .Values.priorityClassName .Values.global.priorityClassName }}
-            - --metric-gateway-priority-class={{ coalesce .Values.priorityClassName .Values.global.priorityClassName }}
+{{- if .Values.priorityClassName }}
+            - --metric-gateway-priority-class={{ .Values.priorityClassName }}
 {{- end }}
 {{- end }}
           name: manager
