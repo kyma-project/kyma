@@ -178,6 +178,92 @@ spec:
                         - http
                         minLength: 1
                         type: string
+                      tls:
+                        description: Defines TLS options for the OTLP output.
+                        properties:
+                          ca:
+                            description: Defines an optional CA certificate for server
+                              certificate verification when using TLS. The certificate
+                              needs to be provided in PEM format.
+                            properties:
+                              value:
+                                description: Value that can contain references to
+                                  Secret values.
+                                type: string
+                              valueFrom:
+                                properties:
+                                  secretKeyRef:
+                                    description: Refers to a key in a Secret. You
+                                      must provide `name` and `namespace` of the Secret,
+                                      as well as the name of the `key`.
+                                    properties:
+                                      key:
+                                        type: string
+                                      name:
+                                        type: string
+                                      namespace:
+                                        type: string
+                                    type: object
+                                type: object
+                            type: object
+                          cert:
+                            description: Defines a client certificate to use when
+                              using TLS. The certificate needs to be provided in PEM
+                              format.
+                            properties:
+                              value:
+                                description: Value that can contain references to
+                                  Secret values.
+                                type: string
+                              valueFrom:
+                                properties:
+                                  secretKeyRef:
+                                    description: Refers to a key in a Secret. You
+                                      must provide `name` and `namespace` of the Secret,
+                                      as well as the name of the `key`.
+                                    properties:
+                                      key:
+                                        type: string
+                                      name:
+                                        type: string
+                                      namespace:
+                                        type: string
+                                    type: object
+                                type: object
+                            type: object
+                          insecure:
+                            description: Defines whether to send requests using plaintext
+                              instead of TLS.
+                            type: boolean
+                          insecureSkipVerify:
+                            description: Defines whether to skip server certificate
+                              verification when using TLS.
+                            type: boolean
+                          key:
+                            description: Defines the client key to use when using
+                              TLS. The key needs to be provided in PEM format.
+                            properties:
+                              value:
+                                description: Value that can contain references to
+                                  Secret values.
+                                type: string
+                              valueFrom:
+                                properties:
+                                  secretKeyRef:
+                                    description: Refers to a key in a Secret. You
+                                      must provide `name` and `namespace` of the Secret,
+                                      as well as the name of the `key`.
+                                    properties:
+                                      key:
+                                        type: string
+                                      name:
+                                        type: string
+                                      namespace:
+                                        type: string
+                                    type: object
+                                type: object
+                            type: object
+                        type: object
                     required:
                     - endpoint
                     type: object

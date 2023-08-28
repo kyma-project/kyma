@@ -32,8 +32,8 @@ spec:
       securityContext:
 {{ toYaml .Values.securityContext | indent 8 }}
 {{- end }}
-{{- if or .Values.priorityClassName .Values.global.highPriorityClassName }}
-      priorityClassName: {{ coalesce .Values.priorityClassName .Values.global.highPriorityClassName }}
+{{- if or .Values.priorityClassName .Values.global.monitoringHighPriorityClassName }}
+      priorityClassName: {{ coalesce .Values.priorityClassName .Values.global.monitoringHighPriorityClassName }}
 {{- end }}
       {{- if .Values.extraInitContainers }}
       initContainers:
