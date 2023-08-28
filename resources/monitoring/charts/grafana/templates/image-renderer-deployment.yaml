@@ -51,8 +51,8 @@ spec:
       hostAliases:
       {{ toYaml .Values.imageRenderer.hostAliases | indent 2 }}
       {{- end }}
-      {{- if or .Values.imageRenderer.priorityClassName .Values.global.priorityClassName }}
-      priorityClassName: {{ coalesce .Values.imageRenderer.priorityClassName .Values.global.priorityClassName }}
+      {{- if or .Values.imageRenderer.priorityClassName .Values.global.monitoringPriorityClassName }}
+      priorityClassName: {{ coalesce .Values.imageRenderer.priorityClassName .Values.global.monitoringPriorityClassName }}
       {{- end }}
       {{- if .Values.imageRenderer.image.pullSecrets }}
       imagePullSecrets:

@@ -10,8 +10,8 @@ global:
       pullPolicy: "IfNotPresent"
     publisher_proxy:
       name: event-publisher-proxy
-      version: PR-17904
-      directory: dev
+      version: v20230824-01c828ca
+      directory: prod
     certHandler:
       name: eventing-webhook-certificates
       version: 1.7.0
@@ -22,11 +22,11 @@ global:
       directory: prod/external
     nats_config_reloader:
       name: natsio/nats-server-config-reloader
-      version: 0.10.1
+      version: 0.12.0
       directory: prod/external
     prometheus_nats_exporter:
       name: natsio/prometheus-nats-exporter
-      version: 0.11.0
+      version: 0.12.0
       directory: prod/external
 
   jetstream:

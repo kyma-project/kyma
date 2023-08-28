@@ -4,11 +4,11 @@ global:
   images:
     directory_size_exporter:
       name: "directory-size-exporter"
-      version: "v20230822-75aecc66"
+      version: "v20230824-2d68935f"
       directory: "prod"
     telemetry_operator:
       name: "telemetry-manager"
-      version: "v20230823-bc5def15"
+      version: "v20230825-38957505"
       directory: "prod"
     telemetry_otel_collector:
       name: "otel-collector"

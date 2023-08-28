@@ -192,7 +192,8 @@ global:
   # - "image-pull-secret"
 
 
-  highPriorityClassName: "kyma-system-priority"
+  monitoringHighPriorityClassName: "monitoring-priority-class-high"
+  monitoringPriorityClassName: "monitoring-priority-class"
 
   # disable slack and victorops alerting by default
   alertTools:
