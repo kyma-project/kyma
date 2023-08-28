@@ -7,3 +7,4 @@
   * [Service Management](/01-overview/service-management/README.md)
   * [Service Mesh](/01-overview/service-mesh/README.md)
   * [User Interfaces](/01-overview/ui/README.md)
+  * [Kyma Istio Operator](/istio-operator/user/00-overview/README.md)

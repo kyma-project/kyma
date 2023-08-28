@@ -1,4 +1,4 @@
-* [Home](/README.md)
+* [Home](/README)
 * [Kyma Components](/01-overview/README.md)
 * [Get Started](/02-get-started/README.md)
 * [Developer Tutorials](/03-tutorials/README.md)

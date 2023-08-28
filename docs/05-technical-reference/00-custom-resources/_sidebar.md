@@ -1,3 +1,4 @@
+
 * [Technical Reference](../README.md)
   * [Custom resources](README.md)
     * [Application](ac-01-application.md)
@@ -5,4 +6,8 @@
     * [APIRule](apix-01-apirule.md)
     * [Subscription](evnt-01-subscription.md)
     * [EventingBackend](evnt-02-eventingbackend.md)
-    * [Istio](oper-01-istio.md)
+    * [Kyma Istio Operator](/istio/user/03-technical-reference/istio-custom-resource/01-30-istio-custom-resource.md)
+    * [Function](svls-01-function.md)
+    * [LogPipeline](telemetry-01-logpipeline.md)
+    * [LogParser](telemetry-02-logparser.md)
+    * [TracePipeline](telemetry-03-tracepipeline.md)

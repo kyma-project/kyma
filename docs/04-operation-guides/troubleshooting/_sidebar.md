@@ -7,6 +7,7 @@
   * [Security](security/README.md)
   * [Serverless](serverless/README.md)
   * [Service Mesh](service-mesh/README.md)
+  * [Kyma Istio Operator](/istio-operator/user/03-troubleshooting/README.md)
   * [Component doesn't work after successful installation](01-component-installation-fails.md)
   * [Local Kyma deployment fails with pending Pods](01-deplyoment-fails-pending-pods.md)
   * [Provisioning k3d fails on a Linux machine](01-k3d-fails-on-linux.md)
