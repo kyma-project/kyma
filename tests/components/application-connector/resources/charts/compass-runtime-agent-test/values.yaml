@@ -11,8 +11,8 @@ containerRegistry:
 images:
   compassTest:
     name: "compass-runtime-agent-test"
-      version: "v20230824-a02c92c2"
-      directory: "prod"
+    version: "v20230824-a02c92c2"
+    directory: "prod"
 
 compassCredentials:
   clientID: ""
