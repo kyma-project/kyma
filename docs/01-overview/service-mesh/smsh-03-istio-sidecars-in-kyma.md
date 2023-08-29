@@ -18,7 +18,7 @@ Another security benefit of having a sidecar proxy is that you can perform [requ
 
 ## Observability
 
-Furthermore, Istio proxies improve tracing: Istio performs global tracing and forwards the data to a tracing backend using the [OTLP protocol](https://opentelemetry.io/docs/reference/specification/protocol/). Learn more in [Tracing Architecture](../../01-overview/telemetry/telemetry-03-traces.md#architecture).
+Furthermore, Istio proxies improve tracing: Istio performs global tracing and forwards the data to a tracing backend using the [OTLP protocol](https://opentelemetry.io/docs/reference/specification/protocol/). Learn more in [Tracing Architecture](https://kyma-project.io/#/telemetry-manager/user/03-traces?id=architecture).
 
 Kiali is another tool to monitor the service mesh; and Kyma configures Istio to export metrics necessary to support Kiali features that facilitate managing, visualizing, and troubleshooting your service mesh. Learn more about deploying Kiali to your Kyma cluster in our [Kiali example](https://github.com/kyma-project/examples/tree/main/kiali).
 
