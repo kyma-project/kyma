@@ -314,7 +314,7 @@ spec:
 The Kyma [Eventing](../eventing/README.md) component dispatches events from an in- or out-cluster backend to your workload. Hereby, it is leveraging the [cloudevents](https://cloudevents.io/) protocol which natively supports the [W3C Trace Context](https://www.w3.org/TR/trace-context) propagation. That said, the Eventing component already propagates trace context properly but does not enrich a trace with more advanced span data.
 
 ### Serverless
-All engines for the [Serverless](../serverless/README.md) runtime integrate the [Open Telemetry SDK](https://opentelemetry.io/docs/reference/specification/metrics/sdk/) by default. With that, trace propagation will no longer be your concern, as the used middlewares are configured to automatically propagate the context for chained calls. By having the Telemetry endpoints configured by default, it also reports custom spans for incoming and outgoing requests. With the provided [tooling](../..///03-tutorials/00-serverless/svls-12-customize-function-traces.md), more spans can be easily added as part of your Serverless source code.
+All engines for the [Serverless](../serverless/README.md) runtime integrate the [Open Telemetry SDK](https://opentelemetry.io/docs/reference/specification/metrics/sdk/) by default. With that, trace propagation will no longer be your concern, as the used middlewares are configured to automatically propagate the context for chained calls. By having the Telemetry endpoints configured by default, it also reports custom spans for incoming and outgoing requests. With the provided [tooling](https://kyma-project.io/#/serverless-manager/user/tutorials/01-100-customize-function-traces), more spans can be easily added as part of your Serverless source code.
 
 ## Limitations
 
