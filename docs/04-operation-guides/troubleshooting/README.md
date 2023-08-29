@@ -53,7 +53,8 @@ See the full list of Kyma troubleshooting guides:
 
 ### Service Mesh
 
-- [Can't access a Kyma endpoint (503 status code)](./service-mesh/smsh-01-503-no-access.md)
-- [Connection refused errors](./service-mesh/smsh-02-connection-refused.md)
-- [Issues with Istio sidecar injection](./service-mesh/smsh-03-istio-no-sidecar.md)
-- [Incompatible Istio sidecar version after Kyma upgrade](./service-mesh/smsh-04-istio-sidecar-version.md)
+- [Can't access a Kyma endpoint (503 status code)](/istio-operator/user/02-operation-guides/troubleshooting/03-10-503-no-access)
+- [Connection refused errors](/istio-operator/user/02-operation-guides/troubleshooting/03-20-connection-refused)
+- [Issues with Istio sidecar injection](/istio-operator/user/02-operation-guides/troubleshooting/03-30-istio-no-sidecar)
+- [Incompatible Istio sidecar version after Kyma upgrade](/istio-operator/user/02-operation-guides/troubleshooting/03-40-incompatible-istio-sidecar-version)
+- [Kyma Istio Operator was unintentionally disabled](/istio-operator/user/02-operation-guides/troubleshooting/03-50-recovering-from-unintentional-istio-module-removal)

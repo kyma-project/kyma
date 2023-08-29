@@ -5,6 +5,6 @@
   * [Eventing](/01-overview/eventing/README.md)
   * [Observability](/01-overview/observability/README.md)
   * [Service Management](/01-overview/service-management/README.md)
-  * [Service Mesh](/01-overview/service-mesh/README.md)
+  * [Telemetry](/01-overview/telemetry/README.md)
   * [User Interfaces](/01-overview/ui/README.md)
   * [Kyma Istio Operator](/istio-operator/user/00-overview/README.md)
