@@ -53,8 +53,8 @@ See the full list of Kyma troubleshooting guides:
 
 ### Service Mesh
 
-- [Can't access a Kyma endpoint (503 status code)](/istio-operator/user/02-operation-guides/troubleshooting/03-10-503-no-access)
-- [Connection refused errors](/istio-operator/user/02-operation-guides/troubleshooting/03-20-connection-refused)
-- [Issues with Istio sidecar injection](/istio-operator/user/02-operation-guides/troubleshooting/03-30-istio-no-sidecar)
-- [Incompatible Istio sidecar version after Kyma upgrade](/istio-operator/user/02-operation-guides/troubleshooting/03-40-incompatible-istio-sidecar-version)
-- [Kyma Istio Operator was unintentionally disabled](/istio-operator/user/02-operation-guides/troubleshooting/03-50-recovering-from-unintentional-istio-module-removal)
+- [Can't access a Kyma endpoint (503 status code)](/istio/user/02-operation-guides/troubleshooting/03-10-503-no-access)
+- [Connection refused errors](/istio/user/02-operation-guides/troubleshooting/03-20-connection-refused)
+- [Issues with Istio sidecar injection](/istio/user/02-operation-guides/troubleshooting/03-30-istio-no-sidecar)
+- [Incompatible Istio sidecar version after Kyma upgrade](/istio/user/02-operation-guides/troubleshooting/03-40-incompatible-istio-sidecar-version)
+- [Kyma Istio Operator was unintentionally disabled](/istio/user/02-operation-guides/troubleshooting/03-50-recovering-from-unintentional-istio-module-removal)

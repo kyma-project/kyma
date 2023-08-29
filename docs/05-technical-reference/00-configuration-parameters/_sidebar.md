@@ -7,6 +7,6 @@
     * [Observability charts](/05-technical-reference/00-configuration-parameters/obsv-01-configpara-observability.md)
     * [Connection with Compass](/05-technical-reference/00-configuration-parameters/ra-01-connection-with-compass.md)
     * [Cluster Users chart](/05-technical-reference/00-configuration-parameters/sec-01-cluster-users.md)
-    * [Kyma Istio Operator](/istio-operator/user/03-technical-reference/configuration-parameters/01-10-istio-controller-parameters.md)
+    * [Kyma Istio Operator](/istio/user/03-technical-reference/configuration-parameters/01-10-istio-controller-parameters.md)
     * [Serverless chart](/05-technical-reference/00-configuration-parameters/svls-01-serverless-chart.md)
     * [Environment variables](/05-technical-reference/00-configuration-parameters/svls-02-environment-variables.md)

@@ -6,7 +6,7 @@
   * [Observability](observability/README.md)
   * [Security](security/README.md)
   * [Serverless](serverless/README.md)
-  * [Kyma Istio Operator](/istio-operator/user/02-operation-guides/troubleshooting/README.md)
+  * [Kyma Istio Operator](/istio/user/02-operation-guides/troubleshooting/README.md)
   * [Component doesn't work after successful installation](01-component-installation-fails.md)
   * [Local Kyma deployment fails with pending Pods](01-deplyoment-fails-pending-pods.md)
   * [Provisioning k3d fails on a Linux machine](01-k3d-fails-on-linux.md)

@@ -22,7 +22,7 @@ All the steps are performed in the `default` Namespace.
   
     Alternatively, you can just use `curl` to publish events.
 - Istio sidecar injection enabled in the `default` Namespace
-  >**NOTE:** Read about [Istio sidecars in Kyma and why you want them](/istio-operator/user/00-overview/00-30-overview-istio-sidecars). Then, check how to [enable automatic Istio sidecar proxy injection](/istio-operator/user/02-operation-guides/operations/02-20-enable-sidecar-injection). For more details, see [Default Istio setup in Kyma](/istio-operator/user/00-overview/00-40-overview-istio-setup).
+  >**NOTE:** Read about [Istio sidecars in Kyma and why you want them](/istio/user/00-overview/00-30-overview-istio-sidecars). Then, check how to [enable automatic Istio sidecar proxy injection](/istio/user/02-operation-guides/operations/02-20-enable-sidecar-injection). For more details, see [Default Istio setup in Kyma](/istio/user/00-overview/00-40-overview-istio-setup).
 
 ## Steps <!-- {docsify-ignore} -->
 

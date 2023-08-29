@@ -8,7 +8,7 @@ This tutorial shows how to use the available CLI commands to manage Functions in
 2. Generate a Function custom resource (CR) from these files and apply it on your cluster (`kyma apply function`).
 3. Fetch the current state of your Function's cluster configuration after it was modified (`kyma sync function`).
 
->**NOTE:** Read about [Istio sidecars in Kyma and why you want them](/istio-operator/user/00-overview/00-30-overview-istio-sidecars). Then, check how to [enable automatic Istio sidecar proxy injection](/istio-operator/user/02-operation-guides/operations/02-20-enable-sidecar-injection). For more details, see [Default Istio setup in Kyma](/istio-operator/user/00-overview/00-40-overview-istio-setup).
+>**NOTE:** Read about [Istio sidecars in Kyma and why you want them](/istio/user/00-overview/00-30-overview-istio-sidecars). Then, check how to [enable automatic Istio sidecar proxy injection](/istio/user/02-operation-guides/operations/02-20-enable-sidecar-injection). For more details, see [Default Istio setup in Kyma](/istio/user/00-overview/00-40-overview-istio-setup).
 
 This tutorial is based on a sample Python Function run on a lightweight [k3d](https://k3d.io/) cluster.
 
@@ -26,7 +26,7 @@ Follow these steps:
 
 1. Run the `init` Kyma CLI command to create local files with the default configuration for a Python Function. Go to the folder in which you want to initiate the workspace content and run this command:
 
-  >**NOTE:** Read about [Istio sidecars in Kyma and why you want them](/istio-operator/user/00-overview/00-30-overview-istio-sidecars). Then, check how to [enable automatic Istio sidecar proxy injection](/istio-operator/user/02-operation-guides/operations/02-20-enable-sidecar-injection). For more details, see [Default Istio setup in Kyma](/istio-operator/user/00-overview/00-40-overview-istio-setup).
+  >**NOTE:** Read about [Istio sidecars in Kyma and why you want them](/istio/user/00-overview/00-30-overview-istio-sidecars). Then, check how to [enable automatic Istio sidecar proxy injection](/istio/user/02-operation-guides/operations/02-20-enable-sidecar-injection). For more details, see [Default Istio setup in Kyma](/istio/user/00-overview/00-40-overview-istio-setup).
 
   ```bash
   kyma init function --runtime python39 --name {FUNCTION_NAME}
