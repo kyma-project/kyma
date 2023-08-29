@@ -7,6 +7,7 @@ var f = &flags{
 
 type flags struct {
 	eventingWebhookAuthEnabled bool
+	natsProvisioningEnabled    bool
 }
 
 // SetEventingWebhookAuthEnabled enable/disable the Eventing webhook auth feature flag.
@@ -18,4 +19,15 @@ func SetEventingWebhookAuthEnabled(enabled bool) {
 // otherwise returns false.
 func IsEventingWebhookAuthEnabled() bool {
 	return f.eventingWebhookAuthEnabled
+}
+
+// SetNATSProvisioningEnabled enable/disable the NATS resources provisioning feature flag.
+func SetNATSProvisioningEnabled(enabled bool) {
+	f.natsProvisioningEnabled = enabled
+}
+
+// IsNATSProvisioningEnabled returns true if the NATS resources provisioning feature flag is enabled,
+// otherwise returns false.
+func IsNATSProvisioningEnabled() bool {
+	return f.natsProvisioningEnabled
 }
