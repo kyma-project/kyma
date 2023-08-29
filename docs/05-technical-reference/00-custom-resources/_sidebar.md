@@ -7,6 +7,3 @@
     * [EventingBackend](evnt-02-eventingbackend.md)
     * [Istio](oper-01-istio.md)
     * [Function](svls-01-function.md)
-    * [LogPipeline](telemetry-01-logpipeline.md)
-    * [LogParser](telemetry-02-logparser.md)
-    * [TracePipeline](telemetry-03-tracepipeline.md)
