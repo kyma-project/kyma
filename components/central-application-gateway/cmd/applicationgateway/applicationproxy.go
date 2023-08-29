@@ -84,7 +84,7 @@ func main() {
 
 	internalHandler := newInternalHandler(serviceDefinitionService, options)
 	internalHandlerForCompass := newInternalHandlerForCompass(serviceDefinitionService, options)
-	externalHandler := externalapi.NewHandler()
+	externalHandler := externalapi.NewHandler(logCfg.Level)
 
 	internalHandler = httptools.RequestLogger("Internal handler: ", internalHandler)
 	internalHandlerForCompass = httptools.RequestLogger("Internal handler: ", internalHandlerForCompass)
@@ -109,17 +109,11 @@ func main() {
 		ReadTimeout: time.Duration(options.requestTimeout) * time.Second,
 	}
 
-	debugSrv := &http.Server{
-		Addr:    ":" + strconv.Itoa(options.debugPort),
-		Handler: logCfg.Level,
-	}
-
 	var g run.Group
 
 	addHttpServerToRunGroup("external-api", &g, externalSrv)
 	addHttpServerToRunGroup("proxy-kyma-os", &g, internalSrv)
 	addHttpServerToRunGroup("proxy-kyma-mps", &g, internalSrvCompass)
-	addHttpServerToRunGroup("debug-settings", &g, debugSrv)
 	addInterruptSignalToRunGroup(&g)
 
 	err = g.Run()
