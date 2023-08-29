@@ -4,7 +4,6 @@
   * [Application Connectivity](/01-overview/application-connectivity/README.md)
   * [Eventing](/01-overview/eventing/README.md)
   * [Observability](/01-overview/observability/README.md)
-  * [Serverless](/01-overview/serverless/README.md)
   * [Service Management](/01-overview/service-management/README.md)
   * [Service Mesh](/01-overview/service-mesh/README.md)
   * [Telemetry](/01-overview/telemetry/README.md)
