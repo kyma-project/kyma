@@ -147,8 +147,10 @@ func (r *Reconciler) Reconcile(ctx context.Context, _ ctrl.Request) (ctrl.Result
 	}
 
 	// Create NATS Secret for the eventing-nats statefulset
-	if createErr := r.createNATSSecret(ctx); createErr != nil {
-		return ctrl.Result{}, createErr
+	if featureflags.IsNATSProvisioningEnabled() {
+		if createErr := r.createNATSSecret(ctx); createErr != nil {
+			return ctrl.Result{}, createErr
+		}
 	}
 
 	var secretList v1.SecretList

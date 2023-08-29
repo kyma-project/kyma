@@ -5,8 +5,8 @@ global:
   images:
     eventing_controller:
       name: eventing-controller
-      version: v20230824-c2e2e731
-      directory: prod
+      version: PR-18041
+      directory: dev
       pullPolicy: "IfNotPresent"
     publisher_proxy:
       name: event-publisher-proxy
@@ -30,6 +30,7 @@ global:
       directory: prod/external
 
   jetstream:
+    enabled: true # If set to `false` then NATS resources will not be deployed to the cluster.
     # Storage type of the stream, memory or file.
     storage: file
     fileStorage:

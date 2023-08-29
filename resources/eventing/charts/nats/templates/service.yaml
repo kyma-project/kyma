@@ -1,4 +1,4 @@
----
+{{- if .Values.global.jetstream.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -53,3 +53,4 @@ spec:
     {{- if .Values.appProtocol.enabled }}
     appProtocol: tcp
     {{- end }}
+{{- end }}

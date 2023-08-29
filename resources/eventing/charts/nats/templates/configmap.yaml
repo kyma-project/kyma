@@ -1,4 +1,4 @@
----
+{{- if .Values.global.jetstream.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -161,3 +161,4 @@ data:
     {{- end }}
     {{- end }}
     {{- end }}
+{{- end }}
