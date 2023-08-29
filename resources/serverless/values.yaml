@@ -69,6 +69,7 @@ global:
   configuration:
     configmapName: "serverless-configuration"
     targetDir: "/appdata"
+    logFilename: "log_config.yaml"
     filename: "config.yaml"
   ingress:
     domainName:

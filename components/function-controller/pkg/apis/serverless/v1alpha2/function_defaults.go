@@ -12,50 +12,50 @@ import (
 const DefaultingConfigKey = "defaulting-config"
 
 type ReplicasPreset struct {
-	Min int32 `json:"min,omitempty"`
-	Max int32 `json:"max,omitempty"`
+	Min int32 `yaml:"min,omitempty"`
+	Max int32 `yaml:"max,omitempty"`
 }
 
 type ResourcesPreset struct {
-	RequestCPU    string `json:"requestCpu,omitempty"`
-	RequestMemory string `json:"requestMemory,omitempty"`
-	LimitCPU      string `json:"limitCpu,omitempty"`
-	LimitMemory   string `json:"limitMemory,omitempty"`
+	RequestCPU    string `yaml:"requestCpu,omitempty"`
+	RequestMemory string `yaml:"requestMemory,omitempty"`
+	LimitCPU      string `yaml:"limitCpu,omitempty"`
+	LimitMemory   string `yaml:"limitMemory,omitempty"`
 }
 
 type FunctionReplicasDefaulting struct {
-	DefaultPreset string                    `envconfig:"default=S"`
-	Presets       map[string]ReplicasPreset `envconfig:"-"`
-	PresetsMap    string                    `envconfig:"default={}"`
+	DefaultPreset string                    `yaml:"defaultPreset"`
+	Presets       map[string]ReplicasPreset `yaml:"presets"`
+	PresetsMap    string                    `yaml:"presetsMap"`
 }
 
 type FunctionResourcesDefaulting struct {
-	DefaultPreset     string                     `envconfig:"default=M"`
-	Presets           map[string]ResourcesPreset `envconfig:"-"`
-	PresetsMap        string                     `envconfig:"default={}"`
-	RuntimePresets    map[string]string          `envconfig:"-"`
-	RuntimePresetsMap string                     `envconfig:"default={}"`
+	DefaultPreset     string                     `yaml:"defaultPreset"`
+	Presets           map[string]ResourcesPreset `yaml:"presets"`
+	PresetsMap        string                     `yaml:"presetsMap"`
+	RuntimePresets    map[string]string          `yaml:"runtimePresets"`
+	RuntimePresetsMap string                     `yaml:"runtimePresetsMap"`
 }
 
 type BuildJobResourcesDefaulting struct {
-	DefaultPreset string                     `envconfig:"default=normal"`
-	Presets       map[string]ResourcesPreset `envconfig:"-"`
-	PresetsMap    string                     `envconfig:"default={}"`
+	DefaultPreset string                     `yaml:"defaultPreset"`
+	Presets       map[string]ResourcesPreset `yaml:"presets"`
+	PresetsMap    string                     `yaml:"presetsMap"`
 }
 
 type FunctionDefaulting struct {
-	Replicas  FunctionReplicasDefaulting
-	Resources FunctionResourcesDefaulting
+	Replicas  FunctionReplicasDefaulting  `yaml:"replicas"`
+	Resources FunctionResourcesDefaulting `yaml:"resources"`
 }
 
 type BuildJobDefaulting struct {
-	Resources BuildJobResourcesDefaulting
+	Resources BuildJobResourcesDefaulting `yaml:"resources"`
 }
 
 type DefaultingConfig struct {
-	Function FunctionDefaulting
-	BuildJob BuildJobDefaulting
-	Runtime  Runtime `envconfig:"default=nodejs18"`
+	Function FunctionDefaulting `yaml:"function"`
+	BuildJob BuildJobDefaulting `yaml:"buildJob"`
+	Runtime  Runtime            `yaml:"runtime"`
 }
 
 func (fn *Function) Default(config *DefaultingConfig) {

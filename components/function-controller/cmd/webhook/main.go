@@ -39,17 +39,25 @@ func init() {
 func main() {
 	setupLog := ctrlzap.New().WithName("setup")
 
-	setupLog.Info("reading 	configuration")
+	setupLog.Info("reading configuration")
 	cfg := &webhook.Config{}
 	if err := envconfig.InitWithPrefix(cfg, "WEBHOOK"); err != nil {
 		panic(errors.Wrap(err, "while reading env variables"))
 	}
 
-	logCfg, err := fileconfig.Load(cfg.ConfigPath)
+	logCfg, err := fileconfig.Load(cfg.LogConfigPath)
 	if err != nil {
-		setupLog.Error(err, "unable to load configuration file")
+		setupLog.Error(err, "unable to load log configuration file")
 		os.Exit(1)
 	}
+
+	setupLog.Info("reading webhook configuration")
+	webhookCfg, err := fileconfig.LoadWebhookCfg(cfg.ConfigPath)
+	if err != nil {
+		setupLog.Error(err, "unable to load webhook configuration file")
+		os.Exit(1)
+	}
+	webhookCfg.Function = fileconfig.FunctionCfg{}
 
 	atomic := zap.NewAtomicLevel()
 	parsedLevel, err := zapcore.ParseLevel(logCfg.LogLevel)
@@ -73,9 +81,6 @@ func main() {
 
 	logrZap := zapr.NewLogger(logWithCtx.Desugar())
 	ctrl.SetLogger(logrZap)
-
-	validationConfigv1alpha2 := webhook.ReadValidationConfigV1Alpha2OrDie()
-	defaultingConfigv1alpha2 := webhook.ReadDefaultingConfigV1Alpha2OrDie()
 
 	// manager setup
 	logWithCtx.Info("setting up controller-manager")
@@ -114,14 +119,14 @@ func main() {
 	whs.KeyName = resources.KeyFile
 	whs.Register(resources.FunctionDefaultingWebhookPath, &ctrlwebhook.Admission{
 		Handler: webhook.NewDefaultingWebhook(
-			defaultingConfigv1alpha2,
+			&serverlessv1alpha2.DefaultingConfig{},
 			mgr.GetClient(),
 			logWithCtx.Named("defaulting-webhook")),
 	})
 
 	whs.Register(resources.FunctionValidationWebhookPath, &ctrlwebhook.Admission{
 		Handler: webhook.NewValidatingWebhook(
-			validationConfigv1alpha2,
+			&serverlessv1alpha2.ValidationConfig{},
 			mgr.GetClient(),
 			logWithCtx.Named("validating-webhook")),
 	})

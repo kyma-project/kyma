@@ -40,6 +40,7 @@ func TestSetDefaults(t *testing.T) {
 
 	MRuntimeResourcesBuilder := ResourceRequirementsBuilder{}.Limits("100m", "128Mi").Requests("50m", "64Mi")
 	SRuntimeResourcesBuilder := ResourceRequirementsBuilder{}.Limits("50m", "64Mi").Requests("25m", "32Mi")
+	LRuntimeResources := ResourceRequirementsBuilder{}.Limits("200m", "256Mi").Requests("100m", "128Mi").BuildCoreV1()
 	MRuntimeResources := MRuntimeResourcesBuilder.BuildCoreV1()
 
 	buildResources := `
@@ -397,6 +398,25 @@ func TestSetDefaults(t *testing.T) {
 					Replicas: &one,
 				}},
 		},
+		"Should set function profile to function default preset L": {
+			givenFunc: Function{
+				ObjectMeta: v1.ObjectMeta{},
+				Spec: FunctionSpec{
+					Runtime: Python39,
+				},
+			},
+			expectedFunc: Function{
+				ObjectMeta: v1.ObjectMeta{},
+				Spec: FunctionSpec{
+					Runtime: Python39,
+					ResourceConfiguration: &ResourceConfiguration{
+						Function: &ResourceRequirements{
+							Resources: &LRuntimeResources,
+						},
+					},
+					Replicas: &one,
+				}},
+		},
 	}
 
 	for testName, testData := range testCases {
@@ -426,7 +446,6 @@ func TestSetDefaults(t *testing.T) {
 			testData.givenFunc.Default(config)
 
 			// then
-			//g.Expect(testData.givenFunc).To(gomega.Equal(testData.expectedFunc))
 			require.EqualValues(t, testData.expectedFunc, testData.givenFunc)
 		})
 	}
