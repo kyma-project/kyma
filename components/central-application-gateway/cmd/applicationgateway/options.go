@@ -23,14 +23,14 @@ type options struct {
 func parseArgs(log *zap.Logger) (opts options) {
 	flag.StringVar(&opts.apiServerURL, "apiServerURL", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
 	flag.StringVar(&opts.applicationSecretsNamespace, "applicationSecretsNamespace", "kyma-system", "Namespace where Application secrets used by the Application Gateway exist")
-	flag.IntVar(&opts.externalAPIPort, "externalAPIPort", 8081, "External API port.")
-	flag.StringVar(&opts.kubeConfig, "kubeConfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
+	flag.IntVar(&opts.externalAPIPort, "externalAPIPort", 8081, "Port that exposes the API which allows checking the component status and exposes log configuration")
+	flag.StringVar(&opts.kubeConfig, "kubeConfig", "", "Path to a kubeconfig. Only required if out-of-cluster")
 	opts.logLevel = zap.LevelFlag("logLevel", zap.InfoLevel, "Log level: panic | fatal | error | warn | info | debug. Can't be lower than info")
 	flag.IntVar(&opts.proxyCacheTTL, "proxyCacheTTL", 120, "TTL, in seconds, for proxy cache of Remote API information")
-	flag.IntVar(&opts.proxyPort, "proxyPort", 8080, "Proxy port for Kyma OS or MPS bundles with a single API definition")
-	flag.IntVar(&opts.proxyPortCompass, "proxyPortCompass", 8082, "Proxy port for Kyma MPS.")
-	flag.IntVar(&opts.proxyTimeout, "proxyTimeout", 10, "Timeout for proxy call.")
-	flag.IntVar(&opts.requestTimeout, "requestTimeout", 1, "Timeout for services.")
+	flag.IntVar(&opts.proxyPort, "proxyPort", 8080, "Port that acts as a proxy for the calls from services and Functions to an external solution in the default standalone mode or Compass bundles with a single API definition")
+	flag.IntVar(&opts.proxyPortCompass, "proxyPortCompass", 8082, "Port that acts as a proxy for the calls from services and Functions to an external solution in the Compass mode")
+	flag.IntVar(&opts.proxyTimeout, "proxyTimeout", 10, "Timeout for requests sent through the proxy, expressed in seconds")
+	flag.IntVar(&opts.requestTimeout, "requestTimeout", 1, "Timeout for requests sent through Central Application Gateway, expressed in seconds")
 
 	flag.Parse()
 
