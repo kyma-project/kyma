@@ -44,9 +44,9 @@ spec:
       source: |
         module.exports = {
           main: function(event, context) {
-            const message = `Hello World` +
-              ` from the Kyma Function ${context['function-name']}` +
-              ` running on ${context.runtime}!`;
+            const message = \`Hello World\` +
+              \` from the Kyma Function \${context['function-name']}\` +
+              \` running on \${context.runtime}!\`;
             return message;
           }
         }

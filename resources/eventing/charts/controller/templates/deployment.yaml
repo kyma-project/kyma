@@ -94,6 +94,8 @@ spec:
             value: {{ .Values.eventingWebhookAuth.secret.name | quote }}
           - name: EVENTING_WEBHOOK_AUTH_SECRET_NAMESPACE
             value: {{ .Values.eventingWebhookAuth.secret.namespace | quote }}
+          - name: NATS_PROVISIONING_ENABLED
+            value: {{ .Values.global.jetstream.enabled | quote }}
           resources:
             requests:
               cpu: {{ .Values.resources.requests.cpu }}
