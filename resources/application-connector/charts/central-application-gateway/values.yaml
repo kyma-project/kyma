@@ -3,7 +3,6 @@ deployment:
     pullPolicy: IfNotPresent
   args:
     proxyPort: &proxyPort 8080
-    debugPort: &debugPort 3000
     proxyPortCompass: &proxyPortCompass 8082
     externalAPIPort: &externalAPIPort 8081
     requestTimeout: 10
@@ -26,7 +25,6 @@ service:
   proxy:
     port: *proxyPort
     portCompass: *proxyPortCompass
-    portDebug: *debugPort
 
 autoscaling:
   enable: true
