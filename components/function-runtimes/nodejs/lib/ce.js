@@ -125,12 +125,12 @@ function emitCloudEvent(type, source, data, optionalCloudEventAttributes) {
     
     cloudEventInput = Object.assign(cloudEventInput, optionalCloudEventAttributesInput)
     const ce = new CloudEvent(cloudEventInput);
+    const message = HTTP.structured(ce)
+
     return axios({
         method: "post",
         baseURL: publishProxyAddress,
-        headers: {
-            "Content-Type": "application/cloudevents+json"
-        },
-        data: ce.toJSON(),
+        headers: message.headers,
+        data: message.body,
     });
 }
