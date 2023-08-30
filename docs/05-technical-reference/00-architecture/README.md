@@ -21,8 +21,3 @@ In this section you can learn more about technicalities behind each main area: t
 ### Observability
 
 * [Monitoring Architecture](obsv-01-architecture-monitoring.md)
-
-### Serverless
-
-* [Serverless Architecture](svls-01-architecture.md)
-* [Internal Docker registry](svls-02-internal-registry.md)

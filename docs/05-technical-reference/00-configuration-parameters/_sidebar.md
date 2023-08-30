@@ -8,5 +8,3 @@
     * [Cluster Users chart](/05-technical-reference/00-configuration-parameters/sec-01-cluster-users.md)
     * [Istio chart](/05-technical-reference/00-configuration-parameters/smsh-01-istio-chart.md)
     * [Istio Resources chart](/05-technical-reference/00-configuration-parameters/smsh-02-istio-resources-chart.md)
-    * [Serverless chart](/05-technical-reference/00-configuration-parameters/svls-01-serverless-chart.md)
-    * [Environment variables](/05-technical-reference/00-configuration-parameters/svls-02-environment-variables.md)

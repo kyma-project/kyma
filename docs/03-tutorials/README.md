@@ -48,24 +48,6 @@ Dive in deeper and explore the functionalities that Kyma provides for various us
 * [Prepare self-signed root CA and client certificates](00-security/sec-02-mtls-selfsign-client-certicate.md)
 * [Set up a custom identity provider](00-security/sec-03-set-up-idp.md)
 
-### Serverless
-
-* [Create an inline Function](00-serverless/svls-01-create-inline-function.md)
-* [Create a Git Function](00-serverless/svls-02-create-git-function.md)
-* [Expose a Function with an API Rule](00-serverless/svls-03-expose-function.md)
-* [Manage Functions with Kyma CLI](00-serverless/svls-04-manage-functions-with-kyma-cli.md)
-* [Debug a Function](00-serverless/svls-05-debug-function.md)
-* [Synchronize Git resources with the cluster using a GitOps operator](00-serverless/svls-06-sync-function-with-gitops.md)
-* [Set an external Docker registry](00-serverless/svls-07-set-external-registry.md)
-* [Switch to an external Docker registry at runtime](00-serverless/svls-08-switch-to-external-registry.md)
-* [Log into a private package registry using credentials from a Secret](00-serverless/svls-09-log-into-private-packages-registry.md)
-* [Set asynchronous communication between Functions](00-serverless/svls-11-set-asynchronous-connection-of-functions.md)
-* [Customize Function traces](00-serverless/svls-12-customize-function-traces.md)
-* [Override runtime image](00-serverless/svls-13-override-runtime-image.md)
-* [Inject environment variables](00-serverless/svls-14-inject-envs.md)
-* [Use external scalers](00-serverless/svls-15-use-external-scalers.md)
-* [Access to Secrets mounted as Volume](00-serverless/svls-16-use-secret-mounts.md)
-
 ### Service Management
 
 * [Deploy an SAP BTP service in your Kyma cluster](00-service-management/smgt-01-deploy-service.md)
