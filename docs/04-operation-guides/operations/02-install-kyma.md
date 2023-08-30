@@ -140,4 +140,4 @@ components:
 
 >**TIP:** To see a complete list of all Kyma components go to the [`components.yaml`](https://github.com/kyma-project/kyma/blob/main/installation/resources/components.yaml) file.
 
-> **NOTE:** To learn how to enable a Kyma module go to [Enable, disable and upgrade a Kyma module](../../02-get-started/08-enable-disable-upgrade-kyma-module.md).
+> **NOTE:** To learn how to enable a Kyma module go to [Enable, disable and upgrade a Kyma module](../../02-get-started/08-enable-disable-upgrade-kyma-module.md#enable-a-kyma-module).
