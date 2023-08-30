@@ -37,8 +37,9 @@ kubectl apply -f https://github.com/kyma-project/btp-manager/releases/latest/dow
 #### Serverless
 
 ```bash
-kubectl apply -f https://github.com/kyma-project/serverless-manager/releases/latest/download/serverless-manager.yaml
-kubectl apply -f https://github.com/kyma-project/serverless-manager/releases/latest/download/serverless-default-cr.yaml
+kubectl create ns kyma-system
+kubectl apply -f https://github.com/kyma-project/serverless-manager/releases/latest/download/serverless-operator.yaml
+kubectl apply -f https://github.com/kyma-project/serverless-manager/releases/latest/download/default_serverless_cr.yaml  -n kyma-system
 ```
 
 #### Telemetry
