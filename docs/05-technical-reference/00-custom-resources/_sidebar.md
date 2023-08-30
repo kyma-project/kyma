@@ -6,4 +6,3 @@
     * [Subscription](evnt-01-subscription.md)
     * [EventingBackend](evnt-02-eventingbackend.md)
     * [Istio](oper-01-istio.md)
-    * [Function](svls-01-function.md)
