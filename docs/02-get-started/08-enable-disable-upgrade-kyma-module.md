@@ -2,7 +2,7 @@
 title: Enable, disable and upgrade a Kyma module
 ---
 
-This guide shows how to quickly install, uninstall or remove Kyma with specific modules. To see the list of all available and planned Kyma modules, go to the [Kyma modules](../README.md#kyma-modules).
+This guide shows how to quickly install, uninstall or upgrade Kyma with specific modules. To see the list of all available and planned Kyma modules, go to the [Kyma modules](../README.md#kyma-modules).
 
 > **NOTE:** This guide describes installation of a standalone Kyma with specific modules, and not how to enable modules in SAP BTP, Kyma runtime (SKR).
 
