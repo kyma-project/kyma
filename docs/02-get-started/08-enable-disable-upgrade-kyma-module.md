@@ -2,7 +2,9 @@
 title: Enable, disable and upgrade a Kyma module
 ---
 
-Learn how to enable, disable and upgrade a Kyma module. To see the list of all available and planned Kyma modules, go to [Overview](../../01-overview/README.md).
+This guide shows how to quickly install, uninstall or remove Kyma with specific modules. To see the list of all available and planned Kyma modules, go to the [Kyma modules](../README.md#kyma-modules).
+
+> **NOTE:** This guide describes installation of a standalone Kyma with specific modules, and not how to enable modules in SAP BTP, Kyma runtime (SKR).
 
 ## Enable a Kyma module
 
@@ -22,8 +24,6 @@ To enable a module, deploy its module manager and apply the module configuration
 kubectl apply -f https://github.com/kyma-project/keda-manager/releases/latest/download/keda-manager.yaml
 kubectl apply -f https://github.com/kyma-project/keda-manager/releases/latest/download/keda-default-cr.yaml -n kyma-system
 ```
-
-For more details see, the [`keda-manager`](https://github.com/kyma-project/keda-manager) repository in GitHub.
 
 #### BTP Operator
 
@@ -47,8 +47,6 @@ kubectl apply -f https://github.com/kyma-project/serverless-manager/releases/lat
 kubectl apply -f https://github.com/kyma-project/telemetry-manager/releases/latest/download/rendered.yaml
 kubectl apply -f https://github.com/kyma-project/telemetry-manager/releases/latest/download/telemetry-default-cr.yaml -n kyma-system
 ```
-
-For more installation options, see the [installation instruction](https://github.com/kyma-project/telemetry-manager/blob/main/docs/contributor/installation.md) in the module repository.
 
 ## Disable a Kyma module
 
