@@ -12,3 +12,4 @@ kubectl delete -n kyma-system services logging-loki --ignore-not-found
 kubectl delete -n kyma-system services logging-loki-headless --ignore-not-found
 kubectl delete -n kyma-system serviceaccounts logging-loki --ignore-not-found
 kubectl delete -n kyma-system statefulsets.apps logging-loki --ignore-not-found
+kubectl delete -n kyma-system persistentvolumeclaims storage-logging-loki-0 --ignore-not-found
