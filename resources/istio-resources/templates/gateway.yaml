@@ -15,11 +15,6 @@ spec:
     tls:
       mode: SIMPLE
       credentialName: {{ .Values.global.istio.gateway.name }}-certs
-      minProtocolVersion: {{ .Values.global.istio.gateway.minProtocolVersion }}
-      cipherSuites:
-      {{- range $v := .Values.global.istio.gateway.cipherSuites }}
-      - {{ . }}
-      {{- end }}
     hosts:
       - "*.{{ .Values.global.domainName }}"
   - port:
