@@ -442,7 +442,7 @@ func TestFunctionReconciler_deleteExcessServices(t *testing.T) {
 			},
 		}
 
-		_, err := stateFnDeleteServices(context.Background(), &r, &s)
+		_, err := stateFnDeleteServices(context.TODO(), &r, &s)
 
 		g.Expect(err).To(gomega.Succeed())
 		g.Expect(client.Calls).To(gomega.HaveLen(1), "delete should happen only for service which has different name than it's parent fn")
@@ -479,7 +479,7 @@ func TestFunctionReconciler_deleteExcessServices(t *testing.T) {
 			},
 		}
 
-		_, err := stateFnDeleteServices(context.Background(), &r, &s)
+		_, err := stateFnDeleteServices(context.TODO(), &r, &s)
 
 		g.Expect(err).To(gomega.Succeed())
 		g.Expect(client.Calls).To(gomega.HaveLen(2), "delete should happen only for service which has different name than it's parent fn")
