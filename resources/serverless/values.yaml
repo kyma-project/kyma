@@ -83,11 +83,11 @@ global:
     function_controller:
       name: "function-controller"
       version: "PR-18070"
-      directory: "prod"
+      directory: "dev"
     function_webhook:
       name: "function-webhook"
       version: "PR-18070"
-      directory: "prod"
+      directory: "dev"
     function_build_init:
       name: "function-build-init"
       version: "v20230824-a02c92c2"
