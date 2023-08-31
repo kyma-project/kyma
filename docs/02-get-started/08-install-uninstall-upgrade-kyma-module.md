@@ -4,11 +4,11 @@ title: Install, uninstall and upgrade Kyma with a module
 
 This guide shows how to quickly install, uninstall or upgrade Kyma with specific modules. To see the list of all available and planned Kyma modules, go to the [Kyma modules](../README.md#kyma-modules).
 
-> **NOTE:** This guide describes installation of a standalone Kyma instance with specific modules, and not how to enable modules in SAP BTP, Kyma runtime (SKR).
+> **NOTE:** This guide describes installation of standalone Kyma with specific modules, and not how to enable modules in SAP BTP, Kyma runtime (SKR).
 
 ## Install Kyma with a module
 
-To enable a module, deploy its module manager and apply the module configuration. The operation installs a standalone Kyma instance with a module of your choice. See the already available Kyma modules with their quick installation steps and links to their GitHub repositories:
+To install a module, deploy its module manager and apply the module configuration. The operation installs a module of your choice with Kyma as an abstract umbrella. See the already available Kyma modules with their quick installation steps and links to their GitHub repositories:
 
 ### Prerequisites
 
