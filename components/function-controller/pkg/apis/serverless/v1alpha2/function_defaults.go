@@ -55,7 +55,6 @@ type BuildJobDefaulting struct {
 type DefaultingConfig struct {
 	Function FunctionDefaulting `yaml:"function"`
 	BuildJob BuildJobDefaulting `yaml:"buildJob"`
-	Runtime  Runtime            `yaml:"runtime"`
 }
 
 func (fn *Function) Default(config *DefaultingConfig) {

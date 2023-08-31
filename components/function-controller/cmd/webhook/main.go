@@ -57,7 +57,6 @@ func main() {
 		setupLog.Error(err, "unable to load webhook configuration file")
 		os.Exit(1)
 	}
-	webhookCfg.Function = fileconfig.FunctionCfg{}
 
 	atomic := zap.NewAtomicLevel()
 	parsedLevel, err := zapcore.ParseLevel(logCfg.LogLevel)
@@ -117,16 +116,27 @@ func main() {
 	whs := mgr.GetWebhookServer()
 	whs.CertName = resources.CertFile
 	whs.KeyName = resources.KeyFile
+
+	defaultCfg, err := webhookCfg.ToDefaultingConfig()
+	if err != nil {
+		setupLog.Error(err, "while creating of defaulting configuration")
+		os.Exit(1)
+	}
 	whs.Register(resources.FunctionDefaultingWebhookPath, &ctrlwebhook.Admission{
 		Handler: webhook.NewDefaultingWebhook(
-			&serverlessv1alpha2.DefaultingConfig{},
+			&defaultCfg,
 			mgr.GetClient(),
 			logWithCtx.Named("defaulting-webhook")),
 	})
 
+	validationCfg, err := webhookCfg.ToValidationConfig()
+	if err != nil {
+		setupLog.Error(err, "while creating of validation configuration")
+		os.Exit(1)
+	}
 	whs.Register(resources.FunctionValidationWebhookPath, &ctrlwebhook.Admission{
 		Handler: webhook.NewValidatingWebhook(
-			&serverlessv1alpha2.ValidationConfig{},
+			&validationCfg,
 			mgr.GetClient(),
 			logWithCtx.Named("validating-webhook")),
 	})
