@@ -6,6 +6,3 @@
     * [Subscription](evnt-01-subscription.md)
     * [EventingBackend](evnt-02-eventingbackend.md)
     * [Istio](oper-01-istio.md)
-    * [LogPipeline](telemetry-01-logpipeline.md)
-    * [LogParser](telemetry-02-logparser.md)
-    * [TracePipeline](telemetry-03-tracepipeline.md)

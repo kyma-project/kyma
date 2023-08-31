@@ -1,10 +1,12 @@
+import bottle
 import io
 import json
+import logging
 import os
 
-import bottle
 import requests
-from cloudevents.http import from_http
+from cloudevents.http import from_http, CloudEvent
+from cloudevents.conversion import to_structured
 
 publisher_proxy_address = os.getenv('PUBLISHER_PROXY_ADDRESS')
 
@@ -56,11 +58,15 @@ def build_cloud_event_attributes(req, data):
         'data': event.data,
         'ce-type': event['type'],
         'ce-source': event['source'],
-        'ce-eventtypeversion': event['eventtypeversion'],
-        'ce-specversion': event['specversion'],
         'ce-id': event['id'],
         'ce-time': event['time'],
     }
+    if event.get('eventtypeversion') is not None:
+        ceHeaders['ce-eventtypeversion'] = event.get('eventtypeversion')
+
+    if event.get('specversion') is not None:
+        ceHeaders['ce-specversion'] = event.get('specversion')
+        
     return ceHeaders
 
 
@@ -98,7 +104,21 @@ class Event:
     def __setitem__(self, name, value):
         self.ceHeaders[name] = value
 
+    def emitCloudEvent(self, type, source, data, optionalCloudEventAttributes=None):
+        attributes = {
+            "type": type,
+            "source": source,
+        }
+        if optionalCloudEventAttributes is not None:
+            attributes.update(optionalCloudEventAttributes)
+
+        event = CloudEvent(attributes, data)
+        headers, body = to_structured(event)
+
+        requests.post(publisher_proxy_address, data=body, headers=headers)
+
     def publishCloudEvent(self, data):
+        logging.warn('"publishCloudEvent" is deprecated. Use "emitCloudEvent"')
         return requests.post(
             publisher_proxy_address,
             data=json.dumps(data, default=str),
@@ -106,6 +126,7 @@ class Event:
         )
 
     def buildResponseCloudEvent(self, event_id, event_type, event_data):
+        logging.warn('"buildResponseCloudEvent" is deprecated. Use "emitCloudEvent"')
         return {
             'type': event_type,
             'source': self.ceHeaders['ce-source'],
