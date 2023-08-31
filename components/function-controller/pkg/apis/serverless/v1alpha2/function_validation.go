@@ -20,32 +20,32 @@ import (
 const ValidationConfigKey = "validation-config"
 
 type MinFunctionReplicasValues struct {
-	MinValue int32 `yaml:"minValue"`
+	MinValue int32
 }
 
 type MinFunctionResourcesValues struct {
-	MinRequestCPU    string `yaml:"minRequestCPU"`
-	MinRequestMemory string `yaml:"minRequestMemory"`
+	MinRequestCPU    string
+	MinRequestMemory string
 }
 
 type MinBuildJobResourcesValues struct {
-	MinRequestCPU    string `yaml:"minRequestCPU"`
-	MinRequestMemory string `yaml:"minRequestMemory"`
+	MinRequestCPU    string
+	MinRequestMemory string
 }
 
 type MinFunctionValues struct {
-	Replicas  MinFunctionReplicasValues  `yaml:"replicas"`
-	Resources MinFunctionResourcesValues `yaml:"resources"`
+	Replicas  MinFunctionReplicasValues
+	Resources MinFunctionResourcesValues
 }
 
 type MinBuildJobValues struct {
-	Resources MinBuildJobResourcesValues `yaml:"resources"`
+	Resources MinBuildJobResourcesValues
 }
 
 type ValidationConfig struct {
-	ReservedEnvs []string          `yaml:"reservedEnvs"`
-	Function     MinFunctionValues `yaml:"function"`
-	BuildJob     MinBuildJobValues `yaml:"buildJob"`
+	ReservedEnvs []string `envconfig:"default={}"`
+	Function     MinFunctionValues
+	BuildJob     MinBuildJobValues
 }
 
 type validationFunction func(*ValidationConfig) error

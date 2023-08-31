@@ -55,13 +55,15 @@ type BuildJob struct {
 }
 
 type WebhookConfig struct {
-	Function     FunctionCfg `yaml:"function"`
-	BuildJob     BuildJob    `yaml:"buildJob"`
-	ReservedEnvs []string    `yaml:"reservedEnvs"`
+	DefaultRuntime string      `yaml:"defaultRuntime"`
+	Function       FunctionCfg `yaml:"function"`
+	BuildJob       BuildJob    `yaml:"buildJob"`
+	ReservedEnvs   []string    `yaml:"reservedEnvs"`
 }
 
 func LoadWebhookCfg(path string) (WebhookConfig, error) {
 	cfg := WebhookConfig{
+		DefaultRuntime: string(v1alpha2.NodeJs18),
 		Function: FunctionCfg{
 			Replicas:  Replicas{DefaultPreset: "S"},
 			Resources: FunctionResources{DefaultPreset: "M"}},
@@ -143,6 +145,7 @@ func (wc WebhookConfig) ToValidationConfig() (v1alpha2.ValidationConfig, error) 
 
 func (wc WebhookConfig) ToDefaultingConfig() (v1alpha2.DefaultingConfig, error) {
 	cfg := v1alpha2.DefaultingConfig{
+		Runtime: v1alpha2.Runtime(wc.DefaultRuntime),
 		Function: v1alpha2.FunctionDefaulting{
 			Replicas: v1alpha2.FunctionReplicasDefaulting{
 				DefaultPreset: wc.Function.Replicas.DefaultPreset,

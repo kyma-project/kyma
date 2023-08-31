@@ -1,60 +1,54 @@
 package v1alpha2
 
 import (
-	"encoding/json"
-
 	"k8s.io/apimachinery/pkg/api/resource"
 
-	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 )
 
 const DefaultingConfigKey = "defaulting-config"
 
 type ReplicasPreset struct {
-	Min int32 `yaml:"min,omitempty"`
-	Max int32 `yaml:"max,omitempty"`
+	Min int32
+	Max int32
 }
 
 type ResourcesPreset struct {
-	RequestCPU    string `yaml:"requestCpu,omitempty"`
-	RequestMemory string `yaml:"requestMemory,omitempty"`
-	LimitCPU      string `yaml:"limitCpu,omitempty"`
-	LimitMemory   string `yaml:"limitMemory,omitempty"`
+	RequestCPU    string
+	RequestMemory string
+	LimitCPU      string
+	LimitMemory   string
 }
 
 type FunctionReplicasDefaulting struct {
-	DefaultPreset string                    `yaml:"defaultPreset"`
-	Presets       map[string]ReplicasPreset `yaml:"presets"`
-	PresetsMap    string                    `yaml:"presetsMap"`
+	DefaultPreset string
+	Presets       map[string]ReplicasPreset
 }
 
 type FunctionResourcesDefaulting struct {
-	DefaultPreset     string                     `yaml:"defaultPreset"`
-	Presets           map[string]ResourcesPreset `yaml:"presets"`
-	PresetsMap        string                     `yaml:"presetsMap"`
-	RuntimePresets    map[string]string          `yaml:"runtimePresets"`
-	RuntimePresetsMap string                     `yaml:"runtimePresetsMap"`
+	DefaultPreset  string
+	Presets        map[string]ResourcesPreset
+	RuntimePresets map[string]string
 }
 
 type BuildJobResourcesDefaulting struct {
-	DefaultPreset string                     `yaml:"defaultPreset"`
-	Presets       map[string]ResourcesPreset `yaml:"presets"`
-	PresetsMap    string                     `yaml:"presetsMap"`
+	DefaultPreset string
+	Presets       map[string]ResourcesPreset
 }
 
 type FunctionDefaulting struct {
-	Replicas  FunctionReplicasDefaulting  `yaml:"replicas"`
-	Resources FunctionResourcesDefaulting `yaml:"resources"`
+	Replicas  FunctionReplicasDefaulting
+	Resources FunctionResourcesDefaulting
 }
 
 type BuildJobDefaulting struct {
-	Resources BuildJobResourcesDefaulting `yaml:"resources"`
+	Resources BuildJobResourcesDefaulting
 }
 
 type DefaultingConfig struct {
-	Function FunctionDefaulting `yaml:"function"`
-	BuildJob BuildJobDefaulting `yaml:"buildJob"`
+	Function FunctionDefaulting
+	BuildJob BuildJobDefaulting
+	Runtime  Runtime
 }
 
 func (fn *Function) Default(config *DefaultingConfig) {
@@ -207,28 +201,4 @@ func presetsToRequirements(preset ResourcesPreset) *corev1.ResourceRequirements 
 		},
 	}
 	return &result
-}
-
-func ParseReplicasPresets(presetsMap string) (map[string]ReplicasPreset, error) {
-	var presets map[string]ReplicasPreset
-	if err := json.Unmarshal([]byte(presetsMap), &presets); err != nil {
-		return presets, errors.Wrap(err, "while parsing resources presets")
-	}
-	return presets, nil
-}
-
-func ParseResourcePresets(presetsMap string) (map[string]ResourcesPreset, error) {
-	var presets map[string]ResourcesPreset
-	if err := json.Unmarshal([]byte(presetsMap), &presets); err != nil {
-		return presets, errors.Wrap(err, "while parsing resources presets")
-	}
-	return presets, nil
-}
-
-func ParseRuntimePresets(presetsMap string) (map[string]string, error) {
-	var presets map[string]string
-	if err := json.Unmarshal([]byte(presetsMap), &presets); err != nil {
-		return presets, errors.Wrap(err, "while parsing runtime presets")
-	}
-	return presets, nil
 }
