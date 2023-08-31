@@ -5,7 +5,6 @@
   * [Eventing](eventing/README.md)
   * [Observability](observability/README.md)
   * [Security](security/README.md)
-  * [Serverless](serverless/README.md)
   * [Service Mesh](service-mesh/README.md)
   * [Component doesn't work after successful installation](01-component-installation-fails.md)
   * [Local Kyma deployment fails with pending Pods](01-deplyoment-fails-pending-pods.md)
