@@ -43,7 +43,7 @@ type MinBuildJobValues struct {
 }
 
 type ValidationConfig struct {
-	ReservedEnvs []string `envconfig:"default={}"`
+	ReservedEnvs []string
 	Function     MinFunctionValues
 	BuildJob     MinBuildJobValues
 }
