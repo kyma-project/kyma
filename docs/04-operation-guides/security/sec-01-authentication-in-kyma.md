@@ -37,7 +37,7 @@ The diagram shows the user authentication flow:
 
 ## Service-to-service authentication
 
-As Kyma is built on top of Istio Service Mesh, service-to-service authentication and encryption is enabled with [Istio MutualTLS](https://istio.io/latest/docs/concepts/security/#mutual-tls-authentication). For details, read the [Default Istio setup in Kyma](/istio/user/00-overview/00-40-overview-istio-setup) documentation.
+As Kyma is built on top of Istio Service Mesh, service-to-service authentication and encryption is enabled with [Istio MutualTLS](https://istio.io/latest/docs/concepts/security/#mutual-tls-authentication). For details, read the [Default Istio setup in Kyma](https://kyma-project.io/#/istio/user/00-overview/00-40-overview-istio-setup) documentation.
 
 ## User-to-service authentication
 

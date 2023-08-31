@@ -8,7 +8,7 @@ Kyma Eventing also supports sending and receiving of legacy events. In this tuto
 
 ## Prerequisites
 
->**NOTE:** Read about [Istio sidecars in Kyma and why you want them](/istio/user/00-overview/00-30-overview-istio-sidecars). Then, check how to [enable automatic Istio sidecar proxy injection](/istio/user/02-operation-guides/operations/02-20-enable-sidecar-injection). For more details, see [Default Istio setup in Kyma](/istio/user/00-overview/00-40-overview-istio-setup).
+>**NOTE:** Read about [Istio sidecars in Kyma and why you want them](https://kyma-project.io/#/istio/user/00-overview/00-30-overview-istio-sidecars). Then, check how to [enable automatic Istio sidecar proxy injection](https://kyma-project.io/#/istio/user/02-operation-guides/operations/02-20-enable-sidecar-injection). For more details, see [Default Istio setup in Kyma](https://kyma-project.io/#/istio/user/00-overview/00-40-overview-istio-setup).
 
 1. Follow the [Prerequisites steps](./) for the Eventing tutorials.
 2. [Create a Function](../../02-get-started/04-trigger-workload-with-event.md#create-a-function).
