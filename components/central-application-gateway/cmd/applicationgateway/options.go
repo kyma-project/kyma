@@ -30,7 +30,7 @@ func parseArgs(log *zap.Logger) (opts options) {
 	flag.IntVar(&opts.proxyPort, "proxyPort", 8080, "Port that acts as a proxy for the calls from services and Functions to an external solution in the default standalone mode or Compass bundles with a single API definition")
 	flag.IntVar(&opts.proxyPortCompass, "proxyPortCompass", 8082, "Port that acts as a proxy for the calls from services and Functions to an external solution in the Compass mode")
 	flag.IntVar(&opts.proxyTimeout, "proxyTimeout", 10, "Timeout for requests sent through the proxy, expressed in seconds")
-	flag.IntVar(&opts.requestTimeout, "requestTimeout", 1, "Timeout for requests sent through Central Application Gateway, expressed in seconds")
+	flag.IntVar(&opts.requestTimeout, "requestTimeout", 10, "Timeout for requests sent through Central Application Gateway, expressed in seconds")
 
 	flag.Parse()
 
