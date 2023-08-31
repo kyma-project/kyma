@@ -1,5 +1,5 @@
 * [Home](/)
-* [Modular Kyma](./08-enable-disable-upgrade-kyma-module.md)
+* [Modular Kyma](08-install-uninstall-upgrade-kyma-module.md)
 * [Get Started](README.md)
   * [Deploy and expose a Function](02-deploy-expose-function.md)
   * [Deploy and expose a microservice](03-deploy-expose-microservice.md)
