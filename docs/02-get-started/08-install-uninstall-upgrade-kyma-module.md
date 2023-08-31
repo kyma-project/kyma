@@ -8,7 +8,7 @@ This guide shows how to quickly install, uninstall or upgrade Kyma with specific
 
 ## Install Kyma with a module
 
-To install a module, deploy its module manager and apply the module configuration. The operation installs a module of your choice with Kyma as an abstract umbrella. See the already available Kyma modules with their quick installation steps and links to their GitHub repositories:
+To install a module, deploy its module manager and apply the module configuration. The operation installs a Kyma module of your choice on a Kubernetes cluster. See the already available Kyma modules with their quick installation steps and links to their GitHub repositories:
 
 ### Prerequisites
 
