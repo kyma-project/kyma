@@ -38,7 +38,7 @@ spec:
           configMap:
             name: "{{ .Values.global.configuration.configmapName }}"
             items:
-            - key: {{ .Values.global.configuration.filename }}
+            - key: {{ .Values.global.configuration.logFilename }}
               path: {{ .Values.global.configuration.filename }}
         - name: configuration
           configMap:

@@ -13,24 +13,3 @@ data:
   WEBHOOK_SECRET_NAME: {{ include "tplValue" ( dict "value" .Values.container.envs.webhookSecretName.value "context" . ) | quote }}
   WEBHOOK_PORT: {{ include "tplValue" ( dict "value" .Values.container.envs.webhookPort.value "context" . ) | quote }}
   {{ .Values.global.configuration.filename }}: {{ include "tplValue" ( dict "value" .Values.values "context" . ) | quote }}
-
-{{/*  WEBHOOK_VALIDATION_RESERVED_ENVS: {{ include "tplValue" ( dict "value" .Values.values.reservedEnvs.value "context" . ) | quote }}*/}}
-
-{{/*  WEBHOOK_VALIDATION_FUNCTION_REPLICAS_MIN_VALUE: {{ include "tplValue" ( dict "value" .Values.values.function.replicas.minValue "context" . ) | quote }}*/}}
-{{/*  WEBHOOK_DEFAULTING_FUNCTION_REPLICAS_DEFAULT_PRESET: {{ .Values.values.function.replicas.defaultPreset | quote }}*/}}
-{{/*  WEBHOOK_DEFAULTING_FUNCTION_REPLICAS_PRESETS_MAP: |-*/}}
-{{/*{{ include "tplValue" ( dict "value" .Values.values.function.replicas.presets "context" . ) | nindent 4 }}*/}}
-
-{{/*  WEBHOOK_VALIDATION_FUNCTION_RESOURCES_MIN_REQUEST_CPU: {{ include "tplValue" ( dict "value" .Values.values.function.resources.minRequestCpu "context" . ) | quote }}*/}}
-{{/*  WEBHOOK_VALIDATION_FUNCTION_RESOURCES_MIN_REQUEST_MEMORY: {{ include "tplValue" ( dict "value" .Values.values.function.resources.minRequestMemory "context" . ) | quote }}*/}}
-{{/*  WEBHOOK_DEFAULTING_FUNCTION_RESOURCES_DEFAULT_PRESET: {{ .Values.values.function.resources.defaultPreset | quote }}*/}}
-{{/*  WEBHOOK_DEFAULTING_FUNCTION_RESOURCES_PRESETS_MAP: |-*/}}
-{{/*{{ include "tplValue" ( dict "value" .Values.values.function.resources.presets "context" . ) | nindent 4 }}*/}}
-{{/*  WEBHOOK_DEFAULTING_FUNCTION_RESOURCES_RUNTIME_PRESETS_MAP: |-*/}}
-{{/*{{ include "tplValue" ( dict "value" .Values.values.function.resources.runtimePresets "context" . ) | nindent 4 }}*/}}
-
-{{/*  WEBHOOK_VALIDATION_BUILD_JOB_RESOURCES_MIN_REQUEST_CPU: {{ include "tplValue" ( dict "value" .Values.values.buildJob.resources.minRequestCpu "context" . ) | quote }}*/}}
-{{/*  WEBHOOK_VALIDATION_BUILD_JOB_RESOURCES_MIN_REQUEST_MEMORY: {{ include "tplValue" ( dict "value" .Values.values.buildJob.resources.minRequestMemory "context" . ) | quote }}*/}}
-{{/*  WEBHOOK_DEFAULTING_BUILD_JOB_RESOURCES_DEFAULT_PRESET: {{ .Values.values.buildJob.resources.defaultPreset | quote }}*/}}
-{{/*  WEBHOOK_DEFAULTING_BUILD_JOB_RESOURCES_PRESETS_MAP: |-*/}}
-{{/*{{ include "tplValue" ( dict "value" .Values.values.buildJob.resources.presets "context" . ) | nindent 4 }}*/}}
