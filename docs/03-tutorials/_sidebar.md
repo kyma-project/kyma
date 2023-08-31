@@ -5,5 +5,4 @@
   * [Eventing](/03-tutorials/00-eventing/README.md)
   * [Observability](/03-tutorials/00-observability.md)
   * [Security](/03-tutorials/00-security/README.md)
-  * [Serverless](/03-tutorials/00-serverless/README.md)
   * [Service Management](/03-tutorials/00-service-management/smgt-01-deploy-service.md)

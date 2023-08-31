@@ -13,7 +13,7 @@
 
 Out of the box, Kyma offers various functionalities, such as:  
 
-- [Serverless](https://kyma-project.io/#/01-overview/serverless/README) development platform to run lightweight Functions in a cost-efficient and scalable way
+- [Serverless](https://kyma-project.io/#/serverless-manager/user/README) development platform to run lightweight Functions in a cost-efficient and scalable way
 - [System connectivity](https://kyma-project.io/#/01-overview/application-connectivity/README) that provides endpoint to securely register Events and APIs of external applications
 - [Eventing](https://kyma-project.io/#/01-overview/eventing/README) that provides messaging channel to receive events, enrich them, and trigger business flows using Functions or services
 - [Istio](https://kyma-project.io/#/istio/user/00-overview/README) for service-to-service communication and proxying
