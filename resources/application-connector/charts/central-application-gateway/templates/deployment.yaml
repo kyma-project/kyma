@@ -35,7 +35,6 @@ spec:
         args:
           - "/app/applicationgateway"
           - "--applicationSecretsNamespace={{ .Values.global.systemNamespace }}"
-          - "--debugPort=3000"
           - "--externalAPIPort={{ .Values.deployment.args.externalAPIPort }}"
           - "--logLevel={{ .Values.deployment.args.logLevel }}"
           - "--proxyCacheTTL={{ .Values.deployment.args.proxyCacheTTL }}"
