@@ -68,8 +68,6 @@ spec:
             name: http-proxy-mps
           - containerPort: {{ .Values.deployment.args.externalAPIPort }}
             name: http-api-port
-          - containerPort: {{ .Values.deployment.args.debugPort }}
-            name: http-debug-port
         securityContext:
           runAsUser: {{ .Values.global.podSecurityPolicy.runAsUser }}
           privileged: {{ .Values.global.podSecurityPolicy.privileged }}
