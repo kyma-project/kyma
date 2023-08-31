@@ -13,7 +13,7 @@ To install a module, deploy its module manager and apply the module configuratio
 ### Prerequisites
 
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
-- Kubernetes cluster, or [k3d](https://k3d.io) for local installation
+- Kubernetes cluster, or [k3d](https://k3d.io) (v5.x or higher) for local installation
 - `kyma-system` Namespace created
 
 ### Steps
