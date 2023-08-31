@@ -32,7 +32,7 @@ data:
     urlPath: logparsers
     scope: cluster
     description: >-
-      {{"{{[LogParser](https://kyma-project.io/docs/kyma/latest/05-technical-reference/00-custom-resources/telemetry-02-logparser)}}"}} configures a custom Log Parser.
+      {{"{{[LogParser](https://kyma-project.io/#/telemetry-manager/user/resources/03-logparser)}}"}} configures a custom Log Parser.
   list: |-
     - source: status.conditions[-1].type
       name: Status
