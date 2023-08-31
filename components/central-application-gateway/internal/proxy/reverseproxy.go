@@ -75,10 +75,8 @@ func newProxy(targetURL string, requestParameters *authorization.RequestParamete
 			zap.String("path", req.URL.Path))
 	}
 
-	log := zap.L()
-
 	errorHandler := func(rw http.ResponseWriter, req *http.Request, err error) {
-		log.Warn("Request failed",
+		zap.L().Warn("Request failed",
 			zap.Error(err),
 			zap.Any("requestID", req.Context().Value(httptools.ContextUUID)),
 			zap.String("method", req.Method),
@@ -130,8 +128,7 @@ func responseModifier(
 	urlRewriter func(gatewayURL, target, loc *url.URL) *url.URL,
 ) func(*http.Response) error {
 	return func(resp *http.Response) error {
-		log := zap.L().Sugar()
-		_ = httptools.LogResponse(log, resp)
+		_ = httptools.LogResponse(zap.L().Sugar(), resp)
 
 		if resp.StatusCode >= 500 && resp.StatusCode < 600 {
 			resp.Header.Set("Target-System-Status", strconv.Itoa(resp.StatusCode))

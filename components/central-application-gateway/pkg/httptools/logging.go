@@ -55,10 +55,6 @@ func RequestLogger(label string, h http.Handler) http.Handler {
 
 		h.ServeHTTP(lw, r)
 
-		fullPath := r.RequestURI
-		if fullPath == "" {
-			fullPath = r.URL.RequestURI()
-		}
 		responseCode := lw.status
 		duration := time.Since(lw.start).Nanoseconds() / int64(time.Millisecond)
 
