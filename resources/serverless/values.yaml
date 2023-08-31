@@ -82,11 +82,11 @@ global:
       directory: "prod"
     function_controller:
       name: "function-controller"
-      version: "v20230824-a02c92c2"
+      version: "PR-18070"
       directory: "prod"
     function_webhook:
       name: "function-webhook"
-      version: "v20230824-a02c92c2"
+      version: "PR-18070"
       directory: "prod"
     function_build_init:
       name: "function-build-init"
