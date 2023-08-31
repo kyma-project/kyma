@@ -58,11 +58,15 @@ def build_cloud_event_attributes(req, data):
         'data': event.data,
         'ce-type': event['type'],
         'ce-source': event['source'],
-        'ce-eventtypeversion': event['eventtypeversion'],
-        'ce-specversion': event['specversion'],
         'ce-id': event['id'],
         'ce-time': event['time'],
     }
+    if event.get('eventtypeversion') is not None:
+        ceHeaders['ce-eventtypeversion'] = event.get('eventtypeversion')
+
+    if event.get('specversion') is not None:
+        ceHeaders['ce-specversion'] = event.get('specversion')
+        
     return ceHeaders
 
 
@@ -107,7 +111,7 @@ class Event:
         }
         if optionalCloudEventAttributes is not None:
             attributes.update(optionalCloudEventAttributes)
-            
+
         event = CloudEvent(attributes, data)
         headers, body = to_structured(event)
 
