@@ -129,7 +129,7 @@ values:
     resources:
       minRequestCpu: "10m"
       minRequestMemory: "16Mi"
-      defaultPreset: "S"
+      defaultPreset: "L"
       presets: |-
         {
           "XS": {
