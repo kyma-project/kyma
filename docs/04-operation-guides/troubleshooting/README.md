@@ -51,14 +51,6 @@ See the full list of Kyma troubleshooting guides:
   
 - [Issues with certificates on Gardener](./security/sec-01-certificates-gardener.md)
 
-### Serverless
-
-- [Failure to build Functions](./serverless/svls-01-cannot-build-functions.md)
-- [Failing Function container](./serverless/svls-02-failing-function-container.md)
-- [Function debugger stops at dependency files](./serverless/svls-03-function-debugger-in-strange-location.md)
-- [Functions failing to build on k3d](./serverless/svls-04-function-build-failing-on-k3d.md)
-- [Serverless periodically restarting](./serverless/svls-05-serverless-periodically-restarting.md)
-
 ### Service Mesh
 
 - [Can't access a Kyma endpoint (503 status code)](./service-mesh/smsh-01-503-no-access.md)
