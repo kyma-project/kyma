@@ -65,7 +65,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	logCfg, err := fileconfig.Load(config.ConfigPath)
+	logCfg, err := fileconfig.LoadLogConfig(config.ConfigPath)
 	if err != nil {
 		setupLog.Error(err, "unable to load configuration file")
 		os.Exit(1)

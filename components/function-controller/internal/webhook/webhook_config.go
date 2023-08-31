@@ -1,4 +1,4 @@
-package config
+package webhook
 
 import (
 	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"

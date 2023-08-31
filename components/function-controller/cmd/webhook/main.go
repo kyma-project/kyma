@@ -45,14 +45,14 @@ func main() {
 		panic(errors.Wrap(err, "while reading env variables"))
 	}
 
-	logCfg, err := fileconfig.Load(cfg.LogConfigPath)
+	logCfg, err := fileconfig.LoadLogConfig(cfg.LogConfigPath)
 	if err != nil {
 		setupLog.Error(err, "unable to load log configuration file")
 		os.Exit(1)
 	}
 
 	setupLog.Info("reading webhook configuration")
-	webhookCfg, err := fileconfig.LoadWebhookCfg(cfg.ConfigPath)
+	webhookCfg, err := webhook.LoadWebhookCfg(cfg.ConfigPath)
 	if err != nil {
 		setupLog.Error(err, "unable to load webhook configuration file")
 		os.Exit(1)
