@@ -53,7 +53,7 @@ spec:
     - displayName: code 500
       name: code 500
       providerDisplayName: code 500
-      description: Should return 502
+      description: Should return 502 given 500
       id: "{{ uuidv4 }}"
       entries:
         - type: API
@@ -62,7 +62,7 @@ spec:
     - displayName: code 503
       name: code 503
       providerDisplayName: code 503
-      description: Should return 502
+      description: Should return 502 given 503
       id: "{{ uuidv4 }}"
       entries:
         - type: API
@@ -71,7 +71,7 @@ spec:
     - displayName: code 502
       name: code 502
       providerDisplayName: code 502
-      description: Should return 502
+      description: Should return 502 given 502
       id: "{{ uuidv4 }}"
       entries:
         - type: API
@@ -80,7 +80,7 @@ spec:
     - displayName: code 123
       name: code 123
       providerDisplayName: code 123
-      description: Should return 502
+      description: Should return 502 given 123
       id: "{{ uuidv4 }}"
       entries:
         - type: API
