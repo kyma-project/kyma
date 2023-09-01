@@ -31,7 +31,7 @@
 /docs/kyma/latest/04-operation-guides/* https://kyma-project.io/#/04-operation-guides/README 301
 /docs/kyma/latest/05-technical-reference/* https://kyma-project.io/#/05-technical-reference/README 301
 /docs/kyma/latest/glossary/ https://kyma-project.io/#/glossary 301
-https://kyma-project.io/#/01-overview/telemetry/README https://kyma-project.io/#/telemetry-manager/user/README 301
+/docs/kyma/latest/01-overview/telemetry/README https://kyma-project.io/#/telemetry-manager/user/README 301
 https://kyma-project.io/#/01-overview/telemetry/telemetry-01-operator https://kyma-project.io/#/telemetry-manager/user/01-manager 301
 https://kyma-project.io/#/01-overview/telemetry/telemetry-02-logs.md https://kyma-project.io/#/telemetry-manager/user/02-logs 301
 https://kyma-project.io/#/01-overview/telemetry/telemetry-03-traces.md https://kyma-project.io/#/telemetry-manager/user/03-traces 301
