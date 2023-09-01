@@ -9,15 +9,6 @@ spec:
   labels:
     app: proxy-errors
   services:
-    - displayName: code 123
-      name: code 123
-      providerDisplayName: code 123
-      description: Should return 503, receiving unknown informational codes
-      id: "{{ uuidv4 }}"
-      entries:
-        - type: API
-          targetUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/code/123"
-          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/proxy-errors/code-123"
     - displayName: timeout
       name: timeout
       providerDisplayName: timeout
