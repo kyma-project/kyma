@@ -41,7 +41,7 @@ https://kyma-project.io/#/05-technical-reference/00-custom-resources/telemetry-0
 https://kyma-project.io/#/05-technical-reference/00-custom-resources/telemetry-03-tracepipeline https://kyma-project.io/#/telemetry-manager/user/resources/04-tracepipeline 301
 https://kyma-project.io/#/01-overview/serverless/README https://kyma-project.io/#/serverless-manager/user/README 301
 https://kyma-project.io/#/03-tutorials/00-serverless/*  https://kyma-project.io/#/serverless-manager/user/tutorials/README 301
-https://kyma-project.io/#/04-operation-guides/troubleshooting/seerverless/* https://kyma-project.io/#/serverless-manager/user/troubleshooting-guides/README 301
+https://kyma-project.io/#/04-operation-guides/troubleshooting/serverless/* https://kyma-project.io/#/serverless-manager/user/troubleshooting-guides/README 301
 https://kyma-project.io/#/05-technical-reference/00-architecture/svls-01-architecture https://kyma-project.io/#/serverless-manager/user/technical-reference/04-10-architecture 301
 https://kyma-project.io/#/05-technical-reference/00-architecture/svls-02-internal-registry https://kyma-project.io/#/serverless-manager/user/technical-reference/04-20-internal-registry 301
 https://kyma-project.io/#/05-technical-reference/00-custom-resources/svls-01-function https://kyma-project.io/#/serverless-manager/user/resources/06-10-function-cr 301
