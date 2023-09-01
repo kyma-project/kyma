@@ -3,13 +3,10 @@ package config
 import (
 	"context"
 	"errors"
-	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/file"
 	"go.uber.org/zap"
-	"gopkg.in/yaml.v2"
 )
 
 const (
@@ -17,25 +14,6 @@ const (
 )
 
 type CallbackFn func(Config)
-
-type Config struct {
-	LogLevel  string `yaml:"logLevel"`
-	LogFormat string `yaml:"logFormat"`
-}
-
-// Load - return cfg struct based on given path
-func Load(path string) (Config, error) {
-	cfg := Config{}
-
-	cleanPath := filepath.Clean(path)
-	yamlFile, err := os.ReadFile(cleanPath)
-	if err != nil {
-		return cfg, err
-	}
-
-	err = yaml.Unmarshal(yamlFile, &cfg)
-	return cfg, err
-}
 
 // RunOnConfigChange - run callback functions when config is changed
 func RunOnConfigChange(ctx context.Context, log *zap.SugaredLogger, path string, callbacks ...CallbackFn) {
@@ -64,7 +42,7 @@ func fireCallbacksOnConfigChange(ctx context.Context, log *zap.SugaredLogger, pa
 
 	log.Info("config file change detected")
 
-	cfg, err := Load(path)
+	cfg, err := LoadLogConfig(path)
 	if err != nil {
 		return err
 	}

@@ -34,9 +34,18 @@ spec:
     spec:
       serviceAccountName: {{ template "webhook.fullname" . }}
       volumes:
-        - name: configuration
+        - name: log-configuration
           configMap:
             name: "{{ .Values.global.configuration.configmapName }}"
+            items:
+            - key: {{ .Values.global.configuration.logFilename }}
+              path: {{ .Values.global.configuration.filename }}
+        - name: configuration
+          configMap:
+            name: {{ template "webhook.fullname" . }}-envs
+            items:
+              - key: {{ .Values.global.configuration.filename }}
+                path: {{ .Values.global.configuration.filename }}
         - name: serverless-webhook
           secret:
             secretName: {{ .Values.container.envs.webhookSecretName.value }}
@@ -57,8 +66,12 @@ spec:
       containers:
         - name: webhook
           volumeMounts:
+            - name: log-configuration
+              mountPath: {{ .Values.global.configuration.targetDir }}/{{ .Values.global.configuration.logFilename }}
+              subPath: config.yaml
             - name: configuration
-              mountPath: {{ .Values.global.configuration.targetDir }}
+              mountPath: {{ .Values.global.configuration.targetDir }}/{{ .Values.global.configuration.filename }}
+              subPath: config.yaml
             - name: serverless-webhook
               mountPath: /tmp/k8s-webhook-server/serving-certs
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_webhook) }}"

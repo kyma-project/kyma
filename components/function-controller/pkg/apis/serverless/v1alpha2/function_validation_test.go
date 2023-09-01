@@ -1,11 +1,9 @@
 package v1alpha2
 
 import (
-	"os"
 	"testing"
 
 	"github.com/onsi/gomega"
-	"github.com/vrischmann/envconfig"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -13,12 +11,6 @@ import (
 )
 
 func TestFunctionSpec_validateResources(t *testing.T) {
-	g := gomega.NewWithT(t)
-	err := os.Setenv("RESERVED_ENVS", "K_CONFIGURATION")
-	g.Expect(err).ShouldNot(gomega.HaveOccurred())
-	err = os.Setenv("FUNCTION_REPLICAS_MIN_VALUE", "1")
-	g.Expect(err).ShouldNot(gomega.HaveOccurred())
-
 	for testName, testData := range map[string]struct {
 		givenFunc              Function
 		expectedError          gomega.OmegaMatcher
@@ -921,9 +913,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			t.Log(tn)
 			// given
 			g := gomega.NewWithT(t)
-			config := &ValidationConfig{}
-			err := envconfig.Init(config)
-			g.Expect(err).ShouldNot(gomega.HaveOccurred())
+			config := fixValidationConfig()
 
 			// when
 			errs := testData.givenFunc.Validate(config)
@@ -1003,5 +993,26 @@ func TestFunctionSpec_validateGitRepoURL(t *testing.T) {
 				t.Errorf("FunctionSpec.validateGitRepoURL() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
+	}
+}
+
+func fixValidationConfig() *ValidationConfig {
+	return &ValidationConfig{
+		ReservedEnvs: []string{"K_CONFIGURATION"},
+		Function: MinFunctionValues{
+			Replicas: MinFunctionReplicasValues{
+				MinValue: int32(1),
+			},
+			Resources: MinFunctionResourcesValues{
+				MinRequestCPU:    "10m",
+				MinRequestMemory: "16Mi",
+			},
+		},
+		BuildJob: MinBuildJobValues{
+			Resources: MinBuildJobResourcesValues{
+				MinRequestCPU:    "200m",
+				MinRequestMemory: "200Mi",
+			},
+		},
 	}
 }

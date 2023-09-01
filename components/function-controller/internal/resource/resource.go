@@ -10,7 +10,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
-//go:generate mockery -name=Client -output=automock -outpkg=automock -case=underscore
+//go:generate mockery --name=Client --output=automock --outpkg=automock --case=underscore
 type Client interface {
 	Create(ctx context.Context, object Object) error
 	CreateWithReference(ctx context.Context, parent Object, object Object) error
@@ -22,7 +22,7 @@ type Client interface {
 	Status() ctrlclient.StatusWriter
 }
 
-//go:generate mockery -name=K8sClient -output=automock -outpkg=automock -case=underscore
+//go:generate mockery --name=K8sClient --output=automock --outpkg=automock --case=underscore
 type K8sClient interface {
 	Create(context.Context, ctrlclient.Object, ...ctrlclient.CreateOption) error
 	Update(ctx context.Context, obj ctrlclient.Object, opts ...ctrlclient.UpdateOption) error

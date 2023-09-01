@@ -78,7 +78,7 @@ If you're interested in learning more about the Observability area, check out th
   - [Prometheus Istio Server keeps crashing](../../04-operation-guides/troubleshooting/observability/obsv-01-troubleshoot-prometheus-istio-server-crash-oom.md)
   - [Trace backend shows fewer traces than expected](../../04-operation-guides/troubleshooting/observability/obsv-02-troubleshoot-trace-backend-shows-few-traces.md)
 
-- Understand the architecture of Kyma's [monitoring](../../05-technical-reference/00-architecture/obsv-01-architecture-monitoring.md), [logging](../../01-overview/telemetry/telemetry-02-logs.md), and [tracing](../../01-overview/telemetry/telemetry-03-traces.md) components.
+- Understand the architecture of Kyma's [monitoring](../../05-technical-reference/00-architecture/obsv-01-architecture-monitoring.md), [logging](https://kyma-project.io/#/telemetry-manager/user/02-logs), and [tracing](https://kyma-project.io/#/telemetry-manager/user/03-traces) components.
 
 - Find the [configuration parameters for Monitoring](../../05-technical-reference/00-configuration-parameters/obsv-01-configpara-observability.md).
 

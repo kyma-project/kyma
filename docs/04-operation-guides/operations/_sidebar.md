@@ -6,7 +6,6 @@
   * [Change Kyma settings](03-change-kyma-config-values.md)
   * [Upgrade or Downgrade Kyma](05-upgrade-kyma.md)
   * [Uninstall Kyma or components](07-uninstall-kyma.md)
-  * [Enable, disable and upgrade a Kyma module](08-enable-disable-upgrade-kyma-module.md)
   * [Back up Kyma](10-backup-kyma.md)
   * [Pass an access token in a request header](ac-01-pass-access-token-in-request-header.md)
   * [Grafana Dashboards for Kyma Eventing](evnt-01-eventing-dashboards.md)
@@ -17,4 +16,4 @@
   * [Enable Istio access logs](obsv-03-enable-istio-access-logs.md)
   * [Enable mTLS for custom metrics](obsv-04-enable-mtls-for-custom-metrics.md)
   * [Enable Kyma with Runtime Agent](ra-01-enable-kyma-with-runtime-agent.md)
-  * [Enable automatic Istio sidecar proxy injection](smsh-01-istio-enable-sidecar-injection.md)
+  * [Enable automatic Istio sidecar proxy injection](/istio/user/02-operation-guides/operations/02-20-enable-sidecar-injection.md)

@@ -35,7 +35,8 @@
         '/keda-manager/(.*)': 'https://raw.githubusercontent.com/kyma-project/keda-manager/main/docs/$1',
         '/serverless-manager/(.*)': 'https://raw.githubusercontent.com/kyma-project/serverless-manager/main/docs/$1',
         '/telemetry-manager/(.*)': 'https://raw.githubusercontent.com/kyma-project/telemetry-manager/main/docs/$1',
-      },
+        '/istio/(.*)': 'https://raw.githubusercontent.com/kyma-project/istio/main/docs/$1',
+      }, 
       plugins: [
         function noAliasesForImages(hook, vm) {
           
@@ -47,7 +48,6 @@
                 "#### **$3**\n$5\n");
               return '<!-- tabs:start -->\n'+tab+'<!-- tabs:end -->\n'
             })
-            console.log(markdown)
             return markdown
           });
           

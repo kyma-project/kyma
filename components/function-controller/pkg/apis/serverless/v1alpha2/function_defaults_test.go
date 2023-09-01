@@ -7,10 +7,6 @@ import (
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/vrischmann/envconfig"
-
-	"github.com/onsi/gomega"
-
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 )
@@ -20,35 +16,10 @@ func TestSetDefaults(t *testing.T) {
 	one := int32(1)
 	two := int32(2)
 
-	functionProfiles := `
-{
-	"python39": "L"
-}
-`
-	functionReplicas := `
-{
-"S":{"min": 1,"max": 1}
-}
-`
-	functionResources := `
-{
-"S":{"requestCpu": "25m","requestMemory": "32Mi","limitCpu": "50m","limitMemory": "64Mi"},
-"M":{"requestCpu": "50m","requestMemory": "64Mi","limitCpu": "100m","limitMemory": "128Mi"},
-"L":{"requestCpu": "100m","requestMemory": "128Mi","limitCpu": "200m","limitMemory": "256Mi"}
-}
-`
-
 	MRuntimeResourcesBuilder := ResourceRequirementsBuilder{}.Limits("100m", "128Mi").Requests("50m", "64Mi")
 	SRuntimeResourcesBuilder := ResourceRequirementsBuilder{}.Limits("50m", "64Mi").Requests("25m", "32Mi")
+	LRuntimeResources := ResourceRequirementsBuilder{}.Limits("200m", "256Mi").Requests("100m", "128Mi").BuildCoreV1()
 	MRuntimeResources := MRuntimeResourcesBuilder.BuildCoreV1()
-
-	buildResources := `
-{
-"slow":{"requestCpu": "350m","requestMemory": "350Mi","limitCpu": "700m","limitMemory": "700Mi"},
-"normal":{"requestCpu": "700m","requestMemory": "700Mi","limitCpu": "1100m","limitMemory": "1100Mi"},
-"fast":{"requestCpu": "1100m","requestMemory": "1100Mi", "limitCpu": "1800m","limitMemory": "1800Mi"}
-}
-`
 
 	slowBuildResourcesBuilder := ResourceRequirementsBuilder{}.Limits("700m", "700Mi").Requests("350m", "350Mi")
 
@@ -201,28 +172,13 @@ func TestSetDefaults(t *testing.T) {
 	} {
 		t.Run(testName, func(t *testing.T) {
 			// given
-			g := gomega.NewWithT(t)
-			config := &DefaultingConfig{}
-			err := envconfig.Init(config)
-			g.Expect(err).To(gomega.BeNil())
-
-			functionReplicasPresets, err := ParseReplicasPresets(functionReplicas)
-			g.Expect(err).To(gomega.BeNil())
-			config.Function.Replicas.Presets = functionReplicasPresets
-
-			functionResourcesPresets, err := ParseResourcePresets(functionResources)
-			g.Expect(err).To(gomega.BeNil())
-			config.Function.Resources.Presets = functionResourcesPresets
-
-			buildResourcesPresets, err := ParseResourcePresets(buildResources)
-			g.Expect(err).To(gomega.BeNil())
-			config.BuildJob.Resources.Presets = buildResourcesPresets
+			config := fixDefaultingConfig()
 
 			// when
 			testData.givenFunc.Default(config)
 
 			// then
-			g.Expect(testData.givenFunc).To(gomega.Equal(testData.expectedFunc))
+			require.EqualValues(t, testData.expectedFunc, testData.givenFunc)
 		})
 	}
 
@@ -397,38 +353,67 @@ func TestSetDefaults(t *testing.T) {
 					Replicas: &one,
 				}},
 		},
+		"Should set function profile to function default preset L": {
+			givenFunc: Function{
+				ObjectMeta: v1.ObjectMeta{},
+				Spec: FunctionSpec{
+					Runtime: Python39,
+				},
+			},
+			expectedFunc: Function{
+				ObjectMeta: v1.ObjectMeta{},
+				Spec: FunctionSpec{
+					Runtime: Python39,
+					ResourceConfiguration: &ResourceConfiguration{
+						Function: &ResourceRequirements{
+							Resources: &LRuntimeResources,
+						},
+					},
+					Replicas: &one,
+				}},
+		},
 	}
 
 	for testName, testData := range testCases {
 		t.Run(testName, func(t *testing.T) {
 			// given
-			g := gomega.NewWithT(t)
-			config := &DefaultingConfig{}
-			err := envconfig.Init(config)
-			g.Expect(err).To(gomega.BeNil())
-
-			functionReplicasPresets, err := ParseReplicasPresets(functionReplicas)
-			g.Expect(err).To(gomega.BeNil())
-			config.Function.Replicas.Presets = functionReplicasPresets
-
-			functionResourcesPresets, err := ParseResourcePresets(functionResources)
-			g.Expect(err).To(gomega.BeNil())
-			config.Function.Resources.Presets = functionResourcesPresets
-
-			buildResourcesPresets, err := ParseResourcePresets(buildResources)
-			g.Expect(err).To(gomega.BeNil())
-			config.BuildJob.Resources.Presets = buildResourcesPresets
-
-			functionProfile, err := ParseRuntimePresets(functionProfiles)
-			g.Expect(err).To(gomega.BeNil())
-			config.Function.Resources.RuntimePresets = functionProfile
+			config := fixDefaultingConfig()
 			// when
 			testData.givenFunc.Default(config)
 
 			// then
-			//g.Expect(testData.givenFunc).To(gomega.Equal(testData.expectedFunc))
 			require.EqualValues(t, testData.expectedFunc, testData.givenFunc)
 		})
+	}
+}
+
+func fixDefaultingConfig() *DefaultingConfig {
+	return &DefaultingConfig{
+		Function: FunctionDefaulting{
+			Replicas: FunctionReplicasDefaulting{
+				DefaultPreset: "S",
+				Presets:       map[string]ReplicasPreset{"S": {Min: 1, Max: 1}},
+			},
+			Resources: FunctionResourcesDefaulting{
+				DefaultPreset: "M",
+				Presets: map[string]ResourcesPreset{
+					"S": {RequestCPU: "25m", RequestMemory: "32Mi", LimitCPU: "50m", LimitMemory: "64Mi"},
+					"M": {RequestCPU: "50m", RequestMemory: "64Mi", LimitCPU: "100m", LimitMemory: "128Mi"},
+					"L": {RequestCPU: "100m", RequestMemory: "128Mi", LimitCPU: "200m", LimitMemory: "256Mi"},
+				},
+				RuntimePresets: map[string]string{"python39": "L"},
+			},
+		},
+		BuildJob: BuildJobDefaulting{
+			Resources: BuildJobResourcesDefaulting{
+				DefaultPreset: "normal",
+				Presets: map[string]ResourcesPreset{
+					"slow":   {RequestCPU: "350m", RequestMemory: "350Mi", LimitCPU: "700m", LimitMemory: "700Mi"},
+					"normal": {RequestCPU: "700m", RequestMemory: "700Mi", LimitCPU: "1100m", LimitMemory: "1100Mi"},
+					"fast":   {RequestCPU: "1100m", RequestMemory: "1100Mi", LimitCPU: "1800m", LimitMemory: "1800Mi"},
+				},
+			},
+		},
 	}
 }
 

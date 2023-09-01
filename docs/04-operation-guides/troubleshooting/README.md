@@ -51,17 +51,10 @@ See the full list of Kyma troubleshooting guides:
   
 - [Issues with certificates on Gardener](./security/sec-01-certificates-gardener.md)
 
-### Serverless
+### Istio
 
-- [Failure to build Functions](./serverless/svls-01-cannot-build-functions.md)
-- [Failing Function container](./serverless/svls-02-failing-function-container.md)
-- [Function debugger stops at dependency files](./serverless/svls-03-function-debugger-in-strange-location.md)
-- [Functions failing to build on k3d](./serverless/svls-04-function-build-failing-on-k3d.md)
-- [Serverless periodically restarting](./serverless/svls-05-serverless-periodically-restarting.md)
-
-### Service Mesh
-
-- [Can't access a Kyma endpoint (503 status code)](./service-mesh/smsh-01-503-no-access.md)
-- [Connection refused errors](./service-mesh/smsh-02-connection-refused.md)
-- [Issues with Istio sidecar injection](./service-mesh/smsh-03-istio-no-sidecar.md)
-- [Incompatible Istio sidecar version after Kyma upgrade](./service-mesh/smsh-04-istio-sidecar-version.md)
+- [Can't access a Kyma endpoint (503 status code)](https://kyma-project.io/#/istio/user/02-operation-guides/troubleshooting/03-10-503-no-access)
+- [Connection refused errors](https://kyma-project.io/#/istio/user/02-operation-guides/troubleshooting/03-20-connection-refused)
+- [Issues with Istio sidecar injection](https://kyma-project.io/#/istio/user/02-operation-guides/troubleshooting/03-30-istio-no-sidecar)
+- [Incompatible Istio sidecar version after Kyma upgrade](https://kyma-project.io/#/istio/user/02-operation-guides/troubleshooting/03-40-incompatible-istio-sidecar-version)
+- [Istio unintentionally deleted](https://kyma-project.io/#/istio/user/02-operation-guides/troubleshooting/03-50-recovering-from-unintentional-istio-module-removal)

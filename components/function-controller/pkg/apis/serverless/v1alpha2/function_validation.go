@@ -20,17 +20,17 @@ import (
 const ValidationConfigKey = "validation-config"
 
 type MinFunctionReplicasValues struct {
-	MinValue int32 `envconfig:"default=1"`
+	MinValue int32
 }
 
 type MinFunctionResourcesValues struct {
-	MinRequestCPU    string `envconfig:"default=10m"`
-	MinRequestMemory string `envconfig:"default=16Mi"`
+	MinRequestCPU    string
+	MinRequestMemory string
 }
 
 type MinBuildJobResourcesValues struct {
-	MinRequestCPU    string `envconfig:"default=200m"`
-	MinRequestMemory string `envconfig:"default=200Mi"`
+	MinRequestCPU    string
+	MinRequestMemory string
 }
 
 type MinFunctionValues struct {
@@ -43,7 +43,7 @@ type MinBuildJobValues struct {
 }
 
 type ValidationConfig struct {
-	ReservedEnvs []string `envconfig:"default={}"`
+	ReservedEnvs []string
 	Function     MinFunctionValues
 	BuildJob     MinBuildJobValues
 }
