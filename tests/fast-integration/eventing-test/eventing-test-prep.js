@@ -135,10 +135,10 @@ describe('Eventing tests preparation', function() {
     await deployJaeger(k8s.loadAllYaml(jaegerYaml));
   });
 
-  afterEach(async function() {
-    // if the test preparation failed, perform the cleanup
-    if (this.currentTest.state === 'failed') {
-      await cleanupTestingResources();
-    }
-  });
+  // afterEach(async function() {
+  // if the test preparation failed, perform the cleanup
+  // if (this.currentTest.state === 'failed') {
+  //    await cleanupTestingResources();
+  //  }
+  //  });
 });
