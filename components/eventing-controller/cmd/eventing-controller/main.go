@@ -69,6 +69,7 @@ func main() {
 	// Get env config and set feature flags
 	envConfig := env.GetConfig()
 	featureflags.SetEventingWebhookAuthEnabled(envConfig.EventingWebhookAuthEnabled)
+	featureflags.SetNATSProvisioningEnabled(envConfig.NATSProvisioningEnabled)
 
 	bebSubMgr := eventmesh.NewSubscriptionManager(restCfg,
 		opts.MetricsAddr,

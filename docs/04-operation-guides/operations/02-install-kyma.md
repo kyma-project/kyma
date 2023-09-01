@@ -8,7 +8,7 @@ Meet the prerequisites, provision a k3d cluster, and use the `deploy` command to
 
 ## Prerequisites
 
->**CAUTION:** As of version 1.20, [Kubernetes deprecated Docker](https://kubernetes.io/blog/2020/12/02/dont-panic-kubernetes-and-docker/) as a container runtime in favor of [containerd](https://containerd.io/). Due to a different way in which containerd handles certificate authorities, Kyma's built-in Docker registry does not work correctly on clusters running with a self-signed TLS certificate on top of Kubernetes installation where containerd is used as a container runtime. If that is your case, either upgrade the cluster to use Docker instead of containerd, generate a valid TLS certificate for your Kyma instance or [configure an external Docker registry](../../03-tutorials/00-serverless/svls-07-set-external-registry.md).
+>**CAUTION:** As of version 1.20, [Kubernetes deprecated Docker](https://kubernetes.io/blog/2020/12/02/dont-panic-kubernetes-and-docker/) as a container runtime in favor of [containerd](https://containerd.io/). Due to a different way in which containerd handles certificate authorities, Kyma's built-in Docker registry does not work correctly on clusters running with a self-signed TLS certificate on top of Kubernetes installation where containerd is used as a container runtime. If that is your case, either upgrade the cluster to use Docker instead of containerd, generate a valid TLS certificate for your Kyma instance or [configure an external Docker registry](https://kyma-project.io/#/serverless-manager/user/00-20-configure-serverless?id=configure-docker-registry).
 
 - [Kubernetes](https://kubernetes.io/docs/setup/) (supported version 1.26)
   - [k3d](https://k3d.io) (for local installation only, v5.0.0 or higher)
@@ -140,4 +140,4 @@ components:
 
 >**TIP:** To see a complete list of all Kyma components go to the [`components.yaml`](https://github.com/kyma-project/kyma/blob/main/installation/resources/components.yaml) file.
 
-> **NOTE:** To learn how to enable a Kyma module go to [Enable, disable and upgrade a Kyma module](./08-enable-disable-upgrade-kyma-module.md#enable-a-kyma-module).
+> **NOTE:** To learn how to install Kyma with a module go to [Install, uninstall and upgrade Kyma with a module](../../02-get-started/08-install-uninstall-upgrade-kyma-module.md#install-kyma-with-a-module).

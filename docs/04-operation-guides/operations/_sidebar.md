@@ -6,7 +6,6 @@
   * [Change Kyma settings](03-change-kyma-config-values.md)
   * [Upgrade or Downgrade Kyma](05-upgrade-kyma.md)
   * [Uninstall Kyma or components](07-uninstall-kyma.md)
-  * [Enable, disable and upgrade a Kyma module](08-enable-disable-upgrade-kyma-module.md)
   * [Back up Kyma](10-backup-kyma.md)
   * [Pass an access token in a request header](ac-01-pass-access-token-in-request-header.md)
   * [Grafana Dashboards for Kyma Eventing](evnt-01-eventing-dashboards.md)
