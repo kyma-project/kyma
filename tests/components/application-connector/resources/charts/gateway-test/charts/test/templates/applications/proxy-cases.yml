@@ -80,7 +80,7 @@ spec:
     - displayName: code 123
       name: code 123
       providerDisplayName: code 123
-      description: Should return 502 given 123
+      description: Should return 200 given 123
       id: "{{ uuidv4 }}"
       entries:
         - type: API
