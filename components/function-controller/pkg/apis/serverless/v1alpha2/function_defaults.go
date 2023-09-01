@@ -1,46 +1,39 @@
 package v1alpha2
 
 import (
-	"encoding/json"
-
 	"k8s.io/apimachinery/pkg/api/resource"
 
-	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 )
 
 const DefaultingConfigKey = "defaulting-config"
 
 type ReplicasPreset struct {
-	Min int32 `json:"min,omitempty"`
-	Max int32 `json:"max,omitempty"`
+	Min int32
+	Max int32
 }
 
 type ResourcesPreset struct {
-	RequestCPU    string `json:"requestCpu,omitempty"`
-	RequestMemory string `json:"requestMemory,omitempty"`
-	LimitCPU      string `json:"limitCpu,omitempty"`
-	LimitMemory   string `json:"limitMemory,omitempty"`
+	RequestCPU    string
+	RequestMemory string
+	LimitCPU      string
+	LimitMemory   string
 }
 
 type FunctionReplicasDefaulting struct {
-	DefaultPreset string                    `envconfig:"default=S"`
-	Presets       map[string]ReplicasPreset `envconfig:"-"`
-	PresetsMap    string                    `envconfig:"default={}"`
+	DefaultPreset string
+	Presets       map[string]ReplicasPreset
 }
 
 type FunctionResourcesDefaulting struct {
-	DefaultPreset     string                     `envconfig:"default=M"`
-	Presets           map[string]ResourcesPreset `envconfig:"-"`
-	PresetsMap        string                     `envconfig:"default={}"`
-	RuntimePresets    map[string]string          `envconfig:"-"`
-	RuntimePresetsMap string                     `envconfig:"default={}"`
+	DefaultPreset  string
+	Presets        map[string]ResourcesPreset
+	RuntimePresets map[string]string
 }
 
 type BuildJobResourcesDefaulting struct {
-	DefaultPreset string                     `envconfig:"default=normal"`
-	Presets       map[string]ResourcesPreset `envconfig:"-"`
-	PresetsMap    string                     `envconfig:"default={}"`
+	DefaultPreset string
+	Presets       map[string]ResourcesPreset
 }
 
 type FunctionDefaulting struct {
@@ -55,7 +48,7 @@ type BuildJobDefaulting struct {
 type DefaultingConfig struct {
 	Function FunctionDefaulting
 	BuildJob BuildJobDefaulting
-	Runtime  Runtime `envconfig:"default=nodejs18"`
+	Runtime  Runtime
 }
 
 func (fn *Function) Default(config *DefaultingConfig) {
@@ -208,28 +201,4 @@ func presetsToRequirements(preset ResourcesPreset) *corev1.ResourceRequirements 
 		},
 	}
 	return &result
-}
-
-func ParseReplicasPresets(presetsMap string) (map[string]ReplicasPreset, error) {
-	var presets map[string]ReplicasPreset
-	if err := json.Unmarshal([]byte(presetsMap), &presets); err != nil {
-		return presets, errors.Wrap(err, "while parsing resources presets")
-	}
-	return presets, nil
-}
-
-func ParseResourcePresets(presetsMap string) (map[string]ResourcesPreset, error) {
-	var presets map[string]ResourcesPreset
-	if err := json.Unmarshal([]byte(presetsMap), &presets); err != nil {
-		return presets, errors.Wrap(err, "while parsing resources presets")
-	}
-	return presets, nil
-}
-
-func ParseRuntimePresets(presetsMap string) (map[string]string, error) {
-	var presets map[string]string
-	if err := json.Unmarshal([]byte(presetsMap), &presets); err != nil {
-		return presets, errors.Wrap(err, "while parsing runtime presets")
-	}
-	return presets, nil
 }

@@ -69,6 +69,7 @@ global:
   configuration:
     configmapName: "serverless-configuration"
     targetDir: "/appdata"
+    logFilename: "log-config.yaml"
     filename: "config.yaml"
   ingress:
     domainName:
@@ -81,12 +82,12 @@ global:
       directory: "prod"
     function_controller:
       name: "function-controller"
-      version: "v20230824-a02c92c2"
-      directory: "prod"
+      version: "PR-18070"
+      directory: "dev"
     function_webhook:
       name: "function-webhook"
-      version: "v20230824-a02c92c2"
-      directory: "prod"
+      version: "PR-18070"
+      directory: "dev"
     function_build_init:
       name: "function-build-init"
       version: "v20230824-a02c92c2"
