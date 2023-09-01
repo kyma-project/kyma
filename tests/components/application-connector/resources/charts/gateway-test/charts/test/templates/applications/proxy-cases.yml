@@ -45,10 +45,10 @@ metadata:
   name: code-rewriting
   namespace: "{{ .Values.global.namespace }}"
 spec:
-  description: Proxying
+  description: Code Rewriting
   skipVerify: true
   labels:
-    app: proxy-cases
+    app: code-rewriting
   services:
     - displayName: code 500
       name: code 500
