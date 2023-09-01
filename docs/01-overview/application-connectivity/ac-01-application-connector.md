@@ -10,7 +10,7 @@ The external solution you connect to Kyma using AC is represented as an Applicat
 
 Application Connector secures Eventing with a client certificate verified by the Istio Ingress Gateway in the [Compass scenario](./README.md).
 
->**NOTE:** When using AC, make sure to [enable automatic Istio sidecar proxy injection](https://kyma-project.io/#/iistio/user/02-operation-guides/operations/02-20-enable-sidecar-injection). For more details, see [Default Istio setup in Kyma](https://kyma-project.io/#/istio/user/00-overview/00-40-overview-istio-setup).
+>**NOTE:** When using AC, make sure to [enable automatic Istio sidecar proxy injection](https://kyma-project.io/#/istio/user/02-operation-guides/operations/02-20-enable-sidecar-injection). For more details, see [Default Istio setup in Kyma](https://kyma-project.io/#/istio/user/00-overview/00-40-overview-istio-setup).
 
 ## Features
 
