@@ -1,4 +1,4 @@
-name: Markdown Links Check
+name: PR Markdown Link Check
 run-name: ${{github.event.pull_request.title}}
 on: [ pull_request ]
 jobs:
@@ -13,3 +13,4 @@ jobs:
           config-file: '.mlc.config.json'
           folder-path: '.'
           max-depth: -1
+          check-modified-files-only: 'yes'
