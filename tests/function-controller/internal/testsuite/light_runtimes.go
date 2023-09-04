@@ -82,7 +82,7 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg internal.Config, logf *logr
 		DataKey:            internal.TestDataKey,
 	}
 	return executor.NewSerialTestRunner(logf, "Runtime test",
-		namespace.NewNamespaceStep("Create test namespace", coreCli, genericContainer),
+		namespace.NewNamespaceStep(logf, "Create test namespace", genericContainer.Namespace, coreCli),
 		secret.CreateSecret(logf, pkgCfgSecret, "Create package configuration secret", pkgCfgSecretData),
 		executor.NewParallelRunner(logf, "Fn tests",
 			executor.NewSerialTestRunner(python39Logger, "Python39 test",
