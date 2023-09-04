@@ -45,8 +45,6 @@ type cloudEventData struct {
 	Hello string `json:"hello"`
 }
 
-var _ executor.Step = &cloudEventCheck{}
-
 type cloudEventCheck struct {
 	name     string
 	log      *logrus.Entry
@@ -54,7 +52,9 @@ type cloudEventCheck struct {
 	encoding cloudevents.Encoding
 }
 
-func CloudEventCheck(log *logrus.Entry, name string, encoding cloudevents.Encoding, target *url.URL) *cloudEventCheck {
+var _ executor.Step = &cloudEventCheck{}
+
+func CloudEventReceiveCheck(log *logrus.Entry, name string, encoding cloudevents.Encoding, target *url.URL) *cloudEventCheck {
 	return &cloudEventCheck{
 		encoding: encoding,
 		name:     name,
@@ -121,6 +121,72 @@ func (ce cloudEventCheck) createCECtx() (context.Context, string, error) {
 	}
 	return ceCtx, data, nil
 }
+
+type cloudEventSendCheck struct {
+	name     string
+	log      *logrus.Entry
+	endpoint string
+}
+
+var _ executor.Step = &cloudEventSendCheck{}
+
+func CloudEventSendCheck(log *logrus.Entry, name string, target *url.URL) executor.Step {
+	return cloudEventSendCheck{
+		name:     name,
+		log:      log,
+		endpoint: target.String(),
+	}
+}
+
+func (s cloudEventSendCheck) Name() string {
+	return s.name
+}
+
+func (s cloudEventSendCheck) Run() error {
+	eventData := cloudEventData{
+		Hello: "send-event",
+	}
+
+	out, err := json.Marshal(&eventData)
+	if err != nil {
+		return errors.Wrap(err, "while marshaling eventData to send")
+	}
+
+	resp, err := http.DefaultClient.Post(s.endpoint, "application/json", bytes.NewReader(out))
+	if err != nil {
+		return errors.Wrap(err, "while sending eventData")
+	}
+	if resp.StatusCode != http.StatusAccepted {
+		return errors.Errorf("Expected: %d, got: %d status code from eventData request", http.StatusAccepted, resp.StatusCode)
+	}
+
+	event, err := getCloudEventFromFunction(s.endpoint, "send-check")
+	if err != nil {
+		return errors.Wrap(err, "while getting saved cloud event")
+	}
+	expected := cloudEventResponse{
+		CeType:             "send-check",
+		CeSource:           "function",
+		CeSpecVersion:      cloudevents.VersionV1,
+		CeEventTypeVersion: "v1alpha2",
+		Data:               eventData,
+	}
+	err = assertCloudEvent(event, expected)
+	if err != nil {
+		return errors.Wrap(err, "while doing assertion on cloud event")
+	}
+
+	return nil
+}
+
+func (s cloudEventSendCheck) Cleanup() error {
+	return nil
+}
+
+func (s cloudEventSendCheck) OnError() error {
+	return nil
+}
+
 func sentCloudEvent(ceCtx context.Context, expResp cloudEventResponse) error {
 	c, err := cloudevents.NewClientHTTP()
 	if err != nil {
@@ -207,70 +273,3 @@ func assertCloudEvent(response cloudEventResponse, expectedResponse cloudEventRe
 	}
 	return errJoined
 }
-
-type cloudEventSendCheck struct {
-	name     string
-	log      *logrus.Entry
-	endpoint string
-}
-
-func CloudEventSendCheck(log *logrus.Entry, name string, target *url.URL) executor.Step {
-	return cloudEventSendCheck{
-		name:     name,
-		log:      log,
-		endpoint: target.String(),
-	}
-}
-
-func (s cloudEventSendCheck) Name() string {
-	return s.name
-}
-
-func (s cloudEventSendCheck) Run() error {
-	eventData := cloudEventData{
-		Hello: "send-event",
-	}
-
-	out, err := json.Marshal(&eventData)
-	if err != nil {
-		return errors.Wrap(err, "while marshaling eventData to send")
-	}
-
-	resp, err := http.DefaultClient.Post(s.endpoint, "application/json", bytes.NewReader(out))
-	if err != nil {
-		return errors.Wrap(err, "while sending eventData")
-	}
-	if resp.StatusCode != http.StatusAccepted {
-		return errors.Errorf("Expected: %d, got: %d status code from eventData request", http.StatusAccepted, resp.StatusCode)
-	}
-
-	event, err := getCloudEventFromFunction(s.endpoint, "send-check")
-	if err != nil {
-		return errors.Wrap(err, "while getting saved cloud event")
-	}
-	//TODO do assertion on content
-
-	expected := cloudEventResponse{
-		CeType:             "send-check",
-		CeSource:           "function",
-		CeSpecVersion:      cloudevents.VersionV1,
-		CeEventTypeVersion: "v1alpha2",
-		Data:               eventData,
-	}
-	err = assertCloudEvent(event, expected)
-	if err != nil {
-		return errors.Wrap(err, "while doing assertion on cloud event")
-	}
-
-	return nil
-}
-
-func (s cloudEventSendCheck) Cleanup() error {
-	return nil
-}
-
-func (s cloudEventSendCheck) OnError() error {
-	return nil
-}
-
-var _ executor.Step = &cloudEventSendCheck{}

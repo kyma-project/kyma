@@ -29,7 +29,7 @@ func TestCloudEventCheckLocally(t *testing.T) {
 				}
 
 				//WHEN
-				check := CloudEventCheck(log, "test", tc.Encoding, fnURL)
+				check := CloudEventReceiveCheck(log, "test", tc.Encoding, fnURL)
 
 				//THEN
 				err = check.Run()
