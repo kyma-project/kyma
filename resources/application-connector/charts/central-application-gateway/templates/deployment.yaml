@@ -72,6 +72,6 @@ spec:
           runAsUser: {{ .Values.global.podSecurityPolicy.runAsUser }}
           privileged: {{ .Values.global.podSecurityPolicy.privileged }}
           allowPrivilegeEscalation: {{ .Values.global.podSecurityPolicy.allowPrivilegeEscalation }}
-    {{- if .Values.global.priorityClassName }}
-      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName }}
     {{- end }}

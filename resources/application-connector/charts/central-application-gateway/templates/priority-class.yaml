@@ -1,0 +1,7 @@
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: {{ .Values.priorityClassName }}
+value: 2000000
+globalDefault: false
+description: "Scheduling priority of central-application-gateway component. By default, central-application-gateway should not be blocked by unschedulable user workloads."
