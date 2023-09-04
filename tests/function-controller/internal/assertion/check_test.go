@@ -8,33 +8,54 @@ import (
 )
 
 func TestCloudEventCheckLocally(t *testing.T) {
-	testCases := map[string]struct {
-		cloudevents.Encoding
-	}{
-		"Structured": {
-			cloudevents.EncodingStructured,
-		},
-		"Binary": {
-			cloudevents.EncodingBinary,
-		},
-	}
-	for name, tc := range testCases {
-		t.Run(name, func(t *testing.T) {
-			//GIVEN
-			log := logrus.New().WithField("test", "cloud event")
-			fnURL, err := url.Parse("http://localhost:8080")
-			if err != nil {
-				panic(err)
-			}
+	t.Run("cloud event check", func(t *testing.T) {
+		testCases := map[string]struct {
+			cloudevents.Encoding
+		}{
+			"Structured": {
+				cloudevents.EncodingStructured,
+			},
+			"Binary": {
+				cloudevents.EncodingBinary,
+			},
+		}
+		for name, tc := range testCases {
+			t.Run(name, func(t *testing.T) {
+				//GIVEN
+				log := logrus.New().WithField("test", "cloud event")
+				fnURL, err := url.Parse("http://localhost:8080")
+				if err != nil {
+					panic(err)
+				}
 
-			//WHEN
-			check := CloudEventCheck(log, "test", tc.Encoding, fnURL)
+				//WHEN
+				check := CloudEventCheck(log, "test", tc.Encoding, fnURL)
 
-			//THEN
-			err = check.Run()
-			if err != nil {
-				panic(err)
-			}
-		})
-	}
+				//THEN
+				err = check.Run()
+				if err != nil {
+					panic(err)
+				}
+			})
+		}
+
+	})
+
+	t.Run("cloud event send check", func(t *testing.T) {
+		//GIVEN
+		log := logrus.New().WithField("test", "cloud event")
+		fnURL, err := url.Parse("http://localhost:8080")
+		if err != nil {
+			panic(err)
+		}
+
+		//WHEN
+		check := CloudEventSendCheck(log, "test", fnURL)
+
+		//THEN
+		err = check.Run()
+		if err != nil {
+			panic(err)
+		}
+	})
 }

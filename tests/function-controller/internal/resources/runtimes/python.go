@@ -2,6 +2,7 @@ package runtimes
 
 import (
 	"fmt"
+	v1 "k8s.io/api/core/v1"
 
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 )
@@ -101,17 +102,29 @@ func PythonCloudEvent(runtime serverlessv1alpha2.Runtime) serverlessv1alpha2.Fun
 
 	src := `import json
 
-event_data = None
+import bottle
+
+event_data = {}
+
+send_check_event_type = "send-check"
+
 
 def main(event, context):
     global event_data
     req = event.ceHeaders['extensions']['request']
-
     if req.method == 'GET':
-        return json.dumps(event_data)
-    event_data = event.ceHeaders
-    event_data.pop('extensions')
-    return ""`
+        saved_event = event_data[send_check_event_type] if send_check_event_type in event_data else {}
+        return json.dumps(saved_event)
+
+    if 'ce-type' not in event.ceHeaders:
+        event.emitCloudEvent(send_check_event_type, 'function', req.json, {'eventtypeversion': 'v1alpha2'})
+        return bottle.HTTPResponse(status=202, body="")
+    event_ce_headers = event.ceHeaders
+    event_ce_headers.pop('extensions')
+
+    event_data[event_ce_headers['ce-type']] = event_ce_headers
+    return ""
+`
 
 	return serverlessv1alpha2.FunctionSpec{
 		Runtime: runtime,
@@ -119,6 +132,12 @@ def main(event, context):
 			Inline: &serverlessv1alpha2.InlineSource{
 				Source:       src,
 				Dependencies: dpd,
+			},
+		},
+		Env: []v1.EnvVar{
+			{
+				Name:  "PUBLISHER_PROXY_ADDRESS",
+				Value: "localhost:8080",
 			},
 		},
 	}
