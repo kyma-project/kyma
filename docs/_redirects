@@ -1,7 +1,3 @@
-/docs/root/* /docs/kyma/latest/ 302
-/docs/components/* / 302
-/docs/ / 302
-/community/* https://github.com/kyma-project/community 301
 /blog/2023/4/14/release-notes-213 https://github.com/kyma-project/kyma/releases/tag/2.13.0 301
 /blog/2023/3/30/release-notes-2121 https://github.com/kyma-project/kyma/releases/tag/2.12.1 301
 /blog/2023/3/15/release-notes-212 https://github.com/kyma-project/kyma/releases/tag/2.12.0 301
@@ -27,14 +23,14 @@
 /docs/kyma/latest/01-overview/main-areas/* /docs/kyma/latest/01-overview/:splat 301
 /docs/kyma/latest/01-overview/telemetry/README /#/telemetry-manager/user/README 301
 /docs/kyma/latest/01-overview/telemetry/telemetry-01-operator /#/telemetry-manager/user/01-manager 301
-/docs/kyma/latest/01-overview/telemetry/telemetry-02-logs.md /#/telemetry-manager/user/02-logs 301
-/docs/kyma/latest/01-overview/telemetry/telemetry-03-traces.md /#/telemetry-manager/user/03-traces 301
-/docs/kyma/latest/01-overview/telemetry/telemetry-04-tutorials.md /#/telemetry-manager/user/05-tutorials
+/docs/kyma/latest/01-overview/telemetry/telemetry-02-logs /#/telemetry-manager/user/02-logs 301
+/docs/kyma/latest/01-overview/telemetry/telemetry-03-traces /#/telemetry-manager/user/03-traces 301
+/docs/kyma/latest/01-overview/telemetry/telemetry-04-tutorials /#/telemetry-manager/user/05-tutorials
 /docs/kyma/latest/05-technical-reference/00-custom-resources/telemetry-01-logpipeline /#/telemetry-manager/user/resources/02-logpipeline 301
 /docs/kyma/latest/05-technical-reference/00-custom-resources/telemetry-02-logparser /#/telemetry-manager/user/resources/03-logparser 301
 /docs/kyma/latest/05-technical-reference/00-custom-resources/telemetry-03-tracepipeline /#/telemetry-manager/user/resources/04-tracepipeline 301
 /docs/kyma/latest/01-overview/serverless/README /#/serverless-manager/user/README 301
-/docs/kyma/latest/03-tutorials/00-serverless/*  /#/serverless-manager/user/tutorials/README 301
+/docs/kyma/latest/03-tutorials/00-serverless/* /#/serverless-manager/user/tutorials/README 301
 /docs/kyma/latest/04-operation-guides/troubleshooting/serverless/* /#/serverless-manager/user/troubleshooting-guides/README 301
 /docs/kyma/latest/05-technical-reference/00-architecture/svls-01-architecture /#/serverless-manager/user/technical-reference/04-10-architecture 301
 /docs/kyma/latest/05-technical-reference/00-architecture/svls-02-internal-registry /#/serverless-manager/user/technical-reference/04-20-internal-registry 301
@@ -46,6 +42,10 @@
 /docs/kyma/latest/05-technical-reference/svls-05-exposing-functions /#/serverless-manager/user/technical-reference/README 301
 /docs/kyma/latest/05-technical-reference/svls-06-function-configuration-file /#/serverless-manager/user/technical-reference/07-60-function-configuration-file 301
 /docs/kyma/latest/05-technical-reference/svls-08-available-presets /#/serverless-manager/user/technical-reference/07-80-available-presets 301
+/docs/root/* /docs/kyma/latest/ 302
+/docs/components/* / 302
+/docs/ / 302
+/community/* https://github.com/kyma-project/community 301
 /docs/kyma/latest/01-overview/* /#/01-overview/README 301
 /docs/kyma/latest/02-get-started/* /#/02-get-started/README 301
 /docs/kyma/latest/03-tutorials/* /#/03-tutorials/README 301
