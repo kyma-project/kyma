@@ -25,12 +25,6 @@
 /blog/:year/:month/:date/release-notes-* https://github.com/kyma-project/kyma/releases/ 301
 /blog/* https://community.sap.com/topics/kyma?lng=en&tab=content 301
 /docs/kyma/latest/01-overview/main-areas/* /docs/kyma/latest/01-overview/:splat 301
-/docs/kyma/latest/01-overview/* /#/01-overview/README 301
-/docs/kyma/latest/02-get-started/* /#/02-get-started/README 301
-/docs/kyma/latest/03-tutorials/* /#/03-tutorials/README 301
-/docs/kyma/latest/04-operation-guides/* /#/04-operation-guides/README 301
-/docs/kyma/latest/05-technical-reference/* /#/05-technical-reference/README 301
-/docs/kyma/latest/glossary/ /#/glossary 301
 /docs/kyma/latest/01-overview/telemetry/README /#/telemetry-manager/user/README 301
 /docs/kyma/latest/01-overview/telemetry/telemetry-01-operator /#/telemetry-manager/user/01-manager 301
 /docs/kyma/latest/01-overview/telemetry/telemetry-02-logs.md /#/telemetry-manager/user/02-logs 301
@@ -52,3 +46,9 @@
 /docs/kyma/latest/05-technical-reference/svls-05-exposing-functions /#/serverless-manager/user/technical-reference/README 301
 /docs/kyma/latest/05-technical-reference/svls-06-function-configuration-file /#/serverless-manager/user/technical-reference/07-60-function-configuration-file 301
 /docs/kyma/latest/05-technical-reference/svls-08-available-presets /#/serverless-manager/user/technical-reference/07-80-available-presets 301
+/docs/kyma/latest/01-overview/* /#/01-overview/README 301
+/docs/kyma/latest/02-get-started/* /#/02-get-started/README 301
+/docs/kyma/latest/03-tutorials/* /#/03-tutorials/README 301
+/docs/kyma/latest/04-operation-guides/* /#/04-operation-guides/README 301
+/docs/kyma/latest/05-technical-reference/* /#/05-technical-reference/README 301
+/docs/kyma/latest/glossary/ /#/glossary 301
