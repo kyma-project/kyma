@@ -87,14 +87,14 @@ func GitAuthTestSteps(restConfig *rest.Config, cfg internal.Config, logf *logrus
 
 	azureTC := getAzureDevopsTestcase(testCfg)
 	azureSecret := secret.NewSecret(azureTC.auth.SecretName, genericContainer)
-	azureFn := function.NewFunction(azureTC.name, cfg.KubectlProxyEnabled, genericContainer)
+	azureFn := function.NewFunction(azureTC.name, genericContainer.Namespace, cfg.KubectlProxyEnabled, genericContainer)
 
 	githubTC, err := getGithubTestcase(testCfg)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while setting github testcase")
 	}
 	githubSecret := secret.NewSecret(githubTC.auth.SecretName, genericContainer)
-	githubFn := function.NewFunction(githubTC.name, cfg.KubectlProxyEnabled, genericContainer)
+	githubFn := function.NewFunction(githubTC.name, genericContainer.Namespace, cfg.KubectlProxyEnabled, genericContainer)
 
 	return executor.NewSerialTestRunner(logf, "Test Git function authentication",
 		namespace.NewNamespaceStep(logf, "Create test namespace", genericContainer.Namespace, coreCli),
