@@ -113,7 +113,8 @@ def main(event, context):
     global event_data
     req = event.ceHeaders['extensions']['request']
     if req.method == 'GET':
-        saved_event = event_data[send_check_event_type] if send_check_event_type in event_data else {}
+        event_type = req.query.get(key='type')
+        saved_event = event_data[event_type] if event_type in event_data else {}
         return json.dumps(saved_event)
 
     if 'ce-type' not in event.ceHeaders:
