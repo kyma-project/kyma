@@ -50,15 +50,6 @@ func TestDefaultingWebHook_Handle(t *testing.T) {
 			fields: fields{
 				configv1alpha2: &serverlessv1alpha2.DefaultingConfig{
 					Function: serverlessv1alpha2.FunctionDefaulting{
-						Replicas: serverlessv1alpha2.FunctionReplicasDefaulting{
-							DefaultPreset: "S",
-							Presets: map[string]serverlessv1alpha2.ReplicasPreset{
-								"S": {
-									Min: int32(1),
-									Max: int32(1),
-								},
-							},
-						},
 						Resources: serverlessv1alpha2.FunctionResourcesDefaulting{
 							DefaultPreset: "S",
 							Presets: map[string]serverlessv1alpha2.ResourcesPreset{

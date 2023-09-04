@@ -390,10 +390,6 @@ func TestSetDefaults(t *testing.T) {
 func fixDefaultingConfig() *DefaultingConfig {
 	return &DefaultingConfig{
 		Function: FunctionDefaulting{
-			Replicas: FunctionReplicasDefaulting{
-				DefaultPreset: "S",
-				Presets:       map[string]ReplicasPreset{"S": {Min: 1, Max: 1}},
-			},
 			Resources: FunctionResourcesDefaulting{
 				DefaultPreset: "M",
 				Presets: map[string]ResourcesPreset{
