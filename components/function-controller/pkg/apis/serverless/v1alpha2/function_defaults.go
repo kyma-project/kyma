@@ -8,21 +8,11 @@ import (
 
 const DefaultingConfigKey = "defaulting-config"
 
-type ReplicasPreset struct {
-	Min int32
-	Max int32
-}
-
 type ResourcesPreset struct {
 	RequestCPU    string
 	RequestMemory string
 	LimitCPU      string
 	LimitMemory   string
-}
-
-type FunctionReplicasDefaulting struct {
-	DefaultPreset string
-	Presets       map[string]ReplicasPreset
 }
 
 type FunctionResourcesDefaulting struct {
@@ -37,7 +27,6 @@ type BuildJobResourcesDefaulting struct {
 }
 
 type FunctionDefaulting struct {
-	Replicas  FunctionReplicasDefaulting
 	Resources FunctionResourcesDefaulting
 }
 
@@ -52,42 +41,8 @@ type DefaultingConfig struct {
 }
 
 func (fn *Function) Default(config *DefaultingConfig) {
-	fn.Spec.defaultScaling(config)
 	fn.Spec.defaultFunctionResources(config, fn)
 	fn.Spec.defaultBuildResources(config, fn)
-}
-
-func (spec *FunctionSpec) defaultScaling(config *DefaultingConfig) {
-	defaultingConfig := config.Function.Replicas
-	replicasPreset := defaultingConfig.Presets[defaultingConfig.DefaultPreset]
-
-	if spec.Replicas == nil {
-		// TODO: The presets structure and docs should be updated to reflect the new behavior.
-		spec.Replicas = &replicasPreset.Min
-	}
-
-	if spec.ScaleConfig == nil {
-		return
-	}
-
-	// spec.ScaleConfig is SET, but not fully configured, for sanity, we will default MinReplicas, we will also use it as a default spec.Replica
-	if spec.ScaleConfig.MinReplicas == nil {
-		newMin := replicasPreset.Min
-		if spec.ScaleConfig.MaxReplicas != nil && *spec.ScaleConfig.MaxReplicas < newMin {
-			newMin = *spec.ScaleConfig.MaxReplicas
-		}
-		spec.ScaleConfig.MinReplicas = &newMin
-	}
-	spec.Replicas = spec.ScaleConfig.MinReplicas
-
-	if spec.ScaleConfig.MaxReplicas == nil {
-		newMax := replicasPreset.Max
-		if *spec.ScaleConfig.MinReplicas > newMax {
-			newMax = *spec.ScaleConfig.MinReplicas
-		}
-
-		spec.ScaleConfig.MaxReplicas = &newMax
-	}
 }
 
 func (spec *FunctionSpec) defaultFunctionResources(config *DefaultingConfig, fn *Function) {

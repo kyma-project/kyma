@@ -10,15 +10,8 @@ import (
 	"strconv"
 )
 
-type ReplicasPreset map[string]struct {
-	Min int32 `yaml:"min"`
-	Max int32 `yaml:"max"`
-}
-
 type Replicas struct {
-	MinValue      string         `yaml:"minValue"`
-	DefaultPreset string         `yaml:"defaultPreset"`
-	Presets       ReplicasPreset `yaml:"presets"`
+	MinValue string `yaml:"minValue"`
 }
 
 type ResourcePreset map[string]struct {
@@ -65,7 +58,6 @@ func LoadWebhookCfg(path string) (WebhookConfig, error) {
 	cfg := WebhookConfig{
 		DefaultRuntime: string(v1alpha2.NodeJs18),
 		Function: FunctionCfg{
-			Replicas:  Replicas{DefaultPreset: "S"},
 			Resources: FunctionResources{DefaultPreset: "M"}},
 		BuildJob: BuildJob{Resources: BuildResources{DefaultPreset: "normal"}},
 	}
@@ -88,18 +80,6 @@ func (r *ResourcePreset) UnmarshalYAML(unmarshal func(interface{}) error) error 
 	}
 
 	if err := json.Unmarshal([]byte(rawPresets), r); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (rp *ReplicasPreset) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	rawPresets := ""
-	err := unmarshal(&rawPresets)
-	if err != nil {
-		return err
-	}
-	if err := json.Unmarshal([]byte(rawPresets), rp); err != nil {
 		return err
 	}
 	return nil
@@ -147,10 +127,6 @@ func (wc WebhookConfig) ToDefaultingConfig() (v1alpha2.DefaultingConfig, error) 
 	cfg := v1alpha2.DefaultingConfig{
 		Runtime: v1alpha2.Runtime(wc.DefaultRuntime),
 		Function: v1alpha2.FunctionDefaulting{
-			Replicas: v1alpha2.FunctionReplicasDefaulting{
-				DefaultPreset: wc.Function.Replicas.DefaultPreset,
-				Presets:       wc.Function.Replicas.Presets.toDefaultingReplicaPreset(),
-			},
 			Resources: v1alpha2.FunctionResourcesDefaulting{
 				DefaultPreset:  wc.Function.Resources.DefaultPreset,
 				Presets:        wc.Function.Resources.Presets.toDefaultingResourcePreset(),
@@ -165,17 +141,6 @@ func (wc WebhookConfig) ToDefaultingConfig() (v1alpha2.DefaultingConfig, error) 
 		},
 	}
 	return cfg, nil
-}
-
-func (rp ReplicasPreset) toDefaultingReplicaPreset() map[string]v1alpha2.ReplicasPreset {
-	out := map[string]v1alpha2.ReplicasPreset{}
-	for k, v := range rp {
-		out[k] = v1alpha2.ReplicasPreset{
-			Min: v.Min,
-			Max: v.Max,
-		}
-	}
-	return out
 }
 
 func (rp ResourcePreset) toDefaultingResourcePreset() map[string]v1alpha2.ResourcesPreset {
