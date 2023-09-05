@@ -2,7 +2,7 @@ name: Daily Markdown Link Check
 run-name: ${{github.event.pull_request.title}}
 on:
     schedule:
-    # Run everyday at 6:00 AM
+    # Run every 5 minutes for the first days, then will be updated to run everyday at 6:00 AM
     - cron: "*/5 * * * *"
 jobs:
   markdown-link-check:
