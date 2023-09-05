@@ -2,7 +2,7 @@
 title: What is Observability in Kyma?
 ---
 
-Out of the box, Kyma provides tools to collect and ship telemetry data using the [Telemetry Module](https://kyma-project.io/#/telemetry-manager/user/README). Of course, you'll want to view and analyze the data you're collecting. This is where observability tools come in.
+Out of the box, Kyma provides tools to collect and ship telemetry data using the [Telemetry Module](../telemetry/README.mdE). Of course, you'll want to view and analyze the data you're collecting. This is where observability tools come in.
 
 ## Data collection
 
@@ -59,7 +59,7 @@ You can see the number of ingested time series samples from the `prometheus_tsdb
 
 # Telemetry
 
-The page moved to the [Telemetry - Logs](./../telemetry/telemetry-02-logs.md) section.
+The page moved to the [Telemetry - Logs](https://kyma-project.io/#/telemetry-manager/user/02-logs) section.
 
 # Useful links
 
