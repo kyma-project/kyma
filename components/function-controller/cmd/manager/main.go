@@ -50,7 +50,7 @@ type config struct {
 	SecretMutatingWebhookPort int    `envconfig:"default=8443"`
 	Kubernetes                k8s.Config
 	Function                  serverless.FunctionConfig
-	LogConfigPath             string `envconfig:"default=/appdata/log-config.yaml"`
+	LogConfigPath             string `envconfig:"default=/appconfig/log-config.yaml"`
 }
 
 type healthzConfig struct {
