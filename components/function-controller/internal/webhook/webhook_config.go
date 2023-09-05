@@ -1,13 +1,13 @@
 package webhook
 
 import (
+	"os"
+	"path/filepath"
+
 	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 	"k8s.io/apimachinery/pkg/util/json"
-	"os"
-	"path/filepath"
-	"strconv"
 )
 
 type Replicas struct {
@@ -97,17 +97,10 @@ func (rp *RuntimePreset) UnmarshalYAML(unmarshal func(interface{}) error) error 
 	return nil
 }
 
-func (wc WebhookConfig) ToValidationConfig() (v1alpha2.ValidationConfig, error) {
-	minReplicas, err := strconv.Atoi(wc.Function.Replicas.MinValue)
-	if err != nil {
-		return v1alpha2.ValidationConfig{}, nil
-	}
-	cfg := v1alpha2.ValidationConfig{
+func (wc WebhookConfig) ToValidationConfig() v1alpha2.ValidationConfig {
+	return v1alpha2.ValidationConfig{
 		ReservedEnvs: wc.ReservedEnvs,
 		Function: v1alpha2.MinFunctionValues{
-			Replicas: v1alpha2.MinFunctionReplicasValues{
-				MinValue: int32(minReplicas),
-			},
 			Resources: v1alpha2.MinFunctionResourcesValues{
 				MinRequestCPU:    wc.Function.Resources.MinRequestCpu,
 				MinRequestMemory: wc.Function.Resources.MinRequestMemory,
@@ -120,7 +113,6 @@ func (wc WebhookConfig) ToValidationConfig() (v1alpha2.ValidationConfig, error) 
 			},
 		},
 	}
-	return cfg, nil
 }
 
 func (wc WebhookConfig) ToDefaultingConfig() (v1alpha2.DefaultingConfig, error) {

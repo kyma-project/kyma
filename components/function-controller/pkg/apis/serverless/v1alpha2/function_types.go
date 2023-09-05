@@ -182,6 +182,7 @@ type FunctionSpec struct {
 	// Defines the exact number of Function's Pods to run at a time.
 	// If **ScaleConfig** is configured, or if the Function is targeted by an external scaler,
 	// then the **Replicas** field is used by the relevant HorizontalPodAutoscaler to control the number of active replicas.
+	// +kubebuilder:validation:Minimum=0
 	// +kubebuilder:default:=1
 	// +optional
 	Replicas *int32 `json:"replicas,omitempty"`

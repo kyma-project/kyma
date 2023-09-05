@@ -2,10 +2,11 @@ package v1alpha2
 
 import (
 	"fmt"
-	"k8s.io/apimachinery/pkg/labels"
 	"net/url"
 	"regexp"
 	"strings"
+
+	"k8s.io/apimachinery/pkg/labels"
 
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
@@ -19,10 +20,6 @@ import (
 
 const ValidationConfigKey = "validation-config"
 
-type MinFunctionReplicasValues struct {
-	MinValue int32
-}
-
 type MinFunctionResourcesValues struct {
 	MinRequestCPU    string
 	MinRequestMemory string
@@ -34,7 +31,6 @@ type MinBuildJobResourcesValues struct {
 }
 
 type MinFunctionValues struct {
-	Replicas  MinFunctionReplicasValues
 	Resources MinFunctionResourcesValues
 }
 
@@ -57,7 +53,6 @@ func (fn *Function) getBasicValidations() []validationFunction {
 		fn.Spec.validateEnv,
 		fn.Spec.validateLabels,
 		fn.Spec.validateAnnotations,
-		fn.Spec.validateReplicas,
 		fn.Spec.validateFunctionResources,
 		fn.Spec.validateBuildResources,
 		fn.Spec.validateSources,
@@ -288,35 +283,6 @@ func validateLimits(resources corev1.ResourceRequirements, minMemory, minCPU res
 		}
 	}
 	return allErrs
-}
-
-func (spec *FunctionSpec) validateReplicas(vc *ValidationConfig) error {
-	minValue := vc.Function.Replicas.MinValue
-	var maxReplicas *int32
-	var minReplicas *int32
-	if spec.ScaleConfig == nil {
-		return nil
-	}
-	maxReplicas = spec.ScaleConfig.MaxReplicas
-	minReplicas = spec.ScaleConfig.MinReplicas
-	allErrs := []string{}
-
-	if spec.Replicas == nil && spec.ScaleConfig == nil {
-		allErrs = append(allErrs, "spec.replicas and spec.scaleConfig are empty at the same time")
-	}
-	if maxReplicas != nil && minReplicas != nil && *minReplicas > *maxReplicas {
-		allErrs = append(allErrs, fmt.Sprintf("spec.maxReplicas(%d) is less than spec.minReplicas(%d)",
-			*maxReplicas, *minReplicas))
-	}
-	if minReplicas != nil && *minReplicas < minValue {
-		allErrs = append(allErrs, fmt.Sprintf("spec.minReplicas(%d) is less than the smallest allowed value(%d)",
-			*minReplicas, minValue))
-	}
-	if maxReplicas != nil && *maxReplicas < minValue {
-		allErrs = append(allErrs, fmt.Sprintf("spec.maxReplicas(%d) is less than the smallest allowed value(%d)",
-			*maxReplicas, minValue))
-	}
-	return returnAllErrs("invalid values", allErrs)
 }
 
 func (spec *FunctionSpec) validateLabels(_ *ValidationConfig) error {

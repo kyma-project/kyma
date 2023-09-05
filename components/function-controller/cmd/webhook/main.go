@@ -129,11 +129,7 @@ func main() {
 			logWithCtx.Named("defaulting-webhook")),
 	})
 
-	validationCfg, err := webhookCfg.ToValidationConfig()
-	if err != nil {
-		setupLog.Error(err, "while creating of validation configuration")
-		os.Exit(1)
-	}
+	validationCfg := webhookCfg.ToValidationConfig()
 	whs.Register(resources.FunctionValidationWebhookPath, &ctrlwebhook.Admission{
 		Handler: webhook.NewValidatingWebhook(
 			&validationCfg,
