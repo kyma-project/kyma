@@ -42,6 +42,12 @@
 /docs/kyma/latest/05-technical-reference/svls-05-exposing-functions /#/serverless-manager/user/technical-reference/README 301
 /docs/kyma/latest/05-technical-reference/svls-06-function-configuration-file /#/serverless-manager/user/technical-reference/07-60-function-configuration-file 301
 /docs/kyma/latest/05-technical-reference/svls-08-available-presets /#/serverless-manager/user/technical-reference/07-80-available-presets 301
+/docs/kyma/latest/01-overview/service-mesh/smsh-02-default-istio-setup-in-kyma /#/istio/user/00-overview/00-40-overview-istio-setup 301
+/docs/kyma/latest/01-overview/service-mesh/* /#/istio/user/00-overview/README 301
+/docs/kyma/latest/04-operation-guides/operations/smsh-01-istio-enable-sidecar-injection.md /#/istio/user/02-operation-guides/operations/02-20-enable-sidecar-injection 301
+/docs/kyma/latest/04-operation-guides/troubleshooting/service-mesh/* /#/istio/user/02-operation-guides/troubleshooting/README 301
+/docs/kyma/latest/05-technical-reference/00-configuration-parameters/smsh-01-istio-chart /#/istio/user/03-technical-reference/configuration-parameters/01-10-istio-controller-parameters 301
+/docs/kyma/latest/05-technical-reference/00-custom-resources/oper-01-istio /#/istio/user/03-technical-reference/istio-custom-resource/01-30-istio-custom-resource 301
 /docs/root/* /docs/kyma/latest/ 302
 /docs/components/* / 302
 /docs/ / 302
