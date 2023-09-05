@@ -53,29 +53,34 @@ func FunctionCloudEventsTest(restConfig *rest.Config, cfg internal.Config, logf 
 		Log:         logf,
 	}
 
-	python39Fn := function.NewFunction("python39", cfg.KubectlProxyEnabled, genericContainer.WithLogger(python39Logger))
-	nodejs16Fn := function.NewFunction("nodejs16", cfg.KubectlProxyEnabled, genericContainer.WithLogger(nodejs16Logger))
-	nodejs18Fn := function.NewFunction("nodejs18", cfg.KubectlProxyEnabled, genericContainer.WithLogger(nodejs18Logger))
+	publisherProxyMock := function.NewFunction("eventing-publisher-proxy", "kyma-system", cfg.KubectlProxyEnabled, genericContainer.WithLogger(python39Logger))
+	python39Fn := function.NewFunction("python39", genericContainer.Namespace, cfg.KubectlProxyEnabled, genericContainer.WithLogger(python39Logger))
+	nodejs16Fn := function.NewFunction("nodejs16", genericContainer.Namespace, cfg.KubectlProxyEnabled, genericContainer.WithLogger(nodejs16Logger))
+	nodejs18Fn := function.NewFunction("nodejs18", genericContainer.Namespace, cfg.KubectlProxyEnabled, genericContainer.WithLogger(nodejs18Logger))
 
 	logf.Infof("Testing function in namespace: %s", cfg.Namespace)
 
 	return executor.NewSerialTestRunner(logf, "Runtime test",
 		namespace.NewNamespaceStep(logf, "Create test namespace", genericContainer.Namespace, coreCli),
+		namespace.NewNamespaceStep(logf, "Create publisher proxy mock namespace", "kyma-system", coreCli),
+		function.CreateFunction(logf, publisherProxyMock, "Create publisher proxy mock", runtimes.PythonPublisherProxyMock()),
 		app.NewApplication("Create HTTP basic application", HTTPAppName, HTTPAppImage, int32(80), appsCli.Deployments(genericContainer.Namespace), coreCli.Services(genericContainer.Namespace), genericContainer),
 		executor.NewParallelRunner(logf, "Fn tests",
 			executor.NewSerialTestRunner(python39Logger, "Python39 test",
 				function.CreateFunction(python39Logger, python39Fn, "Create Python39 Function", runtimes.PythonCloudEvent(serverlessv1alpha2.Python39)),
-				assertion.CloudEventCheck(python39Logger, "Python39 cloud event structured check", cloudevents.EncodingStructured, python39Fn.FunctionURL),
-				assertion.CloudEventCheck(python39Logger, "Python39 cloud event binary check", cloudevents.EncodingBinary, python39Fn.FunctionURL)),
+				assertion.CloudEventReceiveCheck(python39Logger, "Python39 cloud event structured check", cloudevents.EncodingStructured, python39Fn.FunctionURL),
+				assertion.CloudEventReceiveCheck(python39Logger, "Python39 cloud event binary check", cloudevents.EncodingBinary, python39Fn.FunctionURL),
+				assertion.CloudEventSendCheck(python39Logger, "Python39 cloud event sent check", python39Fn.FunctionURL),
+			),
 			executor.NewSerialTestRunner(nodejs16Logger, "NodeJS16 test",
 				function.CreateFunction(nodejs16Logger, nodejs16Fn, "Create NodeJS16 Function", runtimes.NodeJSFunctionWithCloudEvent(serverlessv1alpha2.NodeJs18)),
-				assertion.CloudEventCheck(nodejs16Logger, "NodeJS16 cloud event structured check", cloudevents.EncodingStructured, nodejs16Fn.FunctionURL),
-				assertion.CloudEventCheck(nodejs16Logger, "NodeJS16 cloud event binary check", cloudevents.EncodingBinary, nodejs16Fn.FunctionURL),
+				assertion.CloudEventReceiveCheck(nodejs16Logger, "NodeJS16 cloud event structured check", cloudevents.EncodingStructured, nodejs16Fn.FunctionURL),
+				assertion.CloudEventReceiveCheck(nodejs16Logger, "NodeJS16 cloud event binary check", cloudevents.EncodingBinary, nodejs16Fn.FunctionURL),
 			),
 			executor.NewSerialTestRunner(nodejs18Logger, "NodeJS18 test",
 				function.CreateFunction(nodejs18Logger, nodejs18Fn, "Create NodeJS18 Function", runtimes.NodeJSFunctionWithCloudEvent(serverlessv1alpha2.NodeJs18)),
-				assertion.CloudEventCheck(nodejs18Logger, "NodeJS18 cloud event structured check", cloudevents.EncodingStructured, nodejs18Fn.FunctionURL),
-				assertion.CloudEventCheck(nodejs18Logger, "NodeJS18 cloud event binary check", cloudevents.EncodingBinary, nodejs18Fn.FunctionURL),
+				assertion.CloudEventReceiveCheck(nodejs18Logger, "NodeJS18 cloud event structured check", cloudevents.EncodingStructured, nodejs18Fn.FunctionURL),
+				assertion.CloudEventReceiveCheck(nodejs18Logger, "NodeJS18 cloud event binary check", cloudevents.EncodingBinary, nodejs18Fn.FunctionURL),
 			),
 		),
 	), nil

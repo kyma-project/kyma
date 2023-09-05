@@ -30,7 +30,7 @@ type Function struct {
 	verbose     bool
 }
 
-func NewFunction(name string, proxyEnabled bool, c utils.Container) *Function {
+func NewFunction(name, namespace string, proxyEnabled bool, c utils.Container) *Function {
 	function := &serverlessv1alpha2.Function{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       serverlessv1alpha2.FunctionKind,
@@ -38,17 +38,17 @@ func NewFunction(name string, proxyEnabled bool, c utils.Container) *Function {
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
-			Namespace: c.Namespace,
+			Namespace: namespace,
 		},
 	}
 
-	fnURL, err := utils.GetSvcURL(name, c.Namespace, proxyEnabled)
+	fnURL, err := utils.GetSvcURL(name, namespace, proxyEnabled)
 	if err != nil {
 		panic(err)
 	}
 
 	return &Function{
-		resCli:      resources.New(c.DynamicCli, serverlessv1alpha2.GroupVersion.WithResource("functions"), c.Namespace, c.Log, c.Verbose),
+		resCli:      resources.New(c.DynamicCli, serverlessv1alpha2.GroupVersion.WithResource("functions"), namespace, c.Log, c.Verbose),
 		waitTimeout: c.WaitTimeout,
 		log:         c.Log,
 		verbose:     c.Verbose,
