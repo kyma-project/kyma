@@ -39,15 +39,22 @@ func init() {
 func main() {
 	setupLog := ctrlzap.New().WithName("setup")
 
-	setupLog.Info("reading 	configuration")
+	setupLog.Info("reading configuration")
 	cfg := &webhook.Config{}
 	if err := envconfig.InitWithPrefix(cfg, "WEBHOOK"); err != nil {
 		panic(errors.Wrap(err, "while reading env variables"))
 	}
 
-	logCfg, err := fileconfig.Load(cfg.ConfigPath)
+	logCfg, err := fileconfig.LoadLogConfig(cfg.LogConfigPath)
 	if err != nil {
-		setupLog.Error(err, "unable to load configuration file")
+		setupLog.Error(err, "unable to load log configuration file")
+		os.Exit(1)
+	}
+
+	setupLog.Info("reading webhook configuration")
+	webhookCfg, err := webhook.LoadWebhookCfg(cfg.ConfigPath)
+	if err != nil {
+		setupLog.Error(err, "unable to load webhook configuration file")
 		os.Exit(1)
 	}
 
@@ -73,9 +80,6 @@ func main() {
 
 	logrZap := zapr.NewLogger(logWithCtx.Desugar())
 	ctrl.SetLogger(logrZap)
-
-	validationConfigv1alpha2 := webhook.ReadValidationConfigV1Alpha2OrDie()
-	defaultingConfigv1alpha2 := webhook.ReadDefaultingConfigV1Alpha2OrDie()
 
 	// manager setup
 	logWithCtx.Info("setting up controller-manager")
@@ -112,16 +116,27 @@ func main() {
 	whs := mgr.GetWebhookServer()
 	whs.CertName = resources.CertFile
 	whs.KeyName = resources.KeyFile
+
+	defaultCfg, err := webhookCfg.ToDefaultingConfig()
+	if err != nil {
+		setupLog.Error(err, "while creating of defaulting configuration")
+		os.Exit(1)
+	}
 	whs.Register(resources.FunctionDefaultingWebhookPath, &ctrlwebhook.Admission{
 		Handler: webhook.NewDefaultingWebhook(
-			defaultingConfigv1alpha2,
+			&defaultCfg,
 			mgr.GetClient(),
 			logWithCtx.Named("defaulting-webhook")),
 	})
 
+	validationCfg, err := webhookCfg.ToValidationConfig()
+	if err != nil {
+		setupLog.Error(err, "while creating of validation configuration")
+		os.Exit(1)
+	}
 	whs.Register(resources.FunctionValidationWebhookPath, &ctrlwebhook.Admission{
 		Handler: webhook.NewValidatingWebhook(
-			validationConfigv1alpha2,
+			&validationCfg,
 			mgr.GetClient(),
 			logWithCtx.Named("validating-webhook")),
 	})

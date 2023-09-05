@@ -19,7 +19,7 @@ import (
 
 func TestValidatingWebHook_Handle(t *testing.T) {
 	type fields struct {
-		configV1Alpha2 *serverlessv1alpha2.ValidationConfig
+		configV1Alpha2 serverlessv1alpha2.ValidationConfig
 		client         ctrlclient.Client
 		decoder        *admission.Decoder
 	}
@@ -42,7 +42,7 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 		{
 			name: "Accept valid git function",
 			fields: fields{
-				configV1Alpha2: ReadValidationConfigV1Alpha2OrDie(),
+				configV1Alpha2: fixValidationConfig(),
 				client:         fake.NewClientBuilder().Build(),
 				decoder:        decoder,
 			},
@@ -109,7 +109,7 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 		{
 			name: "Accept valid v1alpha2 function",
 			fields: fields{
-				configV1Alpha2: ReadValidationConfigV1Alpha2OrDie(),
+				configV1Alpha2: fixValidationConfig(),
 				client:         fake.NewClientBuilder().Build(),
 				decoder:        decoder,
 			},
@@ -129,7 +129,7 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 		{
 			name: "Deny invalid function",
 			fields: fields{
-				configV1Alpha2: ReadValidationConfigV1Alpha2OrDie(),
+				configV1Alpha2: fixValidationConfig(),
 				client:         fake.NewClientBuilder().Build(),
 				decoder:        decoder,
 			},
@@ -158,7 +158,7 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 		{
 			name: "Bad request",
 			fields: fields{
-				configV1Alpha2: ReadValidationConfigV1Alpha2OrDie(),
+				configV1Alpha2: fixValidationConfig(),
 				client:         fake.NewClientBuilder().Build(),
 				decoder:        decoder,
 			},
@@ -178,7 +178,7 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 		{
 			name: "Deny on invalid kind",
 			fields: fields{
-				configV1Alpha2: ReadValidationConfigV1Alpha2OrDie(),
+				configV1Alpha2: fixValidationConfig(),
 				client:         fake.NewClientBuilder().Build(),
 				decoder:        decoder,
 			},
@@ -209,7 +209,7 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			w := &ValidatingWebHook{
-				configv1alpha2: tt.fields.configV1Alpha2,
+				configv1alpha2: &tt.fields.configV1Alpha2,
 				client:         tt.fields.client,
 				decoder:        tt.fields.decoder,
 				log:            zap.NewNop().Sugar(),
@@ -217,5 +217,23 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 			got := w.Handle(tt.args.ctx, tt.args.req)
 			require.Equal(t, tt.responseCode, got.Result.Code)
 		})
+	}
+}
+
+func fixValidationConfig() serverlessv1alpha2.ValidationConfig {
+	return serverlessv1alpha2.ValidationConfig{
+		Function: serverlessv1alpha2.MinFunctionValues{
+			Replicas: serverlessv1alpha2.MinFunctionReplicasValues{
+				MinValue: int32(1),
+			},
+			Resources: serverlessv1alpha2.MinFunctionResourcesValues{
+				MinRequestCPU:    "10m",
+				MinRequestMemory: "16Mi",
+			},
+		},
+		BuildJob: serverlessv1alpha2.MinBuildJobValues{Resources: serverlessv1alpha2.MinBuildJobResourcesValues{
+			MinRequestCPU:    "200m",
+			MinRequestMemory: "200Mi",
+		}},
 	}
 }

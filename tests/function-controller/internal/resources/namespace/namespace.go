@@ -21,13 +21,13 @@ const (
 )
 
 type Namespace struct {
-	coreCli typedcorev1.CoreV1Interface
-	name    string
-	log     *logrus.Entry
+	coreCli   typedcorev1.CoreV1Interface
+	namespace string
+	log       *logrus.Entry
 }
 
-func New(coreCli typedcorev1.CoreV1Interface, container utils.Container) *Namespace {
-	return &Namespace{coreCli: coreCli, name: container.Namespace, log: container.Log}
+func New(log *logrus.Entry, coreCli typedcorev1.CoreV1Interface, namespace string) *Namespace {
+	return &Namespace{coreCli: coreCli, namespace: namespace, log: log}
 }
 
 func (n Namespace) LogResource() error {
@@ -46,13 +46,13 @@ func (n Namespace) LogResource() error {
 }
 
 func (n Namespace) get() (*corev1.Namespace, error) {
-	return n.coreCli.Namespaces().Get(context.Background(), n.name, metav1.GetOptions{})
+	return n.coreCli.Namespaces().Get(context.Background(), n.namespace, metav1.GetOptions{})
 }
 
 func (n *Namespace) Create() (string, error) {
 	ns := &corev1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: n.name,
+			Name: n.namespace,
 			Labels: map[string]string{
 				TestNamespaceLabelKey: TestNamespaceLabelValue, // convenience for cleaning up stale namespaces during development
 			},
@@ -77,19 +77,19 @@ func (n *Namespace) Create() (string, error) {
 		return err
 	})
 	if err != nil {
-		return n.name, errors.Wrapf(err, "while creating namespace %s", n.name)
+		return n.namespace, errors.Wrapf(err, "while creating namespace %s", n.namespace)
 	}
 
-	n.log.Infof("Create: namespace %s", n.name)
-	return n.name, nil
+	n.log.Infof("Create: namespace %s", n.namespace)
+	return n.namespace, nil
 }
 
 func (n *Namespace) Delete() error {
 	err := utils.WithIgnoreOnNotFound(utils.DefaultBackoff, func() error {
-		return n.coreCli.Namespaces().Delete(context.Background(), n.name, metav1.DeleteOptions{})
+		return n.coreCli.Namespaces().Delete(context.Background(), n.namespace, metav1.DeleteOptions{})
 	}, n.log)
 	if err != nil {
-		return errors.Wrapf(err, "while deleting namespace %s", n.name)
+		return errors.Wrapf(err, "while deleting namespace %s", n.namespace)
 	}
 	return nil
 }

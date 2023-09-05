@@ -21,4 +21,4 @@ This is a complete list of Kyma operation guides:
 * [Enable Istio access logs](obsv-03-enable-istio-access-logs.md)
 * [Enable mTLS for custom metrics](obsv-04-enable-mtls-for-custom-metrics.md)
 * [Enable Kyma with Runtime Agent](ra-01-enable-kyma-with-runtime-agent.md)
-* [Enable automatic Istio sidecar proxy injection](smsh-01-istio-enable-sidecar-injection.md)
+* [Enable automatic Istio sidecar proxy injection](https://kyma-project.io/#/istio/user/02-operation-guides/operations/02-20-enable-sidecar-injection)

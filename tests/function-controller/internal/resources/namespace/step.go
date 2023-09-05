@@ -2,8 +2,8 @@ package namespace
 
 import (
 	"github.com/kyma-project/kyma/tests/function-controller/internal/executor"
-	"github.com/kyma-project/kyma/tests/function-controller/internal/utils"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
@@ -29,8 +29,8 @@ func (n NamespaceStep) OnError() error {
 	return n.ns.LogResource()
 }
 
-func NewNamespaceStep(stepName string, coreCli typedcorev1.CoreV1Interface, container utils.Container) NamespaceStep {
-	ns := New(coreCli, container)
+func NewNamespaceStep(log *logrus.Entry, stepName, namespace string, coreCli typedcorev1.CoreV1Interface) NamespaceStep {
+	ns := New(log, coreCli, namespace)
 	return NamespaceStep{name: stepName, ns: ns}
 }
 
