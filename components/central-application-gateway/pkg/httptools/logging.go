@@ -1,12 +1,10 @@
 package httptools
 
 import (
-	"context"
 	"net/http"
 	"time"
 
 	"go.uber.org/zap"
-	"k8s.io/apimachinery/pkg/util/uuid"
 )
 
 type ContextKey string
@@ -19,7 +17,6 @@ func LogResponse(log *zap.SugaredLogger, res *http.Response) error {
 		zap.AddCallerSkip(1),
 	).
 		With(
-			"requestID", req.Context().Value(ContextUUID),
 			"method", req.Method,
 			"host", req.Host,
 			"url", req.URL.RequestURI(),
@@ -36,7 +33,6 @@ func LogRequest(log *zap.SugaredLogger, r *http.Request) {
 	log.WithOptions(
 		zap.AddCallerSkip(1),
 	).With(
-		"requestID", r.Context().Value(ContextUUID),
 		"method", r.Method,
 		"host", r.Host,
 		"url", r.URL.RequestURI(),
@@ -47,9 +43,6 @@ func LogRequest(log *zap.SugaredLogger, r *http.Request) {
 
 func RequestLogger(label string, h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		uid := uuid.NewUUID()
-
-		r = r.WithContext(context.WithValue(r.Context(), ContextUUID, uid))
 
 		lw := newLoggingResponseWriter(w)
 
