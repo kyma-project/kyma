@@ -60,7 +60,7 @@ func FunctionCloudEventsTest(restConfig *rest.Config, cfg internal.Config, logf 
 	logf.Infof("Testing function in namespace: %s", cfg.Namespace)
 
 	return executor.NewSerialTestRunner(logf, "Runtime test",
-		namespace.NewNamespaceStep("Create test namespace", coreCli, genericContainer),
+		namespace.NewNamespaceStep(logf, "Create test namespace", genericContainer.Namespace, coreCli),
 		app.NewApplication("Create HTTP basic application", HTTPAppName, HTTPAppImage, int32(80), appsCli.Deployments(genericContainer.Namespace), coreCli.Services(genericContainer.Namespace), genericContainer),
 		executor.NewParallelRunner(logf, "Fn tests",
 			executor.NewSerialTestRunner(python39Logger, "Python39 test",
