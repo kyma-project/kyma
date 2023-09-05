@@ -68,7 +68,7 @@ global:
   registryNodePort: 32137
   configuration:
     configmapName: "serverless-configuration"
-    targetDir: "/appdata"
+    targetDir: "/appconfig"
     logFilename: "log-config.yaml"
     filename: "config.yaml"
   ingress:
