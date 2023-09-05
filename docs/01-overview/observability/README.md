@@ -2,7 +2,7 @@
 title: What is Observability in Kyma?
 ---
 
-Out of the box, Kyma provides tools to collect and ship telemetry data using the [Telemetry Module](../telemetry/README.mdE). Of course, you'll want to view and analyze the data you're collecting. This is where observability tools come in.
+Out of the box, Kyma provides tools to collect and ship telemetry data using the [Telemetry Module](../telemetry/README.md). Of course, you'll want to view and analyze the data you're collecting. This is where observability tools come in.
 
 ## Data collection
 
