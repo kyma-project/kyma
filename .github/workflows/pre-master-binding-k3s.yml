@@ -28,7 +28,7 @@ jobs:
 
     # Check out merge commit
     - name: Fork based /ok-to-test checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         ref: "refs/pull/${{ env.PR_NUMBER }}/merge"
 
