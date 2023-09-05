@@ -53,7 +53,7 @@ func GitopsSteps(restConfig *rest.Config, cfg internal.Config, logf *logrus.Entr
 		return nil, errors.Wrapf(err, "while creating Git config")
 	}
 
-	gitFn := function.NewFunction(gitFnName, cfg.KubectlProxyEnabled, genericContainer)
+	gitFn := function.NewFunction(gitFnName, genericContainer.Namespace, cfg.KubectlProxyEnabled, genericContainer)
 	logf.Infof("Testing Git Function in namespace: %s", cfg.Namespace)
 
 	poll := utils.Poller{

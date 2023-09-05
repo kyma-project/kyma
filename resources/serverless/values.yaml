@@ -68,7 +68,7 @@ global:
   registryNodePort: 32137
   configuration:
     configmapName: "serverless-configuration"
-    targetDir: "/appdata"
+    targetDir: "/appconfig"
     logFilename: "log-config.yaml"
     filename: "config.yaml"
   ingress:
@@ -82,11 +82,11 @@ global:
       directory: "prod"
     function_controller:
       name: "function-controller"
-      version: "PR-18070"
+      version: "PR-18115"
       directory: "dev"
     function_webhook:
       name: "function-webhook"
-      version: "PR-18070"
+      version: "PR-18115"
       directory: "dev"
     function_build_init:
       name: "function-build-init"
