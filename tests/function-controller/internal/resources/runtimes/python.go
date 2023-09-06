@@ -100,7 +100,7 @@ kyma-pypi-test==1.0.0`
 func PythonPublisherProxyMock() serverlessv1alpha2.FunctionSpec {
 	dpd := ``
 
-	src := `    import json
+	src := `import json
 
 import bottle
 
