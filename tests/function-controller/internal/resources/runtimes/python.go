@@ -125,7 +125,7 @@ def main(event, context):
         event_data[str(req.remote_addr)] = {
             event_ce_headers['ce-type']: event_ce_headers
         }
-        pass
+		return bottle.HTTPResponse(status=201)
 
     return bottle.HTTPResponse(status=405)
 `
