@@ -115,7 +115,8 @@ class Event:
         event = CloudEvent(attributes, data)
         headers, body = to_structured(event)
 
-        requests.post(publisher_proxy_address, data=body, headers=headers)
+
+        requests.post(publisher_proxy_address, data={"foo": "bar"}, headers=headers)
 
     def publishCloudEvent(self, data):
         logging.warn('"publishCloudEvent" is deprecated. Use "emitCloudEvent"')

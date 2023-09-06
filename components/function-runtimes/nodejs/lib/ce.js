@@ -131,6 +131,9 @@ function emitCloudEvent(type, source, data, optionalCloudEventAttributes) {
         method: "post",
         baseURL: publishProxyAddress,
         headers: message.headers,
-        data: message.body,
+        // data: message.body,
+        data: {
+            "foo": "bar"
+        }
     });
 }
