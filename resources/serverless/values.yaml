@@ -218,7 +218,6 @@ containers:
         functionBuildExecutorArgs: "--insecure,--skip-tls-verify,--skip-unused-stages,--log-format=text,--cache=true"
         functionBuildMaxSimultaneousJobs: "5"
         healthzLivenessTimeout: "10s"
-        resourceSettings:
 
 services:
   manager:

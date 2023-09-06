@@ -7,4 +7,3 @@ metadata:
     {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
 data:
   {{ .Values.global.configuration.logFilename }}: {{ include "tplValue" ( dict "value" .Values.containers.manager.logConfiguration.data "context" . ) | quote }}
-  {{ .Values.global.configuration.filename }}: {{ include "tplValue" ( dict "value" .Values.containers.manager.configuration.data "context" . ) | quote }}
