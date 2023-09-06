@@ -100,7 +100,7 @@ kyma-pypi-test==1.0.0`
 func PythonPublisherProxyMock() serverlessv1alpha2.FunctionSpec {
 	dpd := ``
 
-	src := `import json
+	src := `    import json
 
 import bottle
 
@@ -125,7 +125,7 @@ def main(event, context):
         event_data[str(req.remote_addr)] = {
             event_ce_headers['ce-type']: event_ce_headers
         }
-		return bottle.HTTPResponse(status=201)
+        return bottle.HTTPResponse(status=201)
 
     return bottle.HTTPResponse(status=405)
 `
