@@ -156,7 +156,7 @@ func (s cloudEventSendCheck) Run() error {
 	if err != nil {
 		return errors.Wrap(err, "while sending eventData")
 	}
-	if resp.StatusCode != http.StatusAccepted {
+	if resp.StatusCode != http.StatusOK {
 		return errors.Errorf("Expected: %d, got: %d status code from eventData request", http.StatusAccepted, resp.StatusCode)
 	}
 

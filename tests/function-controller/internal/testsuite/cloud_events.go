@@ -76,11 +76,13 @@ func FunctionCloudEventsTest(restConfig *rest.Config, cfg internal.Config, logf 
 				function.CreateFunction(nodejs16Logger, nodejs16Fn, "Create NodeJS16 Function", runtimes.NodeJSFunctionWithCloudEvent(serverlessv1alpha2.NodeJs18)),
 				assertion.CloudEventReceiveCheck(nodejs16Logger, "NodeJS16 cloud event structured check", cloudevents.EncodingStructured, nodejs16Fn.FunctionURL),
 				assertion.CloudEventReceiveCheck(nodejs16Logger, "NodeJS16 cloud event binary check", cloudevents.EncodingBinary, nodejs16Fn.FunctionURL),
+				assertion.CloudEventSendCheck(nodejs16Logger, "NodeJS16 cloud event sent check", nodejs16Fn.FunctionURL),
 			),
 			executor.NewSerialTestRunner(nodejs18Logger, "NodeJS18 test",
 				function.CreateFunction(nodejs18Logger, nodejs18Fn, "Create NodeJS18 Function", runtimes.NodeJSFunctionWithCloudEvent(serverlessv1alpha2.NodeJs18)),
 				assertion.CloudEventReceiveCheck(nodejs18Logger, "NodeJS18 cloud event structured check", cloudevents.EncodingStructured, nodejs18Fn.FunctionURL),
 				assertion.CloudEventReceiveCheck(nodejs18Logger, "NodeJS18 cloud event binary check", cloudevents.EncodingBinary, nodejs18Fn.FunctionURL),
+				assertion.CloudEventSendCheck(nodejs18Logger, "NodeJS18 cloud event sent check", nodejs18Fn.FunctionURL),
 			),
 		),
 	), nil
