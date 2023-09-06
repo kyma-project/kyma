@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
@@ -19,7 +19,16 @@ import (
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/httptools"
 )
 
-func makeProxy(targetURL string, requestParameters *authorization.RequestParameters, serviceName string, skipTLSVerify bool, authorizationStrategy authorization.Strategy, csrfTokenStrategy csrf.TokenStrategy, clientCertificate clientcert.ClientCertificate, timeout int) (*httputil.ReverseProxy, apperrors.AppError) {
+func makeProxy(
+	targetURL string,
+	requestParameters *authorization.RequestParameters,
+	serviceName string,
+	skipTLSVerify bool,
+	authorizationStrategy authorization.Strategy,
+	csrfTokenStrategy csrf.TokenStrategy,
+	clientCertificate clientcert.ClientCertificate,
+	timeout int,
+) (*httputil.ReverseProxy, apperrors.AppError) {
 	roundTripper := httptools.NewRoundTripper(httptools.WithTLSSkipVerify(skipTLSVerify), httptools.WithGetClientCertificate(clientCertificate.GetClientCertificate))
 	retryableRoundTripper := NewRetryableRoundTripper(roundTripper, authorizationStrategy, csrfTokenStrategy, clientCertificate, timeout, skipTLSVerify)
 	return newProxy(targetURL, requestParameters, serviceName, retryableRoundTripper)
@@ -28,13 +37,17 @@ func makeProxy(targetURL string, requestParameters *authorization.RequestParamet
 func newProxy(targetURL string, requestParameters *authorization.RequestParameters, serviceName string, transport http.RoundTripper) (*httputil.ReverseProxy, apperrors.AppError) {
 	target, err := url.Parse(targetURL)
 	if err != nil {
-		log.Errorf("failed to parse target url '%s': '%s'", targetURL, err.Error())
+		zap.L().Error("failed to parse target URL",
+			zap.String("targetURL", targetURL),
+			zap.Error(err))
 		return nil, apperrors.Internal("failed to parse target url '%s': '%s'", targetURL, err.Error())
 	}
 
 	targetQuery := target.RawQuery
 	director := func(req *http.Request) {
-		log.Infof("Proxy call for service '%s' to '%s'", serviceName, targetURL)
+		zap.L().Info("Proxy call for service",
+			zap.String("serviceName", serviceName),
+			zap.String("targetURL", targetURL))
 
 		req.URL.Scheme = target.Scheme
 		req.URL.Host = target.Host
@@ -56,12 +69,29 @@ func newProxy(targetURL string, requestParameters *authorization.RequestParamete
 			setCustomHeaders(req.Header, requestParameters.Headers)
 		}
 
-		log.Infof("Modified request url : '%s', schema : '%s', path : '%s'", req.URL.String(), req.URL.Scheme, req.URL.Path)
+		zap.L().Info("modified request URL",
+			zap.String("url", req.URL.String()),
+			zap.String("schema", req.URL.Scheme),
+			zap.String("path", req.URL.Path))
 	}
+
 	errorHandler := func(rw http.ResponseWriter, req *http.Request, err error) {
+		zap.L().Warn("Request failed",
+			zap.Error(err),
+			zap.Any("requestID", req.Context().Value(httptools.ContextUUID)),
+			zap.String("method", req.Method),
+			zap.String("host", req.Host),
+			zap.String("url", req.URL.RequestURI()),
+			zap.String("proto", req.Proto),
+		)
 		codeRewriter(rw, err)
 	}
-	return &httputil.ReverseProxy{Director: director, Transport: transport, ErrorHandler: errorHandler}, nil
+
+	return &httputil.ReverseProxy{
+		Director:     director,
+		Transport:    transport,
+		ErrorHandler: errorHandler,
+	}, nil
 }
 
 func joinPaths(a, b string) string {
@@ -98,6 +128,8 @@ func responseModifier(
 	urlRewriter func(gatewayURL, target, loc *url.URL) *url.URL,
 ) func(*http.Response) error {
 	return func(resp *http.Response) error {
+		_ = httptools.LogResponse(zap.L().Sugar(), resp)
+
 		if resp.StatusCode >= 500 && resp.StatusCode < 600 {
 			resp.Header.Set("Target-System-Status", strconv.Itoa(resp.StatusCode))
 			resp.StatusCode = http.StatusBadGateway
@@ -156,9 +188,9 @@ func urlRewriter(gatewayURL, target, loc *url.URL) *url.URL {
 }
 
 func codeRewriter(rw http.ResponseWriter, err error) {
-
 	if errors.Is(err, context.DeadlineExceeded) {
-		log.Infof("%s: HTTP status code was rewritten to 504", err)
+		zap.L().Warn("HTTP status code rewritten to 504",
+			zap.Error(err))
 		rw.WriteHeader(http.StatusGatewayTimeout)
 		return
 	}

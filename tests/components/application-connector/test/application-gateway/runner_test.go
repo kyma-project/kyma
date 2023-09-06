@@ -11,7 +11,7 @@ import (
 	"github.com/kyma-project/kyma/tests/components/application-connector/internal/testkit/httpd"
 )
 
-var applications = []string{"positive-authorisation", "negative-authorisation", "path-related-error-handling", "missing-resources-error-handling", "proxy-cases", "proxy-errors", "redirects"}
+var applications = []string{"positive-authorisation", "negative-authorisation", "path-related-error-handling", "missing-resources-error-handling", "proxy-cases", "proxy-errors", "redirects", "code-rewriting"}
 
 func (gs *GatewaySuite) TestGetRequest() {
 

@@ -2,53 +2,54 @@ package main
 
 import (
 	"flag"
-	"fmt"
+
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 type options struct {
+	apiServerURL                string
+	applicationSecretsNamespace string
 	externalAPIPort             int
+	kubeConfig                  string
+	logLevel                    *zapcore.Level
+	proxyCacheTTL               int
 	proxyPort                   int
 	proxyPortCompass            int
-	applicationSecretsNamespace string
-	requestTimeout              int
 	proxyTimeout                int
-	requestLogging              bool
-	proxyCacheTTL               int
-	kubeConfig                  string
-	apiServerURL                string
+	requestTimeout              int
 }
 
-func parseArgs() *options {
-	externalAPIPort := flag.Int("externalAPIPort", 8081, "External API port.")
-	proxyPort := flag.Int("proxyPort", 8080, "Proxy port for Kyma OS or MPS bundles with a single API definition")
-	proxyPortCompass := flag.Int("proxyPortCompass", 8082, "Proxy port for Kyma MPS.")
-	applicationSecretsNamespace := flag.String("applicationSecretsNamespace", "kyma-system", "Namespace where Application secrets used by the Application Gateway exist")
-	requestTimeout := flag.Int("requestTimeout", 1, "Timeout for services.")
-	proxyTimeout := flag.Int("proxyTimeout", 10, "Timeout for proxy call.")
-	requestLogging := flag.Bool("requestLogging", false, "Flag for logging incoming requests.")
-	proxyCacheTTL := flag.Int("proxyCacheTTL", 120, "TTL, in seconds, for proxy cache of Remote API information")
-	kubeConfig := flag.String("kubeConfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
-	apiServerURL := flag.String("apiServerURL", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
+func parseArgs(log *zap.Logger) (opts options) {
+	flag.StringVar(&opts.apiServerURL, "apiServerURL", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
+	flag.StringVar(&opts.applicationSecretsNamespace, "applicationSecretsNamespace", "kyma-system", "Namespace where Application secrets used by the Application Gateway exist")
+	flag.IntVar(&opts.externalAPIPort, "externalAPIPort", 8081, "Port that exposes the API which allows checking the component status and exposes log configuration")
+	flag.StringVar(&opts.kubeConfig, "kubeConfig", "", "Path to a kubeconfig. Only required if out-of-cluster")
+	opts.logLevel = zap.LevelFlag("logLevel", zap.InfoLevel, "Log level: panic | fatal | error | warn | info | debug. Can't be lower than info")
+	flag.IntVar(&opts.proxyCacheTTL, "proxyCacheTTL", 120, "TTL, in seconds, for proxy cache of Remote API information")
+	flag.IntVar(&opts.proxyPort, "proxyPort", 8080, "Port that acts as a proxy for the calls from services and Functions to an external solution in the default standalone mode or Compass bundles with a single API definition")
+	flag.IntVar(&opts.proxyPortCompass, "proxyPortCompass", 8082, "Port that acts as a proxy for the calls from services and Functions to an external solution in the Compass mode")
+	flag.IntVar(&opts.proxyTimeout, "proxyTimeout", 10, "Timeout for requests sent through the proxy, expressed in seconds")
+	flag.IntVar(&opts.requestTimeout, "requestTimeout", 10, "Timeout for requests sent through Central Application Gateway, expressed in seconds")
 
 	flag.Parse()
 
-	return &options{
-		externalAPIPort:             *externalAPIPort,
-		proxyPort:                   *proxyPort,
-		proxyPortCompass:            *proxyPortCompass,
-		applicationSecretsNamespace: *applicationSecretsNamespace,
-		requestTimeout:              *requestTimeout,
-		proxyTimeout:                *proxyTimeout,
-		requestLogging:              *requestLogging,
-		proxyCacheTTL:               *proxyCacheTTL,
-		kubeConfig:                  *kubeConfig,
-		apiServerURL:                *apiServerURL,
-	}
+	opts.Log(log)
+
+	return
 }
 
-func (o *options) String() string {
-	return fmt.Sprintf("--externalAPIPort=%d --proxyPort=%d --proxyPortCompass=%d --applicationSecretsNamespace=%s --requestTimeout=%d --proxyTimeout=%d"+
-		" --requestLogging=%t --proxyCacheTTL=%d --kubeConfig=%s --apiServerURL=%s",
-		o.externalAPIPort, o.proxyPort, o.proxyPortCompass, o.applicationSecretsNamespace, o.requestTimeout, o.proxyTimeout,
-		o.requestLogging, o.proxyCacheTTL, o.kubeConfig, o.apiServerURL)
+func (o options) Log(log *zap.Logger) {
+	log.Info("Parsed flags",
+		zap.String("-apiServerURL", o.apiServerURL),
+		zap.String("-applicationSecretsNamespace", o.applicationSecretsNamespace),
+		zap.Int("-externalAPIPort", o.externalAPIPort),
+		zap.String("-kubeConfig", o.kubeConfig),
+		zap.String("-logLevel", o.logLevel.String()),
+		zap.Int("-proxyCacheTTL", o.proxyCacheTTL),
+		zap.Int("-proxyPort", o.proxyPort),
+		zap.Int("-proxyPortCompass", o.proxyPortCompass),
+		zap.Int("-proxyTimeout", o.proxyTimeout),
+		zap.Int("-requestTimeout", o.requestTimeout),
+	)
 }

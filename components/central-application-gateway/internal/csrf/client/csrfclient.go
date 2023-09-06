@@ -7,13 +7,14 @@ import (
 	"strings"
 	"time"
 
+	"go.uber.org/zap"
+
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/clientcert"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/httpconsts"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/httptools"
-	log "github.com/sirupsen/logrus"
 )
 
 func New(timeoutDuration int, tokenCache TokenCache) csrf.Client {
@@ -39,7 +40,9 @@ func (c *client) GetTokenEndpointResponse(tokenEndpointURL string, strategy auth
 		return resp, nil
 	}
 
-	log.Infof("CSRF Token not found in cache, fetching (Endpoint: %s)", tokenEndpointURL)
+	zap.L().Info("CSRF Token not found in cache, fetching",
+		zap.String("tokenEndpoint", tokenEndpointURL))
+
 	tokenResponse, err := c.requestToken(tokenEndpointURL, strategy, c.timeoutDuration, skipTLSVerify)
 	if err != nil {
 		return nil, err
@@ -52,7 +55,8 @@ func (c *client) GetTokenEndpointResponse(tokenEndpointURL string, strategy auth
 }
 
 func (c *client) InvalidateTokenCache(tokenEndpointURL string) {
-	log.Infof("Invalidating token for endpoint: %s", tokenEndpointURL)
+	zap.L().Info("Invalidating token for endpoint",
+		zap.String("tokenEndpoint", tokenEndpointURL))
 	c.tokenCache.Remove(tokenEndpointURL)
 }
 

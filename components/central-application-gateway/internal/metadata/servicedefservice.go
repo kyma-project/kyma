@@ -4,11 +4,12 @@ package metadata
 import (
 	"fmt"
 
+	"go.uber.org/zap"
+
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/applications"
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/model"
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/serviceapi"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
-	log "github.com/sirupsen/logrus"
 )
 
 // ServiceDefinitionService is a service that manages ServiceDefinition objects.
@@ -68,7 +69,9 @@ func (sds *serviceDefinitionService) getAPI(service applications.Service) (*mode
 
 	api, err := sds.serviceAPIService.Read(service.API)
 	if err != nil {
-		log.Errorf("failed to read api for serviceId '%s': %s", service.Name, err.Error())
+		zap.L().Error("failed to read api for serviceID",
+			zap.String("serviceID", service.Name),
+			zap.Error(err))
 		return nil, apperrors.Internal("failed to read API for %s service, %s", service.Name, err)
 	}
 	return api, nil
@@ -78,7 +81,7 @@ func handleError(err apperrors.AppError, notFoundMessage, internalErrorMEssage s
 	if err.Code() == apperrors.CodeNotFound {
 		return apperrors.NotFound(notFoundMessage)
 	}
-	log.Error(internalErrorMEssage)
+	zap.L().Error(internalErrorMEssage)
 
 	if err.Code() == apperrors.CodeWrongInput {
 		return apperrors.WrongInput(internalErrorMEssage)

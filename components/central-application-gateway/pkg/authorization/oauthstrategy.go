@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"net/http"
 
+	"go.uber.org/zap"
+
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/clientcert"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/httpconsts"
-	log "github.com/sirupsen/logrus"
 )
 
 type oauthStrategy struct {
@@ -33,7 +34,8 @@ func (o oauthStrategy) AddAuthorization(r *http.Request, _ clientcert.SetClientC
 	headers, queryParameters := o.requestParameters.unpack()
 	token, err := o.oauthClient.GetToken(o.clientId, o.clientSecret, o.url, headers, queryParameters, skipTLSVerification)
 	if err != nil {
-		log.Errorf("failed to get token : '%s'", err)
+		zap.L().Error("failed to get token",
+			zap.Error(err))
 		return err
 	}
 

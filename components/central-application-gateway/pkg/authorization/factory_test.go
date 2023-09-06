@@ -2,9 +2,10 @@ package authorization
 
 import (
 	"crypto/tls"
-	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/testconsts"
 	"net/http"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/testconsts"
 
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/clientcert"
 

@@ -24,7 +24,7 @@ import (
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/httptools"
 	"github.com/oklog/run"
-	log "github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -35,24 +35,42 @@ const (
 )
 
 func main() {
-	formatter := &log.TextFormatter{
-		FullTimestamp: true,
+	setupLogger := zap.Must(zap.NewProduction())
+	defer func(setupLogger *zap.Logger) {
+		err := setupLogger.Sync()
+		if err != nil {
+			panic(err)
+		}
+	}(setupLogger)
+
+	setupLogger.Info("Starting Application Gateway")
+
+	options := parseArgs(setupLogger)
+
+	logCfg := zap.NewProductionConfig()
+	logCfg.Level.SetLevel(*options.logLevel)
+
+	log, err := logCfg.Build()
+	zap.ReplaceGlobals(log)
+	defer func(log *zap.Logger) {
+		err := log.Sync()
+		if err != nil {
+			panic(err)
+		}
+	}(log)
+
+	if err != nil {
+		setupLogger.Fatal("Couldn't initiate logger", zap.Error(err))
 	}
-	log.SetFormatter(formatter)
-
-	log.Info("Starting Application Gateway.")
-
-	options := parseArgs()
-	log.Infof("Options: %s", options)
 
 	k8sConfig, err := clientcmd.BuildConfigFromFlags(options.apiServerURL, options.kubeConfig)
 	if err != nil {
-		log.Fatalf("Error reading in cluster config: %s", err.Error())
+		log.Fatal("Error reading in cluster config", zap.Error(err))
 	}
 
 	coreClientset, err := kubernetes.NewForConfig(k8sConfig)
 	if err != nil {
-		log.Fatalf("Error creating core clientset: %s", err.Error())
+		log.Fatal("Error creating core clientset", zap.Error(err))
 	}
 
 	serviceDefinitionService, err := newServiceDefinitionService(
@@ -61,19 +79,16 @@ func main() {
 		options.applicationSecretsNamespace,
 	)
 	if err != nil {
-		log.Errorf("Unable to create ServiceDefinitionService: '%s'", err.Error())
-		os.Exit(1)
+		log.Fatal("Unable to create ServiceDefinitionService:'", zap.Error(err))
 	}
 
 	internalHandler := newInternalHandler(serviceDefinitionService, options)
 	internalHandlerForCompass := newInternalHandlerForCompass(serviceDefinitionService, options)
-	externalHandler := externalapi.NewHandler()
+	externalHandler := externalapi.NewHandler(logCfg.Level)
 
-	if options.requestLogging {
-		internalHandler = httptools.RequestLogger("Internal handler: ", internalHandler)
-		internalHandlerForCompass = httptools.RequestLogger("Internal handler: ", internalHandlerForCompass)
-		externalHandler = httptools.RequestLogger("External handler: ", externalHandler)
-	}
+	internalHandler = httptools.RequestLogger("Internal handler: ", internalHandler)
+	internalHandlerForCompass = httptools.RequestLogger("Internal handler: ", internalHandlerForCompass)
+	externalHandler = httptools.RequestLogger("External handler: ", externalHandler)
 
 	externalSrv := &http.Server{
 		Addr:         ":" + strconv.Itoa(options.externalAPIPort),
@@ -103,15 +118,17 @@ func main() {
 
 	err = g.Run()
 	if err != nil && err != http.ErrServerClosed {
-		log.Fatal(err)
+		log.Fatal("Servers encountered error", zap.Error(err))
 	}
 }
 
 func addHttpServerToRunGroup(name string, g *run.Group, srv *http.Server) {
+	log := zap.L().Sugar()
+
 	log.Infof("Starting %s HTTP server on %s", name, srv.Addr)
 	ln, err := net.Listen("tcp", srv.Addr)
 	if err != nil {
-		log.Fatalf("Unable to start %s HTTP server: '%s'", name, err.Error())
+		log.Fatalf("Unable to start %s HTTP server: '%s'", name, err)
 	}
 	g.Add(func() error {
 		defer log.Infof("Server %s finished", name)
@@ -123,7 +140,7 @@ func addHttpServerToRunGroup(name string, g *run.Group, srv *http.Server) {
 		defer cancel()
 		err = srv.Shutdown(ctx)
 		if err != nil && err != http.ErrServerClosed {
-			log.Warnf("HTTP server shutdown %s failed: %s", name, err.Error())
+			log.Warnf("HTTP server shutdown %s failed: %s", name, err)
 		}
 	})
 }
@@ -136,7 +153,7 @@ func addInterruptSignalToRunGroup(g *run.Group) {
 		select {
 		case <-cancelInterrupt:
 		case sig := <-c:
-			log.Infof("received signal %s", sig)
+			zap.L().Sugar().Infof("received signal %s", sig)
 		}
 		return nil
 	}, func(error) {
@@ -144,7 +161,7 @@ func addInterruptSignalToRunGroup(g *run.Group) {
 	})
 }
 
-func newInternalHandler(serviceDefinitionService metadata.ServiceDefinitionService, options *options) http.Handler {
+func newInternalHandler(serviceDefinitionService metadata.ServiceDefinitionService, options options) http.Handler {
 	authStrategyFactory := newAuthenticationStrategyFactory(options.proxyTimeout)
 	csrfCl := newCSRFClient(options.proxyTimeout)
 	csrfTokenStrategyFactory := csrfStrategy.NewTokenStrategyFactory(csrfCl)
@@ -152,7 +169,7 @@ func newInternalHandler(serviceDefinitionService metadata.ServiceDefinitionServi
 	return proxy.New(serviceDefinitionService, authStrategyFactory, csrfTokenStrategyFactory, getProxyConfig(options))
 }
 
-func newInternalHandlerForCompass(serviceDefinitionService metadata.ServiceDefinitionService, options *options) http.Handler {
+func newInternalHandlerForCompass(serviceDefinitionService metadata.ServiceDefinitionService, options options) http.Handler {
 	authStrategyFactory := newAuthenticationStrategyFactory(options.proxyTimeout)
 	csrfCl := newCSRFClient(options.proxyTimeout)
 	csrfTokenStrategyFactory := csrfStrategy.NewTokenStrategyFactory(csrfCl)
@@ -160,7 +177,7 @@ func newInternalHandlerForCompass(serviceDefinitionService metadata.ServiceDefin
 	return proxy.NewForCompass(serviceDefinitionService, authStrategyFactory, csrfTokenStrategyFactory, getProxyConfig(options))
 }
 
-func getProxyConfig(options *options) proxy.Config {
+func getProxyConfig(options options) proxy.Config {
 	return proxy.Config{
 		ProxyTimeout:  options.proxyTimeout,
 		ProxyCacheTTL: options.proxyCacheTTL,
