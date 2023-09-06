@@ -157,7 +157,6 @@ func NodeJSFunctionWithEnvFromConfigMapAndSecret(configMapName, cmEnvKey, secret
 func NodeJSFunctionWithCloudEvent(rtm serverlessv1alpha2.Runtime) serverlessv1alpha2.FunctionSpec {
 	src := `const process = require("process");
 const axios = require('axios');
-const {response} = require("express");
 
 let cloudevent = {}
 
