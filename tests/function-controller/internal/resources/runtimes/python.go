@@ -153,7 +153,6 @@ func PythonCloudEvent(runtime serverlessv1alpha2.Runtime) serverlessv1alpha2.Fun
 	src := `import json
 import os
 
-import bottle
 import requests
 
 event_data = {}
@@ -178,7 +177,7 @@ def main(event, context):
 
     if 'ce-type' not in event.ceHeaders:
         event.emitCloudEvent(send_check_event_type, 'function', req.json, {'eventtypeversion': 'v1alpha2'})
-		return ""        
+        return ""
     event_ce_headers = event.ceHeaders
     event_ce_headers.pop('extensions')
 
