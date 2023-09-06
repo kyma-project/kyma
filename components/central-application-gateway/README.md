@@ -39,11 +39,11 @@ To start Central Application Gateway, run this command:
 
 Central Application Gateway has the following parameters:
 
-- **apiServerURL** - The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.
+- **apiServerURL** - The address of the Kubernetes API server. Overrides any value in a kubeconfig. Only required if out-of-cluster.
 - **applicationSecretsNamespace** - Namespace where Application secrets used by the Application Gateway exist. The default is `kymasystem`
 - **externalAPIPort** - Port that exposes the API which allows checking the component status and exposes log configuration. The default is `8081`
 - **kubeConfig** - Path to a kubeconfig. Only required if out-of-cluster
-- **logLevel** - Log level: panic | fatal | error | warn | info | debug. Can't be lower than info. The default is  zapInfoLevel
+- **logLevel** - Log level: `panic` | `fatal` | `error` | `warn` | `info` | `debug`. Can't be lower than `info`. The default is  `zapInfoLevel`
 - **proxyCacheTTL** - TTL, in seconds, for proxy cache of Remote API information. The default is `120`
 - **proxyPort** - Port that acts as a proxy for the calls from services and Functions to an external solution in the default standalone mode or Compass bundles with a single API definition. The default is `8080`
 - **proxyPortCompass** - Port that acts as a proxy for the calls from services and Functions to an external solution in the Compass mode. The default is `8082`
