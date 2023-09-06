@@ -178,7 +178,7 @@ def main(event, context):
 
     if 'ce-type' not in event.ceHeaders:
         event.emitCloudEvent(send_check_event_type, 'function', req.json, {'eventtypeversion': 'v1alpha2'})
-        return bottle.HTTPResponse(status=202, body="")
+		return ""        
     event_ce_headers = event.ceHeaders
     event_ce_headers.pop('extensions')
 

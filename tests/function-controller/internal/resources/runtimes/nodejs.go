@@ -155,7 +155,13 @@ func NodeJSFunctionWithEnvFromConfigMapAndSecret(configMapName, cmEnvKey, secret
 }
 
 func NodeJSFunctionWithCloudEvent(rtm serverlessv1alpha2.Runtime) serverlessv1alpha2.FunctionSpec {
-	src := `let cloudevent = {}
+	src := `const process = require("process");
+const axios = require('axios');
+const {response} = require("express");
+
+let cloudevent = {}
+
+send_check_event_type = "send-check"
 
 module.exports = {
     main: async function (event, context) {
@@ -163,7 +169,7 @@ module.exports = {
             case "POST":
                 return handlePost(event)
             case "GET":
-                return handleGet()
+                return handleGet(event.extensions.request)
             default:
                 event.extensions.response.statusCode = 405
                 return ""
@@ -172,6 +178,10 @@ module.exports = {
 }
 
 function handlePost(event) {
+    if (!Object.keys(event).includes("ce-type")) {
+        event.emitCloudEvent(send_check_event_type, 'function', event.data, {'eventtypeversion': 'v1alpha2'})
+        return ""
+    }
     Object.keys(event).filter((val) => {
         return val.startsWith("ce-")
     }).forEach((item) => {
@@ -181,7 +191,19 @@ function handlePost(event) {
     return ""
 }
 
-function handleGet() {
+async function handleGet(req) {
+    if (req.query.type === 'send-check') {
+        let data = {}
+        let publisherProxy = process.env.PUBLISHER_PROXY_ADDRESS
+        await axios.get(publisherProxy, {
+            params: {
+                type: req.query.type
+            }
+        }).then((res) => {
+            data = res.data
+        })
+        return data
+    }
     return cloudevent
 }
 `
