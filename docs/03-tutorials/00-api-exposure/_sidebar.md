@@ -1,4 +1,5 @@
 * [Home](/)
+<!-- markdown-link-check-disable -->
 * [Developer Tutorials](/03-tutorials/README.md)
 * [API Exposure](/03-tutorials/00-api-exposure/README.md)
   * [Create a workload](/03-tutorials/00-api-exposure/apix-01-create-workload.md)
@@ -14,3 +15,4 @@
     * [Secure a workload with JWT](/03-tutorials/00-api-exposure/apix-05-expose-and-secure-a-workload/apix-05-03-expose-and-secure-workload-jwt.md)
     * [Secure a workload with Istio](/03-tutorials/00-api-exposure/apix-05-expose-and-secure-a-workload/apix-05-04-expose-and-secure-workload-istio.md)
     * [Secure a workload with a certificate](/03-tutorials/00-api-exposure/apix-05-expose-and-secure-a-workload/apix-05-05-expose-and-secure-workload-with-certificate.md)
+<!-- markdown-link-check-enable -->

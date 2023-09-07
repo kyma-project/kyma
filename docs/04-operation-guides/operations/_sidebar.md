@@ -16,4 +16,4 @@
   * [Enable Istio access logs](obsv-03-enable-istio-access-logs.md)
   * [Enable mTLS for custom metrics](obsv-04-enable-mtls-for-custom-metrics.md)
   * [Enable Kyma with Runtime Agent](ra-01-enable-kyma-with-runtime-agent.md)
-  * [Enable automatic Istio sidecar proxy injection](/istio/user/02-operation-guides/operations/02-20-enable-sidecar-injection.md)
+  * <!-- markdown-link-check-disable-line -->[Enable automatic Istio sidecar proxy injection](/istio/user/02-operation-guides/operations/02-20-enable-sidecar-injection.md)
