@@ -6,4 +6,4 @@
     * [APIRule](apix-01-apirule.md)
     * [Subscription](evnt-01-subscription.md)
     * [EventingBackend](evnt-02-eventingbackend.md)
-    * [Istio](/istio/user/03-technical-reference/istio-custom-resource/01-30-istio-custom-resource.md)
+    * <!-- markdown-link-check-disable-line -->[Istio](/istio/user/03-technical-reference/istio-custom-resource/01-30-istio-custom-resource.md)

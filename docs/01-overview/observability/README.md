@@ -54,7 +54,7 @@ The amount of generated time series in a Kyma cluster depends on the following f
 * Number of buckets for histogram metrics
 * Frequency of Pod recreation
 * Topology of the Istio Service Mesh
-
+<!-- markdown-link-check-disable-next-line -->
 You can see the number of ingested time series samples from the `prometheus_tsdb_head_series` metric, which is exported by the Prometheus itself. Furthermore, you can identify expensive metrics with the [TSDB Status](http://localhost:9090/tsdb-status) page.
 
 # Telemetry
