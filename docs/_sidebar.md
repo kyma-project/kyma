@@ -11,4 +11,4 @@
   * [Serverless](/serverless-manager/user/README.md)
   * [Telemetry](/telemetry-manager/user/README.md)
 * [Glossary](/glossary.md)
-<!-- markdown-link-check-disable -->
+<!-- markdown-link-check-enable -->
