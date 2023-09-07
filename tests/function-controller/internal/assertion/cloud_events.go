@@ -233,7 +233,7 @@ func getCloudEventFromFunction(endpoint, eventType string) (cloudEventResponse, 
 	ceResp := cloudEventResponse{}
 	err = json.Unmarshal(out, &ceResp)
 	if err != nil {
-		return cloudEventResponse{}, errors.Wrap(err, "while unmarshalling response")
+		return cloudEventResponse{}, errors.Wrapf(err, "while unmarshalling response, got: %s", out)
 	}
 	return ceResp, nil
 }
