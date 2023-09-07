@@ -2,8 +2,8 @@ name: Daily Markdown Link Check
 run-name: ${{github.event.pull_request.title}}
 on:
     schedule:
-    # Run every 5 minutes for the first days, then will be updated to run everyday at 6:00 AM
-    - cron: "*/5 * * * *"
+    # Run everyday at 5:00 AM
+    - cron: "0 5 * * *"
 jobs:
   markdown-link-check:
     runs-on: ubuntu-latest
