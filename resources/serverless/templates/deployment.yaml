@@ -114,7 +114,7 @@ spec:
             - name: APP_HEALTHZ_ADDRESS
               value: ":{{ .Values.containers.manager.healthz.port }}"
             - name: APP_KUBERNETES_BASE_NAMESPACE
-              value: "{{ .Values.containers.manager.configuration.data.baseNamespace }}"
+              value: "{{- tpl ( .Values.containers.manager.configuration.data.baseNamespace) . }}"
             - name: APP_KUBERNETES_CONFIG_MAP_REQUEUE_DURATION
               value: "{{ .Values.containers.manager.configuration.data.configMapRequeueDuration }}"
             - name: APP_KUBERNETES_SECRET_REQUEUE_DURATION
@@ -142,7 +142,7 @@ spec:
             - name: APP_FUNCTION_BUILD_EXECUTOR_IMAGE
               value: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.kaniko_executor) }}"
             - name: APP_FUNCTION_TARGET_CPU_UTILIZATION_PERCENTAGE
-              value: {{.Values.containers.manager.configuration.data.targetCPUUtilizationPercentage }}
+              value: "{{.Values.containers.manager.configuration.data.targetCPUUtilizationPercentage }}"
             - name: APP_FUNCTION_BUILD_REPO_FETCHER_IMAGE
               value: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_build_init)}}"
             - name: APP_FUNCTION_BUILD_MAX_SIMULTANEOUS_JOBS
