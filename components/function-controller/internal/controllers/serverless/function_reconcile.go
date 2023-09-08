@@ -2,6 +2,8 @@ package serverless
 
 import (
 	"context"
+	"encoding/base64"
+	"encoding/json"
 	"time"
 
 	"github.com/pkg/errors"
@@ -177,10 +179,14 @@ func (r *FunctionReconciler) readDockerConfig(ctx context.Context, instance *ser
 	// try reading user config
 	if err := r.client.Get(ctx, client.ObjectKey{Namespace: instance.Namespace, Name: r.config.ImageRegistryExternalDockerConfigSecretName}, &secret); err == nil {
 		data := readSecretData(secret.Data)
+		registryAddress, err2 := getRegistryAddressFromSecretData(data)
+		if err2 != nil {
+			return DockerConfig{}, err2
+		}
 		return DockerConfig{
 			ActiveRegistryConfigSecretName: r.config.ImageRegistryExternalDockerConfigSecretName,
-			PushAddress:                    data[keyRegistryAddress],
-			PullAddress:                    data[keyRegistryAddress],
+			PushAddress:                    registryAddress,
+			PullAddress:                    registryAddress,
 		}, nil
 	}
 
@@ -203,4 +209,24 @@ func (r *FunctionReconciler) readDockerConfig(ctx context.Context, instance *ser
 		}, nil
 	}
 
+}
+
+func getRegistryAddressFromSecretData(data map[string]string) (string, error) {
+	encodedConfig := data[".dockerconfigjson"]
+	jsonConfig, err := base64.StdEncoding.DecodeString(encodedConfig)
+	if err != nil {
+		return "", errors.Wrapf(err, "can't decode configuration from docker registry configuration secret")
+	}
+	config := map[string]map[string]interface{}{}
+	err = json.Unmarshal(jsonConfig, &config)
+	if err != nil {
+		return "", errors.Wrapf(err, "can't unmarshal configuration from docker registry configuration secret")
+	}
+	if len(config["auths"]) != 1 {
+		return "", errors.New("invalid length of auths in configuration from docker registry configuration secret")
+	}
+	for key := range config["auths"] {
+		return key, nil
+	}
+	return "", errors.New("can't parse auths in configuration from docker registry configuration secret")
 }

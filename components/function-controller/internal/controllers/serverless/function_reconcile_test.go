@@ -343,7 +343,8 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 				Namespace: testNamespace,
 			},
 			StringData: map[string]string{
-				"registryAddress": "registry.external.host",
+				//"registryAddress": "registry.external.host",
+				".dockerconfigjson": "eyJhdXRocyI6eyJyZWdpc3RyeS5leHRlcm5hbC5ob3N0Ijp7InVzZXJuYW1lIjoiMSIsInBhc3N3b3JkIjoiMSIsImVtYWlsIjoiYUBiLmMiLCJhdXRoIjoiTVRveCJ9fX0=",
 			},
 		}
 		g.Expect(resourceClient.Create(context.TODO(), &customDockerRegistryConfiguration)).To(gomega.Succeed())
