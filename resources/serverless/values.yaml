@@ -195,7 +195,6 @@ containers:
     configuration:
       data:
         baseNamespace: "{{ .Release.Namespace }}"
-        configPath: "{{ .Values.global.configuration.targetDir }}/{{ .Values.global.configuration.filename }}"
         configMapRequeueDuration: 5m
         secretRequeueDuration: 5m
         serviceAccountRequeueDuration: 5m

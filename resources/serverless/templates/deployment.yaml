@@ -114,45 +114,41 @@ spec:
             - name: APP_HEALTHZ_ADDRESS
               value: ":{{ .Values.containers.manager.healthz.port }}"
             - name: APP_KUBERNETES_BASE_NAMESPACE
-              value: {{ .Values.containers.manager.configuration.data.baseNamespace }}
+              value: "{{ .Values.containers.manager.configuration.data.baseNamespace }}"
             - name: APP_KUBERNETES_CONFIG_MAP_REQUEUE_DURATION
-              value: {{ .Values.containers.manager.configuration.data.configMapRequeueDuration }}
+              value: "{{ .Values.containers.manager.configuration.data.configMapRequeueDuration }}"
             - name: APP_KUBERNETES_SECRET_REQUEUE_DURATION
               value: {{.Values.containers.manager.configuration.data.secretRequeueDuration }}
             - name: APP_KUBERNETES_SERVICE_ACCOUNT_REQUEUE_DURATION
               value: {{.Values.containers.manager.configuration.data.serviceAccountRequeueDuration }}
             - name: APP_KUBERNETES_EXCLUDED_NAMESPACES
-              value: {{.Values.containers.manager.configuration.data.namespaceExcludedNames | toYaml }}
+              value: "{{.Values.containers.manager.configuration.data.namespaceExcludedNames | toYaml }}"
             - name: APP_FUNCTION_TRACE_COLLECTOR_ENDPOINT
-              value: {{.Values.containers.manager.configuration.data.functionTraceCollectorEndpoint }}
+              value: "{{.Values.containers.manager.configuration.data.functionTraceCollectorEndpoint }}"
             - name: APP_FUNCTION_PUBLISHER_PROXY_ADDRESS
-              value: {{.Values.containers.manager.configuration.data.functionPublisherProxyAddress }}
+              value: "{{.Values.containers.manager.configuration.data.functionPublisherProxyAddress }}"
             - name: APP_FUNCTION_IMAGE_REGISTRY_DEFAULT_DOCKER_CONFIG_SECRET_NAME
-              value: {{.Values.containers.manager.configuration.data.imageRegistryDefaultDockerConfigSecretName }}
+              value: "{{- tpl ( .Values.containers.manager.configuration.data.imageRegistryDefaultDockerConfigSecretName) . }}"
             - name: APP_FUNCTION_IMAGE_REGISTRY_EXTERNAL_DOCKER_CONFIG_SECRET_NAME
-              value: {{.Values.containers.manager.configuration.data.imageRegistryExternalDockerConfigSecretName }}
+              value: "{{- tpl ( .Values.containers.manager.configuration.data.imageRegistryExternalDockerConfigSecretName) . }}"
             - name: APP_FUNCTION_PACKAGE_REGISTRY_CONFIG_SECRET_NAME
-              value: {{.Values.containers.manager.configuration.data.packageRegistryConfigSecretName }}
+              value: "{{- tpl ( .Values.containers.manager.configuration.data.packageRegistryConfigSecretName) . }}"
             - name: APP_FUNCTION_IMAGE_PULL_ACCOUNT_NAME
-              value: {{.Values.containers.manager.configuration.data.imagePullAccountName }}
+              value: "{{- tpl ( .Values.containers.manager.configuration.data.imagePullAccountName ) . }}"
             - name: APP_FUNCTION_REQUEUE_DURATION
-              value: {{.Values.containers.manager.configuration.data.functionRequeueDuration }}
+              value: "{{.Values.containers.manager.configuration.data.functionRequeueDuration }}"
             - name: APP_FUNCTION_BUILD_EXECUTOR_ARGS
-              value: {{.Values.containers.manager.configuration.data.functionBuildExecutorArgs }}
-            {{ $kaniko_executor_image := include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.kaniko_executor) }}
+              value: "{{.Values.containers.manager.configuration.data.functionBuildExecutorArgs }}"
             - name: APP_FUNCTION_BUILD_EXECUTOR_IMAGE
-              value: {{(dict "value" $kaniko_executor_image) }}
+              value: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.kaniko_executor) }}"
             - name: APP_FUNCTION_TARGET_CPU_UTILIZATION_PERCENTAGE
               value: {{.Values.containers.manager.configuration.data.targetCPUUtilizationPercentage }}
-            {{ $function_build_init_image := include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_build_init) }}
             - name: APP_FUNCTION_BUILD_REPO_FETCHER_IMAGE
-              value: {{(dict "value" $function_build_init_image) }}
+              value: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_build_init)}}"
             - name: APP_FUNCTION_BUILD_MAX_SIMULTANEOUS_JOBS
-              value: {{.Values.containers.manager.configuration.data.functionBuildMaxSimultaneousJobs }}
+              value: "{{.Values.containers.manager.configuration.data.functionBuildMaxSimultaneousJobs }}"
             - name: APP_HEALTHZ_LIVENESS_TIMEOUT
-              value: {{.Values.containers.manager.configuration.data.healthzLivenessTimeout }}
-            - name: APP_FUNCTION_RESOURCE_PRESETS
-              value: {{ .Values.containers.manager.configuration.data.resourceSettings | toYaml }}
+              value: "{{.Values.containers.manager.configuration.data.healthzLivenessTimeout }}"
             - name: APP_LOG_CONFIG_PATH
-              value: {{.Values.containers.manager.configuration.data.configPath }}
+              value: "{{ .Values.global.configuration.targetDir }}/{{ .Values.global.configuration.logFilename }}"
       priorityClassName: {{ .Values.global.serverlessPriorityClassName }}
