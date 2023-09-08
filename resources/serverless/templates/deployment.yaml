@@ -48,7 +48,7 @@ spec:
           configMap:
             name: "{{ .Values.global.configuration.configmapName }}"
         - name: tmpdir # Needed to allow git repo fetching with read-only rootfs enabled
-          emptyDir: {}
+          emptyDir: { }
       serviceAccountName: {{ template "fullname" . }}-controller-manager
       {{- if .Values.pod.extraProperties }}
       {{ include "tplValue" ( dict "value" .Values.pod.extraProperties  "context" . ) | nindent 6 }}
@@ -63,7 +63,7 @@ spec:
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_controller) }}"
           imagePullPolicy: {{ .Values.images.function_controller.pullPolicy }}
           command:
-          - /app/manager
+            - /app/manager
           {{- if .Values.containers.manager.resources }}
           resources:
             {{- include "tplValue" ( dict "value" .Values.containers.manager.resources "context" . ) | nindent 12 }}
@@ -113,28 +113,42 @@ spec:
           {{- end }}
             - name: APP_HEALTHZ_ADDRESS
               value: ":{{ .Values.containers.manager.healthz.port }}"
-            {{ include "createEnv" ( dict "name" "APP_KUBERNETES_BASE_NAMESPACE" "value" .Values.containers.manager.envs.baseNamespace "context" . ) | nindent 12 }}
-            {{ include "createEnv" ( dict "name" "APP_KUBERNETES_CONFIG_MAP_REQUEUE_DURATION" "value" .Values.containers.manager.envs.configMapRequeueDuration "context" . ) | nindent 12 }}
-            {{ include "createEnv" ( dict "name" "APP_KUBERNETES_SECRET_REQUEUE_DURATION" "value" .Values.containers.manager.envs.secretRequeueDuration "context" . ) | nindent 12 }}
-            {{ include "createEnv" ( dict "name" "APP_KUBERNETES_SERVICE_ACCOUNT_REQUEUE_DURATION" "value" .Values.containers.manager.envs.serviceAccountRequeueDuration "context" . ) | nindent 12 }}
-            {{ include "createEnv" ( dict "name" "APP_KUBERNETES_EXCLUDED_NAMESPACES" "value" .Values.containers.manager.envs.namespaceExcludedNames "context" . ) | nindent 12 }}
-            {{ include "createEnv" ( dict "name" "APP_FUNCTION_TRACE_COLLECTOR_ENDPOINT" "value" .Values.containers.manager.envs.functionTraceCollectorEndpoint "context" . ) | nindent 12 }}
-            {{ include "createEnv" ( dict "name" "APP_FUNCTION_PUBLISHER_PROXY_ADDRESS" "value" .Values.containers.manager.envs.functionPublisherProxyAddress "context" . ) | nindent 12 }}
-            {{ include "createEnv" ( dict "name" "APP_FUNCTION_IMAGE_REGISTRY_DEFAULT_DOCKER_CONFIG_SECRET_NAME" "value" .Values.containers.manager.envs.imageRegistryDefaultDockerConfigSecretName "context" . ) | nindent 12 }}
-            {{ include "createEnv" ( dict "name" "APP_FUNCTION_IMAGE_REGISTRY_EXTERNAL_DOCKER_CONFIG_SECRET_NAME" "value" .Values.containers.manager.envs.imageRegistryExternalDockerConfigSecretName "context" . ) | nindent 12 }}
-            {{ include "createEnv" ( dict "name" "APP_FUNCTION_PACKAGE_REGISTRY_CONFIG_SECRET_NAME" "value" .Values.containers.manager.envs.packageRegistryConfigSecretName "context" . ) | nindent 12 }}
-            {{ include "createEnv" ( dict "name" "APP_FUNCTION_IMAGE_PULL_ACCOUNT_NAME" "value" .Values.containers.manager.envs.imagePullAccountName "context" . ) | nindent 12 }}
-            {{ include "createEnv" ( dict "name" "APP_FUNCTION_REQUEUE_DURATION" "value" .Values.containers.manager.envs.functionRequeueDuration "context" . ) | nindent 12 }}
-            {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_EXECUTOR_ARGS" "value" .Values.containers.manager.envs.functionBuildExecutorArgs "context" . ) | nindent 12 }}
-            {{ $kaniko_executor_image := include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.kaniko_executor) }}
-            {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_EXECUTOR_IMAGE" "value" (dict "value" $kaniko_executor_image) "context" . ) | nindent 12 }}
-            {{ include "createEnv" ( dict "name" "APP_FUNCTION_TARGET_CPU_UTILIZATION_PERCENTAGE" "value" .Values.containers.manager.envs.targetCPUUtilizationPercentage "context" . ) | nindent 12 }}
-            {{ $function_build_init_image := include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_build_init) }}
-            {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_REPO_FETCHER_IMAGE" "value" (dict "value" $function_build_init_image) "context" . ) | nindent 12 }}
-            {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_MAX_SIMULTANEOUS_JOBS" "value" .Values.containers.manager.envs.functionBuildMaxSimultaneousJobs "context" . ) | nindent 12 }}
-            {{ include "createEnv" ( dict "name" "APP_HEALTHZ_LIVENESS_TIMEOUT" "value" .Values.containers.manager.envs.healthzLivenessTimeout "context" . ) | nindent 12 }}
-            {{ include "createEnv" ( dict "name" "APP_CONFIG_PATH" "value" .Values.containers.manager.envs.configPath "context" . ) | nindent 12 }}
-          {{- if .Values.containers.manager.extraProperties }}
-          {{ include "tplValue" ( dict "value" .Values.containers.manager.extraProperties "context" . ) | nindent 10 }}
-          {{- end }}
+            - name: APP_KUBERNETES_BASE_NAMESPACE
+              value: "{{- tpl ( .Values.containers.manager.configuration.data.baseNamespace) . }}"
+            - name: APP_KUBERNETES_CONFIG_MAP_REQUEUE_DURATION
+              value: "{{ .Values.containers.manager.configuration.data.configMapRequeueDuration }}"
+            - name: APP_KUBERNETES_SECRET_REQUEUE_DURATION
+              value: {{.Values.containers.manager.configuration.data.secretRequeueDuration }}
+            - name: APP_KUBERNETES_SERVICE_ACCOUNT_REQUEUE_DURATION
+              value: {{.Values.containers.manager.configuration.data.serviceAccountRequeueDuration }}
+            - name: APP_KUBERNETES_EXCLUDED_NAMESPACES
+              value: "{{.Values.containers.manager.configuration.data.namespaceExcludedNames | toYaml }}"
+            - name: APP_FUNCTION_TRACE_COLLECTOR_ENDPOINT
+              value: "{{.Values.containers.manager.configuration.data.functionTraceCollectorEndpoint }}"
+            - name: APP_FUNCTION_PUBLISHER_PROXY_ADDRESS
+              value: "{{.Values.containers.manager.configuration.data.functionPublisherProxyAddress }}"
+            - name: APP_FUNCTION_IMAGE_REGISTRY_DEFAULT_DOCKER_CONFIG_SECRET_NAME
+              value: "{{- tpl ( .Values.containers.manager.configuration.data.imageRegistryDefaultDockerConfigSecretName) . }}"
+            - name: APP_FUNCTION_IMAGE_REGISTRY_EXTERNAL_DOCKER_CONFIG_SECRET_NAME
+              value: "{{- tpl ( .Values.containers.manager.configuration.data.imageRegistryExternalDockerConfigSecretName) . }}"
+            - name: APP_FUNCTION_PACKAGE_REGISTRY_CONFIG_SECRET_NAME
+              value: "{{- tpl ( .Values.containers.manager.configuration.data.packageRegistryConfigSecretName) . }}"
+            - name: APP_FUNCTION_IMAGE_PULL_ACCOUNT_NAME
+              value: "{{- tpl ( .Values.containers.manager.configuration.data.imagePullAccountName ) . }}"
+            - name: APP_FUNCTION_REQUEUE_DURATION
+              value: "{{.Values.containers.manager.configuration.data.functionRequeueDuration }}"
+            - name: APP_FUNCTION_BUILD_EXECUTOR_ARGS
+              value: "{{.Values.containers.manager.configuration.data.functionBuildExecutorArgs }}"
+            - name: APP_FUNCTION_BUILD_EXECUTOR_IMAGE
+              value: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.kaniko_executor) }}"
+            - name: APP_FUNCTION_TARGET_CPU_UTILIZATION_PERCENTAGE
+              value: "{{.Values.containers.manager.configuration.data.targetCPUUtilizationPercentage }}"
+            - name: APP_FUNCTION_BUILD_REPO_FETCHER_IMAGE
+              value: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_build_init)}}"
+            - name: APP_FUNCTION_BUILD_MAX_SIMULTANEOUS_JOBS
+              value: "{{.Values.containers.manager.configuration.data.functionBuildMaxSimultaneousJobs }}"
+            - name: APP_HEALTHZ_LIVENESS_TIMEOUT
+              value: "{{.Values.containers.manager.configuration.data.healthzLivenessTimeout }}"
+            - name: APP_LOG_CONFIG_PATH
+              value: "{{ .Values.global.configuration.targetDir }}/{{ .Values.global.configuration.logFilename }}"
       priorityClassName: {{ .Values.global.serverlessPriorityClassName }}

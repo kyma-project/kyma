@@ -188,46 +188,35 @@ containers:
       readOnlyRootFilesystem: true # Mandatory
     healthz:
       port: "8090"
-    extraProperties: { }
-    configuration:
+    logConfiguration:
       data:
         logLevel: "info"
         logFormat: "json"
-    envs:
-      baseNamespace:
-        value: "{{ .Release.Namespace }}"
-      configPath:
-        value: "{{ .Values.global.configuration.targetDir }}/{{ .Values.global.configuration.filename }}"
-      configMapRequeueDuration:
-        value: 5m
-      secretRequeueDuration:
-        value: 5m
-      serviceAccountRequeueDuration:
-        value: 5m
-      namespaceExcludedNames:
-        value: "istio-system,kube-node-lease,kube-public,kube-system,kyma-installer,kyma-system,natss"
-      imageRegistryExternalDockerConfigSecretName:
-        value: '{{ template "fullname" . }}-registry-config'
-      imageRegistryDefaultDockerConfigSecretName:
-        value: '{{ template "fullname" . }}-registry-config-default'
-      packageRegistryConfigSecretName:
-        value: '{{ template "fullname" . }}-package-registry-config'
-      imagePullAccountName:
-        value: '{{ template "fullname" . }}-function'
-      targetCPUUtilizationPercentage:
-        value: "50"
-      functionTraceCollectorEndpoint:
-        value: "http://telemetry-otlp-traces.kyma-system.svc.cluster.local:4318/v1/traces"
-      functionPublisherProxyAddress:
-        value: "http://eventing-publisher-proxy.kyma-system.svc.cluster.local/publish"
-      functionRequeueDuration:
-        value: 5m
-      functionBuildExecutorArgs:
-        value: "--insecure,--skip-tls-verify,--skip-unused-stages,--log-format=text,--cache=true"
-      functionBuildMaxSimultaneousJobs:
-        value: "5"
-      healthzLivenessTimeout:
-        value: "10s"
+    configuration:
+      data:
+        baseNamespace: "{{ .Release.Namespace }}"
+        configMapRequeueDuration: 5m
+        secretRequeueDuration: 5m
+        serviceAccountRequeueDuration: 5m
+        namespaceExcludedNames:
+          - istio-system
+          - kube-node-lease
+          - kube-public
+          - kube-system
+          - kyma-installer
+          - kyma-system
+          - natss
+        imageRegistryExternalDockerConfigSecretName: '{{ template "fullname" . }}-registry-config'
+        imageRegistryDefaultDockerConfigSecretName: '{{ template "fullname" . }}-registry-config-default'
+        packageRegistryConfigSecretName: '{{ template "fullname" . }}-package-registry-config'
+        imagePullAccountName: '{{ template "fullname" . }}-function'
+        targetCPUUtilizationPercentage: "50"
+        functionTraceCollectorEndpoint: "http://telemetry-otlp-traces.kyma-system.svc.cluster.local:4318/v1/traces"
+        functionPublisherProxyAddress: "http://eventing-publisher-proxy.kyma-system.svc.cluster.local/publish"
+        functionRequeueDuration: 5m
+        functionBuildExecutorArgs: "--insecure,--skip-tls-verify,--skip-unused-stages,--log-format=text,--cache=true"
+        functionBuildMaxSimultaneousJobs: "5"
+        healthzLivenessTimeout: "10s"
 
 services:
   manager:
