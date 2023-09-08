@@ -3,7 +3,8 @@
 * [Troubleshooting](README.md)
   * [API Exposure](api-exposure/README.md)
   * [Eventing](eventing/README.md)
-  * <!-- markdown-link-check-disable-line -->[Istio](/istio/user/02-operation-guides/troubleshooting/README.md)
+  <!-- markdown-link-check-disable-next-line -->
+  * [Istio](/istio/user/02-operation-guides/troubleshooting/README.md)
   * [Observability](observability/README.md)
   * [Security](security/README.md)
   * [Component doesn't work after successful installation](01-component-installation-fails.md)
