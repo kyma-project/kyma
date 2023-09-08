@@ -53,7 +53,7 @@ func GitopsSteps(restConfig *rest.Config, cfg internal.Config, logf *logrus.Entr
 		return nil, errors.Wrapf(err, "while creating Git config")
 	}
 
-	gitFn := function.NewFunction(gitFnName, cfg.KubectlProxyEnabled, genericContainer)
+	gitFn := function.NewFunction(gitFnName, genericContainer.Namespace, cfg.KubectlProxyEnabled, genericContainer)
 	logf.Infof("Testing Git Function in namespace: %s", cfg.Namespace)
 
 	poll := utils.Poller{
@@ -63,7 +63,7 @@ func GitopsSteps(restConfig *rest.Config, cfg internal.Config, logf *logrus.Entr
 		DataKey:            internal.TestDataKey,
 	}
 	return executor.NewSerialTestRunner(logf, "create git func",
-		namespace.NewNamespaceStep("Create test namespace", coreCli, genericContainer),
+		namespace.NewNamespaceStep(logf, "Create test namespace", genericContainer.Namespace, coreCli),
 		git.NewGitServer(gitCfg, "Start in-cluster Git Server", appsCli.Deployments(genericContainer.Namespace), coreCli.Services(genericContainer.Namespace), cfg.KubectlProxyEnabled, cfg.IstioEnabled),
 		function.CreateFunction(logf, gitFn, "Create Git Function", runtimes.GitopsFunction(gitCfg.GetGitServerInClusterURL(), "/", "master", serverlessv1alpha2.NodeJs18, nil)),
 		assertion.NewDefaultedFunctionCheck("Check if Git Function has correct default values", gitFn),

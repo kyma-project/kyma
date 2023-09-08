@@ -1,0 +1,7 @@
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: {{ .Values.priorityClassName }}
+value: 2000000
+globalDefault: false
+description: "Scheduling priority of compass-runtime-agent component. By default, compass-runtime-agent should not be blocked by unschedulable user workloads."

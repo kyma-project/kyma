@@ -114,6 +114,6 @@ spec:
             initialDelaySeconds: {{ .Values.compassRuntimeAgent.readinessProbe.initialDelaySeconds }}
             timeoutSeconds: {{ .Values.compassRuntimeAgent.readinessProbe.timeoutSeconds }}
             periodSeconds: {{.Values.compassRuntimeAgent.readinessProbe.periodSeconds }}
-    {{- if .Values.global.priorityClassName }}
-      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName }}
     {{- end }}

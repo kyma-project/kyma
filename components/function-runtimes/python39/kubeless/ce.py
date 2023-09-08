@@ -76,7 +76,7 @@ def has_ce_headers(headers):
 
 
 def is_cloud_event(req):
-    return req.get_header('content-type') == 'application/cloudevents+json' or has_ce_headers(req.headers)
+    return 'application/cloudevents+json' in req.content_type.split(';') or has_ce_headers(req.headers)
 
 
 class Event:

@@ -38,15 +38,17 @@ To start Central Application Gateway, run this command:
 ```
 
 Central Application Gateway has the following parameters:
-- **proxyPort** is the port that acts as a proxy for the calls from services and Functions to an external solution in the default standalone mode or Compass bundles with a single API definition. The default port is `8080`.
-- **proxyPortCompass** is the port that acts as a proxy for the calls from services and Functions to an external solution in the Compass mode. The default port is `8082`.
-- **externalAPIPort** is the port that exposes the API which allows checking the component status. The default port is `8081`.
-- **applicationSecretsNamespace** is the Namespace in which the Application secrets used by Central Application Gateway exist. The default Namespace is `kyma-system`.
-- **requestTimeout** is the timeout for requests sent through Central Application Gateway, expressed in seconds. The default value is `1`.
-- **requestLogging** is the flag for logging incoming requests. The default value is `false`.
-- **proxyTimeout** is the timeout for requests sent through the proxy, expressed in seconds. The default value is `10`.
-- **proxyCacheTTL** is the time to live of the remote API information stored in the proxy cache, expressed in seconds. The default value is `120`.
 
+- **apiServerURL** - The address of the Kubernetes API server. Overrides any value in a kubeconfig. Only required if out-of-cluster.
+- **applicationSecretsNamespace** - Namespace where Application secrets used by the Application Gateway exist. The default is `kymasystem`
+- **externalAPIPort** - Port that exposes the API which allows checking the component status and exposes log configuration. The default is `8081`
+- **kubeConfig** - Path to a kubeconfig. Only required if out-of-cluster
+- **logLevel** - Log level: `panic` | `fatal` | `error` | `warn` | `info` | `debug`. Can't be lower than `info`. The default is  `zapInfoLevel`
+- **proxyCacheTTL** - TTL, in seconds, for proxy cache of Remote API information. The default is `120`
+- **proxyPort** - Port that acts as a proxy for the calls from services and Functions to an external solution in the default standalone mode or Compass bundles with a single API definition. The default is `8080`
+- **proxyPortCompass** - Port that acts as a proxy for the calls from services and Functions to an external solution in the Compass mode. The default is `8082`
+- **proxyTimeout** - Timeout for requests sent through the proxy, expressed in seconds. The default is `10`
+- **requestTimeout** - Timeout for requests sent through Central Application Gateway, expressed in seconds. The defaultis `1`
 
 ## API
 

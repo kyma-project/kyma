@@ -57,11 +57,11 @@ func FunctionTracingTest(restConfig *rest.Config, cfg internal.Config, logf *log
 		Log:         logf,
 	}
 
-	python39Fn := function.NewFunction("python39", cfg.KubectlProxyEnabled, genericContainer.WithLogger(python39Logger))
+	python39Fn := function.NewFunction("python39", genericContainer.Namespace, cfg.KubectlProxyEnabled, genericContainer.WithLogger(python39Logger))
 
-	nodejs16Fn := function.NewFunction("nodejs16", cfg.KubectlProxyEnabled, genericContainer.WithLogger(nodejs16Logger))
+	nodejs16Fn := function.NewFunction("nodejs16", genericContainer.Namespace, cfg.KubectlProxyEnabled, genericContainer.WithLogger(nodejs16Logger))
 
-	nodejs18Fn := function.NewFunction("nodejs18", cfg.KubectlProxyEnabled, genericContainer.WithLogger(nodejs18Logger))
+	nodejs18Fn := function.NewFunction("nodejs18", genericContainer.Namespace, cfg.KubectlProxyEnabled, genericContainer.WithLogger(nodejs18Logger))
 
 	logf.Infof("Testing function in namespace: %s", cfg.Namespace)
 
@@ -76,7 +76,7 @@ func FunctionTracingTest(restConfig *rest.Config, cfg internal.Config, logf *log
 		DataKey:            internal.TestDataKey,
 	}
 	return executor.NewSerialTestRunner(logf, "Runtime test",
-		namespace.NewNamespaceStep("Create test namespace", coreCli, genericContainer),
+		namespace.NewNamespaceStep(logf, "Create test namespace", genericContainer.Namespace, coreCli),
 		app.NewApplication("Create HTTP basic application", HTTPAppName, HTTPAppImage, int32(80), appsCli.Deployments(genericContainer.Namespace), coreCli.Services(genericContainer.Namespace), genericContainer),
 		executor.NewParallelRunner(logf, "Fn tests",
 			executor.NewSerialTestRunner(python39Logger, "Python39 test",

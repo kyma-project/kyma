@@ -49,7 +49,7 @@ These are the pre-defined test execution tags:
 - **testName** is the name of a test scenario that every test should provide in the test script implementation.
 - **component** is the tested component or area. Provide this tag also with the test script implementation.
 - **revision** is the SHA ID of the `main` branch used for tests. It is provided with the Kyma performance test runner. The test script should use the **REVISION** variable as a value.
-
+<!-- markdown-link-check-disable-next-line -->
 The tags allow you to distinguish test results in [Grafana](https://grafana.perf.kyma-project.io/d/ReuNR5Aik/kyma-performance-test-results?orgId=1).
 
 See [this](./components/examples/http-db-service.js) file for a k6 test example run for **http-db-service**, that contains the pre-defined **testName** and **component** tag names:
@@ -114,7 +114,7 @@ The **options** variable defines the execution behavior of the test implementati
 - **tags** defines custom tags to add metadata to test execution.
 
 > **NOTE:** Read [this](https://docs.k6.io/docs/options) document for more details on the available options and the test execution behavior.
-
+<!-- markdown-link-check-disable-next-line -->
 The test result is stored in InfluxDB and in Grafana that is deployed on a Kyma load generator cluster. You can access the result [here](https://grafana.perf.kyma-project.io/d/ReuNR5Aik/kyma-performance-test-results?orgId=1).
 
 ## Usage

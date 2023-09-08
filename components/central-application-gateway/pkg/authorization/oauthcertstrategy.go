@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"net/http"
 
+	"go.uber.org/zap"
+
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/httpconsts"
-	log "github.com/sirupsen/logrus"
 
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/clientcert"
@@ -35,11 +36,13 @@ func newOAuthWithCertStrategy(oauthClient OAuthClient, clientId string, clientSe
 }
 
 func (o oauthWithCertStrategy) AddAuthorization(r *http.Request, _ clientcert.SetClientCertificateFunc, skipTLSVerification bool) apperrors.AppError {
-	log.Infof("Passing skipTLSVerification=%v to GetTokenMTLS", skipTLSVerification)
+	zap.L().Info("passing skipTLSVerification to GetTokenMTLS",
+		zap.Bool("skipTLSVerification", skipTLSVerification))
 	headers, queryParameters := o.requestParameters.unpack()
 	token, err := o.oauthClient.GetTokenMTLS(o.clientId, o.url, o.certificate, o.privateKey, headers, queryParameters, skipTLSVerification)
 	if err != nil {
-		log.Errorf("failed to get token : '%s'", err)
+		zap.L().Error("failed to get token",
+			zap.Error(err))
 		return apperrors.Internal("Failed to get token: %s", err.Error())
 	}
 

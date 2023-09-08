@@ -3,7 +3,7 @@ package httptools
 import (
 	"net/http"
 
-	log "github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 )
 
 // SetHeaders modifies request headers setting additional entries from customHeaders
@@ -25,7 +25,8 @@ func SetHeaders(reqHeaders http.Header, customHeaders *map[string][]string) {
 // RemoveHeader modifies request headers removing headerToRemove entry
 func RemoveHeader(reqHeaders http.Header, headerToRemove string) {
 	if _, ok := reqHeaders[headerToRemove]; ok {
-		log.Debugf("Removing header %s\n", headerToRemove)
+		zap.L().Debug("Removing header",
+			zap.String("header", headerToRemove))
 		reqHeaders.Del(headerToRemove)
 	}
 }

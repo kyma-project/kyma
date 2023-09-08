@@ -4,25 +4,61 @@ import (
 	"net/http"
 	"time"
 
-	log "github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 )
+
+type ContextKey string
+
+const ContextUUID ContextKey = "context-uuid"
+
+func LogResponse(log *zap.SugaredLogger, res *http.Response) error {
+	req := res.Request
+	log.WithOptions(
+		zap.AddCallerSkip(1),
+	).
+		With(
+			"method", req.Method,
+			"host", req.Host,
+			"url", req.URL.RequestURI(),
+			"proto", req.Proto,
+			"code", res.StatusCode,
+			"contentLength", res.ContentLength,
+			"kind", "response",
+		).Debugf("%s %s %s %s", req.Method, req.Host, req.URL.RequestURI(), req.Proto)
+
+	return nil
+}
+
+func LogRequest(log *zap.SugaredLogger, r *http.Request) {
+	log.WithOptions(
+		zap.AddCallerSkip(1),
+	).With(
+		"method", r.Method,
+		"host", r.Host,
+		"url", r.URL.RequestURI(),
+		"proto", r.Proto,
+		"kind", "request",
+	).Debugf("%s %s %s %s", r.Method, r.Host, r.URL.RequestURI(), r.Proto)
+}
 
 func RequestLogger(label string, h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
 		lw := newLoggingResponseWriter(w)
 
 		h.ServeHTTP(lw, r)
 
-		method := r.Method
-		fullPath := r.RequestURI
-		if fullPath == "" {
-			fullPath = r.URL.RequestURI()
-		}
-		proto := r.Proto
 		responseCode := lw.status
 		duration := time.Since(lw.start).Nanoseconds() / int64(time.Millisecond)
 
-		log.Infof("%s: %s %s %s %d %d", label, method, fullPath, proto, responseCode, duration)
+		log := zap.L().Sugar().
+			With(
+				"label", label,
+				"duration", duration,
+				"code", responseCode,
+			)
+
+		LogRequest(log, r)
 	})
 }
 

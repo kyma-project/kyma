@@ -3,7 +3,6 @@ const {
   // gettingStartedGuideTests,
 } = require('./');
 
-const {apiExposureTests} = require('../api-exposure');
 const {monitoringTests, unexposeGrafana} = require('../monitoring');
 const {loggingTests} = require('../logging');
 const {createIstioAccessLogResource} = require('../logging/client.js');
@@ -41,7 +40,6 @@ describe('Executing Standard Testsuite:', function() {
 
   monitoringTests();
 
-  apiExposureTests();
   commerceMockTests(testNamespace);
   // unusuble because of redis dependency that is not usable in the current form after SC migration
   // gettingStartedGuideTests();

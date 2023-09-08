@@ -49,6 +49,7 @@ To manage Kyma via GUI, open Kyma Dashboard:
 ```bash
 kyma dashboard
 ```
+<!-- markdown-link-check-disable-next-line -->
 This command takes you to your Kyma Dashboard under [`http://localhost:3001/`](http://localhost:3001/).
 
 ## Check the list of Deployments via Dashboard

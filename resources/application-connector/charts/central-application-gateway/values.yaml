@@ -2,14 +2,15 @@ deployment:
   image:
     pullPolicy: IfNotPresent
   args:
+    externalAPIPort: &externalAPIPort 8081
+    logLevel: info
+    proxyCacheTTL: 120
     proxyPort: &proxyPort 8080
     proxyPortCompass: &proxyPortCompass 8082
-    externalAPIPort: &externalAPIPort 8081
+    proxyTimeout: 10
+    requestLogging: false
     requestTimeout: 10
     skipVerify: false
-    proxyTimeout: 10
-    proxyCacheTTL: 120
-    requestLogging: false
   resources:
     limits:
       cpu: 500m
@@ -17,6 +18,8 @@ deployment:
     requests:
       cpu: 20m
       memory: 64Mi
+
+priorityClassName: "central-application-gateway-priority-class"
 
 service:
   externalapi:

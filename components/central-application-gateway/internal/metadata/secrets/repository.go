@@ -4,8 +4,9 @@ package secrets
 import (
 	"context"
 
+	"go.uber.org/zap"
+
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
-	log "github.com/sirupsen/logrus"
 	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -40,7 +41,9 @@ func NewRepository(secretsManager Manager) Repository {
 func (r *repository) Get(name string) (map[string][]byte, apperrors.AppError) {
 	secret, err := r.secretsManager.Get(context.Background(), name, metav1.GetOptions{})
 	if err != nil {
-		log.Errorf("failed to read secret '%s': %s", name, err.Error())
+		zap.L().Error("failed to read secret",
+			zap.String("secretName", name),
+			zap.Error(err))
 		if k8serrors.IsNotFound(err) {
 			return nil, apperrors.NotFound("secret '%s' not found", name)
 		}
