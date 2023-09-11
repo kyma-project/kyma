@@ -26,7 +26,6 @@ If you're interested in learning more about API Exposure in Kyma, follow these l
   - A [resource is ignored by the controller](../../04-operation-guides/troubleshooting/api-exposure/apix-02-dns-mgt/apix-02-03-dns-mgt-resource-ignored.md)
   - The [Issuer Custom Resource fails to be created](../../04-operation-guides/troubleshooting/api-exposure/apix-03-cert-mgt-issuer-not-created.md)
   - The [Kyma Gateway is not reachable](../../04-operation-guides/troubleshooting/api-exposure/apix-04-gateway-not-reachable.md)
-  - The [Pods are stuck in `Pending/Failed/Unknown` state after an upgrade](../../04-operation-guides/troubleshooting/api-exposure/apix-05-upgrade-sidecar-proxy.md)
   - There are [Issues when creating an APIRule - Various reasons](../../04-operation-guides/troubleshooting/api-exposure/apix-06-api-rule-troubleshooting.md)
 
 - Learn something more about:

@@ -31,7 +31,6 @@ See the full list of Kyma troubleshooting guides:
   - [Resource ignored by the controller](./api-exposure/apix-02-dns-mgt/apix-02-03-dns-mgt-resource-ignored.md)
 - [Certificate management - Issuer not created](./api-exposure/apix-03-cert-mgt-issuer-not-created.md)
 - [Kyma Gateway - not reachable](./api-exposure/apix-04-gateway-not-reachable.md)
-- [Pods stuck in `Pending/Failed/Unknown` state after an upgrade](./api-exposure/apix-05-upgrade-sidecar-proxy.md)
 - [Issues when creating an APIRule - various reasons](./api-exposure/apix-06-api-rule-troubleshooting.md)
 
 ### Eventing

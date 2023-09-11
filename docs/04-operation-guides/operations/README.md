@@ -9,7 +9,6 @@ This is a complete list of Kyma operation guides:
 * [Install Kyma CLI](01-install-kyma-CLI.md)
 * [Install Kyma](02-install-kyma.md)
 * [Change Kyma settings](03-change-kyma-config-values.md)
-* [Upgrade or Downgrade Kyma](05-upgrade-kyma.md)
 * [Uninstall Kyma or components](07-uninstall-kyma.md)
 * [Back up Kyma](10-backup-kyma.md)
 * [Pass an access token in a request header](ac-01-pass-access-token-in-request-header.md)
