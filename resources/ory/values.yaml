@@ -6,6 +6,9 @@ global:
       name: kyma-gateway
       namespace: kyma-system
   ory:
+    hydra:
+      persistence:
+        enabled: false
     oathkeeper:
       maester:
         mode: sidecar
