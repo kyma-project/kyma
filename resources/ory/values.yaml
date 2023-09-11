@@ -1,9 +1,6 @@
 # Global or kyma related overrides
 global:
   domainName: "kyma.example.com"
-  postgresql:
-    postgresqlDatabase: db4hydra
-    postgresqlUsername: hydra
   istio:
     gateway:
       name: kyma-gateway
@@ -12,19 +9,6 @@ global:
     oathkeeper:
       maester:
         mode: sidecar
-    hydra:
-      persistence:
-        enabled: true
-        gcloud:
-          enabled: false
-          saJson: ""
-        postgresql:
-          enabled: true
-        # user: "someUser"
-        # password: "postgres"
-        # dbUrl: "mydb.mynamespace.svc.cluster.local:1234"
-        # dbName: "db4hydra"
-        # dbType: "postgres | mysql | cockroach"
   containerRegistry:
     path: europe-docker.pkg.dev/kyma-project
   images:
@@ -39,14 +23,6 @@ global:
       name: "gce-proxy"
       version: "v1.33.8-afb993b8"
       directory: "prod/tpi/cloudsql-docker"
-    hydra:
-      name: "hydra"
-      version: "v1.11.8"
-      directory: "prod/external/oryd"
-    hydra_maester:
-      name: "hydra-maester"
-      version: "v0.0.25"
-      directory: "prod/external/oryd"
     busybox:
       name: "busybox"
       version: "1.34.1-v1"
@@ -59,18 +35,6 @@ global:
       name: "oathkeeper-maester"
       version: "v0.1.5"
       directory: "prod/external/oryd"
-    postgres:
-      name: "postgres"
-      version: "11.21-alpine3.18"
-      directory: "prod/external"
-    postgres_exporter:
-      name: "postgres-exporter"
-      version: "0.11.1-debian-11-r69"
-      directory: "prod/external/bitnami"
-    alpine:
-      name: "alpine"
-      version: "3.17.3"
-      directory: "prod/external"
 
 # Configure priorityClassName
 priorityClassName: "ory-priority-class"
@@ -79,62 +43,6 @@ headerRewrite:
   enabled: true
   certificateDataHeader: "Certificate-Data"
   workloadLabel: oathkeeper
-
-# Overrides for the Hydra chart
-hydra:
-  enabled: true
-  ingress:
-    public:
-      enabled: false
-    admin:
-      enabled: false
-  deployment:
-    strategy:
-      type: RollingUpdate
-      rollingUpdate:
-        maxSurge: "50%"
-        maxUnavailable: "0%"
-    resources:
-      limits:
-        cpu: 500m
-        memory: 256Mi
-      requests:
-        cpu: 10m
-        memory: 128Mi
-    autoscaling:
-      enabled: true
-      minReplicas: 1
-      maxReplicas: 3
-      targetMemoryUtilizationPercentage: 75
-      targetCPUUtilizationPercentage: 80
-  hydra:
-    # The ORY Hydra configuration. For a full list of available settings, check:
-    #   https://github.com/ory/hydra/blob/master/docs/config.yaml
-    config:
-      serve:
-        public:
-          port: 4444
-        admin:
-          port: 4445
-        tls:
-          allow_termination_from:
-            - 10.0.0.0/8
-            - 172.16.0.0/12
-            - 192.168.0.0/16
-      secrets: {}
-      urls:
-        self: {}
-      dsn: memory
-    # Required for DB autoMigrate: true
-    autoMigrate: true
-    dangerousForceHttp: true
-    dangerousAllowInsecureRedirectUrls: false
-    existingSecret: "ory-hydra-credentials"
-  hydra-maester:
-    globalAccess: true
-    config:
-      # Must be in-sync with hydra.config.existingSecret
-      hydraSecret: "ory-hydra-credentials"
 
 # Overrides for the Oathkeeper chart
 oathkeeper:
@@ -258,34 +166,3 @@ oathkeeper:
         requests:
           cpu: 10m
           memory: 20Mi
-
-# Local persistance settings
-postgresql:
-  resources:
-    requests:
-      memory: 256Mi
-      cpu: 100m
-    limits:
-      memory: 1024Mi
-      cpu: 750m
-  master:
-    podAnnotations:
-      sidecar.istio.io/inject: "false"
-  slave:
-    podAnnotations:
-      sidecar.istio.io/inject: "false"
-  # Must be in-sync with hydra.hydra.config.existingSecret
-  existingSecret: "ory-hydra-credentials"
-
-# Remote persistance settings
-gcloud-sqlproxy:
-  rbac:
-    create: true
-  extraArgs:
-    log_debug_stdout: true
-    term_timeout: 30s
-  podAnnotations:
-    sidecar.istio.io/inject: "false"
-  # Must be in-sync with hydra.hydra.config.existingSecret
-  existingSecret: "ory-hydra-credentials"
-  existingSecretKey: "gcp-sa.json"
