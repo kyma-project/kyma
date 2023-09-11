@@ -8,7 +8,7 @@ global:
   ory:
     hydra:
       persistence:
-        enabled: false
+        enabled: true
     oathkeeper:
       maester:
         mode: sidecar
