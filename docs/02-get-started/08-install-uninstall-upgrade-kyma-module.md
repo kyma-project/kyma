@@ -44,7 +44,7 @@ kubectl apply -f https://github.com/kyma-project/serverless-manager/releases/lat
 #### [Telemetry](https://github.com/kyma-project/telemetry-manager)
 
 ```bash
-kubectl apply -f https://github.com/kyma-project/telemetry-manager/releases/latest/download/rendered.yaml
+kubectl apply -f https://github.com/kyma-project/telemetry-manager/releases/latest/download/telemetry-manager.yaml
 kubectl apply -f https://github.com/kyma-project/telemetry-manager/releases/latest/download/telemetry-default-cr.yaml -n kyma-system
 ```
 
