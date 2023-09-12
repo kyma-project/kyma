@@ -47,41 +47,6 @@ k3d cluster create kyma \
 For managed Kubernetes, see the documentation related to your provider.
 For example, if you use Gardener as a managed Kubernetes offering, see the [OIDC Preset](https://github.com/gardener/gardener/blob/master/docs/usage/openidconnect-presets.md) documentation.
 
-### Configure role-based access to identities provided by your OIDC server
-
-Including the JWT token in the call to the API server, enables the API server to validate and extract the associated identity from the **username** and **group** claims of the JWT token.
-
-Now, define which individuals or groups should have access to which Kyma resources. The default setup does not provide access to any. You need to model permissions using the [RBAC concept](https://kubernetes.io/docs/reference/access-authn-authz/rbac/).
-
-By default, Kyma comes with the following ClusterRoles:
-
-- **kyma-admin** - gives full admin access to the entire cluster
-- **kyma-namespace-admin** - gives full admin access to the specific Namespace
-- **kyma-edit** - gives full access to all Kyma-managed resources
-- **kyma-developer** - gives full access to Kyma-managed resources and basic Kubernetes resources
-- **kyma-view** - allows viewing and listing all of the resources in the cluster
-- **kyma-essentials** - gives a set of minimal view access rights to use in Kyma Dashboard
-
-To bind a user to the **kyma-admin** ClusterRole, run this command:
-
-```
-kubectl create clusterrolebinding {BINDING_NAME} --clusterrole=kyma-admin --user={USERNAME AS IDENTIFIED AT YOUR IDP}
-```
-
-To check if the binding is created, run:
-
-```
-kubectl get clusterrolebinding {BINDING_NAME}
-```
-
-To bind a group of users to the **kyma-admin** ClusterRole, run this command:
-
-```
-kubectl create clusterrolebinding {BINDING_NAME} --clusterrole=kyma-admin --group={GROUPNAME}
-```
-
-You can combine user-level and group-level permissions in one binding. Run `kubectl create clusterrolebinding --help` in your terminal to see more options.
-
 ### Configure kubectl access
 
 With this step, you will set up the OIDC provider in the `kubeconfig` file to enforce authentication flow when accessing Kyma using `kubectl`.
