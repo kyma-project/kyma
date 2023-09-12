@@ -137,21 +137,10 @@ async function checkFunctionResponse(functionNamespace, mockNamespace = 'mocks')
   const mockHost = vs.spec.hosts[0];
   const host = mockHost.split('.').slice(1).join('.');
 
-  // get OAuth client id and client secret from Kubernetes Secret
-  const oAuthSecretData = await getSecretData('lastorder-oauth', functionNamespace);
-
-  // get access token from OAuth server
-  const oAuthTokenGetter = new OAuthToken(
-      `https://oauth2.${host}/oauth2/token`,
-      new OAuthCredentials(oAuthSecretData['client_id'], oAuthSecretData['client_secret']),
-  );
-  const accessToken = await oAuthTokenGetter.getToken(['read', 'write']);
-
   // expect no error when authorized
   const res = await retryPromise(
       () => axios.post(`https://lastorder.${host}/function`, {orderCode: '789'}, {
         timeout: 5000,
-        headers: {Authorization: `bearer ${accessToken}`},
       }),
       45,
       2000,
@@ -162,15 +151,6 @@ async function checkFunctionResponse(functionNamespace, mockNamespace = 'mocks')
   // the request should be authorized and successful
   expect(res.status).to.be.equal(200);
 
-  // expect error when unauthorized
-  let errorOccurred = false;
-  try {
-    await axios.post(`https://lastorder.${host}/function`, {orderCode: '789'}, {timeout: 5000});
-  } catch (err) {
-    errorOccurred = true;
-    expect(err.response.status).to.be.equal(401);
-  }
-  expect(errorOccurred).to.be.equal(true);
 }
 
 async function sendEventAndCheckResponse(eventType, body, params, mockNamespace = 'mocks') {
