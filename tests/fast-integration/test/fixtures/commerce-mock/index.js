@@ -31,7 +31,6 @@ const {
   eventingSubscription,
   eventingSubscriptionV1Alpha2,
   k8sDelete,
-  getSecretData,
   namespaceObj,
   getTraceDAG,
   printStatusOfInClusterEventingInfrastructure,
@@ -48,11 +47,6 @@ const {
 } = require('../../../compass');
 
 const {getJaegerTrace} = require('../../../tracing/client');
-
-const {
-  OAuthToken,
-  OAuthCredentials,
-} = require('../../../lib/oauth');
 
 const {bebBackend, getEventMeshNamespace} = require('../../../eventing-test/common/common');
 
@@ -150,7 +144,6 @@ async function checkFunctionResponse(functionNamespace, mockNamespace = 'mocks')
 
   // the request should be authorized and successful
   expect(res.status).to.be.equal(200);
-
 }
 
 async function sendEventAndCheckResponse(eventType, body, params, mockNamespace = 'mocks') {
