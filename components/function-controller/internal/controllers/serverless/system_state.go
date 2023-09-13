@@ -247,9 +247,7 @@ func (s *systemState) buildJobExecutorContainer(cfg cfg, volumeMounts []corev1.V
 			fmt.Sprintf("--build-arg=base_image=%s", s.instance.Spec.RuntimeImageOverride))
 	}
 
-	resourceRequirements := s.instance.Spec.ResourceConfiguration.Build.EffectiveResource(
-		cfg.fn.ResourceConfiguration.BuildJob.Resources.DefaultPreset,
-		cfg.fn.ResourceConfiguration.BuildJob.Resources.Presets.ToResourceRequirements())
+	resourceRequirements := s.getBuildResourceRequirements(cfg)
 
 	return corev1.Container{
 		Name:            "executor",
@@ -263,6 +261,17 @@ func (s *systemState) buildJobExecutorContainer(cfg cfg, volumeMounts []corev1.V
 		},
 		SecurityContext: buildJobContainerSecurityContext(),
 	}
+}
+
+func (s *systemState) getBuildResourceRequirements(cfg cfg) corev1.ResourceRequirements {
+	presets := cfg.fn.ResourceConfiguration.BuildJob.Resources.Presets.ToResourceRequirements()
+	if s.instance.Spec.ResourceConfiguration != nil &&
+		s.instance.Spec.ResourceConfiguration.Build != nil {
+		return s.instance.Spec.ResourceConfiguration.Build.EffectiveResource(
+			cfg.fn.ResourceConfiguration.BuildJob.Resources.DefaultPreset,
+			presets)
+	}
+	return presets[cfg.fn.ResourceConfiguration.BuildJob.Resources.DefaultPreset]
 }
 
 func (s *systemState) getBuildJobVolumeMounts() []corev1.VolumeMount {
@@ -395,7 +404,7 @@ type buildDeploymentArgs struct {
 	ImagePullAccountName   string
 }
 
-func (s *systemState) buildDeployment(cfg buildDeploymentArgs, resourceConfig ResourceConfig) appsv1.Deployment {
+func (s *systemState) buildDeployment(cfg buildDeploymentArgs, resourceConfig Resources) appsv1.Deployment {
 	imageName := s.buildImageAddress(cfg.DockerPullAddress)
 
 	const volumeName = "tmp-dir"
@@ -439,16 +448,17 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs, resourceConfig Re
 			ReadOnly:  false,
 		},
 	}
+	var resources = getDeploymentResources(s.instance, resourceConfig)
+
 	volumeMounts = append(volumeMounts, secretVolumeMounts...)
 	templateSpec := corev1.PodSpec{
 		Volumes: volumes,
 		Containers: []corev1.Container{
 			{
-				Name:  functionContainerName,
-				Image: imageName,
-				Env:   envs,
-				Resources: s.instance.Spec.ResourceConfiguration.Function.EffectiveResource(resourceConfig.DefaultPreset,
-					resourceConfig.Presets.ToResourceRequirements()),
+				Name:         functionContainerName,
+				Image:        imageName,
+				Env:          envs,
+				Resources:    resources,
 				VolumeMounts: volumeMounts,
 				/*
 					In order to mark pod as ready we need to ensure the function is actually running and ready to serve traffic.
@@ -519,6 +529,16 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs, resourceConfig Re
 			},
 		},
 	}
+}
+
+func getDeploymentResources(instance serverlessv1alpha2.Function, resourceCfg Resources) corev1.ResourceRequirements {
+	presets := resourceCfg.Presets.ToResourceRequirements()
+	if instance.Spec.ResourceConfiguration != nil {
+		return instance.Spec.ResourceConfiguration.Build.EffectiveResource(
+			resourceCfg.DefaultPreset,
+			presets)
+	}
+	return presets[resourceCfg.DefaultPreset]
 }
 
 func buildDeploymentSecretVolumes(secretMounts []serverlessv1alpha2.SecretMount) (volumes []corev1.Volume, volumeMounts []corev1.VolumeMount) {

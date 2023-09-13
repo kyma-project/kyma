@@ -20,7 +20,7 @@ type FunctionConfig struct {
 	RequeueDuration                             time.Duration         `envconfig:"default=1m"`
 	FunctionReadyRequeueDuration                time.Duration         `envconfig:"default=5m"`
 	GitFetchRequeueDuration                     time.Duration         `envconfig:"default=30s"`
-	ResourceConfiguration                       ResourceConfiguration `envconfig:""`
+	ResourceConfiguration                       ResourceConfiguration `envconfig:"optional"`
 	Build                                       BuildConfig
 }
 
@@ -50,21 +50,23 @@ func (rc *ResourceConfiguration) Unmarshal(input string) error {
 }
 
 type FunctionResourceConfig struct {
-	Resources ResourceConfig `yaml:"resources"`
+	Resources Resources `yaml:"resources"`
 }
 
 type BuildJobResourceConfig struct {
-	Resources ResourceConfig `yaml:"resources"`
+	Resources Resources `yaml:"resources"`
 }
 
-type ResourceConfig struct {
+type Resources struct {
 	Presets            Preset   `yaml:"presets"`
 	DefaultPreset      string   `yaml:"defaultPreset"`
 	MinRequestedCPU    Quantity `yaml:"minRequestedCPU"`
 	MinRequestedMemory Quantity `yaml:"minRequestedMemory"`
 }
 
-type Preset map[string]struct {
+type Preset map[string]Resource
+
+type Resource struct {
 	RequestCPU    Quantity `yaml:"requestCpu"`
 	RequestMemory Quantity `yaml:"requestMemory"`
 	LimitCPU      Quantity `yaml:"limitCpu"`

@@ -2,6 +2,7 @@ package serverless
 
 import (
 	"fmt"
+	"k8s.io/apimachinery/pkg/api/resource"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
@@ -78,6 +79,7 @@ func TestFunctionReconciler_buildDeployment(t *testing.T) {
 		instance *serverlessv1alpha2.Function
 	}
 	rtmCfg := runtime.GetRuntimeConfig(serverlessv1alpha2.NodeJs18)
+	resourceCfg := fixResources()
 
 	tests := []struct {
 		name string
@@ -98,7 +100,7 @@ func TestFunctionReconciler_buildDeployment(t *testing.T) {
 				instance: *tt.args.instance,
 			}
 
-			got := s.buildDeployment(buildDeploymentArgs{})
+			got := s.buildDeployment(buildDeploymentArgs{}, resourceCfg)
 
 			// deployment selector labels are equal with pod labels
 			for key, value := range got.Spec.Selector.MatchLabels {
@@ -478,5 +480,19 @@ func assertVolumes(g *gomega.WithT, actual []corev1.Volume, expected []expectedV
 			}
 		}
 		g.Expect(found).To(gomega.BeTrue(), "Volume with name: %s, referencing object: %s not found", expVol.name, expVol.localObjectReference)
+	}
+}
+
+func fixResources() Resources {
+	return Resources{
+		Presets: map[string]Resource{
+			"P": {
+				RequestCPU:    Quantity{resource.MustParse("100m")},
+				RequestMemory: Quantity{resource.MustParse("100Mi")},
+				LimitCPU:      Quantity{resource.MustParse("200m")},
+				LimitMemory:   Quantity{resource.MustParse("200Mi")},
+			},
+		},
+		DefaultPreset: "P",
 	}
 }
