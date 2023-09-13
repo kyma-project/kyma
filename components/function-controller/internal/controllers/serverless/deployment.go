@@ -46,7 +46,7 @@ func stateFnCheckDeployments(ctx context.Context, r *reconciler, s *systemState)
 		ImagePullAccountName:   r.cfg.fn.ImagePullAccountName,
 	}
 
-	expectedDeployment := s.buildDeployment(args)
+	expectedDeployment := s.buildDeployment(args, r.cfg.fn.ResourceConfiguration.Function.Resources)
 	if len(s.deployments.Items) == 0 {
 		return buildStateFnCreateDeployment(expectedDeployment), nil
 	}

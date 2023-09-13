@@ -149,6 +149,8 @@ spec:
               value: "{{.Values.containers.manager.configuration.data.functionBuildMaxSimultaneousJobs }}"
             - name: APP_HEALTHZ_LIVENESS_TIMEOUT
               value: "{{.Values.containers.manager.configuration.data.healthzLivenessTimeout }}"
+            - name: APP_FUNCTION_RESOURCE_CONFIGURATION
+              value: {{ .Values.containers.manager.configuration.data.resourcesConfiguration | toYaml | quote }}
             - name: APP_LOG_CONFIG_PATH
               value: "{{ .Values.global.configuration.targetDir }}/{{ .Values.global.configuration.logFilename }}"
       priorityClassName: {{ .Values.global.serverlessPriorityClassName }}
