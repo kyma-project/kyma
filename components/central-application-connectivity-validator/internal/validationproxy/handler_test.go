@@ -286,8 +286,6 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 	})
 
 	t.Run("should rewrite 5xx codes", func(t *testing.T) {
-		const mockIncomingRequestHost = "fake.istio.gateway"
-		const eventTitle = "my-event"
 		eventPublisherProxyHandler := mux.NewRouter()
 		eventPublisherProxyServer := httptest.NewServer(eventPublisherProxyHandler)
 		eventPublisherProxyHost := strings.TrimPrefix(eventPublisherProxyServer.URL, "http://")
