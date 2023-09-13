@@ -310,9 +310,6 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 		// given
 		appData := controller.CachedAppData{
 			AppPathPrefixV1: fmt.Sprintf("/%s/v1/events", application.Name),
-			// AppPathPrefixV2:     fmt.Sprintf("/%s/v2/events", application.Name),
-			// AppPathPrefixEvents: fmt.Sprintf("/%s/events", application.Name),
-			// TODO: is this correct? request has `/%s/v2/events`, but it goes to `/%s/v1/events`
 		}
 
 		idCache := cache.New(time.Minute, time.Minute)
