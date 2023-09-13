@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -255,8 +256,12 @@ func createReverseProxy(log *logger.Logger, destinationHost string, reqOpts ...r
 
 			log.WithTracing(request.Context()).With("handler", handlerName).With("targetURL", request.URL).Infof("Proxying request to target URL...")
 		},
-		ModifyResponse: func(response *http.Response) error {
-			log.WithContext().With("handler", handlerName).Infof("Host responded with status %s", response.Status)
+		ModifyResponse: func(res *http.Response) error {
+			log.WithContext().With("handler", handlerName).Infof("Host responded with status %s", res.Status)
+			if res.StatusCode >= 500 && res.StatusCode < 600 {
+				res.Header.Set("Target-System-Status", strconv.Itoa(res.StatusCode))
+				res.StatusCode = http.StatusBadGateway
+			}
 			return nil
 		},
 		Transport: &http.Transport{
