@@ -1678,7 +1678,7 @@ async function switchEventingBackend(secretName, namespace='default', backendTyp
 function waitForEventingBackendToReady(backendType='beb',
     name='eventing-backend',
     namespace = 'kyma-system',
-    timeout = 360000) {
+    timeout = 600000) {
   return waitForK8sObject(
       `/apis/eventing.kyma-project.io/v1alpha1/namespaces/${namespace}/eventingbackends`,
       {},
