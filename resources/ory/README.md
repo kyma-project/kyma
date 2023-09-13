@@ -8,4 +8,4 @@ This chart bootstraps [Oathkeeper](https://www.ory.sh/docs/oathkeeper/) componen
 
 ## Chart Details
 
-This chart installs two ORY oathkeepr component as subchart.
+This chart installs ORY Oathkeeper component as subchart.
