@@ -285,6 +285,77 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 		}
 	})
 
+	t.Run("should rewrite 5xx codes", func(t *testing.T) {
+		const mockIncomingRequestHost = "fake.istio.gateway"
+		const eventTitle = "my-event"
+		eventPublisherProxyHandler := mux.NewRouter()
+		eventPublisherProxyServer := httptest.NewServer(eventPublisherProxyHandler)
+		eventPublisherProxyHost := strings.TrimPrefix(eventPublisherProxyServer.URL, "http://")
+
+		application := applicationNotManagedByCompass
+
+		cert := `Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=test-application,OU=OrgUnit,O=Organization,L=Waldorf,ST=Waldorf,C=DE";` +
+			`URI=,By=spiffe://cluster.local/ns/kyma-system/sa/default;` +
+			`Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject="";` +
+			`URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account`
+
+		// publish handler which are overwritten in the tests
+		var publishHandler http.HandlerFunc
+		eventPublisherProxyHandler.Path(eventingPathPrefixEvents).HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+			publishHandler.ServeHTTP(writer, request)
+		})
+
+		eventPublisherProxyHandler.PathPrefix(eventingDestinationPathPublish).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			var receivedEvent event
+
+			err := json.NewDecoder(r.Body).Decode(&receivedEvent)
+			require.NoError(t, err)
+			assert.Equal(t, eventTitle, receivedEvent.Title)
+
+			assert.NotEqual(t, mockIncomingRequestHost, r.Host, "proxy should rewrite Host field")
+
+			w.WriteHeader(http.StatusInternalServerError)
+		})
+
+		// given
+		appData := controller.CachedAppData{
+			AppPathPrefixV1:     fmt.Sprintf("/%s/v1/events", application.Name),
+			AppPathPrefixV2:     fmt.Sprintf("/%s/v2/events", application.Name),
+			AppPathPrefixEvents: fmt.Sprintf("/%s/events", application.Name),
+		}
+
+		idCache := cache.New(time.Minute, time.Minute)
+		if application.Spec.CompassMetadata != nil {
+			appData.ClientIDs = []string{applicationID}
+		} else {
+			appData.ClientIDs = []string{}
+		}
+
+		idCache.Set(application.Name, appData, cache.NoExpiration)
+
+		proxyHandler := NewProxyHandler(
+			eventPublisherProxyHost,
+			eventingDestinationPathPublish,
+			idCache,
+			log)
+
+		body, err := json.Marshal(event{Title: eventTitle})
+		require.NoError(t, err)
+
+		req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("/%s/v2/events", application.Name), bytes.NewReader(body))
+		require.NoError(t, err)
+		req.Header.Set(CertificateInfoHeader, cert)
+		req = mux.SetURLVars(req, map[string]string{"application": application.Name})
+
+		recorder := httptest.NewRecorder()
+
+		// when
+		proxyHandler.ProxyAppConnectorRequests(recorder, req)
+
+		// then
+		assert.Equal(t, http.StatusBadGateway, recorder.Code)
+	})
+
 	t.Run("should return 404 failed when cache doesn't contain the element", func(t *testing.T) {
 		eventPublisherProxyHandler := mux.NewRouter()
 		eventPublisherProxyServer := httptest.NewServer(eventPublisherProxyHandler)
