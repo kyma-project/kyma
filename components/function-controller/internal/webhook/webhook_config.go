@@ -114,36 +114,3 @@ func (wc WebhookConfig) ToValidationConfig() v1alpha2.ValidationConfig {
 		},
 	}
 }
-
-func (wc WebhookConfig) ToDefaultingConfig() (v1alpha2.DefaultingConfig, error) {
-	cfg := v1alpha2.DefaultingConfig{
-		Runtime: v1alpha2.Runtime(wc.DefaultRuntime),
-		Function: v1alpha2.FunctionDefaulting{
-			Resources: v1alpha2.FunctionResourcesDefaulting{
-				DefaultPreset:  wc.Function.Resources.DefaultPreset,
-				Presets:        wc.Function.Resources.Presets.toDefaultingResourcePreset(),
-				RuntimePresets: wc.Function.Resources.RuntimePresets,
-			},
-		},
-		BuildJob: v1alpha2.BuildJobDefaulting{
-			Resources: v1alpha2.BuildJobResourcesDefaulting{
-				DefaultPreset: wc.BuildJob.Resources.DefaultPreset,
-				Presets:       wc.BuildJob.Resources.Presets.toDefaultingResourcePreset(),
-			},
-		},
-	}
-	return cfg, nil
-}
-
-func (rp ResourcePreset) toDefaultingResourcePreset() map[string]v1alpha2.ResourcesPreset {
-	out := map[string]v1alpha2.ResourcesPreset{}
-	for k, v := range rp {
-		out[k] = v1alpha2.ResourcesPreset{
-			RequestCPU:    v.RequestCpu,
-			RequestMemory: v.RequestMemory,
-			LimitCPU:      v.LimitCpu,
-			LimitMemory:   v.LimitMemory,
-		}
-	}
-	return out
-}
