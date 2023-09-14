@@ -264,7 +264,13 @@ func (s *systemState) buildJobExecutorContainer(cfg cfg, volumeMounts []corev1.V
 }
 
 func getBuildResourceRequirements(instance serverlessv1alpha2.Function, cfg cfg) corev1.ResourceRequirements {
-	presets := cfg.fn.ResourceConfiguration.BuildJob.Resources.Presets.ToResourceRequirements()
+	rtmPresets, found := cfg.fn.ResourceConfiguration.BuildJob.Resources.RuntimePresets[string(instance.Spec.Runtime)]
+	var presets map[string]corev1.ResourceRequirements
+	if found {
+		presets = rtmPresets.ToResourceRequirements()
+	} else {
+		presets = cfg.fn.ResourceConfiguration.BuildJob.Resources.Presets.ToResourceRequirements()
+	}
 	if instance.Spec.ResourceConfiguration != nil {
 		return instance.Spec.ResourceConfiguration.Build.EffectiveResource(
 			cfg.fn.ResourceConfiguration.BuildJob.Resources.DefaultPreset,
@@ -530,7 +536,13 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs, resourceConfig Re
 }
 
 func getDeploymentResources(instance serverlessv1alpha2.Function, resourceCfg Resources) corev1.ResourceRequirements {
-	presets := resourceCfg.Presets.ToResourceRequirements()
+	rtmPresets, found := resourceCfg.RuntimePresets[string(instance.Spec.Runtime)]
+	var presets map[string]corev1.ResourceRequirements
+	if found {
+		presets = rtmPresets.ToResourceRequirements()
+	} else {
+		presets = resourceCfg.Presets.ToResourceRequirements()
+	}
 	if instance.Spec.ResourceConfiguration != nil {
 		return instance.Spec.ResourceConfiguration.Build.EffectiveResource(
 			resourceCfg.DefaultPreset,

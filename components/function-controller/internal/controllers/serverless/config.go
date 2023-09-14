@@ -58,11 +58,14 @@ type BuildJobResourceConfig struct {
 }
 
 type Resources struct {
-	Presets            Preset   `yaml:"presets"`
-	DefaultPreset      string   `yaml:"defaultPreset"`
-	MinRequestedCPU    Quantity `yaml:"minRequestedCPU"`
-	MinRequestedMemory Quantity `yaml:"minRequestedMemory"`
+	Presets            Preset         `yaml:"presets"`
+	RuntimePresets     RuntimePresets `yaml:"runtimePresets"`
+	DefaultPreset      string         `yaml:"defaultPreset"`
+	MinRequestedCPU    Quantity       `yaml:"minRequestedCPU"`
+	MinRequestedMemory Quantity       `yaml:"minRequestedMemory"`
 }
+
+type RuntimePresets map[string]Preset
 
 type Preset map[string]Resource
 

@@ -90,6 +90,7 @@ func TestFunctionReconciler_buildDeployment(t *testing.T) {
 			args: args{
 				instance: newFixFunction("ns", "name", 1, 2),
 			},
+			//	TODO: add test for resources
 		},
 	}
 	for _, tt := range tests {
