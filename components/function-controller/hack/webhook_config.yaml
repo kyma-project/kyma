@@ -6,8 +6,6 @@ reservedEnvs:
   - "NODE_PATH"
   - "PYTHONPATH" # https://github.com/kubeless/runtimes/blob/master/stable/nodejs/kubeless.js;https://github.com/kubeless/runtimes/tree/master/stable/python
 function:
-  replicas:
-    minValue: "1"
   resources:
     minRequestCpu: "10m"
     minRequestMemory: "16Mi"

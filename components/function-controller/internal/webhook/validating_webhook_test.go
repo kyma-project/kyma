@@ -223,9 +223,6 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 func fixValidationConfig() serverlessv1alpha2.ValidationConfig {
 	return serverlessv1alpha2.ValidationConfig{
 		Function: serverlessv1alpha2.MinFunctionValues{
-			Replicas: serverlessv1alpha2.MinFunctionReplicasValues{
-				MinValue: int32(1),
-			},
 			Resources: serverlessv1alpha2.MinFunctionResourcesValues{
 				MinRequestCPU:    "10m",
 				MinRequestMemory: "16Mi",

@@ -190,6 +190,7 @@ spec:
                   by the relevant HorizontalPodAutoscaler to control the number of
                   active replicas.
                 format: int32
+                minimum: 0
                 type: integer
               resourceConfiguration:
                 description: Specifies resources requested by the Function and the
