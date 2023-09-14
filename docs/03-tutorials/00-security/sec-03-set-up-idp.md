@@ -47,6 +47,12 @@ k3d cluster create kyma \
 For managed Kubernetes, see the documentation related to your provider.
 For example, if you use Gardener as a managed Kubernetes offering, see the [OIDC Preset](https://github.com/gardener/gardener/blob/master/docs/usage/openidconnect-presets.md) documentation.
 
+### Configure role-based access to identities provided by your OIDC server
+
+Including the JWT token in the call to the API server, enables the API server to validate and extract the associated identity from the **username** and **group** claims of the JWT token.
+
+Now, define which individuals or groups should have access to which Kyma resources. The default setup does not provide access to any. You need to model permissions using the [RBAC concept](https://kubernetes.io/docs/reference/access-authn-authz/rbac/).
+
 ### Configure kubectl access
 
 With this step, you will set up the OIDC provider in the `kubeconfig` file to enforce authentication flow when accessing Kyma using `kubectl`.
