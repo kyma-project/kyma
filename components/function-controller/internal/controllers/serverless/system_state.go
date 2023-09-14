@@ -247,7 +247,7 @@ func (s *systemState) buildJobExecutorContainer(cfg cfg, volumeMounts []corev1.V
 			fmt.Sprintf("--build-arg=base_image=%s", s.instance.Spec.RuntimeImageOverride))
 	}
 
-	resourceRequirements := s.getBuildResourceRequirements(cfg)
+	resourceRequirements := getBuildResourceRequirements(s.instance, cfg)
 
 	return corev1.Container{
 		Name:            "executor",
@@ -263,11 +263,10 @@ func (s *systemState) buildJobExecutorContainer(cfg cfg, volumeMounts []corev1.V
 	}
 }
 
-func (s *systemState) getBuildResourceRequirements(cfg cfg) corev1.ResourceRequirements {
+func getBuildResourceRequirements(instance serverlessv1alpha2.Function, cfg cfg) corev1.ResourceRequirements {
 	presets := cfg.fn.ResourceConfiguration.BuildJob.Resources.Presets.ToResourceRequirements()
-	if s.instance.Spec.ResourceConfiguration != nil &&
-		s.instance.Spec.ResourceConfiguration.Build != nil {
-		return s.instance.Spec.ResourceConfiguration.Build.EffectiveResource(
+	if instance.Spec.ResourceConfiguration != nil {
+		return instance.Spec.ResourceConfiguration.Build.EffectiveResource(
 			cfg.fn.ResourceConfiguration.BuildJob.Resources.DefaultPreset,
 			presets)
 	}
@@ -448,9 +447,8 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs, resourceConfig Re
 			ReadOnly:  false,
 		},
 	}
-	var resources = getDeploymentResources(s.instance, resourceConfig)
-
 	volumeMounts = append(volumeMounts, secretVolumeMounts...)
+
 	templateSpec := corev1.PodSpec{
 		Volumes: volumes,
 		Containers: []corev1.Container{
@@ -458,7 +456,7 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs, resourceConfig Re
 				Name:         functionContainerName,
 				Image:        imageName,
 				Env:          envs,
-				Resources:    resources,
+				Resources:    getDeploymentResources(s.instance, resourceConfig),
 				VolumeMounts: volumeMounts,
 				/*
 					In order to mark pod as ready we need to ensure the function is actually running and ready to serve traffic.
