@@ -10,4 +10,4 @@ spec:
     matchLabels: {{- include "controller.peerAuth.selectorLabels" . | nindent 6 }}
   portLevelMtls:
     {{ .Values.metrics.config.port }}:
-      mode: STRICT
+      mode: PERMISSIVE
