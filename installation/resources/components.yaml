@@ -6,7 +6,6 @@ prerequisites:
   - name: "certificates"
     namespace: "istio-system"
 components:
-  - name: "istio-resources"
   - name: "telemetry"
   - name: "monitoring"
   - name: "eventing"
