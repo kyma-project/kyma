@@ -5,6 +5,7 @@ metadata:
   labels: {{- include "controller.labels" . | nindent 4 }}
   annotations:
     prometheus.io/scrape: "true"
+    prometheus.io/scheme: http
     prometheus.io/port: {{ .Values.metrics.config.port | quote }}
 spec:
   type: ClusterIP
