@@ -1,6 +1,9 @@
-name: PR Markdown Link Check
+name: Lint Markdown Links Daily
 run-name: ${{github.event.pull_request.title}}
-on: [ pull_request ]
+on:
+    schedule:
+    # Run everyday at 5:00 AM
+    - cron: "0 5 * * *"
 jobs:
   markdown-link-check:
     runs-on: ubuntu-latest
@@ -13,5 +16,3 @@ jobs:
           config-file: '.mlc.config.json'
           folder-path: '.'
           max-depth: -1
-          check-modified-files-only: 'yes'
-          base-branch: 'main'
