@@ -78,7 +78,6 @@ func Test_Reconcile(t *testing.T) {
 			givenSubscription: testSub,
 			givenReconcilerSetup: func() (*Reconciler, *mocks.Backend) {
 				te := setupTestEnvironment(t, testSub)
-				te.Backend.On("Initialize", mock.Anything).Return(nil)
 				te.Backend.On("SyncSubscription", mock.Anything).Return(nil)
 				te.Backend.On("GetJetStreamSubjects", mock.Anything, mock.Anything, mock.Anything).Return(
 					[]string{controllertesting.JetStreamSubject})
@@ -101,7 +100,6 @@ func Test_Reconcile(t *testing.T) {
 			givenSubscription: testSub,
 			givenReconcilerSetup: func() (*Reconciler, *mocks.Backend) {
 				te := setupTestEnvironment(t)
-				te.Backend.On("Initialize", mock.Anything).Return(nil)
 				return NewReconciler(ctx,
 						te.Client,
 						te.Backend,
@@ -120,7 +118,6 @@ func Test_Reconcile(t *testing.T) {
 			givenSubscription: controllertesting.NewSubscription(subscriptionName, namespaceName),
 			givenReconcilerSetup: func() (*Reconciler, *mocks.Backend) {
 				te := setupTestEnvironment(t, controllertesting.NewSubscription(subscriptionName, namespaceName))
-				te.Backend.On("Initialize", mock.Anything).Return(nil)
 				return NewReconciler(ctx,
 						te.Client,
 						te.Backend,
@@ -139,7 +136,6 @@ func Test_Reconcile(t *testing.T) {
 			givenSubscription: testSub,
 			givenReconcilerSetup: func() (*Reconciler, *mocks.Backend) {
 				te := setupTestEnvironment(t, testSub)
-				te.Backend.On("Initialize", mock.Anything).Return(nil)
 				te.Backend.On("SyncSubscription", mock.Anything).Return(backendSyncErr)
 				te.Backend.On("GetJetStreamSubjects", mock.Anything, mock.Anything, mock.Anything).Return(
 					[]string{controllertesting.JetStreamSubject})
@@ -164,7 +160,6 @@ func Test_Reconcile(t *testing.T) {
 			givenSubscription: testSub,
 			givenReconcilerSetup: func() (*Reconciler, *mocks.Backend) {
 				te := setupTestEnvironment(t, testSub)
-				te.Backend.On("Initialize", mock.Anything).Return(nil)
 				te.Backend.On("SyncSubscription", mock.Anything).Return(missingSubSyncErr)
 				te.Backend.On("GetJetStreamSubjects", mock.Anything, mock.Anything, mock.Anything).Return(
 					[]string{controllertesting.JetStreamSubject})
@@ -187,7 +182,6 @@ func Test_Reconcile(t *testing.T) {
 			givenSubscription: testSubUnderDeletion,
 			givenReconcilerSetup: func() (*Reconciler, *mocks.Backend) {
 				te := setupTestEnvironment(t, testSubUnderDeletion)
-				te.Backend.On("Initialize", mock.Anything).Return(nil)
 				te.Backend.On("DeleteSubscription", mock.Anything).Return(backendDeleteErr)
 				return NewReconciler(ctx,
 						te.Client,
@@ -207,7 +201,6 @@ func Test_Reconcile(t *testing.T) {
 			givenSubscription: testSub,
 			givenReconcilerSetup: func() (*Reconciler, *mocks.Backend) {
 				te := setupTestEnvironment(t, testSub)
-				te.Backend.On("Initialize", mock.Anything).Return(nil)
 				te.Backend.On("DeleteSubscriptionsOnly", mock.Anything).Return(nil)
 				te.Backend.On("GetJetStreamSubjects", mock.Anything, mock.Anything, mock.Anything).Return(
 					[]string{controllertesting.JetStreamSubject})
