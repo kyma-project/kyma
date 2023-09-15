@@ -190,9 +190,7 @@ spec:
     - path: /function
       methods: ["GET", "POST"]
       accessStrategies:
-        - handler: oauth2_introspection
-          config:
-            required_scope: ["read"]
+        - handler: allow
     - path: /.*
       methods: ["GET", "POST"]
       accessStrategies:

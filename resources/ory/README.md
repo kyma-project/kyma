@@ -4,10 +4,8 @@
 
 ## Introduction
 
-This chart bootstraps [Hydra](https://www.ory.sh/docs/hydra/) and [Oathkeeper](https://www.ory.sh/docs/oathkeeper/) components on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
+This chart bootstraps the [Oathkeeper](https://www.ory.sh/docs/oathkeeper/) component on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
 
 ## Chart Details
 
-This chart installs two ORY components as subcharts:
-- hydra
-- oathkeeper
+This chart installs the ORY Oathkeeper component as a subchart.

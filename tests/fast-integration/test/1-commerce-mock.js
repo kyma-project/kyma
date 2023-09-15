@@ -29,7 +29,7 @@ function commerceMockTests(testNamespace) {
       await checkInClusterEventDelivery(testNamespace);
     });
 
-    it('function should be reachable through secured API Rule', async function() {
+    it('function should be reachable through API Rule', async function() {
       await checkFunctionResponse(testNamespace);
     });
 
