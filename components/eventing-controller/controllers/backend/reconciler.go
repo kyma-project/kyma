@@ -66,7 +66,7 @@ const (
 	secretKeyTokenURL     = "token_url"
 	secretKeyCertsURL     = "certs_url"
 
-	thirtySeconds = 30 * time.Second
+	reconcileInterval = 30 * time.Second
 )
 
 var (
@@ -216,7 +216,7 @@ func (r *Reconciler) reconcileNATSBackend(ctx context.Context, backendStatus *ev
 			return ctrl.Result{}, errors.Wrapf(err, "failed to update status while starting NATS controller")
 		}
 		r.namedLogger().Errorf("failed to start NATS controller: %v", err)
-		return ctrl.Result{RequeueAfter: thirtySeconds}, nil
+		return ctrl.Result{RequeueAfter: reconcileInterval}, nil
 	}
 
 	// Delete secret for publisher proxy if it exists
