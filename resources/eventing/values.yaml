@@ -5,7 +5,7 @@ global:
   images:
     eventing_controller:
       name: eventing-controller
-      version: PR-18175
+      version: PR-18183
       directory: dev
       pullPolicy: "IfNotPresent"
     publisher_proxy:
