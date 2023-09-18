@@ -20,7 +20,7 @@ type FunctionConfig struct {
 	RequeueDuration                             time.Duration  `envconfig:"default=1m"`
 	FunctionReadyRequeueDuration                time.Duration  `envconfig:"default=5m"`
 	GitFetchRequeueDuration                     time.Duration  `envconfig:"default=30s"`
-	ResourceConfiguration                       ResourceConfig `envconfig:"optional"`
+	ResourceConfig                              ResourceConfig `envconfig:"optional"`
 	Build                                       BuildConfig
 }
 
