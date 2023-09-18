@@ -10,17 +10,17 @@ import (
 )
 
 type FunctionConfig struct {
-	PublisherProxyAddress                       string                `envconfig:"optional"`
-	TraceCollectorEndpoint                      string                `envconfig:"optional"`
-	ImageRegistryDefaultDockerConfigSecretName  string                `envconfig:"default=serverless-registry-config-default"`
-	ImageRegistryExternalDockerConfigSecretName string                `envconfig:"default=serverless-registry-config"`
-	PackageRegistryConfigSecretName             string                `envconfig:"default=serverless-package-registry-config"`
-	ImagePullAccountName                        string                `envconfig:"default=serverless-function"`
-	TargetCPUUtilizationPercentage              int32                 `envconfig:"default=50"`
-	RequeueDuration                             time.Duration         `envconfig:"default=1m"`
-	FunctionReadyRequeueDuration                time.Duration         `envconfig:"default=5m"`
-	GitFetchRequeueDuration                     time.Duration         `envconfig:"default=30s"`
-	ResourceConfiguration                       ResourceConfiguration `envconfig:"optional"`
+	PublisherProxyAddress                       string         `envconfig:"optional"`
+	TraceCollectorEndpoint                      string         `envconfig:"optional"`
+	ImageRegistryDefaultDockerConfigSecretName  string         `envconfig:"default=serverless-registry-config-default"`
+	ImageRegistryExternalDockerConfigSecretName string         `envconfig:"default=serverless-registry-config"`
+	PackageRegistryConfigSecretName             string         `envconfig:"default=serverless-package-registry-config"`
+	ImagePullAccountName                        string         `envconfig:"default=serverless-function"`
+	TargetCPUUtilizationPercentage              int32          `envconfig:"default=50"`
+	RequeueDuration                             time.Duration  `envconfig:"default=1m"`
+	FunctionReadyRequeueDuration                time.Duration  `envconfig:"default=5m"`
+	GitFetchRequeueDuration                     time.Duration  `envconfig:"default=30s"`
+	ResourceConfiguration                       ResourceConfig `envconfig:"optional"`
 	Build                                       BuildConfig
 }
 
@@ -37,14 +37,14 @@ type DockerConfig struct {
 	PullAddress                    string
 }
 
-type ResourceConfiguration struct {
+type ResourceConfig struct {
 	Function FunctionResourceConfig `yaml:"function"`
 	BuildJob BuildJobResourceConfig `yaml:"buildJob"`
 }
 
-var _ envconfig.Unmarshaler = &ResourceConfiguration{}
+var _ envconfig.Unmarshaler = &ResourceConfig{}
 
-func (rc *ResourceConfiguration) Unmarshal(input string) error {
+func (rc *ResourceConfig) Unmarshal(input string) error {
 	err := yaml.Unmarshal([]byte(input), rc)
 	return err
 }
