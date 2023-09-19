@@ -1,9 +1,0 @@
-apiVersion: telemetry.kyma-project.io/v1alpha1
-kind: TracePipeline
-metadata:
-  name: test-trace
-spec:
-  output:
-    otlp:
-      endpoint:
-        value: http://foo-bar

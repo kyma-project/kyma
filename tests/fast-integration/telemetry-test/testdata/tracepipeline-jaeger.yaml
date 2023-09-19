@@ -1,9 +1,0 @@
-apiVersion: telemetry.kyma-project.io/v1alpha1
-kind: TracePipeline
-metadata:
-  name: jaeger
-spec:
-  output:
-    otlp:
-      endpoint:
-        value: http://tracing-jaeger-collector.default.svc.cluster.local:4317
