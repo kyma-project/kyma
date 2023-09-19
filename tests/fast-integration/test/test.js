@@ -4,8 +4,6 @@ const {
 } = require('./');
 
 const {monitoringTests, unexposeGrafana} = require('../monitoring');
-const {loggingTests} = require('../logging');
-const {createIstioAccessLogResource} = require('../logging/client.js');
 const {cleanMockTestFixture} = require('./fixtures/commerce-mock');
 const {ensureCommerceMockLocalTestFixture} = require('../test/fixtures/commerce-mock');
 const {tracingTests} = require('../tracing');
@@ -26,10 +24,6 @@ describe('Executing Standard Testsuite:', function() {
     });
   });
 
-  before('Istio Accesslog Resource should be deployed', async function() {
-    await createIstioAccessLogResource();
-  });
-
   after('Test Cleanup: Test namespaces should be deleted', async function() {
     await cleanMockTestFixture(mockNamespace, testNamespace, true);
   });
@@ -44,6 +38,5 @@ describe('Executing Standard Testsuite:', function() {
   // unusuble because of redis dependency that is not usable in the current form after SC migration
   // gettingStartedGuideTests();
 
-  loggingTests();
   tracingTests(testNamespace);
 });

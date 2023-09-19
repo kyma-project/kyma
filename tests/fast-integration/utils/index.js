@@ -1886,12 +1886,6 @@ async function deployJaeger(jaegerObj) {
   await sleep(20 * 1000); // give istio some time to propagate the changes to the proxies
 }
 
-async function deployLoki(lokiObj) {
-  await k8sApply(lokiObj, 'kyma-system').catch(console.error);
-  await waitForStatefulSet('logging-loki-test', 'kyma-system');
-  await sleep(20 * 1000); // give istio some time to propagate the changes to the proxies
-}
-
 module.exports = {
   initializeK8sClient,
   getShootNameFromK8sServerUrl,
@@ -1990,5 +1984,4 @@ module.exports = {
   getSubscription,
   deployJaeger,
   waitForTracePipeline,
-  deployLoki,
 };

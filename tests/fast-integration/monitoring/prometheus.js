@@ -124,12 +124,6 @@ async function assertMetricsExist() {
     },
 
     {
-      'logging-loki': [
-        {'log_messages_total': [['level']]},
-        {'loki_request_duration_seconds_bucket': [['route']]}],
-    },
-
-    {
       'monitoring-grafana': [
         {'grafana_stat_totals_dashboard': [[]]},
         {'grafana_api_dataproxy_request_all_milliseconds_sum ': [['pod']]}],
@@ -279,9 +273,6 @@ function removeNamePrefixes(ruleNames) {
     rule
         .replace('monitoring-', '')
         .replace('kyma-', '')
-        .replace('logging-', '')
-        .replace('fluent-bit-', '')
-        .replace('loki-', ''),
   );
 }
 
