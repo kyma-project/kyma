@@ -59,7 +59,7 @@ spec:
             - name: APP_CERT_VALIDITY_RENEWAL_THRESHOLD
               value: {{ .Values.compassRuntimeAgent.certificates.renewal.validityThreshold | quote }}
             - name: APP_CLUSTER_CERTIFICATES_SECRET
-              value: "{{ .Values.compassRuntimeAgent.certificates.clientCertificate.secret.namespace }}/{{ .Values.compassRuntimeAgent.certificates.clientCertificate.secret.name }}"
+              value: "{{ .Values.compassRuntimeAgent.certificates.clientCertificate.secret.namespace }}/{{ .Values.compassRuntimeAgent.certificates.clientCertificate.secret.na~~~me }}"
             - name: APP_CA_CERTIFICATES_SECRET
               value: "{{ .Values.compassRuntimeAgent.certificates.caCertificate.secret.namespace }}/{{ .Values.compassRuntimeAgent.certificates.caCertificate.secret.name }}"
             - name: APP_SKIP_COMPASS_TLS_VERIFY

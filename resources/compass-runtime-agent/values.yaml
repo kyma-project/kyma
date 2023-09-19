@@ -13,8 +13,6 @@ global:
       namespace: kyma-system
   skrConfigmapNamespace: kyma-system
 
-managementPlane: {} # default value
-
 priorityClassName: "compass-runtime-agent-priority-class"
 
 compassRuntimeAgent:
@@ -25,8 +23,6 @@ compassRuntimeAgent:
     minimalConfigSyncTime: 15s
   resources:
     systemNamespace: "kyma-system"
-    dexSecretNamespace: "kyma-system"
-    dexSecretName: "admin-user"
     gatewayPort: 8080
     centralGatewayServiceUrl: http://central-application-gateway.kyma-system.svc.cluster.local:8082
   config:
@@ -37,7 +33,7 @@ compassRuntimeAgent:
       namespace: kyma-system
       migration:
         namespace: compass-system
-        enabled: true
+        enabled: false
   certificates:
     renewal:
       validityThreshold: "0.3"
@@ -47,7 +43,7 @@ compassRuntimeAgent:
         namespace: kyma-system
         migration:
           namespace: compass-system
-          enabled: true
+          enabled: false
     caCertificate:
       secret:
         name: kyma-gateway-certs-cacert
@@ -68,21 +64,6 @@ compassRuntimeAgent:
   healthCheck:
     port: 8090
     proxyStatusPort: 15020
-  tests:
-    labels:
-      integration: true
-      after-upgrade: true
-    enabled: true
-    mockService:
-      port: 8080
-    configApplicationWaitTime: 50s
-    proxyInvalidationWaitTime: 120s
-    applicationInstallationTimeout: 180s
-    graphqlLogs: false
-    director:
-      url: "https://compass-gateway.{{ .Values.global.domainName }}/director/graphql"
-    idProvider:
-      clientTimeout: 10s
   livenessProbe:
     initialDelaySeconds: 50
     timeoutSeconds: 1

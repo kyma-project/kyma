@@ -1,5 +1,3 @@
-central_application_gateway:
-  enabled: true
 
 global:
   domainName: kyma.example.com
@@ -15,12 +13,6 @@ global:
     runAsUser: 1000
     privileged: false
     allowPrivilegeEscalation: false
-  ingress:
-    domainName: "TBD"
-  helm:
-    tls:
-      crt: "TBD"
-      key: "TBD"
   istio:
     gateway:
       name: kyma-gateway
@@ -37,7 +29,3 @@ global:
       name: "central-application-gateway"
       version: "PR-18016"
       directory: "dev"
-    busybox:
-      name: "busybox"
-      version: "1.34.1-v1"
-      directory: "prod/external"

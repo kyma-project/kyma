@@ -8,9 +8,7 @@ deployment:
     proxyPort: &proxyPort 8080
     proxyPortCompass: &proxyPortCompass 8082
     proxyTimeout: 10
-    requestLogging: false
     requestTimeout: 10
-    skipVerify: false
   resources:
     limits:
       cpu: 500m

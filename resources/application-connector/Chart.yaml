@@ -8,4 +8,3 @@ dependencies:
   - name: central-application-connectivity-validator
     condition: global.disableLegacyConnectivity
   - name: central-application-gateway
-    condition: central_application_gateway.enabled
