@@ -272,7 +272,7 @@ function removeNamePrefixes(ruleNames) {
   return ruleNames.map((rule) =>
     rule
         .replace('monitoring-', '')
-        .replace('kyma-', '')
+        .replace('kyma-', ''),
   );
 }
 
