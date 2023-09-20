@@ -57,7 +57,6 @@
 /resources/serverless @kyma-project/Otters
 /resources/telemetry @kyma-project/observability
 
-/resources/keda-manager @kyma-project/Otters
 /resources/btp-manager @kyma-project/gopher
 
 # Fast Integration Tests
