@@ -18,8 +18,8 @@ To develop the Function Controller, you need:
 
 To develop the component, use the formulae declared in the [Makefile](./Makefile).
 
-To run manager and setup envs correctly,  source [controller.env](./hack/controller.env). 
-You can customize configuration by editing files in [hack](./hack) dir. 
+To run the manager and set up envs correctly, source [controller.env](./hack/controller.env). 
+You can customize the configuration by editing files in [hack](./hack) dir. 
 
 
 ### Environment variables
