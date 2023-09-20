@@ -651,7 +651,7 @@ async function printContainerLogs(selector, container, namespace = 'default', ti
 function waitForVirtualService(namespace, apiRuleName, timeout = 30_000) {
   const path = `/apis/networking.istio.io/v1beta1/namespaces/${namespace}/virtualservices`;
   const query = {
-    labelSelector: `apirule.gateway.kyma-project.io/v1alpha1=${apiRuleName}.${namespace}`,
+    labelSelector: `apirule.gateway.kyma-project.io/v1beta1=${apiRuleName}.${namespace}`,
   };
   return waitForK8sObject(
       path,

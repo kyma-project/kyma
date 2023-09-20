@@ -764,7 +764,7 @@ function getResourcePaths(namespace) {
   return [
     `/apis/serverless.kyma-project.io/v1alpha2/namespaces/${namespace}/functions`,
     `/apis/addons.kyma-project.io/v1alpha1/namespaces/${namespace}/addonsconfigurations`,
-    `/apis/gateway.kyma-project.io/v1alpha1/namespaces/${namespace}/apirules`,
+    `/apis/gateway.kyma-project.io/v1beta1/namespaces/${namespace}/apirules`,
     `/apis/apps/v1/namespaces/${namespace}/deployments`,
     `/api/v1/namespaces/${namespace}/services`,
   ];
