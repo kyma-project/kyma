@@ -1,8 +1,10 @@
 package featureflags
 
+const FalseValue = false
+
 //nolint:gochecknoglobals // This is global only inside the package.
 var f = &flags{
-	eventingWebhookAuthEnabled: false,
+	eventingWebhookAuthEnabled: FalseValue,
 }
 
 type flags struct {
