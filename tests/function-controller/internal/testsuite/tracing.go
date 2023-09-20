@@ -76,7 +76,7 @@ func FunctionTracingTest(restConfig *rest.Config, cfg internal.Config, logf *log
 		DataKey:            internal.TestDataKey,
 	}
 	return executor.NewSerialTestRunner(logf, "Runtime test",
-		namespace.NewNamespaceStep(logf, "Create test namespace", genericContainer.Namespace, coreCli),
+		namespace.NewNamespaceStep(logf, fmt.Sprintf("Create %s namespace", genericContainer.Namespace), genericContainer.Namespace, coreCli),
 		app.NewApplication("Create HTTP basic application", HTTPAppName, HTTPAppImage, int32(80), appsCli.Deployments(genericContainer.Namespace), coreCli.Services(genericContainer.Namespace), genericContainer),
 		executor.NewParallelRunner(logf, "Fn tests",
 			executor.NewSerialTestRunner(python39Logger, "Python39 test",

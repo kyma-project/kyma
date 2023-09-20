@@ -395,3 +395,17 @@ func (l *Condition) Equal(r *Condition) bool {
 	}
 	return true
 }
+
+func (rc *ResourceRequirements) EffectiveResource(defaultProfile string, profiles map[string]v1.ResourceRequirements) v1.ResourceRequirements {
+	if rc == nil {
+		return profiles[defaultProfile]
+	}
+	profileResources, found := profiles[rc.Profile]
+	if found {
+		return profileResources
+	}
+	if rc.Resources != nil {
+		return *rc.Resources
+	}
+	return profiles[defaultProfile]
+}

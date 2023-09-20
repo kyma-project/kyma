@@ -41,8 +41,6 @@ type DefaultingConfig struct {
 }
 
 func (fn *Function) Default(config *DefaultingConfig) {
-	fn.Spec.defaultFunctionResources(config, fn)
-	fn.Spec.defaultBuildResources(config, fn)
 }
 
 func (spec *FunctionSpec) defaultFunctionResources(config *DefaultingConfig, fn *Function) {

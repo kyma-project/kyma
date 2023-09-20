@@ -61,8 +61,7 @@ func FunctionCloudEventsTest(restConfig *rest.Config, cfg internal.Config, logf 
 	logf.Infof("Testing function in namespace: %s", cfg.Namespace)
 
 	return executor.NewSerialTestRunner(logf, "Runtime test",
-		namespace.NewNamespaceStep(logf, "Create test namespace", genericContainer.Namespace, coreCli),
-		namespace.NewNamespaceStep(logf, "Create publisher proxy mock namespace", "kyma-system", coreCli),
+		namespace.NewNamespaceStep(logf, fmt.Sprintf("Create %s namespace", genericContainer.Namespace), genericContainer.Namespace, coreCli),
 		function.CreateFunction(logf, publisherProxyMock, "Create publisher proxy mock", runtimes.PythonPublisherProxyMock()),
 		app.NewApplication("Create HTTP basic application", HTTPAppName, HTTPAppImage, int32(80), appsCli.Deployments(genericContainer.Namespace), coreCli.Services(genericContainer.Namespace), genericContainer),
 		executor.NewParallelRunner(logf, "Fn tests",

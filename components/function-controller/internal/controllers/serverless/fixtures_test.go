@@ -78,12 +78,6 @@ func newTestGitFunction(namespace, name string, auth *serverlessv1alpha2.Reposit
 	}
 }
 
-func newFixFunctionWithCustomImage(namespace, name, runtimeImageOverride string, minReplicas, maxReplicas int) *serverlessv1alpha2.Function {
-	fn := newFixFunction(namespace, name, minReplicas, maxReplicas)
-	fn.Spec.RuntimeImageOverride = runtimeImageOverride
-	return fn
-}
-
 func newFixFunction(namespace, name string, minReplicas, maxReplicas int) *serverlessv1alpha2.Function {
 	one := int32(minReplicas)
 	two := int32(maxReplicas)
@@ -113,11 +107,6 @@ func newFixFunction(namespace, name string, minReplicas, maxReplicas int) *serve
 					Value: "VAL_2",
 				},
 			},
-			ResourceConfiguration: &serverlessv1alpha2.ResourceConfiguration{
-				Function: &serverlessv1alpha2.ResourceRequirements{
-					Resources: &corev1.ResourceRequirements{},
-				},
-			},
 			ScaleConfig: &serverlessv1alpha2.ScaleConfig{
 				MinReplicas: &one,
 				MaxReplicas: &two,
@@ -142,6 +131,50 @@ func newFixFunction(namespace, name string, minReplicas, maxReplicas int) *serve
 			},
 		},
 	}
+}
+
+func newFixFunctionWithCustomImage(namespace, name, runtimeImageOverride string, minReplicas, maxReplicas int) *serverlessv1alpha2.Function {
+	fn := newFixFunction(namespace, name, minReplicas, maxReplicas)
+	fn.Spec.RuntimeImageOverride = runtimeImageOverride
+	return fn
+}
+
+func newFixFunctionWithFunctionResourceProfile(namespace, name, profile string) *serverlessv1alpha2.Function {
+	fn := newFixFunction(namespace, name, 1, 1)
+	fn.Spec.ResourceConfiguration = &serverlessv1alpha2.ResourceConfiguration{
+		Function: &serverlessv1alpha2.ResourceRequirements{Profile: profile},
+	}
+	return fn
+}
+
+func newFixFunctionWithBuildResourceProfile(namespace, name, profile string) *serverlessv1alpha2.Function {
+	fn := newFixFunction(namespace, name, 1, 1)
+	fn.Spec.ResourceConfiguration = &serverlessv1alpha2.ResourceConfiguration{
+		Build: &serverlessv1alpha2.ResourceRequirements{Profile: profile},
+	}
+	return fn
+}
+
+func newFixFunctionWithRuntime(namespace, name string, runtime serverlessv1alpha2.Runtime) *serverlessv1alpha2.Function {
+	fn := newFixFunction(namespace, name, 1, 1)
+	fn.Spec.Runtime = runtime
+	return fn
+}
+
+func newFixFunctionWithCustomFunctionResource(namespace, name string, resources *corev1.ResourceRequirements) *serverlessv1alpha2.Function {
+	fn := newFixFunction(namespace, name, 1, 1)
+	fn.Spec.ResourceConfiguration = &serverlessv1alpha2.ResourceConfiguration{
+		Function: &serverlessv1alpha2.ResourceRequirements{Resources: resources},
+	}
+	return fn
+}
+
+func newFixFunctionWithCustomBuildResource(namespace, name string, resources *corev1.ResourceRequirements) *serverlessv1alpha2.Function {
+	fn := newFixFunction(namespace, name, 1, 1)
+	fn.Spec.ResourceConfiguration = &serverlessv1alpha2.ResourceConfiguration{
+		Build: &serverlessv1alpha2.ResourceRequirements{Resources: resources},
+	}
+	return fn
 }
 
 func newTestSecret(name, namespace string, stringData map[string]string) *corev1.Secret {

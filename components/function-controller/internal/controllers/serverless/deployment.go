@@ -46,7 +46,7 @@ func stateFnCheckDeployments(ctx context.Context, r *reconciler, s *systemState)
 		ImagePullAccountName:   r.cfg.fn.ImagePullAccountName,
 	}
 
-	expectedDeployment := s.buildDeployment(args)
+	expectedDeployment := s.buildDeployment(args, r.cfg.fn.ResourceConfig.Function.Resources)
 	if len(s.deployments.Items) == 0 {
 		return buildStateFnCreateDeployment(expectedDeployment), nil
 	}
@@ -151,7 +151,7 @@ func stateFnUpdateDeploymentStatus(ctx context.Context, r *reconciler, s *system
 			Status:             corev1.ConditionUnknown,
 			LastTransitionTime: metav1.Now(),
 			Reason:             serverlessv1alpha2.ConditionReasonMinReplicasNotAvailable,
-			Message:            fmt.Sprintf("Minimum replcas not available for deployment %s", deploymentName),
+			Message:            fmt.Sprintf("Minimum replicas not available for deployment %s", deploymentName),
 		}
 
 		return buildStatusUpdateStateFnWithCondition(condition), nil
