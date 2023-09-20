@@ -26,7 +26,6 @@ type Config struct {
 	SkipAppsTLSVerify                  bool          `envconfig:"default=false"`
 	CentralGatewayServiceUrl           string        `envconfig:"default=http://central-application-gateway.kyma-system.svc.cluster.local:8082"`
 	QueryLogging                       bool          `envconfig:"default=false"`
-	DirectorProxy                      director.ProxyConfig
 	MetricsLoggingTimeInterval         time.Duration `envconfig:"default=30m"`
 	HealthPort                         string        `envconfig:"default=8090"`
 	IntegrationNamespace               string        `envconfig:"default=kyma-system"`
@@ -45,7 +44,7 @@ func (o *Config) String() string {
 		"SkipAppTLSVerify=%v, "+
 		"QueryLogging=%v, MetricsLoggingTimeInterval=%s, "+
 		"RuntimeEventsURL=%s, RuntimeConsoleURL=%s, "+
-		"DirectorProxyPort=%v,  DirectorProxyInsecureSkipVerify=%v, HealthPort=%s, IntegrationNamespace=%s, CaCertSecretToMigrate=%s, caCertificateSecretKeysToMigrate=%s, "+
+		"HealthPort=%s, IntegrationNamespace=%s, CaCertSecretToMigrate=%s, caCertificateSecretKeysToMigrate=%s, "+
 		"ClusterCertificatesSecretToMigrate=%s, AgentConfigurationSecretToMigrate=%s, "+
 		"CentralGatewayServiceUrl=%v",
 		o.AgentConfigurationSecret,
@@ -55,7 +54,7 @@ func (o *Config) String() string {
 		o.SkipAppsTLSVerify,
 		o.QueryLogging, o.MetricsLoggingTimeInterval,
 		o.Runtime.EventsURL, o.Runtime.ConsoleURL,
-		o.DirectorProxy.Port, o.DirectorProxy.InsecureSkipVerify, o.HealthPort, o.IntegrationNamespace, o.CaCertSecretToMigrate, o.CaCertSecretKeysToMigrate,
+		o.HealthPort, o.IntegrationNamespace, o.CaCertSecretToMigrate, o.CaCertSecretKeysToMigrate,
 		o.ClusterCertificatesSecretToMigrate, o.AgentConfigurationSecretToMigrate,
 		o.CentralGatewayServiceUrl)
 }

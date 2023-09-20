@@ -57,10 +57,6 @@ compassRuntimeAgent:
           keys: ["cacert"]
   compass:
     skipTLSVerification: true
-  director:
-    proxy:
-      port: 8081
-      insecureSkipVerify: true
   debug:
     queryLogging: false
   metrics:
