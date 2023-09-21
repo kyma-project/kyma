@@ -2,9 +2,7 @@
 global:
   domainName: kyma.example.com
   disableLegacyConnectivity: false
-  isLocalEnv: false
   systemNamespace: kyma-system
-  strictMode: disabled
   log:
     format: "json"
     level: "warn"
