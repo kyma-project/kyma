@@ -13,7 +13,7 @@ The Istio Resources Helm chart includes Kyma configuration of Istio and consists
 
 ## Prerequisites
 
-Installation of Istio Resources chart requires Kyma prerequisties, namely [`cluster essentials`](../cluster-essentials),[`istio`](../istio), and [`certificates`](../certificates), to be installed first.
+Installation of Istio Resources chart requires Kyma prerequisties, namely [`istio`](../istio), and [`certificates`](../certificates), to be installed first.
 
 ## Installation
 

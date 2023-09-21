@@ -41,4 +41,4 @@ As Kyma is built on top of Istio Service Mesh, service-to-service authentication
 
 ## User-to-service authentication
 
-Kyma uses a custom [API Gateway](../../01-overview/api-exposure/apix-01-api-gateway.md) component that is built on top of [ORY Oathkeeper](https://www.ory.sh/oathkeeper/docs/). The API Gateway allows exposing user applications within the Kyma environment and secures them if necessary. You can then access the secured resources using [authentication options](../../05-technical-reference/00-architecture/apix-01-architecture-apigateway.md#request-flow).
+Kyma uses a custom [API Gateway](../../01-overview/api-exposure/apix-01-api-gateway.md) component that is built on top of [ORY Oathkeeper](https://www.ory.sh/oathkeeper/docs/). The API Gateway allows exposing user applications within the Kyma environment and secures them if necessary. You can then access the secured resources using authentication options.
