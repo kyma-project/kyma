@@ -7,10 +7,6 @@ const conditionReady = {
   condition: 'Ready',
   status: 'True',
 };
-const telemetryOperatorLabel = {
-  key: 'control-plane',
-  value: 'telemetry-operator',
-};
 
 // returns the EventMesh namespace from the secret.
 function getEventMeshNamespace() {
@@ -32,6 +28,5 @@ module.exports = {
   natsBackend,
   bebBackend,
   kymaSystem,
-  conditionReady,
-  telemetryOperatorLabel,
+  conditionReady
 };

@@ -65,7 +65,6 @@ const {
   natsBackend,
   getEventMeshNamespace,
   kymaSystem,
-  telemetryOperatorLabel,
   conditionReady,
 } = require('./common/common');
 const {
@@ -94,8 +93,6 @@ describe('Eventing tests', function() {
     }
     await exposeGrafana();
     this.test.retries(3);
-    await waitForPodWithLabelAndCondition( telemetryOperatorLabel.key, telemetryOperatorLabel.value, kymaSystem,
-        conditionReady.condition, conditionReady.status, 60_000);
   });
 
   before('Create an ApiRule for NATS', async () => {
