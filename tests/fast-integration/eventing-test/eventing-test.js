@@ -13,7 +13,6 @@ const {
   switchEventingBackend,
   debug,
   createK8sConfigMap,
-  waitForPodWithLabelAndCondition,
   createApiRuleForService,
   deleteApiRule,
   k8sApply,
@@ -65,7 +64,6 @@ const {
   natsBackend,
   getEventMeshNamespace,
   kymaSystem,
-  conditionReady,
 } = require('./common/common');
 const {
   expect,
