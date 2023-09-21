@@ -5,8 +5,8 @@ global:
   images:
     gatewayTest:
       name: "gateway-test"
-      version: "PR-18016"
-      directory: "dev"
+      version: "v20230906-4be474c8"
+      directory: "prod"
 
     mockApplication:
       name: "mock-app"
