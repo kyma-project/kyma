@@ -6,7 +6,6 @@ const {
 const {monitoringTests, unexposeGrafana} = require('../monitoring');
 const {cleanMockTestFixture} = require('./fixtures/commerce-mock');
 const {ensureCommerceMockLocalTestFixture} = require('../test/fixtures/commerce-mock');
-const {tracingTests} = require('../tracing');
 const {error, sleep} = require('../utils');
 
 describe('Executing Standard Testsuite:', function() {
@@ -37,6 +36,4 @@ describe('Executing Standard Testsuite:', function() {
   commerceMockTests(testNamespace);
   // unusuble because of redis dependency that is not usable in the current form after SC migration
   // gettingStartedGuideTests();
-
-  tracingTests(testNamespace);
 });

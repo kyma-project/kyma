@@ -1,7 +1,6 @@
 const {
   cleanMockTestFixture,
   generateTraceParentHeader,
-  checkTrace,
 } = require('../test/fixtures/commerce-mock');
 
 const {
@@ -19,7 +18,6 @@ const {
   waitForSubscription,
   eventingSubscriptionV1Alpha2,
   convertAxiosError,
-  sleep,
   getConfigMap,
   createK8sConfigMap,
   namespaceObj,
@@ -312,33 +310,6 @@ async function checkFunctionUnreachable(name, namespace, host) {
       .catch((err) => {
         debug(err);
       });
-}
-
-async function checkEventTracing(proxyHost, eventType, eventSource, namespace) {
-  // first send an event and verify if it was delivered
-  const result = await checkEventDelivery(proxyHost, 'binary', eventType, eventSource);
-  expect(result).to.have.nested.property('traceParentId');
-  expect(result.traceParentId).to.not.be.empty;
-  expect(result.response).to.have.nested.property('data.metadata.podName');
-  expect(result.response.data.metadata.podName).to.not.be.empty;
-
-  // Define expected trace data
-  const podName = result.response.data.metadata.podName;
-  const correctTraceProcessSequence = [
-    // We are sending the in-cluster event from inside the eventing sink pod
-    'istio-ingressgateway.istio-system',
-    `${eventingSinkName}-${podName.split('-')[2]}.${namespace}`,
-    'eventing-publisher-proxy.kyma-system',
-    'eventing-controller.kyma-system',
-    `${eventingSinkName}-${podName.split('-')[2]}.${namespace}`,
-  ];
-
-  // wait sometime for jaeger to complete tracing data.
-  // Arrival of traces might be delayed by otel-collectors batch timeout.
-  const traceId = result.traceParentId.split('-')[1];
-  debug(`Checking the tracing with traceId: ${traceId}, traceParentId: ${result.traceParentId}`);
-  await sleep(20_000);
-  await checkTrace(traceId, correctTraceProcessSequence);
 }
 
 // checks if the event publish and receive is working.
@@ -709,7 +680,6 @@ module.exports = {
   deployV1Alpha2Subscriptions,
   waitForV1Alpha1Subscriptions,
   waitForV1Alpha2Subscriptions,
-  checkEventTracing,
   saveJetStreamDataForRecreateTest,
   getConfigMapWithRetries,
   checkStreamNotReCreated,

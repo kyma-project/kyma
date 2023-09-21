@@ -209,13 +209,8 @@ async function getServiceMonitors() {
 }
 
 function shouldIgnoreServiceMonitor(serviceMonitorName) {
-  const serviceMonitorsToBeIgnored = [
-    // tracing-metrics is created automatically by jaeger operator and can't be disabled
-    'tracing-metrics',
-  ];
-  return serviceMonitorsToBeIgnored.includes(serviceMonitorName) || !serviceMonitorName.startsWith('monitoring');
+  return !serviceMonitorName.startsWith('monitoring');
 }
-
 async function buildScrapePoolSet() {
   const serviceMonitors = await getServiceMonitors();
   const scrapePools = new Set();

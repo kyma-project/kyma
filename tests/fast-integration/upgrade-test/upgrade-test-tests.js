@@ -6,7 +6,6 @@ const {
   monitoringTests,
   unexposeGrafana,
 } = require('../monitoring');
-const {tracingTests} = require('../tracing');
 const {
   checkInClusterEventDelivery,
   checkFunctionResponse,
@@ -37,7 +36,6 @@ describe('Upgrade test tests', function() {
   });
 
   monitoringTests();
-  tracingTests(testNamespace);
 
   after('Unexpose Grafana', async () => {
     await unexposeGrafana();

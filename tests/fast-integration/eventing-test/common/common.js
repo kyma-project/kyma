@@ -3,7 +3,6 @@ const eventMeshSecretFilePath = process.env.EVENTMESH_SECRET_FILE || '';
 const natsBackend = 'nats';
 const bebBackend = 'beb';
 const kymaSystem = 'kyma-system';
-const jaegerEndpoint = 'tracing-jaeger-collector';
 const conditionReady = {
   condition: 'Ready',
   status: 'True',
@@ -11,14 +10,6 @@ const conditionReady = {
 const telemetryOperatorLabel = {
   key: 'control-plane',
   value: 'telemetry-operator',
-};
-const jaegerLabel = {
-  key: 'app',
-  value: 'jaeger',
-};
-const jaegerOperatorLabel = {
-  key: 'app.kubernetes.io/name',
-  value: 'tracing-jaeger-operator',
 };
 
 // returns the EventMesh namespace from the secret.
@@ -41,9 +32,6 @@ module.exports = {
   natsBackend,
   bebBackend,
   kymaSystem,
-  jaegerLabel,
-  jaegerOperatorLabel,
-  jaegerEndpoint,
   conditionReady,
   telemetryOperatorLabel,
 };

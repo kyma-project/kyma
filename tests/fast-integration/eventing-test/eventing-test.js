@@ -12,9 +12,7 @@ const {
   waitForNamespace,
   switchEventingBackend,
   debug,
-  error,
   createK8sConfigMap,
-  waitForEndpoint,
   waitForPodWithLabelAndCondition,
   createApiRuleForService,
   deleteApiRule,
@@ -44,7 +42,6 @@ const {
   checkEventDelivery,
   waitForV1Alpha1Subscriptions,
   waitForV1Alpha2Subscriptions,
-  checkEventTracing,
   saveJetStreamDataForRecreateTest,
   jsRecreatedTestConfigMapName,
   getConfigMapWithRetries,
@@ -70,8 +67,6 @@ const {
   kymaSystem,
   telemetryOperatorLabel,
   conditionReady,
-  jaegerLabel,
-  jaegerEndpoint,
 } = require('./common/common');
 const {
   expect,
@@ -91,16 +86,6 @@ describe('Eventing tests', function() {
 
   before('Ensure the test namespace exist', async function() {
     await waitForNamespace(testNamespace);
-  });
-
-  before('Ensure tracing is ready', async function() {
-    console.log('Checking for jaeger in default namespace');
-    if (isSKR || isUpgradeJob) {
-      return;
-    }
-    await waitForPodWithLabelAndCondition(jaegerLabel.key, jaegerLabel.value, 'default', conditionReady.condition,
-        conditionReady.status);
-    await waitForEndpoint(jaegerEndpoint, 'default');
   });
 
   before('Expose Grafana', async function() {
@@ -219,25 +204,6 @@ describe('Eventing tests', function() {
     }
     it('Run Eventing Monitoring tests', async function() {
       await eventingMonitoringTest(backend, isSKR, true);
-    });
-  }
-
-  // eventingTracingTestSuite - Runs Eventing tracing tests
-  function eventingTracingTestSuiteV2(isSKR, isUpgradeJob) {
-    // Only run tracing tests on OSS
-    if (isSKR || isUpgradeJob) {
-      debug('Skipping eventing tracing test');
-      return;
-    }
-
-    it('In-cluster event should have correct tracing spans', async function() {
-      try {
-        await checkEventTracing(clusterHost, subscriptionsTypes[0].type, subscriptionsTypes[0].source, testNamespace);
-      } catch (e) {
-        debugBanner('[FAILED] Tracing tests failed! Ignoring the test!');
-        error(e);
-        this.skip();
-      }
     });
   }
 
@@ -460,9 +426,6 @@ describe('Eventing tests', function() {
     // Running Eventing end-to-end event delivery tests
     eventDeliveryTestSuite(natsBackend);
 
-    // Running Eventing tracing tests [v2]
-    eventingTracingTestSuiteV2(isSKR, isUpgradeJob);
-
     // Running Eventing monitoring tests.
     eventingMonitoringTestSuite(natsBackend, isSKR, isUpgradeJob);
 
@@ -515,9 +478,6 @@ describe('Eventing tests', function() {
 
     // Running Eventing end-to-end event delivery tests
     eventDeliveryTestSuite(natsBackend);
-
-    // Running Eventing tracing tests [v2]
-    eventingTracingTestSuiteV2(isSKR, isUpgradeJob);
 
     // Running Eventing monitoring tests.
     eventingMonitoringTestSuite(natsBackend, isSKR, isUpgradeJob);
