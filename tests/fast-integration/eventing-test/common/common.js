@@ -28,5 +28,5 @@ module.exports = {
   natsBackend,
   bebBackend,
   kymaSystem,
-  conditionReady
+  conditionReady,
 };
