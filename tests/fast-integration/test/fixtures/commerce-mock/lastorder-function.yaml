@@ -180,12 +180,13 @@ spec:
   scope: "read write"
   secretName: lastorder-oauth
 ---
-apiVersion: gateway.kyma-project.io/v1alpha1
+apiVersion: gateway.kyma-project.io/v1beta1
 kind: APIRule
 metadata:
   name: lastorder
 spec:
   gateway: kyma-gateway.kyma-system.svc.cluster.local
+  host: lastorder
   rules:
     - path: /function
       methods: ["GET", "POST"]
@@ -197,6 +198,5 @@ spec:
         - handler: allow
           config: {}
   service:
-    host: lastorder
     name: lastorder
     port: 80
