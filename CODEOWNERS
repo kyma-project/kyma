@@ -57,7 +57,7 @@
 /resources/btp-manager @kyma-project/gopher
 
 # Fast Integration Tests
-/tests/fast-integration/test @kyma-project/observability @kyma-project/eventing @kyma-project/Otters @kyma-project/goat
+/tests/fast-integration/test @kyma-project/observability @kyma-project/eventing @kyma-project/Otters
 /tests/fast-integration/eventing-test @kyma-project/eventing
 /tests/fast-integration/image @kyma-project/eventing
 /tests/fast-integration/kcp @kyma-project/gopher
@@ -70,8 +70,6 @@
 /tests/fast-integration/prow @kyma-project/Jellyfish
 
 /tests/function-controller @kyma-project/Otters
-/tests/components/api-gateway @kyma-project/goat
-/tests/components/istio @kyma-project/goat
 /tests/components/application-connector @kyma-project/Framefrog
 
 # performance tests
