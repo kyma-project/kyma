@@ -54,4 +54,4 @@ The modified `Location` header has the following format: `{APP_GATEWAY_URL}:{APP
 This functionality makes the HTTP clients that originally called Application Gateway follow redirects through the Gateway, and not to the service directly. 
 This allows for passing authorization, custom headers, URL parameters, and the body without an issue.
 
-Application Gateway also rewrites all `5xx` status codes to a `502`. In such a case, the `Target-System-Status` header will contain the original code returned by the target. 
+Application Gateway also rewrites all the `5xx` status codes to a `502`. In such a case, the `Target-System-Status` header contains the original code returned by the target. 

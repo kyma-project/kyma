@@ -55,7 +55,7 @@ Central Application Gateway has the following parameters:
 Central Application Gateway exposes:
 - an external API implementing a health endpoint for liveness and readiness probes
 - 2 internal APIs implementing a proxy handler accessible via a service of type `ClusterIP`
-- an endpoint for changing log level
+- an endpoint for changing the log level
 
 Application Gateway also supports redirects for the request flows in which the URL host remains unchanged. For more details, see [Response rewriting](../../docs/05-technical-reference/ac-01-application-gateway-details.md#response-rewriting).
 
@@ -121,7 +121,7 @@ Invocation of endpoints with duplicate names results in a `400 Bad Request` fail
 
 ### Debugging
 
-Log level can be changed using `zap.AtomicLevel`.
+The log level can be changed using `zap.AtomicLevel`.
 The endpoint is exposed at `http://central-application-gateway.kyma-system:8081/v1/loglevel`.
 
 https://pkg.go.dev/go.uber.org/zap#AtomicLevel.ServeHTTP
