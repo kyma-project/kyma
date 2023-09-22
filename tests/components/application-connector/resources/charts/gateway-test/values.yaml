@@ -7,7 +7,6 @@ global:
       name: "gateway-test"
       version: "PR-18214"
       directory: "dev"
-
     mockApplication:
       name: "mock-app"
       version: "PR-18214"
