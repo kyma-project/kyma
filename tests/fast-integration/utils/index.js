@@ -1802,42 +1802,6 @@ async function printAllSubscriptions(testNamespace, crdVersion='v1alpha1') {
   }
 }
 
-// getTraceDAG returns a DAG for the provided Jaeger tracing data
-async function getTraceDAG(trace) {
-  // Find root spans which are not child of any other span
-  const rootSpans = [];
-  for (const span of trace['spans']) {
-    if (span['references'].length === 0) {
-      rootSpans.push(span);
-    }
-
-    if (!trace['spans'].find((s) => s['spanID'] === span['references'][0]['spanID'])) {
-      rootSpans.push(span);
-    }
-  }
-
-  // Find and attach child spans for each root span
-  for (const root of rootSpans) {
-    await attachTraceChildSpans(root, trace);
-  }
-  return rootSpans;
-}
-
-// attachChildSpans finds child spans of current parentSpan and attach it to parentSpan object
-// and also recursively, finds and attaches further child spans of each child.
-async function attachTraceChildSpans(parentSpan, trace) {
-  // find child spans of current parentSpan and attach it to parentSpan object
-  parentSpan['childSpans'] = trace['spans'].filter((s) => s['references'].find((r) => r['refType'] === 'CHILD_OF' &&
-  r['spanID'] === parentSpan['spanID'] &&
-  r['traceID'] === parentSpan['traceID']));
-  // recursively, find and attach further child span of each parentSpan["childSpans"]
-  if (parentSpan['childSpans'] && parentSpan['childSpans'].length > 0) {
-    for (const child of parentSpan['childSpans']) {
-      await attachTraceChildSpans(child, trace);
-    }
-  }
-}
-
 function waitForDeploymentWithLabel(
     labelKey,
     labelValue,
@@ -1859,37 +1823,6 @@ function waitForDeploymentWithLabel(
       timeout,
       `Waiting for deployment with label ${labelKey}=${labelValue} timeout (${timeout} ms)`,
   );
-}
-
-function waitForTracePipeline(name, timeout = 90_000) {
-  return waitForK8sObject(
-      `/apis/telemetry.kyma-project.io/v1alpha1/tracepipelines`,
-      {},
-      (_type, _apiObj, watchObj) => {
-        return (
-          watchObj.object.metadata.name === name &&
-        watchObj.object.status.conditions &&
-        watchObj.object.status.conditions.some(
-            (c) => c.type === 'Running',
-        )
-        );
-      },
-      timeout,
-      `Waiting for Tracepipeline ${name} timeout (${timeout} ms)`,
-  );
-}
-
-async function deployJaeger(jaegerObj) {
-  await k8sApply(jaegerObj, 'default').catch(console.error);
-  await waitForDeployment('tracing-jaeger', 'default');
-  await waitForTracePipeline('jaeger');
-  await sleep(20 * 1000); // give istio some time to propagate the changes to the proxies
-}
-
-async function deployLoki(lokiObj) {
-  await k8sApply(lokiObj, 'kyma-system').catch(console.error);
-  await waitForStatefulSet('logging-loki-test', 'kyma-system');
-  await sleep(20 * 1000); // give istio some time to propagate the changes to the proxies
 }
 
 module.exports = {
@@ -1981,14 +1914,10 @@ module.exports = {
   deleteK8sConfigMap,
   createApiRuleForService,
   deleteApiRule,
-  getTraceDAG,
   printStatusOfInClusterEventingInfrastructure,
   getFunction,
   waitForEndpoint,
   waitForPodWithLabelAndCondition,
   waitForDeploymentWithLabel,
   getSubscription,
-  deployJaeger,
-  waitForTracePipeline,
-  deployLoki,
 };
