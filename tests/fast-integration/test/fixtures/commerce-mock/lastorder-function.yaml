@@ -170,16 +170,6 @@ spec:
           }
         }
 ---
-apiVersion: hydra.ory.sh/v1alpha1
-kind: OAuth2Client
-metadata:
-  name: lastorder
-spec:
-  grantTypes:
-    - "client_credentials"
-  scope: "read write"
-  secretName: lastorder-oauth
----
 apiVersion: gateway.kyma-project.io/v1beta1
 kind: APIRule
 metadata:
