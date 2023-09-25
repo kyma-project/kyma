@@ -130,7 +130,7 @@ async function ensureGettingStartedTestFixture() {
   await k8sApply([ordersServiceNamespaceObj]);
   await k8sApply(ordersServiceMicroserviceObj, orderService);
   await k8sApply(addonServiceBindingServiceInstanceObjs, orderService);
-  const apiRulePath = `/apis/gateway.kyma-project.io/v1alpha1/namespaces/${orderService}/apirules`;
+  const apiRulePath = `/apis/gateway.kyma-project.io/v1beta1/namespaces/${orderService}/apirules`;
   await waitForK8sObject(apiRulePath, {}, (_type, _apiObj, watchObj) => {
     return (watchObj.object.metadata.name == orderService && watchObj.object.status.APIRuleStatus.code == 'OK');
   }, 60 * 1000, 'Waiting for APIRule to be ready timeout');
@@ -151,7 +151,7 @@ function getResourcePaths(namespace) {
   return [
     `/apis/serverless.kyma-project.io/v1alpha2/namespaces/${namespace}/functions`,
     `/apis/addons.kyma-project.io/v1alpha1/namespaces/${namespace}/addonsconfigurations`,
-    `/apis/gateway.kyma-project.io/v1alpha1/namespaces/${namespace}/apirules`,
+    `/apis/gateway.kyma-project.io/v1beta1/namespaces/${namespace}/apirules`,
     `/apis/apps/v1/namespaces/${namespace}/deployments`,
     `/api/v1/namespaces/${namespace}/services`,
   ];

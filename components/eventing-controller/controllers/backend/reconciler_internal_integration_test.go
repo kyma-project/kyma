@@ -31,6 +31,7 @@ import (
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/internal/featureflags"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
@@ -77,6 +78,8 @@ var _ = BeforeSuite(func(done Done) {
 	newCABundle := make([]byte, 20)
 	_, err2 = rand.Read(newCABundle)
 	Expect(err2).NotTo(HaveOccurred())
+
+	featureflags.SetEventingWebhookAuthEnabled(false)
 
 	// setup dummy mutating webhook
 	url := "https://eventing-controller.kyma-system.svc.cluster.local"

@@ -5,7 +5,6 @@
 * [API Exposure](/04-operation-guides/troubleshooting/api-exposure/README.md)
   * Cannot connect to a service exposed by an APIRule
     * [Basic diagnostics](/04-operation-guides/troubleshooting/api-exposure/apix-01-cannot-connect-to-service/apix-01-01-apigateway-connect-api-rule.md)
-    * [401 Unauthorized or 403 Forbidden](/04-operation-guides/troubleshooting/api-exposure/apix-01-cannot-connect-to-service/apix-01-02-401-unauthorized-403-forbidden.md)
     * [404 Not Found](/04-operation-guides/troubleshooting/api-exposure/apix-01-cannot-connect-to-service/apix-01-03-404-not-found.md)
     * [500 Internal Server Error](/04-operation-guides/troubleshooting/api-exposure/apix-01-cannot-connect-to-service/apix-01-04-500-server-error.md)
   * External DNS management 

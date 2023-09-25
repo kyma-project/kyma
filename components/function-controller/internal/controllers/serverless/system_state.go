@@ -58,8 +58,8 @@ func (s *systemState) functionLabels() map[string]string {
 
 func (s *systemState) functionAnnotations() map[string]string {
 	return map[string]string{
-		"prometheus.io/port": "80",
-		"prometheus.io/path": "/metrics",
+		"prometheus.io/port":   "80",
+		"prometheus.io/path":   "/metrics",
 		"prometheus.io/scrape": "true",
 	}
 }
@@ -247,7 +247,7 @@ func (s *systemState) buildJobExecutorContainer(cfg cfg, volumeMounts []corev1.V
 			fmt.Sprintf("--build-arg=base_image=%s", s.instance.Spec.RuntimeImageOverride))
 	}
 
-	resourceRequirements := getBuildResourceRequirements(s)
+	resourceRequirements := getBuildResourceRequirements(s.instance, cfg)
 
 	return corev1.Container{
 		Name:            "executor",
@@ -261,6 +261,22 @@ func (s *systemState) buildJobExecutorContainer(cfg cfg, volumeMounts []corev1.V
 		},
 		SecurityContext: buildJobContainerSecurityContext(),
 	}
+}
+
+func getBuildResourceRequirements(instance serverlessv1alpha2.Function, cfg cfg) corev1.ResourceRequirements {
+	rtmPresets, found := cfg.fn.ResourceConfig.BuildJob.Resources.RuntimePresets[string(instance.Spec.Runtime)]
+	var presets map[string]corev1.ResourceRequirements
+	if found {
+		presets = rtmPresets.ToResourceRequirements()
+	} else {
+		presets = cfg.fn.ResourceConfig.BuildJob.Resources.Presets.ToResourceRequirements()
+	}
+	if instance.Spec.ResourceConfiguration != nil {
+		return instance.Spec.ResourceConfiguration.Build.EffectiveResource(
+			cfg.fn.ResourceConfig.BuildJob.Resources.DefaultPreset,
+			presets)
+	}
+	return presets[cfg.fn.ResourceConfig.BuildJob.Resources.DefaultPreset]
 }
 
 func (s *systemState) getBuildJobVolumeMounts() []corev1.VolumeMount {
@@ -343,16 +359,6 @@ func (s *systemState) deploymentSelectorLabels() map[string]string {
 	)
 }
 
-func getBuildResourceRequirements(s *systemState) corev1.ResourceRequirements {
-	var resourceRequirements corev1.ResourceRequirements
-	if s.instance.Spec.ResourceConfiguration != nil &&
-		s.instance.Spec.ResourceConfiguration.Build != nil &&
-		s.instance.Spec.ResourceConfiguration.Build.Resources != nil {
-		resourceRequirements = *s.instance.Spec.ResourceConfiguration.Build.Resources
-	}
-	return resourceRequirements
-}
-
 func (s *systemState) podLabels() map[string]string {
 	result := s.deploymentSelectorLabels()
 	if s.instance.Spec.Template != nil && s.instance.Spec.Template.Labels != nil {
@@ -403,7 +409,7 @@ type buildDeploymentArgs struct {
 	ImagePullAccountName   string
 }
 
-func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment {
+func (s *systemState) buildDeployment(cfg buildDeploymentArgs, resourceConfig Resources) appsv1.Deployment {
 	imageName := s.buildImageAddress(cfg.DockerPullAddress)
 
 	const volumeName = "tmp-dir"
@@ -456,7 +462,7 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 				Name:         functionContainerName,
 				Image:        imageName,
 				Env:          envs,
-				Resources:    *s.instance.Spec.ResourceConfiguration.Function.Resources,
+				Resources:    getDeploymentResources(s.instance, resourceConfig),
 				VolumeMounts: volumeMounts,
 				/*
 					In order to mark pod as ready we need to ensure the function is actually running and ready to serve traffic.
@@ -527,6 +533,22 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 			},
 		},
 	}
+}
+
+func getDeploymentResources(instance serverlessv1alpha2.Function, resourceCfg Resources) corev1.ResourceRequirements {
+	rtmPresets, found := resourceCfg.RuntimePresets[string(instance.Spec.Runtime)]
+	var presets map[string]corev1.ResourceRequirements
+	if found {
+		presets = rtmPresets.ToResourceRequirements()
+	} else {
+		presets = resourceCfg.Presets.ToResourceRequirements()
+	}
+	if instance.Spec.ResourceConfiguration != nil {
+		return instance.Spec.ResourceConfiguration.Function.EffectiveResource(
+			resourceCfg.DefaultPreset,
+			presets)
+	}
+	return presets[resourceCfg.DefaultPreset]
 }
 
 func buildDeploymentSecretVolumes(secretMounts []serverlessv1alpha2.SecretMount) (volumes []corev1.Volume, volumeMounts []corev1.VolumeMount) {
@@ -601,9 +623,9 @@ func (s *systemState) hasDeploymentConditionTrueStatus(conditionType appsv1.Depl
 func (s *systemState) buildService() corev1.Service {
 	return corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      s.instance.GetName(),
-			Namespace: s.instance.GetNamespace(),
-			Labels:    s.functionLabels(),
+			Name:        s.instance.GetName(),
+			Namespace:   s.instance.GetNamespace(),
+			Labels:      s.functionLabels(),
 			Annotations: s.functionAnnotations(),
 		},
 		Spec: corev1.ServiceSpec{

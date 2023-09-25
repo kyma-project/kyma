@@ -2,6 +2,7 @@ package serverless
 
 import (
 	"fmt"
+	"k8s.io/apimachinery/pkg/api/resource"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
@@ -78,6 +79,7 @@ func TestFunctionReconciler_buildDeployment(t *testing.T) {
 		instance *serverlessv1alpha2.Function
 	}
 	rtmCfg := runtime.GetRuntimeConfig(serverlessv1alpha2.NodeJs18)
+	resourceCfg := fixResources()
 
 	tests := []struct {
 		name string
@@ -98,7 +100,7 @@ func TestFunctionReconciler_buildDeployment(t *testing.T) {
 				instance: *tt.args.instance,
 			}
 
-			got := s.buildDeployment(buildDeploymentArgs{})
+			got := s.buildDeployment(buildDeploymentArgs{}, resourceCfg)
 
 			// deployment selector labels are equal with pod labels
 			for key, value := range got.Spec.Selector.MatchLabels {
@@ -146,6 +148,75 @@ func checkSecretVolume(g *gomega.WithT, secretMounts []serverlessv1alpha2.Secret
 		}
 		g.Expect(matchingSecretMount).ToNot(gomega.BeNil())
 		g.Expect(volumeMount.MountPath).To(gomega.Equal(matchingSecretMount.MountPath))
+	}
+}
+
+func TestFunctionReconciler_buildDeploymentWithResources(t *testing.T) {
+	resourceCfg := fixResources()
+	resources := resourceCfg.Presets.ToResourceRequirements()
+	python39Resources := resourceCfg.RuntimePresets[string(serverlessv1alpha2.NodeJs18)].ToResourceRequirements()
+
+	customResources := &corev1.ResourceRequirements{
+		Limits: corev1.ResourceList{
+			corev1.ResourceCPU:    resource.MustParse("378m"),
+			corev1.ResourceMemory: resource.MustParse("378Mi"),
+		},
+		Requests: corev1.ResourceList{
+			corev1.ResourceCPU:    resource.MustParse("157m"),
+			corev1.ResourceMemory: resource.MustParse("157Mi"),
+		},
+	}
+
+	type args struct {
+		instance          *serverlessv1alpha2.Function
+		expectedResources corev1.ResourceRequirements
+	}
+
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "deployment should use set resources preset",
+			args: args{
+				instance:          newFixFunctionWithFunctionResourceProfile("ns", "name", "M"),
+				expectedResources: resources["M"],
+			},
+		},
+		{
+			name: "deployment should use default resources preset",
+			args: args{
+				instance:          newFixFunction("ns", "name", 1, 2),
+				expectedResources: resources["L"],
+			},
+		},
+		{
+			name: "deployment should use default runtime preset",
+			args: args{
+				instance:          newFixFunctionWithRuntime("ns", "name", serverlessv1alpha2.Python39),
+				expectedResources: python39Resources["S"],
+			},
+		},
+		{
+			name: "deployment should use default runtime preset",
+			args: args{
+				instance:          newFixFunctionWithCustomFunctionResource("ns", "name", customResources),
+				expectedResources: *customResources,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := gomega.NewGomegaWithT(t)
+			s := systemState{
+				instance: *tt.args.instance,
+			}
+
+			got := s.buildDeployment(buildDeploymentArgs{}, resourceCfg)
+
+			g.Expect(got.Spec.Template.Spec.Containers).To(gomega.HaveLen(1))
+			g.Expect(got.Spec.Template.Spec.Containers[0].Resources).To(gomega.Equal(tt.args.expectedResources))
+		})
 	}
 }
 
@@ -462,6 +533,81 @@ func TestFunctionReconciler_buildJob(t *testing.T) {
 	}
 }
 
+func TestFunctionReconciler_buildJobWithResources(t *testing.T) {
+	resourceCfg := fixResources()
+	cfg := cfg{
+		fn: FunctionConfig{
+			ResourceConfig: ResourceConfig{BuildJob: BuildJobResourceConfig{resourceCfg}},
+		},
+	}
+
+	resources := resourceCfg.Presets.ToResourceRequirements()
+	python39Resources := resourceCfg.RuntimePresets[string(serverlessv1alpha2.NodeJs18)].ToResourceRequirements()
+
+	customResources := &corev1.ResourceRequirements{
+		Limits: corev1.ResourceList{
+			corev1.ResourceCPU:    resource.MustParse("378m"),
+			corev1.ResourceMemory: resource.MustParse("378Mi"),
+		},
+		Requests: corev1.ResourceList{
+			corev1.ResourceCPU:    resource.MustParse("157m"),
+			corev1.ResourceMemory: resource.MustParse("157Mi"),
+		},
+	}
+
+	type args struct {
+		instance          *serverlessv1alpha2.Function
+		expectedResources corev1.ResourceRequirements
+	}
+
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "job should have resources profile preset",
+			args: args{
+				instance:          newFixFunctionWithBuildResourceProfile("ns", "name", "M"),
+				expectedResources: resources["M"],
+			},
+		},
+		{
+			name: "job should have default resources preset",
+			args: args{
+				instance:          newFixFunction("ns", "name", 1, 2),
+				expectedResources: resources["L"],
+			},
+		},
+		{
+			name: "job should have default runtime preset",
+			args: args{
+				instance:          newFixFunctionWithRuntime("ns", "name", serverlessv1alpha2.Python39),
+				expectedResources: python39Resources["S"],
+			},
+		},
+		{
+			name: "job should have custom resources",
+			args: args{
+				instance:          newFixFunctionWithCustomBuildResource("ns", "name", customResources),
+				expectedResources: *customResources,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := gomega.NewGomegaWithT(t)
+			s := systemState{
+				instance: *tt.args.instance,
+			}
+
+			got := s.buildJob("configmap", cfg)
+
+			g.Expect(got.Spec.Template.Spec.Containers).To(gomega.HaveLen(1))
+			g.Expect(got.Spec.Template.Spec.Containers[0].Resources).To(gomega.Equal(tt.args.expectedResources))
+		})
+	}
+}
+
 type expectedVolume struct {
 	name                 string
 	localObjectReference string
@@ -478,5 +624,35 @@ func assertVolumes(g *gomega.WithT, actual []corev1.Volume, expected []expectedV
 			}
 		}
 		g.Expect(found).To(gomega.BeTrue(), "Volume with name: %s, referencing object: %s not found", expVol.name, expVol.localObjectReference)
+	}
+}
+
+func fixResources() Resources {
+	return Resources{
+		Presets: map[string]Resource{
+			"L": {
+				RequestCPU:    Quantity{resource.MustParse("100m")},
+				RequestMemory: Quantity{resource.MustParse("100Mi")},
+				LimitCPU:      Quantity{resource.MustParse("200m")},
+				LimitMemory:   Quantity{resource.MustParse("200Mi")},
+			},
+			"M": {
+				RequestCPU:    Quantity{resource.MustParse("50m")},
+				RequestMemory: Quantity{resource.MustParse("50Mi")},
+				LimitCPU:      Quantity{resource.MustParse("100m")},
+				LimitMemory:   Quantity{resource.MustParse("100Mi")},
+			},
+		},
+		DefaultPreset: "L",
+		RuntimePresets: map[string]Preset{
+			string(serverlessv1alpha2.Python39): map[string]Resource{
+				"S": {
+					RequestCPU:    Quantity{resource.MustParse("135m")},
+					RequestMemory: Quantity{resource.MustParse("135Mi")},
+					LimitCPU:      Quantity{resource.MustParse("246m")},
+					LimitMemory:   Quantity{resource.MustParse("246Mi")},
+				},
+			},
+		},
 	}
 }

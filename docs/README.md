@@ -23,7 +23,7 @@ The table of Kyma modules:
 
 | Module | Purpose |
 |---|---|
-| [BTP Operator](https://kyma-project.io/#/btp-manager/user/README.md) | Within the BTP Operator module, BTP Manager installs SAP BTP Service Operator that allows you to consume SAP BTP services from your Kubernetes cluster using Kubernetes-native tools. |
+| [SAP BTP Operator](https://kyma-project.io/#/btp-manager/user/README.md) | Within the SAP BTP Operator module, BTP Manager installs SAP BTP Service Operator that allows you to consume SAP BTP services from your Kubernetes cluster using Kubernetes-native tools. |
 | [Keda](https://kyma-project.io//#/keda-manager/user/README.md) | The Keda module comes with Keda Manager, an extension to Kyma that allows you to install [KEDA (Kubernetes Event Driven Autoscaler)](https://keda.sh/). |
 | [Telemetry](https://kyma-project.io/#/telemetry-manager/user/README.md) | Enable telemetry agents to easily collect application logs and distributed traces for your application and dispatch them to backends.|
 | [Serverless*](https://kyma-project.io/#/serverless-manager/user/README.md) | With the Serverless module, you can define simple code snippets (Functions) with minimal implementation effort. |

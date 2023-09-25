@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -64,6 +65,8 @@ const (
 	secretKeyClientSecret = "client_secret"
 	secretKeyTokenURL     = "token_url"
 	secretKeyCertsURL     = "certs_url"
+
+	reconcileInterval = 30 * time.Second
 )
 
 var (
@@ -212,7 +215,8 @@ func (r *Reconciler) reconcileNATSBackend(ctx context.Context, backendStatus *ev
 		if updateErr := r.syncBackendStatus(ctx, backendStatus, nil); updateErr != nil {
 			return ctrl.Result{}, errors.Wrapf(err, "failed to update status while starting NATS controller")
 		}
-		return ctrl.Result{}, err
+		r.namedLogger().Errorf("failed to start NATS controller: %v", err)
+		return ctrl.Result{RequeueAfter: reconcileInterval}, nil
 	}
 
 	// Delete secret for publisher proxy if it exists

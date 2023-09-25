@@ -68,8 +68,3 @@ ci-test-eventing-provision-skr:
 ci-test-eventing-deprovision-skr:
 	npm ci
 	npm run test-eventing-deprovision-skr
-
-.PHONY: telemetry
-telemetry:
-	npm install
-	npm run test-telemetry

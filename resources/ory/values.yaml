@@ -18,7 +18,7 @@ global:
   images:
     k8s_tools:
       name: "k8s-tools"
-      version: "v20230911-40bb7860"
+      version: "v20230921-aff55ec1"
       directory: "prod/tpi"
     busybox:
       name: "busybox"
@@ -69,13 +69,13 @@ oathkeeper:
           enabled: true
           config:
             # REQUIRED IF ENABLED - The OAuth 2.0 Token Endpoint that will be used to validate the client credentials.
-            token_url: http://ory-hydra-public.kyma-system.svc.cluster.local:4444/oauth2/token
+            token_url: http://ory-hydra-public.hydra-deprecated.svc.cluster.local:4444/oauth2/token
         oauth2_introspection:
           # Set enabled to true if the authenticator should be enabled and false to disable the authenticator. Defaults to false.
           enabled: true
           config:
             # REQUIRED IF ENABLED - The OAuth 2.0 Token Introspection endpoint.
-            introspection_url: http://ory-hydra-admin.kyma-system.svc.cluster.local:4445/oauth2/introspect
+            introspection_url: http://ory-hydra-admin.hydra-deprecated.svc.cluster.local:4445/oauth2/introspect
             # Sets the strategy to be used to validate/match the token scope. Supports "hierarchic", "exact", "wildcard", "none". Defaults
             # to "none".
             scope_strategy: exact
@@ -84,7 +84,7 @@ oathkeeper:
           enabled: true
           config:
             jwks_urls:
-              - http://ory-hydra-public.kyma-system.svc.cluster.local:4444/.well-known/jwks.json
+              - http://ory-hydra-public.hydra-deprecated.svc.cluster.local:4444/.well-known/jwks.json
             scope_strategy: wildcard
       authorizers:
         allow:

@@ -1,10 +1,10 @@
-apiVersion: gateway.kyma-project.io/v1alpha1
+apiVersion: gateway.kyma-project.io/v1beta1
 kind: APIRule
 metadata:
   name: noop-unsecured
 spec:
+  host: httpbin.$NAMESPACE.$CLUSTER_DOMAIN_NAME
   service:
-    host: httpbin.$NAMESPACE.$CLUSTER_DOMAIN_NAME
     name: httpbin
     port: 8000
   gateway: kyma-system/kyma-gateway
@@ -15,14 +15,14 @@ spec:
         - handler: noop
       mutators: []
 ---
-apiVersion: gateway.kyma-project.io/v1alpha1
+apiVersion: gateway.kyma-project.io/v1beta1
 kind: APIRule
 metadata:
   name: oauth
 spec:
   gateway: kyma-system/kyma-gateway
+  host: httpbin1.$NAMESPACE.$CLUSTER_DOMAIN_NAME
   service:
-    host: httpbin1.$NAMESPACE.$CLUSTER_DOMAIN_NAME
     name: httpbin1
     port: 8000
   rules:
@@ -34,14 +34,14 @@ spec:
           config:
             required_scope: ["read"]
 ---
-apiVersion: gateway.kyma-project.io/v1alpha1
+apiVersion: gateway.kyma-project.io/v1beta1
 kind: APIRule
 metadata:
   name: oauth-with-id-token-mutator
 spec:
   gateway: kyma-system/kyma-gateway
+  host: httpbin2.$NAMESPACE.$CLUSTER_DOMAIN_NAME
   service:
-    host: httpbin2.$NAMESPACE.$CLUSTER_DOMAIN_NAME
     name: httpbin2
     port: 8000
   rules:
@@ -56,14 +56,14 @@ spec:
           config:
             required_scope: ["read"]
 ---
-apiVersion: gateway.kyma-project.io/v1alpha1
+apiVersion: gateway.kyma-project.io/v1beta1
 kind: APIRule
 metadata:
   name: oauth-with-header-mutator
 spec:
   gateway: kyma-system/kyma-gateway
+  host: httpbin3.$NAMESPACE.$CLUSTER_DOMAIN_NAME
   service:
-    host: httpbin3.$NAMESPACE.$CLUSTER_DOMAIN_NAME
     name: httpbin3
     port: 8000
   rules:

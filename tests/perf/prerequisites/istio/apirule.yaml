@@ -1,10 +1,10 @@
-apiVersion: gateway.kyma-project.io/v1alpha1
+apiVersion: gateway.kyma-project.io/v1beta1
 kind: APIRule
 metadata:
   name: allow-$WORKER
 spec:
+  host: httpbin-$WORKER.$NAMESPACE.$CLUSTER_DOMAIN_NAME
   service:
-    host: httpbin-$WORKER.$NAMESPACE.$CLUSTER_DOMAIN_NAME
     name: httpbin-$WORKER
     port: 8000
   gateway: kyma-system/kyma-gateway
