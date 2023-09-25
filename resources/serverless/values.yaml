@@ -78,24 +78,24 @@ global:
   images:
     k8s_tools:
       name: "tpi/k8s-tools"
-      version: "v20230911-40bb7860"
+      version: "v20230921-aff55ec1"
       directory: "prod"
     function_controller:
       name: "function-controller"
-      version: "v20230905-3dd37d62"
-      directory: "prod"
+      version: "PR-18164"
+      directory: "dev"
     function_webhook:
       name: "function-webhook"
-      version: "v20230905-3dd37d62"
-      directory: "prod"
+      version: "PR-18164"
+      directory: "dev"
     function_build_init:
       name: "function-build-init"
-      version: "v20230824-a02c92c2"
-      directory: "prod"
+      version: "PR-18164"
+      directory: "dev"
     function_registry_gc:
       name: "function-registry-gc"
-      version: "v20230628-61d97068"
-      directory: "prod"
+      version: "PR-18202"
+      directory: "dev"
     function_runtime_nodejs16:
       name: "function-runtime-nodejs16"
       version: "v20230831-fb331fc0"
@@ -217,6 +217,68 @@ containers:
         functionBuildExecutorArgs: "--insecure,--skip-tls-verify,--skip-unused-stages,--log-format=text,--cache=true"
         functionBuildMaxSimultaneousJobs: "5"
         healthzLivenessTimeout: "10s"
+        resourcesConfiguration:
+          function:
+            resources:
+              minRequestCpu: "10m"
+              minRequestMemory: "16Mi"
+              defaultPreset: "L"
+              presets:
+                XS:
+                  requestCpu: "50m"
+                  requestMemory: "64Mi"
+                  limitCpu: "100m"
+                  limitMemory: "128Mi"
+                S:
+                  requestCpu: "100m"
+                  requestMemory: "128Mi"
+                  limitCpu: "200m"
+                  limitMemory: "256Mi"
+                M:
+                  requestCpu: "200m"
+                  requestMemory: "256Mi"
+                  limitCpu: "400m"
+                  limitMemory: "512Mi"
+                L:
+                  requestCpu: "400m"
+                  requestMemory: "512Mi"
+                  limitCpu: "800m"
+                  limitMemory: "1024Mi"
+                XL:
+                  requestCpu: "800m"
+                  requestMemory: "1024Mi"
+                  limitCpu: "1600m"
+                  limitMemory: "2048Mi"
+#              runtimePresets:
+
+
+          buildJob:
+            resources:
+              minRequestCpu: "200m"
+              minRequestMemory: "200Mi"
+              defaultPreset: "fast"
+              presets:
+                local-dev:
+                  requestCpu: "200m"
+                  requestMemory: "200Mi"
+                  limitCpu: "400m"
+                  limitMemory: "400Mi"
+                slow:
+                  requestCpu: "200m"
+                  requestMemory: "200Mi"
+                  limitCpu: "700m"
+                  limitMemory: "700Mi"
+                normal:
+                  requestCpu: "700m"
+                  requestMemory: "700Mi"
+                  limitCpu: "1100m"
+                  limitMemory: "1100Mi"
+                fast:
+                  requestCpu: "1100m"
+                  requestMemory: "1100Mi"
+                  limitCpu: "1700m"
+                  limitMemory: "1100Mi"
+
 
 services:
   manager:

@@ -69,10 +69,6 @@ func NewReconciler(ctx context.Context, client client.Client, jsBackend jetstrea
 		customEventsChannel: make(chan event.GenericEvent),
 		collector:           collector,
 	}
-	if err := jsBackend.Initialize(reconciler.handleNatsConnClose); err != nil {
-		logger.WithContext().Errorw("Failed to start reconciler", "name", reconcilerName, "error", err)
-		panic(err)
-	}
 	return reconciler
 }
 
@@ -217,11 +213,11 @@ func (r *Reconciler) updateSubscriptionMetrics(current, desired *eventingv1alpha
 	}
 }
 
-// handleNatsConnClose is called by NATS when the connection to the NATS server is closed. When it
+// HandleNatsConnClose is called by NATS when the connection to the NATS server is closed. When it
 // is called, the reconnect-attempts have exceeded the defined value.
 // It forces reconciling the subscription to make sure the subscription is marked as not ready, until
 // it is possible to connect to the NATS server again.
-func (r *Reconciler) handleNatsConnClose(_ *nats.Conn) {
+func (r *Reconciler) HandleNatsConnClose(_ *nats.Conn) {
 	r.namedLogger().Info("JetStream connection is closed and reconnect attempts are exceeded!")
 	var subs eventingv1alpha2.SubscriptionList
 	if err := r.Client.List(context.Background(), &subs); err != nil {

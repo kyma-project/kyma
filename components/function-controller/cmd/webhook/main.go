@@ -117,23 +117,13 @@ func main() {
 	whs.CertName = resources.CertFile
 	whs.KeyName = resources.KeyFile
 
-	defaultCfg, err := webhookCfg.ToDefaultingConfig()
-	if err != nil {
-		setupLog.Error(err, "while creating of defaulting configuration")
-		os.Exit(1)
-	}
 	whs.Register(resources.FunctionDefaultingWebhookPath, &ctrlwebhook.Admission{
 		Handler: webhook.NewDefaultingWebhook(
-			&defaultCfg,
 			mgr.GetClient(),
 			logWithCtx.Named("defaulting-webhook")),
 	})
 
-	validationCfg, err := webhookCfg.ToValidationConfig()
-	if err != nil {
-		setupLog.Error(err, "while creating of validation configuration")
-		os.Exit(1)
-	}
+	validationCfg := webhookCfg.ToValidationConfig()
 	whs.Register(resources.FunctionValidationWebhookPath, &ctrlwebhook.Admission{
 		Handler: webhook.NewValidatingWebhook(
 			&validationCfg,

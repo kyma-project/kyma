@@ -226,7 +226,7 @@ func TestFunctionReconciler_Reconcile_Scaling(t *testing.T) {
 		function := &serverlessv1alpha2.Function{}
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 		g.Expect(function.Spec.ScaleConfig).NotTo(gomega.BeNil())
-		g.Expect(function.Spec.Replicas).To(gomega.BeNil())
+		g.Expect(function.Spec.Replicas).NotTo(gomega.BeNil())
 
 		functionWithReplicas := function.DeepCopy()
 		functionWithReplicas.Spec.ScaleConfig = nil

@@ -1,7 +1,7 @@
 const k8s = require('@kubernetes/client-node');
 const fs = require('fs');
 const path = require('path');
-const {expect, assert} = require('chai');
+const {expect} = require('chai');
 const https = require('https');
 const axios = require('axios').default;
 const crypto = require('crypto');
@@ -31,11 +31,8 @@ const {
   eventingSubscription,
   eventingSubscriptionV1Alpha2,
   k8sDelete,
-  getSecretData,
   namespaceObj,
-  getTraceDAG,
   printStatusOfInClusterEventingInfrastructure,
-  deployJaeger, deployLoki,
 } = require('../../../utils');
 
 const {
@@ -46,13 +43,6 @@ const {
   getApplicationByName,
   unassignRuntimeFromScenario,
 } = require('../../../compass');
-
-const {getJaegerTrace} = require('../../../tracing/client');
-
-const {
-  OAuthToken,
-  OAuthCredentials,
-} = require('../../../lib/oauth');
 
 const {bebBackend, getEventMeshNamespace} = require('../../../eventing-test/common/common');
 
@@ -72,20 +62,6 @@ const applicationMockYaml = fs.readFileSync(
 
 const lastorderFunctionYaml = fs.readFileSync(
     path.join(__dirname, './lastorder-function.yaml'),
-    {
-      encoding: 'utf8',
-    },
-);
-
-const jaegerYaml = fs.readFileSync(
-    path.join(__dirname, '../jaeger/jaeger.yaml'),
-    {
-      encoding: 'utf8',
-    },
-);
-
-const lokiYaml = fs.readFileSync(
-    path.join(__dirname, '../loki/loki.yaml'),
     {
       encoding: 'utf8',
     },
@@ -137,21 +113,10 @@ async function checkFunctionResponse(functionNamespace, mockNamespace = 'mocks')
   const mockHost = vs.spec.hosts[0];
   const host = mockHost.split('.').slice(1).join('.');
 
-  // get OAuth client id and client secret from Kubernetes Secret
-  const oAuthSecretData = await getSecretData('lastorder-oauth', functionNamespace);
-
-  // get access token from OAuth server
-  const oAuthTokenGetter = new OAuthToken(
-      `https://oauth2.${host}/oauth2/token`,
-      new OAuthCredentials(oAuthSecretData['client_id'], oAuthSecretData['client_secret']),
-  );
-  const accessToken = await oAuthTokenGetter.getToken(['read', 'write']);
-
   // expect no error when authorized
   const res = await retryPromise(
       () => axios.post(`https://lastorder.${host}/function`, {orderCode: '789'}, {
         timeout: 5000,
-        headers: {Authorization: `bearer ${accessToken}`},
       }),
       45,
       2000,
@@ -161,16 +126,6 @@ async function checkFunctionResponse(functionNamespace, mockNamespace = 'mocks')
 
   // the request should be authorized and successful
   expect(res.status).to.be.equal(200);
-
-  // expect error when unauthorized
-  let errorOccurred = false;
-  try {
-    await axios.post(`https://lastorder.${host}/function`, {orderCode: '789'}, {timeout: 5000});
-  } catch (err) {
-    errorOccurred = true;
-    expect(err.response.status).to.be.equal(401);
-  }
-  expect(errorOccurred).to.be.equal(true);
 }
 
 async function sendEventAndCheckResponse(eventType, body, params, mockNamespace = 'mocks') {
@@ -275,180 +230,6 @@ async function sendCloudEventBinaryModeAndCheckResponse(backendType = 'nats', mo
   };
 
   return await sendEventAndCheckResponse('cloud event binary', body, params, mockNamespace);
-}
-
-async function getTraceId(data) {
-  // Extract traceId from response
-  // Second part of traceparent header contains trace-id. See https://www.w3.org/TR/trace-context/#traceparent-header
-  const traceParent = data.event.headers['traceparent'];
-  debug(`Traceparent header is: ${traceParent}`);
-  let traceId;
-  if (traceParent == null) {
-    debug('traceID using traceparent is not present. Trying to fetch traceID using b3');
-    traceId = data.event.headers['x-b3-traceid'];
-    assert.isNotEmpty(traceId, 'neither traceparent or b3 header is present in the response header');
-  } else {
-    traceId = data.event.headers['traceparent'].split('-')[1];
-  }
-  debug(`got the traceId: ${traceId}`);
-  return traceId;
-}
-
-async function checkEventTracing(targetNamespace = 'test', res) {
-  expect(res.data).to.have.nested.property('event.headers.traceparent');
-  expect(res.data).to.have.nested.property('podName');
-
-  // Extract traceId from response
-  const traceId = getTraceId(res.data);
-
-  // Define expected trace data
-  const correctTraceProcessSequence = [
-    'istio-ingressgateway.istio-system',
-    'central-application-connectivity-validator.kyma-system',
-    'central-application-connectivity-validator.kyma-system',
-    'eventing-publisher-proxy.kyma-system',
-    'eventing-controller.kyma-system',
-    `lastorder-${res.data.podName.split('-')[1]}.${targetNamespace}`,
-  ];
-  // wait some time for jaeger to complete tracing data
-  await sleep(10 * 1000);
-  await checkTrace(traceId, correctTraceProcessSequence);
-}
-
-async function sendLegacyEventAndCheckTracing(targetNamespace = 'test', mockNamespace = 'mocks') {
-  // Send an event and get it back from the lastorder function
-  const res = await sendLegacyEventAndCheckResponse(mockNamespace);
-
-  // Check the correct event tracing
-  await checkEventTracing(targetNamespace, res);
-}
-
-async function sendCloudEventStructuredModeAndCheckTracing(targetNamespace = 'test', mockNamespace = 'mocks') {
-  // Send an event and get it back from the lastorder function
-  const res = await sendCloudEventStructuredModeAndCheckResponse(mockNamespace);
-
-  // Check the correct event tracing
-  await checkEventTracing(targetNamespace, res);
-}
-
-async function sendCloudEventBinaryModeAndCheckTracing(targetNamespace = 'test', mockNamespace = 'mocks') {
-  // Send an event and get it back from the lastorder function
-  const res = await sendCloudEventBinaryModeAndCheckResponse(mockNamespace);
-
-  // Check the correct event tracing
-  await checkEventTracing(targetNamespace, res);
-}
-
-async function checkInClusterEventTracing(targetNamespace) {
-  const res = await checkInClusterEventDeliveryHelper(targetNamespace, 'structured');
-  expect(res.data).to.have.nested.property('event.headers.traceparent');
-  expect(res.data).to.have.nested.property('podName');
-
-  const traceId = await getTraceId(res.data);
-
-  // Define expected trace data
-  const correctTraceProcessSequence = [
-    // We are sending the in-cluster event from inside the lastorder pod
-    'istio-ingressgateway.istio-system',
-    `lastorder-${res.data.podName.split('-')[1]}.${targetNamespace}`,
-    'eventing-publisher-proxy.kyma-system',
-    'eventing-controller.kyma-system',
-    `lastorder-${res.data.podName.split('-')[1]}.${targetNamespace}`,
-  ];
-
-  // wait sometime for jaeger to complete tracing data.
-  // Arrival of traces might be delayed by otel-collectors batch timeout.
-  await sleep(20_000);
-  await checkTrace(traceId, correctTraceProcessSequence);
-}
-
-async function checkTrace(traceId, expectedTraceProcessSequence) {
-  const traceRes = await getJaegerTrace(traceId);
-
-  // log the expected trace
-  debug('expected spans:');
-  for (let i = 0; i < expectedTraceProcessSequence.length; i++) {
-    debug(`${buildLevel(i)} ${expectedTraceProcessSequence[i]}`);
-  }
-
-  // the trace response should have data for single trace
-  expect(traceRes.data).to.have.length(1);
-
-  // extract trace data from response
-  const traceData = traceRes.data[0];
-  expect(traceData['spans'].length).to.be.gte(expectedTraceProcessSequence.length);
-
-  // generate DAG for trace spans
-  const traceDAG = await getTraceDAG(traceData);
-  expect(traceDAG).to.have.length(1);
-
-  // log the actual trace
-  debug('actual spans:');
-  logSpansGraph(0, traceDAG[0], traceData);
-
-  // searching through the trace-graph for the expected span sequence staring at the root element
-  debug('trying to match expected and actual');
-  expect(findSpanSequence(expectedTraceProcessSequence, 0, traceDAG[0], traceData, 0)).to.be.true;
-}
-
-function logSpansGraph(position, currentSpan, traceData) {
-  const actualSpan = traceData.processes[currentSpan.processID].serviceName;
-  debug(`${buildLevel(position)} ${actualSpan}`);
-
-  const newPosition = position +1;
-  for (let i = 0; i < currentSpan.childSpans.length; i++) {
-    logSpansGraph(newPosition, currentSpan.childSpans[i], traceData);
-  }
-}
-
-// findSpanSequence recursively searches through the trace-graph to find all expected spans in the right, consecutive
-// order while ignoring the spans that are not expected.
-function findSpanSequence(expectedSpans, position, currentSpan, traceData, numberFound) {
-  // validate if the actual span is the expected span
-  const actualSpan = traceData.processes[currentSpan.processID].serviceName;
-  const expectedSpan = expectedSpans[numberFound];
-  const debugMsg = `${buildLevel(position)} ${actualSpan}`;
-
-  // if this span contains the currently expected span, the position will be increased
-  if (actualSpan === expectedSpan) {
-    numberFound++;
-    debug(debugMsg);
-  } else {
-    debug(`${debugMsg} [expected ${expectedSpan}, continue to search]`);
-  }
-
-  // check if all traces have been found yet
-  if (numberFound === expectedSpans.length) {
-    return true;
-  }
-
-  // recursive search through all the child spans
-  for (let i = 0; i < currentSpan.childSpans.length; i++) {
-    if (findSpanSequence(expectedSpans, position +1, currentSpan.childSpans[i], traceData, numberFound)) {
-      return true;
-    }
-  }
-
-  // if nothing was found on this branch of the graph, close it
-  return false;
-}
-
-// buildLevel helps to display trace hierarchy by adding a whitespace for each level of hierarchy in front of the trace
-// to get output like
-// -> myTrace
-//  └> myChildTrace
-//   └> ChildOfMyChildTrace
-// ...
-function buildLevel(n) {
-  if (n === 0) {
-    return '  ->';
-  }
-
-  let level = '';
-  for (let i = 0; i < n+1; i++) {
-    level += ' ';
-  }
-  return `${level} └>`;
 }
 
 async function addService() {
@@ -744,8 +525,6 @@ async function provisionCommerceMockResources(appName, mockNamespace, targetName
         targetNamespace),
   ]), 1000, 10);
   await waitForDeployment('commerce-mock', mockNamespace, 120 * 1000);
-  await deployJaeger(k8s.loadAllYaml(jaegerYaml));
-  await deployLoki(k8s.loadAllYaml(lokiYaml));
   const vs = await waitForVirtualService(mockNamespace, 'commerce-mock');
   const mockHost = vs.spec.hosts[0];
   await retryPromise(
@@ -764,7 +543,7 @@ function getResourcePaths(namespace) {
   return [
     `/apis/serverless.kyma-project.io/v1alpha2/namespaces/${namespace}/functions`,
     `/apis/addons.kyma-project.io/v1alpha1/namespaces/${namespace}/addonsconfigurations`,
-    `/apis/gateway.kyma-project.io/v1alpha1/namespaces/${namespace}/apirules`,
+    `/apis/gateway.kyma-project.io/v1beta1/namespaces/${namespace}/apirules`,
     `/apis/apps/v1/namespaces/${namespace}/deployments`,
     `/api/v1/namespaces/${namespace}/services`,
   ];
@@ -805,11 +584,6 @@ async function waitForSubscriptions(subscriptions) {
     const subscription = subscriptions[i];
     await waitForSubscription(subscription.metadata.name, subscription.metadata.namespace);
   }
-}
-
-async function waitForSubscriptionsTillReady(targetNamespace) {
-  await waitForSubscription(orderReceivedSubName, targetNamespace);
-  await waitForSubscription('order-created', targetNamespace);
 }
 
 async function checkInClusterEventDelivery(targetNamespace, testSubscriptionV1Alpha2=false) {
@@ -1024,19 +798,14 @@ module.exports = {
   sendLegacyEventAndCheckResponse,
   sendCloudEventStructuredModeAndCheckResponse,
   sendCloudEventBinaryModeAndCheckResponse,
-  sendLegacyEventAndCheckTracing,
-  sendCloudEventStructuredModeAndCheckTracing,
-  sendCloudEventBinaryModeAndCheckTracing,
   addService,
   updateService,
   deleteService,
   checkFunctionResponse,
   checkInClusterEventDelivery,
   checkFullyQualifiedTypeWithExactSub,
-  checkInClusterEventTracing,
   cleanMockTestFixture,
   deleteMockTestFixture,
-  waitForSubscriptionsTillReady,
   waitForSubscriptions,
   setEventMeshSourceNamespace,
   cleanCompassResourcesSKR,
@@ -1050,5 +819,4 @@ module.exports = {
   eventTypeOrderReceived,
   orderReceivedSubName,
   generateTraceParentHeader,
-  checkTrace,
 };

@@ -1,45 +1,4 @@
 ---
-global:
-  ory:
-    hydra:
-      persistence:
-        enabled: true
-        postgresql:
-          enabled: true
-        gcloud:
-          enabled: false
-hydra:
-  affinity:
-    podAntiAffinity:
-      preferredDuringSchedulingIgnoredDuringExecution:
-      - weight: 100
-        podAffinityTerm:
-          labelSelector:
-            matchLabels:
-              app.kubernetes.io/name: hydra
-          topologyKey: "kubernetes.io/hostname"
-  hydra-maester:
-    deployment:
-      resources:
-        requests:
-          cpu: "10m"
-          memory: "256Mi"
-        limits:
-          cpu: "400m"
-          memory: "1Gi"
-  deployment:
-    resources:
-      requests:
-        cpu: "250m"
-        memory: "256Mi"
-      limits:
-        memory: "1Gi"
-    autoscaling:
-      enabled: true
-      minReplicas: 2
-      maxReplicas: 5
-      targetMemoryUtilizationPercentage: 75
-      targetCPUUtilizationPercentage: 80          
 oathkeeper:
   deployment:
     resources:
@@ -70,15 +29,3 @@ oathkeeper:
             matchLabels:
               app: oathkeeper
           topologyKey: "kubernetes.io/hostname"
-
-postgresql:
-  slave:
-    affinity:
-      podAntiAffinity:
-        preferredDuringSchedulingIgnoredDuringExecution:
-        - weight: 100
-          podAffinityTerm:
-            labelSelector:
-              matchLabels:
-                app: postgresql
-            topologyKey: "kubernetes.io/hostname"

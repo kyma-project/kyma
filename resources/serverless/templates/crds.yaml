@@ -181,12 +181,14 @@ spec:
                   on the Function's runtime Pod.
                 type: object
               replicas:
+                default: 1
                 description: Defines the exact number of Function's Pods to run at
                   a time. If **ScaleConfig** is configured, or if the Function is
                   targeted by an external scaler, then the **Replicas** field is used
                   by the relevant HorizontalPodAutoscaler to control the number of
                   active replicas.
                 format: int32
+                minimum: 0
                 type: integer
               resourceConfiguration:
                 description: Specifies resources requested by the Function and the

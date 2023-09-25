@@ -16,7 +16,11 @@ To develop the Function Controller, you need:
 - [controller-gen](https://github.com/kubernetes-sigs/controller-tools/releases/tag/v0.6.2) (v0.6.2)
 - <!-- markdown-link-check-disable-line -->[kustomize](https://github.com/kubernetes-sigs/kustomize/releases/tag/kustomize%2Fv4.5.7) (v4.5.7)
 
-To develop the component, use the formulae declared in the [generic](/common/makefiles/generic-make-go.mk) and [component-specific](./Makefile) Makefiles. To run tests without the Makefile logic, use the `go test ./...` command.
+To develop the component, use the formulae declared in the [Makefile](./Makefile).
+
+To run the manager and set up envs correctly, source [controller.env](./hack/controller.env). 
+You can customize the configuration by editing files in [hack](./hack) dir. 
+
 
 ### Environment variables
 

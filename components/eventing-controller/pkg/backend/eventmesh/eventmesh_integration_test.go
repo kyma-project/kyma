@@ -179,7 +179,7 @@ func Test_handleKymaSubModified(t *testing.T) {
 			givenKymaSub: &eventingv1alpha2.Subscription{
 				Status: eventingv1alpha2.SubscriptionStatus{
 					Backend: eventingv1alpha2.Backend{
-						Ev2hash: int64(-9219276050977208880),
+						EventMeshLocalHash: int64(-9219276050977208880),
 					},
 				},
 			},

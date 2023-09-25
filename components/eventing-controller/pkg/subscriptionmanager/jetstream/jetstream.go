@@ -119,6 +119,10 @@ func (sm *SubscriptionManager) Start(defaultSubsConfig env.DefaultSubscriptionCo
 	)
 	sm.backendv2 = jetStreamReconciler.Backend
 
+	if err := jetStreamHandler.Initialize(jetStreamReconciler.HandleNatsConnClose); err != nil {
+		return fmt.Errorf("failed to initialise jetstream reconciler: %w", err)
+	}
+
 	// delete dangling invalid consumers here
 	var subs eventingv1alpha2.SubscriptionList
 	if err := client.List(context.Background(), &subs); err != nil {

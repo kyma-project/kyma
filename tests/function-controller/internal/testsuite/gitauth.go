@@ -97,7 +97,7 @@ func GitAuthTestSteps(restConfig *rest.Config, cfg internal.Config, logf *logrus
 	githubFn := function.NewFunction(githubTC.name, genericContainer.Namespace, cfg.KubectlProxyEnabled, genericContainer)
 
 	return executor.NewSerialTestRunner(logf, "Test Git function authentication",
-		namespace.NewNamespaceStep(logf, "Create test namespace", genericContainer.Namespace, coreCli),
+		namespace.NewNamespaceStep(logf, fmt.Sprintf("Create %s namespace", genericContainer.Namespace), genericContainer.Namespace, coreCli),
 		executor.NewParallelRunner(logf, "Providers tests",
 			executor.NewSerialTestRunner(genericContainer.Log, fmt.Sprintf("%s Function auth test", azureTC.provider),
 				secret.CreateSecret(genericContainer.Log, azureSecret, "Create Azure Auth Secret", azureTC.secretData),

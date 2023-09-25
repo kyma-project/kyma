@@ -170,35 +170,23 @@ spec:
           }
         }
 ---
-apiVersion: hydra.ory.sh/v1alpha1
-kind: OAuth2Client
-metadata:
-  name: lastorder
-spec:
-  grantTypes:
-    - "client_credentials"
-  scope: "read write"
-  secretName: lastorder-oauth
----
-apiVersion: gateway.kyma-project.io/v1alpha1
+apiVersion: gateway.kyma-project.io/v1beta1
 kind: APIRule
 metadata:
   name: lastorder
 spec:
   gateway: kyma-gateway.kyma-system.svc.cluster.local
+  host: lastorder
   rules:
     - path: /function
       methods: ["GET", "POST"]
       accessStrategies:
-        - handler: oauth2_introspection
-          config:
-            required_scope: ["read"]
+        - handler: allow
     - path: /.*
       methods: ["GET", "POST"]
       accessStrategies:
         - handler: allow
           config: {}
   service:
-    host: lastorder
     name: lastorder
     port: 80
