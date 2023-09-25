@@ -39,7 +39,6 @@
 /installation/resources/crds/monitoring @kyma-project/observability
 /installation/resources/crds/ory @kyma-project/goat
 /installation/resources/crds/serverless @kyma-project/Otters
-/installation/resources/crds/telemetry @kyma-project/observability
 
 /resources/api-gateway @kyma-project/goat
 /resources/application-connector @kyma-project/Framefrog
@@ -51,11 +50,9 @@
 /resources/istio @kyma-project/goat
 /resources/istio-resources @kyma-project/goat
 /resources/istio-resources/files/dashboards @kyma-project/observability
-/resources/logging @kyma-project/observability
 /resources/monitoring @kyma-project/observability
 /resources/ory @kyma-project/goat
 /resources/serverless @kyma-project/Otters
-/resources/telemetry @kyma-project/observability
 
 /resources/btp-manager @kyma-project/gopher
 
@@ -69,10 +66,7 @@
 /tests/fast-integration/skr-nightly @kyma-project/gopher
 /tests/fast-integration/skr-test @kyma-project/gopher
 /tests/fast-integration/smctl @kyma-project/gopher
-/tests/fast-integration/logging @kyma-project/observability
 /tests/fast-integration/monitoring @kyma-project/observability
-/tests/fast-integration/telemetry-test @kyma-project/observability
-/tests/fast-integration/tracing @kyma-project/observability
 /tests/fast-integration/prow @kyma-project/Jellyfish
 
 /tests/function-controller @kyma-project/Otters

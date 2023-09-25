@@ -1,3 +1,4 @@
+{{ if not .Values.eventingWebhookAuth.enabled}}
 # Used by controller for BEB backend
 apiVersion: hydra.ory.sh/v1alpha1
 kind: OAuth2Client
@@ -11,3 +12,4 @@ spec:
   metadata: null
   scope: read write beb uaa.resource
   secretName: {{ include "controller.fullname" . }}{{ .Values.bebSecret.nameSuffix }}
+{{ end }}
