@@ -1,4 +1,5 @@
-FROM europe-docker.pkg.dev/kyma-project/prod/external/golang:1.21.0-alpine3.18 as builder
+# image builder base on golang:1.21.1-alpine3.18
+FROM golang@sha256:0c860c7ceba62231d0f99fb92e9d7c1577f26fea794a12c75756a8f64b146e45 as builder
 
 WORKDIR /validator-test/
 
