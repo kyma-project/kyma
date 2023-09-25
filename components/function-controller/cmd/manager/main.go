@@ -183,6 +183,5 @@ func loadConfig(prefix string) (config, error) {
 	if err != nil {
 		return cfg, err
 	}
-
 	return cfg, nil
 }

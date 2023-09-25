@@ -16,17 +16,15 @@ import (
 )
 
 type DefaultingWebHook struct {
-	configAlphaV2 *serverlessv1alpha2.DefaultingConfig
-	client        ctrlclient.Client
-	decoder       *admission.Decoder
-	log           *zap.SugaredLogger
+	client  ctrlclient.Client
+	decoder *admission.Decoder
+	log     *zap.SugaredLogger
 }
 
-func NewDefaultingWebhook(configV1Alpha2 *serverlessv1alpha2.DefaultingConfig, client ctrlclient.Client, log *zap.SugaredLogger) *DefaultingWebHook {
+func NewDefaultingWebhook(client ctrlclient.Client, log *zap.SugaredLogger) *DefaultingWebHook {
 	return &DefaultingWebHook{
-		configAlphaV2: configV1Alpha2,
-		client:        client,
-		log:           log,
+		client: client,
+		log:    log,
 	}
 }
 
@@ -37,11 +35,6 @@ func (w *DefaultingWebHook) Handle(_ context.Context, req admission.Request) adm
 	if req.Kind.Kind == "Function" {
 		res := w.handleFunctionDefaulting(req)
 		log.Debug("defaulting finished for function")
-		return res
-	}
-	if req.Kind.Kind == "GitRepository" {
-		res := w.handleGitRepoDefaulting()
-		log.Debug("defaulting finished for gitrepository")
 		return res
 	}
 
@@ -63,7 +56,6 @@ func (w *DefaultingWebHook) handleFunctionDefaulting(req admission.Request) admi
 			if err := w.decoder.Decode(req, fn); err != nil {
 				return admission.Errored(http.StatusBadRequest, err)
 			}
-			fn.Default(w.configAlphaV2)
 			f = fn
 		}
 	default:
@@ -75,8 +67,4 @@ func (w *DefaultingWebHook) handleFunctionDefaulting(req admission.Request) admi
 		return admission.Errored(http.StatusInternalServerError, err)
 	}
 	return admission.PatchResponseFromRaw(req.Object.Raw, fBytes)
-}
-
-func (w *DefaultingWebHook) handleGitRepoDefaulting() admission.Response {
-	return admission.Allowed("")
 }

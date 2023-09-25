@@ -1,23 +1,15 @@
-const k8s = require('@kubernetes/client-node');
-const fs = require('fs');
-const path = require('path');
-
 const {
   printRestartReport,
   getContainerRestartsForAllNamespaces,
-  deployLoki,
 } = require('../utils');
-const {loggingTests} = require('../logging');
 const {
   monitoringTests,
   unexposeGrafana,
 } = require('../monitoring');
-const {tracingTests} = require('../tracing');
 const {
   checkInClusterEventDelivery,
   checkFunctionResponse,
 } = require('../test/fixtures/commerce-mock');
-const {createIstioAccessLogResource} = require('../logging/client.js');
 
 
 describe('Upgrade test tests', function() {
@@ -25,20 +17,6 @@ describe('Upgrade test tests', function() {
   this.slow(5000);
   let initialRestarts = null;
   const testNamespace = 'test';
-
-  it('Deploys Istio access logs', async function() {
-    await createIstioAccessLogResource();
-  });
-
-  it('Deploys the Loki resource', async function() {
-    const lokiYaml = fs.readFileSync(
-        path.join(__dirname, '../test/fixtures/loki/loki.yaml'),
-        {
-          encoding: 'utf8',
-        },
-    );
-    await deployLoki(k8s.loadAllYaml(lokiYaml));
-  });
 
   it('Listing all pods in cluster', async function() {
     initialRestarts = await getContainerRestartsForAllNamespaces();
@@ -58,8 +36,6 @@ describe('Upgrade test tests', function() {
   });
 
   monitoringTests();
-  loggingTests();
-  tracingTests(testNamespace);
 
   after('Unexpose Grafana', async () => {
     await unexposeGrafana();

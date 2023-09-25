@@ -124,21 +124,9 @@ async function assertMetricsExist() {
     },
 
     {
-      'logging-loki': [
-        {'log_messages_total': [['level']]},
-        {'loki_request_duration_seconds_bucket': [['route']]}],
-    },
-
-    {
       'monitoring-grafana': [
         {'grafana_stat_totals_dashboard': [[]]},
         {'grafana_api_dataproxy_request_all_milliseconds_sum ': [['pod']]}],
-    },
-
-    {
-      'telemetry-fluent-bit': [
-        {'telemetry_fsbuffer_usage_bytes': [[]]},
-        {'fluentbit_input_bytes_total ': [['pod']]}],
     },
   ];
 
@@ -221,13 +209,8 @@ async function getServiceMonitors() {
 }
 
 function shouldIgnoreServiceMonitor(serviceMonitorName) {
-  const serviceMonitorsToBeIgnored = [
-    // tracing-metrics is created automatically by jaeger operator and can't be disabled
-    'tracing-metrics',
-  ];
-  return serviceMonitorsToBeIgnored.includes(serviceMonitorName) || !serviceMonitorName.startsWith('monitoring');
+  return !serviceMonitorName.startsWith('monitoring');
 }
-
 async function buildScrapePoolSet() {
   const serviceMonitors = await getServiceMonitors();
   const scrapePools = new Set();
@@ -278,10 +261,7 @@ function removeNamePrefixes(ruleNames) {
   return ruleNames.map((rule) =>
     rule
         .replace('monitoring-', '')
-        .replace('kyma-', '')
-        .replace('logging-', '')
-        .replace('fluent-bit-', '')
-        .replace('loki-', ''),
+        .replace('kyma-', ''),
   );
 }
 

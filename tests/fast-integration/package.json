@@ -24,7 +24,6 @@
     "eventing-get-registered-scenarios": "node -e 'require(\"./eventing-test/utils.js\").getRegisteredCompassScenarios()'",
     "test-eventing-provision-skr": "DEBUG=true mocha --timeout 150000 --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./eventing-test/provision/provision-skr.js",
     "test-eventing-deprovision-skr": "DEBUG=true mocha --timeout 150000 --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./eventing-test/provision/deprovision-skr.js",
-    "test-telemetry": "mocha --timeout 180000 --exit --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./telemetry-test/suite.js",
     "upgrade-test-prep": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json upgrade-test/upgrade-test-prep.js",
     "upgrade-test-tests": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json upgrade-test/upgrade-test-tests.js",
     "upgrade-test-cleanup": "DEBUG=true mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json upgrade-test/upgrade-test-cleanup.js",

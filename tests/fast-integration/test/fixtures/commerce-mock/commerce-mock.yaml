@@ -72,13 +72,14 @@ spec:
   selector:
     app: commerce-mock
 ---
-apiVersion: gateway.kyma-project.io/v1alpha1
+apiVersion: gateway.kyma-project.io/v1beta1
 kind: APIRule
 metadata:
   name: commerce-mock
   namespace: %%MOCK_NAMESPACE%%
 spec:
   gateway: kyma-gateway.kyma-system.svc.cluster.local
+  host: commerce-%%MOCK_NAMESPACE%%
   rules:
     - accessStrategies:
         - config: {}
@@ -86,6 +87,5 @@ spec:
       methods: ["*"]
       path: /.*
   service:
-    host: commerce-%%MOCK_NAMESPACE%%
     name: commerce-mock
     port: 10000

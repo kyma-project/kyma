@@ -8,8 +8,7 @@ API Gateway is a Kubernetes controller, which operates on APIRule custom resourc
    kubectl describe apirules.gateway.kyma-project.io -n {NAMESPACE} {APIRULE_NAME}
    ```
 
-If the status is `Error`, edit the APIRule and fix the issues described in the **.Status.APIRuleStatus.desc** field. If you still encounter issues, make sure that API Gateway, Hydra, and Oathkeeper are running, or take a look at one of the more specific troubleshooting guides:
+If the status is `Error`, edit the APIRule and fix the issues described in the **.Status.APIRuleStatus.desc** field. If you still encounter issues, make sure that API Gateway and Oathkeeper are running, or take a look at one of the more specific troubleshooting guides:
 
-- [Cannot connect to a service exposed by an APIRule - `401 Unauthorized` or `403 Forbidden`](./apix-01-02-401-unauthorized-403-forbidden.md)
 - [Cannot connect to a service exposed by an APIRule - `404 Not Found`](./apix-01-03-404-not-found.md)
 - [Cannot connect to a service exposed by an APIRule - `500 Internal Server Error`](./apix-01-04-500-server-error.md)

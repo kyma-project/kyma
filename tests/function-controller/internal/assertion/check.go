@@ -80,53 +80,6 @@ func (h HTTPCheck) OnError() error {
 	return nil
 }
 
-var _ executor.Step = DefaultedFunctionCheck{}
-
-type DefaultedFunctionCheck struct {
-	name string
-	fn   *function.Function
-}
-
-func NewDefaultedFunctionCheck(name string, fn *function.Function) executor.Step {
-	return &DefaultedFunctionCheck{
-		name: name,
-		fn:   fn,
-	}
-}
-
-func (d DefaultedFunctionCheck) Name() string {
-	return d.name
-}
-
-func (d DefaultedFunctionCheck) Run() error {
-	fn, err := d.fn.Get()
-	if err != nil {
-		return err
-	}
-
-	if fn == nil {
-		return errors.New("function can't be nil")
-	}
-
-	spec := fn.Spec
-	if spec.Replicas == nil {
-		return errors.New("replicas equal nil")
-	} else if spec.ResourceConfiguration.Function.Resources.Requests.Memory().IsZero() || spec.ResourceConfiguration.Function.Resources.Requests.Cpu().IsZero() {
-		return errors.New("requests equal zero")
-	} else if spec.ResourceConfiguration.Function.Resources.Limits.Memory().IsZero() || spec.ResourceConfiguration.Function.Resources.Limits.Cpu().IsZero() {
-		return errors.New("limits equal zero")
-	}
-	return nil
-}
-
-func (d DefaultedFunctionCheck) Cleanup() error {
-	return nil
-}
-
-func (d DefaultedFunctionCheck) OnError() error {
-	return nil
-}
-
 var _ executor.Step = &tracingHTTPCheck{}
 
 type tracingHTTPCheck struct {

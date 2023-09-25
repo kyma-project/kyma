@@ -54,7 +54,7 @@ spec:
     app: orders-service
     example: orders-service
 ---
-apiVersion: gateway.kyma-project.io/v1alpha1
+apiVersion: gateway.kyma-project.io/v1beta1
 kind: APIRule
 metadata:
   name: orders-service
@@ -63,8 +63,8 @@ metadata:
     app: orders-service
     example: orders-service
 spec:
+  host: orders-service
   service:
-    host: orders-service
     name: orders-service
     port: 80
   gateway: kyma-gateway.kyma-system.svc.cluster.local

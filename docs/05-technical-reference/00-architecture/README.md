@@ -10,10 +10,6 @@ In this section you can learn more about technicalities behind each main area: t
 * [Application Gateway](ac-03-application-gateway.md)
 * [Runtime Agent Architecture](ra-01-runtime-agent-workflow.md)
 
-### API Exposure
-
-* [API Gateway Architecture](apix-01-architecture-apigateway.md)
-
 ### Eventing
 
 * [Eventing Architecture](evnt-01-architecture.md)
