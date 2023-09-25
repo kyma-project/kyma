@@ -34,7 +34,7 @@ spec:
             required_scope: ["read"]
 ```
 
-The following tables list all the possible parameters of a given resource together with their descriptions:
+The following table lists all the possible parameters of a given resource together with their descriptions:
 
 >**CAUTION:** If `service` is not defined at **spec.service** level, all defined rules must have `service` defined at **spec.rules.service** level, otherwise the validation fails.
 
