@@ -32,7 +32,7 @@ func (gs *GatewaySuite) TestGetRequest() {
 
 						expectedCode, err := getExpectedHTTPCode(service)
 						if err != nil {
-							gs.T().Log("Error during getting the error code from description -> applicationCRD")
+							gs.T().Log("Error during getting the error code from description -> applicationCRD [TEST CHANGE DO NOT MERGE]")
 							gs.T().Fail()
 						}
 
