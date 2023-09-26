@@ -1,6 +1,12 @@
 package v1alpha2
 
 import (
+	"context"
+	"github.com/stretchr/testify/require"
+	"k8s.io/client-go/kubernetes/scheme"
+	"path/filepath"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	"testing"
 
 	"github.com/onsi/gomega"
@@ -898,5 +904,64 @@ func fixValidationConfig() *ValidationConfig {
 				MinRequestMemory: "200Mi",
 			},
 		},
+	}
+}
+
+func Test_XKubernetesValidations(t *testing.T) {
+	ctx := context.TODO()
+	testEnv := &envtest.Environment{
+		CRDDirectoryPaths: []string{
+			filepath.Join("..", "..", "..", "..", "config", "crd", "bases"),
+		},
+		ErrorIfCRDPathMissing: true,
+	}
+	cfg, err := testEnv.Start()
+	require.NoError(t, err)
+
+	err = scheme.AddToScheme(scheme.Scheme)
+	require.NoError(t, err)
+
+	err = AddToScheme(scheme.Scheme)
+	require.NoError(t, err)
+
+	k8sClient, err := client.New(cfg, client.Options{Scheme: scheme.Scheme})
+	require.NoError(t, err)
+
+	testNs := corev1.Namespace{
+		ObjectMeta: metav1.ObjectMeta{Name: "test"},
+	}
+	err = k8sClient.Create(ctx, &testNs)
+	require.NoError(t, err)
+
+	defer func() {
+		require.NoError(t, testEnv.Stop())
+	}()
+
+	testCases := map[string]struct {
+		fn *Function
+	}{
+		"Restricted labels used": {
+			fn: &Function{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test",
+					Namespace: "test",
+				},
+				Spec: FunctionSpec{
+					Labels: map[string]string{
+						"serverless.kyma-project.io/": "test",
+					},
+				},
+			},
+		},
+	}
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			//GIVEN
+
+			//WHEN
+			err := k8sClient.Create(ctx, tc.fn)
+			//THEN
+			require.Error(t, err)
+		})
 	}
 }
