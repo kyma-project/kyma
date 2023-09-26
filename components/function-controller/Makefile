@@ -43,7 +43,7 @@ manifests: controller-gen-local generate-local
 	kustomize build config/crd > config/crd/crd-serverless.yaml
 	cp config/crd/crd-serverless.yaml ../../installation/resources/crds/serverless/
 	cp config/crd/crd-serverless.yaml ../../resources/serverless/templates/crds.yaml
-	(cd ../../hack/table-gen && make serverless-docs )
+	#(cd ../../hack/table-gen && make serverless-docs )
 
 # Generate code
 .PHONY: generate-local

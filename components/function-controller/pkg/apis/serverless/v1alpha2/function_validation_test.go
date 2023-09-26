@@ -962,6 +962,7 @@ func Test_XKubernetesValidations(t *testing.T) {
 			err := k8sClient.Create(ctx, tc.fn)
 			//THEN
 			require.Error(t, err)
+			//TODO: cast err to v1.Status and from details, I can get causes with Type, Message and field
 		})
 	}
 }

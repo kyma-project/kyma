@@ -242,9 +242,6 @@ spec:
                               More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
                             type: object
                         type: object
-                        x-kubernetes-validations:
-                        - message: Limit for CPU
-                          rule: has(self.resources.requests) && 'cpu' in has(self.resources.requests)
                     type: object
                     x-kubernetes-validations:
                     - message: Profile or resources
@@ -286,9 +283,6 @@ spec:
                               More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
                             type: object
                         type: object
-                        x-kubernetes-validations:
-                        - message: Limit for CPU
-                          rule: has(self.resources.requests) && 'cpu' in has(self.resources.requests)
                     type: object
                     x-kubernetes-validations:
                     - message: Profile or resources

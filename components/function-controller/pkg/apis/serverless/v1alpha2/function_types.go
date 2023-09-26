@@ -114,7 +114,6 @@ type ResourceRequirements struct {
 	// Can't be used together with **Profile**.
 	// For configuration details, see the [official Kubernetes documentation](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/).
 	// +optional
-	// +kubebuilder:validation:XValidation:message="Limit for CPU",rule="has(self.resources.requests) && 'cpu' in has(self.resources.requests)"
 	Resources *v1.ResourceRequirements `json:"resources,omitempty"`
 }
 
