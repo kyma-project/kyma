@@ -2,6 +2,8 @@
 title: Install Kyma
 ---
 
+> **NOTE:** This guide shows how to install classic Kyma with a set of predefined components. To learn how to install Kyma with a module, go to [Install, uninstall and upgrade Kyma with a module](../../02-get-started/08-install-uninstall-upgrade-kyma-module.md#install-kyma-with-a-module).
+
 You can simply use the default Kyma installation, or modify it as it fits your purposes.
 
 Meet the prerequisites, provision a k3d cluster, and use the `deploy` command to run Kyma locally.
@@ -138,6 +140,4 @@ components:
   kyma deploy --component eventing --component istio@istio-system
   ```
 
->**TIP:** To see a complete list of all Kyma components go to the [`components.yaml`](https://github.com/kyma-project/kyma/blob/main/installation/resources/components.yaml) file.
-
-> **NOTE:** To learn how to install Kyma with a module go to [Install, uninstall and upgrade Kyma with a module](../../02-get-started/08-install-uninstall-upgrade-kyma-module.md#install-kyma-with-a-module).
+>**TIP:** To see a complete list of all Kyma components, go to the [`components.yaml`](https://github.com/kyma-project/kyma/blob/main/installation/resources/components.yaml) file.
