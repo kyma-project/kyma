@@ -2,7 +2,7 @@
 title: Install Kyma
 ---
 
-> **NOTE:** This guide shows how to install classic Kyma with a set of predefined components. To learn how to install Kyma with a module, go to [Install, uninstall and upgrade Kyma with a module](../../02-get-started/08-install-uninstall-upgrade-kyma-module.md#install-kyma-with-a-module).
+>**NOTE:** This guide shows how to install classic Kyma with a set of predefined components. To learn how to install Kyma with a module, go to [Install, uninstall and upgrade Kyma with a module](../../02-get-started/08-install-uninstall-upgrade-kyma-module.md#install-kyma-with-a-module).
 
 You can simply use the default Kyma installation, or modify it as it fits your purposes.
 
