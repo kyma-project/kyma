@@ -42,8 +42,6 @@ Runtime Agent uses these environment variables:
 - **APP_QUERY_LOGGING** specifies whether to log GraphQL queries.
 - **APP_RUNTIME_EVENTS_URL** specifies the Events URL of the cluster that Runtime Agent runs on.
 - **APP_RUNTIME_CONSOLE_URL** specifies the Console URL of the cluster that Runtime Agent runs on. <!-- TODO: To be removed after it's been removed from the code. See https://github.com/kyma-project/kyma/pull/13984, the comment: discussion_r861476457. -->
-- **APP_DIRECTOR_PROXY_PORT** specifies the port used by the Director Proxy.
-- **APP_DIRECTOR_PROXY_INSECURE_SKIP_VERIFY** specifies whether to communicate with Director with disabled TLS verification.
 - **APP_HEALTH_PORT** specifies the health check port.
 - **APP_CA_CERT_SECRET_TO_MIGRATE** specifies the Namespace and the name of the Secret which stores the CA certificate to be renamed. Requires the `{NAMESPACE}/{SECRET_NAME}` format. 
 - **APP_CA_CERT_SECRET_KEYS_TO_MIGRATE** specifies the list of keys to be copied when migrating the old Secret specified in **APP_CA_CERT_SECRET_TO_MIGRATE** to the new one specified in **APP_CA_CERTIFICATES_SECRET**. Requires the JSON table format.

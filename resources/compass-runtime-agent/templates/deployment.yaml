@@ -78,10 +78,6 @@ spec:
               value: "https://gateway.{{ .Values.global.domainName }}"
             - name: APP_RUNTIME_CONSOLE_URL
               value: "https://console.{{ .Values.global.domainName }}"
-            - name: APP_DIRECTOR_PROXY_PORT
-              value: {{ .Values.compassRuntimeAgent.director.proxy.port | quote }}
-            - name: APP_DIRECTOR_PROXY_INSECURE_SKIP_VERIFY
-              value: {{ .Values.compassRuntimeAgent.director.proxy.insecureSkipVerify | quote }}
             - name: APP_HEALTH_PORT
               value: {{ .Values.compassRuntimeAgent.healthCheck.port | quote }}
               {{ if  .Values.compassRuntimeAgent.certificates.caCertificate.secret.migration}}
