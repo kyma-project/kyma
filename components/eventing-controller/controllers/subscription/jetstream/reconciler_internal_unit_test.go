@@ -242,9 +242,6 @@ func Test_Reconcile(t *testing.T) {
 }
 
 func Test_handleSubscriptionDeletion(t *testing.T) {
-	testEnvironment := setupTestEnvironment(t)
-	ctx, r, mockedBackend := testEnvironment.Context, testEnvironment.Reconciler, testEnvironment.Backend
-
 	testCases := []struct {
 		name            string
 		givenFinalizers []string
@@ -286,12 +283,14 @@ func Test_handleSubscriptionDeletion(t *testing.T) {
 	for _, tC := range testCases {
 		testCase := tC
 		t.Run(testCase.name, func(t *testing.T) {
+
 			// given
 			sub := controllertesting.NewSubscription(subscriptionName, namespaceName,
 				controllertesting.WithFinalizers(testCase.givenFinalizers),
 			)
-			err := r.Client.Create(testEnvironment.Context, sub)
-			require.NoError(t, err)
+
+			testEnvironment := setupTestEnvironment(t, sub)
+			ctx, r, mockedBackend := testEnvironment.Context, testEnvironment.Reconciler, testEnvironment.Backend
 
 			if testCase.wantDeleteCall {
 				if errors.Is(testCase.wantError, errFailedToDeleteSub) {
@@ -302,7 +301,7 @@ func Test_handleSubscriptionDeletion(t *testing.T) {
 			}
 
 			// when
-			_, err = r.handleSubscriptionDeletion(ctx, sub, r.namedLogger())
+			_, err := r.handleSubscriptionDeletion(ctx, sub, r.namedLogger())
 			require.ErrorIs(t, err, testCase.wantError)
 
 			// then
@@ -382,8 +381,6 @@ func Test_addFinalizer(t *testing.T) {
 }
 
 func Test_syncSubscriptionStatus(t *testing.T) {
-	testEnvironment := setupTestEnvironment(t)
-	ctx, r := testEnvironment.Context, testEnvironment.Reconciler
 
 	jetStreamError := errors.New("JetStream is not ready")
 	falseNatsSubActiveCondition := eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionSubscriptionActive,
@@ -456,11 +453,12 @@ func Test_syncSubscriptionStatus(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			// given
 			sub := testCase.givenSub
-			err := r.Client.Create(ctx, sub)
-			require.NoError(t, err)
+
+			testEnvironment := setupTestEnvironment(t, sub)
+			ctx, r := testEnvironment.Context, testEnvironment.Reconciler
 
 			// when
-			err = r.syncSubscriptionStatus(ctx, sub, testCase.givenError, r.namedLogger())
+			err := r.syncSubscriptionStatus(ctx, sub, testCase.givenError, r.namedLogger())
 			require.NoError(t, err)
 
 			// then
@@ -647,20 +645,15 @@ func Test_updateStatus(t *testing.T) {
 }
 
 func Test_updateSubscription(t *testing.T) {
-	// given
 	sub := controllertesting.NewSubscription(subscriptionName, namespaceName,
 		controllertesting.WithStatusTypes([]eventingv1alpha2.EventType{
 			{OriginalType: "order.created.v1", CleanType: "order.created.v1"},
 		}),
 	)
-
 	subWithDifferentStatus := sub.DeepCopy()
 	subWithDifferentStatus.Status.Ready = !sub.Status.Ready
 
 	ctx := context.Background()
-	testEnvironment := setupTestEnvironment(t)
-	r := testEnvironment.Reconciler
-
 	testCases := []struct {
 		name             string
 		actualSub        *eventingv1alpha2.Subscription
@@ -694,10 +687,13 @@ func Test_updateSubscription(t *testing.T) {
 	for _, tC := range testCases {
 		testCase := tC
 		t.Run(testCase.name, func(t *testing.T) {
+			testEnvironment := setupTestEnvironment(t)
 			if tC.wantErrorMessage == "" {
 				sub.ResourceVersion = ""
-				require.NoError(t, r.Client.Create(ctx, sub))
+				testEnvironment = setupTestEnvironment(t, sub)
 			}
+			r := testEnvironment.Reconciler
+
 			resourceVersionBefore := sub.ResourceVersion
 
 			// when
@@ -742,7 +738,7 @@ type TestEnvironment struct {
 func setupTestEnvironment(t *testing.T, objs ...client.Object) *TestEnvironment {
 	mockedBackend := &mocks.Backend{}
 	ctx := context.Background()
-	fakeClient := createFakeClientBuilder(t).WithObjects(objs...).Build()
+	fakeClient := createFakeClientBuilder(t).WithObjects(objs...).WithStatusSubresource(objs...).Build()
 	recorder := &record.FakeRecorder{}
 
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))

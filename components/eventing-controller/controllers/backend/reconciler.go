@@ -21,7 +21,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/internal/featureflags"
@@ -825,7 +824,7 @@ func (r *Reconciler) getOAuth2ClientCredentials(ctx context.Context) (*oauth2Cre
 }
 
 func getDeploymentMapper() handler.EventHandler {
-	var mapper handler.MapFunc = func(obj client.Object) []reconcile.Request {
+	var mapper handler.MapFunc = func(ctx context.Context, obj client.Object) []reconcile.Request {
 		var reqs []reconcile.Request
 		// Ignore deployments other than publisher-proxy
 		if obj.GetName() == deployment.PublisherName && obj.GetNamespace() == deployment.PublisherNamespace {
@@ -839,7 +838,7 @@ func getDeploymentMapper() handler.EventHandler {
 }
 
 func getEventingBackendCRMapper() handler.EventHandler {
-	var mapper handler.MapFunc = func(obj client.Object) []reconcile.Request {
+	var mapper handler.MapFunc = func(ctx context.Context, obj client.Object) []reconcile.Request {
 		return []reconcile.Request{
 			{NamespacedName: types.NamespacedName{Namespace: obj.GetNamespace(), Name: "any"}},
 		}
@@ -850,8 +849,8 @@ func getEventingBackendCRMapper() handler.EventHandler {
 func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1.Secret{}).
-		Watches(&source.Kind{Type: &eventingv1alpha1.EventingBackend{}}, getEventingBackendCRMapper()).
-		Watches(&source.Kind{Type: &appsv1.Deployment{}}, getDeploymentMapper()).
+		Watches(&eventingv1alpha1.EventingBackend{}, getEventingBackendCRMapper()).
+		Watches(&appsv1.Deployment{}, getDeploymentMapper()).
 		Complete(r)
 }
 

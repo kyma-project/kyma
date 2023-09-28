@@ -743,17 +743,18 @@ func (r *Reconciler) emitConditionEvent(subscription *eventingv1alpha2.Subscript
 func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
 	ctru, err := controller.NewUnmanaged(reconcilerName, mgr, controller.Options{Reconciler: r})
 	if err != nil {
-		return xerrors.Errorf("failed to create unmanaged controller: %v", err)
+		return fmt.Errorf("failed to create unmanaged controller: %w", err)
 	}
 
-	if err := ctru.Watch(&source.Kind{Type: &eventingv1alpha2.Subscription{}}, &handler.EnqueueRequestForObject{}); err != nil {
-		return xerrors.Errorf("failed to watch subscriptions: %v", err)
+	if err := ctru.Watch(source.Kind(mgr.GetCache(), &eventingv1alpha2.Subscription{}),
+		&handler.EnqueueRequestForObject{}); err != nil {
+		return fmt.Errorf("failed to watch subscriptions: %w", err)
 	}
 
-	apiRuleEventHandler :=
-		&handler.EnqueueRequestForOwner{OwnerType: &eventingv1alpha2.Subscription{}, IsController: false}
-	if err := ctru.Watch(&source.Kind{Type: &apigatewayv1beta1.APIRule{}}, apiRuleEventHandler); err != nil {
-		return xerrors.Errorf("failed to watch APIRule: %v", err)
+	apiRuleEventHandler := handler.EnqueueRequestForOwner(r.Scheme(), mgr.GetRESTMapper(),
+		&eventingv1alpha2.Subscription{}, handler.OnlyControllerOwner())
+	if err := ctru.Watch(source.Kind(mgr.GetCache(), &apigatewayv1beta1.APIRule{}), apiRuleEventHandler); err != nil {
+		return fmt.Errorf("failed to watch APIRule: %w", err)
 	}
 
 	go func(r *Reconciler, c controller.Controller) {

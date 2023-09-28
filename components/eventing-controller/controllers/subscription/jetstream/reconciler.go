@@ -80,7 +80,7 @@ func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
 		return err
 	}
 
-	if err := ctru.Watch(&source.Kind{Type: &eventingv1alpha2.Subscription{}},
+	if err := ctru.Watch(source.Kind(mgr.GetCache(), &eventingv1alpha2.Subscription{}),
 		&handler.EnqueueRequestForObject{}); err != nil {
 		r.namedLogger().Errorw("Failed to setup watch for subscriptions", "error", err)
 		return err

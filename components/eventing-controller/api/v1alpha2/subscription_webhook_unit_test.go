@@ -420,7 +420,7 @@ func Test_validateSubscription(t *testing.T) {
 		tc := testCase
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			err := tc.givenSub.ValidateSubscription()
+			_, err := tc.givenSub.ValidateSubscription()
 			require.Equal(t, err, tc.wantErr)
 		})
 	}
