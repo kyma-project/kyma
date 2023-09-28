@@ -113,4 +113,27 @@ Build and install the libgit2 binary required by the Function Controller on macO
    cmake -DCMAKE_OSX_ARCHITECTURES="x86_64" .
    make install
    ```
-   
+#### Alternative Remedy
+There is an alternative method for macOS that relies on [brew](https://brew.sh/).
+If you still see the `Invalid libgit2 version` error message on macOS, follow these steps:
+
+1. Locate your brew's Cellar directory.
+
+   ```bash
+   find / -type d -name "Cellar"
+   ```
+Alternatively, you can use **⌘⇧G** in Finder to search for `Cellar`.
+
+2. Prepare the libgit2 directory.
+
+If you already have libgit2 installed via brew you need to delete previous installations found in the `libgit2` directory.
+
+Otherwise create an empty directory named `libgit2`.
+
+3. Extract `libgit.tgz` located in `./components/serverless/hack` into `Cellar/libgit2`.
+
+
+4. Link libgit2 using:
+   ```bash
+   brew link libgit2
+   ```
