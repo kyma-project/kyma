@@ -15,7 +15,7 @@ First, create a sample Function that prints out the received event to console:
   Kyma Dashboard
   </summary>
 
-1. Go to **Namespaces** and select the default Namespace.
+1. Go to **Namespaces** and select the `default` Namespace.
 2. Go to **Workloads** > **Functions** and click **Create Function +**.
 3. Name the Function `lastorder`.
 4. From the **Language** dropdown, choose `JavaScript`.
@@ -95,7 +95,7 @@ All the published events of this type are then forwarded to an HTTP endpoint cal
   Kyma Dashboard
   </summary>
 
-1. Go to **Namespaces** and select the default Namespace.
+1. Go to **Namespaces** and select the `default` Namespace.
 2. Go to **Configuration** > **Subscriptions** and click **Create Subscription+**.
 3. Provide the following parameters:
    - **Subscription name**: `lastorder-sub`
