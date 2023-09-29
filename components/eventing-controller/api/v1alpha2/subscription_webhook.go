@@ -13,6 +13,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
 const (
@@ -54,21 +55,21 @@ func (s *Subscription) Default() {
 var _ webhook.Validator = &Subscription{}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type.
-func (s *Subscription) ValidateCreate() error {
+func (s *Subscription) ValidateCreate() (admission.Warnings, error) {
 	return s.ValidateSubscription()
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type.
-func (s *Subscription) ValidateUpdate(_ runtime.Object) error {
+func (s *Subscription) ValidateUpdate(_ runtime.Object) (admission.Warnings, error) {
 	return s.ValidateSubscription()
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type.
-func (s *Subscription) ValidateDelete() error {
-	return nil
+func (s *Subscription) ValidateDelete() (admission.Warnings, error) {
+	return nil, nil
 }
 
-func (s *Subscription) ValidateSubscription() error {
+func (s *Subscription) ValidateSubscription() (admission.Warnings, error) {
 	var allErrs field.ErrorList
 
 	if err := s.validateSubscriptionSource(); err != nil {
@@ -84,10 +85,10 @@ func (s *Subscription) ValidateSubscription() error {
 		allErrs = append(allErrs, err)
 	}
 	if len(allErrs) == 0 {
-		return nil
+		return nil, nil
 	}
 
-	return apierrors.NewInvalid(GroupKind, s.Name, allErrs)
+	return nil, apierrors.NewInvalid(GroupKind, s.Name, allErrs)
 }
 
 func (s *Subscription) validateSubscriptionSource() *field.Error {

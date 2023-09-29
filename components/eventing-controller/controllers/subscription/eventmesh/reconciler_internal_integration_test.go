@@ -571,10 +571,10 @@ func TestReconciler_PreserveBackendHashes(t *testing.T) {
 	validator := sink.ValidatorFunc(func(s *eventingv1alpha2.Subscription) error { return nil })
 
 	const (
-		ev2hash            = int64(118518533334734626)
-		eventMeshHash      = int64(748405436686967274)
-		webhookAuthHash    = int64(118518533334734627)
-		eventMeshLocalHash = int64(883494500014499539)
+		ev2hash            = int64(118518533334734)
+		eventMeshHash      = int64(748405436686967)
+		webhookAuthHash    = int64(118518533334734)
+		eventMeshLocalHash = int64(883494500014499)
 	)
 
 	var testCases = []struct {
@@ -1367,7 +1367,7 @@ type testEnvironment struct {
 // setupTestEnvironment is a testEnvironment constructor.
 func setupTestEnvironment(t *testing.T, objs ...client.Object) *testEnvironment {
 	mockedBackend := &mocks.Backend{}
-	fakeClient := createFakeClientBuilder(t).WithObjects(objs...).Build()
+	fakeClient := createFakeClientBuilder(t).WithObjects(objs...).WithStatusSubresource(objs...).Build()
 	recorder := &record.FakeRecorder{}
 	defaultLogger, err := eventinglogger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	if err != nil {
