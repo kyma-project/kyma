@@ -752,7 +752,7 @@ func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
 	}
 
 	apiRuleEventHandler := handler.EnqueueRequestForOwner(r.Scheme(), mgr.GetRESTMapper(),
-		&eventingv1alpha2.Subscription{}, handler.OnlyControllerOwner())
+		&eventingv1alpha2.Subscription{})
 	if err := ctru.Watch(source.Kind(mgr.GetCache(), &apigatewayv1beta1.APIRule{}), apiRuleEventHandler); err != nil {
 		return fmt.Errorf("failed to watch APIRule: %w", err)
 	}

@@ -64,7 +64,7 @@ const (
 	testEnvStartAttempts     = 10
 	twoMinTimeOut            = 120 * time.Second
 	bigPollingInterval       = 3 * time.Second
-	bigTimeOut               = 40 * time.Second
+	bigTimeOut               = 60 * time.Second
 	smallTimeOut             = 5 * time.Second
 	smallPollingInterval     = 1 * time.Second
 	domain                   = "domain.com"
