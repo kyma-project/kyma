@@ -60,7 +60,7 @@ async function assertGrafanaRedirectsExist() {
 }
 
 async function assertGrafanaRedirects() {
-  let res = await checkGrafanaRedirect('https://kyma-project.io/docs', 403);
+  let res = await checkGrafanaRedirect('https://kyma-project.io/#', 403);
   assert.isTrue(res, 'Grafana redirect to kyma docs does not work!');
 
   await createBasicProxySecret();
@@ -94,7 +94,7 @@ async function resetGrafanaProxy(isSkr) {
   await deleteProxySecret();
   await restartProxyPod();
 
-  const docsUrl = (isSkr ? 'https://help.sap.com/docs/BTP/' : 'https://kyma-project.io/docs');
+  const docsUrl = (isSkr ? 'https://help.sap.com/docs/BTP/' : 'https://kyma-project.io/#');
   const res = await checkGrafanaRedirect(docsUrl, 403);
   assert.isTrue(res, 'Authproxy reset was not successful. Grafana is not redirected to kyma docs!');
 }
