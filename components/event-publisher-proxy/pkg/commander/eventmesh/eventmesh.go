@@ -87,8 +87,14 @@ func (c *Commander) Start() error {
 	k8sConfig := config.GetConfigOrDie()
 
 	// setup application lister
-	dynamicClient := dynamic.NewForConfigOrDie(k8sConfig)
-	applicationLister := application.NewLister(ctx, dynamicClient)
+	var applicationLister *application.Lister
+	if c.envCfg.ApplicationCRDEnabled {
+		dynamicClient := dynamic.NewForConfigOrDie(k8sConfig)
+		applicationLister = application.NewLister(ctx, dynamicClient)
+		c.namedLogger().Info("Application CR lister is enabled!")
+	} else {
+		c.namedLogger().Info("Application CR lister is disabled!")
+	}
 
 	// configure legacyTransformer
 	legacyTransformer := legacy.NewTransformer(

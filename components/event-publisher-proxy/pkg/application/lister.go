@@ -30,6 +30,7 @@ func NewLister(ctx context.Context, client dynamic.Interface) *Lister {
 	lister := factory.ForResource(gvr).Lister()
 	logger, _ := kymalogger.New("json", "error")
 	informers.WaitForCacheSyncOrDie(ctx, factory, logger)
+
 	return &Lister{lister: lister}
 }
 

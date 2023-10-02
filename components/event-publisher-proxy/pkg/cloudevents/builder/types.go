@@ -17,7 +17,7 @@ type CloudEventBuilder interface {
 
 type GenericBuilder struct {
 	typePrefix        string
-	applicationLister *application.Lister
+	applicationLister *application.Lister // applicationLister will be nil when disabled.
 	cleaner           cleaner.Cleaner
 	logger            *logger.Logger
 }

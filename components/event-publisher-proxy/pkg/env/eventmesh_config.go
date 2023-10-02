@@ -23,7 +23,8 @@ type EventMeshConfig struct {
 	EventMeshNamespace string `envconfig:"BEB_NAMESPACE" required:"true"`
 	// EventTypePrefix is the prefix of each event as per the eventing specification.
 	// It follows the eventType format: <eventTypePrefix>.<appName>.<event-name>.<version>
-	EventTypePrefix string `envconfig:"EVENT_TYPE_PREFIX" default:""`
+	EventTypePrefix       string `envconfig:"EVENT_TYPE_PREFIX" default:""`
+	ApplicationCRDEnabled bool   `envconfig:"APPLICATION_CRD_ENABLED" default:"true"`
 }
 
 // ConfigureTransport receives an HTTP transport and configure its max idle connection properties.
