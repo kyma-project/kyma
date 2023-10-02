@@ -46,48 +46,63 @@ func TestTransformLegacyRequestsToCE(t *testing.T) {
 		// derived from that a legacy event path (a.k.a. endpoint) has the structure
 		// http://<HOST>:<PORT>/<APPNAME>/<VERSION>/events
 		// e.g. http://localhost:8081/varkestest/v1/events
-		givenPrefix      string
-		givenApplication string
-		givenTypeLabel   string
-		givenEventName   string
-		wantVersion      string
-		wantType         string
+		givenPrefix                   string
+		givenApplication              string
+		givenTypeLabel                string
+		givenApplicationListerEnabled bool
+		givenEventName                string
+		wantVersion                   string
+		wantType                      string
 	}{
 		{
-			name:             "clean",
-			givenPrefix:      "pre1.pre2.pre3",
-			givenApplication: "app",
-			givenTypeLabel:   "",
-			givenEventName:   "object.do",
-			wantVersion:      "v1",
-			wantType:         "pre1.pre2.pre3.app.object.do.v1",
+			name:                          "clean",
+			givenPrefix:                   "pre1.pre2.pre3",
+			givenApplication:              "app",
+			givenTypeLabel:                "",
+			givenApplicationListerEnabled: true,
+			givenEventName:                "object.do",
+			wantVersion:                   "v1",
+			wantType:                      "pre1.pre2.pre3.app.object.do.v1",
 		},
 		{
-			name:             "not clean app name",
-			givenPrefix:      "pre1.pre2.pre3",
-			givenApplication: "no-app",
-			givenTypeLabel:   "",
-			givenEventName:   "object.do",
-			wantVersion:      "v1",
-			wantType:         "pre1.pre2.pre3.noapp.object.do.v1",
+			name:                          "not clean app name",
+			givenPrefix:                   "pre1.pre2.pre3",
+			givenApplication:              "no-app",
+			givenTypeLabel:                "",
+			givenApplicationListerEnabled: true,
+			givenEventName:                "object.do",
+			wantVersion:                   "v1",
+			wantType:                      "pre1.pre2.pre3.noapp.object.do.v1",
 		},
 		{
-			name:             "event name too many segments",
-			givenPrefix:      "pre1.pre2.pre3",
-			givenApplication: "app",
-			givenTypeLabel:   "",
-			givenEventName:   "too.many.dots.object.do",
-			wantVersion:      "v1",
-			wantType:         "pre1.pre2.pre3.app.toomanydotsobject.do.v1",
+			name:                          "event name too many segments",
+			givenPrefix:                   "pre1.pre2.pre3",
+			givenApplication:              "app",
+			givenTypeLabel:                "",
+			givenApplicationListerEnabled: true,
+			givenEventName:                "too.many.dots.object.do",
+			wantVersion:                   "v1",
+			wantType:                      "pre1.pre2.pre3.app.toomanydotsobject.do.v1",
 		},
 		{
-			name:             "with event type label",
-			givenPrefix:      "pre1.pre2.pre3",
-			givenApplication: "app",
-			givenTypeLabel:   "different",
-			givenEventName:   "object.do",
-			wantVersion:      "v1",
-			wantType:         "pre1.pre2.pre3.different.object.do.v1",
+			name:                          "with event type label",
+			givenPrefix:                   "pre1.pre2.pre3",
+			givenApplication:              "app",
+			givenTypeLabel:                "different",
+			givenApplicationListerEnabled: true,
+			givenEventName:                "object.do",
+			wantVersion:                   "v1",
+			wantType:                      "pre1.pre2.pre3.different.object.do.v1",
+		},
+		{
+			name:                          "with application lister disabled",
+			givenPrefix:                   "pre1.pre2.pre3",
+			givenApplication:              "app",
+			givenTypeLabel:                "different",
+			givenApplicationListerEnabled: false,
+			givenEventName:                "object.do",
+			wantVersion:                   "v1",
+			wantType:                      "pre1.pre2.pre3.app.object.do.v1",
 		},
 	}
 
@@ -104,7 +119,12 @@ func TestTransformLegacyRequestsToCE(t *testing.T) {
 
 			writer := httptest.NewRecorder()
 			app := applicationtest.NewApplication(tc.givenApplication, applicationTypeLabel(tc.givenTypeLabel))
-			appLister := fake.NewApplicationListerOrDie(ctx, app)
+
+			var appLister *application.Lister
+			if tc.givenApplicationListerEnabled {
+				appLister = fake.NewApplicationListerOrDie(ctx, app)
+			}
+
 			transformer := NewTransformer("test", tc.givenPrefix, appLister)
 			publishData, errResp, _ := transformer.ExtractPublishRequestData(request)
 			assert.Nil(t, errResp)
