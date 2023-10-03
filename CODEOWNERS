@@ -8,7 +8,7 @@
 * @kyma-project/kyma-steering-committee
 
 /.github @kyma-project/prow
-/.github/workflows @kyma-project/prow @kyma-project/gopher
+/.github/workflows @kyma-project/prow
 /.github/ISSUE_TEMPLATE @kyma-project/technical-writers
 
 
@@ -54,18 +54,10 @@
 /resources/ory @kyma-project/goat
 /resources/serverless @kyma-project/Otters
 
-/resources/btp-manager @kyma-project/gopher
-
 # Fast Integration Tests
 /tests/fast-integration/test @kyma-project/observability @kyma-project/eventing @kyma-project/Otters
 /tests/fast-integration/eventing-test @kyma-project/eventing
 /tests/fast-integration/image @kyma-project/eventing
-/tests/fast-integration/kcp @kyma-project/gopher
-/tests/fast-integration/kyma-environment-broker @kyma-project/gopher
-/tests/fast-integration/skr-aws-upgrade-integration @kyma-project/gopher
-/tests/fast-integration/skr-nightly @kyma-project/gopher
-/tests/fast-integration/skr-test @kyma-project/gopher
-/tests/fast-integration/smctl @kyma-project/gopher
 /tests/fast-integration/monitoring @kyma-project/observability
 /tests/fast-integration/prow @kyma-project/Jellyfish
 
