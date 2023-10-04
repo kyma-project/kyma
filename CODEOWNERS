@@ -55,7 +55,7 @@
 /resources/serverless @kyma-project/Otters
 
 # Fast Integration Tests
-/tests/fast-integration/test @kyma-project/observability @kyma-project/eventing @kyma-project/Otters
+/tests/fast-integration/test @kyma-project/observability @kyma-project/eventing
 /tests/fast-integration/eventing-test @kyma-project/eventing
 /tests/fast-integration/image @kyma-project/eventing
 /tests/fast-integration/monitoring @kyma-project/observability
