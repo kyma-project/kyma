@@ -51,7 +51,6 @@ const {
   checkFunctionUnreachable,
   publishEventWithRetry,
   debugBanner,
-  isSKR,
   isUpgradeJob,
   isJSRecreatedTestEnabled,
   isJSAtLeastOnceDeliveryTestEnabled,
