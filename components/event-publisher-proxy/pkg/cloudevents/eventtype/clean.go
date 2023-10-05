@@ -28,7 +28,7 @@ type Cleaner interface {
 
 type cleaner struct {
 	eventTypePrefix   string
-	applicationLister *application.Lister
+	applicationLister *application.Lister // applicationLister will be nil when disabled.
 	logger            *logger.Logger
 }
 
@@ -37,6 +37,10 @@ var _ Cleaner = &cleaner{}
 
 func NewCleaner(eventTypePrefix string, applicationLister *application.Lister, logger *logger.Logger) Cleaner {
 	return &cleaner{eventTypePrefix: eventTypePrefix, applicationLister: applicationLister, logger: logger}
+}
+
+func (c *cleaner) isApplicationListerEnabled() bool {
+	return c.applicationLister != nil
 }
 
 // Clean cleans the event-type from none-alphanumeric characters and returns it
@@ -51,12 +55,13 @@ func (c *cleaner) Clean(eventType string) (string, error) {
 	}
 
 	// clean the application name
-	var eventTypeClean string
-	if appObj, err := c.applicationLister.Get(appName); err != nil {
-		namedLogger.With("application", appName).Debug("Cannot find application")
-		eventTypeClean = build(c.eventTypePrefix, application.GetCleanName(appName), event, version)
-	} else {
-		eventTypeClean = build(c.eventTypePrefix, application.GetCleanTypeOrName(appObj), event, version)
+	eventTypeClean := build(c.eventTypePrefix, application.GetCleanName(appName), event, version)
+	if c.isApplicationListerEnabled() {
+		if appObj, err := c.applicationLister.Get(appName); err == nil {
+			eventTypeClean = build(c.eventTypePrefix, application.GetCleanTypeOrName(appObj), event, version)
+		} else {
+			namedLogger.With("application", appName).Debug("Cannot find application")
+		}
 	}
 
 	// clean the event-type segments

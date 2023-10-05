@@ -30,6 +30,10 @@ func NewGenericBuilder(typePrefix string, cleaner cleaner.Cleaner, applicationLi
 	}
 }
 
+func (gb *GenericBuilder) isApplicationListerEnabled() bool {
+	return gb.applicationLister != nil
+}
+
 func (gb *GenericBuilder) Build(event cev2event.Event) (*cev2event.Event, error) {
 	// format logger
 	namedLogger := gb.namedLogger(event.Source(), event.Type())
@@ -77,12 +81,15 @@ func (gb *GenericBuilder) getFinalSubject(source, eventType string) string {
 // GetAppNameOrSource returns the application name if exists, otherwise returns source name.
 func (gb *GenericBuilder) GetAppNameOrSource(source string, namedLogger *zap.SugaredLogger) string {
 	var appName = source
-	if appObj, err := gb.applicationLister.Get(source); err == nil && appObj != nil {
-		appName = application.GetTypeOrName(appObj)
-		namedLogger.With("application", source).Debug("Using application name: %s as source.", appName)
-	} else {
-		namedLogger.With("application", source).Debug("Cannot find application.")
+	if gb.isApplicationListerEnabled() {
+		if appObj, err := gb.applicationLister.Get(source); err == nil && appObj != nil {
+			appName = application.GetTypeOrName(appObj)
+			namedLogger.With("application", source).Debug("Using application name: %s as source.", appName)
+		} else {
+			namedLogger.With("application", source).Debug("Cannot find application.")
+		}
 	}
+
 	return appName
 }
 

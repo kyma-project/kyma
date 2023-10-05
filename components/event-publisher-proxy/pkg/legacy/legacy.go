@@ -37,7 +37,7 @@ type RequestToCETransformer interface {
 type Transformer struct {
 	eventMeshNamespace string
 	eventTypePrefix    string
-	applicationLister  *application.Lister
+	applicationLister  *application.Lister // applicationLister will be nil when disabled.
 }
 
 func NewTransformer(bebNamespace string, eventTypePrefix string, applicationLister *application.Lister) *Transformer {
@@ -46,6 +46,10 @@ func NewTransformer(bebNamespace string, eventTypePrefix string, applicationList
 		eventTypePrefix:    eventTypePrefix,
 		applicationLister:  applicationLister,
 	}
+}
+
+func (t *Transformer) isApplicationListerEnabled() bool {
+	return t.applicationLister != nil
 }
 
 // CheckParameters validates the parameters in the request and sends error responses if found invalid.
@@ -121,14 +125,17 @@ func (t *Transformer) ExtractPublishRequestData(request *http.Request) (*apiv1.P
 // WriteLegacyRequestsToCE transforms the legacy event to cloudevent from the given request.
 // It also returns the original event-type without cleanup as the second return type.
 func (t *Transformer) WriteLegacyRequestsToCE(writer http.ResponseWriter, publishData *apiv1.PublishRequestData) (*cev2.Event, string) {
+	uncleanedAppName := publishData.ApplicationName
+
 	// clean the application name form non-alphanumeric characters
-	appName := publishData.ApplicationName
-	if appObj, err := t.applicationLister.Get(appName); err == nil {
-		// handle existing applications
-		appName = application.GetCleanTypeOrName(appObj)
-	} else {
-		// handle non-existing applications
-		appName = application.GetCleanName(appName)
+	// handle non-existing applications
+	appName := application.GetCleanName(uncleanedAppName)
+	// check if we need to use name from application CR.
+	if t.isApplicationListerEnabled() {
+		if appObj, err := t.applicationLister.Get(uncleanedAppName); err == nil {
+			// handle existing applications
+			appName = application.GetCleanTypeOrName(appObj)
+		}
 	}
 
 	event, err := t.convertPublishRequestToCloudEvent(appName, publishData.PublishEventParameters)
