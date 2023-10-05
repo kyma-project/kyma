@@ -3,7 +3,6 @@ const {
   // gettingStartedGuideTests,
 } = require('./');
 
-const {monitoringTests, unexposeGrafana} = require('../monitoring');
 const {cleanMockTestFixture} = require('./fixtures/commerce-mock');
 const {ensureCommerceMockLocalTestFixture} = require('../test/fixtures/commerce-mock');
 const {error, sleep} = require('../utils');
@@ -26,12 +25,6 @@ describe('Executing Standard Testsuite:', function() {
   after('Test Cleanup: Test namespaces should be deleted', async function() {
     await cleanMockTestFixture(mockNamespace, testNamespace, true);
   });
-
-  after('Unexpose Grafana', async function() {
-    await unexposeGrafana();
-  });
-
-  monitoringTests();
 
   commerceMockTests(testNamespace);
   // unusuble because of redis dependency that is not usable in the current form after SC migration

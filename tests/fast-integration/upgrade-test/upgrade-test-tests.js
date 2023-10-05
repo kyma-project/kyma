@@ -3,10 +3,6 @@ const {
   getContainerRestartsForAllNamespaces,
 } = require('../utils');
 const {
-  monitoringTests,
-  unexposeGrafana,
-} = require('../monitoring');
-const {
   checkInClusterEventDelivery,
   checkFunctionResponse,
 } = require('../test/fixtures/commerce-mock');
@@ -33,11 +29,5 @@ describe('Upgrade test tests', function() {
   it('Should print report of restarted containers, skipped if no crashes happened', async function() {
     const afterTestRestarts = await getContainerRestartsForAllNamespaces();
     printRestartReport(initialRestarts, afterTestRestarts);
-  });
-
-  monitoringTests();
-
-  after('Unexpose Grafana', async () => {
-    await unexposeGrafana();
   });
 });
