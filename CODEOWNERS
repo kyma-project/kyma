@@ -23,8 +23,6 @@
 /components/compass-runtime-agent @kyma-project/Framefrog
 /components/event-publisher-proxy @kyma-project/eventing
 /components/eventing-controller @kyma-project/eventing
-/components/function-controller @kyma-project/Otters
-/components/function-runtimes @kyma-project/Otters
 
 
 # All files and subdirectories in /docs
@@ -38,7 +36,6 @@
 /installation/resources/crds/istio @kyma-project/goat
 /installation/resources/crds/monitoring @kyma-project/observability
 /installation/resources/crds/ory @kyma-project/goat
-/installation/resources/crds/serverless @kyma-project/Otters
 
 /resources/api-gateway @kyma-project/goat
 /resources/application-connector @kyma-project/Framefrog
@@ -48,7 +45,6 @@
 /resources/istio @kyma-project/goat
 /resources/monitoring @kyma-project/observability
 /resources/ory @kyma-project/goat
-/resources/serverless @kyma-project/Otters
 
 # Fast Integration Tests
 /tests/fast-integration/test @kyma-project/observability @kyma-project/eventing
@@ -57,18 +53,13 @@
 /tests/fast-integration/monitoring @kyma-project/observability
 /tests/fast-integration/prow @kyma-project/Jellyfish
 
-/tests/function-controller @kyma-project/Otters
 /tests/components/application-connector @kyma-project/Framefrog
 
 # performance tests
 /tests/perf @kyma-project/observability
-/tests/serverless-bench @kyma-project/Otters
-
-# The tools/gitserver directory
-/tools/gitserver/ @kyma-project/Otters
 
 # Config file for MILV - milv.config.yaml
-milv.config.yaml @kyma-project/Otters @kyma-project/technical-writers
+milv.config.yaml @kyma-project/technical-writers
 
 # VERSION file
 VERSION @kyma-project/prow
