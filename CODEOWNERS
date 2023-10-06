@@ -43,13 +43,9 @@
 /resources/api-gateway @kyma-project/goat
 /resources/application-connector @kyma-project/Framefrog
 /resources/certificates @kyma-project/goat
-/resources/cluster-essentials @kyma-project/goat
-/resources/cluster-users @kyma-project/goat
 /resources/compass-runtime-agent @kyma-project/Framefrog
 /resources/eventing @kyma-project/eventing
 /resources/istio @kyma-project/goat
-/resources/istio-resources @kyma-project/goat
-/resources/istio-resources/files/dashboards @kyma-project/observability
 /resources/monitoring @kyma-project/observability
 /resources/ory @kyma-project/goat
 /resources/serverless @kyma-project/Otters
