@@ -1,5 +1,5 @@
 # image builder base on golang:1.21.1-alpine3.18
-FROM golang@sha256:0c860c7ceba62231d0f99fb92e9d7c1577f26fea794a12c75756a8f64b146e45 as builder
+FROM golang@sha256:e9ebfe932adeff65af5338236f0b0604c86b143c1bff3e1d0551d8f6196ab5c5 as builder
 
 ARG DOCK_PKG_DIR=/compass-runtime-agent
 WORKDIR $DOCK_PKG_DIR
