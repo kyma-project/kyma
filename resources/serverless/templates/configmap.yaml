@@ -1,9 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: "{{ .Values.global.configuration.configmapName }}"
-  namespace: {{ .Release.Namespace }}
-  labels:
-    {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
-data:
-  {{ .Values.global.configuration.logFilename }}: {{ include "tplValue" ( dict "value" .Values.containers.manager.logConfiguration.data "context" . ) | quote }}
