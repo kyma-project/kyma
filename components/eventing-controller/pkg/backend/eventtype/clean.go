@@ -6,7 +6,6 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
 )
 
 var (
@@ -30,16 +29,15 @@ func (cf CleanerFunc) Clean(et string) (string, error) {
 }
 
 type cleaner struct {
-	eventTypePrefix   string
-	applicationLister *application.Lister
-	logger            *logger.Logger
+	eventTypePrefix string
+	logger          *logger.Logger
 }
 
 // Perform a compile-time check.
 var _ Cleaner = &cleaner{}
 
-func NewCleaner(eventTypePrefix string, applicationLister *application.Lister, logger *logger.Logger) Cleaner {
-	return &cleaner{eventTypePrefix: eventTypePrefix, applicationLister: applicationLister, logger: logger}
+func NewCleaner(eventTypePrefix string, logger *logger.Logger) Cleaner {
+	return &cleaner{eventTypePrefix: eventTypePrefix, logger: logger}
 }
 
 // Clean cleans the event-type from none-alphanumeric characters and returns it
@@ -54,13 +52,7 @@ func (c *cleaner) Clean(eventType string) (string, error) {
 	}
 
 	// clean the application name
-	var eventTypeClean string
-	if appObj, err := c.applicationLister.Get(appName); err != nil {
-		log.Debugw("Cannot find application", "application", appName)
-		eventTypeClean = build(c.eventTypePrefix, application.GetCleanName(appName), event, version)
-	} else {
-		eventTypeClean = build(c.eventTypePrefix, application.GetCleanTypeOrName(appObj), event, version)
-	}
+	eventTypeClean := build(c.eventTypePrefix, getCleanName(appName), event, version)
 
 	// clean the event-type segments
 	eventTypeClean = cleanEventType(eventTypeClean)

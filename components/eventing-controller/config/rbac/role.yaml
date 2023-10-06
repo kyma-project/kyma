@@ -43,14 +43,6 @@ rules:
   - list
   - watch
 - apiGroups:
-  - applicationconnector.kyma-project.io
-  resources:
-  - applications
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
   - apps
   resources:
   - deployments
