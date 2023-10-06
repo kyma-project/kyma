@@ -1,7 +1,0 @@
-domain: kyma-project.io
-repo: github.com/kyma-project/kyma/components/function-controller
-resources:
-- group: serverless
-  kind: Function
-  version: v1alpha2
-version: "3"
