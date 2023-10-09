@@ -35,7 +35,7 @@ The table of Kyma modules:
 
 ## Kyma's strengths
 
-Kyma is built upon leading cloud-native, open-source projects and open standards, such as Istio, NATS, Cloud Events, Open Telemetry, and Prometheus. We created an opinionated set of modules you can easily enable in your Kubernetes cluster to speed up cloud application development and operations. With Kyma, you save the time to pick the right tools and the effort to keep them secure and up to date. Also, you can use the modules you need from Kyma and complement them with other Kubernetes tools.
+Kyma is built upon leading cloud-native, open-source projects and open standards, such as Istio, NATS, Cloud Events, Open Telemetry. We created an opinionated set of modules you can easily enable in your Kubernetes cluster to speed up cloud application development and operations. With Kyma, you save the time to pick the right tools and the effort to keep them secure and up to date. Also, you can use the modules you need from Kyma and complement them with other Kubernetes tools.
 
 Kyma is a Kubernetes-based application runtime with several extensions, not a full-blown platform. The extensions make Kyma more attractive for developers who want to focus on business logic and limit investment in technical services and infrastructure. Kyma is part of SAP Business Technology Platform and offers easy integration with BTP services and other SAP systems. 
 

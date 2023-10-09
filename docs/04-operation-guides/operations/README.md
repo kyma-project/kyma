@@ -16,8 +16,6 @@ This is a complete list of Kyma operation guides:
 * [Kyma Eventing Metrics](evnt-02-eventing-metrics.md)
 * [Acquiring NATS server system account credentials](evnt-03-nats-server-system-events.md)
 * [Access Kyma application logs](obsv-01-access-logs.md)
-* [Enable Grafana for Istio monitoring](obsv-03-enable-grafana-for-istio.md)
 * [Enable Istio access logs](obsv-03-enable-istio-access-logs.md)
-* [Enable mTLS for custom metrics](obsv-04-enable-mtls-for-custom-metrics.md)
 * [Enable Kyma with Runtime Agent](ra-01-enable-kyma-with-runtime-agent.md)
 * [Enable automatic Istio sidecar proxy injection](https://kyma-project.io/#/istio/user/02-operation-guides/operations/02-20-enable-sidecar-injection)

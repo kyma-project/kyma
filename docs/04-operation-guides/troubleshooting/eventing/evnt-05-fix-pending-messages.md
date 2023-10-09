@@ -22,7 +22,7 @@ You need the latest version of NATS CLI installed on your machine.
 
 ### Consumer leader reelection
 
-First, find out which consumer(s) have pending messages. You can find the broken consumer either with the NATS CLI command or with a Grafana dashboard.
+First, find out which consumer(s) have pending messages. You can find the broken consumer either with the NATS CLI command or with a Grafana dashboard in case you had a [custom kube-prometheus-stack installed](https://github.com/kyma-project/examples/tree/main/prometheus).
 
 #### Option 1: Find the broken consumers with NATS CLI
 
@@ -52,8 +52,7 @@ First, find out which consumer(s) have pending messages. You can find the broken
    The other one has no pending message and is successfully processing events.
 
 #### Option 2: Find the broken consumers using Grafana dashboard
-
-1. [Access and Expose Grafana](../../security/sec-06-access-expose-grafana.md).
+1. [Access Grafana](https://github.com/kyma-project/examples/tree/main/prometheus#verify-the-installation).
 2. Find the NATS JetStream Dashboard and check the pending messages:
    ![Pending consumer](../../assets/grafana_pending_consumer.png)
 3. Find the consumer with pending messages and encode it as an `md5` hash:

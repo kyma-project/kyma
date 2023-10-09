@@ -4,17 +4,9 @@ title: Grafana Dashboards for Kyma Eventing
 
 Kyma Eventing provides several Grafana Dashboard with various [metrics](./evnt-02-eventing-metrics.md), so you can monitor statistics and other information in real time.
 
-> **NOTE:** See how to [expose Grafana securely](../security/sec-06-access-expose-grafana.md) for easier access in the future.
+1. [Install a custom kube-prometheus-stack in Kyma](https://github.com/kyma-project/examples/tree/main/prometheus).
 
-> **NOTE:** Prometheus and Grafana are [deprecated](https://github.com/kyma-project/website/blob/main/content/blog-posts/2022-12-09-monitoring-deprecation/index.md) and are planned to be removed. If you want to install a custom stack, take a look at [Install a custom kube-prometheus-stack in Kyma](https://github.com/kyma-project/examples/tree/main/prometheus).
-
-1. To access the Grafana Dashboard, port-forward the Grafana Service to localhost:
-
-   ```bash
-   kubectl -n kyma-system port-forward svc/monitoring-grafana 8081:80
-   ```
-<!-- markdown-link-check-disable-next-line -->
-2. Access the Grafana Dashboard on [localhost:8081](http://localhost:8081).
+2. [Access Grafana](https://github.com/kyma-project/examples/tree/main/prometheus#verify-the-installation).
 
 3. Select the Grafana Dashboard with the desired information about Kyma Eventing:
 

@@ -31,6 +31,5 @@ These guides cover the following steps:
 1. [Deploy and expose a Function](02-deploy-expose-function.md), which shows how to deploy a sample function in a matter of seconds and how to expose it through the APIRule custom resource (CR) on HTTP endpoints. This way it will be available for other services outside the cluster.
 2. [Deploy and expose a microservice](03-deploy-expose-microservice.md), which demonstrates how to create a sample microservice and, as before, how to expose it so that it is available for other services outside the cluster.
 3. [Trigger your workload with an event](04-trigger-workload-with-event.md), which shows how to trigger your Function or microservice with a sample event.
-4. [Observability](05-observability.md), which shows how to access the Grafana dashboard and view the logs and metrics for the Function.
 
 Let's get started!

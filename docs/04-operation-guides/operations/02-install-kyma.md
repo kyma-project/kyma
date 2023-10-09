@@ -71,7 +71,7 @@ A profile is defined globally for the whole Kyma installation. It's not possible
 If you install Kyma on a remote cluster, you can use the out-of-the box `kyma.example.com` domain. All you need to do is get your load balancer IP address and add the following line to the `hosts` file:
 
   ```bash
-  {load_balancer_IP} grafana.kyma.example.com oauth2.kyma.example.com registry.kyma.example.com connector-service.kyma.example.com gateway.kyma.example.com
+  {load_balancer_IP} oauth2.kyma.example.com registry.kyma.example.com connector-service.kyma.example.com gateway.kyma.example.com
   ```
 
 To install Kyma using your own domain name, you must provide the certificate and key as files. If you don't have a certificate yet, you can create a self-signed certificate and key:
@@ -124,7 +124,6 @@ prerequisites:
   - name: "certificates"
     namespace: "istio-system"
 components:
-  - name: "monitoring"
   - name: "eventing"
   ```
 

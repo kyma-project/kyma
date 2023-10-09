@@ -42,8 +42,7 @@ See the full list of Kyma troubleshooting guides:
 
 ### Observability
 
-- [Prometheus Istio Server restarting or in crashback loop](./observability/obsv-01-troubleshoot-prometheus-istio-server-crash-oom.md)
-- [Component doesn't work after successful installation](./observability/obsv-02-troubleshoot-trace-backend-shows-few-traces.md)
+- [Trace backend shows fewer traces than you would like to see](./observability/obsv-02-troubleshoot-trace-backend-shows-few-traces.md)
 
 ### Security
   
