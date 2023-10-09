@@ -1,15 +1,21 @@
 package eventtype
 
 import (
+	"regexp"
+
 	"go.uber.org/zap"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
 )
 
 const (
 	// simpleCleanerName used as the logger name.
 	simpleCleanerName = "event-type-simple-cleaner"
+)
+
+var (
+	// invalidApplicationNameSegment used to match and replace none-alphanumeric characters in the application name.
+	invalidApplicationNameSegment = regexp.MustCompile(`\W|_`)
 )
 
 type simpleCleaner struct {
@@ -25,7 +31,7 @@ func NewSimpleCleaner(eventTypePrefix string, logger *logger.Logger) Cleaner {
 }
 
 // Clean cleans the event-type from none-alphanumeric characters and returns it
-// or returns an error if the event-type parsing failed. It does not search for existing applications.
+// or returns an error if the event-type parsing failed.
 func (sc *simpleCleaner) Clean(eventType string) (string, error) {
 	// format logger
 	log := sc.namedLogger().With("prefix", sc.eventTypePrefix, "type", eventType)
@@ -36,7 +42,7 @@ func (sc *simpleCleaner) Clean(eventType string) (string, error) {
 	}
 
 	// clean the application name
-	var eventTypeClean = build(sc.eventTypePrefix, application.GetCleanName(appName), event, version)
+	var eventTypeClean = build(sc.eventTypePrefix, getCleanName(appName), event, version)
 
 	// clean the event-type segments
 	eventTypeClean = cleanEventType(eventTypeClean)
@@ -50,4 +56,9 @@ func (sc *simpleCleaner) Clean(eventType string) (string, error) {
 
 func (sc *simpleCleaner) namedLogger() *zap.SugaredLogger {
 	return sc.logger.WithContext().Named(simpleCleanerName)
+}
+
+// getCleanName cleans the name form none-alphanumeric characters and returns the clean name.
+func getCleanName(name string) string {
+	return invalidApplicationNameSegment.ReplaceAllString(name, "")
 }
