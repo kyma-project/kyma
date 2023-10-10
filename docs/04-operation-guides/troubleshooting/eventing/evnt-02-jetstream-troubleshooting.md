@@ -37,12 +37,3 @@ Events were not received by the consumers.
           To correlate the consumer to the Subscription and the specific event type, check the `description` field of the consumer.
 
        5. If the PVC storage is fully consumed and matches the stream size as shown above, the stream can no longer receive messages. Either increase the PVC storage size or set the `MaxBytes` property which removes the old messages.
-
-3. In case you had a [custom kube-prometheus-stack installed](https://github.com/kyma-project/examples/tree/main/prometheus), Check the [JetStream grafana dashboard](https://grafana.com/grafana/dashboards/14725):
-
-    1. [Access Grafana](https://github.com/kyma-project/examples/tree/main/prometheus#verify-the-installation).
-
-    2. Search for `NATS JetStream` dashboard. You can find the stream and consumer metrics as well as the storage and memory consumption.
-   
-    3. Also search for `JetStream Event Types Summary` and `Delivery per Subscription` dashboards to visualize and debug the phase during which the events were lost.
-    
