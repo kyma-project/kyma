@@ -12,6 +12,12 @@ kubectl delete -n kyma-system clusterrolebindings.rbac.authorization.k8s.io moni
 kubectl delete -n kyma-system clusterrolebindings.rbac.authorization.k8s.io monitoring-operator --ignore-not-found
 kubectl delete -n kyma-system clusterrolebindings.rbac.authorization.k8s.io monitoring-prometheus --ignore-not-found
 kubectl delete -n kyma-system clusterrolebindings.rbac.authorization.k8s.io monitoring-prometheus-istio-server --ignore-not-found
+kubectl delete -n kyma-system configmaps eventing-dashboards-delivery --ignore-not-found
+kubectl delete -n kyma-system configmaps eventing-dashboards-jetstream --ignore-not-found
+kubectl delete -n kyma-system configmaps eventing-dashboards-latency --ignore-not-found
+kubectl delete -n kyma-system configmaps eventing-dashboards-nats-server --ignore-not-found
+kubectl delete -n kyma-system configmaps eventing-dashboards-pods --ignore-not-found
+kubectl delete -n kyma-system configmaps function-dashboard --ignore-not-found
 kubectl delete -n kyma-system configmaps monitoring-alertmanager-overview --ignore-not-found
 kubectl delete -n kyma-system configmaps monitoring-apiserver --ignore-not-found
 kubectl delete -n kyma-system configmaps monitoring-auth-proxy-grafana-templates --ignore-not-found
@@ -39,6 +45,7 @@ kubectl delete -n kyma-system configmaps monitoring-prometheus --ignore-not-foun
 kubectl delete -n kyma-system configmaps monitoring-prometheus-istio-server --ignore-not-found
 kubectl delete -n kyma-system configmaps monitoring-statefulset --ignore-not-found
 kubectl delete -n kyma-system configmaps monitoring-workload-total --ignore-not-found
+kubectl delete -n kyma-system configmaps ory-oathkeeper-maester-dashboard --ignore-not-found
 kubectl delete -n kyma-system daemonsets.apps monitoring-prometheus-node-exporter --ignore-not-found
 kubectl delete -n kyma-system deployments.apps monitoring-auth-proxy-grafana --ignore-not-found
 kubectl delete -n kyma-system deployments.apps monitoring-grafana --ignore-not-found
@@ -104,4 +111,9 @@ kubectl delete -n kyma-system servicemonitors.monitoring.coreos.com monitoring-p
 kubectl delete -n kyma-system servicemonitors.monitoring.coreos.com monitoring-prometheus-istio-server-server --ignore-not-found
 kubectl delete -n kyma-system servicemonitors.monitoring.coreos.com monitoring-prometheus-node-exporter --ignore-not-found
 kubectl delete -n kyma-system virtualservices.networking.istio.io monitoring-grafana --ignore-not-found
-kubectl delete -n kyma-system persistentvolumeclaims prometheus-monitoring-prometheus-db-prometheus-monitoring-prometheus-0
+kubectl delete -n kyma-system persistentvolumeclaims prometheus-monitoring-prometheus-db-prometheus-monitoring-prometheus-0 --ignore-not-found
+kubectl delete -n kyma-system configmaps istio-control-plane-grafana-dashboard --ignore-not-found
+kubectl delete -n kyma-system configmaps istio-mesh-grafana-dashboard --ignore-not-found
+kubectl delete -n kyma-system configmaps istio-performance-grafana-dashboard --ignore-not-found
+kubectl delete -n kyma-system configmaps istio-service-grafana-dashboard --ignore-not-found
+kubectl delete -n kyma-system configmaps istio-workload-grafana-dashboard --ignore-not-found
