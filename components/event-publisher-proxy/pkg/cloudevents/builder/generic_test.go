@@ -149,38 +149,51 @@ func Test_GetAppNameOrSource(t *testing.T) {
 	}
 
 	testCases := []struct {
-		name                   string
-		givenApplicationName   string
-		givenApplicationLabels map[string]string
-		givenSource            string
-		wantSource             string
+		name                          string
+		givenApplicationName          string
+		givenApplicationLabels        map[string]string
+		givenSource                   string
+		givenApplicationListerEnabled bool
+		wantSource                    string
 	}{
 		{
-			name:                 "should return application name instead of source name",
-			givenSource:          "appName1",
-			givenApplicationName: "appName1",
-			wantSource:           "appName1",
+			name:                          "should return application name instead of source name",
+			givenSource:                   "appName1",
+			givenApplicationName:          "appName1",
+			givenApplicationListerEnabled: true,
+			wantSource:                    "appName1",
 		},
 		{
-			name:                   "should return application label instead of source name or app name",
-			givenSource:            "appName1",
-			givenApplicationName:   "appName1",
-			givenApplicationLabels: map[string]string{application.TypeLabel: "testapptype"},
-			wantSource:             "testapptype",
+			name:                          "should return application label instead of source name or app name",
+			givenSource:                   "appName1",
+			givenApplicationName:          "appName1",
+			givenApplicationListerEnabled: true,
+			givenApplicationLabels:        map[string]string{application.TypeLabel: "testapptype"},
+			wantSource:                    "testapptype",
 		},
 		{
-			name:                   "should return non-clean application label",
-			givenSource:            "appName1",
-			givenApplicationName:   "appName1",
-			givenApplicationLabels: map[string]string{application.TypeLabel: "t..e--s__t!!a@@p##p%%t^^y&&p**e"},
-			wantSource:             "t..e--s__t!!a@@p##p%%t^^y&&p**e",
+			name:                          "should return non-clean application label",
+			givenSource:                   "appName1",
+			givenApplicationName:          "appName1",
+			givenApplicationListerEnabled: true,
+			givenApplicationLabels:        map[string]string{application.TypeLabel: "t..e--s__t!!a@@p##p%%t^^y&&p**e"},
+			wantSource:                    "t..e--s__t!!a@@p##p%%t^^y&&p**e",
 		},
 		{
-			name:                   "should return source name as application does not exists",
-			givenSource:            "noapp1",
-			givenApplicationName:   "appName1",
-			givenApplicationLabels: map[string]string{application.TypeLabel: "testapptype"},
-			wantSource:             "noapp1",
+			name:                          "should return source name as application does not exists",
+			givenSource:                   "noapp1",
+			givenApplicationName:          "appName1",
+			givenApplicationListerEnabled: true,
+			givenApplicationLabels:        map[string]string{application.TypeLabel: "testapptype"},
+			wantSource:                    "noapp1",
+		},
+		{
+			name:                          "should return source name when application lister is disabled",
+			givenSource:                   "appName1",
+			givenApplicationName:          "appName1",
+			givenApplicationListerEnabled: false,
+			givenApplicationLabels:        map[string]string{application.TypeLabel: "testapptype"},
+			wantSource:                    "appName1",
 		},
 	}
 	for _, testCase := range testCases {
@@ -189,7 +202,11 @@ func Test_GetAppNameOrSource(t *testing.T) {
 			t.Parallel()
 
 			app := applicationtest.NewApplication(tc.givenApplicationName, tc.givenApplicationLabels)
-			appLister := fake.NewApplicationListerOrDie(context.Background(), app)
+
+			var appLister *application.Lister
+			if tc.givenApplicationListerEnabled {
+				appLister = fake.NewApplicationListerOrDie(context.Background(), app)
+			}
 
 			genericBuilder := &GenericBuilder{
 				applicationLister: appLister,

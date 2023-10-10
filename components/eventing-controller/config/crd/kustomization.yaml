@@ -5,7 +5,6 @@ resources:
 - bases/eventing.kyma-project.io_subscriptions.yaml
 - bases/eventing.kyma-project.io_eventingbackends.yaml
 - external/apirules-gateway-kyma-project-io.yaml
-- external/applications-applicationconnector-kyma-project-io.yaml
 #+kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:

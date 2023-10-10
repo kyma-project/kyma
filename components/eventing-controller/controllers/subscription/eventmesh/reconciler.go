@@ -105,8 +105,6 @@ func NewReconciler(ctx context.Context, client client.Client, logger *logger.Log
 // Generate required RBAC to emit kubernetes events in the controller.
 // +kubebuilder:rbac:groups="",resources=events,verbs=create;patch
 // +kubebuilder:rbac:groups=gateway.kyma-project.io,resources=apirules,verbs=get;list;watch;create;update;patch;delete
-// Generated required RBAC to list Applications (required by event type cleaner).
-// +kubebuilder:rbac:groups="applicationconnector.kyma-project.io",resources=applications,verbs=get;list;watch
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	// fetch current subscription object and ensure the object was not deleted in the meantime

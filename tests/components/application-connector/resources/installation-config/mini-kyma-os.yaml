@@ -1,12 +1,9 @@
 ---
 defaultNamespace: kyma-system
 prerequisites:
-  - name: "cluster-essentials"
   - name: "istio"
     namespace: "istio-system"
   - name: "certificates"
     namespace: "istio-system"
 components:
-  - name: "istio-resources"
-  - name: "cluster-users"
   - name: "application-connector"

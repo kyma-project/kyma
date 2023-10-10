@@ -118,7 +118,6 @@ To deploy Kyma with only specific components, run:
 
   ```yaml
 prerequisites:
-  - name: "cluster-essentials"
   - name: "istio"
     namespace: "istio-system"
   - name: "certificates"

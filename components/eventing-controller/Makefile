@@ -134,7 +134,6 @@ copy-crds: manifests-local ## copy Eventing CRDs to installation/eventing
 copy-external-crds: ## copy external CRDs to config/crd/external
 	mkdir -p config/crd/external
 	cp ../../installation/resources/crds/api-gateway/apirules.gateway.crd.yaml config/crd/external/apirules-gateway-kyma-project-io.yaml
-	cp ../../installation/resources/crds/application-connector/applications.applicationconnector.crd.yaml config/crd/external/applications-applicationconnector-kyma-project-io.yaml
 
 $(eval $(call buildpack-cp-ro,resolve))
 $(eval $(call buildpack-mount,mod-verify))

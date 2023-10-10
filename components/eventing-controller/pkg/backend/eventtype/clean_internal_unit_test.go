@@ -1,16 +1,12 @@
 package eventtype
 
 import (
-	"context"
 	"testing"
 
-	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	"github.com/stretchr/testify/require"
 
+	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/applicationtest"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/fake"
 )
 
 func TestCleaner(t *testing.T) {
@@ -24,7 +20,7 @@ func TestCleaner(t *testing.T) {
 		wantEventType          string
 		wantError              bool
 	}{
-		// valid even-types for existing applications
+		// valid even-types
 		{
 			name:                 "success if prefix is empty",
 			givenEventTypePrefix: "",
@@ -50,24 +46,6 @@ func TestCleaner(t *testing.T) {
 			wantError:            false,
 		},
 		{
-			name:                   "success if the given application type label is clean",
-			givenEventTypePrefix:   "prefix",
-			givenApplicationName:   "testapp",
-			givenApplicationLabels: map[string]string{application.TypeLabel: "testapptype"},
-			givenEventType:         "prefix.testapp.Segment1-Part1-Part2-Ä.Segment2-Part1-Part2-Ä.v1",
-			wantEventType:          "prefix.testapptype.Segment1Part1Part2.Segment2Part1Part2.v1",
-			wantError:              false,
-		},
-		{
-			name:                   "success if the given application type label is clean and event has more than two segments",
-			givenEventTypePrefix:   "prefix",
-			givenApplicationName:   "testapp",
-			givenApplicationLabels: map[string]string{application.TypeLabel: "testapptype"},
-			givenEventType:         "prefix.testapp.Segment1.Segment2.Segment3.Segment4-Part1-Part2-Ä.Segment5-Part1-Part2-Ä.v1",
-			wantEventType:          "prefix.testapptype.Segment1Segment2Segment3Segment4Part1Part2.Segment5Part1Part2.v1",
-			wantError:              false,
-		},
-		{
 			name:                 "success if the given application name needs to be cleaned",
 			givenEventTypePrefix: "prefix",
 			givenApplicationName: "te--s__t!!a@@p##p%%",
@@ -82,24 +60,6 @@ func TestCleaner(t *testing.T) {
 			givenEventType:       "prefix.te--s__t!!a@@p##p%%.Segment1.Segment2.Segment3.Segment4-Part1-Part2-Ä.Segment5-Part1-Part2-Ä.v1",
 			wantEventType:        "prefix.testapp.Segment1Segment2Segment3Segment4Part1Part2.Segment5Part1Part2.v1",
 			wantError:            false,
-		},
-		{
-			name:                   "success if the given application type label needs to be cleaned",
-			givenEventTypePrefix:   "prefix",
-			givenApplicationName:   "te--s__t!!a@@p##p%%",
-			givenApplicationLabels: map[string]string{application.TypeLabel: "t..e--s__t!!a@@p##p%%t^^y&&p**e"},
-			givenEventType:         "prefix.te--s__t!!a@@p##p%%.Segment1-Part1-Part2-Ä.Segment2-Part1-Part2-Ä.v1",
-			wantEventType:          "prefix.testapptype.Segment1Part1Part2.Segment2Part1Part2.v1",
-			wantError:              false,
-		},
-		{
-			name:                   "success if the given application type label needs to be cleaned and event has more than two segments",
-			givenEventTypePrefix:   "prefix",
-			givenApplicationName:   "te--s__t!!a@@p##p%%",
-			givenApplicationLabels: map[string]string{application.TypeLabel: "t..e--s__t!!a@@p##p%%t^^y&&p**e"},
-			givenEventType:         "prefix.te--s__t!!a@@p##p%%.Segment1.Segment2.Segment3.Segment4-Part1-Part2-Ä.Segment5-Part1-Part2-Ä.v1",
-			wantEventType:          "prefix.testapptype.Segment1Segment2Segment3Segment4Part1Part2.Segment5Part1Part2.v1",
-			wantError:              false,
 		},
 		// valid even-types for non-existing applications to simulate in-cluster eventing
 		{
@@ -167,9 +127,7 @@ func TestCleaner(t *testing.T) {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			app := applicationtest.NewApplication(tc.givenApplicationName, tc.givenApplicationLabels)
-			appLister := fake.NewApplicationListerOrDie(context.Background(), app)
-			cleaner := NewCleaner(tc.givenEventTypePrefix, appLister, defaultLogger)
+			cleaner := NewCleaner(tc.givenEventTypePrefix, defaultLogger)
 			eventType, err := cleaner.Clean(tc.givenEventType)
 			require.Equal(t, tc.wantError, err != nil)
 			if !tc.wantError {
