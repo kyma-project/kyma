@@ -1,4 +1,3 @@
-# image builder base on golang:1.21.1-alpine3.18
 FROM golang:1.21.3-alpine3.18 as builder
 
 ARG DOCK_PKG_DIR=/go/src/github.com/kyma-project/kyma/components/central-application-connectivity-validator

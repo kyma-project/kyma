@@ -1,6 +1,6 @@
 module github.com/kyma-project/kyma/components/central-application-connectivity-validator
 
-go 1.21.3
+go 1.21
 
 require (
 	github.com/gorilla/mux v1.8.0
