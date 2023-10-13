@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy/api"
 
@@ -24,7 +25,6 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/health"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/receiver"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
