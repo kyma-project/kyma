@@ -32,17 +32,18 @@ func TestNewCollector(t *testing.T) {
 	latency.AssertExpectations(t)
 }
 
+//nolint: lll // prometheus tef follows
 func TestCollector_MetricsMiddleware(t *testing.T) {
 	router := mux.NewRouter()
 	c := NewCollector(latency.BucketsProvider{})
 	router.Use(c.MetricsMiddleware())
 	router.HandleFunc("/test", func(writer http.ResponseWriter, request *http.Request) {
 		time.Sleep(6 * time.Millisecond)
-		writer.WriteHeader(200)
+		writer.WriteHeader(http.StatusOK)
 	})
 	srv := httptest.NewServer(router)
 	defer srv.Close()
-	http.Get(srv.URL + "/test")
+	http.Get(srv.URL + "/test") //nolint: errcheck // this call never fails as it is a testserver
 	tef := `
 	# HELP eventing_epp_requests_duration_seconds The duration of processing an incoming request (includes sending to the backend)
 	# TYPE eventing_epp_requests_duration_seconds histogram
@@ -68,14 +69,16 @@ func TestCollector_MetricsMiddleware(t *testing.T) {
 	}
 }
 
-// Hack to filter out validation of the sum calculated by the metric
+// Hack to filter out validation of the sum calculated by the metric.
 func ignoreErr(err error, metric string) error {
 	for _, line := range strings.Split(err.Error(), "\n") {
 		if line == "--- metric output does not match expectation; want" || line == "+++ got:" {
 			continue
 		}
-		if strings.HasPrefix(strings.TrimSpace(line), "+") || strings.HasPrefix(strings.TrimSpace(line), "-") {
-			if !(strings.HasPrefix(strings.TrimSpace(line), "+"+metric) || strings.HasPrefix(strings.TrimSpace(line), "-"+metric)) {
+		if strings.HasPrefix(strings.TrimSpace(line), "+") ||
+			strings.HasPrefix(strings.TrimSpace(line), "-") {
+			if !(strings.HasPrefix(strings.TrimSpace(line), "+"+metric) ||
+				strings.HasPrefix(strings.TrimSpace(line), "-"+metric)) {
 				return err
 			}
 		}

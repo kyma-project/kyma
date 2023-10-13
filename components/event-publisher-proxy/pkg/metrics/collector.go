@@ -97,9 +97,11 @@ func NewCollector(latency histogram.BucketsProvider) *Collector {
 
 		duration: prometheus.NewHistogramVec(
 			prometheus.HistogramOpts{
-				Name:    durationKey,
-				Help:    durationHelp,
-				Buckets: []float64{.005, .01, .02, .05, .1, .25, .5, 1, 2.5, 5},
+				Name: durationKey,
+				Help: durationHelp,
+				Buckets: []float64{0.001, 0.002, 0.004, 0.008, 0.016, 0.032, 0.050, 0.075,
+					0.1, 0.15, 0.02, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.6, 0.7, 0.8, 0.9,
+					1, 1.5, 2, 3, 5},
 			},
 			[]string{responseCodeLabel, methodLabel, pathLabel},
 		),
