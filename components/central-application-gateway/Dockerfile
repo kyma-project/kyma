@@ -1,5 +1,5 @@
 # image builder base on golang:1.21.1-alpine3.18
-FROM golang@sha256:0c860c7ceba62231d0f99fb92e9d7c1577f26fea794a12c75756a8f64b146e45 as builder
+FROM golang@sha256:24a09375a6216764a3eda6a25490a88ac178b5fcb9511d59d0da5ebf9e496474 as builder
 
 ARG DOCK_PKG_DIR=/go/src/github.com/kyma-project/kyma/components/central-application-gateway
 WORKDIR $DOCK_PKG_DIR
