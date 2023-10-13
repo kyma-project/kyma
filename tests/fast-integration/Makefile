@@ -40,14 +40,20 @@ ci-application-connectivity-2-compass:
 
 .PHONY: ci-test-eventing
 ci-test-eventing:
+	kubectl apply -f https://github.com/kyma-project/serverless-manager/releases/latest/download/serverless-operator.yaml
+	kubectl apply -f https://github.com/kyma-project/serverless-manager/releases/latest/download/default_serverless_cr.yaml -n kyma-system
 	npm install
+	kubectl wait --for condition=Installed -n kyma-system serverless default --timeout=120s
 	npm run eventing-test-prep
 	npm run eventing-tests
 	npm run eventing-test-cleanup
 
 .PHONY: ci-test-eventing-pre-upgrade
 ci-test-eventing-pre-upgrade:
+	kubectl apply -f https://github.com/kyma-project/serverless-manager/releases/latest/download/serverless-operator.yaml
+	kubectl apply -f https://github.com/kyma-project/serverless-manager/releases/latest/download/default_serverless_cr.yaml -n kyma-system
 	npm install
+	kubectl wait --for condition=Installed -n kyma-system serverless default --timeout=120s
 	npm run eventing-test-prep
 	npm run eventing-tests
 
