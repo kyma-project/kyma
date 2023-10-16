@@ -30,7 +30,7 @@ global:
       directory: prod/external
 
   jetstream:
-    enabled: true # If set to `false` then NATS resources will not be deployed to the cluster.
+    enabled: false # If set to `false` then NATS resources will not be deployed to the cluster.
     # Storage type of the stream, memory or file.
     storage: file
     fileStorage:
