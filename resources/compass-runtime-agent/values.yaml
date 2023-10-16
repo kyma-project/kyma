@@ -5,7 +5,7 @@ global:
   images:
     compass_runtime_agent:
       name: "compass-runtime-agent"
-      version: "PR-18199"
+      version: "PR-18291"
       directory: "dev"
   istio:
     gateway:
