@@ -1,6 +1,6 @@
 module github.com/kyma-project/kyma/components/compass-runtime-agent
 
-go 1.19
+go 1.21
 
 require (
 	github.com/google/uuid v1.3.0
