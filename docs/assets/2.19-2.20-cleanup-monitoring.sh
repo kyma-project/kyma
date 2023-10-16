@@ -117,3 +117,4 @@ kubectl delete -n kyma-system configmaps istio-mesh-grafana-dashboard --ignore-n
 kubectl delete -n kyma-system configmaps istio-performance-grafana-dashboard --ignore-not-found
 kubectl delete -n kyma-system configmaps istio-service-grafana-dashboard --ignore-not-found
 kubectl delete -n kyma-system configmaps istio-workload-grafana-dashboard --ignore-not-found
+kubectl delete -n kyma-system configmaps function-metrics-dashboard --ignore-not-found
