@@ -1,5 +1,0 @@
-* [Home](/)
-* [Operation Guides](../../README.md)
-* [Troubleshooting](../README.md)
-* [Observability](README.md)
-  * [Trace backend shows fewer traces than you would like to see](obsv-02-troubleshoot-trace-backend-shows-few-traces.md)
