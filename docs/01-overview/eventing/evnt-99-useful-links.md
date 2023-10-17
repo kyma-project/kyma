@@ -32,3 +32,4 @@ For other technical resources, check out these links on the Kyma GitHub reposito
 - [Eventing Helm chart](https://github.com/kyma-project/kyma/tree/main/resources/eventing)
 - [Event Publishing Proxy](https://github.com/kyma-project/kyma/tree/main/components/event-publisher-proxy)
 - [Eventing Controller](https://github.com/kyma-project/kyma/tree/main/components/eventing-controller)
+- [Eventing Metrics](../../04-operation-guides/operations/evnt-02-eventing-metrics.md)
