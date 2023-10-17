@@ -2,16 +2,16 @@
 
 kubectl delete -n kyma-system alertmanagers.monitoring.coreos.com monitoring-alertmanager --ignore-not-found
 kubectl delete -n kyma-system authorizationpolicies.security.istio.io grafana --ignore-not-found
-kubectl delete -n kyma-system clusterroles.rbac.authorization.k8s.io monitoring-grafana-clusterrole --ignore-not-found
-kubectl delete -n kyma-system clusterroles.rbac.authorization.k8s.io monitoring-kube-state-metrics --ignore-not-found
-kubectl delete -n kyma-system clusterroles.rbac.authorization.k8s.io monitoring-operator --ignore-not-found
-kubectl delete -n kyma-system clusterroles.rbac.authorization.k8s.io monitoring-prometheus --ignore-not-found
-kubectl delete -n kyma-system clusterroles.rbac.authorization.k8s.io monitoring-prometheus-istio-server --ignore-not-found
-kubectl delete -n kyma-system clusterrolebindings.rbac.authorization.k8s.io monitoring-grafana-clusterrolebinding --ignore-not-found
-kubectl delete -n kyma-system clusterrolebindings.rbac.authorization.k8s.io monitoring-kube-state-metrics --ignore-not-found
-kubectl delete -n kyma-system clusterrolebindings.rbac.authorization.k8s.io monitoring-operator --ignore-not-found
-kubectl delete -n kyma-system clusterrolebindings.rbac.authorization.k8s.io monitoring-prometheus --ignore-not-found
-kubectl delete -n kyma-system clusterrolebindings.rbac.authorization.k8s.io monitoring-prometheus-istio-server --ignore-not-found
+kubectl delete clusterroles.rbac.authorization.k8s.io monitoring-grafana-clusterrole --ignore-not-found
+kubectl delete clusterroles.rbac.authorization.k8s.io monitoring-kube-state-metrics --ignore-not-found
+kubectl delete clusterroles.rbac.authorization.k8s.io monitoring-operator --ignore-not-found
+kubectl delete clusterroles.rbac.authorization.k8s.io monitoring-prometheus --ignore-not-found
+kubectl delete clusterroles.rbac.authorization.k8s.io monitoring-prometheus-istio-server --ignore-not-found
+kubectl delete clusterrolebindings.rbac.authorization.k8s.io monitoring-grafana-clusterrolebinding --ignore-not-found
+kubectl delete clusterrolebindings.rbac.authorization.k8s.io monitoring-kube-state-metrics --ignore-not-found
+kubectl delete clusterrolebindings.rbac.authorization.k8s.io monitoring-operator --ignore-not-found
+kubectl delete clusterrolebindings.rbac.authorization.k8s.io monitoring-prometheus --ignore-not-found
+kubectl delete clusterrolebindings.rbac.authorization.k8s.io monitoring-prometheus-istio-server --ignore-not-found
 kubectl delete -n kyma-system configmaps eventing-dashboards-delivery --ignore-not-found
 kubectl delete -n kyma-system configmaps eventing-dashboards-jetstream --ignore-not-found
 kubectl delete -n kyma-system configmaps eventing-dashboards-latency --ignore-not-found
@@ -54,8 +54,8 @@ kubectl delete -n kyma-system deployments.apps monitoring-operator --ignore-not-
 kubectl delete -n kyma-system destinationrules.networking.istio.io monitoring-prometheus --ignore-not-found
 kubectl delete -n kyma-system peerauthentications.security.istio.io monitoring-grafana-policy --ignore-not-found
 kubectl delete -n kyma-system persistentvolumeclaims monitoring-grafana --ignore-not-found
-kubectl delete -n kyma-system priorityclasses.scheduling.k8s.io monitoring-priority-class --ignore-not-found
-kubectl delete -n kyma-system priorityclasses.scheduling.k8s.io monitoring-priority-class-high --ignore-not-found
+kubectl delete priorityclasses.scheduling.k8s.io monitoring-priority-class --ignore-not-found
+kubectl delete priorityclasses.scheduling.k8s.io monitoring-priority-class-high --ignore-not-found
 kubectl delete -n kyma-system prometheuses.monitoring.coreos.com monitoring-prometheus --ignore-not-found
 kubectl delete -n kyma-system prometheusrules.monitoring.coreos.com monitoring-alertmanager.rules --ignore-not-found
 kubectl delete -n kyma-system prometheusrules.monitoring.coreos.com monitoring-config-reloaders --ignore-not-found
