@@ -20,7 +20,10 @@ ci-compass:
 
 .PHONY: ci-pre-upgrade
 ci-pre-upgrade:
+	kubectl apply -f https://github.com/kyma-project/serverless-manager/releases/latest/download/serverless-operator.yaml
+	kubectl apply -f https://github.com/kyma-project/serverless-manager/releases/latest/download/default_serverless_cr.yaml -n kyma-system
 	npm install
+	kubectl wait --for condition=Installed -n kyma-system serverless default --timeout=120s
 	npm run upgrade-test-prep
 	npm run upgrade-test-tests
 

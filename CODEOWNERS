@@ -47,6 +47,7 @@
 /resources/ory @kyma-project/goat
 
 # Fast Integration Tests
+/tests/fast-integration/Makefile @kyma-project/eventing
 /tests/fast-integration/test @kyma-project/observability @kyma-project/eventing
 /tests/fast-integration/eventing-test @kyma-project/eventing
 /tests/fast-integration/image @kyma-project/eventing
