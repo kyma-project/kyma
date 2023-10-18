@@ -24,7 +24,7 @@ const (
 	backendLatencyHelp = "The duration of sending events to the messaging server in milliseconds"
 
 	// durationKey name of the duration metric.
-	durationKey = "eventing_epp_requests_duration_milliseconds"
+	durationKey = "eventing_epp_requests_duration_seconds"
 	// durationHelp help text for the duration metric.
 	durationHelp = "The duration of processing an incoming request (includes sending to the backend)"
 
@@ -95,12 +95,13 @@ func NewCollector(latency histogram.BucketsProvider) *Collector {
 			[]string{eventTypeLabel, eventSourceLabel, responseCodeLabel},
 		),
 
-		//nolint:promlinter // we follow the same pattern as istio. so a millisecond unit if fine here
 		duration: prometheus.NewHistogramVec(
 			prometheus.HistogramOpts{
-				Name:    durationKey,
-				Help:    durationHelp,
-				Buckets: latency.Buckets(),
+				Name: durationKey,
+				Help: durationHelp,
+				Buckets: []float64{0.001, 0.002, 0.004, 0.008, 0.016, 0.032, 0.050, 0.075,
+					0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.6, 0.7, 0.8, 0.9,
+					1, 1.5, 2, 3, 5},
 			},
 			[]string{responseCodeLabel, methodLabel, pathLabel},
 		),

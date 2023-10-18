@@ -7,13 +7,13 @@ The metrics follow the [Prometheus naming convention](https://prometheus.io/docs
 
 ### Metrics Emitted by Eventing Publisher Proxy:
 
-| Metric                                          | Description                                                                      |
-| ----------------------------------------------- | :------------------------------------------------------------------------------- |
-| **eventing_epp_backend_duration_milliseconds**  | The duration of sending events to the messaging server in milliseconds           |
-| **eventing_epp_event_type_published_total**     | The total number of events published for a given eventTypeLabel                  |
-| **eventing_epp_health**                         | The current health of the system. `1` indicates a healthy system                 |
-| **eventing_epp_requests_duration_milliseconds** | The duration of processing an incoming request (includes sending to the backend) |
-| **eventing_epp_requests_total**                 | The total number of requests                                                     |
+| Metric                                         | Description                                                                      |
+| ---------------------------------------------- | :------------------------------------------------------------------------------- |
+| **eventing_epp_backend_duration_milliseconds** | The duration of sending events to the messaging server in milliseconds           |
+| **eventing_epp_event_type_published_total**    | The total number of events published for a given eventTypeLabel                  |
+| **eventing_epp_health**                        | The current health of the system. `1` indicates a healthy system                 |
+| **eventing_epp_requests_duration_seconds**     | The duration of processing an incoming request (includes sending to the backend) |
+| **eventing_epp_requests_total**                | The total number of requests                                                     |
 
 ### Metrics Emitted by Eventing Controller:
 
