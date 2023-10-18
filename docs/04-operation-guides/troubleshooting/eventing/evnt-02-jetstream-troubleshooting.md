@@ -37,14 +37,3 @@ Events were not received by the consumers.
           To correlate the consumer to the Subscription and the specific event type, check the `description` field of the consumer.
 
        5. If the PVC storage is fully consumed and matches the stream size as shown above, the stream can no longer receive messages. Either increase the PVC storage size or set the `MaxBytes` property which removes the old messages.
-
-3. Check the [JetStream grafana dashboard](https://grafana.com/grafana/dashboards/14725):
-
-    1. Port forward the Kyma Eventing NATS Service to localhost. Use port `8081`. Run:
-        ```bash
-        kubectl -n kyma-system port-forward svc/monitoring-grafana 8081:80
-        ```
-    2. On `localhost:8081` search for `NATS JetStream` dashboard. You can find the stream and consumer metrics as well as the storage and memory consumption.
-   
-    3. Also search for `JetStream Event Types Summary` and `Delivery per Subscription` dashboards to visualize and debug the phase during which the events were lost.
-    

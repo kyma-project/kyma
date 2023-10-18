@@ -34,7 +34,6 @@
 /installation/resources/crds/compass-runtime-agent @kyma-project/Framefrog
 /installation/resources/crds/eventing @kyma-project/eventing
 /installation/resources/crds/istio @kyma-project/goat
-/installation/resources/crds/monitoring @kyma-project/observability
 /installation/resources/crds/ory @kyma-project/goat
 
 /resources/api-gateway @kyma-project/goat
@@ -43,15 +42,13 @@
 /resources/compass-runtime-agent @kyma-project/Framefrog
 /resources/eventing @kyma-project/eventing
 /resources/istio @kyma-project/goat
-/resources/monitoring @kyma-project/observability
 /resources/ory @kyma-project/goat
 
 # Fast Integration Tests
 /tests/fast-integration/Makefile @kyma-project/eventing
-/tests/fast-integration/test @kyma-project/observability @kyma-project/eventing
+/tests/fast-integration/test @kyma-project/eventing
 /tests/fast-integration/eventing-test @kyma-project/eventing
 /tests/fast-integration/image @kyma-project/eventing
-/tests/fast-integration/monitoring @kyma-project/observability
 /tests/fast-integration/prow @kyma-project/Jellyfish
 
 /tests/components/application-connector @kyma-project/Framefrog

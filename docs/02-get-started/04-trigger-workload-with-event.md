@@ -226,3 +226,6 @@ Received event: { orderCode: '3211213' }
   </details>
 </div>
 
+That's it!
+
+Go ahead and dive a little deeper into the Kyma documentation for [tutorials](../03-tutorials), [operation guides](../04-operation-guides), and [technical references](../05-technical-reference), as well as information on the [main areas in Kyma](../01-overview/). Happy Kyma-ing!

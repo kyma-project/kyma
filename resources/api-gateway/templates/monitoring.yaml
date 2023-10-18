@@ -4,7 +4,7 @@ kind: Service
 metadata:
   name: {{ include "api-gateway.name" . }}-metrics
   annotations:
-    prometheus.io/scrape: "true"
+    prometheus.io/scrape: "false"
     prometheus.io/port: {{ .Values.config.ports.metrics | quote }}
   labels:
 {{ include "api-gateway.labels" . | indent 4 }}

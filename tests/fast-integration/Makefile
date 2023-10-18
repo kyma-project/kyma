@@ -8,11 +8,6 @@ lint-fix:
 	npm install
 	npm run lint-fix
 
-.PHONY: ci
-ci:
-	npm install
-	npm test
-
 .PHONY: ci-compass
 ci-compass:
 	npm install

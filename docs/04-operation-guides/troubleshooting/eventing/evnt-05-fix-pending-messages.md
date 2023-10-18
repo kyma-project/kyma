@@ -22,9 +22,7 @@ You need the latest version of NATS CLI installed on your machine.
 
 ### Consumer leader reelection
 
-First, find out which consumer(s) have pending messages. You can find the broken consumer either with the NATS CLI command or with a Grafana dashboard.
-
-#### Option 1: Find the broken consumers with NATS CLI
+First, find out which consumer(s) have pending messages. You can find the broken consumer with the NATS CLI command.
 
 1. Port forward to a NATS replica:
 
@@ -50,50 +48,6 @@ First, find out which consumer(s) have pending messages. You can find the broken
 3. Check the output to see which consumer has pending messages and which replica is the leader.
    In this example, the consumer `ebcabfe5c902612f0ba3ebde7653f30b` has 25 pending messages and has the leader.
    The other one has no pending message and is successfully processing events.
-
-#### Option 2: Find the broken consumers using Grafana dashboard
-
-1. [Access and Expose Grafana](../../security/sec-06-access-expose-grafana.md).
-2. Find the NATS JetStream Dashboard and check the pending messages:
-   ![Pending consumer](../../assets/grafana_pending_consumer.png)
-3. Find the consumer with pending messages and encode it as an `md5` hash:
-
-   ```bash
-   echo -n "tunas-testing/test-noapp3/kyma.noapp.order.created.v1" | md5
-   ```
-
-   This shell command results in `ebcabfe5c902612f0ba3ebde7653f30b`.
-
-4. Port forward to a NATS replica:
-
-   ```bash
-   kubectl port-forward -n kyma-system eventing-nats-0 4222  
-
-5. Get information about the consumer:
-
-   ```bash
-   nats consumer info sap ebcabfe5c902612f0ba3ebde7653f30b
-   ```
-
-6. In the output, find the consumer's leader.
-   In the following example, the leader is the `eventing-nats-1` replica:
-
-   ```bash
-   Information for Consumer sap > ebcabfe5c902612f0ba3ebde7653f30b created 2022-10-24T15:49:43+02:00
-   
-   Configuration:
-   
-                   Name: ebcabfe5c902612f0ba3ebde7653f30b
-            Description: tunas-testing/test-noapp3/kyma.noapp.order.created.v1
-             ...
-   
-   Cluster Information:
-   
-                   Name: eventing-nats
-                 Leader: eventing-nats-1 # that's what we need
-                Replica: eventing-nats-0, current, seen 0.96s ago
-                Replica: eventing-nats-2, current, seen 0.96s ago
-   ```
 
 #### Trigger the consumer leader reelection
 

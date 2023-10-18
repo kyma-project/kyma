@@ -5,7 +5,6 @@
   * [Eventing](eventing/README.md)
   <!-- markdown-link-check-disable-next-line -->
   * [Istio](/istio/user/02-operation-guides/troubleshooting/README.md)
-  * [Observability](observability/README.md)
   * [Security](security/README.md)
   * [Component doesn't work after successful installation](01-component-installation-fails.md)
   * [Local Kyma deployment fails with pending Pods](01-deplyoment-fails-pending-pods.md)

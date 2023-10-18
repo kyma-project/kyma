@@ -40,11 +40,6 @@ See the full list of Kyma troubleshooting guides:
 - [Eventing backend stopped receiving events due to full storage](./eventing/evnt-04-free-jetstream-storage.md)
 - [Published events are pending in the stream](./eventing/evnt-05-fix-pending-messages.md)
 
-### Observability
-
-- [Prometheus Istio Server restarting or in crashback loop](./observability/obsv-01-troubleshoot-prometheus-istio-server-crash-oom.md)
-- [Component doesn't work after successful installation](./observability/obsv-02-troubleshoot-trace-backend-shows-few-traces.md)
-
 ### Security
   
 - [Issues with certificates on Gardener](./security/sec-01-certificates-gardener.md)

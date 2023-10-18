@@ -14,6 +14,3 @@ In this section you can learn more about technicalities behind each main area: t
 
 * [Eventing Architecture](evnt-01-architecture.md)
 
-### Observability
-
-* [Monitoring Architecture](obsv-01-architecture-monitoring.md)

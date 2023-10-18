@@ -21,9 +21,6 @@ const {
   deleteK8sConfigMap,
 } = require('../utils');
 const {
-  eventingMonitoringTest,
-} = require('./metric-test');
-const {
   testNamespace,
   backendK8sSecretName,
   backendK8sSecretNamespace,
@@ -54,7 +51,6 @@ const {
   checkFunctionUnreachable,
   publishEventWithRetry,
   debugBanner,
-  isSKR,
   isUpgradeJob,
   isJSRecreatedTestEnabled,
   isJSAtLeastOnceDeliveryTestEnabled,
@@ -68,10 +64,6 @@ const {
 const {
   expect,
 } = require('chai');
-const {
-  exposeGrafana,
-  unexposeGrafana,
-} = require('../monitoring');
 
 let clusterHost = '';
 let isJSAtLeastOnceTested = false;
@@ -83,14 +75,6 @@ describe('Eventing tests', function() {
 
   before('Ensure the test namespace exist', async function() {
     await waitForNamespace(testNamespace);
-  });
-
-  before('Expose Grafana', async function() {
-    if (isUpgradeJob) {
-      return;
-    }
-    await exposeGrafana();
-    this.test.retries(3);
   });
 
   before('Create an ApiRule for NATS', async () => {
@@ -189,16 +173,6 @@ describe('Eventing tests', function() {
         debugBanner(`Testing Cloud Events (type matching: exact) ${subscriptionsExactTypeMatching[i].type}`);
         await checkEventDelivery(clusterHost, 'binary', subscriptionsExactTypeMatching[i].type, eventSource);
       }
-    });
-  }
-
-  // eventingMonitoringTestSuite - Runs Eventing tests for monitoring
-  function eventingMonitoringTestSuite(backend, isSKR, isUpgradeJob=true) {
-    if (isUpgradeJob) {
-      return;
-    }
-    it('Run Eventing Monitoring tests', async function() {
-      await eventingMonitoringTest(backend, isSKR, true);
     });
   }
 
@@ -421,9 +395,6 @@ describe('Eventing tests', function() {
     // Running Eventing end-to-end event delivery tests
     eventDeliveryTestSuite(natsBackend);
 
-    // Running Eventing monitoring tests.
-    eventingMonitoringTestSuite(natsBackend, isSKR, isUpgradeJob);
-
     // Running JetStream stream and consumers not re-created by upgrade test.
     jsTestStreamConsumerNotRecreatedTestSuite('post');
 
@@ -452,9 +423,6 @@ describe('Eventing tests', function() {
 
     // Running Eventing end-to-end event delivery tests
     eventDeliveryTestSuite(bebBackend);
-
-    // Running Eventing monitoring tests.
-    eventingMonitoringTestSuite(bebBackend, isSKR, isUpgradeJob);
   });
 
   context('with Nats backend switched back from BEB', async function() {
@@ -474,9 +442,6 @@ describe('Eventing tests', function() {
     // Running Eventing end-to-end event delivery tests
     eventDeliveryTestSuite(natsBackend);
 
-    // Running Eventing monitoring tests.
-    eventingMonitoringTestSuite(natsBackend, isSKR, isUpgradeJob);
-
     // Running stream and consumer not re-created by upgrade test
     jsTestStreamConsumerNotRecreatedTestSuite('pre');
 
@@ -491,13 +456,5 @@ describe('Eventing tests', function() {
     }
 
     await deleteApiRule(eventingNatsApiRuleAName, kymaSystem);
-  });
-
-  after('Unexpose Grafana', async function() {
-    if (isUpgradeJob) {
-      return;
-    }
-    await unexposeGrafana(isSKR);
-    this.test.retries(3);
   });
 });
