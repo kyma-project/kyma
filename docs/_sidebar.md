@@ -5,7 +5,7 @@
 * [Developer Tutorials](/03-tutorials/README.md)
 * [Operation Guides](/04-operation-guides/README.md)
 * [Technical Reference](05-technical-reference/README.md)
-* Kyma Modules
+* [Kyma Modules](06-modules/README.md)
   * [SAP BTP Operator](/btp-manager/user/README.md)
   * [Keda](/keda-manager/user/README.md)
   * [Serverless](/serverless-manager/user/README.md)
