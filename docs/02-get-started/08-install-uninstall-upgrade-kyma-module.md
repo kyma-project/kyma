@@ -48,6 +48,13 @@ kubectl apply -f https://github.com/kyma-project/telemetry-manager/releases/late
 kubectl apply -f https://github.com/kyma-project/telemetry-manager/releases/latest/download/telemetry-default-cr.yaml -n kyma-system
 ```
 
+#### [NATS](https://github.com/kyma-project/nats-manager)
+
+```bash
+kubectl apply -f https://github.com/kyma-project/nats-manager/releases/latest/download/nats-manager.yaml
+kubectl apply -f https://github.com/kyma-project/nats-manager/releases/latest/download/nats_default_cr.yaml -n kyma-system
+```
+
 ## Uninstall Kyma with a module
 
 You uninstall Kyma with a module using the `kubectl delete` command.
