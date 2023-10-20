@@ -1,6 +1,6 @@
 module github.com/kyma-project/kyma/components/eventing-controller
 
-go 1.20
+go 1.21
 
 require (
 	github.com/avast/retry-go/v3 v3.1.1
@@ -92,5 +92,3 @@ require (
 	sigs.k8s.io/structured-merge-diff/v4 v4.3.0 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
-
-replace github.com/kyma-incubator/api-gateway => github.com/kyma-project/api-gateway v0.0.0-20220819093753-296e6704d413
