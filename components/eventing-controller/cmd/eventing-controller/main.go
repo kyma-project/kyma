@@ -26,6 +26,8 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager/jetstream"
 )
 
+const webhookServerPort = 9443
+
 func main() {
 	opts := options.New()
 	if err := opts.Parse(); err != nil {
@@ -93,7 +95,7 @@ func main() {
 		Cache:                  cache.Options{SyncPeriod: &opts.ReconcilePeriod}, // CHECK Only used in BEB so far.
 		Metrics:                server.Options{BindAddress: opts.MetricsAddr},
 		WebhookServer: webhook.NewServer(webhook.Options{
-			Port: 9443,
+			Port: webhookServerPort,
 		}),
 	})
 	if err != nil {
