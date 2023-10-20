@@ -3,8 +3,8 @@ package backend
 import (
 	"context"
 	"errors"
-	"math/rand"
 	"testing"
+    "crypto/rand"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
