@@ -8,7 +8,10 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
+	"sigs.k8s.io/controller-runtime/pkg/metrics/server"
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
@@ -86,10 +89,12 @@ func main() {
 	// Init the manager.
 	mgr, err := ctrl.NewManager(restCfg, ctrl.Options{
 		Scheme:                 scheme,
-		MetricsBindAddress:     opts.MetricsAddr,
 		HealthProbeBindAddress: opts.ProbeAddr,
-		Port:                   9443,
-		SyncPeriod:             &opts.ReconcilePeriod, // CHECK Only used in BEB so far.
+		Cache:                  cache.Options{SyncPeriod: &opts.ReconcilePeriod}, // CHECK Only used in BEB so far.
+		Metrics:                server.Options{BindAddress: opts.MetricsAddr},
+		WebhookServer: webhook.NewServer(webhook.Options{
+			Port: 9443,
+		}),
 	})
 	if err != nil {
 		setupLogger.Fatalw("Failed to start manager", "error", err)

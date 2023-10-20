@@ -25,8 +25,11 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	"k8s.io/client-go/rest"
+	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+	"sigs.k8s.io/controller-runtime/pkg/metrics/server"
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
@@ -148,12 +151,14 @@ func startReconciler() error {
 	webhookInstallOptions := &jsTestEnsemble.TestEnv.WebhookInstallOptions
 	k8sManager, err := ctrl.NewManager(jsTestEnsemble.Cfg, ctrl.Options{
 		Scheme:                 scheme.Scheme,
-		SyncPeriod:             &syncPeriod,
-		Host:                   webhookInstallOptions.LocalServingHost,
-		Port:                   webhookInstallOptions.LocalServingPort,
-		CertDir:                webhookInstallOptions.LocalServingCertDir,
-		MetricsBindAddress:     "0", // disable
 		HealthProbeBindAddress: "0", // disable
+		Cache:                  cache.Options{SyncPeriod: &syncPeriod},
+		Metrics:                server.Options{BindAddress: "0"}, // disable
+		WebhookServer: webhook.NewServer(webhook.Options{
+			Host:    webhookInstallOptions.LocalServingHost,
+			Port:    webhookInstallOptions.LocalServingPort,
+			CertDir: webhookInstallOptions.LocalServingCertDir,
+		}),
 	})
 	if err != nil {
 		return err

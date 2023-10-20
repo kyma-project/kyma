@@ -24,9 +24,11 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+	"sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 
@@ -158,10 +160,10 @@ var _ = BeforeSuite(func(done Done) {
 	shutdownTimeout := time.Duration(0)
 	k8sManager, err := ctrl.NewManager(cfg, ctrl.Options{
 		Scheme:                  scheme.Scheme,
-		SyncPeriod:              &syncPeriod,
 		GracefulShutdownTimeout: &shutdownTimeout,
-		MetricsBindAddress:      "0", // disable
 		HealthProbeBindAddress:  "0", // disable
+		Cache:                   cache.Options{SyncPeriod: &syncPeriod},
+		Metrics:                 server.Options{BindAddress: "0"}, // disable,
 	})
 	Expect(err).To(BeNil())
 
