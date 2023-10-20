@@ -15,7 +15,7 @@ import (
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
 	"github.com/nats-io/nats.go"
 
-	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
+	apigatewayv1beta1 "github.com/kyma-project/api-gateway/apis/gateway/v1beta1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 

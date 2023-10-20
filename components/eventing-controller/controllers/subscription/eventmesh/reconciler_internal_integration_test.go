@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
+	apigatewayv1beta1 "github.com/kyma-project/api-gateway/apis/gateway/v1beta1"
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
