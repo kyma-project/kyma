@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
+	apigatewayv1beta1 "github.com/kyma-project/api-gateway/apis/gateway/v1beta1"
 
 	"github.com/stretchr/testify/require"
 
