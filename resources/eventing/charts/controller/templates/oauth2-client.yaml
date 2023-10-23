@@ -1,4 +1,4 @@
-{{ if not .Values.eventingWebhookAuth.enabled}}
+{{- if and .Values.global.eventing.enabled (not .Values.eventingWebhookAuth.enabled) }}
 # Used by controller for BEB backend
 apiVersion: hydra.ory.sh/v1alpha1
 kind: OAuth2Client

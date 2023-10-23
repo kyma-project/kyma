@@ -1,3 +1,4 @@
+{{- if .Values.global.eventing.enabled }}
 # Used by application validator pod to send events to
 # TODO https://github.com/kyma-project/kyma/issues/11319
 apiVersion: v1
@@ -59,3 +60,4 @@ spec:
       protocol: TCP
       port: {{ .Values.global.istio.proxy.statusPort }}
       targetPort: {{ .Values.global.istio.proxy.statusPort }}
+{{- end }}

@@ -1,5 +1,7 @@
 # globally shared values among Helm subcharts
 global:
+  eventing:
+    enabled: true
   containerRegistry:
     path: europe-docker.pkg.dev/kyma-project
   images:

@@ -1,4 +1,4 @@
-{{- if .Values.global.jetstream.enabled }}
+{{- if and .Values.global.eventing.enabled .Values.global.jetstream.enabled }}
 apiVersion: v1
 kind: Service
 metadata:

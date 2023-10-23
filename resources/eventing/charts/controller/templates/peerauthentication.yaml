@@ -1,3 +1,4 @@
+{{- if .Values.global.eventing.enabled }}
 # Used by publisher proxy for NATS backend
 apiVersion: security.istio.io/v1beta1
 kind: PeerAuthentication
@@ -11,3 +12,4 @@ spec:
   portLevelMtls:
     {{ .Values.metrics.config.port }}:
       mode: PERMISSIVE
+{{- end }}

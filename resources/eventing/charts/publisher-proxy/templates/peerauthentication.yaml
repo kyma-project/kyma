@@ -1,3 +1,4 @@
+{{- if .Values.global.eventing.enabled }}
 apiVersion: security.istio.io/v1beta1
 kind: PeerAuthentication
 metadata:
@@ -10,3 +11,4 @@ spec:
   portLevelMtls:
     {{ .Values.metrics.config.port }}:
       mode: PERMISSIVE
+{{- end }}
