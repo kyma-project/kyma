@@ -9,9 +9,9 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
-	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
+	apigatewayv1beta1 "github.com/kyma-project/api-gateway/apis/gateway/v1beta1"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
@@ -638,88 +638,88 @@ func Test_ownerReferencesDeepEqual(t *testing.T) {
 		{
 			name: "same OwnerReferences and same order",
 			givenOwnerReferences1: []metav1.OwnerReference{
-				ownerReference("v-0", "k-0", "n-0", "u-0", pointer.Bool(false), pointer.Bool(false)),
-				ownerReference("v-1", "k-1", "n-1", "u-1", pointer.Bool(false), pointer.Bool(false)),
-				ownerReference("v-2", "k-2", "n-2", "u-2", pointer.Bool(false), pointer.Bool(false)),
+				ownerReference("v-0", "k-0", "n-0", "u-0", ptr.To(false), ptr.To(false)),
+				ownerReference("v-1", "k-1", "n-1", "u-1", ptr.To(false), ptr.To(false)),
+				ownerReference("v-2", "k-2", "n-2", "u-2", ptr.To(false), ptr.To(false)),
 			},
 			givenOwnerReferences2: []metav1.OwnerReference{
-				ownerReference("v-0", "k-0", "n-0", "u-0", pointer.Bool(false), pointer.Bool(false)),
-				ownerReference("v-1", "k-1", "n-1", "u-1", pointer.Bool(false), pointer.Bool(false)),
-				ownerReference("v-2", "k-2", "n-2", "u-2", pointer.Bool(false), pointer.Bool(false)),
+				ownerReference("v-0", "k-0", "n-0", "u-0", ptr.To(false), ptr.To(false)),
+				ownerReference("v-1", "k-1", "n-1", "u-1", ptr.To(false), ptr.To(false)),
+				ownerReference("v-2", "k-2", "n-2", "u-2", ptr.To(false), ptr.To(false)),
 			},
 			wantEqual: true,
 		},
 		{
 			name: "same OwnerReferences but different order",
 			givenOwnerReferences1: []metav1.OwnerReference{
-				ownerReference("v-0", "k-0", "n-0", "u-0", pointer.Bool(false), pointer.Bool(false)),
-				ownerReference("v-1", "k-1", "n-1", "u-1", pointer.Bool(false), pointer.Bool(false)),
-				ownerReference("v-2", "k-2", "n-2", "u-2", pointer.Bool(false), pointer.Bool(false)),
+				ownerReference("v-0", "k-0", "n-0", "u-0", ptr.To(false), ptr.To(false)),
+				ownerReference("v-1", "k-1", "n-1", "u-1", ptr.To(false), ptr.To(false)),
+				ownerReference("v-2", "k-2", "n-2", "u-2", ptr.To(false), ptr.To(false)),
 			},
 			givenOwnerReferences2: []metav1.OwnerReference{
-				ownerReference("v-2", "k-2", "n-2", "u-2", pointer.Bool(false), pointer.Bool(false)),
-				ownerReference("v-0", "k-0", "n-0", "u-0", pointer.Bool(false), pointer.Bool(false)),
-				ownerReference("v-1", "k-1", "n-1", "u-1", pointer.Bool(false), pointer.Bool(false)),
+				ownerReference("v-2", "k-2", "n-2", "u-2", ptr.To(false), ptr.To(false)),
+				ownerReference("v-0", "k-0", "n-0", "u-0", ptr.To(false), ptr.To(false)),
+				ownerReference("v-1", "k-1", "n-1", "u-1", ptr.To(false), ptr.To(false)),
 			},
 			wantEqual: true,
 		},
 		{
 			name: "different OwnerReference APIVersion",
 			givenOwnerReferences1: []metav1.OwnerReference{
-				ownerReference("v-0", "k-0", "n-0", "u-0", pointer.Bool(false), pointer.Bool(false)),
+				ownerReference("v-0", "k-0", "n-0", "u-0", ptr.To(false), ptr.To(false)),
 			},
 			givenOwnerReferences2: []metav1.OwnerReference{
-				ownerReference("v-1", "k-0", "n-0", "u-0", pointer.Bool(false), pointer.Bool(false)),
+				ownerReference("v-1", "k-0", "n-0", "u-0", ptr.To(false), ptr.To(false)),
 			},
 			wantEqual: false,
 		},
 		{
 			name: "different OwnerReference Kind",
 			givenOwnerReferences1: []metav1.OwnerReference{
-				ownerReference("v-0", "k-0", "n-0", "u-0", pointer.Bool(false), pointer.Bool(false)),
+				ownerReference("v-0", "k-0", "n-0", "u-0", ptr.To(false), ptr.To(false)),
 			},
 			givenOwnerReferences2: []metav1.OwnerReference{
-				ownerReference("v-0", "k-1", "n-0", "u-0", pointer.Bool(false), pointer.Bool(false)),
+				ownerReference("v-0", "k-1", "n-0", "u-0", ptr.To(false), ptr.To(false)),
 			},
 			wantEqual: false,
 		},
 		{
 			name: "different OwnerReference Name",
 			givenOwnerReferences1: []metav1.OwnerReference{
-				ownerReference("v-0", "k-0", "n-0", "u-0", pointer.Bool(false), pointer.Bool(false)),
+				ownerReference("v-0", "k-0", "n-0", "u-0", ptr.To(false), ptr.To(false)),
 			},
 			givenOwnerReferences2: []metav1.OwnerReference{
-				ownerReference("v-0", "k-0", "n-1", "u-0", pointer.Bool(false), pointer.Bool(false)),
+				ownerReference("v-0", "k-0", "n-1", "u-0", ptr.To(false), ptr.To(false)),
 			},
 			wantEqual: false,
 		},
 		{
 			name: "different OwnerReference UID",
 			givenOwnerReferences1: []metav1.OwnerReference{
-				ownerReference("v-0", "k-0", "n-0", "u-0", pointer.Bool(false), pointer.Bool(false)),
+				ownerReference("v-0", "k-0", "n-0", "u-0", ptr.To(false), ptr.To(false)),
 			},
 			givenOwnerReferences2: []metav1.OwnerReference{
-				ownerReference("v-0", "k-0", "n-0", "u-1", pointer.Bool(false), pointer.Bool(false)),
+				ownerReference("v-0", "k-0", "n-0", "u-1", ptr.To(false), ptr.To(false)),
 			},
 			wantEqual: false,
 		},
 		{
 			name: "different OwnerReference Controller",
 			givenOwnerReferences1: []metav1.OwnerReference{
-				ownerReference("v-0", "k-0", "n-0", "u-0", pointer.Bool(false), pointer.Bool(false)),
+				ownerReference("v-0", "k-0", "n-0", "u-0", ptr.To(false), ptr.To(false)),
 			},
 			givenOwnerReferences2: []metav1.OwnerReference{
-				ownerReference("v-0", "k-0", "n-0", "u-0", pointer.Bool(true), pointer.Bool(false)),
+				ownerReference("v-0", "k-0", "n-0", "u-0", ptr.To(true), ptr.To(false)),
 			},
 			wantEqual: false,
 		},
 		{
 			name: "different OwnerReference BlockOwnerDeletion",
 			givenOwnerReferences1: []metav1.OwnerReference{
-				ownerReference("v-0", "k-0", "n-0", "u-0", pointer.Bool(false), pointer.Bool(false)),
+				ownerReference("v-0", "k-0", "n-0", "u-0", ptr.To(false), ptr.To(false)),
 			},
 			givenOwnerReferences2: []metav1.OwnerReference{
-				ownerReference("v-0", "k-0", "n-0", "u-0", pointer.Bool(false), pointer.Bool(true)),
+				ownerReference("v-0", "k-0", "n-0", "u-0", ptr.To(false), ptr.To(true)),
 			},
 			wantEqual: false,
 		},
