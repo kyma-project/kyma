@@ -7,6 +7,7 @@
 * [Technical Reference](05-technical-reference/README.md)
 * [Kyma Modules](06-modules/README.md)
   * [SAP BTP Operator](/btp-manager/user/README.md)
+  * [Application Connector](/application-connector-manager/user/README.md)
   * [Keda](/keda-manager/user/README.md)
   * [Serverless](/serverless-manager/user/README.md)
   * [Telemetry](/telemetry-manager/user/README.md)
