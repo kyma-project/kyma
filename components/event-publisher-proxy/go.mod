@@ -1,6 +1,6 @@
 module github.com/kyma-project/kyma/components/event-publisher-proxy
 
-go 1.20
+go 1.21
 
 require (
 	github.com/cloudevents/sdk-go/v2 v2.14.0
