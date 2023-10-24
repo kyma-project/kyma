@@ -570,7 +570,7 @@ func TestHandler_sendEventAndRecordMetrics_TracingAndDefaults(t *testing.T) {
 	for _, v := range headers {
 		header.Add(v, v)
 	}
-	expectedExtensions := map[string]interface{}{
+	expectedExtensions := map[string]any{
 		"traceparent":    "traceparent",
 		"b3traceid":      "X-B3-TraceId",
 		"b3parentspanid": "X-B3-ParentSpanId",
@@ -595,7 +595,7 @@ func CreateCloudEvent(t *testing.T) *cev2event.Event {
 	err := json.Unmarshal([]byte(payload), &newEvent)
 	assert.NoError(t, err)
 	newEvent.SetType(testingutils.CloudEventTypeWithPrefix)
-	err = newEvent.SetData("", map[string]interface{}{"foo": "bar"})
+	err = newEvent.SetData("", map[string]any{"foo": "bar"})
 	assert.NoError(t, err)
 
 	return &newEvent
