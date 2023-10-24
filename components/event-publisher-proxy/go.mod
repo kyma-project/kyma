@@ -26,9 +26,6 @@ require (
 )
 
 require (
-	cloud.google.com/go v0.97.0 // indirect
-	github.com/PuerkitoBio/purell v1.1.1 // indirect
-	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -44,7 +41,7 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
-	github.com/google/gnostic v0.5.7-v3refs // indirect
+	github.com/google/gnostic-models v0.6.8 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/imdario/mergo v0.3.12 // indirect
@@ -70,6 +67,7 @@ require (
 	github.com/stretchr/objx v0.5.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/crypto v0.14.0 // indirect
+	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
 	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/sys v0.13.0 // indirect
 	golang.org/x/term v0.13.0 // indirect
@@ -89,17 +87,6 @@ require (
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.3.0 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
-)
-
-replace (
-	// keep all following packages at the same version
-	k8s.io/api => k8s.io/api v0.25.11
-	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.25.11
-	k8s.io/apimachinery => k8s.io/apimachinery v0.25.11
-	k8s.io/cli-runtime => k8s.io/cli-runtime v0.25.11
-	k8s.io/client-go => k8s.io/client-go v0.25.11
-	k8s.io/component-base => k8s.io/component-base v0.25.11
-	k8s.io/kubectl => k8s.io/kubectl v0.25.11
 )
 
 replace github.com/prometheus/client_golang => github.com/prometheus/client_golang v1.14.0
