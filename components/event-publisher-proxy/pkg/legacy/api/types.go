@@ -3,8 +3,7 @@ package api
 import "net/http"
 
 // AnyValue implements the service definition of AnyValue.
-type AnyValue interface {
-}
+type AnyValue any
 
 // PublishRequestData holds request data.
 type PublishRequestData struct {

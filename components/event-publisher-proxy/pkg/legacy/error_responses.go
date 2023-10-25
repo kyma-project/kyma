@@ -80,7 +80,7 @@ func ErrorResponse(status int, err error) *api.PublishEventResponses {
 }
 
 // CreateMissingFieldError creates an error for a missing field.
-func CreateMissingFieldError(field interface{}) *api.PublishEventResponses {
+func CreateMissingFieldError(field any) *api.PublishEventResponses {
 	apiErrorDetail := api.ErrorDetail{
 		Field:    field.(string),
 		Type:     ErrorTypeMissingField,
@@ -99,7 +99,7 @@ func CreateMissingFieldError(field interface{}) *api.PublishEventResponses {
 }
 
 // CreateInvalidFieldError creates an error for an invalid field.
-func CreateInvalidFieldError(field interface{}) *api.PublishEventResponses {
+func CreateInvalidFieldError(field any) *api.PublishEventResponses {
 	apiErrorDetail := api.ErrorDetail{
 		Field:    field.(string),
 		Type:     ErrorTypeInvalidField,
