@@ -11,6 +11,7 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/kyma-project/api-gateway v0.0.0-20231020123059-319383e7e6e5
 	github.com/kyma-project/kyma/common/logging v0.0.0-20231020092259-d58329d50da1
+	github.com/kyma-project/kyma/components/application-operator v0.0.0-20230127165033-ec8e43477eca
 	github.com/mitchellh/hashstructure/v2 v2.0.2
 	github.com/nats-io/nats-server/v2 v2.10.3
 	github.com/nats-io/nats.go v1.31.0
@@ -31,7 +32,6 @@ require (
 )
 
 require (
-	cloud.google.com/go v0.97.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -39,13 +39,13 @@ require (
 	github.com/evanphx/json-patch v5.6.0+incompatible // indirect
 	github.com/evanphx/json-patch/v5 v5.6.0 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
-	github.com/go-openapi/jsonpointer v0.19.5 // indirect
-	github.com/go-openapi/jsonreference v0.20.0 // indirect
-	github.com/go-openapi/swag v0.19.14 // indirect
+	github.com/go-openapi/jsonpointer v0.19.6 // indirect
+	github.com/go-openapi/jsonreference v0.20.2 // indirect
+	github.com/go-openapi/swag v0.22.3 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
-	github.com/google/gnostic v0.5.7-v3refs // indirect
+	github.com/google/gnostic-models v0.6.8 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/uuid v1.3.1 // indirect
