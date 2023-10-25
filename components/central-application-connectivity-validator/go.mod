@@ -59,11 +59,11 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
-	golang.org/x/net v0.10.0 // indirect
+	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20220223155221-ee480838109b // indirect
-	golang.org/x/sys v0.9.0 // indirect
-	golang.org/x/term v0.6.0 // indirect
-	golang.org/x/text v0.9.0 // indirect
+	golang.org/x/sys v0.13.0 // indirect
+	golang.org/x/term v0.13.0 // indirect
+	golang.org/x/text v0.13.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	golang.org/x/tools v0.9.3 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.2.0 // indirect
@@ -86,8 +86,4 @@ replace (
 	github.com/containerd/containerd => github.com/containerd/containerd v1.4.11
 	github.com/docker/docker => github.com/docker/docker v20.10.8+incompatible
 	github.com/opencontainers/runc => github.com/opencontainers/runc v1.0.0-rc92
-	golang.org/x/crypto => golang.org/x/crypto v0.4.0
-	golang.org/x/net => golang.org/x/net v0.8.0
-	golang.org/x/sys => golang.org/x/sys v0.3.0
-	golang.org/x/text => golang.org/x/text v0.5.0
 )
