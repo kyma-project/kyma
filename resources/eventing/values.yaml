@@ -5,13 +5,13 @@ global:
   images:
     eventing_controller:
       name: eventing-controller
-      version: PR-18337
+      version: PR-18353
       directory: dev
       pullPolicy: "IfNotPresent"
     publisher_proxy:
       name: event-publisher-proxy
-      version: v20231019-57b79ed0
-      directory: prod
+      version: PR-18353
+      directory: dev
     certHandler:
       name: eventing-webhook-certificates
       version: 1.7.0
