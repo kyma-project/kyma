@@ -15,7 +15,7 @@ func TestAddTracingContextToCEExtensions(t *testing.T) {
 	testCases := []struct {
 		name               string
 		headers            http.Header
-		expectedExtensions map[string]interface{}
+		expectedExtensions map[string]any
 	}{
 		{
 			name: "headers with w3c tracing headers",
@@ -24,7 +24,7 @@ func TestAddTracingContextToCEExtensions(t *testing.T) {
 				headers.Add(traceParentKey, "traceparent")
 				return headers
 			}(),
-			expectedExtensions: map[string]interface{}{
+			expectedExtensions: map[string]any{
 				traceParentKey: "traceparent",
 			},
 		}, {
@@ -39,7 +39,7 @@ func TestAddTracingContextToCEExtensions(t *testing.T) {
 
 				return headers
 			}(),
-			expectedExtensions: map[string]interface{}{
+			expectedExtensions: map[string]any{
 				b3TraceIDCEExtensionsKey:      "traceID",
 				b3ParentSpanIDCEExtensionsKey: "parentspanID",
 				b3SpanIDCEExtensionsKey:       "spanID",
