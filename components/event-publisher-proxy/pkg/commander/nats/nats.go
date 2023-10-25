@@ -3,22 +3,9 @@ package nats
 import (
 	"context"
 
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/builder"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
-	"k8s.io/client-go/tools/cache"
-
 	"github.com/kelseyhightower/envconfig"
-	"golang.org/x/xerrors"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-	"go.uber.org/zap"
-
-	"k8s.io/client-go/dynamic"
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp" // TODO: remove as this is only required in a dev setup
-	"sigs.k8s.io/controller-runtime/pkg/client/config"
-
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/builder"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler"
@@ -31,6 +18,14 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender/jetstream"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/signals"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/subscribed"
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
+
+	"go.uber.org/zap"
+	"golang.org/x/xerrors"
+	"k8s.io/client-go/dynamic"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp" // TODO: remove as this is only required in a dev setup
+	"sigs.k8s.io/controller-runtime/pkg/client/config"
 )
 
 const (
@@ -107,8 +102,7 @@ func (c *Commander) Start() error {
 
 	// configure Subscription Lister
 	subDynamicSharedInfFactory := subscribed.GenerateSubscriptionInfFactory(k8sConfig)
-	var subLister cache.GenericLister
-	subLister = subDynamicSharedInfFactory.ForResource(subscribed.GVR).Lister()
+	subLister := subDynamicSharedInfFactory.ForResource(subscribed.GVR).Lister()
 	subscribedProcessor := &subscribed.Processor{
 		SubscriptionLister: &subLister,
 		Prefix:             c.envCfg.ToConfig().EventTypePrefix,
