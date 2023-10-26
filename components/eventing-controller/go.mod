@@ -9,13 +9,13 @@ require (
 	github.com/go-logr/logr v1.2.4
 	github.com/go-logr/zapr v1.2.4
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/kyma-project/api-gateway v0.0.0-20231020123059-319383e7e6e5
-	github.com/kyma-project/kyma/common/logging v0.0.0-20231020092259-d58329d50da1
+	github.com/kyma-project/api-gateway v0.0.0-20231025094533-b7f4433b5cac
+	github.com/kyma-project/kyma/common/logging v0.0.0-20231025103331-ecda502ad878
 	github.com/mitchellh/hashstructure/v2 v2.0.2
 	github.com/nats-io/nats-server/v2 v2.10.3
 	github.com/nats-io/nats.go v1.31.0
 	github.com/onsi/ginkgo v1.16.5
-	github.com/onsi/gomega v1.28.0
+	github.com/onsi/gomega v1.28.1
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.17.0
 	github.com/stretchr/testify v1.8.4
@@ -45,7 +45,7 @@ require (
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/gnostic-models v0.6.8 // indirect
-	github.com/google/go-cmp v0.5.9 // indirect
+	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/uuid v1.3.1 // indirect
 	github.com/imdario/mergo v0.3.12 // indirect
