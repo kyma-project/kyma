@@ -55,6 +55,13 @@ kubectl apply -f https://github.com/kyma-project/nats-manager/releases/latest/do
 kubectl apply -f https://github.com/kyma-project/nats-manager/releases/latest/download/nats_default_cr.yaml -n kyma-system
 ```
 
+#### [API Gateway](https://github.com/kyma-project/api-gateway)
+
+```bash
+kubectl apply -f https://github.com/kyma-project/api-gateway/releases/latest/download/api-gateway-manager.yaml
+kubectl apply -f https://github.com/kyma-project/api-gateway/releases/latest/download/apigateway-default-cr.yaml -n kyma-system
+```
+
 ## Uninstall Kyma with a module
 
 You uninstall Kyma with a module using the `kubectl delete` command.
