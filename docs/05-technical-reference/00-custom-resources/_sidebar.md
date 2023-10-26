@@ -3,7 +3,6 @@
   * [Custom resources](README.md)
     * [Application](ac-01-application.md)
     * [CompassConnection](ra-01-compassconnection.md)
-    * [APIRule](apix-01-apirule.md)
     * [Subscription](evnt-01-subscription.md)
     * [EventingBackend](evnt-02-eventingbackend.md)
     <!-- markdown-link-check-disable-next-line -->

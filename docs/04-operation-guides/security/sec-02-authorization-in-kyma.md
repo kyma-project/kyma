@@ -27,4 +27,4 @@ Kyma uses the native [Istio Authorization Policy](https://istio.io/latest/docs/r
 
 ## User-to-service authorization
 
-Kyma uses a custom [API Gateway](../../01-overview/api-exposure/apix-01-api-gateway.md) component that is built on top of [ORY Oathkeeper](https://www.ory.sh/oathkeeper/docs/). The API Gateway allows exposing user applications within the Kyma environment and secures them if necessary.
+You can install the [API Gateway module](https://kyma-project.io/#/api-gateway/user/README) that is built on top of [Ory Oathkeeper](https://www.ory.sh/oathkeeper/docs/). It allows exposing user applications within the Kyma environment and secures them if necessary.

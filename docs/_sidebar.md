@@ -6,6 +6,7 @@
 * [Operation Guides](/04-operation-guides/README.md)
 * [Technical Reference](05-technical-reference/README.md)
 * [Kyma Modules](06-modules/README.md)
+  * [API Gateway](/api-gateway/user/README.md)
   * [SAP BTP Operator](/btp-manager/user/README.md)
   * [Application Connector](/application-connector-manager/user/README.md)
   * [Keda](/keda-manager/user/README.md)

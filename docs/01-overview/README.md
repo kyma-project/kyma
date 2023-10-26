@@ -6,7 +6,6 @@ Classic Kyma offered a fixed set of preconfigured components whose development r
 
 See the list of Kyma components that have not been transformed into modules yet:
 
-- [API Exposure](../01-overview/api-exposure/README.md)
 - [Application Connectivity](../01-overview/application-connectivity/README.md)
 - [Eventing](../01-overview/eventing/README.md)
 - [Service Management](../01-overview/service-management/README.md)

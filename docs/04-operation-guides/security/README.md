@@ -14,4 +14,3 @@ This is a complete list of security-related guides in Kyma:
 * [Authorization in Kyma](sec-02-authorization-in-kyma.md)
 * [Access Kyma securely](sec-03-access-kyma.md)
 * [Ingress and Egress traffic](https://kyma-project.io/#/istio/user/02-operation-guides/security/02-10-ingress-egress-traffic)
-* [Useful links](sec-07-useful-links.md)
