@@ -30,14 +30,12 @@
 
 /installation @kyma-project/Jellyfish
 /installation/resources/crds/api-gateway @kyma-project/goat
-/installation/resources/crds/application-connector @kyma-project/Framefrog
 /installation/resources/crds/compass-runtime-agent @kyma-project/Framefrog
 /installation/resources/crds/eventing @kyma-project/eventing
 /installation/resources/crds/istio @kyma-project/goat
 /installation/resources/crds/ory @kyma-project/goat
 
 /resources/api-gateway @kyma-project/goat
-/resources/application-connector @kyma-project/Framefrog
 /resources/certificates @kyma-project/goat
 /resources/compass-runtime-agent @kyma-project/Framefrog
 /resources/eventing @kyma-project/eventing
