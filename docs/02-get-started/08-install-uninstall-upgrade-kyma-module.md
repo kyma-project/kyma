@@ -22,7 +22,7 @@ To install a module, deploy its module manager and apply the module configuratio
 
 ```bash
 kubectl apply -f https://github.com/kyma-project/keda-manager/releases/latest/download/keda-manager.yaml
-kubectl apply -f https://github.com/kyma-project/keda-manager/releases/latest/download/keda_default_cr.yaml -n kyma-system
+kubectl apply -f https://github.com/kyma-project/keda-manager/releases/latest/download/keda-default-cr.yaml -n kyma-system
 ```
 
 #### [BTP Operator](https://github.com/kyma-project/btp-manager)
@@ -38,7 +38,7 @@ kubectl apply -f https://github.com/kyma-project/btp-manager/releases/latest/dow
 
 ```bash
 kubectl apply -f https://github.com/kyma-project/serverless-manager/releases/latest/download/serverless-operator.yaml
-kubectl apply -f https://github.com/kyma-project/serverless-manager/releases/latest/download/default_serverless_cr.yaml  -n kyma-system
+kubectl apply -f https://github.com/kyma-project/serverless-manager/releases/latest/download/default-serverless-cr.yaml  -n kyma-system
 ```
 
 #### [Telemetry](https://github.com/kyma-project/telemetry-manager)

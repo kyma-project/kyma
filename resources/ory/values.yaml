@@ -18,7 +18,7 @@ global:
   images:
     k8s_tools:
       name: "k8s-tools"
-      version: "v20230926-7802cb4a"
+      version: "v20231026-aa6060ec"
       directory: "prod/tpi"
     busybox:
       name: "busybox"
