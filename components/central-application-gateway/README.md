@@ -57,7 +57,7 @@ Central Application Gateway exposes:
 - 2 internal APIs implementing a proxy handler accessible via a service of type `ClusterIP`
 - an endpoint for changing the log level
 
-Application Gateway also supports redirects for the request flows in which the URL host remains unchanged. For more details, see [Response rewriting](../../docs/05-technical-reference/ac-01-application-gateway-details.md#response-rewriting).
+Application Gateway also supports redirects for the request flows in which the URL host remains unchanged. For more details, see [Response rewriting](https://kyma-project.io/#/application-connector-manager/user/technical-reference/07-10-application-gateway-details?id=response-rewriting).
 
 ### Standalone mode
 
