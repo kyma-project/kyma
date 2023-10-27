@@ -6,6 +6,7 @@ A custom resource (CR) is an extension to the Kubernetes API which allows you to
 
 | Area | Custom resource |
 | ---- | -------------- |
+| Application Connectivity | [CompassConnection](ra-01-compassconnection.md) |
 | API Gateway | [APIRule](apix-01-apirule.md) |
 | Eventing | [Subscription](evnt-01-subscription.md), [EventingBackend](evnt-02-eventingbackend.md) |
 | Istio | [Istio](https://kyma-project.io/#/istio/user/03-technical-reference/istio-custom-resource/01-30-istio-custom-resource) |

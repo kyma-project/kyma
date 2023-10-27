@@ -18,6 +18,14 @@ Dive in deeper and explore the functionalities that Kyma provides for various us
 * [Secure a workload with Istio](00-api-exposure/apix-05-expose-and-secure-a-workload/apix-05-04-expose-and-secure-workload-istio.md)
 * [Secure a workload with a certificate](00-api-exposure/apix-05-expose-and-secure-a-workload/apix-05-05-expose-and-secure-workload-with-certificate.md)
 
+### Application Connectivity
+
+* [Establish a secure connection with Compass](00-application-connectivity/ra-01-establish-secure-connection-with-compass.md)
+* [Maintain a secure connection with Compass](00-application-connectivity/ra-02-maintain-secure-connection-with-compass.md)
+* [Revoke a client certificate (RA)](00-application-connectivity/ra-03-revoke-client-certificate.md)
+* [Configure Runtime Agent with Compass](00-application-connectivity/ra-04-configure-runtime-agent-with-compass.md)
+* [Reconnect Runtime Agent with Compass](00-application-connectivity/ra-05-reconnect-runtime-agent-with-compass.md)
+
 ### Eventing
 
 * [Create Subscription subscribing to multiple event types](00-eventing/evnt-02-subs-with-multiple-filters.md)
