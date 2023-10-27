@@ -1,6 +1,7 @@
 * [Home](/)
 * [Technical Reference](../README.md)
   * [Custom resources](README.md)
+    * [CompassConnection](ra-01-compassconnection.md)
     * [APIRule](apix-01-apirule.md)
     * [Subscription](evnt-01-subscription.md)
     * [EventingBackend](evnt-02-eventingbackend.md)
