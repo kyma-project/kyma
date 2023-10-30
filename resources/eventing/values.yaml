@@ -1,4 +1,4 @@
-# globally shared values among Helm subcharts
+# test change - globally shared values among Helm subcharts
 global:
   containerRegistry:
     path: europe-docker.pkg.dev/kyma-project
