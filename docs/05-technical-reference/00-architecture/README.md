@@ -6,8 +6,6 @@ In this section you can learn more about technicalities behind each main area: t
 
 ### Application Connectivity
 
-* [Application Connector components](ac-01-application-connector-components.md)
-* [Application Gateway](ac-03-application-gateway.md)
 * [Runtime Agent Architecture](ra-01-runtime-agent-workflow.md)
 
 ### Eventing

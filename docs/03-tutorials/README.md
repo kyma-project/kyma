@@ -20,11 +20,6 @@ Dive in deeper and explore the functionalities that Kyma provides for various us
 
 ### Application Connectivity
 
-* [Create a new Application](00-application-connectivity/ac-01-create-application.md)
-* [Register a service](00-application-connectivity/ac-03-register-manage-services.md)
-* [Register a secured API](00-application-connectivity/ac-04-register-secured-api.md)
-* [Call a registered external service from Kyma](00-application-connectivity/ac-05-call-registered-service-from-kyma.md)
-* [Disable TLS certificate verification](00-application-connectivity/ac-11-disable-tls-certificate-verification.md)
 * [Establish a secure connection with Compass](00-application-connectivity/ra-01-establish-secure-connection-with-compass.md)
 * [Maintain a secure connection with Compass](00-application-connectivity/ra-02-maintain-secure-connection-with-compass.md)
 * [Revoke a client certificate (RA)](00-application-connectivity/ra-03-revoke-client-certificate.md)
