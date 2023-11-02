@@ -6,7 +6,7 @@ require (
 	github.com/avast/retry-go/v3 v3.1.1
 	github.com/cloudevents/sdk-go/protocol/nats/v2 v2.14.0
 	github.com/cloudevents/sdk-go/v2 v2.14.0
-	github.com/go-logr/logr v1.2.4
+	github.com/go-logr/logr v1.3.0
 	github.com/go-logr/zapr v1.2.4
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/kyma-project/api-gateway v0.0.0-20231025094533-b7f4433b5cac
@@ -15,7 +15,7 @@ require (
 	github.com/nats-io/nats-server/v2 v2.10.3
 	github.com/nats-io/nats.go v1.31.0
 	github.com/onsi/ginkgo v1.16.5
-	github.com/onsi/gomega v1.28.1
+	github.com/onsi/gomega v1.29.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.17.0
 	github.com/stretchr/testify v1.8.4
