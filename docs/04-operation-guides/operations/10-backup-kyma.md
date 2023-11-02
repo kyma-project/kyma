@@ -171,7 +171,7 @@ spec:
           serviceAccountName: volume-snapshotter
           containers:
           - name: job
-            image: europe-docker.pkg.dev/kyma-project/prod/tpi/k8s-tools:v20230926-7802cb4a
+            image: europe-docker.pkg.dev/kyma-project/prod/tpi/k8s-tools:v20231026-aa6060ec
             command:
               - /bin/bash
               - -c

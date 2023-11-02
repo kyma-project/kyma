@@ -77,6 +77,6 @@ func (scc *signalContext) Err() error {
 }
 
 // Value implements context.Context.
-func (scc *signalContext) Value(interface{}) interface{} {
+func (scc *signalContext) Value(any) any {
 	return nil
 }
