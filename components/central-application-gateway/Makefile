@@ -18,6 +18,3 @@ resolve-local:
 test-local:
 	GO111MODULE=on go test ./...
 
-.PHONY: path-to-referenced-charts
-path-to-referenced-charts:
-	@echo "resources/application-connector"
