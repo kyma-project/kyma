@@ -18,6 +18,13 @@ To install a module, deploy its module manager and apply the module configuratio
 
 ### Steps
 
+#### [Application Connector](https://github.com/kyma-project/application-connector-manager)
+
+```bash
+kubectl apply -f https://github.com/kyma-project/application-connector-manager/releases/latest/download/application-connector-manager.yaml
+kubectl apply -f https://github.com/kyma-project/application-connector-manager/releases/latest/download/default_application_connector_cr.yaml -n kyma-system
+```
+
 #### [Keda](https://github.com/kyma-project/keda-manager)
 
 ```bash
