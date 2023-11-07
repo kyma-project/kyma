@@ -32,7 +32,7 @@ kubectl apply -f https://github.com/kyma-project/keda-manager/releases/latest/do
 kubectl apply -f https://github.com/kyma-project/keda-manager/releases/latest/download/keda-default-cr.yaml -n kyma-system
 ```
 
-#### [BTP Operator](https://github.com/kyma-project/btp-manager)
+#### [SAP BTP Operator](https://github.com/kyma-project/btp-manager)
 
 ```bash
 kubectl apply -f https://github.com/kyma-project/btp-manager/releases/latest/download/btp-manager.yaml
