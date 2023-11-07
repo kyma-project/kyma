@@ -9,4 +9,3 @@ components:
   - name: "eventing"
   - name: "ory"
   - name: "api-gateway"
-  - name: "application-connector"
