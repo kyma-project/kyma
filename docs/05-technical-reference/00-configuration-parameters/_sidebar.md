@@ -2,7 +2,6 @@
 <!-- markdown-link-check-disable -->
 * [Technical Reference](/05-technical-reference/README.md)
   * [Configurable parameters](/05-technical-reference/00-configuration-parameters/README.md)
-    * [Application Connector chart](/05-technical-reference/00-configuration-parameters/ac-01-application-connector-chart.md)
     * [Ory limitations](/05-technical-reference/00-configuration-parameters/apix-01-ory-limitations.md)
     * [ORY chart](/05-technical-reference/00-configuration-parameters/apix-02-ory-chart.md)
     * [Connection with Compass](/05-technical-reference/00-configuration-parameters/ra-01-connection-with-compass.md)
