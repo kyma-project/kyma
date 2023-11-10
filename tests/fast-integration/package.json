@@ -37,7 +37,7 @@
   },
   "dependencies": {
     "@kubernetes/client-node": "0.15.1",
-    "axios": "^0.21.0",
+    "axios": "^1.6.0",
     "execa": "^5.0.0",
     "mocha-junit-reporter": "^2.0.0",
     "mockserver-client": "^5.15.0",
