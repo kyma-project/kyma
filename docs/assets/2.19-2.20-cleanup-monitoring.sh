@@ -116,7 +116,7 @@ kubectl delete -n kyma-system configmaps function-dashboard --ignore-not-found -
 kubectl delete -n kyma-system configmaps monitoring-alertmanager-overview --ignore-not-found --timeout=$DELETE_TIMEOUT
 kubectl delete -n kyma-system configmaps monitoring-apiserver --ignore-not-found --timeout=$DELETE_TIMEOUT
 kubectl delete -n kyma-system configmaps monitoring-auth-proxy-grafana-templates --ignore-not-found --timeout=$DELETE_TIMEOUT
-kubectl delete -n kyma-system configmaps monitoring-cluster-total --ignore-not-found--timeout=$DELETE_TIMEOUT
+kubectl delete -n kyma-system configmaps monitoring-cluster-total --ignore-not-found --timeout=$DELETE_TIMEOUT
 kubectl delete -n kyma-system configmaps monitoring-grafana --ignore-not-found --timeout=$DELETE_TIMEOUT
 kubectl delete -n kyma-system configmaps monitoring-grafana-config-dashboards --ignore-not-found --timeout=$DELETE_TIMEOUT
 kubectl delete -n kyma-system configmaps monitoring-grafana-datasource --ignore-not-found --timeout=$DELETE_TIMEOUT
