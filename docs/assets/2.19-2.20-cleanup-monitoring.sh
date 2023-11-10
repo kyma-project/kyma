@@ -46,7 +46,6 @@ kubectl delete -n kyma-system deployments.apps monitoring-prometheus-istio-serve
 
 #Delete Daemonsets
 kubectl delete -n kyma-system daemonsets.apps monitoring-prometheus-node-exporter --ignore-not-found --timeout=$DELETE_TIMEOUT
-kubectl delete -n kyma-system daemonsets.apps monitoring-prometheus-node-exporter --ignore-not-found --timeout=$DELETE_TIMEOUT
 
 
 # Delete Services
