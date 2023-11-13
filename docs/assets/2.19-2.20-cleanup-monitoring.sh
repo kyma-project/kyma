@@ -44,7 +44,7 @@ kubectl delete -n kyma-system deployments.apps monitoring-kube-state-metrics --i
 kubectl delete -n kyma-system deployments.apps monitoring-operator --ignore-not-found --timeout=$DELETE_TIMEOUT
 kubectl delete -n kyma-system deployments.apps monitoring-prometheus-istio-server --ignore-not-found --timeout=$DELETE_TIMEOUT
 
-#Delete Daemonsets
+# Delete DaemonSets
 kubectl delete -n kyma-system daemonsets.apps monitoring-prometheus-node-exporter --ignore-not-found --timeout=$DELETE_TIMEOUT
 
 
@@ -58,14 +58,14 @@ kubectl delete -n kyma-system services monitoring-prometheus --ignore-not-found 
 kubectl delete -n kyma-system services monitoring-prometheus-istio-server --ignore-not-found --timeout=$DELETE_TIMEOUT
 kubectl delete -n kyma-system services monitoring-prometheus-node-exporter --ignore-not-found --timeout=$DELETE_TIMEOUT
 
-# Delete Clusterrolebindings
+# Delete ClusterRoleBindings
 kubectl delete clusterrolebindings.rbac.authorization.k8s.io monitoring-grafana-clusterrolebinding --ignore-not-found --timeout=$DELETE_TIMEOUT
 kubectl delete clusterrolebindings.rbac.authorization.k8s.io monitoring-kube-state-metrics --ignore-not-found --timeout=$DELETE_TIMEOUT
 kubectl delete clusterrolebindings.rbac.authorization.k8s.io monitoring-operator --ignore-not-found --timeout=$DELETE_TIMEOUT
 kubectl delete clusterrolebindings.rbac.authorization.k8s.io monitoring-prometheus --ignore-not-found --timeout=$DELETE_TIMEOUT
 kubectl delete clusterrolebindings.rbac.authorization.k8s.io monitoring-prometheus-istio-server --ignore-not-found --timeout=$DELETE_TIMEOUT
 
-# Delete Serviceaccounts
+# Delete ServiceAccounts
 kubectl delete -n kyma-system serviceaccounts monitoring-alertmanager --ignore-not-found --timeout=$DELETE_TIMEOUT
 kubectl delete -n kyma-system serviceaccounts monitoring-auth-proxy-grafana --ignore-not-found --timeout=$DELETE_TIMEOUT
 kubectl delete -n kyma-system serviceaccounts monitoring-grafana --ignore-not-found --timeout=$DELETE_TIMEOUT
@@ -76,7 +76,7 @@ kubectl delete -n kyma-system serviceaccounts monitoring-prometheus-istio-server
 kubectl delete -n kyma-system serviceaccounts monitoring-prometheus-node-exporter --ignore-not-found --timeout=$DELETE_TIMEOUT
 
 
-# Delete Clusterroles
+# Delete ClusterRoles
 kubectl delete clusterroles.rbac.authorization.k8s.io monitoring-grafana-clusterrole --ignore-not-found --timeout=$DELETE_TIMEOUT
 kubectl delete clusterroles.rbac.authorization.k8s.io monitoring-kube-state-metrics --ignore-not-found --timeout=$DELETE_TIMEOUT
 kubectl delete clusterroles.rbac.authorization.k8s.io monitoring-operator --ignore-not-found --timeout=$DELETE_TIMEOUT
@@ -92,7 +92,7 @@ kubectl delete -n kyma-system authorizationpolicies.security.istio.io grafana --
 kubectl delete -n kyma-system virtualservices.networking.istio.io monitoring-grafana --ignore-not-found --timeout=$DELETE_TIMEOUT
 
 
-# Delete Rolebinding and roles
+# Delete RoleBindings and roles
 kubectl delete -n kyma-system rolebindings.rbac.authorization.k8s.io monitoring-grafana --ignore-not-found --timeout=$DELETE_TIMEOUT
 kubectl delete -n kyma-system roles.rbac.authorization.k8s.io monitoring-grafana --ignore-not-found --timeout=$DELETE_TIMEOUT
 
@@ -148,7 +148,7 @@ kubectl delete -n kyma-system configmaps istio-service-grafana-dashboard --ignor
 kubectl delete -n kyma-system configmaps istio-workload-grafana-dashboard --ignore-not-found --timeout=$DELETE_TIMEOUT
 kubectl delete -n kyma-system configmaps function-metrics-dashboard --ignore-not-found --timeout=$DELETE_TIMEOUT
 
-# delete PVC
+# Delete PVC
 kubectl delete -n kyma-system persistentvolumeclaims monitoring-grafana --ignore-not-found --timeout=$DELETE_TIMEOUT
 kubectl delete -n kyma-system persistentvolumeclaims prometheus-monitoring-prometheus-db-prometheus-monitoring-prometheus-0 --ignore-not-found --timeout=$DELETE_TIMEOUT
 
