@@ -12,6 +12,7 @@
   * [Serverless](/serverless-manager/user/README.md)
   * [Telemetry](/telemetry-manager/user/README.md)
   * [NATS](/nats-manager/user/README.md)
+  * [Eventing](/eventing-manager/user/README.md)
   * [API Gateway](/api-gateway/user/README.md)
 * [Glossary](/glossary.md)
 <!-- markdown-link-check-enable -->
