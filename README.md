@@ -19,7 +19,7 @@ Out of the box, Kyma offers various functionalities, such as:
 - [Istio](https://kyma-project.io/#/istio/user/00-overview/README) for service-to-service communication and proxying
 - [Service Management](https://kyma-project.io/#/01-overview/service-management/README) to use the built-in cloud services from such cloud providers as GCP, Azure, and AWS
 - Secure API exposure
-- In-cluster observability
+- Collection and shipment of telemetry data to observability backends using the [telemetry module](https://kyma-project.io/#/telemetry-manager/user/README)
 - CLI supported by the intuitive UI through which you can connect your application to a Kubernetes cluster
 
 <p align="center">
