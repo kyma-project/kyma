@@ -9,11 +9,9 @@ Now it's time to actually use an event to trigger a workload.
 
 First, create a sample Function that prints out the received event to console:
 
-<div tabs name="Deploy a Function" group="trigger-workload">
-  <details open>
-  <summary label="Kyma Dashboard">
-  Kyma Dashboard
-  </summary>
+<!-- tabs:start -->
+
+#### **Kyma Dashboard**
 
 1. Go to **Namespaces** and select the `default` Namespace.
 2. Go to **Workloads** > **Functions** and click **Create Function +**.
@@ -32,11 +30,7 @@ First, create a sample Function that prints out the received event to console:
 7. Click **Create**.
 8. Wait a few seconds for the Function to have the status `RUNNING`.
 
-  </details>
-  <details>
-  <summary label="kubectl">
-  kubectl
-  </summary>
+#### **kubectl**
 
 Run:
 
@@ -81,19 +75,16 @@ kubectl get functions -n default lastorder
 
 > **NOTE:** You might need to wait a few seconds for the Function to be ready.
 
-  </details>
-</div>
+<!-- tabs:end -->
 
 ## Create a Subscription
 
 Next, to subscribe to events, we need a [Subscription](../05-technical-reference/00-custom-resources/evnt-01-subscription.md) custom resource. We're going to subscribe to events of the type `order.received.v1`. 
 All the published events of this type are then forwarded to an HTTP endpoint called `Sink`. You can define this endpoint in the Subscription's spec.
 
-<div tabs name="Create a Subscription" group="trigger-workload">
-  <details open>
-  <summary label="Kyma Dashboard">
-  Kyma Dashboard
-  </summary>
+<!-- tabs:start -->
+
+#### **Kyma Dashboard**
 
 1. Go to **Namespaces** and select the `default` Namespace.
 2. Go to **Configuration** > **Subscriptions** and click **Create Subscription+**.
@@ -107,11 +98,7 @@ All the published events of this type are then forwarded to an HTTP endpoint cal
 4. Click **Create**.
 5. Wait a few seconds for the Subscription to have status `READY`.
 
-  </details>
-  <details>
-  <summary label="kubectl">
-  kubectl
-  </summary>
+#### **kubectl**
 
 Run:
 ```bash
@@ -136,8 +123,7 @@ kubectl get subscriptions lastorder-sub -o=jsonpath="{.status.ready}"
 
 The operation was successful if the returned status says `true`.
 
-  </details>
-</div>
+<!-- tabs:end -->
 
 ## Trigger the workload with an event
 
@@ -149,11 +135,7 @@ We created the `lastorder` Function and subscribed to the `order.received.v1` ev
    ```
 2. Now publish an event to trigger your Function. In another terminal window, run: 
 
-<div tabs name="Publish an event" group="trigger-workload">
-  <details open>
-  <summary label="curl">
-  curl
-  </summary>
+#### **curl**
 
    ```bash
    curl -v -X POST \
@@ -166,11 +148,8 @@ We created the `lastorder` Function and subscribed to the `order.received.v1` ev
         -d "{\"orderCode\":\"3211213\"}" \
         http://localhost:3000/publish
    ```
-  </details>
-  <details>
-  <summary label="CloudEvents Conformance Tool">
-  CloudEvents Conformance Tool
-  </summary>
+ 
+ #### **CloudEvents Conformance Tool**
 
    ```bash
    cloudevents send http://localhost:3000/publish \
@@ -182,18 +161,15 @@ We created the `lastorder` Function and subscribed to the `order.received.v1` ev
       --yaml
    ```
 
-  </details>
-</div>
+<!-- tabs:end -->
 
 ## Verify the event delivery
 
 To verify that the event was properly delivered, check the logs of the Function: 
 
-<div tabs name="Verify the event delivery" group="trigger-workload">
-  <details open>
-  <summary label="Kyma Dashboard">
-  Kyma Dashboard
-  </summary>
+<!-- tabs:start -->
+  
+#### **Kyma Dashboard**
 
 1. In Kyma Dashboard, return to the view of your `lastorder` Function.
 2. In the **Code** view, find the **Replicas of the Function** section.
@@ -204,11 +180,8 @@ To verify that the event was properly delivered, check the logs of the Function:
    Received event: { orderCode: '3211213' }
    ```
 
-  </details>
-  <details>
-  <summary label="kubectl">
-  kubectl
-  </summary>
+#### **kubectl**
+
 Run: 
 
 ```bash
@@ -223,8 +196,7 @@ You see the received event in the logs:
 Received event: { orderCode: '3211213' }
 ```
 
-  </details>
-</div>
+<!-- tabs:end -->
 
 That's it!
 
