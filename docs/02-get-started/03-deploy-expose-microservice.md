@@ -9,11 +9,9 @@ We'll use the Kyma example [`orders-service`](https://github.com/kyma-project/ex
 
 First, let's create a Deployment that provides the microservice definition and lets you run it on the cluster.
 
-<div tabs name="Create a microservice Deployment" group="deploy-expose-microservice">
-  <details open>
-  <summary label="Kyma Dashboard">
-  Kyma Dashboard
-  </summary>
+<!-- tabs:start -->
+
+#### **Kyma Dashboard**
 
 1. From the left navigation, go to **Workloads > Deployments**.
 2. Click on **Create Deployment**.
@@ -30,11 +28,8 @@ First, let's create a Deployment that provides the microservice definition and l
 4. Click **Create**.
 
 The operation was successful if you can see `1/1` Pods running in the Deployment's view.
-  </details>
-  <details>
-  <summary label="kubectl">
-  kubectl
-  </summary>
+
+#### **kubectl**
 
 Run:
 
@@ -88,18 +83,15 @@ The operation was successful if the returned number of **readyReplicas** is `1`.
 
 > **NOTE:** You might need to wait a few seconds for the replica to be ready and return the status.
 
-  </details>
-</div>
+<!-- tabs:end -->
 
 ### Create the Service
 
 Now that we have the Deployment, let's deploy the [Kubernetes Service](https://kubernetes.io/docs/concepts/services-networking/service/) to allow other Kubernetes resources to communicate with your microservice.
 
-<div tabs name="Create a Service" group="deploy-expose-microservice">
-  <details open>
-  <summary label="Kyma Dashboard">
-  Kyma Dashboard
-  </summary>
+<!-- tabs:start -->
+
+#### **Kyma Dashboard**
 
 1. From the left navigation, go to **Discovery and Network > Services**.
 2. Click on **Create Service**.
@@ -120,11 +112,8 @@ Now that we have the Deployment, let's deploy the [Kubernetes Service](https://k
     ```
 
 4. Click **Create**. 
-  </details>
-  <details>
-  <summary label="kubectl">
-  kubectl
-  </summary>
+  
+#### **kubectl**
 
 Run:
 
@@ -159,8 +148,7 @@ kubectl get service orders-service -o=jsonpath="{.metadata.uid}"
 
 The operation was successful if the command returns the **uid** of your Service.
 
-  </details>
-</div>
+<!-- tabs:end -->
 
 ## Expose the microservice
 
@@ -170,11 +158,9 @@ We have created the Service. Let's now expose it outside the cluster.
 
 To expose our microservice, we must create an [APIRule](../05-technical-reference/00-custom-resources/apix-01-apirule.md) CR for it, just like when we [exposed our Function](02-deploy-expose-function.md#expose-the-function).
 
-<div tabs name="Expose the microservice" group="deploy-expose-microservice">
-  <details open>
-  <summary label="Kyma Dashboard">
-  Kyma Dashboard
-  </summary>
+<!-- tabs:start -->
+
+#### **Kyma Dashboard**
 
 1. Go to **Discovery and Network** > **API Rules**, and click on **Create API Rule**.
 2. Provide the **Name** (`orders-service`)
@@ -183,11 +169,7 @@ To expose our microservice, we must create an [APIRule](../05-technical-referenc
 5. Choose your host from the **Host** dropdown and replace the asterisk (*) with the name of your subdomain (`orders-service`).
 6. Click **Create**.
 
-  </details>
-  <details>
-  <summary label="kubectl">
-  kubectl
-  </summary>
+#### **kubectl**
 
 Run:
 
@@ -215,19 +197,15 @@ spec:
       mutators: []
 EOF
 ```
-
-  </details>
-</div>
+<!-- tabs:end -->
 
 ### Verify the microservice exposure
 
 Now let's check that the microservice has been exposed successfully.
 
-<div tabs name="Verify microservice exposure" group="deploy-expose-microservice">
-  <details open>
-  <summary label="Kyma Dashboard">
-  Kyma Dashboard
-  </summary>
+<!-- tabs:start -->
+
+#### **Kyma Dashboard**
 
 1. From your Service's view, get the APIRule's **Host**.
 
@@ -236,11 +214,8 @@ Now let's check that the microservice has been exposed successfully.
 2. Paste this **Host** in your browser and add the `/orders` suffix to the end of it, like this: `{HOST}/orders`. Open it.
 
 The operation was successful if the page shows the (possibly empty `[]`) list of orders.
-  </details>
-  <details>
-  <summary label="kubectl">
-  kubectl
-  </summary>
+
+#### **kubectl**
 
 Run:
 
@@ -250,5 +225,4 @@ curl https://orders-service.$CLUSTER_DOMAIN/orders
 
 The operation was successful if the command returns the (possibly empty `[]`) list of orders.
 
-  </details>
-</div>
+<!-- tabs:end -->
