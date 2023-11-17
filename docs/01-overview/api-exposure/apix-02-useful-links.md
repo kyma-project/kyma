@@ -13,7 +13,7 @@ If you're interested in learning more about API Exposure in Kyma, follow these l
   - [Get a JWT](../../03-tutorials/00-api-exposure/apix-05-expose-and-secure-a-workload/apix-05-02-get-jwt.md)
   - [Expose and secure a workload with Istio](../../03-tutorials/00-api-exposure/apix-05-expose-and-secure-a-workload/apix-05-04-expose-and-secure-workload-istio.md)
   - [Expose and secure a workload with JWT](../../03-tutorials/00-api-exposure/apix-05-expose-and-secure-a-workload/apix-05-03-expose-and-secure-workload-jwt.md)
-  - [Activate access logs](../../04-operation-guides/operations/obsv-03-enable-istio-access-logs.md)
+  - [Activate access logs](https://kyma-project.io/#/istio/user/02-operation-guides/operations/02-30-enable-istio-access-logs)
 
 - Troubleshoot API Exposure-related issues when:
 
