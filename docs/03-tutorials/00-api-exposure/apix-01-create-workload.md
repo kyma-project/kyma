@@ -15,12 +15,9 @@ This tutorial explains how to create a sample HttpBin service deployment and a s
    ```
 2. Deploy an instance of the HttpBin service or a sample Function.
    
-  <div tabs name="create">
+ <!-- tabs:start -->
 
-    <details>
-    <summary>
-    HttpBin
-    </summary>
+#### **HttpBin**
 
     To deploy an instance of the HttpBin service in your Namespace using the [sample code](https://raw.githubusercontent.com/istio/istio/master/samples/httpbin/httpbin.yaml), run:
 
@@ -28,12 +25,7 @@ This tutorial explains how to create a sample HttpBin service deployment and a s
     kubectl -n $NAMESPACE create -f https://raw.githubusercontent.com/istio/istio/master/samples/httpbin/httpbin.yaml
     ```
 
-    </details>
-
-    <details>
-    <summary>
-    Function
-    </summary>
+#### **Function**
 
     To create a Function in your Namespace using the [sample code](https://raw.githubusercontent.com/kyma-project/kyma/main/docs/03-tutorials/00-api-exposure/assets/function.yaml), run:
 
@@ -41,17 +33,13 @@ This tutorial explains how to create a sample HttpBin service deployment and a s
     kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/kyma-project/kyma/main/docs/03-tutorials/00-api-exposure/assets/function.yaml
     ```
 
-    </details>
-  </div>
+<!-- tabs:end -->
 
-3. Verify if an instance of the HttpBin service or a sample Function is successfully created.
+1. Verify if an instance of the HttpBin service or a sample Function is successfully created.
    
-  <div tabs name="verify">
+<!-- tabs:start -->
 
-    <details>
-    <summary>
-    HttpBin
-    </summary>
+#### **HttpBin**
 
     To verify if an instance of the HttpBin service is created, run:
 
@@ -66,12 +54,7 @@ This tutorial explains how to create a sample HttpBin service deployment and a s
         httpbin-test     2/2      Running    0           96s
       ```
 
-    </details>
-
-    <details>
-    <summary>
-    Function
-    </summary>
+#### **Function**
 
     To verify if a Function is created, run:
 
@@ -85,5 +68,4 @@ This tutorial explains how to create a sample HttpBin service deployment and a s
         NAME            CONFIGURED   BUILT     RUNNING   RUNTIME    VERSION   AGE
         test-function   True         True      True      nodejs18   1         96s
       ```
-    </details>
-  </div>
+<!-- tabs:end -->
