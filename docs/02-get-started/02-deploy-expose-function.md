@@ -10,7 +10,7 @@ First, let's create the Function and apply it.
 
 <!-- tabs:start -->
 
-### Kyma Dashboard
+#### **Kyma Dashboard**
 
 1. In Kyma Dashboard, go to the `default` Namespace.
 2. Go to **Workloads** > **Functions**.
@@ -21,7 +21,7 @@ First, let's create the Function and apply it.
 7. Keep the sample Function code.
 8. Click **Create**.
   
-### kubectl
+#### **kubectl**
 
 Run:
 
@@ -55,13 +55,13 @@ Now let's make sure that the Function has been deployed successfully.
 
 <!-- tabs:start -->
 
-### Kyma Dashboard
+#### **Kyma Dashboard**
 
 The operation was successful if the Function **Status** changed to `RUNNING`.
 
 > **NOTE:** You might need to wait a few seconds for the status to change.
   
-### kubectl
+#### **kubectl**
 
 Run:
 
@@ -83,7 +83,7 @@ First, let's create an [APIRule](../05-technical-reference/00-custom-resources/a
 
 <!-- tabs:start -->
 
-### Kyma Dashboard
+#### **Kyma Dashboard**
 
 1. Go to **Discovery and Network** > **API Rules**.
 2. Click on **Create API Rule**.
@@ -92,7 +92,7 @@ First, let's create an [APIRule](../05-technical-reference/00-custom-resources/a
 5. Provide your Service **Port** (`80`).
 6. Choose your host from the **Host** dropdown and replace the asterisk (*) with the name of your subdomain (`hello-world`).
 
-### kubectl
+#### **kubectl**
 
 Run:
 
@@ -131,7 +131,7 @@ Now let's verify that the Function has been exposed successfully.
 
 <!-- tabs:start -->
 
-### Kyma Dashboard
+#### **Kyma Dashboard**
 
 In your Function's **Configuration** tab, click on the APIRule's **Host**.
 This opens the Function's external address as a new page.
@@ -140,7 +140,7 @@ This opens the Function's external address as a new page.
 
 The operation was successful if the page says `Hello World from the Kyma Function hello-world running on nodejs18!`.
   
-### kubectl
+#### **kubectl**
 
 Run:
 
