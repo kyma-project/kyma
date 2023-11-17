@@ -135,6 +135,8 @@ We created the `lastorder` Function and subscribed to the `order.received.v1` ev
    ```
 2. Now publish an event to trigger your Function. In another terminal window, run: 
 
+<!-- tabs:start -->
+
 #### **curl**
 
    ```bash
