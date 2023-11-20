@@ -12,41 +12,29 @@ This tutorial shows how to expose an unsecured instance of the HttpBin service o
 * Set up [your custom domain](../apix-02-setup-custom-domain-for-workload.md) or use a Kyma domain instead. 
 * Depending on whether you use your custom domain or a Kyma domain, export the necessary values as environment variables:
   
-  <div tabs name="export-values">
+<!-- tabs:start -->
 
-    <details>
-    <summary>
-    Custom domain
-    </summary>
+#### **Custom domain**
     
     ```bash
     export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
     export GATEWAY=$NAMESPACE/httpbin-gateway
     ```
-    </details>
-
-    <details>
-    <summary>
-    Kyma domain
-    </summary>
+#### **Kyma domain**
 
     ```bash
     export DOMAIN_TO_EXPOSE_WORKLOADS={KYMA_DOMAIN_NAME}
     export GATEWAY=kyma-system/kyma-gateway
     ```
-    </details>
-  </div>
+<!-- tabs:end -->
 
 ## Expose and access your workload
 
 Follow these steps:
 
-<div tabs>
+<!-- tabs:start -->
 
-  <details>
-  <summary>
-  HttpBin
-  </summary>
+#### **HttpBin**
 
 1. Expose an instance of the HttpBin service by creating APIRule CR in your Namespace. Run:
 
@@ -98,12 +86,7 @@ Follow these steps:
     ```
   If successful, the call returns the code `200 OK` response.
 
-  </details>
-
-  <details>
-  <summary>
-  Function
-  </summary>
+#### **Function**
 
 1. Expose the sample Function by creating APIRule CR in your Namespace. Run:
 
@@ -141,5 +124,4 @@ Follow these steps:
 
   If successful, the call returns the code `200 OK` response.
 
-  </details>
-</div>
+<!-- tabs:end -->
