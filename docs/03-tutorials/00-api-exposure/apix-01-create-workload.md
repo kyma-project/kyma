@@ -14,7 +14,7 @@ This tutorial explains how to create a sample HttpBin service deployment and a s
    kubectl label namespace $NAMESPACE istio-injection=enabled --overwrite
    ```
 2. Deploy an instance of the HttpBin service or a sample Function.
-   
+
 <!-- tabs:start -->
 
 #### **HttpBin**
@@ -36,7 +36,7 @@ This tutorial explains how to create a sample HttpBin service deployment and a s
 <!-- tabs:end -->
 
 1. Verify if an instance of the HttpBin service or a sample Function is successfully created.
-   
+
 <!-- tabs:start -->
 
 #### **HttpBin**
