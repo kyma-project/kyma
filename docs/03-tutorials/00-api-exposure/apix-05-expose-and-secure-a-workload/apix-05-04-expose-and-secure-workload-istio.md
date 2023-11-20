@@ -10,42 +10,32 @@ This tutorial shows how to expose and secure a workload using Istio's built-in s
 * [JSON Web Token (JWT)](./apix-05-02-get-jwt.md).
 * Set up [your custom domain](../apix-02-setup-custom-domain-for-workload.md) or use a Kyma domain instead. 
 * Depending on whether you use your custom domain or a Kyma domain, export the necessary values as environment variables:
-  
-  <div tabs name="export-values">
 
-    <details>
-    <summary>
-    Custom domain
-    </summary>
-    
-    ```bash
-    export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
-    export GATEWAY=$NAMESPACE/httpbin-gateway
-    ```
-    </details>
+<!-- tabs:start -->
 
-    <details>
-    <summary>
-    Kyma domain
-    </summary>
+#### **Custom domain**
 
-    ```bash
-    export DOMAIN_TO_EXPOSE_WORKLOADS={KYMA_DOMAIN_NAME}
-    export GATEWAY=kyma-system/kyma-gateway
-    ```
-    </details>
-  </div>  
+   ```bash
+   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
+   export GATEWAY=$NAMESPACE/httpbin-gateway
+   ```
+
+#### **Kyma domain**
+
+   ```bash
+   export DOMAIN_TO_EXPOSE_WORKLOADS={KYMA_DOMAIN_NAME}
+   export GATEWAY=kyma-system/kyma-gateway
+   ```
+
+<!-- tabs:end -->  
 
 ## Expose your workload using a Virtual Service
 
 Follow the instructions in the tabs to expose the HttpBin workload or the Function using a VirtualService.
 
-<div tabs>
+<!-- tabs:start -->
 
-  <details>
-  <summary>
-  Expose the HttpBin workload
-  </summary>
+#### **Expose the HttpBin workload**
 
 1. Create a VirtualService:
 
@@ -72,12 +62,8 @@ Follow the instructions in the tabs to expose the HttpBin workload or the Functi
            host: httpbin.$NAMESPACE.svc.cluster.local
    EOF
    ```
-  </details>
 
-  <details>
-  <summary>
-  Expose the Function
-  </summary>
+#### **Expose the Function**
 
 1. Create a VirtualService:
 
@@ -105,19 +91,15 @@ Follow the instructions in the tabs to expose the HttpBin workload or the Functi
    EOF
    ```
 
-  </details>
-</div>
+<!-- tabs:end -->
 
 ## Secure a workload or the Function using a JWT
 
 To secure the HttpBin workload or the Function using a JWT, create a Request Authentication with Authorization Policy. Workloads with the `matchLabels` parameter specified require a JWT for all requests. Follow the instructions in the tabs:
 
-<div tabs>
+<!-- tabs:start -->
 
-  <details>
-  <summary>
-  Secure the Httpbin workload
-  </summary>
+#### **Secure the HttpBin workload**
 
 1. Create the Request Authentication and Authorization Policy resources:
 
@@ -163,12 +145,8 @@ To secure the HttpBin workload or the Function using a JWT, create a Request Aut
    ```shell
    curl -ik -X GET https://httpbin.$DOMAIN_TO_EXPOSE_WORKLOADS/status/200 --header "Authorization:Bearer $ACCESS_TOKEN"
    ```
-  </details>
 
-  <details>
-  <summary>
-  Secure the Function
-  </summary>
+#### **Secure the Function**
 
 1. Create the Request Authentication and Authorization Policy resources:
 
@@ -214,5 +192,5 @@ To secure the HttpBin workload or the Function using a JWT, create a Request Aut
    ```shell
    curl -ik -X GET https://function.$DOMAIN_TO_EXPOSE_WORKLOADS/status/200 --header "Authorization:Bearer $ACCESS_TOKEN"
    ```
-  </details>
-</div>
+
+<!-- tabs:end -->
