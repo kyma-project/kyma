@@ -43,30 +43,30 @@ This tutorial explains how to create a sample HttpBin service deployment and a s
 
    To verify if an instance of the HttpBin service is created, run:
 
-     ```shell
-       kubectl get pods -l app=httpbin -n $NAMESPACE
-     ```
+   ```shell
+   kubectl get pods -l app=httpbin -n $NAMESPACE
+   ```
     
    You should get a result similar to this one:
     
-     ```shell
-       NAME             READY    STATUS     RESTARTS    AGE
-       httpbin-test     2/2      Running    0           96s
-     ```
+   ```shell
+     NAME             READY    STATUS     RESTARTS    AGE
+     httpbin-test     2/2      Running    0           96s
+   ```
 
 #### **Function**
 
    To verify if a Function is created, run:
 
-     ```shell
-       kubectl get functions $NAME -n $NAMESPACE
-     ```
+   ```shell
+     kubectl get functions $NAME -n $NAMESPACE
+   ```
 
    You should get a result similar to this one:
     
-     ```shell
-       NAME            CONFIGURED   BUILT     RUNNING   RUNTIME    VERSION   AGE
-       test-function   True         True      True      nodejs18   1         96s
-     ```
+   ```shell
+     NAME            CONFIGURED   BUILT     RUNNING   RUNTIME    VERSION   AGE
+     test-function   True         True      True      nodejs18   1         96s
+   ```
 
 <!-- tabs:end -->
