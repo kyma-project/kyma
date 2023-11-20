@@ -16,17 +16,17 @@ This tutorial shows how to expose multiple workloads on different paths by defin
 
 #### **Custom domain**
 
-    ```bash
-    export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
-    export GATEWAY=$NAMESPACE/httpbin-gateway
-    ```
+   ```bash
+   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
+   export GATEWAY=$NAMESPACE/httpbin-gateway
+   ```
 
 #### **Kyma domain**
 
-    ```bash
-    export DOMAIN_TO_EXPOSE_WORKLOADS={KYMA_DOMAIN_NAME}
-    export GATEWAY=kyma-system/kyma-gateway
-    ```
+   ```bash
+   export DOMAIN_TO_EXPOSE_WORKLOADS={KYMA_DOMAIN_NAME}
+   export GATEWAY=kyma-system/kyma-gateway
+   ```
 
 <!-- tabs:end -->
 
