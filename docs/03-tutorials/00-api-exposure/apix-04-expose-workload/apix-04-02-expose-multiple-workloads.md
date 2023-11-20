@@ -28,7 +28,7 @@ This tutorial shows how to expose multiple workloads on different paths by defin
     export GATEWAY=kyma-system/kyma-gateway
     ```
 
-<!-- tabs:end -->   
+<!-- tabs:end -->
 
 ## Define multiple services on different paths
 
