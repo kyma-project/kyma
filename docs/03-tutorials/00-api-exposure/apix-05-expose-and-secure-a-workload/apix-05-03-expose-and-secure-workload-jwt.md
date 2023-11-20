@@ -10,40 +10,30 @@ This tutorial shows how to expose and secure services or Functions using API Gat
 * [JSON Web Token (JWT)](./apix-05-02-get-jwt.md)
 * Set up [your custom domain](../apix-02-setup-custom-domain-for-workload.md) or use a Kyma domain instead. 
 * Depending on whether you use your custom domain or a Kyma domain, export the necessary values as environment variables:
-  
-  <div tabs name="export-values">
 
-    <details>
-    <summary>
-    Custom domain
-    </summary>
-    
-    ```bash
-    export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
-    export GATEWAY=$NAMESPACE/httpbin-gateway
-    ```
-    </details>
+<!-- tabs:start -->
 
-    <details>
-    <summary>
-    Kyma domain
-    </summary>
+#### **Custom domain**
 
-    ```bash
-    export DOMAIN_TO_EXPOSE_WORKLOADS={KYMA_DOMAIN_NAME}
-    export GATEWAY=kyma-system/kyma-gateway
-    ```
-    </details>
-  </div>  
+   ```bash
+   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
+   export GATEWAY=$NAMESPACE/httpbin-gateway
+   ```
+
+#### **Kyma domain**
+
+   ```bash
+   export DOMAIN_TO_EXPOSE_WORKLOADS={KYMA_DOMAIN_NAME}
+   export GATEWAY=kyma-system/kyma-gateway
+   ```
+
+<!-- tabs:end -->
 
 ## Expose, secure, and access your workload
 
-<div tabs>
+<!-- tabs:start -->
 
-  <details>
-  <summary>
-  HttpBin
-  </summary>
+#### **HttpBin**
 
 1. Expose the service and secure it by creating an APIRule CR in your Namespace. Run:
 
@@ -81,13 +71,8 @@ This tutorial shows how to expose and secure services or Functions using API Gat
    ```
 
   If successful, the call returns the code `200 OK` response.
-   
-  </details>
 
-  <details>
-  <summary>
-  Function
-  </summary>
+#### **Function**
 
 1. Expose the Function and secure it by creating an APIRule CR in your Namespace. Run:
 
@@ -124,5 +109,4 @@ This tutorial shows how to expose and secure services or Functions using API Gat
 
   If successful, the call returns the code `200 OK` response.
 
-  </details>
-</div>
+<!-- tabs:end -->
