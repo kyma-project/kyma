@@ -26,12 +26,11 @@ The following instructions describe how to secure an mTLS service or a Function.
    export CLIENT_CERT_KEY_FILE={CLIENT_CERT_KEY_FILE}
    ```
 2. Create VirtualService that adds the X-CLIENT-SSL headers to incoming requests:
-   
-  <div tabs>
-    <details>
-    <summary>
-    HttpBin
-    </summary>
+
+<!-- tabs:start -->
+
+#### **HttpBin**
+
     Run:
 
     ```bash
@@ -60,11 +59,8 @@ The following instructions describe how to secure an mTLS service or a Function.
                 X-CLIENT-SSL-ISSUER: "%DOWNSTREAM_PEER_ISSUER%"
     EOF
     ```
-    </details>
-    <details>
-    <summary>
-    Function
-    </summary>
+
+#### **Function**
 
     Run:
     ```bash
@@ -93,17 +89,15 @@ The following instructions describe how to secure an mTLS service or a Function.
                 X-CLIENT-SSL-ISSUER: "%DOWNSTREAM_PEER_ISSUER%"
     EOF
     ```
-    </details>
-  </div>
 
-3. Create AuthorizationPolicy that verifies if the request contains a client certificate:
-   
-  <div tabs>
-    <details>
-    <summary>
-    HttpBin
-    </summary>
-    
+<!-- tabs:end -->
+
+1. Create AuthorizationPolicy that verifies if the request contains a client certificate:
+
+<!-- tabs:start -->
+
+#### **HttpBin**
+
     Run:
     
     ```bash
@@ -124,11 +118,8 @@ The following instructions describe how to secure an mTLS service or a Function.
           values: ["O=${CLIENT_CERT_ORG},CN=${CLIENT_CERT_CN}"]
     EOF
     ```
-    </details>
-    <details>
-    <summary>
-    Function
-    </summary>
+
+#### **Function**
 
     Run:
     ```bash
@@ -149,17 +140,14 @@ The following instructions describe how to secure an mTLS service or a Function.
           values: ["O=${CLIENT_CERT_ORG},CN=${CLIENT_CERT_CN}"]
     EOF
     ```
-    </details>
-  </div>
 
-4. Call the secured endpoints of the HttpBin service or the secured Function.
+<!-- tabs:end -->
 
-  <div tabs>
+1. Call the secured endpoints of the HttpBin service or the secured Function.
 
-    <details>
-    <summary>
-    HttpBin
-    </summary>
+<!-- tabs:start -->
+
+#### **HttpBin**
 
   Send a `GET` request to the HttpBin service with the client certificates that you used to create mTLS Gateway:
 
@@ -172,12 +160,7 @@ The following instructions describe how to secure an mTLS service or a Function.
 
   If successful, the call returns the code `200 OK` response. If you call the service without the proper certificates or with invalid ones, you get the code `403` response.
 
-    </details>
-
-    <details>
-    <summary>
-    Function
-    </summary>
+#### **Function**
 
   Send a `GET` request to the Function with the client certificates that you used to create mTLS Gateway:
 
@@ -189,5 +172,5 @@ The following instructions describe how to secure an mTLS service or a Function.
     ```
 
   If successful, the call returns the code `200 OK` response. If you call the Function without the proper certificates or with invalid ones, you get the code `403` response.
-    </details>
-  </div>
+
+<!-- tabs:end -->
