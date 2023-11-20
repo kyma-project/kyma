@@ -20,13 +20,14 @@ This tutorial shows how to expose an unsecured instance of the HttpBin service o
     export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
     export GATEWAY=$NAMESPACE/httpbin-gateway
     ```
-    
+
 #### **Kyma domain**
 
     ```bash
     export DOMAIN_TO_EXPOSE_WORKLOADS={KYMA_DOMAIN_NAME}
     export GATEWAY=kyma-system/kyma-gateway
     ```
+
 <!-- tabs:end -->
 
 ## Expose and access your workload
