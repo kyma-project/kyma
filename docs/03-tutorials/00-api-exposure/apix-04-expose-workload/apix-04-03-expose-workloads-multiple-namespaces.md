@@ -30,12 +30,15 @@ This tutorial shows how to expose service endpoints in multiple Namespaces using
    export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
    export GATEWAY=$NAMESPACE_APIRULE/httpbin-gateway
    ```
+
 #### **Kyma domain**
 
    ```bash
    export DOMAIN_TO_EXPOSE_WORKLOADS={KYMA_DOMAIN_NAME}
    export GATEWAY=kyma-system/kyma-gateway
    ```
+
+<!-- tabs:end -->
 
 ## Expose and access your workloads in multiple Namespaces
 
