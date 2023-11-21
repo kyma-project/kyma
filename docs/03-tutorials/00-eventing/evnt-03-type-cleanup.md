@@ -28,32 +28,32 @@ You learn how Eventing behaves when you create a [Subscription](../../05-technic
 
 #### **kubectl**
 
-   ```bash
-   cat <<EOF | kubectl apply -f -
-   apiVersion: serverless.kyma-project.io/v1alpha2
-   kind: Function
-   metadata:
-     name: lastorder
-     namespace: default
-   spec:
-     replicas: 1
-     resourceConfiguration:
-       function:
-         profile: S
-       build:
-         profile: local-dev
-     runtime: nodejs18
-     source:
-       inline:
-         source: |-
-           module.exports = {
-             main: async function (event, context) {
-               console.log("Received event: ", event.data, ", Event Type: ", event.extensions.request.headers['ce-type']);
-               return;
-             }
-           }
-   EOF
-   ```
+```bash
+cat <<EOF | kubectl apply -f -
+apiVersion: serverless.kyma-project.io/v1alpha2
+kind: Function
+metadata:
+  name: lastorder
+  namespace: default
+spec:
+  replicas: 1
+  resourceConfiguration:
+    function:
+      profile: S
+    build:
+      profile: local-dev
+  runtime: nodejs18
+  source:
+    inline:
+      source: |-
+        module.exports = {
+          main: async function (event, context) {
+            console.log("Received event: ", event.data, ", Event Type: ", event.extensions.request.headers['ce-type']);
+            return;
+          }
+        }
+EOF
+```
 
 <!-- tabs:end -->
 
@@ -128,29 +128,29 @@ Next, you see that you can still publish events with the original Event name (i.
 
 #### **CloudEvents Conformance Tool**
    
-      ```bash
-      cloudevents send http://localhost:3000/publish \
-         --type "order.payment*success.v1" \
-         --id e4bcc616-c3a9-4840-9321-763aa23851fc \
-         --source myapp \
-         --datacontenttype application/json \
-         --data "{\"orderCode\":\"3211213\", \"orderAmount\":\"1250\"}" \
-         --yaml
-      ```
+   ```bash
+   cloudevents send http://localhost:3000/publish \
+       --type "order.payment*success.v1" \
+       --id e4bcc616-c3a9-4840-9321-763aa23851fc \
+       --source myapp \
+       --datacontenttype application/json \
+       --data "{\"orderCode\":\"3211213\", \"orderAmount\":\"1250\"}" \
+       --yaml
+   ```
 
 #### **curl**
 
-      ```bash
-      curl -v -X POST \
-           -H "ce-specversion: 1.0" \
-           -H "ce-type: order.payment*success.v1" \
-           -H "ce-source: myapp" \
-           -H "ce-eventtypeversion: v1" \
-           -H "ce-id: e4bcc616-c3a9-4840-9321-763aa23851fc" \
-           -H "content-type: application/json" \
-           -d "{\"orderCode\":\"3211213\", \"orderAmount\":\"1250\"}" \
-           http://localhost:3000/publish
-      ```
+   ```bash
+   curl -v -X POST \
+         -H "ce-specversion: 1.0" \
+         -H "ce-type: order.payment*success.v1" \
+         -H "ce-source: myapp" \
+         -H "ce-eventtypeversion: v1" \
+         -H "ce-id: e4bcc616-c3a9-4840-9321-763aa23851fc" \
+         -H "content-type: application/json" \
+         -d "{\"orderCode\":\"3211213\", \"orderAmount\":\"1250\"}" \
+         http://localhost:3000/publish
+   ```
 
 <!-- tabs:end -->
 
