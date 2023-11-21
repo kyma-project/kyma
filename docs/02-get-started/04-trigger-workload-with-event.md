@@ -92,7 +92,7 @@ All the published events of this type are then forwarded to an HTTP endpoint cal
    - **Subscription name**: `lastorder-sub`
    - **Types**: `order.received.v1`
    - **Service**: `lastorder` (The sink field will be populated automatically.)
-   - **Type matching:**: `standard`
+   - **Type matching**: `standard`
    - **Source**: `myapp`
 
 4. Click **Create**.
