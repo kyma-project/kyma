@@ -35,11 +35,9 @@ Be aware that a full backup of a Kyma cluster isn't supported. Start with the ex
 
 If you want to provision a new volume or restore the existing one, create on-demand [volume snapshots](https://kubernetes.io/docs/concepts/storage/volume-snapshots/):
 
-<div tabs name="backup-providers">
-  <details>
-  <summary label="Gardener GCP">
-  Gardener
-  </summary>
+<!-- tabs:start -->
+
+#### **Gardener**
 
 ### Steps
 
@@ -97,31 +95,21 @@ If you want to provision a new volume or restore the existing one, create on-dem
       apiGroup: snapshot.storage.k8s.io
   ```
 
-  </details>
-  <details>
-  <summary label="AKS">
-  AKS
-  </summary>
+#### **AKS**
 
 ### Steps
 
   1. [Install the CSI driver](https://github.com/kubernetes-sigs/azuredisk-csi-driver/blob/master/docs/install-csi-driver-master.md).
   2. Follow our instructions to create a volume snapshot on Gardener, using the driver for Azure.
 
-  </details>
-  
-  <details>
-  <summary label="GKE">
-  GKE
-  </summary>
+#### **GKE**
 
 ### Steps
 
   1. [Enable the required feature gate on the cluster](https://cloud.google.com/kubernetes-engine/docs/how-to/gce-pd-csi-driver).
   2. Check out [the repository for the Google Compute Engine Persistent Disk (GCE PD) CSI driver](https://github.com/kubernetes-sigs/gcp-compute-persistent-disk-csi-driver) for details on how to use volume snapshots on GKE.
 
-  </details>
- </div>
+<!-- tabs:end -->
 
 ## Create a periodic snapshot job
 
