@@ -13,11 +13,9 @@ You learn how Eventing behaves when you create a [Subscription](../../05-technic
 2. [Create a Function](../../02-get-started/04-trigger-workload-with-event.md#create-a-function).
 3. For this tutorial, instead of the default code sample, replace the Function source with the following code:
 
-   <div tabs name="Deploy a Function" group="create-workload">
-     <details open>
-     <summary label="Kyma Dashboard">
-     Kyma Dashboard
-     </summary>
+<!-- tabs:start -->
+
+#### **Kyma Dashboard**
 
    ```js
    module.exports = {
@@ -27,13 +25,9 @@ You learn how Eventing behaves when you create a [Subscription](../../05-technic
      } 
    }
    ```
-       
-     </details>
-     <details>
-     <summary label="kubectl">
-     kubectl
-     </summary>
-   
+
+#### **kubectl**
+
    ```bash
    cat <<EOF | kubectl apply -f -
    apiVersion: serverless.kyma-project.io/v1alpha2
@@ -61,18 +55,15 @@ You learn how Eventing behaves when you create a [Subscription](../../05-technic
    EOF
    ```
 
-     </details>
-   </div>
+<!-- tabs:end -->
 
 ## Create a Subscription with Event type consisting of alphanumeric characters
 
 Create a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) custom resource and subscribe for events of the type: `order.payment*success.v1`. Note that `order.payment*success.v1` contains a prohibited character, the asterisk `*`.
 
-<div tabs name="Create a Subscription" group="create-subscription">
-  <details open>
-  <summary label="Kyma Dashboard">
-  Kyma Dashboard
-  </summary>
+<!-- tabs:start -->
+
+#### **Kyma Dashboard**
 
 1. Go to **Namespaces** and select the default Namespace.
 2. Go to **Configuration** > **Subscriptions** and click **Create Subscription+**.
@@ -86,11 +77,7 @@ Create a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01
 4. Click **Create**.
 5. Wait a few seconds for the Subscription to have status `READY`.
 
-  </details>
-  <details>
-  <summary label="kubectl">
-  kubectl
-  </summary>
+#### **kubectl**
 
 Run:
 ```bash
@@ -114,8 +101,8 @@ kubectl get subscriptions lastorder-payment-sub -o=jsonpath="{.status.ready}"
 ```
 
 The operation was successful if the returned status says `true`.
-  </details>
-</div>
+
+<!-- tabs:end -->
 
 ## Check the Subscription cleaned Event type
 
@@ -137,11 +124,9 @@ Next, you see that you can still publish events with the original Event name (i.
    ```
 2. Publish an event to trigger your Function. In another terminal window, run:
 
-   <div tabs name="Publish an event" group="trigger-workload">
-     <details open>
-     <summary label="CloudEvents Conformance Tool">
-     CloudEvents Conformance Tool
-     </summary>
+<!-- tabs:start -->
+
+#### **CloudEvents Conformance Tool**
    
       ```bash
       cloudevents send http://localhost:3000/publish \
@@ -152,13 +137,9 @@ Next, you see that you can still publish events with the original Event name (i.
          --data "{\"orderCode\":\"3211213\", \"orderAmount\":\"1250\"}" \
          --yaml
       ```
-   
-     </details>
-     <details>
-     <summary label="curl">
-     curl
-     </summary>
-   
+
+#### **curl**
+
       ```bash
       curl -v -X POST \
            -H "ce-specversion: 1.0" \
@@ -170,8 +151,8 @@ Next, you see that you can still publish events with the original Event name (i.
            -d "{\"orderCode\":\"3211213\", \"orderAmount\":\"1250\"}" \
            http://localhost:3000/publish
       ```
-     </details>
-   </div>
+
+<!-- tabs:end -->
 
 ## Verify the event delivery
 
