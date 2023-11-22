@@ -1,5 +1,5 @@
 ---
-title: Compass Connection
+title: CompassConnection CR
 ---
 
 The `compassconnections.compass.kyma-project.io` CustomResourceDefinition (CRD) 
