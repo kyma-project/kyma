@@ -21,5 +21,5 @@ The table of Kyma modules:
 | [Telemetry](https://kyma-project.io/#/telemetry-manager/user/README.md) | Enable telemetry agents to easily collect application logs and distributed traces for your application and dispatch them to backends.|
 | [NATS](https://kyma-project.io/#/nats-manager/user/README.md) | NATS deploys a NATS cluster within the Kyma cluster. You can use it as a backend for Kyma Eventing. |
 | [Eventing](https://github.com/kyma-project/eventing-manager) | Eventing provides functionality to publish and subscribe to CloudEvents. <br> At the moment, the SAP Event Mesh default plan and NATS (provided by the NATS module) are supported. | 
-| [API Gateway*](https://github.com/kyma-project/api-gateway) | API Gateway provides functionalities that allow you to expose and secure APIs. |
+| [API Gateway](https://github.com/kyma-project/api-gateway) | API Gateway provides functionalities that allow you to expose and secure APIs. |
 | [Istio*](https://github.com/kyma-project/istio) | Istio is a service mesh with the Kyma-specific configuration. |
