@@ -26,13 +26,6 @@ Dive in deeper and explore the functionalities that Kyma provides for various us
 * [Configure Runtime Agent with Compass](00-application-connectivity/ra-04-configure-runtime-agent-with-compass.md)
 * [Reconnect Runtime Agent with Compass](00-application-connectivity/ra-05-reconnect-runtime-agent-with-compass.md)
 
-### Eventing
-
-* [Create Subscription subscribing to multiple event types](00-eventing/evnt-02-subs-with-multiple-filters.md)
-* [Event name cleanup in Subscriptions](00-eventing/evnt-03-type-cleanup.md)
-* [Changing Events Max-In-Flight in Subscriptions](00-eventing/evnt-04-change-max-in-flight-in-sub.md)
-* [Publish legacy events using Kyma Eventing](00-eventing/evnt-05-send-legacy-events.md)
-
 ### Observability
 
 * [Observability](00-observability.md)
