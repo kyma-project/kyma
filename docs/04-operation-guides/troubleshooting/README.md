@@ -19,7 +19,7 @@ See the full list of Kyma troubleshooting guides:
 - [Cannot create a volume snapshot](./01-volume-backup.md)
 
 ### API Exposure
-  
+
 - Cannot connect to a service exposed by an APIRule
   - [Basic diagnostics](./api-exposure/apix-01-cannot-connect-to-service/apix-01-01-apigateway-connect-api-rule.md)
   - [404 Not Found](./api-exposure/apix-01-cannot-connect-to-service/apix-01-03-404-not-found.md)
@@ -32,16 +32,8 @@ See the full list of Kyma troubleshooting guides:
 - [Kyma Gateway - not reachable](./api-exposure/apix-04-gateway-not-reachable.md)
 - [Issues when creating an APIRule - various reasons](./api-exposure/apix-06-api-rule-troubleshooting.md)
 
-### Eventing
-
-- [Kyma Eventing - Basic Diagnostics](./eventing/evnt-01-eventing-troubleshooting.md)
-- [NATS JetStream backend troubleshooting](./eventing/evnt-02-jetstream-troubleshooting.md)
-- [Subscriber receives irrelevant events](./eventing/evnt-03-type-collision.md)
-- [Eventing backend stopped receiving events due to full storage](./eventing/evnt-04-free-jetstream-storage.md)
-- [Published events are pending in the stream](./eventing/evnt-05-fix-pending-messages.md)
-
 ### Security
-  
+
 - [Issues with certificates on Gardener](./security/sec-01-certificates-gardener.md)
 
 ### Istio

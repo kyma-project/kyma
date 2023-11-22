@@ -6,8 +6,6 @@
   * [Change Kyma settings](03-change-kyma-config-values.md)
   * [Uninstall Kyma or components](07-uninstall-kyma.md)
   * [Back up Kyma](10-backup-kyma.md)
-  * [Kyma Eventing Metrics](evnt-02-eventing-metrics.md)
-  * [Acquiring NATS server system account credentials](evnt-03-nats-server-system-events.md)
   * [Access Kyma application logs](obsv-01-access-logs.md)
   <!-- markdown-link-check-disable-next-line -->
   * [Enable Istio access logs](/istio/user/02-operation-guides/operations/02-30-enable-istio-access-logs.md)
