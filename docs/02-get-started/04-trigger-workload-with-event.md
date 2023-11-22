@@ -2,7 +2,7 @@
 title: Trigger a workload with an event
 ---
 
-We already know how to create and expose a workload ([Function](02-deploy-expose-function.md) and [microservice](03-deploy-expose-microservice.md)). 
+We already know how to create and expose a workload ([Function](02-deploy-expose-function.md) and [microservice](03-deploy-expose-microservice.md)).
 Now it's time to actually use an event to trigger a workload.
 
 ## Create a Function
@@ -24,7 +24,7 @@ First, create a sample Function that prints out the received event to console:
       main: async function (event, context) {
         console.log("Received event:", event.data);
         return;
-      } 
+      }
     }
     ```
 7. Click **Create**.
@@ -56,7 +56,7 @@ spec:
           main: async function (event, context) {
             console.log("Received event:", event.data);
             return;
-          } 
+          }
         }
 EOF
 ```
@@ -79,7 +79,7 @@ kubectl get functions -n default lastorder
 
 ## Create a Subscription
 
-Next, to subscribe to events, we need a [Subscription](../05-technical-reference/00-custom-resources/evnt-01-subscription.md) custom resource. We're going to subscribe to events of the type `order.received.v1`. 
+Next, to subscribe to events, we need a Subscription custom resource. We're going to subscribe to events of the type `order.received.v1`.
 All the published events of this type are then forwarded to an HTTP endpoint called `Sink`. You can define this endpoint in the Subscription's spec.
 
 <!-- tabs:start -->
@@ -127,13 +127,13 @@ The operation was successful if the returned status says `true`.
 
 ## Trigger the workload with an event
 
-We created the `lastorder` Function and subscribed to the `order.received.v1` event by creating a Subscription CR. Now it's time to publish your event and trigger the Function. In this example, we'll port-forward the Kyma Eventing Service to localhost. 
+We created the `lastorder` Function and subscribed to the `order.received.v1` event by creating a Subscription CR. Now it's time to publish your event and trigger the Function. In this example, we'll port-forward the Kyma Eventing Service to localhost.
 
-1. Port-forward the Kyma Eventing Service to localhost. We will use port `3000`. In your terminal, run: 
+1. Port-forward the Kyma Eventing Service to localhost. We will use port `3000`. In your terminal, run:
    ```bash
    kubectl -n kyma-system port-forward service/eventing-event-publisher-proxy 3000:80
    ```
-2. Now publish an event to trigger your Function. In another terminal window, run: 
+2. Now publish an event to trigger your Function. In another terminal window, run:
 
 <!-- tabs:start -->
 
@@ -150,7 +150,7 @@ We created the `lastorder` Function and subscribed to the `order.received.v1` ev
         -d "{\"orderCode\":\"3211213\"}" \
         http://localhost:3000/publish
    ```
- 
+
  #### **CloudEvents Conformance Tool**
 
    ```bash
@@ -167,10 +167,10 @@ We created the `lastorder` Function and subscribed to the `order.received.v1` ev
 
 ## Verify the event delivery
 
-To verify that the event was properly delivered, check the logs of the Function: 
+To verify that the event was properly delivered, check the logs of the Function:
 
 <!-- tabs:start -->
-  
+
 #### **Kyma Dashboard**
 
 1. In Kyma Dashboard, return to the view of your `lastorder` Function.
@@ -184,7 +184,7 @@ To verify that the event was properly delivered, check the logs of the Function:
 
 #### **kubectl**
 
-Run: 
+Run:
 
 ```bash
 kubectl logs \
