@@ -9,5 +9,4 @@
   * [Allowed domains in API Gateway Controller](/05-technical-reference/apix-02-whitelisted-domains.md)
   * [Blocked services in API Gateway Controller](/05-technical-reference/apix-03-blacklisted-services.md)
   * [Configure the runtime](/05-technical-reference/ra-01-configuring-runtime.md)
-  * [Event names](/05-technical-reference/evnt-01-event-names.md)
 <!-- markdown-link-check-enable -->
