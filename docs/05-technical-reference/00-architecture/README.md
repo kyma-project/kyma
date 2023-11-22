@@ -11,4 +11,3 @@ In this section you can learn more about technicalities behind each main area: t
 ### Eventing
 
 * [Eventing Architecture](evnt-01-architecture.md)
-

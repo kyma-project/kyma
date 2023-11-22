@@ -1,5 +1,5 @@
 ---
-title: EventingBackend
+title: EventingBackend CR
 ---
 
 The `eventingbackends.eventing.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data used to manage Eventing backends within Kyma. To get the up-to-date CRD and show the output in the YAML format, run this command:
