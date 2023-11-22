@@ -6,4 +6,3 @@
   * [Access Kyma securely](sec-03-access-kyma.md)
   <!-- markdown-link-check-disable-next-line -->
   * [Ingress and Egress traffic](/istio/user/02-operation-guides/security/02-10-ingress-egress-traffic.md)
-  * [Useful links](sec-07-useful-links.md)
