@@ -4,13 +4,9 @@ title: Install Kyma CLI
 
 You can easily install Kyma CLI on macOS, Linux, or Windows. To do so, perform the instructions described in the respective section.
 
-<div tabs name="CLI-installation" group="OS-specific">
-  <details open>
-  <summary label="macOS">
-  macOS
-  </summary>
+<!-- tabs:start -->
 
-## macOS
+#### **macOS**
 
 To install Kyma CLI on macOS, run:
 
@@ -29,13 +25,8 @@ brew install kyma-cli
 ```
 
 If the Homebrew team does not update the Homebrew formula of the CLI within three days of the release, follow this [guide](https://github.com/Homebrew/brew/blob/master/docs/How-To-Open-a-Homebrew-Pull-Request.md) to update it manually to the most recent version. For a sample Homebrew Kyma CLI formula version bump, see [this PR](https://github.com/Homebrew/homebrew-core/pull/52375).
-  </details>
-  <details>
-  <summary label="Linux">
-  Linux
-  </summary>
 
-## Linux
+#### **Linux**
 
 To install Kyma CLI on Linux, run:
 
@@ -45,13 +36,7 @@ curl -Lo kyma.tar.gz "https://github.com/kyma-project/cli/releases/download/$(cu
 && rm -rf kyma-release kyma.tar.gz
 ```
 
-  </details>
-  <details>
-  <summary label="Windows">
-  Windows
-  </summary>
-
-## Windows
+#### **Windows**
 
 To install Kyma CLI on Windows, download and unzip the [release artifact](https://github.com/kyma-project/cli/releases). Change the path to point to the desired version and architecture (`x86_64` or `i386`).
 
@@ -74,18 +59,13 @@ choco install kyma-cli
 You don't have to bump Kyma CLI Chocolatey package manually with each new release, as it includes a script that automatically checks for new releases and updates the package to the latest one.
 
 Still, the package requires some maintenance to keep its dedicated [site](https://chocolatey.org/packages/kyma-cli) at`chocolatey.org` up to date. This means you should regularly update the description, details, screenshots, etc. To keep the site up to date, submit a pull request to [Chocolatey's GitHub repository](https://github.com/dgalbraith/chocolatey-packages/tree/master/automatic/kyma-cli).
-  </details>
-  <details>
-  <summary label="other">
-  other
-  </summary>
 
-## Other
+#### **other**
 
 To install a different release version, change the path to point to the desired version and architecture:
 
 ```bash
 curl -Lo kyma.tar.gz https://github.com/kyma-project/cli/releases/download/${KYMA_VERSION}/kyma_${ARCH}.tar.gz
 ```
-  </details>
-</div>
+
+<!-- tabs:end -->

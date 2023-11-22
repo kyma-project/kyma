@@ -1,4 +1,4 @@
-## Kyma modules
+# Kyma modules
 
 Classic Kyma offered a fixed set of preconfigured components whose development rhythm is synchronized and determined by the release schedule.
 
