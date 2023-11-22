@@ -8,8 +8,6 @@ You can easily install Kyma CLI on macOS, Linux, or Windows. To do so, perform t
 
 #### **macOS**
 
-## macOS
-
 To install Kyma CLI on macOS, run:
 
 ```bash
@@ -30,8 +28,6 @@ If the Homebrew team does not update the Homebrew formula of the CLI within thre
 
 #### **Linux**
 
-## Linux
-
 To install Kyma CLI on Linux, run:
 
 ```bash
@@ -41,8 +37,6 @@ curl -Lo kyma.tar.gz "https://github.com/kyma-project/cli/releases/download/$(cu
 ```
 
 #### **Windows**
-
-## Windows
 
 To install Kyma CLI on Windows, download and unzip the [release artifact](https://github.com/kyma-project/cli/releases). Change the path to point to the desired version and architecture (`x86_64` or `i386`).
 
@@ -67,8 +61,6 @@ You don't have to bump Kyma CLI Chocolatey package manually with each new releas
 Still, the package requires some maintenance to keep its dedicated [site](https://chocolatey.org/packages/kyma-cli) at`chocolatey.org` up to date. This means you should regularly update the description, details, screenshots, etc. To keep the site up to date, submit a pull request to [Chocolatey's GitHub repository](https://github.com/dgalbraith/chocolatey-packages/tree/master/automatic/kyma-cli).
 
 #### **other**
-
-## Other
 
 To install a different release version, change the path to point to the desired version and architecture:
 
