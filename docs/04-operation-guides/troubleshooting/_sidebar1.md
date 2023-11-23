@@ -1,7 +1,6 @@
 * [Home](/)
 * [Operation Guides](../README.md)
 * [Troubleshooting](README.md)
-  * [API Exposure](api-exposure/README.md)
   <!-- markdown-link-check-disable-next-line -->
   * [Istio](/istio/user/02-operation-guides/troubleshooting/README.md)
   * [Security](security/README.md)

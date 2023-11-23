@@ -77,9 +77,9 @@ The operation was successful if the statuses for **CONFIGURED**, **BUILT**, and 
 
 After we've got our `hello-world` Function deployed, we might want to expose it outside our cluster so that it's available for other external services.
 
-> **CAUTION:** Exposing a workload to the outside world is always a potential security vulnerability, so tread carefully. In a production environment, always secure the workload you expose with [OAuth2](../03-tutorials/00-api-exposure/apix-05-expose-and-secure-a-workload/apix-05-01-expose-and-secure-workload-oauth2.md) or [JWT](../03-tutorials/00-api-exposure/apix-05-expose-and-secure-a-workload/apix-05-03-expose-and-secure-workload-jwt.md).
+> **CAUTION:** Exposing a workload to the outside world is always a potential security vulnerability, so tread carefully. In a production environment, always secure the workload you expose with [OAuth2](https://kyma-project.io/#/api-gateway/user/tutorials/01-50-expose-and-secure-a-workload/01-50-expose-and-secure-workload-oauth2) or [JWT](https://kyma-project.io/#/api-gateway/user/tutorials/01-50-expose-and-secure-a-workload/01-52-expose-and-secure-workload-jwt).
 
-First, let's create an [APIRule](../05-technical-reference/00-custom-resources/apix-01-apirule.md) for the Function.
+First, let's create an [APIRule](https://kyma-project.io/#/api-gateway/user/custom-resources/apirule/04-10-apirule-custom-resource) for the Function.
 
 <!-- tabs:start -->
 

@@ -84,4 +84,4 @@ See these sample excerpts from APIRule custom resources that show the **rules** 
 
 </div>
 
->**TIP:** To learn more, read about the [APIRule custom resource](./00-custom-resources/apix-01-apirule.md). You can also follow the [tutorials](../03-tutorials/00-api-exposure/apix-05-expose-and-secure-a-workload/apix-05-01-expose-and-secure-workload-oauth2.md) to learn how to expose and secure services.
+>**TIP:** To learn more, read about the [APIRule custom resource](https://kyma-project.io/#/api-gateway/user/custom-resources/apirule/04-10-apirule-custom-resource). You can also follow the [tutorials](https://kyma-project.io/#/api-gateway/user/tutorials/README) to learn how to expose and secure services.

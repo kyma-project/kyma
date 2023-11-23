@@ -5,8 +5,5 @@
   * [Architecture](/05-technical-reference/00-architecture/README.md)
   * [Configuration parameters](/05-technical-reference/00-configuration-parameters/README.md)
   * [Custom resources](/05-technical-reference/00-custom-resources/README.md)
-  * [Configure Authorization (OAuth2, JWT)](/05-technical-reference/apix-01-config-authorizations-apigateway.md)
-  * [Allowed domains in API Gateway Controller](/05-technical-reference/apix-02-whitelisted-domains.md)
-  * [Blocked services in API Gateway Controller](/05-technical-reference/apix-03-blacklisted-services.md)
   * [Configure the runtime](/05-technical-reference/ra-01-configuring-runtime.md)
 <!-- markdown-link-check-enable -->
