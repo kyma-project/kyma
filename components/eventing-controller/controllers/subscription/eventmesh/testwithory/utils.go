@@ -202,7 +202,6 @@ func startTestEnv() (*rest.Config, error) {
 	emTestEnsemble.testEnv = &envtest.Environment{
 		CRDDirectoryPaths: []string{
 			filepath.Join("../../../../", "config", "crd", "bases"),
-			filepath.Join("../../../../", "config", "crd", "external"),
 		},
 		AttachControlPlaneOutput: attachControlPlaneOutput,
 		UseExistingCluster:       &useExistingCluster,
