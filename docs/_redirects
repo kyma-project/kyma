@@ -59,6 +59,7 @@
 /docs/kyma/latest/05-technical-reference/00-custom-resources/oper-01-istio /#/istio/user/03-technical-reference/istio-custom-resource/01-30-istio-custom-resource 301
 
 # API Exposure
+/#/docs/01-overview/main-areas/api-exposure/* /#/api-gateway/user/README
 /docs/kyma/latest/05-technical-reference/00-custom-resources/apix-01-apirule /#/api-gateway/user/custom-resources/apirule/04-10-apirule-custom-resource
 /docs/kyma/latest/01-overview/api-exposure/apix-03-api-gateway-limitations.md /#/api-gateway/user/00-20-overview-api-rule-controller?id=controller-limitations
 
