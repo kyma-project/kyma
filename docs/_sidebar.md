@@ -6,6 +6,7 @@
   * [Service Management](/01-overview/service-management/README.md)
   * [User Interfaces](/01-overview/ui/README.md)
 * [Get Started](/02-get-started/README.md)
+  * [Module quick install](08-install-uninstall-upgrade-kyma-module.md)
   * [Kyma quick install](01-quick-install.md)
   * [Deploy and expose a Function](02-deploy-expose-function.md)
   * [Deploy and expose a microservice](03-deploy-expose-microservice.md)
