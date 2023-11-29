@@ -30,11 +30,9 @@
 
 /installation @kyma-project/Jellyfish
 /installation/resources/crds/compass-runtime-agent @kyma-project/Framefrog
-/installation/resources/crds/eventing @kyma-project/eventing
 /installation/resources/crds/istio @kyma-project/goat
 
 /resources/compass-runtime-agent @kyma-project/Framefrog
-/resources/eventing @kyma-project/eventing
 /resources/istio @kyma-project/goat
 
 # Fast Integration Tests

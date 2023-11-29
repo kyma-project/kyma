@@ -121,9 +121,6 @@ OS := $(shell uname)
 controller-gen-local: ## Download controller-gen locally if necessary.
 	GOBIN=$(PROJECT_DIR)/bin/$(OS) go install sigs.k8s.io/controller-tools/cmd/controller-gen@$(CONTROLLER_TOOLS_VERSION)
 
-path-to-referenced-charts:
-	@echo "resources/eventing"
-
 ##@ CRD
 
 copy-crds: manifests-local ## copy Eventing CRDs to installation/eventing
