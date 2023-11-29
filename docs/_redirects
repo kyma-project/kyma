@@ -58,11 +58,16 @@
 /docs/kyma/latest/05-technical-reference/00-configuration-parameters/smsh-01-istio-chart /#/istio/user/03-technical-reference/configuration-parameters/01-10-istio-controller-parameters 301
 /docs/kyma/latest/05-technical-reference/00-custom-resources/oper-01-istio /#/istio/user/03-technical-reference/istio-custom-resource/01-30-istio-custom-resource 301
 
-# API Exposure
-/docs/kyma/latest/01-overview/main-areas/api-exposure/* /#/api-gateway/user/README
-/docs/kyma/latest/03-tutorials/00-api-exposure/apix-01-create-workload.md /#/api-gateway/user/tutorials/01-00-create-workload
-/docs/kyma/latest/03-tutorials/00-api-exposure/apix-02-setup-custom-domain-for-workload.md /#/api-gateway/user/tutorials/01-10-setup-custom-domain-for-workload
-/docs/kyma/latest/03-tutorials/00-api-exposure/apix-03-set-up-tls-gateway.md
+# API Gateway
+/#/docs/kyma/latest/01-overview/main-areas/api-exposure/* /#/api-gateway/user/README
+/docs/kyma/latest/01-overview/main-areas/api-exposure/* /#/api-gateway/user/README 301
+/docs/kyma/latest/03-tutorials/00-api-exposure/apix-01-create-workload.md /#/api-gateway/user/tutorials/01-00-create-workload 301
+/docs/kyma/latest/03-tutorials/00-api-exposure/apix-02-setup-custom-domain-for-workload.md /#/api-gateway/user/tutorials/01-10-setup-custom-domain-for-workload 301
+/docs/kyma/latest/03-tutorials/00-api-exposure/apix-03-set-up-tls-gateway.md /#/api-gateway/user/tutorials/01-20-set-up-tls-gateway 301
+/docs/kyma/latest/03-tutorials/00-api-exposure/apix-04-expose-workload /#/api-gateway/user/tutorials/01-40-expose-workload/01-40-expose-workload-apigateway 301
+/docs/kyma/latest/03-tutorials/00-api-exposure/apix-04-expose-workload/apix-04-02-expose-multiple-workloads.md /#/api-gateway/user/tutorials/01-40-expose-workload/01-41-expose-multiple-workloads 301
+/docs/kyma/latest/03-tutorials/00-api-exposure/apix-04-expose-workload/apix-04-03-expose-workloads-multiple-namespaces.md /#/api-gateway/user/tutorials/01-40-expose-workload/01-42-expose-workloads-multiple-namespaces 301
+
 
 /docs/kyma/latest/05-technical-reference/00-custom-resources/apix-01-apirule /#/api-gateway/user/custom-resources/apirule/04-10-apirule-custom-resource
 /docs/kyma/latest/01-overview/api-exposure/apix-03-api-gateway-limitations.md /#/api-gateway/user/00-20-overview-api-rule-controller?id=controller-limitations
