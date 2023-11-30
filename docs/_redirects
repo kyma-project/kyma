@@ -85,7 +85,7 @@
 /docs/kyma/latest/05-technical-reference/00-custom-resources/apix-01-apirule /#/api-gateway/user/custom-resources/apirule/04-10-apirule-custom-resource
 
 # General
-/docs/root/* /docs/kyma/latest/ 302
+/docs/root/* / 302
 /docs/components/* / 302
 /docs/ / 302
 /community/* https://github.com/kyma-project/community 301
