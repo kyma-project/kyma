@@ -28,4 +28,4 @@ See the full list of Kyma troubleshooting guides:
 - [Connection refused errors](https://kyma-project.io/#/istio/user/02-operation-guides/troubleshooting/03-20-connection-refused)
 - [Issues with Istio sidecar injection](https://kyma-project.io/#/istio/user/02-operation-guides/troubleshooting/03-30-istio-no-sidecar)
 - [Incompatible Istio sidecar version after Kyma upgrade](https://kyma-project.io/#/istio/user/02-operation-guides/troubleshooting/03-40-incompatible-istio-sidecar-version)
-- [Istio unintentionally deleted](https://kyma-project.io/#/istio/user/02-operation-guides/troubleshooting/03-50-recovering-from-unintentional-istio-module-removal)
+- [Istio unintentionally deleted](https://kyma-project.io/#/istio/user/02-operation-guides/troubleshooting/03-50-recovering-from-unintentional-istio-removal.md)
