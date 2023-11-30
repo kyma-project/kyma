@@ -45,4 +45,5 @@
   * [Eventing](/eventing-manager/user/README.md)
   * [API Gateway](/api-gateway/user/README.md)
 * [Glossary](/glossary.md)
+* [test](./test.md)
 <!-- markdown-link-check-enable -->
