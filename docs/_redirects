@@ -60,29 +60,24 @@
 
 # API Gateway
 /docs/kyma/latest/01-overview/api-exposure/apix-03-api-gateway-limitations.md /#/api-gateway/user/00-20-overview-api-rule-controller?id=controller-limitations
-/docs/kyma/latest/01-overview/main-areas/api-exposure/* /#/api-gateway/user/README 301
-/docs/kyma/latest/03-tutorials/00-api-exposure/apix-01-create-workload.md /#/api-gateway/user/tutorials/01-00-create-workload 301
-/docs/kyma/latest/03-tutorials/00-api-exposure/apix-02-setup-custom-domain-for-workload.md /#/api-gateway/user/tutorials/01-10-setup-custom-domain-for-workload 301
-/docs/kyma/latest/03-tutorials/00-api-exposure/apix-03-set-up-tls-gateway.md /#/api-gateway/user/tutorials/01-20-set-up-tls-gateway 301
-/docs/kyma/latest/03-tutorials/00-api-exposure/apix-04-expose-workload /#/api-gateway/user/tutorials/01-40-expose-workload/01-40-expose-workload-apigateway 301
-/docs/kyma/latest/03-tutorials/00-api-exposure/apix-04-expose-workload/apix-04-02-expose-multiple-workloads.md /#/api-gateway/user/tutorials/01-40-expose-workload/01-41-expose-multiple-workloads 301
-/docs/kyma/latest/03-tutorials/00-api-exposure/apix-04-expose-workload/apix-04-03-expose-workloads-multiple-namespaces.md /#/api-gateway/user/tutorials/01-40-expose-workload/01-42-expose-workloads-multiple-namespaces 301
-/docs/kyma/latest/03-tutorials/00-api-exposure/apix-05-expose-and-secure-a-workload/apix-05-01-expose-and-secure-workload-oauth2.md /#/api-gateway/user/tutorials/01-50-expose-and-secure-a-workload/01-50-expose-and-secure-workload-oauth2 301
-/docs/kyma/latest/03-tutorials/00-api-exposure/apix-05-expose-and-secure-a-workload/apix-05-02-get-jwt.md /#/api-gateway/user/tutorials/01-50-expose-and-secure-a-workload/01-51-get-jwt 301
-/docs/kyma/latest/docs/03-tutorials/00-api-exposure/apix-05-expose-and-secure-a-workload/apix-05-03-expose-and-secure-workload-jwt.md /#/api-gateway/user/tutorials/01-50-expose-and-secure-a-workload/01-52-expose-and-secure-workload-jwt 301
-/docs/kyma/latest/03-tutorials/00-api-exposure/apix-05-expose-and-secure-a-workload/apix-05-04-expose-and-secure-workload-istio.md /#/api-gateway/user/tutorials/01-50-expose-and-secure-a-workload/01-53-expose-and-secure-workload-istio 301
-/docs/kyma/latest/docs/03-tutorials/00-api-exposure/apix-05-expose-and-secure-a-workload/apix-05-05-expose-and-secure-workload-with-certificate.md /#/api-gateway/user/tutorials/01-50-expose-and-secure-a-workload/01-54-expose-and-secure-workload-with-certificate 301
-/docs/kyma/latest/04-operation-guides/troubleshooting/api-exposure/apix-01-cannot-connect-to-service/apix-01-01-apigateway-connect-api-rule.md /#/api-gateway/user/troubleshooting-guides/03-00-cannot-connect-to-service/03-00-apigateway-connect-api-rule
-/docs/kyma/latest/04-operation-guides/troubleshooting/api-exposure/apix-04-gateway-not-reachable.md /#/api-gateway/user/troubleshooting-guides/03-30-gateway-not-reachable
-/docs/kyma/latest/docs/04-operation-guides/troubleshooting/api-exposure/apix-06-api-rule-troubleshooting.md /#/api-gateway/user/troubleshooting-guides/03-40-api-rule-troubleshooting
-/docs/kyma/latest/docs/04-operation-guides/troubleshooting/api-exposure/apix-01-cannot-connect-to-service/apix-01-01-apigateway-connect-api-rule.md /#/api-gateway/user/troubleshooting-guides/03-00-cannot-connect-to-service/03-00-apigateway-connect-api-rule
-/docs/kyma/latest/04-operation-guides/troubleshooting/api-exposure/apix-01-cannot-connect-to-service/apix-01-02-401-unauthorized-403-forbidden.md /#/api-gateway/user/troubleshooting-guides/03-00-cannot-connect-to-service/03-01-401-unauthorized-403-forbidden
-/docs/kyma/latest/docs/04-operation-guides/troubleshooting/api-exposure/apix-01-cannot-connect-to-service/apix-01-03-404-not-found.md /#/api-gateway/user/troubleshooting-guides/03-00-cannot-connect-to-service/03-02-404-not-found
-/docs/kyma/latest/04-operation-guides/troubleshooting/api-exposure/apix-01-cannot-connect-to-service/apix-01-04-500-server-error.md /#/api-gateway/user/troubleshooting-guides/03-00-cannot-connect-to-service/03-03-500-server-error
-/docs/kyma/latest/04-operation-guides/troubleshooting/api-exposure/apix-02-dns-mgt/apix-02-01-dns-mgt-connection-refused.md /#/api-gateway/user/troubleshooting-guides/03-10-dns-mgt/03-10-dns-mgt-connection-refused
-/docs/kyma/latest/04-operation-guides/troubleshooting/api-exposure/apix-02-dns-mgt/apix-02-02-dns-mgt-could-not-resolve-host.md /#/api-gateway/user/troubleshooting-guides/03-10-dns-mgt/03-11-dns-mgt-could-not-resolve-host
-/docs/kyma/latest/04-operation-guides/troubleshooting/api-exposure/apix-02-dns-mgt/apix-02-03-dns-mgt-resource-ignored.md /#/api-gateway/user/troubleshooting-guides/03-10-dns-mgt/03-12-dns-mgt-resource-ignored
+/docs/kyma/latest/01-overview/api-exposure/* /#/api-gateway/user/README 301
+/docs/kyma/latest/03-tutorials/00-api-exposure/* /#/api-gateway/user/tutorials/README 301
+/docs/kyma/latest/04-operation-guides/troubleshooting/* /#/api-gateway/user/troubleshooting-guides/README
 /docs/kyma/latest/05-technical-reference/00-custom-resources/apix-01-apirule /#/api-gateway/user/custom-resources/apirule/04-10-apirule-custom-resource
+
+# Eventing 
+/docs/kyma/latest/01-overview/eventing/* /#/eventing-manager/user/README
+/docs/kyma/latest/03-tutorials/00-eventing/* /#/eventing-manager/user/tutorials/evnt-01-prerequisites
+/docs/kyma/latest/05-technical-reference/00-custom-resources/evnt-01-subscription.md /#/eventing-manager/user/resources/evnt-cr-subscription
+/docs/kyma/latest/04-operation-guides/troubleshooting/eventing /#/eventing-manager/user/troubleshooting/evnt-01-eventing-troubleshooting
+
+# Application Connector
+/docs/kyma/latest/01-overview/application-connectivity/README.md /#/application-connector-manager/user/README
+/docs/kyma/latest/01-overview/application-connectivity/ac-02-application-gateway.md /#/application-connector-manager/user/00-10-application-gateway
+/docs/kyma/latest/01-overview/application-connectivity/ac-04-security.md /#/application-connector-manager/user/00-20-security
+/docs/kyma/latest/03-tutorials/00-application-connectivity/* /#/application-connector-manager/user/tutorials/README
+/docs/kyma/latest/05-technical-reference/00-custom-resources/ac-01-application.md /#/application-connector-manager/user/resources/06-10-application
+/docs/kyma/latest/05-technical-reference/ac-01-application-gateway-details.md /#/application-connector-manager/user/technical-reference/07-10-application-gateway-details
 
 # General
 /docs/root/* / 302
