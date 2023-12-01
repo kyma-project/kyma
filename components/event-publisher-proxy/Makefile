@@ -14,6 +14,9 @@ VERIFY_IGNORE := /vendor\|/mocks
 release:
 	$(MAKE) gomod-release-local
 
+path-to-referenced-charts:
+	@echo "resources/event-publisher-proxy"
+
 .PHONY: clean
 clean: resolve_clean
 
