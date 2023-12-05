@@ -15,7 +15,7 @@ Out of the box, Kyma offers various functionalities, such as:
 
 - [Serverless](https://kyma-project.io/#/serverless-manager/user/README) development platform to run lightweight Functions in a cost-efficient and scalable way
 - [System connectivity](https://kyma-project.io/#/01-overview/application-connectivity/README) that provides endpoint to securely register Events and APIs of external applications
-- [Istio](https://kyma-project.io/#/istio/user/00-overview/README) for service-to-service communication and proxying
+- [Istio](https://kyma-project.io/#/istio/user/README) for service-to-service communication and proxying
 - [Service Management](https://kyma-project.io/#/01-overview/service-management/README) to use the built-in cloud services from such cloud providers as GCP, Azure, and AWS
 - Secure API exposure
 - Collection and shipment of telemetry data to observability backends using the [Telemetry module](https://kyma-project.io/#/telemetry-manager/user/README)
