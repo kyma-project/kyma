@@ -2,7 +2,6 @@
 <!-- markdown-link-check-disable -->
 * [Kyma Components](/01-overview/README.md)
   * [API Exposure](/01-overview/api-exposure/README.md)
-  * [Istio](/istio/user/00-overview/README.md)
   * [Service Management](/01-overview/service-management/README.md)
   * [User Interfaces](/01-overview/ui/README.md)
 * [Get Started](/02-get-started/README.md)
@@ -44,5 +43,6 @@
   * [NATS](/nats-manager/user/README.md)
   * [Eventing](/eventing-manager/user/README.md)
   * [API Gateway](/api-gateway/user/README.md)
+  * [Istio](/istio/user/README.md)
 * [Glossary](/glossary.md)
 <!-- markdown-link-check-enable -->
