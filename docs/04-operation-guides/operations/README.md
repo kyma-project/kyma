@@ -12,7 +12,4 @@ This is a complete list of Kyma operation guides:
 * [Uninstall Kyma or components](07-uninstall-kyma.md)
 * [Back up Kyma](10-backup-kyma.md)
 * [Access Kyma application logs](obsv-01-access-logs.md)
-* [Enable Istio access logs](https://kyma-project.io/#/istio/user/02-operation-guides/operations/02-30-enable-istio-access-logs)
 * [Enable Kyma with Runtime Agent](ra-01-enable-kyma-with-runtime-agent.md)
-* [Check if automatic Istio sidecar proxy injection is enabled](https://kyma-project.io/#/istio/user/02-operation-guides/operations/02-10-check-if-sidecar-injection-is-enabled.md)
-* [Enable automatic Istio sidecar proxy injection](https://kyma-project.io/#/istio/user/02-operation-guides/operations/02-20-enable-sidecar-injection)
