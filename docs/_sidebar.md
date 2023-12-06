@@ -1,4 +1,4 @@
-* [Home](/README.md)
+* [Kyma Home](/README.md)
 <!-- markdown-link-check-disable -->
 * [Kyma Components](/01-overview/README.md)
   * [API Exposure](/01-overview/api-exposure/README.md)
