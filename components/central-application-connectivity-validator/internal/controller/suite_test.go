@@ -19,11 +19,12 @@ import (
 	"github.com/kyma-project/kyma/components/central-application-connectivity-validator/internal/controller"
 	"github.com/kyma-project/kyma/components/central-application-connectivity-validator/internal/validationproxy"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apis/applicationconnector/v1alpha1"
-	"github.com/patrickmn/go-cache"
+	gocache "github.com/patrickmn/go-cache"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"k8s.io/utils/pointer"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -37,7 +38,7 @@ var (
 	suiteCtx       context.Context
 	cancelSuiteCtx context.CancelFunc
 
-	idCache                 *cache.Cache
+	idCache                 *gocache.Cache
 	appNamePlaceholder      = "%%APP_NAME%%"
 	eventingPathPrefixV1    = "/%%APP_NAME%%/v1/events"
 	eventingPathPrefixV2    = "/%%APP_NAME%%/v2/events"
@@ -89,14 +90,14 @@ var _ = BeforeSuite(func() {
 	Expect(k8sClient).NotTo(BeNil())
 
 	k8sManager, err := ctrl.NewManager(config, ctrl.Options{
-		Scheme:     scheme.Scheme,
-		SyncPeriod: pointer.Duration(time.Second * 2),
+		Scheme: scheme.Scheme,
+		Cache:  cache.Options{SyncPeriod: pointer.Duration(time.Second * 2)},
 	})
 	Expect(err).ToNot(HaveOccurred())
 
-	idCache = cache.New(
-		cache.NoExpiration,
-		cache.NoExpiration,
+	idCache = gocache.New(
+		gocache.NoExpiration,
+		gocache.NoExpiration,
 	)
 
 	log, err := logger.New(logger.TEXT, logger.DEBUG)

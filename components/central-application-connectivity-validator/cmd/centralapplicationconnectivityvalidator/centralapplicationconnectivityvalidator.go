@@ -22,12 +22,15 @@ import (
 	"github.com/kyma-project/kyma/components/central-application-connectivity-validator/internal/externalapi"
 	"github.com/kyma-project/kyma/components/central-application-connectivity-validator/internal/validationproxy"
 	"github.com/oklog/run"
-	"github.com/patrickmn/go-cache"
+	gocache "github.com/patrickmn/go-cache"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/cache"
+	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/metrics/server"
 )
 
 const (
@@ -86,9 +89,9 @@ func main() {
 
 	log.WithContext().With("options", options).Info("Starting Validation Proxy.")
 
-	idCache := cache.New(
-		cache.NoExpiration,
-		cache.NoExpiration,
+	idCache := gocache.New(
+		gocache.NoExpiration,
+		gocache.NoExpiration,
 	)
 	idCache.OnEvicted(func(key string, i interface{}) {
 		log.WithContext().
@@ -116,11 +119,15 @@ func main() {
 	}
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
-		Scheme:             scheme,
-		MetricsBindAddress: "0",
-		SyncPeriod:         &options.syncPeriod,
-		ClientDisableCacheFor: []client.Object{
-			&v1alpha1.Application{},
+		Scheme:  scheme,
+		Metrics: server.Options{BindAddress: "0"},
+		Cache:   cache.Options{SyncPeriod: &options.syncPeriod},
+		Client: ctrlclient.Options{
+			Cache: &ctrlclient.CacheOptions{
+				DisableFor: []client.Object{
+					&v1alpha1.Application{},
+				},
+			},
 		},
 	})
 	if err != nil {
