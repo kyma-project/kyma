@@ -28,7 +28,6 @@
   * [Runtime Agent Architecture](/05-technical-reference/00-architecture/ra-01-runtime-agent-workflow.md)
   * [CLI Commands](/05-technical-reference/00-cli-commands/README.md)
   * [Runtime Agent Connection with Compass](/05-technical-reference/00-configuration-parameters/ra-01-connection-with-compass.md)
-  * [Application CR](/05-technical-reference/00-custom-resources/ac-01-application.md)
   * [CompassConnection CR](/05-technical-reference/00-custom-resources/ra-01-compassconnection.md)
   * [Configure Authorization (OAuth2, JWT)](/05-technical-reference/apix-01-config-authorizations-apigateway.md)
   * [Allowed domains in API Gateway Controller](/05-technical-reference/apix-02-whitelisted-domains.md)
