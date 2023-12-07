@@ -69,6 +69,13 @@ kubectl apply -f https://github.com/kyma-project/api-gateway/releases/latest/dow
 kubectl apply -f https://github.com/kyma-project/api-gateway/releases/latest/download/apigateway-default-cr.yaml
 ```
 
+#### [Istio](https://github.com/kyma-project/istio)
+
+```bash
+kubectl apply -f https://github.com/kyma-project/istio/releases/latest/download/istio-manager.yaml
+kubectl apply -f https://github.com/kyma-project/istio/releases/latest/download/istio-default-cr.yaml
+```
+
 ## Uninstall Kyma with a module
 
 You uninstall Kyma with a module using the `kubectl delete` command.
