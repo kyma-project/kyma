@@ -6,6 +6,6 @@ A custom resource (CR) is an extension to the Kubernetes API which allows you to
 
 | Area | Custom resource |
 | ---- | -------------- |
-| Application Connectivity | [Application](ac-01-application.md), [CompassConnection](ra-01-compassconnection.md) |
+| Application Connectivity | [CompassConnection](ra-01-compassconnection.md) |
 
  > **TIP:** For information about third-party custom resources that come together with Kyma, visit the documentation of the respective project.

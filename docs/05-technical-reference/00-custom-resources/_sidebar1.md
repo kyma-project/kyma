@@ -1,5 +1,4 @@
 * [Home](/)
 * [Technical Reference](../README.md)
   * [Custom resources](README.md)
-    * [Application](ac-01-application.md)
     * [CompassConnection](ra-01-compassconnection.md)
