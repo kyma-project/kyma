@@ -1,5 +1,2 @@
 ---
 defaultNamespace: kyma-system
-prerequisites:
-  - name: "istio"
-    namespace: "istio-system"
