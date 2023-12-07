@@ -131,7 +131,7 @@ We created the `lastorder` Function and subscribed to the `order.received.v1` ev
 
 1. Port-forward the Kyma Eventing Service to localhost. We will use port `3000`. In your terminal, run:
    ```bash
-   kubectl -n kyma-system port-forward service/eventing-event-publisher-proxy 3000:80
+   kubectl -n kyma-system port-forward service/eventing-publisher-proxy 3000:80
    ```
 2. Now publish an event to trigger your Function. In another terminal window, run:
 
