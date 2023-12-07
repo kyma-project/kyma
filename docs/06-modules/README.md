@@ -10,8 +10,6 @@ You can enable modules at any time. Give them a try! If you decide that some of 
 
 The table of Kyma modules:
 
-> **NOTE:** The entries marked with "*" are still components that will be modularized soon.
-
 | Module | Purpose |
 |---|---|
 | [Application Connector](https://github.com/kyma-project/application-connector-manager) | Application Connector allows you to connect with external solutions. No matter if you want to integrate an on-premise or a cloud system, the integration process doesn't change, which allows you to avoid any configuration or network-related problems. |
