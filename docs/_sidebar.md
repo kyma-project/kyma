@@ -27,9 +27,6 @@
   * [API Overview](/05-technical-reference/00-api-overview/README.md)
   * [Runtime Agent Connection with Compass](/05-technical-reference/00-configuration-parameters/ra-01-connection-with-compass.md)
   * [CompassConnection CR](/05-technical-reference/00-custom-resources/ra-01-compassconnection.md)
-  * [Configure Authorization (OAuth2, JWT)](/05-technical-reference/apix-01-config-authorizations-apigateway.md)
-  * [Allowed domains in API Gateway Controller](/05-technical-reference/apix-02-whitelisted-domains.md)
-  * [Blocked services in API Gateway Controller](/05-technical-reference/apix-03-blacklisted-services.md)
   * [Configure the runtime](/05-technical-reference/ra-01-configuring-runtime.md)
 * [Glossary](/glossary.md)
 <!-- markdown-link-check-enable -->
