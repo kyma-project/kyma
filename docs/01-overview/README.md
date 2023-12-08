@@ -4,7 +4,4 @@ title: Kyma components
 
 Classic Kyma offered a fixed set of preconfigured components whose development rhythm is synchronized and determined by the release schedule.
 
-See the list of Kyma components that have not been transformed into modules yet:
-
-- [Service Mesh](../01-overview/service-mesh/README.md)
-- [User Interfaces](../01-overview/ui/README.md)
+All the components have become independent modules. For more details, read [Modules](../06-modules/README.md).

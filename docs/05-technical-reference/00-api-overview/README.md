@@ -1,10 +1,10 @@
----
-title: API Overview
----
+# API Overview
 
 Kyma API versioning and deprecation closely follows the Kubernetes API versioning and deprecation policy. Hence, this document is based on the Kubernetes official documentation.
 
-## API versioning (derived from [API Overview](https://kubernetes.io/docs/reference/using-api/#api-versioning))
+## API versioning 
+
+(Derived from [API Overview](https://kubernetes.io/docs/reference/using-api/#api-versioning))
 
 Different API versions indicate different levels of stability and support.
 
@@ -30,7 +30,9 @@ Here's a summary of each level:
   - The version name is `vX`, where `X` is an integer.
   - The stable versions of features appear in released software for many subsequent versions.
   
-## Deprecating parts of the API (derived from [Kubernetes Deprecation Policy](https://kubernetes.io/docs/reference/using-api/deprecation-policy/#deprecating-parts-of-the-api))
+## Deprecating parts of the API
+
+(Derived from [Kubernetes Deprecation Policy](https://kubernetes.io/docs/reference/using-api/deprecation-policy/#deprecating-parts-of-the-api))
 
 API versions fall into 3 main tracks. Each of the tracks has different policies for deprecation:
 
