@@ -16,7 +16,3 @@ Dive in deeper and explore the functionalities that Kyma provides for various us
 ### Observability
 
 * [Observability](00-observability.md)
-
-### Service Management
-
-* [Deploy an SAP BTP service in your Kyma cluster](00-service-management/smgt-01-deploy-service.md)
