@@ -83,4 +83,5 @@ To get started with Kyma, let's quickly install it with specific modules first.
 
 ## Related links
 
-To see the list of all available Kyma modules, go to [Kyma modules](../06-modules/README.md).
+- To see the list of all available Kyma modules, go to [Kyma modules](../06-modules/README.md).
+- To learn how to [uinstall and upgrade Kyma with a module](./08-uninstall-upgrade-kyma-module.md).
