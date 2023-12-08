@@ -1,5 +1,0 @@
-* [Home](/)
-* [Operation Guides](README.md)
-  * [Operations](operations/README.md)
-  * [Security](security/README.md)
-  * [Troubleshooting](troubleshooting/README.md)

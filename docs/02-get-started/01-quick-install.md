@@ -1,65 +1,86 @@
----
-title: Quick install
----
+# Quick install
 
-To get started with Kyma, let's quickly install it first.
+To get started with Kyma, let's quickly install it with specific modules first.
 
-The Kyma project is currently in the transition phase from classic to modular Kyma. You can either install classic Kyma with its components, or available modules. To see the list of Kyma modules, go to [Overview](../01-overview/README.md). To learn how to install Kyma with a module, go to [Install, uninstall and upgrade Kyma with a module](08-install-uninstall-upgrade-kyma-module.md).
+> **NOTE:** This guide describes installation of standalone Kyma with specific modules. If you are using SAP BTP, Kyma runtime (SKR), read [Enable and Disable a Kyma Module](https://help.sap.com/docs/btp/sap-business-technology-platform/enable-and-disable-kyma-module?locale=en-US&version=Cloud) instead.
 
-> **CAUTION:** Components transformed into modules aren't installed as part of preconfigured classic Kyma.
+## Prerequisites
 
-## Install Kyma
+- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
+- Kubernetes cluster, or [k3d](https://k3d.io) (v5.x or higher) for local installation
+- `kyma-system` Namespace created
 
-To install Kyma on a local k3d cluster, run:
+## Steps
 
-```bash
-kyma provision k3d
-kyma deploy
-```
+1. Provision a k3d cluster, run:
 
-When asked whether to install the Kyma certificate, confirm.
+  ```bash
+  kyma provision k3d
+  ```
 
-> **NOTE:** Check out [more installation options for Kyma](../04-operation-guides/operations/02-install-kyma.md).
+  When asked whether to install the Kyma certificate, confirm.
 
-### Verify the installation
+2. Choose a module, deploy its module manager, and apply the module configuration. The operation installs a Kyma module of your choice on a Kubernetes cluster. See the already available Kyma modules with their quick installation steps and links to their GitHub repositories:
 
-Now let's verify that the installation was successful. Run:
+  [**Application Connector**](https://github.com/kyma-project/application-connector-manager)
 
-```bash
-kubectl get deployments -n kyma-system
-```
+  ```bash
+  kubectl apply -f https://github.com/kyma-project/application-connector-manager/releases/latest/download/application-connector-manager.yaml
+  kubectl apply -f https://github.com/kyma-project/application-connector-manager/releases/latest/download/default_application_connector_cr.yaml -n kyma-system
+  ```
 
-The installation succeeded if all the Deployments returned are in status `READY`.
+  [**Keda**](https://github.com/kyma-project/keda-manager)
 
-### Export your cluster domain
+  ```bash
+  kubectl apply -f https://github.com/kyma-project/keda-manager/releases/latest/download/keda-manager.yaml
+  kubectl apply -f https://github.com/kyma-project/keda-manager/releases/latest/download/keda-default-cr.yaml -n kyma-system
+  ```
 
-For convenience, expose the domain of the cluster as an environment variable now. 
-We will use it later in the guides. 
+  [**SAP BTP Operator**](https://github.com/kyma-project/btp-manager)
 
-```bash
-export CLUSTER_DOMAIN={YOUR_CLUSTER_DOMAIN}
-```
+  ```bash
+  kubectl apply -f https://github.com/kyma-project/btp-manager/releases/latest/download/btp-manager.yaml
+  kubectl apply -f https://github.com/kyma-project/btp-manager/releases/latest/download/btp-operator-default-cr.yaml -n kyma-system
+  ```
 
-> **NOTE:** For local installation, the cluster domain is `local.kyma.dev`.
+  > **CAUTION:** The CR is in the `Warning` state and the message is `Secret resource not found reason: MissingSecret`. To create a Secret, follow the instructions in the [`btp-manager`](https://github.com/kyma-project/btp-manager/blob/main/docs/user/02-10-usage.md#create-and-install-secret) repository.
 
-## Open Kyma Dashboard
+  [**Serverless**](https://github.com/kyma-project/serverless-manager)
 
-To manage Kyma via GUI, open Kyma Dashboard:
+  ```bash
+  kubectl apply -f https://github.com/kyma-project/serverless-manager/releases/latest/download/serverless-operator.yaml
+  kubectl apply -f https://github.com/kyma-project/serverless-manager/releases/latest/download/default-serverless-cr.yaml  -n kyma-system
+  ```
 
-```bash
-kyma dashboard
-```
-<!-- markdown-link-check-disable-next-line -->
-This command takes you to your Kyma Dashboard under [`http://localhost:3001/`](http://localhost:3001/).
+  [**Telemetry**](https://github.com/kyma-project/telemetry-manager)
 
-## Check the list of Deployments via Dashboard
+  ```bash
+  kubectl apply -f https://github.com/kyma-project/telemetry-manager/releases/latest/download/telemetry-manager.yaml
+  kubectl apply -f https://github.com/kyma-project/telemetry-manager/releases/latest/download/telemetry-default-cr.yaml -n kyma-system
+  ```
 
-Now let's check the list of deployments using the Dashboard.
+  [**NATS**](https://github.com/kyma-project/nats-manager)
 
-1. Navigate to **Namespaces**.
-2. Click on the `kyma-system` Namespace.
-    > **NOTE:** The system Namespaces are hidden by default. 
-    > To see `kyma-system` and other hidden Namespaces, go to your Dashboard profile in the top-right corner, choose **Preferences** > **Clusters**, and activate the **Show Hidden Namespaces** toggle.
-3. Go to **Workloads** > **Deployments**.
+  ```bash
+  kubectl apply -f https://github.com/kyma-project/nats-manager/releases/latest/download/nats-manager.yaml
+  kubectl apply -f https://github.com/kyma-project/nats-manager/releases/latest/download/nats_default_cr.yaml -n kyma-system
+  ```
 
-This gives you the same list of deployments as you got earlier via `kubectl`, just in a nicer visual packaging. 
+  [**API Gateway**](https://github.com/kyma-project/api-gateway)
+
+  ```bash
+  kubectl apply -f https://github.com/kyma-project/api-gateway/releases/latest/download/api-gateway-manager.yaml
+  kubectl apply -f https://github.com/kyma-project/api-gateway/releases/latest/download/apigateway-default-cr.yaml
+  ```
+
+3. To manage Kyma using graphical user interface (GUI), open Kyma Dashboard:
+
+  ```bash
+  kyma dashboard
+  ```
+  <!-- markdown-link-check-disable-next-line -->
+  This command takes you to your Kyma Dashboard under [`http://localhost:3001/`](http://localhost:3001/).
+
+## Related links
+
+To see the list of all available Kyma modules, go to [Kyma modules](../06-modules/README.md).
