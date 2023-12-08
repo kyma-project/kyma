@@ -20,6 +20,7 @@
     * [Configure Runtime Agent with Compass](ra-04-configure-runtime-agent-with-compass.md)
     * [Reconnect Runtime Agent with Compass](ra-05-reconnect-runtime-agent-with-compass.md)
 * [Operation Guides](/04-operation-guides/README.md)
+  * [Operations](/04-operation-guides/operations/README.md)
   * [Security](/04-operation-guides/security/README.md)
   * [Troubleshooting](/04-operation-guides/troubleshooting/README.md)
 * [Technical Reference](/05-technical-reference/README.md)
