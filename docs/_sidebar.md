@@ -5,7 +5,7 @@
   * [SAP BTP Operator](/btp-manager/user/README.md)
   * [Application Connector](/application-connector-manager/user/README.md)
   * [Keda](/keda-manager/user/README.md)
-  * [Serverless](/serverless/user/README.md)
+  * [Serverless](/serverless-manager/user/README.md)
   * [Telemetry](/telemetry-manager/user/README.md)
   * [NATS](/nats-manager/user/README.md)
   * [Eventing](/eventing-manager/user/README.md)
