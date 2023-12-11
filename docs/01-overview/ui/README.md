@@ -17,7 +17,7 @@ You can deploy microservices, create Functions, and manage their configurations.
 
 ## Integration
 
-Busola is a web-based UI for managing resources within Kyma or any Kubernetes cluster. Busola has a dedicated Node.js backend, which is a proxy for a [Kubernetes API server](https://kubernetes.io/docs/concepts/overview/components/#kube-apiserver).
+Kyma Dashboard is a web-based UI for managing resources within Kyma or any Kubernetes cluster. Kyma Dashboard has a dedicated Node.js backend, which is a proxy for a [Kubernetes API server](https://kubernetes.io/docs/concepts/overview/components/#kube-apiserver).
 
 # Kyma CLI
 
