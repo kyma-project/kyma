@@ -6,7 +6,7 @@ If you're interested in learning more about Runtime Agent, follow these links to
 
 - Perform some simple and more advanced tasks:
 
-    - [Enable Kyma with Runtime Agent](../../04-operation-guides/operations/ra-01-enable-kyma-with-runtime-agent.md)
+    - [Enable Kyma with Runtime Agent](https://kyma-project.io/#/application-connector-manager/user/02-20-enable-kyma-with-runtime-agent)
     - [Establish a secure connection with Compass](../../03-tutorials/00-application-connectivity/ra-01-establish-secure-connection-with-compass.md)
     - [Maintain a secure connection with Compass](../../03-tutorials/00-application-connectivity/ra-02-maintain-secure-connection-with-compass.md)
     - [Revoke a client certificate (RA)](../../03-tutorials/00-application-connectivity/ra-03-revoke-client-certificate.md)
