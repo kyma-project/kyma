@@ -85,7 +85,7 @@ To get started with Kyma, let's quickly install it with specific modules first.
   kubectl apply -f https://github.com/kyma-project/istio/releases/latest/download/istio-default-cr.yaml
   ```
 
-3. To manage Kyma using graphical user interface (GUI), open Kyma Dashboard:
+3. To manage Kyma using graphical user interface (GUI), open Kyma dashboard:
 
   ```bash
   kyma dashboard
