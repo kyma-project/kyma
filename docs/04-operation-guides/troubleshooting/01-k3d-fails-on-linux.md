@@ -1,5 +1,5 @@
 ---
-title: Provisioning k3d fails on a Linux machine
+title: Provisioning k3d Fails on a Linux Machine
 ---
 
 ## Symptom

@@ -2,21 +2,22 @@
 
 **Table of Contents**
 
-- [Design and architecture](#design-and-architecture)
-- [Mock application](#mock-application)
-  - [Certificates](#certificates)
-  - [API exposed on port 8080](#api-exposed-on-port-8080)
-  - [API exposed on port 8090](#api-exposed-on-port-8090)
-  - [API exposed on port 8091](#api-exposed-on-port-8091)
-- [Building](#building)
-- [Running](#running)
-  - [Deploy a Kyma cluster locally](#deploy-a-kyma-cluster-locally)
-  - [Run the tests](#run-the-tests)
-- [Debugging](#debugging)
-  - [Running locally](#running-locally)
-  - [Running without cleanup](#running-without-cleanup)
+- [Application Gateway](#application-gateway)
+  - [Design and Architecture](#design-and-architecture)
+  - [Mock Application](#mock-application)
+    - [Certificates](#certificates)
+    - [API Exposed on Port `8080`](#api-exposed-on-port-8080)
+    - [API Exposed on Port `8090`](#api-exposed-on-port-8090)
+    - [API Exposed on Port `8091`](#api-exposed-on-port-8091)
+  - [Building](#building)
+  - [Running](#running)
+    - [Deploy a Kyma Cluster Locally](#deploy-a-kyma-cluster-locally)
+    - [Run the Tests](#run-the-tests)
+  - [Debugging](#debugging)
+    - [Running Locally](#running-locally)
+    - [Running Without Cleanup](#running-without-cleanup)
       
-## Design and architecture
+## Design and Architecture
 
 The tests consist of:
 - [Application CRs](../resources/charts/gateway-test/charts/test/templates/applications/) describing the test cases
@@ -29,11 +30,11 @@ Additionally, the following resources are created on the cluster:
 - [Secrets](../resources/charts/gateway-test/charts/test/templates/applications/credentials) used by the Mock application to configure mTLS servers
 
 The tests are executed as a Kubernetes Job on a Kyma cluster where the tested Application Gateway is installed.
-The test Job and the mock application deployment are in the `test` Namespace.
+The test Job and the mock application deployment are in the `test` namespace.
 
 ![Application Gateway tests architecture](assets/app-gateway-tests-architecture.svg)
 
-## Mock application
+## Mock Application
 
 Mock application exposes the following APIs:
 - API on port `8080` implementing various authentication methods and returning the `OAuth` and `CSRF` tokens
@@ -51,7 +52,7 @@ The target is executed before the tests are run, and it invokes [`generate-self-
 
 > **NOTE:** Since self-signed certificates are used, Application CRs have the **skipVerify: true** property set to `true` to force Application Gateway to skip certificate verification.
 
-### API exposed on port `8080`
+### API Exposed on Port `8080`
 
 To get tokens for the `OAuth` and `CSRF` protected endpoints, we have the following API:
 ![8080 token API](assets/api-tokens.png)
@@ -61,7 +62,7 @@ To test authentication methods, we have the following API:
 
 The credentials used for authentication, such as `user` and `password`, are [hardcoded](../tools/external-api-mock-app/config.go).
 
-### API exposed on port `8090`
+### API Exposed on Port `8090`
 
 To get tokens for the `OAuth` protected endpoints, we have the following API:
 ![8090 token API](assets/api-tokens-mtls.png)
@@ -74,7 +75,7 @@ The server key, server certificate, and the CA root certificate for port `8090` 
 
 > **NOTE:** Port `8090` must be excluded from redirection to Envoy, otherwise Application Gateway cannot pass the client certificate to the mock application.
 
-### API exposed on port `8091`
+### API Exposed on Port `8091`
 
 This API is identical to the one exposed on port `8090`.
 The HTTPS server on port `8091` uses an expired server certificate.
@@ -102,7 +103,7 @@ Tests can be run on any Kyma cluster with Application Gateway.
 
 Pipelines run the tests using the **test-gateway** target from the `Makefile`.
 
-### Deploy a Kyma cluster locally
+### Deploy a Kyma Cluster Locally
 
 1. Provision a local Kubernetes cluster with k3d:
    ```sh
@@ -136,19 +137,19 @@ Pipelines run the tests using the **test-gateway** target from the `Makefile`.
 
    >**TIP:** Read more about Kyma installation in the [official Kyma documentation](https://kyma-project.io/#/02-get-started/01-quick-install).
 
-### Run the tests
+### Run the Tests
 
 ``` sh
 make -f Makefile.test-application-gateway test-gateway
 ```
 
-By default, the tests clean up after themselves, removing all the previously created resources and the `test` Namespace.
+By default, the tests clean up after themselves, removing all the previously created resources and the `test` namespace.
 
 > **CAUTION:** If the names of your existing resources are the same as the names used in the tests, running this command overrides or removes the existing resources.
 
 ## Debugging
 
-### Running locally
+### Running Locally
 
 > **CAUTION:** Because of the way it accesses the Application CRs, the test Job must run **on a cluster**.
 > Application Gateway and the mock application can both be run locally.
@@ -214,7 +215,7 @@ To run the mock application locally, follow these steps:
 
 You can now send requests to Application Gateway, and debug its behavior locally.
 
-### Running without cleanup
+### Running Without Cleanup
 
 To run the tests without removing all the created resources afterwards, run them in the debugging mode.
 

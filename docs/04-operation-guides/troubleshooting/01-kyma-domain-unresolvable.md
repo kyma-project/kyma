@@ -1,5 +1,5 @@
 ---
-title: Kyma domain is not resolvable
+title: Kyma Domain Is Not Resolvable
 ---
 
 ## Condition

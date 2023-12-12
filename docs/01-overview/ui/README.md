@@ -1,10 +1,10 @@
 ---
-title: What are the UIs available in Kyma?
+title: What Are the UIs Available in Kyma?
 ---
 
 Kyma provides two interfaces that you can use for interactions:
 
-- **Kyma Dashboard** - a web-based administrative UI that you can use to manage the basic Kubernetes resources.
+- **Kyma dashboard** - a web-based administrative UI that you can use to manage the basic Kubernetes resources.
 - **Kyma CLI** - a CLI to execute various Kyma tasks, such as installing or upgrading Kyma.
 
 # Kyma Dashboard
@@ -17,7 +17,7 @@ You can deploy microservices, create Functions, and manage their configurations.
 
 ## Integration
 
-Kyma Dashboard is a web-based UI for managing resources within Kyma or any Kubernetes cluster. Kyma Dashboard has a dedicated Node.js backend, which is a proxy for a [Kubernetes API server](https://kubernetes.io/docs/concepts/overview/components/#kube-apiserver).
+Kyma dashboard is a web-based UI for managing resources within Kyma or any Kubernetes cluster. Kyma dashboard has a dedicated Node.js backend, which is a proxy for a [Kubernetes API server](https://kubernetes.io/docs/concepts/overview/components/#kube-apiserver).
 
 # Kyma CLI
 

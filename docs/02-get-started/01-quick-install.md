@@ -1,4 +1,4 @@
-# Quick install
+# Quick Install
 
 To get started with Kyma, let's quickly install it with specific modules first.
 
@@ -8,7 +8,7 @@ To get started with Kyma, let's quickly install it with specific modules first.
 
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 - Kubernetes cluster, or [k3d](https://k3d.io) (v5.x or higher) for local installation
-- `kyma-system` Namespace created
+- `kyma-system` namespace created
 
 ## Steps
 
@@ -85,15 +85,15 @@ To get started with Kyma, let's quickly install it with specific modules first.
   kubectl apply -f https://github.com/kyma-project/istio/releases/latest/download/istio-default-cr.yaml
   ```
 
-3. To manage Kyma using graphical user interface (GUI), open Kyma Dashboard:
+3. To manage Kyma using graphical user interface (GUI), open Kyma dashboard:
 
   ```bash
   kyma dashboard
   ```
   <!-- markdown-link-check-disable-next-line -->
-  This command takes you to your Kyma Dashboard under [`http://localhost:3001/`](http://localhost:3001/).
+  This command takes you to your Kyma dashboard under [`http://localhost:3001/`](http://localhost:3001/).
 
-## Related links
+## Related Links
 
 - To see the list of all available Kyma modules, go to [Kyma modules](../06-modules/README.md).
 - To learn how to [uninstall and upgrade Kyma with a module](./08-uninstall-upgrade-kyma-module.md).

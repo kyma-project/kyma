@@ -14,7 +14,7 @@ For local usage, you need:
 * [dep](https://github.com/golang/dep) v0.5.1 or higher
 * [Mockery](https://github.com/vektra/mockery)
 
-## Add the generic Makefile
+## Add the Generic Makefile
 To add the generic Makefile to your Makefile, add these variables and the statement:
 ```makefile
 APP_NAME = {APPLICATION NAME}
@@ -57,7 +57,7 @@ The Docker container is used in the CI environment.
 | build-image                       | Builds a Docker image used in the CI environment.                 |
 | push-image                        | Pushes the image to the image registry used in the CI environment.           |
 
-### Example workflow
+### Example Workflow
 The generic Makefile is used by the CI.
 When a job is triggered, the CI runs the `make release` command.
 The `release` rule depends on the `resolve`, `dep-status`, `verify`, `build-image`, and `push-image` rules.
@@ -88,20 +88,20 @@ These are two variables which contain rules names that are created dynamically:
 - **MOUNT_TARGET** - contains rules which are dynamically created by the `buildpack-mount` Function
 - **COPY_TARGET** - contains rules which are dynamically created by the `buildpack-cp-ro` Function
 
-## Adjust the generic Makefile
+## Adjust the Generic Makefile
 
-### Disable the current rule in the local Makefile
+### Disable the Current Rule in the Local Makefile
 To disable a rule in the new Makefile, follow it with the semicolon `;`.
 For example, write: `{RULE}: ;`.
 The warning will appear in the console but the rule will be disabled.
 
-### Add a new local rule that doesn't need a buildpack
+### Add a New Local Rule That Doesn't Need a Buildpack
 To add a new local rule that doesn't need a buildpack, define a rule in the local Makefile and add this rule to one of the global rule:
 ```makefile
 verify:: {YOUR_RULE}
 ```
 
-### Add a new local rule that needs a buildpack
+### Add a New Local Rule That Needs a Buildpack
 To add a new local rule that needs a buildpack, define a rule in the local Makefile and call the Function that creates the rule:
 ```makefile
 {RULE}-local: {COMMANDS}
@@ -110,14 +110,14 @@ To add a new local rule that needs a buildpack, define a rule in the local Makef
 $(eval $(call {BUILDPACK_FUNCTION},{RULE}))
 ```
 
-### Add a new rule in the generic Makefile
+### Add a New Rule in the Generic Makefile
 To add a new rule in the generic Makefile, define a new local rule in the `generic_make_go.mk` file:
 ```makefile
 {YOUR_RULE}-local:  {COMMANDS}
 ```
 Then, add {YOUR_RULE} to the **MOUNT_TARGETS** or **COPY_TARGETS** variables.
 
-### Change artifacts directory
+### Change Artifacts Directory
 
 By default, the test coverage report is saved to the `/tmp/artifacts` directory.
 To change this location, set the `ARTIFACTS` environment variable.

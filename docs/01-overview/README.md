@@ -1,5 +1,5 @@
 ---
-title: Kyma components
+title: Kyma Components
 ---
 
 Classic Kyma offered a fixed set of preconfigured components whose development rhythm is synchronized and determined by the release schedule.

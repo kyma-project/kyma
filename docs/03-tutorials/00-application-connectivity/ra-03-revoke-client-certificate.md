@@ -1,5 +1,5 @@
 ---
-title: Revoke a client certificate (RA)
+title: Revoke a Client Certificate (RA)
 ---
 
 After you have established a secure connection with Compass and generated a client certificate, you may want to revoke this certificate at some point. To revoke a client certificate, follow the steps in this tutorial.
@@ -16,7 +16,7 @@ After you have established a secure connection with Compass and generated a clie
 
 > **NOTE**: See how to [maintain a secure connection with Compass and renew a client certificate](ra-02-maintain-secure-connection-with-compass.md).
 
-## Revoke the certificate
+## Revoke the Certificate
 
 To revoke a client certificate, make a call to the Certificate-Secured Connector URL using the client certificate.
 The Certificate-Secured Connector URL is the `certificateSecuredConnectorURL` obtained when establishing a secure connection with Compass.

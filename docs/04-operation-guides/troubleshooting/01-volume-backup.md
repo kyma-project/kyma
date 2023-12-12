@@ -1,5 +1,5 @@
 ---
-title: Cannot create a volume snapshot
+title: Cannot Create a Volume Snapshot
 ---
 
 ## Symptom

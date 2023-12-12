@@ -10,4 +10,4 @@ You can deploy microservices, create Functions, and manage their configurations.
 
 ## Integration
 
-Kyma Dashboard is a web-based UI for managing resources within Kyma or any Kubernetes cluster. It consists of separate micro front-end applications managed by the [Luigi framework](https://luigi-project.io/). Kyma Dashboard has a dedicated Node.js back end, which is a proxy for a [Kubernetes API server](https://kubernetes.io/docs/concepts/overview/components/#kube-apiserver).
+Kyma dashboard is a web-based UI for managing resources within Kyma or any Kubernetes cluster. It consists of separate micro front-end applications managed by the [Luigi framework](https://luigi-project.io/). Kyma dashboard has a dedicated Node.js back end, which is a proxy for a [Kubernetes API server](https://kubernetes.io/docs/concepts/overview/components/#kube-apiserver).

@@ -2,7 +2,7 @@
 
 Kyma API versioning and deprecation closely follows the Kubernetes API versioning and deprecation policy. Hence, this document is based on the Kubernetes official documentation.
 
-## API versioning 
+## API Versioning 
 
 (Derived from [API Overview](https://kubernetes.io/docs/reference/using-api/#api-versioning))
 
@@ -30,7 +30,7 @@ Here's a summary of each level:
   - The version name is `vX`, where `X` is an integer.
   - The stable versions of features appear in released software for many subsequent versions.
   
-## Deprecating parts of the API
+## Deprecating Parts of the API
 
 (Derived from [Kubernetes Deprecation Policy](https://kubernetes.io/docs/reference/using-api/deprecation-policy/#deprecating-parts-of-the-api))
 
@@ -77,18 +77,18 @@ For example, an object can be written as v1 and then read back as v2 and convert
 
 Users must be able to upgrade to a new release of a Kyma module and then roll back to a previous release, without converting anything to the new API version or suffering breakages unless they explicitly choose to use features only available in the newer version. This is particularly evident in the stored representation of objects.
 
-### REST resources (aka API objects)
+### REST Resources (aka API Objects)
 
 Consider a hypothetical REST resource named Widget, which was present in API v1 in the above timeline, and which needs to be deprecated. The deprecation is documented and announced in sync with release X+1. The Widget resource still exists in API version v1 (deprecated) but not in v2alpha1. The Widget resource continues to exist and function in releases up to and including X+5. The Widget resource ceases to exist, and the behavior gets removed in release X+6, when API v1 has aged out.  
 
-### Fields of REST resources
+### Fields of REST Resources
 
 As with whole REST resources, an individual field which was present in API v1 must exist and function until API v1 is removed.  Unlike whole resources, the v2 APIs may choose a different representation for the field, as long as it can be round-tripped. For example, a v1 field named `magnitude` which was deprecated might be named `deprecatedMagnitude` in API v2. When v1 is eventually removed, the deprecated field can be removed from v2.
 
-### Enumerated or constant values
+### Enumerated or Constant Values
 
 As with whole REST resources and their fields, a constant value which was supported in API v1 must exist and function until API v1 is removed.
 
-### Component config structures
+### Component Config Structures
 
 Component configs are versioned and managed similarly to REST resources.

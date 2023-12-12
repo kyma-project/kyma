@@ -32,7 +32,7 @@ $ go mod vendor
 $ make test-local
 ```
 
-### Deploy inside a cluster
+### Deploy Inside a Cluster
 
 ```bash
 $ ko apply -f config/event-publisher-proxy/
@@ -75,7 +75,7 @@ EOF
     http://<hostname>/application-name/v1/events
 ```
 
-### Get a list of subscriptions for a connected application
+### Get a List of Subscriptions for a Connected Application
 
 ```bash
 curl -v -X GET \

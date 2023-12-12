@@ -20,11 +20,11 @@ Central Application Connectivity Validator has the following parameters:
 - **cacheCleanupIntervalSeconds** is the clean-up interval controlling how often the client IDs stored in cache are removed. The default value is `15`.
 - **syncPeriod** is the time in seconds after which the controller should reconcile the Application resource. The default value is `60 seconds`.
 
-### Application name placeholder
+### Application Name Placeholder
 
 If the **appNamePlaceholder** parameter is not empty, it defines a placeholder for the application name in the parameters **eventingPathPrefixV1**, **eventingPathPrefixV2**, and **eventingPathPrefixEvents**. This placeholder is replaced on every proxy request with the value from the certificate Common Name (CN).
 
-### Local cache refresh
+### Local Cache Refresh
 
 The application **clientIDs** are read from Application resources and cached locally with the TTL (Time to live) defined by the **cacheExpirationSeconds** parameter.
 The cache refresh is performed by the controller during reconciliation in intervals defined by the **syncPeriod**.
@@ -47,7 +47,7 @@ Central Application Connectivity Validator forwards only the requests with the `
 
 ## Development
 
-### Generate mocks
+### Generate Mocks
 
 Prerequisites:
 

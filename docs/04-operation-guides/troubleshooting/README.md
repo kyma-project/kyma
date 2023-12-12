@@ -8,7 +8,7 @@ If you can't find a solution, don't hesitate to create a [GitHub](https://github
 
 See the full list of Kyma troubleshooting guides:
 
-### General troubleshooting guides
+### General Troubleshooting Guides
 
 - [Component doesn't work after successful installation](./01-component-installation-fails.md)
 - [Local Kyma deployment fails with pending Pods](./01-deplyoment-fails-pending-pods.md)

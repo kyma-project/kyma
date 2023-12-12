@@ -51,7 +51,7 @@ if err := client.Run(ctx, req, &respData); err != nil {
 }
 ```
 
-### File support via multipart form data
+### File Support via Multipart Form Data
 
 By default, the package will send a JSON body. To enable the sending of files, you can opt to
 use multipart form data instead using the `UseMultipartForm` option when you create your `Client`:

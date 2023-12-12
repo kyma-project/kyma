@@ -1,5 +1,5 @@
 ---
-title: Look up all the nifty details
+title: Look Up All the Nifty Details
 ---
 
 So, you really want to learn the answer to life, the universe, and everything!

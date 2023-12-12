@@ -1,5 +1,5 @@
 ---
-title: Maintain a secure connection with Compass
+title: Maintain a Secure Connection With Compass
 ---
 
 After you have established a secure connection with Compass, you can fetch the configuration details and renew the client certificate before it expires. To renew the client certificate, follow the steps in this tutorial.

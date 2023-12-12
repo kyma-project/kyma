@@ -1,4 +1,4 @@
-# Kyma common package
+# Kyma Common Package
 
 This package is a set of Go libraries that implement common use cases found in different Kyma components.
 
@@ -8,7 +8,7 @@ With the consolidated structure of the Kyma project, all core components written
 
 This package aims to address this problem by providing a set of libraries that the developers should use rather than  introduce new solutions to an already solved problem.
 
-## How to add code to this package
+## How to Add Code to This Package
 
 To add a new library to this package, it must meet these criteria:
 
@@ -16,7 +16,7 @@ To add a new library to this package, it must meet these criteria:
 - It must be well covered with unit tests. Many components may end up depending on the library you add.
 - It must have open source-grade documentation. The library will be widely used and must be easy to use without the need to contact the author.
 
-## Naming conventions
+## Naming Conventions
 
 If the common package is a Kubernetes client for a custom resource, add a `-client` suffix to the folder name.
 
