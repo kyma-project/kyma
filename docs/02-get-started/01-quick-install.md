@@ -17,6 +17,8 @@ To get started with Kyma, let's quickly install it with specific modules first.
   ```bash
   kyma provision k3d
   ```
+  
+  When asked whether to install the Kyma certificate, confirm.
 
 2. Choose a module, deploy its module manager, and apply the module configuration. The operation installs a Kyma module of your choice on a Kubernetes cluster. See the already available Kyma modules with their quick installation steps and links to their GitHub repositories:
 
@@ -71,13 +73,6 @@ To get started with Kyma, let's quickly install it with specific modules first.
   kubectl apply -f https://github.com/kyma-project/api-gateway/releases/latest/download/apigateway-default-cr.yaml
   ```
   
-  [**Istio**](https://github.com/kyma-project/istio)
-  ```bash
-  kubectl label namespace kyma-system istio-injection=enabled --overwrite
-  kubectl apply -f https://github.com/kyma-project/istio/releases/latest/download/istio-manager.yaml
-  kubectl apply -f https://github.com/kyma-project/istio/releases/latest/download/istio-default-cr.yaml
-  ```
-
   [**Istio**](https://github.com/kyma-project/istio)
   ```bash
   kubectl label namespace kyma-system istio-injection=enabled --overwrite
