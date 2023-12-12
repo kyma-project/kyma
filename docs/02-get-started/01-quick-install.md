@@ -17,6 +17,7 @@ To get started with Kyma, let's quickly install it with specific modules first.
   ```bash
   kyma provision k3d
   ```
+
   When asked whether to install the Kyma certificate, confirm.
 
 2. Choose a module, deploy its module manager, and apply the module configuration. The operation installs a Kyma module of your choice on a Kubernetes cluster. See the already available Kyma modules with their quick installation steps and links to their GitHub repositories:
