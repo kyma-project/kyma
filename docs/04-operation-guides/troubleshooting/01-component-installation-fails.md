@@ -1,6 +1,4 @@
----
-title: Component Doesn't Work After Successful Installation
----
+# Component Doesn't Work After Successful Installation
 
 ## Symptom
 

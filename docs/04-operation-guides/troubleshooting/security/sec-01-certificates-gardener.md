@@ -1,6 +1,4 @@
----
-title: Issues With Certificates on Gardener
----
+# Issues With Certificates on Gardener
 
 ## Symptom & Cause
 

@@ -1,6 +1,4 @@
----
-title: What Are the UIs Available in Kyma?
----
+# What Are the UIs Available in Kyma?
 
 Kyma provides two interfaces that you can use for interactions:
 

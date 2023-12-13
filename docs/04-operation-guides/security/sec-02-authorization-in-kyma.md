@@ -1,6 +1,4 @@
----
-title: Authorization in Kyma
----
+# Authorization in Kyma
 
 ## User Authorization
 

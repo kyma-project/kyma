@@ -1,6 +1,4 @@
----
-title: Access Kyma Application Logs
----
+# Access Kyma Application Logs
 
 Get insights into your applications (microservices, Functions...) by viewing the respective logs.
 

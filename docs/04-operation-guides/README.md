@@ -1,6 +1,4 @@
----
-title: Keep the Vessel Afloat!
----
+# Keep the Vessel Afloat!
 
 The operation guides are there to help you if you want more than just the default Kyma installation. They also support you to keep Kyma running smoothly, make backups, and troubleshoot any issues that might come up.
 

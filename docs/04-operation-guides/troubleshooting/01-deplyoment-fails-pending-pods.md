@@ -1,6 +1,4 @@
----
-title: Local Kyma Deployment Fails With Pending Pods
----
+# Local Kyma Deployment Fails With Pending Pods
 
 ## Symptom
 

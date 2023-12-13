@@ -1,6 +1,4 @@
----
-title: Kyma Dashboard
----
+# Kyma Dashboard
 
 ## Purpose
 

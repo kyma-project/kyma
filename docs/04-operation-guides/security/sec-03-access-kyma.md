@@ -1,6 +1,4 @@
----
-title: Access Kyma Securely
----
+# Access Kyma Securely
 
 As a user, you can access Kyma using the following user interfaces:
 

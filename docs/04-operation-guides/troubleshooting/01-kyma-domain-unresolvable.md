@@ -1,6 +1,4 @@
----
-title: Kyma Domain Is Not Resolvable
----
+# Kyma Domain Is Not Resolvable
 
 ## Condition
 

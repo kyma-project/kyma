@@ -1,6 +1,4 @@
----
-title: Configure Runtime Agent With Compass
----
+# Configure Runtime Agent With Compass
 
 This tutorial shows how to configure Runtime Agent with Compass.
 

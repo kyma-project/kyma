@@ -1,6 +1,4 @@
----
-title: Troubleshooting - Security
----
+# Troubleshooting - Security
 
 The troubleshooting section aims to identify the most common recurring problems the users face with Kyma security component, as well as the most suitable solutions to these problems.
 

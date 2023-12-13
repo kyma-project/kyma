@@ -1,6 +1,4 @@
----
-title: Error for kubectl Port Forwarding
----
+# Error for kubectl Port Forwarding
 
 ## Symptom
 

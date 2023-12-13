@@ -1,6 +1,4 @@
----
-title: Back Up Kyma
----
+# Back Up Kyma
 
 ## Context
 

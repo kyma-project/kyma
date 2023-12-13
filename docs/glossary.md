@@ -1,6 +1,4 @@
----
-title: Glossary
----
+# Glossary
 
 Here's a list of the most commonly used terms that you may come across when browsing through the Kyma documentation:
 

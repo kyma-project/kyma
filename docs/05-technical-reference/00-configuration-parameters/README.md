@@ -1,6 +1,4 @@
----
-title: Configuration Parameters
----
+# Configuration Parameters
 
 Kyma uses Helm's chart templating mechanism with `values.yaml` files that contain the configuration parameters.
 

@@ -1,6 +1,4 @@
----
-title: Configuring the Runtime
----
+# Configuring the Runtime
 
 > **NOTE:** To represent API and Event Definitions of the Applications connected to a Runtime, we recommend that you use the Open Service Broker API.
 

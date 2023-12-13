@@ -1,6 +1,4 @@
----
-title: Troubleshooting
----
+# Troubleshooting
 
 The troubleshooting section aims to identify the most common recurring problems the users face when they install and start using Kyma, as well as the most suitable solutions to these problems.
 
