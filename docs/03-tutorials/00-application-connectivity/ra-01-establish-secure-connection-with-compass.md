@@ -1,4 +1,4 @@
-# Establish a Secure Connection With Compass
+# Establish a Secure Connection with Compass
 
 To establish a secure connection with Compass and generate the client certificate, follow this tutorial.
 
