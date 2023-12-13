@@ -67,6 +67,7 @@ To get started with Kyma, let's quickly install it with specific modules first.
   [**API Gateway**](https://github.com/kyma-project/api-gateway)
 
   ```bash
+  kubectl label namespace kyma-system istio-injection=enabled --overwrite
   kubectl apply -f https://github.com/kyma-project/api-gateway/releases/latest/download/api-gateway-manager.yaml
   kubectl apply -f https://github.com/kyma-project/api-gateway/releases/latest/download/apigateway-default-cr.yaml
   ```
