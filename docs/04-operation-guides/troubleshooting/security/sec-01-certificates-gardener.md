@@ -1,6 +1,4 @@
----
-title: Issues with certificates on Gardener
----
+# Issues with Certificates on Gardener
 
 ## Symptom & Cause
 
@@ -32,22 +30,22 @@ The result describes the reason for the failure of issuing a domain SSL certific
 
 <!-- tabs:start -->
 
-#### **Error during the installation**
+#### **Error During the Installation**
 
 1. Make sure the provided domain name is proper and meets the Gardener requirements.
 
-2. Check if the `istio-ingressgateway` Service in the `istio-system` Namespace contains proper annotations:
+2. Check if the `istio-ingressgateway` Service in the `istio-system` namespace contains proper annotations:
 
     ```yaml
     dns.gardener.cloud/class=garden
     dns.gardener.cloud/dnsnames=*.{DOMAIN}
     ```
 
-#### **Error after the installation**
+#### **Error After the Installation**
 
 You can create a new Certificate resource applying suggestions from the error message to request a new domain SSL certificate. Follow these steps:
 
-1. Make sure the Secret connected to the Certificate resource is not present on the cluster. To find its name and Namespace, run:
+1. Make sure the Secret connected to the Certificate resource is not present on the cluster. To find its name and namespace, run:
 
     ```bash
     kubectl get certificates -n {CERTIFICATE_NAMESPACE} {CERTIFICATE_NAME} -o jsonpath='{ .spec.secretRef }'

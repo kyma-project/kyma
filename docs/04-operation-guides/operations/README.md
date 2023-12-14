@@ -1,6 +1,4 @@
----
-title: Operations
----
+# Operations
 
 Here you can find general instructions on how to maintain Kyma.
 

@@ -1,6 +1,4 @@
----
-title: Runtime Agent
----
+# Runtime Agent
 
 Runtime Agent is a Kyma component that connects to [Compass](https://github.com/kyma-incubator/compass). It is an integral part of every Kyma Runtime in the [Compass mode](README.md) and it fetches the latest configuration from Compass. It also provides Runtime-specific information that is displayed in the Compass UI, such as Runtime UI URL, and it provides Compass with Runtime configuration, such as Event Gateway URL, that should be passed to an Application. To learn more, read the section on [configuring the Runtime](../../05-technical-reference/ra-01-configuring-runtime.md).
 

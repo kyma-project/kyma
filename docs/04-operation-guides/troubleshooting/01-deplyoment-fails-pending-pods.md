@@ -1,6 +1,4 @@
----
-title: Local Kyma deployment fails with pending Pods
----
+# Local Kyma Deployment Fails with Pending Pods {docsify-ignore-all}
 
 ## Symptom
 

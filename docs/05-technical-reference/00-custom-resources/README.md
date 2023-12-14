@@ -1,6 +1,4 @@
----
-title: Custom resources
----
+# Custom Resources
 
 A custom resource (CR) is an extension to the Kubernetes API which allows you to cover use cases that are not directly covered by core Kubernetes. Here's the list of the CRs developed by Kyma to support its functionality:
 

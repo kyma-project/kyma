@@ -1,12 +1,10 @@
----
-title: Back up Kyma
----
+# Back Up Kyma
 
 ## Context
 
 The Kyma cluster load consists of Kubernetes [objects](https://kubernetes.io/docs/concepts/overview/working-with-objects/kubernetes-objects/) and [volumes](https://kubernetes.io/docs/concepts/storage/volumes/).
 
-### Object backup
+### Object Backup
 
 Kyma relies on a managed Kubernetes cluster for periodic backups of Kubernetes objects to avoid any manual steps.
 
@@ -18,7 +16,7 @@ The major snapshot that includes all resources is taken on a daily basis, while 
 
 If the etcd database experiences any problems, Gardener automatically restores the Kubernetes cluster using the most recent snapshot.
 
-### Volume backup
+### Volume Backup
 
 We recommend that you back up your volumes periodically with the [VolumeSnapshot API resource](https://kubernetes.io/docs/concepts/storage/volume-snapshots/#volumesnapshots), which is provided by Kubernetes. You can use your snapshot to provision a new volume prepopulated with the snapshot data, or restore the existing volume to the state represented by the snapshot.
 
@@ -26,12 +24,12 @@ Taking volume snapshots is possible thanks to [Container Storage Interface (CSI)
 
 You can create on-demand volume snapshots manually, or set up a periodic job that takes automatic snapshots periodically.
 
-## Back up resources using Velero
+## Back Up Resources Using Velero
 
 You can back up and restore individual resources manually or automatically with Velero. For more information, read the [Velero documentation](https://velero.io/docs/).
 Be aware that a full backup of a Kyma cluster isn't supported. Start with the existing Kyma installation and restore specific resources individually.
 
-## Create on-demand volume snapshots
+## Create On-Demand Volume Snapshots
 
 If you want to provision a new volume or restore the existing one, create on-demand [volume snapshots](https://kubernetes.io/docs/concepts/storage/volume-snapshots/):
 
@@ -111,7 +109,7 @@ If you want to provision a new volume or restore the existing one, create on-dem
 
 <!-- tabs:end -->
 
-## Create a periodic snapshot job
+## Create a Periodic Snapshot Job
 
 You can also create a CronJob to handle taking volume snapshots periodically. A sample CronJob definition that includes the required ServiceAccount and roles looks as follows:
 

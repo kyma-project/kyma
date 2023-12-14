@@ -42,7 +42,7 @@ For eventing in NATS mode, Eventing Controller also acts as a dispatcher. It con
 
 ## Usage
 
-### Environment variables
+### Environment Variables
 
 The Eventing Controller expects the following environment variables:
 
@@ -51,7 +51,7 @@ The Eventing Controller expects the following environment variables:
 | **For both**                      |                                                                                                |
 | `APP_LOG_FORMAT`                  | The format of the Application logs.                                                            |
 | `APP_LOG_LEVEL`                   | The level of the Application logs.                                                             |
-| `BACKEND_CR_NAMESPACE`            | The Namespace of the Backend Resource (CR).                                                    |
+| `BACKEND_CR_NAMESPACE`            | The namespace of the Backend Resource (CR).                                                    |
 | `BACKEND_CR_NAME`                 | The name of the Backend Resource (CR).                                                         |
 | `PUBLISHER_IMAGE`                 | The image of the Event Publisher Proxy.                                                        |
 | `PUBLISHER_IMAGE_PULL_POLICY`     | The pull-policy of the Event Publisher Proxy.                                                  |
@@ -89,7 +89,7 @@ The Eventing Controller expects the following environment variables:
 | `CONTENT_MODE`                    | The content mode of the subscription protocol settings.                                        |
 | `DOMAIN`                          | The Kyma cluster public domain.                                                                |
 
-### Command line arguments
+### Command Line Arguments
 
 The additional command line arguments are:
 
@@ -137,7 +137,7 @@ Before a commit, check the code quality:
 $ make check-code
 ```
 
-### Project setup
+### Project Setup
 
 Before running the Eventing Controller component, run the following command once to pull software dependencies and run tests:
 
@@ -147,7 +147,7 @@ make test
 make resolve-local
 ```
 
-### Generate code during local development
+### Generate Code During Local Development
 
 If you want to know more about scaffolding code with Kubebuilder, read [Simplified Builder-Based Scaffolding](https://github.com/kubernetes-sigs/kubebuilder/blob/master/designs/simplified-scaffolding.md).
 
@@ -180,9 +180,9 @@ If you want to know more about scaffolding code with Kubebuilder, read [Simplifi
    kubebuilder init --domain kyma-project.io
    ```
 
-### Set up the environment
+### Set Up the Environment
 
-#### Start the controller locally
+#### Start the Controller Locally
 
 > **CAUTION:** Running the Eventing Controller in local developer mode is currently broken and needs adoption of the latest changes.
 

@@ -1,10 +1,10 @@
-# Uninstall and upgrade Kyma with a module
+# Uninstall and Upgrade Kyma with a Module
 
 This guide shows how to quickly uninstall or upgrade Kyma with specific modules.
 
 > **NOTE:** This guide describes uninstallation and upgrade of standalone Kyma with specific modules. If you are using SAP BTP, Kyma runtime (SKR), read [Enable and Disable a Kyma Module](https://help.sap.com/docs/btp/sap-business-technology-platform/enable-and-disable-kyma-module?locale=en-US&version=Cloud) instead.
 
-## Uninstall Kyma with a module
+## Uninstall Kyma with a Module
 
 You uninstall Kyma with a module using the `kubectl delete` command.
 
@@ -24,10 +24,10 @@ You uninstall Kyma with a module using the `kubectl delete` command.
    kubectl delete {PATH_TO_THE_MODULE_MANAGER_YAML_FILE}
    ```
 
-## Upgrade a Kyma module
+## Upgrade a Kyma Module
 
 To upgrade a Kyma module to the latest version, run the same `kubectl` commands used for its [installation](./01-quick-install.md).
 
-## Related links
+## Related Links
 
 To see the list of all available Kyma modules, go to [Kyma modules](../06-modules/README.md).

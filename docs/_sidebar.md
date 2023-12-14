@@ -1,6 +1,6 @@
 * [Kyma Home](/README.md)
 <!-- markdown-link-check-disable -->
-* [Quick install](/02-get-started/01-quick-install.md)
+* [Quick Install](/02-get-started/01-quick-install.md)
 * [Modules](/06-modules/README.md)
   * [SAP BTP Operator](/btp-manager/user/README.md)
   * [Application Connector](/application-connector-manager/user/README.md)
@@ -14,9 +14,9 @@
 * [User Interfaces](/01-overview/ui/README.md)
 * [Developer Tutorials](/03-tutorials/README.md)
   * [Application Connectivity](/03-tutorials/00-application-connectivity/README.md)
-    * [Establish a secure connection with Compass](ra-01-establish-secure-connection-with-compass.md)
-    * [Maintain a secure connection with Compass](ra-02-maintain-secure-connection-with-compass.md)
-    * [Revoke a client certificate (RA)](ra-03-revoke-client-certificate.md)
+    * [Establish a Secure Connection with Compass](ra-01-establish-secure-connection-with-compass.md)
+    * [Maintain a Secure Connection with Compass](ra-02-maintain-secure-connection-with-compass.md)
+    * [Revoke a Client Certificate (RA)](ra-03-revoke-client-certificate.md)
     * [Configure Runtime Agent with Compass](ra-04-configure-runtime-agent-with-compass.md)
     * [Reconnect Runtime Agent with Compass](ra-05-reconnect-runtime-agent-with-compass.md)
 * [Operation Guides](/04-operation-guides/README.md)
@@ -27,6 +27,6 @@
   * [API Overview](/05-technical-reference/00-api-overview/README.md)
   * [Runtime Agent Connection with Compass](/05-technical-reference/00-configuration-parameters/ra-01-connection-with-compass.md)
   * [CompassConnection CR](/05-technical-reference/00-custom-resources/ra-01-compassconnection.md)
-  * [Configure the runtime](/05-technical-reference/ra-01-configuring-runtime.md)
+  * [Configure the Runtime](/05-technical-reference/ra-01-configuring-runtime.md)
 * [Glossary](/glossary.md)
 <!-- markdown-link-check-enable -->

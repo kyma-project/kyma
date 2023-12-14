@@ -59,7 +59,7 @@ Central Application Gateway exposes:
 
 Application Gateway also supports redirects for the request flows in which the URL host remains unchanged. For more details, see [Response rewriting](https://kyma-project.io/#/application-connector-manager/user/technical-reference/07-10-application-gateway-details?id=response-rewriting).
 
-### Standalone mode
+### Standalone Mode
 
 The proxy API exposes the following endpoint:
 ```bash
@@ -79,7 +79,7 @@ As a result, Central Application Gateway:
    {TARGET_URL_EXTRACTED_FROM_APPLICATION_CR}/basesites
    ```
 
-#### Standalone mode for Compass - simplified API
+#### Standalone Mode for Compass - Simplified API
 
 The standalone mode can also be used for Compass bundles with a single API definition.
 In this case, `{API_DEFINITION_NAME}` is removed from the URL and the pattern looks as follows:
@@ -88,7 +88,7 @@ In this case, `{API_DEFINITION_NAME}` is removed from the URL and the pattern lo
 ```
 > **NOTE:** Invocation of service bundles configured with multiple API definitions results in a `400 Bad Request` failure.
 
-### Compass mode
+### Compass Mode
 
 The proxy API exposes the following endpoint:
 ```bash
@@ -108,12 +108,12 @@ As a result, Central Application Gateway:
    {TARGET_URL_EXTRACTED_FROM_APPLICATION_CRD}/basesites
    ```
 
-#### Handling ambiguous API definition names
+#### Handling Ambiguous API Definition Names
 
 A combination of `{API_BUNDLE_NAME}` and `{API_DEFINITION_NAME}` which are extracted from an Application CR must be unique for a given application.
 Invocation of endpoints with duplicate names results in a `400 Bad Request` failure. In such a case, you must change one of the names to avoid ambiguity.
 
-### Status codes for errors returned by Application Gateway
+### Status Codes for Errors Returned by Application Gateway
 
 - `404 Not Found` - returned when the Application specified in the path doesn't exist.
 - `400 Bad Request` - returned when an Application, service, or entry for the [Compass mode](https://kyma-project.io/#/01-overview/application-connectivity/README) is not specified in the path.
@@ -131,7 +131,7 @@ https://pkg.go.dev/go.uber.org/zap#AtomicLevel.ServeHTTP
 
 This section explains the development process.
 
-### Generate mocks
+### Generate Mocks
 
 Prerequisites:
 
@@ -153,7 +153,7 @@ When adding a new interface to be mocked or when a mock of an existing interface
 
 This section outlines the testing details.
 
-#### Unit tests
+#### Unit Tests
 
 To run the unit tests, run this command:
 

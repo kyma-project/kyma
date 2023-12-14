@@ -1,6 +1,4 @@
----
-title: Provisioning k3d fails on a Linux machine
----
+# Provisioning k3d Fails on a Linux Machine {docsify-ignore-all}
 
 ## Symptom
 

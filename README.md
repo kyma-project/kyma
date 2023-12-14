@@ -43,7 +43,7 @@ Kyma comes with the ready-to-use code snippets that you can use to test the exte
 
 Read the [`CONTRIBUTING.md`](CONTRIBUTING.md) document that includes the contributing rules and development steps specific for this repository.
 
-## Kyma users
+## Kyma Users
 
 The following companies use Kyma:
 
@@ -64,11 +64,11 @@ The following companies use Kyma:
   <img src="https://github.com/kyma-project/website/blob/main/content/adopters/logos/dotsource.svg" alt="dotSource" width="250" height="40" />
 </p>
 
-## Join us
+## Join Us
 
 If you would like to join us and work together on the Kyma project, there are some prerequisite skills you should acquire beforehand. Git basic skills are the most important for a quick start with the code. Mastering Kubernetes skills is very important for your future work.
 
-### Required programming skills
+### Required Programming Skills
 
 - Git basic skillset:
   - Forking a project from the `main` repository to your own repository
@@ -92,7 +92,7 @@ If you would like to join us and work together on the Kyma project, there are so
   - Downloading additional tools modules with the `go get` command
 
 - Kubernetes basic skillset:
-  - Understanding basic [Kubernetes architecture](https://shipit.dev/posts/kubernetes-overview-diagrams.html) and basic concepts such as: Namespace, Pod, Deployment, Secret, ConfigMap, ReplicaSet, Service, CustomResourceDefinition, Kubernetes Control Loop; understanding Kubernetes Design Patterns such as sidecars and init containers
+  - Understanding basic [Kubernetes architecture](https://shipit.dev/posts/kubernetes-overview-diagrams.html) and basic concepts such as: namespace, Pod, Deployment, Secret, ConfigMap, ReplicaSet, Service, CustomResourceDefinition, Kubernetes Control Loop; understanding Kubernetes Design Patterns such as sidecars and init containers
   - Using a kubeconfig file to connect to a cluster
   - Browsing cluster resources using `kubectl` commands and editing Kubernetes resources using Terminal
   - Applying YAML files to a cluster with Kubernetes resources
@@ -137,7 +137,7 @@ If you would like to join us and work together on the Kyma project, there are so
   - Basic Markdown editing
 
 
-### Basic Kyma knowledge
+### Basic Kyma Knowledge
 
 These are the sources you can get the basic Kyma knowledge from:
 
@@ -145,7 +145,7 @@ These are the sources you can get the basic Kyma knowledge from:
 - [Getting Started guide](https://kyma-project.io/#/02-get-started/README)
 - Kyma project [Youtube channel](https://www.youtube.com/watch?v=wqQflgmyboY&list=PLmZLSvJAm8FabPF4hLjScx-dDl84NK3l5)
 
-### Open job positions
+### Open Job Positions
 
 Kyma team is located mostly in Poland and Germany. See the open job positions for both locations:
 - [Gliwice, Poland](https://jobs.sap.com/search/?createNewAlert=false&q=%23kymaopensource&optionsFacetsDD_department=&optionsFacetsDD_customfield3=&optionsFacetsDD_country=&locationsearch=)

@@ -1,9 +1,9 @@
-# Makefiles directory
+# Makefiles Directory
 
 The `makefiles` directory contains various Makefiles that include common targets 
  used in Kyma components.
 
-### Directory structure
+### Directory Structure
 
 The directory has the following structure:
 
