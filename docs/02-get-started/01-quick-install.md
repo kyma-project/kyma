@@ -71,6 +71,13 @@ To get started with Kyma, let's quickly install it with specific modules first.
   kubectl apply -f https://github.com/kyma-project/nats-manager/releases/latest/download/nats_default_cr.yaml -n kyma-system
   ```
 
+  [**Eventing**](https://github.com/kyma-project/eventing-manager)
+
+  ```bash
+  kubectl apply -f https://github.com/kyma-project/eventing-manager/releases/latest/download/eventing-manager.yaml
+  kubectl apply -f https://github.com/kyma-project/eventing-manager/releases/latest/download/eventing_default_cr.yaml -n kyma-system
+  ```
+
   [**API Gateway**](https://github.com/kyma-project/api-gateway)
 
   ```bash
