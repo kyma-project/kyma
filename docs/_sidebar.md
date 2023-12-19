@@ -2,6 +2,7 @@
 <!-- markdown-link-check-disable -->
 * [Quick Install](/02-get-started/01-quick-install.md)
 * [Modules](/06-modules/README.md)
+  * [Istio](/istio/user/README.md)
   * [SAP BTP Operator](/btp-manager/user/README.md)
   * [Application Connector](/application-connector-manager/user/README.md)
   * [Keda](/keda-manager/user/README.md)
@@ -10,7 +11,6 @@
   * [NATS](/nats-manager/user/README.md)
   * [Eventing](/eventing-manager/user/README.md)
   * [API Gateway](/api-gateway/user/README.md)
-  * [Istio](/istio/user/README.md)
 * [User Interfaces](/01-overview/ui/README.md)
 * [Developer Tutorials](/03-tutorials/README.md)
   * [Application Connectivity](/03-tutorials/00-application-connectivity/README.md)
