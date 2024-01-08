@@ -3,19 +3,19 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>Document</title>
+  <title>Kyma Project</title>
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-  <meta name="description" content="Description">
+  <meta name="description" content="Kyma Project open-source documentation">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
-  <link rel="apple-touch-icon" sizes="180x180" href="./assets/apple-touch-icon.png?" />
-  <link rel="mask-icon" color="#2872dd" href="./assets/safari-pinned-tab.svg?" />
-  <link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32x32.png?" />
-  <link rel="icon" type="image/png" sizes="16x16" href="./assets/favicon-16x16.png?" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./assets/apple-touch-icon.png" />
+  <link rel="mask-icon" color="#2872dd" href="./assets/safari-pinned-tab.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="./assets/favicon-16x16.png" />
   <link rel="stylesheet" media="(prefers-color-scheme: dark)"
     href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple-dark.css">
   <link rel="stylesheet" media="(prefers-color-scheme: light)"
     href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple.css">
-  <link rel="stylesheet" href="assets/theme-custom.css">
+  <link rel="stylesheet" href="./assets/theme-custom.css">
 </head>
 
 <body>
@@ -44,6 +44,21 @@
         '/api-gateway/(.*)': 'https://raw.githubusercontent.com/kyma-project/api-gateway/main/docs/$1',
       }, 
       plugins: [
+        function (hook, vm) {
+            hook.beforeEach(function (html) {
+              if (/githubusercontent\.com/.test(vm.route.file)) {
+                url = vm.route.file
+                  .replace('raw.githubusercontent.com', 'github.com')
+                  .replace(/\/main/, '/blob/main')
+              } else {
+                url = 'https://github.com/kyma-project/kyma/blob/main/docs/' + vm.route.file
+              }
+              var editHtml = '[:memo: Edit in GitHub](' + url + ')\n'
+
+              return editHtml
+                + html
+            })
+        },
         function noAliasesForImages(hook, vm) {
           
           // remove title metadata section
@@ -87,7 +102,6 @@
   <script src="//cdn.jsdelivr.net/npm/docsify-copy-code/dist/docsify-copy-code.min.js"></script>
   <script src="//unpkg.com/docsify-pagination/dist/docsify-pagination.min.js"></script>
   <script src="//cdn.jsdelivr.net/npm/docsify-sidebar-collapse/dist/docsify-sidebar-collapse.min.js"></script>
-
 </body>
 
 </html>
