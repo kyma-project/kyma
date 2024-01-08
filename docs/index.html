@@ -45,6 +45,7 @@
       }, 
       plugins: [
         function (hook, vm) {
+            // edit on GitHub link
             hook.beforeEach(function (html) {
               if (/githubusercontent\.com/.test(vm.route.file)) {
                 url = vm.route.file
@@ -53,7 +54,7 @@
               } else {
                 url = 'https://github.com/kyma-project/kyma/blob/main/docs/' + vm.route.file
               }
-              var editHtml = '[:memo: Edit in GitHub](' + url + ')\n'
+              var editHtml = '[:memo: Edit on GitHub](' + url + ')\n'
 
               return editHtml
                 + html
