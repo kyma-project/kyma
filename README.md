@@ -9,12 +9,14 @@
 
 ## Overview
 
-**Kyma** `/kee-ma/` is an application runtime that provides you a flexible and easy way to connect, extend, and customize your applications in the cloud-native world of Kubernetes.
+**Kyma** `/kee-ma/` Kyma is an opinionated set of Kubernetes-based modular building blocks, including all necessary capabilities to develop and run enterprise-grade cloud-native applications. It is the open path to the SAP ecosystem supporting business scenarios end-to-end.
 
-Out of the box, Kyma offers various functionalities, such as:
+Kyma is an actively maintained open-source project supported by SAP. The Kyma project is also a foundation of SAP BTP, Kyma runtime which is a part of SAP Business Technology Platform (BTP). You can use Kyma modules in your own Kubernetes cluster, or try the managed version from SAP BTP with a ready-to-use Kubernetes cluster powered by Gardener.
+
+Kyma modules offer various functionalities, such as:
 
 - [Serverless](https://kyma-project.io/#/serverless-manager/user/README) development platform to run lightweight Functions in a cost-efficient and scalable way
-- [System connectivity](https://kyma-project.io/#/01-overview/application-connectivity/README) that provides endpoint to securely register Events and APIs of external applications
+- [System connectivity](https://kyma-project.io/#/application-connector-manager/user/README) that provides an endpoint to securely register Events and APIs of external applications
 - [Istio](https://kyma-project.io/#/istio/user/README) for service-to-service communication and proxying
 - [Service Management](https://kyma-project.io/#/01-overview/service-management/README) to use the built-in cloud services from such cloud providers as GCP, Azure, and AWS
 - Secure API exposure
@@ -27,21 +29,19 @@ Out of the box, Kyma offers various functionalities, such as:
 </a>
 </p>
 
-Go to the [Kyma project website](https://kyma-project.io/) to learn more about our project, its features, and components.
+Go to the [Kyma project website](https://kyma-project.io/) to learn more about our project, its features, and Kyma modules.
 
 ## Installation
 
-Install Kyma locally or on a cluster. See the [Installation guides](https://kyma-project.io/#/04-operation-guides/operations/02-install-kyma) for details.
-
-> **NOTE:** Make sure to install the latest Kyma version and keep it up to date by [upgrading Kyma](https://kyma-project.io/#/04-operation-guides/operations/05-upgrade-kyma).
+To get started with Kyma and install it with specific modules, see the [Quick Install](https://kyma-project.io/#/02-get-started/01-quick-install) guide.
 
 ## Usage
 
-Kyma comes with the ready-to-use code snippets that you can use to test the extensions and the core functionality. See the list of existing examples in the [`examples`](https://github.com/kyma-project/examples) repository.
+Kyma comes with ready-to-use code snippets that you can use to test the extensions and the core functionality. See the list of existing examples in the [`examples`](https://github.com/kyma-project/examples) repository.
 
 ## Contributing
 
-Read the [`CONTRIBUTING.md`](CONTRIBUTING.md) document that includes the contributing rules and development steps specific for this repository.
+Read the [`CONTRIBUTING.md`](CONTRIBUTING.md) document that includes the contributing rules and development steps specific to this repository.
 
 ## Kyma Users
 
