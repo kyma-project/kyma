@@ -13,6 +13,7 @@ See the full list of Kyma troubleshooting guides:
 - [Provisioning k3d fails on a Linux machine](./01-k3d-fails-on-linux.md)
 - [Error for kubectl port forwarding](./01-kube-troubleshoot-kubectl-port-forward.md)
 - [Kyma domain is not resolvable](./01-kyma-domain-unresolvable.md)
+- [Secret with certificates is missing](./01-missing-certificate-secret.md)
 - [Kyma resource is misconfigured](./01-resources-misconfigured.md)
 - [Cannot create a volume snapshot](./01-volume-backup.md)
 
