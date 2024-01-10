@@ -1,6 +1,6 @@
 # Kyma Modules
 
-Classic Kyma offered a fixed set of preconfigured components whose development rhythm is synchronized and determined by the release schedule.
+Classic Kyma offered a fixed set of preconfigured components whose development rhythm was synchronized and determined by the release schedule.
 
 With the modular approach, Kyma components became independent modules, each providing one functionality developed independently of the other ones. Each module has its own custom resource that holds the desired configuration and the operator that reconciles the configuration.
 
