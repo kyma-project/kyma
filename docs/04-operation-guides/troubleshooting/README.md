@@ -8,14 +8,14 @@ See the full list of Kyma troubleshooting guides:
 
 ### General Troubleshooting Guides
 
-- [Component doesn't work after successful installation](./01-component-installation-fails.md)
-- [Local Kyma deployment fails with pending Pods](./01-deplyoment-fails-pending-pods.md)
-- [Provisioning k3d fails on a Linux machine](./01-k3d-fails-on-linux.md)
-- [Error for kubectl port forwarding](./01-kube-troubleshoot-kubectl-port-forward.md)
-- [Kyma domain is not resolvable](./01-kyma-domain-unresolvable.md)
-- [Kyma resource is misconfigured](./01-resources-misconfigured.md)
-- [Cannot create a volume snapshot](./01-volume-backup.md)
+- [Component Doesn't Work After Successful Installation](./01-component-installation-fails.md)
+- [Local Kyma Deployment Fails with Pending Pods](./01-deplyoment-fails-pending-pods.md)
+- [Provisioning k3d Fails on a Linux Machine](./01-k3d-fails-on-linux.md)
+- [Error for kubectl Port Forwarding](./01-kube-troubleshoot-kubectl-port-forward.md)
+- [Kyma Domain Is Not Resolvable](./01-kyma-domain-unresolvable.md)
+- [Kyma Resource Is Misconfigured](./01-resources-misconfigured.md)
+- [Cannot Create a Volume Snapshot](./01-volume-backup.md)
 
 ### Security
 
-- [Issues with certificates on Gardener](./security/sec-01-certificates-gardener.md)
+- [Issues with Certificates on Gardener](./security/sec-01-certificates-gardener.md)

@@ -5,9 +5,9 @@ Dive in deeper and explore the functionalities that Kyma provides for various us
 
 ### Application Connectivity
 
-* [Establish a secure connection with Compass](00-application-connectivity/ra-01-establish-secure-connection-with-compass.md)
-* [Maintain a secure connection with Compass](00-application-connectivity/ra-02-maintain-secure-connection-with-compass.md)
-* [Revoke a client certificate (RA)](00-application-connectivity/ra-03-revoke-client-certificate.md)
+* [Establish a Secure Connection with Compass](00-application-connectivity/ra-01-establish-secure-connection-with-compass.md)
+* [Maintain a Secure Connection with Compass](00-application-connectivity/ra-02-maintain-secure-connection-with-compass.md)
+* [Revoke a Client Certificate (RA)](00-application-connectivity/ra-03-revoke-client-certificate.md)
 * [Configure Runtime Agent with Compass](00-application-connectivity/ra-04-configure-runtime-agent-with-compass.md)
 * [Reconnect Runtime Agent with Compass](00-application-connectivity/ra-05-reconnect-runtime-agent-with-compass.md)
 
