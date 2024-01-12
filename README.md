@@ -18,8 +18,8 @@ Kyma modules offer various functionalities, such as:
 - [Serverless](https://kyma-project.io/#/serverless-manager/user/README) development platform to run lightweight Functions in a cost-efficient and scalable way
 - [System connectivity](https://kyma-project.io/#/application-connector-manager/user/README) that provides an endpoint to securely register Events and APIs of external applications
 - [Istio](https://kyma-project.io/#/istio/user/README) for service-to-service communication and proxying
-- [Service Management](https://kyma-project.io/#/01-overview/service-management/README) to use the built-in cloud services from such cloud providers as GCP, Azure, and AWS
-- Secure API exposure
+- [Service Management](https://kyma-project.io/#/btp-manager/user/README) to use the built-in cloud services from such cloud providers as GCP, Azure, and AWS
+- Secure [API exposure](https://kyma-project.io/#/api-gateway/user/README)
 - Collection and shipment of telemetry data to observability backends using the [Telemetry module](https://kyma-project.io/#/telemetry-manager/user/README)
 - CLI supported by the intuitive UI through which you can connect your application to a Kubernetes cluster
 
@@ -65,87 +65,6 @@ The following companies use Kyma:
 </p>
 
 ## Join Us
-
-If you would like to join us and work together on the Kyma project, there are some prerequisite skills you should acquire beforehand. Git basic skills are the most important for a quick start with the code. Mastering Kubernetes skills is very important for your future work.
-
-### Required Programming Skills
-
-- Git basic skillset:
-  - Forking a project from the `main` repository to your own repository
-  - Checking out code from a public and private repository
-  - Managing and fetching remote repositories
-  - Creating a custom branch, adding and pushing commits to a remote branch of a forked project
-  - Rebasing and merging a local branch with changes to the `main` branch
-  - Creating and merging pull requests to the `main` branch
-  - Interpreting automatic test results, rerunning a test suite
-  - Resolving conflicts with the `main` branch
-
-- Go basic skillset:
-  - Installing and upgrading Go compiler
-  - Setting up your IDE
-  - Building a GoLang project
-  - Running tests on a Golang project
-  - Running code in the debug mode in your IDE
-  - Understanding Makefiles and Dockerfiles
-  - Downloading dependencies for the project
-  - Understanding dependency tools such as `go mod` and `dep`
-  - Downloading additional tools modules with the `go get` command
-
-- Kubernetes basic skillset:
-  - Understanding basic [Kubernetes architecture](https://shipit.dev/posts/kubernetes-overview-diagrams.html) and basic concepts such as: namespace, Pod, Deployment, Secret, ConfigMap, ReplicaSet, Service, CustomResourceDefinition, Kubernetes Control Loop; understanding Kubernetes Design Patterns such as sidecars and init containers
-  - Using a kubeconfig file to connect to a cluster
-  - Browsing cluster resources using `kubectl` commands and editing Kubernetes resources using Terminal
-  - Applying YAML files to a cluster with Kubernetes resources
-  - Port forwarding from a running Pod to a local machine
-  - Installing and using Minikube
-  - Displaying logs from a container
-  - Exporting Kubernetes objects to YAML files
-  - Understanding Helm package manager
-  - Certified Kubernetes Application Developer (CKAD) level preferred
-
-- Docker basic skillset:
-  - Listing all running Docker containers
-  - Starting, stopping, deleting Docker containers
-  - Exposing ports from running containers
-  - Managing local image repositories
-  - Pulling images from a remote repository and running them
-  - Building images and tagging them
-  - Pushing and managing images in your Docker Hub account
-  - Executing `bash` commands inside containers
-
-> **TIP:** Complete the [Docker and Kubernetes fundamentals](https://github.com/K8sAcademy/Fundamentals-HandsOn) training to get the basic Docker and Kubernetes knowledge.
-
-- Cloud services skillset:
-  - Logging in to Google Cloud Platform (GCP)
-  - Understanding GCP basics concepts
-  - Creating and deleting Kubernetes clusters in team projects on GCP
-  - Creating Kubernetes shoot clusters on GCP and Azure
-
-- Linux/Terminal basic skill set
-  - Understanding basic `bash` scripting
-  - Understanding the basics of the Unix filesystem
-  - Performing basic operations on files (list, create, copy, delete, move, execute)
-  - Sending REST queries with curl or HTTPie
-  - CLI/Terminal confident use
-
-- Fluency with command-line JSON and YAML processors, such as jq, yq, grep
-- CI/CD experience (ideally Prow)
-
-- Other skills
-  - Understanding the Architecture Base Pattern
-  - Understanding the Service Mesh concept
-  - Basic Markdown editing
-
-
-### Basic Kyma Knowledge
-
-These are the sources you can get the basic Kyma knowledge from:
-
-- [Official Kyma documentation](https://kyma-project.io/)
-- [Getting Started guide](https://kyma-project.io/#/02-get-started/README)
-- Kyma project [Youtube channel](https://www.youtube.com/watch?v=wqQflgmyboY&list=PLmZLSvJAm8FabPF4hLjScx-dDl84NK3l5)
-
-### Open Job Positions
 
 Kyma team is located mostly in Poland and Germany. See the open job positions for both locations:
 - [Gliwice, Poland](https://jobs.sap.com/search/?createNewAlert=false&q=%23kymaopensource&optionsFacetsDD_department=&optionsFacetsDD_customfield3=&optionsFacetsDD_country=&locationsearch=)
