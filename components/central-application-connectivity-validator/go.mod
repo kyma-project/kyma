@@ -7,7 +7,7 @@ require (
 	github.com/kyma-project/kyma/common/logging v0.0.0-20230130154909-4c81ab2cee61
 	github.com/kyma-project/kyma/components/central-application-gateway v0.0.0-20230130154909-4c81ab2cee61
 	github.com/oklog/run v1.1.0
-	github.com/onsi/ginkgo/v2 v2.13.2
+	github.com/onsi/ginkgo/v2 v2.14.0
 	github.com/onsi/gomega v1.30.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/stretchr/testify v1.8.4
@@ -65,7 +65,7 @@ require (
 	golang.org/x/term v0.15.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
-	golang.org/x/tools v0.14.0 // indirect
+	golang.org/x/tools v0.16.1 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.2.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
