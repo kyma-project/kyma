@@ -121,4 +121,3 @@ Then, add {YOUR_RULE} to the **MOUNT_TARGETS** or **COPY_TARGETS** variables.
 
 By default, the test coverage report is saved to the `/tmp/artifacts` directory.
 To change this location, set the `ARTIFACTS` environment variable.
-It is automatically set when running in the [Prow environment](https://github.com/kubernetes/test-infra/blob/master/prow/pod-utilities.md).
