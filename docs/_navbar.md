@@ -1,3 +1,2 @@
-* [Release Notes](#notes)
+* [Release Notes](release-notes.md)
 * [Contact & Support](#contact)
-  
