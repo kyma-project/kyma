@@ -3,4 +3,4 @@
 * [Security](README.md)
   * [Authentication in Kyma](sec-01-authentication-in-kyma.md)
   * [Authorization in Kyma](sec-02-authorization-in-kyma.md)
-  * [Access Kyma securely](sec-03-access-kyma.md)
+  * [Access Kyma Securely](sec-03-access-kyma.md)

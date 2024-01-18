@@ -1,4 +1,4 @@
-# Secret with certificates is missing
+# Secret With Certificates Is Missing
 
 ## Symptom
 

@@ -1,6 +1,0 @@
-.idea
-*.iml
-/event-publisher-nats
-/event-publisher-proxy
-vendor
-licenses
