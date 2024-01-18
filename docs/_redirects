@@ -29,6 +29,8 @@
 /docs/kyma/main/01-overview/main-areas/* /docs/kyma/latest/01-overview/:splat 301
 
 # Telemetry
+/#/01-overview/telemetry/README /#/telemetry-manager/user/README 301
+/#/01-overview/observability/README /#/telemetry-manager/user/README 301
 ## Latest
 /docs/kyma/latest/01-overview/telemetry/telemetry-01-operator /#/telemetry-manager/user/01-manager 301
 /docs/kyma/latest/01-overview/telemetry/telemetry-02-logs /#/telemetry-manager/user/02-logs 301
@@ -38,8 +40,6 @@
 /docs/kyma/latest/05-technical-reference/00-custom-resources/telemetry-01-logpipeline /#/telemetry-manager/user/resources/02-logpipeline 301
 /docs/kyma/latest/05-technical-reference/00-custom-resources/telemetry-02-logparser /#/telemetry-manager/user/resources/03-logparser 301
 /docs/kyma/latest/05-technical-reference/00-custom-resources/telemetry-03-tracepipeline /#/telemetry-manager/user/resources/04-tracepipeline 301
-/#/01-overview/telemetry/README /#/telemetry-manager/user/README 301
-/#/01-overview/observability/README /#/telemetry-manager/user/README 301
 ## Main
 /docs/kyma/main/01-overview/telemetry/telemetry-01-operator /#/telemetry-manager/user/01-manager 301
 /docs/kyma/main/01-overview/telemetry/telemetry-02-logs /#/telemetry-manager/user/02-logs 301
@@ -49,10 +49,9 @@
 /docs/kyma/main/05-technical-reference/00-custom-resources/telemetry-01-logpipeline /#/telemetry-manager/user/resources/02-logpipeline 301
 /docs/kyma/main/05-technical-reference/00-custom-resources/telemetry-02-logparser /#/telemetry-manager/user/resources/03-logparser 301
 /docs/kyma/main/05-technical-reference/00-custom-resources/telemetry-03-tracepipeline /#/telemetry-manager/user/resources/04-tracepipeline 301
-/#/01-overview/telemetry/README /#/telemetry-manager/user/README 301
-/#/01-overview/observability/README /#/telemetry-manager/user/README 301
 
 # Serverless
+/#/01-overview/serverless/README /#/serverless-manager/user/README 301
 ## Latest
 /docs/kyma/latest/01-overview/serverless/* /#/serverless-manager/user/README 301
 /docs/kyma/latest/03-tutorials/00-serverless/* /#/serverless-manager/user/tutorials/README 301
@@ -67,7 +66,6 @@
 /docs/kyma/latest/05-technical-reference/svls-05-exposing-functions /#/serverless-manager/user/technical-reference/README 301
 /docs/kyma/latest/05-technical-reference/svls-06-function-configuration-file /#/serverless-manager/user/technical-reference/07-60-function-configuration-file 301
 /docs/kyma/latest/05-technical-reference/svls-08-available-presets /#/serverless-manager/user/technical-reference/07-80-available-presets 301
-/#/01-overview/serverless/README /#/serverless-manager/user/README 301
 ## Main
 /docs/kyma/main/01-overview/serverless/* /#/serverless-manager/user/README 301
 /docs/kyma/main/03-tutorials/00-serverless/* /#/serverless-manager/user/tutorials/README 301
@@ -82,9 +80,9 @@
 /docs/kyma/main/05-technical-reference/svls-05-exposing-functions /#/serverless-manager/user/technical-reference/README 301
 /docs/kyma/main/05-technical-reference/svls-06-function-configuration-file /#/serverless-manager/user/technical-reference/07-60-function-configuration-file 301
 /docs/kyma/main/05-technical-reference/svls-08-available-presets /#/serverless-manager/user/technical-reference/07-80-available-presets 301
-/#/01-overview/serverless/README /#/serverless-manager/user/README 301
 
 # Istio
+/#/01-overview/service-mesh/README /#/istio/user/README 301
 ## Latest
 /docs/kyma/latest/01-overview/service-mesh/smsh-02-default-istio-setup-in-kyma /#/istio/user/00-40-overview-istio-setup 301
 /docs/kyma/latest/01-overview/service-mesh/* /#/istio/user/README 301
@@ -92,7 +90,6 @@
 /docs/kyma/latest/04-operation-guides/troubleshooting/service-mesh/* /#/istio/user/troubleshooting/README 301
 /docs/kyma/latest/05-technical-reference/00-configuration-parameters/smsh-01-istio-chart /#/istio/user/technical-reference//05-00-istio-controller-parameters 301
 /docs/kyma/latest/05-technical-reference/00-custom-resources/oper-01-istio /#/istio/user/04-00-istio-custom-resource 301
-/#/01-overview/service-mesh/README /#/istio/user/README 301
 ## Main
 /docs/kyma/main/01-overview/service-mesh/smsh-02-default-istio-setup-in-kyma /#/istio/user/00-40-overview-istio-setup 301
 /docs/kyma/main/01-overview/service-mesh/* /#/istio/user/README 301
@@ -100,39 +97,37 @@
 /docs/kyma/main/04-operation-guides/troubleshooting/service-mesh/* /#/istio/user/troubleshooting/README 301
 /docs/kyma/main/05-technical-reference/00-configuration-parameters/smsh-01-istio-chart /#/istio/user/technical-reference//05-00-istio-controller-parameters 301
 /docs/kyma/main/05-technical-reference/00-custom-resources/oper-01-istio /#/istio/user/04-00-istio-custom-resource 301
-/#/01-overview/service-mesh/README /#/istio/user/README 301
 
 # API Gateway
+/#/01-overview/api-exposure/README /#/api-gateway/user/README 301
 ## Latest
 /docs/kyma/latest/01-overview/api-exposure/apix-03-api-gateway-limitations.md /#/api-gateway/user/00-20-overview-api-rule-controller?id=controller-limitations
 /docs/kyma/latest/01-overview/api-exposure/* /#/api-gateway/user/README 301
 /docs/kyma/latest/03-tutorials/00-api-exposure/* /#/api-gateway/user/tutorials/README 301
 /docs/kyma/latest/04-operation-guides/troubleshooting/* /#/api-gateway/user/troubleshooting-guides/README
 /docs/kyma/latest/05-technical-reference/00-custom-resources/apix-01-apirule /#/api-gateway/user/custom-resources/apirule/04-10-apirule-custom-resource
-/#/01-overview/api-exposure/README /#/api-gateway/user/README 301
 ## Main
 /docs/kyma/main/01-overview/api-exposure/apix-03-api-gateway-limitations.md /#/api-gateway/user/00-20-overview-api-rule-controller?id=controller-limitations
 /docs/kyma/main/01-overview/api-exposure/* /#/api-gateway/user/README 301
 /docs/kyma/main/03-tutorials/00-api-exposure/* /#/api-gateway/user/tutorials/README 301
 /docs/kyma/main/04-operation-guides/troubleshooting/* /#/api-gateway/user/troubleshooting-guides/README
 /docs/kyma/main/05-technical-reference/00-custom-resources/apix-01-apirule /#/api-gateway/user/custom-resources/apirule/04-10-apirule-custom-resource
-/#/01-overview/api-exposure/README /#/api-gateway/user/README 301
 
 # Eventing
+/#/01-overview/eventing/README /#/eventing-manager/user/README 301
 ## Latest 
 /docs/kyma/latest/01-overview/eventing/* /#/eventing-manager/user/README
 /docs/kyma/latest/03-tutorials/00-eventing/* /#/eventing-manager/user/tutorials/evnt-01-prerequisites
 /docs/kyma/latest/05-technical-reference/00-custom-resources/evnt-01-subscription.md /#/eventing-manager/user/resources/evnt-cr-subscription
 /docs/kyma/latest/04-operation-guides/troubleshooting/eventing /#/eventing-manager/user/troubleshooting/evnt-01-eventing-troubleshooting
-/#/01-overview/eventing/README /#/eventing-manager/user/README 301
 ## Main
 /docs/kyma/main/01-overview/eventing/* /#/eventing-manager/user/README
 /docs/kyma/main/03-tutorials/00-eventing/* /#/eventing-manager/user/tutorials/evnt-01-prerequisites
 /docs/kyma/main/05-technical-reference/00-custom-resources/evnt-01-subscription.md /#/eventing-manager/user/resources/evnt-cr-subscription
 /docs/kyma/main/04-operation-guides/troubleshooting/eventing /#/eventing-manager/user/troubleshooting/evnt-01-eventing-troubleshooting
-/#/01-overview/eventing/README /#/eventing-manager/user/README 301
 
 # Application Connector
+/#/01-overview/application-connectivity/README /#/application-connector-manager/user/README 301
 ## Latest
 /docs/kyma/latest/01-overview/application-connectivity/README.md /#/application-connector-manager/user/README
 /docs/kyma/latest/01-overview/application-connectivity/ac-02-application-gateway.md /#/application-connector-manager/user/00-10-application-gateway
@@ -140,7 +135,6 @@
 /docs/kyma/latest/03-tutorials/00-application-connectivity/* /#/application-connector-manager/user/tutorials/README
 /docs/kyma/latest/05-technical-reference/00-custom-resources/ac-01-application.md /#/application-connector-manager/user/resources/06-10-application
 /docs/kyma/latest/05-technical-reference/ac-01-application-gateway-details.md /#/application-connector-manager/user/technical-reference/07-10-application-gateway-details
-/#/01-overview/application-connectivity/README /#/application-connector-manager/user/README 301
 ## Main
 /docs/kyma/main/01-overview/application-connectivity/README.md /#/application-connector-manager/user/README
 /docs/kyma/main/01-overview/application-connectivity/ac-02-application-gateway.md /#/application-connector-manager/user/00-10-application-gateway
@@ -149,7 +143,6 @@
 /docs/kyma/main/03-tutorials/00-application-connectivity/* /#/application-connector-manager/user/tutorials/README
 /docs/kyma/main/05-technical-reference/00-custom-resources/ac-01-application.md /#/application-connector-manager/user/resources/06-10-application
 /docs/kyma/main/05-technical-reference/ac-01-application-gateway-details.md /#/application-connector-manager/user/technical-reference/07-10-application-gateway-details
-/#/01-overview/application-connectivity/README /#/application-connector-manager/user/README 301
 
 # Service Management
 /#/01-overview/service-management/README /#/btp-manager/user/README 301
