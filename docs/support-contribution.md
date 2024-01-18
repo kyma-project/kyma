@@ -1,6 +1,6 @@
-# Support and Contribution
+# Support & Contribution
 
-## Kyma Support
+## Support
 
 Here are our support channels:
 
