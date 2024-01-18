@@ -57,7 +57,7 @@ To establish a secure connection with Compass and generate the client certificat
 
 3. Generate a key and a Certificate Signing Request (CSR).
 
-    Generate a CSR with the following command. `SUBJECT` is the certificate subject data returned with the CSR information as `subject`.   
+    Generate a CSR with the following command. **{SUBJECT}** is the certificate subject data returned with the CSR information as `subject`.   
 
     ```bash
     export KEY_LENGTH=4096
