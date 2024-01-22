@@ -21,8 +21,6 @@
 /components/central-application-connectivity-validator @kyma-project/Framefrog
 /components/central-application-gateway @kyma-project/Framefrog
 /components/compass-runtime-agent @kyma-project/Framefrog
-/components/event-publisher-proxy @kyma-project/eventing
-/components/eventing-controller @kyma-project/eventing
 
 
 # All files and subdirectories in /docs
