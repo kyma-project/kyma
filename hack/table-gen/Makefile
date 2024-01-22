@@ -1,5 +1,5 @@
 .PHONY: generate
-generate: cra-docs eventing-docs apix-docs
+generate: cra-docs apix-docs
 
 .PHONY: cra-docs
 cra-docs:
