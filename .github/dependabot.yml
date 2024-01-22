@@ -2,46 +2,6 @@
 
 version: 2
 updates:
-  - package-ecosystem: "docker"
-    directory: "/components/event-publisher-proxy"
-    labels:
-      - "docker"
-      - "area/dependency"
-    schedule:
-      interval: "daily"
-    commit-message:
-      prefix: "docker"
-      include: "scope"
-  - package-ecosystem: "gomod"
-    directory: "/components/event-publisher-proxy"
-    labels:
-      - "go"
-      - "area/dependency"
-    schedule:
-      interval: "daily"
-    commit-message:
-      prefix: "gomod"
-      include: "scope"
-  - package-ecosystem: "gomod"
-    directory: "/components/eventing-controller"
-    labels:
-      - "go"
-      - "area/dependency"
-    schedule:
-      interval: "daily"
-    commit-message:
-      prefix: "gomod"
-      include: "scope"
-  - package-ecosystem: "docker"
-    directory: "/components/eventing-controller"
-    labels:
-      - "docker"
-      - "area/dependency"
-    schedule:
-      interval: "daily"
-    commit-message:
-      prefix: "docker"
-      include: "scope"
   - package-ecosystem: "gomod"
     directory: "/components/compass-runtime-agent"
     labels:
