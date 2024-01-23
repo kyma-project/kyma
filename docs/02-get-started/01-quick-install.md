@@ -9,6 +9,7 @@ To get started with Kyma, let's quickly install it with specific modules first.
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 - Kubernetes cluster, or [k3d](https://k3d.io) (v5.x or higher) for local installation
 - `kyma-system` namespace created
+- [Kyma CLI](https://github.com/kyma-project/cli)
 
 ## Steps
 
