@@ -23,11 +23,6 @@ Kyma modules offer various functionalities, such as:
 - Collection and shipment of telemetry data to observability backends using the [Telemetry module](https://kyma-project.io/#/telemetry-manager/user/README)
 - CLI supported by the intuitive UI through which you can connect your application to a Kubernetes cluster
 
-<p align="center">
-<a href="https://youtu.be/kP7mSELIxXw">
-<img src="./docs/kyma/assets/withoutprov4.gif" style="max-width:100%;">
-</a>
-</p>
 
 Go to the [Kyma project website](https://kyma-project.io/) to learn more about our project, its features, and Kyma modules.
 
