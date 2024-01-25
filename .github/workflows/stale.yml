@@ -1,0 +1,31 @@
+name: 'Manage Stale Issues and Pull Requests'
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Runs daily at midnight
+  workflow_dispatch: # Allows manual triggering of the workflow
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v9
+        with:
+          days-before-stale: 60
+          days-before-close: 7
+          stale-issue-label: 'lifecycle/stale'
+          stale-pr-label: 'lifecycle/stale'
+          exempt-issue-labels: 'lifecycle/frozen,lifecycle/active'
+          exempt-pr-labels: 'lifecycle/frozen,lifecycle/active'
+          stale-issue-message: |
+            This issue has been automatically marked as stale due to the lack of recent activity. It will soon be closed if no further activity occurs.
+            Thank you for your contributions.
+          stale-pr-message: |
+            This pull request has been automatically marked as stale due to the lack of recent activity. It will soon be closed if no further activity occurs.
+            Thank you for your contributions.
+          close-issue-message: |
+            This issue has been automatically closed due to the lack of recent activity.
+            /lifecycle rotten
+          close-pr-message: |
+            This pull request has been automatically closed due to the lack of recent activity.
+            /lifecycle rotten
