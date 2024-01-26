@@ -16,8 +16,7 @@ Apart from the general rules described in the `community` repository, every `kym
 Develop on your remote repository forked from the original repository in Go.
 
 Follow these steps:
-
-> **NOTE:** The example assumes you have the `$GOPATH` already set.
+>[!NOTE] The example assumes you have the `$GOPATH` already set.
 
 1. Fork the repository in GitHub.
 
