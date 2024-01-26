@@ -55,6 +55,7 @@ You can create a new Certificate resource applying suggestions from the error me
 
 3. Apply the fixed Certificate.
 
->**NOTE:** If you upgrade Kyma, you may need to perform steps from the **Error during the installation** tab.
+> [!NOTE]
+> If you upgrade Kyma, you may need to perform steps from the **Error during the installation** tab.
 
 <!-- tabs:end -->

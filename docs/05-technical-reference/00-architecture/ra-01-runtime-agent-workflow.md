@@ -1,6 +1,7 @@
 # Runtime Agent Architecture
 
->**CAUTION:** Runtime Agent is used in the [Compass mode](../../01-overview/application-connectivity/README.md) of Application Connectivity. To learn how to install Compass and integrate with it, refer to the [Compass documentation](https://github.com/kyma-incubator/compass/blob/master/docs/compass/04-01-installation.md) or to the [Director GraphQL schema](https://github.com/kyma-incubator/compass/blob/master/components/director/pkg/graphql/schema.graphql) directly. 
+> [!ATTENTION]
+>  Runtime Agent is used in the [Compass mode](../../01-overview/application-connectivity/README.md) of Application Connectivity. To learn how to install Compass and integrate with it, refer to the [Compass documentation](https://github.com/kyma-incubator/compass/blob/master/docs/compass/04-01-installation.md) or to the [Director GraphQL schema](https://github.com/kyma-incubator/compass/blob/master/components/director/pkg/graphql/schema.graphql) directly. 
 
 This document presents the workflow of Runtime Agent.
 
