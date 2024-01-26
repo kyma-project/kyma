@@ -50,7 +50,8 @@ To test mTLS-related authentication methods, you need:
 All certificates are generated using the **generate-certs** target from the `Makefile`.
 The target is executed before the tests are run, and it invokes [`generate-self-signed-certs.sh`](../scripts/generate-self-signed-certs.sh), which creates the CA root, server, and client certificates and keys.
 
-> **NOTE:** Since self-signed certificates are used, Application CRs have the **skipVerify: true** property set to `true` to force Application Gateway to skip certificate verification.
+> [!NOTE]
+> Since self-signed certificates are used, Application CRs have the **skipVerify: true** property set to `true` to force Application Gateway to skip certificate verification.
 
 ### API Exposed on Port `8080`
 
@@ -73,7 +74,8 @@ To test authentication methods, we have the following API:
 The credentials used for authentication, such as `clientID`, are [hardcoded](../tools/external-api-mock-app/config.go).
 The server key, server certificate, and the CA root certificate for port `8090` are defined in [this Secret](../resources/charts/gateway-test/charts/mock-app/templates/credentials/mtls-cert-secret.yml).
 
-> **NOTE:** Port `8090` must be excluded from redirection to Envoy, otherwise Application Gateway cannot pass the client certificate to the mock application.
+> [!NOTE]
+> Port `8090` must be excluded from redirection to Envoy, otherwise Application Gateway cannot pass the client certificate to the mock application.
 
 ### API Exposed on Port `8091`
 
@@ -81,7 +83,8 @@ This API is identical to the one exposed on port `8090`.
 The HTTPS server on port `8091` uses an expired server certificate.
 The server key, server certificate, and the CA root certificate for port `8091` are defined in [this Secret](../resources/charts/gateway-test/charts/mock-app/templates/credentials/expired-mtls-cert-secret.yaml).
 
-> **NOTE:** Port `8091` must be excluded from redirection to Envoy, otherwise Application Gateway cannot pass the client certificate to the mock application.
+> [!NOTE]
+>  Port `8091` must be excluded from redirection to Envoy, otherwise Application Gateway cannot pass the client certificate to the mock application.
 
 ## Building
 
@@ -146,13 +149,15 @@ make -f Makefile.test-application-gateway test-gateway
 
 By default, the tests clean up after themselves, removing all the previously created resources and the `test` namespace.
 
-> **CAUTION:** If the names of your existing resources are the same as the names used in the tests, running this command overrides or removes the existing resources.
+> [!WARNING]
+> If the names of your existing resources are the same as the names used in the tests, running this command overrides or removes the existing resources.
 
 ## Debugging
 
 ### Running Locally
 
-> **CAUTION:** Because of the way it accesses the Application CRs, the test Job must run **on a cluster**.
+> [!WARNING]
+> Because of the way it accesses the Application CRs, the test Job must run **on a cluster**.
 > Application Gateway and the mock application can both be run locally.
 
 To run the mock application locally, follow these steps:
@@ -160,7 +165,10 @@ To run the mock application locally, follow these steps:
 1. Change all the **targetUrl** values in the [Application CRs](../resources/charts/gateway-test/charts/test/templates/applications/) to reflect the new application URL. For example, `http://localhost:8081/v1/api/unsecure/ok`.
 2. Change all the **centralGatewayUrl** values to reflect the new Application Gateway URL. For example, `http://localhost:8080/positive-authorisation/unsecure-always-ok`.
 3. Deploy all the resources on the cluster.
-   > **NOTE:** You can omit the test Job and the Central Gateway, but it's easier to just let them fail.
+
+> [!NOTE]
+> You can omit the test Job and the Central Gateway, but it's easier to just let them fail.
+
 4. Build the mock application:
 
    <div tabs name="Mock App Build Flavor" group="mock-app-flavor">
@@ -208,7 +216,8 @@ To run the mock application locally, follow these steps:
    ```shell
    ./external-api-mock-app
    ```
-   > **CAUTION:** For the certificates to work, you must copy them from `./k8s/gateway-test/certs` to `/etc/secret-volume`.
+> [!WARNING]
+> For the certificates to work, you must copy them from `./k8s/gateway-test/certs` to `/etc/secret-volume`.
 
    </details>
    </div>

@@ -29,7 +29,8 @@ To establish a secure connection with Compass and generate the client certificat
     }
     ```
 
-   > **NOTE:** The one-time token expires after 5 minutes.
+> [!NOTE]
+> The one-time token expires after 5 minutes.
 
 2. Get the CSR information and configuration details from Kyma using the one-time token.
 
@@ -65,7 +66,8 @@ To establish a secure connection with Compass and generate the client certificat
     openssl genrsa -out compass-app.key $KEY_LENGTH
     openssl req -new -sha256 -out compass-app.csr -key compass-app.key -subj "{SUBJECT}"
     ```
-   > **NOTE:** The key length is configurable, however, 4096 is the recommended value.
+> [!NOTE]
+> The key length is configurable, however, 4096 is the recommended value.
 
 4. Sign the CSR and get a client certificate.
 
@@ -96,4 +98,5 @@ To establish a secure connection with Compass and generate the client certificat
     base64 -d {CERTIFICATE_CHAIN}
     ```
 
-> **NOTE**: See how to [maintain a secure connection with Compass and renew a client certificate](ra-02-maintain-secure-connection-with-compass.md).
+> [!NOTE]
+> See how to [maintain a secure connection with Compass and renew a client certificate](ra-02-maintain-secure-connection-with-compass.md).

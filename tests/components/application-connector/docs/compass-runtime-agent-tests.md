@@ -93,7 +93,8 @@ The [`values.yaml`](../resources/charts/compass-runtime-agent-test/values.yaml) 
 
 By default, the tests clean up after themselves, removing all the previously created resources and the `test` namespace.
 
-> **CAUTION:** If the names of your existing resources are the same as the names used in the tests, running this command overrides or removes the existing resources.
+> [!WARNING]
+> If the names of your existing resources are the same as the names used in the tests, running this command overrides or removes the existing resources.
 
 ## Debugging
 

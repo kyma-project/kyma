@@ -86,7 +86,8 @@ In this case, `{API_DEFINITION_NAME}` is removed from the URL and the pattern lo
 ```bash
 {APPLICATION_NAME}/{API_BUNDLE_NAME}/{TARGET_API_PATH}
 ```
-> **NOTE:** Invocation of service bundles configured with multiple API definitions results in a `400 Bad Request` failure.
+> [!NOTE]
+> Invocation of service bundles configured with multiple API definitions results in a `400 Bad Request` failure.
 
 ### Compass Mode
 

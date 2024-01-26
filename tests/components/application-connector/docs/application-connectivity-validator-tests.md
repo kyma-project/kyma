@@ -21,7 +21,8 @@ The tests are executed as a Kubernetes Job on a Kyma cluster where the tested Ap
 
 ![Connectivity Validator tests architecture](assets/connectivity-validator-tests-architecture.svg)
 
-> **NOTE:** Port `8080` must be excluded from redirection to Envoy, otherwise the Connectivity Validator test Pod cannot pass the `X-Forwarded-Client-Cert` header to Connectivity Validator.
+> [!NOTE]
+> Port `8080` must be excluded from redirection to Envoy, otherwise the Connectivity Validator test Pod cannot pass the `X-Forwarded-Client-Cert` header to Connectivity Validator.
 
 ## Building
 
@@ -66,7 +67,8 @@ make -f Makefile.test-application-conn-validator test-validator
 
 By default, the tests clean up after themselves, removing all the previously created resources and the `test` namespace.
 
-> **CAUTION:** If the names of your existing resources are the same as the names used in the tests, running this command overrides or removes the existing resources.
+> [!WARNING]
+> If the names of your existing resources are the same as the names used in the tests, running this command overrides or removes the existing resources.
 
 ## Debugging
 
