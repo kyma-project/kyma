@@ -16,46 +16,13 @@ See the full list of Kyma troubleshooting guides:
 - [Kyma Resource Is Misconfigured](./01-resources-misconfigured.md)
 - [Cannot Create a Volume Snapshot](./01-volume-backup.md)
 
-## Istio Module
+## Modules` Troubleshooting Guides
 
-- [Can’t Access a Kyma Endpoint (503 status code)](https://kyma-project.io/#/istio/user/troubleshooting/03-10-503-no-access)
-- [Connection Refused Errors](https://kyma-project.io/#/istio/user/troubleshooting/03-20-connection-refused)
-- [Issues with Istio Sidecar Injection](https://kyma-project.io/#/istio/user/troubleshooting/03-30-istio-no-sidecar)
-- [Incompatible Istio Sidecar Version After Istio Operator’s Upgrade](https://kyma-project.io/#/istio/user/troubleshooting/03-40-incompatible-istio-sidecar-version)
-- [Istio Unintentionally Removed](https://kyma-project.io/#/istio/user/troubleshooting/03-50-recovering-from-unintentional-istio-removal)
-- [Kyma Endpoint Returns a not found Error (404 Status Code)](https://kyma-project.io/#/istio/user/troubleshooting/03-60-404-on-istio-gateway)
-
-## Serverless Module
-
-- [Failure to Build Functions](https://kyma-project.io/#/serverless-manager/user/troubleshooting-guides/03-10-cannot-build-functions)
-- [Failing Function Container](https://kyma-project.io/#/serverless-manager/user/troubleshooting-guides/03-20-failing-function-container)
-- [Functions Failing to Build on k3d](https://kyma-project.io/#/serverless-manager/user/troubleshooting-guides/03-40-function-build-failing-k3d)
-- [Serverless Periodically Restarting](https://kyma-project.io/#/serverless-manager/user/troubleshooting-guides/03-50-serverless-periodically-restaring)
-
-## Telemetry Module
-
-- [Traces Troubleshooting](https://kyma-project.io/#/telemetry-manager/user/03-traces?id=troubleshooting)
-- [Metrics Troubleshooting](https://kyma-project.io/#/telemetry-manager/user/04-metrics?id=troubleshooting)
-
-## Eventing Module
-
-- [Kyma Eventing - Basic Diagnostics](https://kyma-project.io/#/eventing-manager/user/troubleshooting/evnt-01-eventing-troubleshooting)
-- [NATS JetStream Backend Troubleshooting](https://kyma-project.io/#/eventing-manager/user/troubleshooting/evnt-02-jetstream-troubleshooting)
-- [Subscriber Receives Irrelevant Events](https://kyma-project.io/#/eventing-manager/user/troubleshooting/evnt-03-type-collision)
-- [Eventing Backend Stopped Receiving Events Due To Full Storage](https://kyma-project.io/#/eventing-manager/user/troubleshooting/evnt-04-free-jetstream-storage)
-- [Published Events Are Pending in the Stream](https://kyma-project.io/#/eventing-manager/user/troubleshooting/evnt-05-fix-pending-messages)
-
-## API Gateway Module
-
-- [Certificate Management - Issuer Not Created](https://kyma-project.io/#/api-gateway/user/troubleshooting-guides/03-20-cert-mgt-issuer-not-created)
-- [Kyma Gateway - Not Reachable](https://kyma-project.io/#/api-gateway/user/troubleshooting-guides/03-30-gateway-not-reachable)
-- [Issues When Creating an APIRule - Various Reasons](https://kyma-project.io/#/api-gateway/user/troubleshooting-guides/03-40-api-rule-troubleshooting)
-- [Issues with Certificates on Gardener](https://kyma-project.io/#/api-gateway/user/troubleshooting-guides/03-50-certificates-gardener)
-- [Cannot Connect to a Service Exposed by an APIRule - Basic Diagnostics](https://kyma-project.io/#/api-gateway/user/troubleshooting-guides/03-00-cannot-connect-to-service/03-00-basic-diagnostics)
-- [DNS Management](https://kyma-project.io/#/api-gateway/user/troubleshooting-guides/03-10-dns-mgt/README)
-  - [Connection Refused or Timeout](https://kyma-project.io/#/api-gateway/user/troubleshooting-guides/03-10-dns-mgt/03-10-dns-mgt-connection-refused)
-  - [Could Not Resolve Host](https://kyma-project.io/#/api-gateway/user/troubleshooting-guides/03-10-dns-mgt/03-11-dns-mgt-could-not-resolve-host)
-  - [Resource Ignored by the Controller](https://kyma-project.io/#/api-gateway/user/troubleshooting-guides/03-10-dns-mgt/03-12-dns-mgt-resource-ignored)
+- [Istio Troubleshooting](https://kyma-project.io/#/istio/user/troubleshooting/README)
+- [Serverless Troubleshooting](https://kyma-project.io/#/serverless-manager/user/troubleshooting-guides/README)
+- For [Telemetry](https://kyma-project.io/#/telemetry-manager/user/README), the troubleshooting guides are part of the document of each signal type.
+- [Troubleshooting - Eventing](https://kyma-project.io/#/eventing-manager/user/troubleshooting/README)
+- [API Gateway Troubleshooting Guides](https://kyma-project.io/#/api-gateway/user/troubleshooting-guides/README)
 
 ## Security
 
