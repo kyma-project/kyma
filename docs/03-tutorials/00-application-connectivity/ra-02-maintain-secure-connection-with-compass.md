@@ -42,6 +42,7 @@ After you have established a secure connection with Compass, you can fetch the c
     openssl genrsa -out compass-app.key $KEY_LENGTH
     openssl req -new -sha256 -out compass-app.csr -key compass-app.key -subj "{SUBJECT}"
     ```
+
 > [!NOTE]
 > The key length is configurable, however, 4096 is the recommended value.
 
