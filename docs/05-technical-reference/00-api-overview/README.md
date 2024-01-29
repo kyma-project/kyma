@@ -24,7 +24,7 @@ Here's a summary of each level:
   - The schema and/or semantics of objects may change in incompatible ways in a subsequent beta or stable release. When this happens, migration instructions are provided. Schema changes may require deleting, editing, and re-creating API objects. The editing process may not be straightforward. The migration may require downtime for applications that rely on the feature.
   - The software is not recommended for production uses. Subsequent releases may introduce incompatible changes. If you have multiple clusters which can be upgraded independently, you may be able to relax this restriction.
  
->[!NOTE]
+> [!NOTE]
 > Try beta features and provide feedback. After the features exit beta, it may not be practical to make more changes.
 
 - Stable:
