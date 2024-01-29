@@ -15,8 +15,8 @@ To establish a secure connection with Compass and generate the client certificat
 
     To get the Connector URL and the one-time token which allow you to fetch the required configuration details, use the Compass Console.
 
-   > [!NOTE]
-   > To access the Compass Console, go to the `https://compass.{CLUSTER_DOMAIN}` URL and enter your Kyma credentials.
+   > [!WARNING]
+   > The CR is in the `Warning` state and the message is `Secret resource not found reason: MissingSecret`. To create a Secret, follow the instructions in the [`btp-manager`](https://github.com/kyma-project/btp-manager/blob/main/docs/user/02-10-usage.md#create-and-install-secret) repository.
 
     Alternatively, make a call to the Director including the `Tenant` header with Tenant ID and `authorization` header with the Bearer token issued by your custom OpenID Connect-compliant identity provider. Use the following mutation:
 
