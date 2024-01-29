@@ -74,5 +74,6 @@ After you have established a secure connection with Compass, you can fetch the c
     ```bash
     base64 -d {CERTIFICATE_CHAIN}
     ```
+
 > [!NOTE]
 > See how to [revoke a client certificate](ra-03-revoke-client-certificate.md).
