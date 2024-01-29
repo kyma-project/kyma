@@ -14,8 +14,9 @@ To establish a secure connection with Compass and generate the client certificat
 1. Get the Connector URL and the one-time token.
 
     To get the Connector URL and the one-time token which allow you to fetch the required configuration details, use the Compass Console.
-   > [!NOTE]
-   > To access the Compass Console, go to the `https://compass.{CLUSTER_DOMAIN}` URL and enter your Kyma credentials.
+
+> [!NOTE]
+> To access the Compass Console, go to the `https://compass.{CLUSTER_DOMAIN}` URL and enter your Kyma credentials.
 
     Alternatively, make a call to the Director including the `Tenant` header with Tenant ID and `authorization` header with the Bearer token issued by your custom OpenID Connect-compliant identity provider. Use the following mutation:
 
@@ -65,8 +66,8 @@ To establish a secure connection with Compass and generate the client certificat
     openssl genrsa -out compass-app.key $KEY_LENGTH
     openssl req -new -sha256 -out compass-app.csr -key compass-app.key -subj "{SUBJECT}"
     ```
-    > [!NOTE]
-    > The key length is configurable, however, 4096 is the recommended value.
+> [!NOTE]
+> The key length is configurable, however, 4096 is the recommended value.
 
 4. Sign the CSR and get a client certificate.
 

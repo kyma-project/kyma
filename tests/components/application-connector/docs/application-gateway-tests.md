@@ -138,8 +138,8 @@ Pipelines run the tests using the **test-gateway** target from the `Makefile`.
     </details>
     </div>
 
-   > [!TIP]
-   > Read more about Kyma installation in the [official Kyma documentation](https://kyma-project.io/#/02-get-started/01-quick-install).
+> [!TIP]
+> Read more about Kyma installation in the [official Kyma documentation](https://kyma-project.io/#/02-get-started/01-quick-install).
 
 ### Run the Tests
 
@@ -166,8 +166,8 @@ To run the mock application locally, follow these steps:
 2. Change all the **centralGatewayUrl** values to reflect the new Application Gateway URL. For example, `http://localhost:8080/positive-authorisation/unsecure-always-ok`.
 3. Deploy all the resources on the cluster.
 
-   > [!NOTE]
-   > You can omit the test Job and the Central Gateway, but it's easier to just let them fail.
+> [!NOTE]
+> You can omit the test Job and the Central Gateway, but it's easier to just let them fail.
 
 4. Build the mock application:
 
@@ -217,8 +217,8 @@ To run the mock application locally, follow these steps:
    ./external-api-mock-app
    ```
 
-   > [!WARNING]
-   > For the certificates to work, you must copy them from `./k8s/gateway-test/certs` to `/etc/secret-volume`.
+> [!WARNING]
+> For the certificates to work, you must copy them from `./k8s/gateway-test/certs` to `/etc/secret-volume`.
 
    </details>
    </div>
