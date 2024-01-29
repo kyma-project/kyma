@@ -32,6 +32,11 @@ See the full list of Kyma troubleshooting guides:
 - [Functions Failing to Build on k3d](https://kyma-project.io/#/serverless-manager/user/troubleshooting-guides/03-40-function-build-failing-k3d)
 - [Serverless Periodically Restarting](https://kyma-project.io/#/serverless-manager/user/troubleshooting-guides/03-50-serverless-periodically-restaring)
 
+## Telemetry Module
+
+- [Traces Troubleshooting](https://kyma-project.io/#/telemetry-manager/user/03-traces?id=troubleshooting)
+- [Metrics Troubleshooting](https://kyma-project.io/#/telemetry-manager/user/04-metrics?id=troubleshooting)
+
 ## Eventing Module
 
 - [Kyma Eventing - Basic Diagnostics](https://kyma-project.io/#/eventing-manager/user/troubleshooting/evnt-01-eventing-troubleshooting)
