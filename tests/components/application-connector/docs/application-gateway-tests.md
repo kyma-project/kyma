@@ -135,8 +135,7 @@ Pipelines run the tests using the **test-gateway** target from the `Makefile`.
     </details>
     </div>
 
-   > [!TIP]
-   > Read more about Kyma installation in the [official Kyma documentation](https://kyma-project.io/#/02-get-started/01-quick-install).
+   >**TIP:** Read more about Kyma installation in the [official Kyma documentation](https://kyma-project.io/#/02-get-started/01-quick-install).
 
 ### Run the Tests
 
