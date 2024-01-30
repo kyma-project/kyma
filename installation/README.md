@@ -2,6 +2,4 @@
 
 ## Overview
 
-This folder contains Kyma CustomResourceDefinitions (CRDs) and the components list for installation. 
-
-See the document on [Kyma installation](https://kyma-project.io/#/04-operation-guides/operations/02-install-kyma) for basic information on how to set up Kyma on a cluster.
+This folder is going to be removed soon. With the modular Kyma you can install only the components you need. Please refer to the [Kyma installation](https://kyma-project.io/#/02-get-started/01-quick-install) document for more information.
