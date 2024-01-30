@@ -6,7 +6,7 @@ If you can't find a solution, don't hesitate to create a [GitHub](https://github
 
 See the full list of Kyma troubleshooting guides:
 
-### General Troubleshooting Guides
+## General Troubleshooting Guides
 
 - [Component Doesn't Work After Successful Installation](./01-component-installation-fails.md)
 - [Local Kyma Deployment Fails with Pending Pods](./01-deplyoment-fails-pending-pods.md)
@@ -16,6 +16,14 @@ See the full list of Kyma troubleshooting guides:
 - [Kyma Resource Is Misconfigured](./01-resources-misconfigured.md)
 - [Cannot Create a Volume Snapshot](./01-volume-backup.md)
 
-### Security
+## Modules` Troubleshooting Guides
+
+- [Istio Troubleshooting](https://kyma-project.io/#/istio/user/troubleshooting/README)
+- [Serverless Troubleshooting](https://kyma-project.io/#/serverless-manager/user/troubleshooting-guides/README)
+- For [Telemetry](https://kyma-project.io/#/telemetry-manager/user/README), the troubleshooting guides are part of the document of each signal type.
+- [Troubleshooting - Eventing](https://kyma-project.io/#/eventing-manager/user/troubleshooting/README)
+- [API Gateway Troubleshooting Guides](https://kyma-project.io/#/api-gateway/user/troubleshooting-guides/README)
+
+## Security
 
 - [Issues with Certificates on Gardener](./security/sec-01-certificates-gardener.md)
