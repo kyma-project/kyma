@@ -17,11 +17,8 @@ Apart from the general rules described in the `community` repository, every `kym
 
    Follow these steps:
 
-
-   > [!NOTE]
-   > The example assumes you have the `$GOPATH` already set.
+   ?> **NOTE** The example assumes you have the `$GOPATH` already set.
    
-
 1. Fork the repository in GitHub.
 
 2. Clone the fork to your `$GOPATH` workspace. Use this command to create the folder structure and clone the repository under the correct location:
