@@ -35,7 +35,9 @@ The default rule in the generic Makefile is `verify`, which means that when you 
 It runs tests, checks formatting and imports, and runs error checks.
 
 These are the possible rules that you can use:
->**NOTE:** Rules without the `-local` suffix are used inside the Docker container.
+
+> [!NOTE]
+> Rules without the `-local` suffix are used inside the Docker container.
 The Docker container is used in the CI environment.
 
 | Rule                              | Description                                                    |
