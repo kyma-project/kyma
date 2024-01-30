@@ -17,6 +17,7 @@ Apart from the general rules described in the `community` repository, every `kym
 
    Follow these steps:
 
+
    > [!NOTE]
    > The example assumes you have the `$GOPATH` already set.
 
