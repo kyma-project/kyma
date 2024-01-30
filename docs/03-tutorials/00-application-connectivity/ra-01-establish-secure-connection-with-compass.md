@@ -11,7 +11,7 @@ To establish a secure connection with Compass and generate the client certificat
 
 ## Steps
 
-1. Get the Connector URL and the one-time token.
+   Get the Connector URL and the one-time token.
 
    To get the Connector URL and the one-time token which allow you to fetch the required configuration details, use the Compass Console.
 
@@ -32,7 +32,7 @@ To establish a secure connection with Compass and generate the client certificat
    > [!NOTE] 
    > The one-time token expires after 5 minutes.
 
-2. Get the CSR information and configuration details from Kyma using the one-time token.
+1. Get the CSR information and configuration details from Kyma using the one-time token.
 
    To get the CSR information and configuration details, send this GraphQL query to the Connector URL.
    You must include the `connector-token` header containing the one-time token when making the call.
@@ -57,7 +57,7 @@ To establish a secure connection with Compass and generate the client certificat
 
    A successful call returns the data requested in the query including a new one-time token.
 
-3. Generate a key and a Certificate Signing Request (CSR).
+2. Generate a key and a Certificate Signing Request (CSR).
 
    Generate a CSR with the following command. **{SUBJECT}** is the certificate subject data returned with the CSR information as `subject`.   
 
@@ -69,7 +69,7 @@ To establish a secure connection with Compass and generate the client certificat
    > [!NOTE] 
    > The key length is configurable, however, 4096 is the recommended value.
 
-4. Sign the CSR and get a client certificate.
+3. Sign the CSR and get a client certificate.
 
    Encode the obtained CSR with base64:
    ```bash
@@ -91,7 +91,7 @@ To establish a secure connection with Compass and generate the client certificat
 
    The response contains a certificate chain, a valid client certificate signed by the Kyma Certificate Authority (CA), and the CA certificate.
 
-5. Decode the certificate chain.
+4. Decode the certificate chain.
 
    After you receive the certificates, decode the certificate chain with the base64 method and use it in your application:
    ```bash
