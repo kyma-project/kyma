@@ -20,6 +20,7 @@ Apart from the general rules described in the `community` repository, every `kym
 
    > [!NOTE]
    > The example assumes you have the `$GOPATH` already set.
+   
 
 1. Fork the repository in GitHub.
 
