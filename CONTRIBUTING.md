@@ -13,7 +13,7 @@ Apart from the general rules described in the `community` repository, every `kym
 
 ## Development
 
-Develop on your remote repository forked from the original repository in Go.
+   Develop on your remote repository forked from the original repository in Go.
 
    Follow these steps:
 
