@@ -2,11 +2,12 @@
 
 Here's a list of the most commonly used terms that you may come across when browsing through the Kyma documentation:
 
->**TIP:** The terms in the list are ordered alphabetically.
+> [!TIP]
+> The terms in the list are ordered alphabetically.
 
 | Term |  Description | Useful links |
 | ---- | ------------ | ------------ |
-| Application | An external solution connected to Kyma through Application Connector.   <br><br> **CAUTION:** <span style="color:red">Don't confuse it with `application`, which is the term used for a microservice deployed on Kyma or in a general sense for software.</span>  | [Application custom resource](https://kyma-project.io/#/application-connector-manager/user/resources/06-10-application)      |
+| Application | An external solution connected to Kyma through Application Connector.   <br><br> <div style="background-color:#ffddd3; padding:9px;"> **Warning** <br> Don't confuse it with `application`, which is the term used for a microservice deployed on Kyma or in a general sense for software.</div>  | [Application custom resource](https://kyma-project.io/#/application-connector-manager/user/resources/06-10-application)      |
 | Credentials/Secrets | Sensitive data to call the service, connect to it, and authenticate it.  |       |
 | Custom resource | A custom resource (CR) allows you to extend the Kubernetes API to cover use cases that are not directly covered by core Kubernetes.  | [Kubernetes - Custom Resource](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/) & [Custom resources provided by Kyma](./05-technical-reference/00-custom-resources)  |
 | CustomResourceDefinition (CRD) | An object used to define a custom resource. | [CRDs of custom resources provided by Kyma](https://github.com/kyma-project/kyma/tree/main/installation/resources/crds)      |
@@ -21,4 +22,5 @@ Here's a list of the most commonly used terms that you may come across when brow
 | Service | A Service in Kubernetes is an abstract way to expose an application running on a set of Pods as a network service. <br><br> In Kyma documentation, we use `Service` to refer to the Kubernetes term, and `service` to refer to a software functionality in general. | [Kubernetes -  Service](https://kubernetes.io/docs/concepts/services-networking/service/)    |
 | Service operator | Service Management in Kyma uses service operators. A service operator is a piece of software that provides a set of all necessary resources (such as CustomResourceDefinition and controllers) needed to provision third-party services in your Kubernetes cluster. | [OperatorHub.io](https://operatorhub.io/) & [SAP BTP Operator Module](https://kyma-project.io/#/btp-manager/user/README) |
 
->**TIP:** To learn the basic Kubernetes terminology, read the [Kubernetes glossary](https://kubernetes.io/docs/reference/glossary).
+> [!TIP] 
+> To learn the basic Kubernetes terminology, read the [Kubernetes glossary](https://kubernetes.io/docs/reference/glossary).

@@ -11,7 +11,8 @@ The diagram shows the Kyma access flow using Kyma dashboard.
 
 ![Kyma dashboard](assets/all-kyma-dashboard.svg)
 
->**NOTE:** Kyma dashboard is permission-aware so it only shows elements to which you have access as a logged-in user. The access is RBAC-based.
+> [!NOTE]
+> Kyma dashboard is permission-aware so it only shows elements to which you have access as a logged-in user. The access is RBAC-based.
 
 1. Access Kyma dashboard.
 2. If Kyma dashboard does not find a JWT token in the browser session storage, it forwards the authentication request to your Open ID Connect (OIDC)-compliant identity provider.
