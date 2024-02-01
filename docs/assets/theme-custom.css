@@ -1,4 +1,14 @@
 :root {
     /* Theme */
-    --sidebar-width: 20rem;
+    --sidebar-width: 20rem;   
+    --sidebar-nav-link-color--hover: var(--theme-color);
+    --sidebar-nav-link-font-weight--active : bold;
+    /* --sidebar-nav-link-font-weight--hover: bold; */
+    --sidebar-nav-link-text-decoration--active: none;
+    --sidebar-nav-link-text-decoration--hover: none;
+
+    --navbar-root-color--hover: var(--theme-color);
+
+    --code-inline-color: inherit;
+    --code-inline-background: hsla(113, 0%, 50%, 0.25);
 }
