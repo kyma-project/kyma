@@ -11,10 +11,11 @@
     --code-inline-color: inherit;
     --code-inline-background: hsla(113, 0%, 50%, 0.25);
     --code-font-size: calc(var(--font-size-m) * 0.9);
+    --code-font-weight: inherit;
 
     --strong-color: inherit;
 
-    --heading-h1-font-weight: bold;
+    --heading-h1-font-weight: 700;
     --heading-h1-margin: 2rem 0 0;
     --heading-h2-margin: 1.5rem 0 0;
     --heading-h3-margin: 1.5rem 0 0;
