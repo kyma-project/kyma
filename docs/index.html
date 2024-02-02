@@ -8,7 +8,7 @@
   <meta name="description" content="Kyma Project open-source documentation">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
   <link rel="apple-touch-icon" sizes="180x180" href="./assets/apple-touch-icon.png" />
-  <link rel="mask-icon" color="#2872dd" href="./assets/safari-pinned-tab.svg" />
+  <link rel="mask-icon" color="#0874DE" href="./assets/safari-pinned-tab.svg" />
   <link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32x32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="./assets/favicon-16x16.png" />
   <link rel="stylesheet" media="(prefers-color-scheme: dark)"
@@ -35,7 +35,7 @@
       subMaxLevel: 3,
       relativePath: true,
       loadFooter: true,
-      themeColor: 'blue',
+      themeColor: '#0874DE',
       //basePath: 'https://raw.githubusercontent.com/pbochynski/kyma/main/docs/',
       alias: {
         '/btp-manager/(.*)': 'https://raw.githubusercontent.com/kyma-project/btp-manager/main/docs/$1',
@@ -47,37 +47,37 @@
         '/nats-manager/(.*)': 'https://raw.githubusercontent.com/kyma-project/nats-manager/main/docs/$1',
         '/eventing-manager/(.*)': 'https://raw.githubusercontent.com/kyma-project/eventing-manager/main/docs/$1',
         '/api-gateway/(.*)': 'https://raw.githubusercontent.com/kyma-project/api-gateway/main/docs/$1',
-      }, 
+      },
       plugins: [
         function (hook, vm) {
-            // edit on GitHub link
-            hook.beforeEach(function (html) {
-              if (/githubusercontent\.com/.test(vm.route.file)) {
-                url = vm.route.file
-                  .replace('raw.githubusercontent.com', 'github.com')
-                  .replace(/\/main/, '/blob/main')
-              } else {
-                url = 'https://github.com/kyma-project/kyma/blob/main/docs/' + vm.route.file
-              }
-              var editHtml = '[:memo: Edit on GitHub](' + url + ')\n'
+          // edit on GitHub link
+          hook.beforeEach(function (html) {
+            if (/githubusercontent\.com/.test(vm.route.file)) {
+              url = vm.route.file
+                .replace('raw.githubusercontent.com', 'github.com')
+                .replace(/\/main/, '/blob/main')
+            } else {
+              url = 'https://github.com/kyma-project/kyma/blob/main/docs/' + vm.route.file
+            }
+            var editHtml = '[:memo: Edit on GitHub](' + url + ')\n'
 
-              return editHtml
-                + html
-            })
+            return editHtml
+              + html
+          })
         },
         function noAliasesForImages(hook, vm) {
-          
+
           // remove title metadata section
           hook.beforeEach(function (markdown) {
             markdown = markdown.replaceAll(/---.*\ntitle: (.*)\n---.*\n/gm, "# $1");
-            markdown = markdown.replace(/(<div tabs.*?>)((.|\n)*?)(<\/div>)/gm, function(match, g1, g2, g3, g4) {
+            markdown = markdown.replace(/(<div tabs.*?>)((.|\n)*?)(<\/div>)/gm, function (match, g1, g2, g3, g4) {
               let tab = g2.replace(/<details.*?>((.|\n)*?)<summary.*?>(\n|\s)*(.*?)(\n|\s)*<\/summary>((.|\n)*?).*?<\/details>/gm,
                 "#### **$4**\n$6\n");
               return '<!-- tabs:start -->\n' + tab + '<!-- tabs:end -->\n';
             });
             return markdown
           });
-          
+
           // replace aliases with absolute urls for images
           hook.afterEach(function (html) {
             let path = vm.route.path.split('/')

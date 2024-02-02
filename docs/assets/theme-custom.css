@@ -1,9 +1,8 @@
 :root {
-    /* Theme */
-    --sidebar-width: 20rem;   
+
+    --sidebar-width: 20rem;
     --sidebar-nav-link-color--hover: var(--theme-color);
-    --sidebar-nav-link-font-weight--active : bold;
-    /* --sidebar-nav-link-font-weight--hover: bold; */
+    --sidebar-nav-link-font-weight--active: bold;
     --sidebar-nav-link-text-decoration--active: none;
     --sidebar-nav-link-text-decoration--hover: none;
 
@@ -11,4 +10,17 @@
 
     --code-inline-color: inherit;
     --code-inline-background: hsla(113, 0%, 50%, 0.25);
+    --code-font-size: calc(var(--font-size-m) * 0.9);
+
+    --strong-color: inherit;
+
+    --heading-h1-font-weight: bold;
+    --heading-h1-margin: 2rem 0 0;
+    --heading-h2-margin: 1.5rem 0 0;
+    --heading-h3-margin: 1.5rem 0 0;
+    
+    --pagination-title-font-size       : var(--font-size-m);
+    --pagination-chevron-height        : 2em;
+    --pagination-chevron-stroke-width  : 1.5px;
+    
 }
