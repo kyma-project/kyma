@@ -19,7 +19,7 @@
     --heading-h1-margin: 2rem 0 0;
     --heading-h2-margin: 1.5rem 0 0;
     --heading-h3-margin: 1.5rem 0 0;
-    --heading-h1-font-size: calc(var(--font-size-xxl)*0.9);
+    --heading-h1-font-size: calc(var(--font-size-xxl)*0.95);
     
     --pagination-title-font-size: var(--font-size-m);
     --pagination-chevron-height: 2em;
