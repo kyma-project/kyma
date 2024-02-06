@@ -1,5 +1,4 @@
 :root {
-
     --sidebar-width: 20rem;
     --sidebar-nav-link-color--hover: var(--theme-color);
     --sidebar-nav-link-font-weight--active: bold;
@@ -23,6 +22,5 @@
     
     --pagination-title-font-size: var(--font-size-m);
     --pagination-chevron-height: 2em;
-    --pagination-chevron-stroke-width: 1.5px;
-    
+    --pagination-chevron-stroke-width: 1.5px; 
 }
