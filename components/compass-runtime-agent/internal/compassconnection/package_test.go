@@ -255,7 +255,7 @@ func TestCompassConnectionController(t *testing.T) {
 		connectedConnection.Spec.RefreshCredentialsNow = true
 
 		// when
-		connectedConnection, err = compassConnectionCRClient.Update(context.Background(), connectedConnection, v1.UpdateOptions{})
+		_, err = compassConnectionCRClient.Update(context.Background(), connectedConnection, v1.UpdateOptions{})
 		require.NoError(t, err)
 
 		err = waitFor(checkInterval, testTimeout, func() bool {
@@ -615,13 +615,6 @@ func isConnectionInState(expectedState v1alpha1.ConnectionState) bool {
 	}
 
 	return connectedConnection.Status.State == expectedState
-}
-
-func assertConnectionStatusError(t *testing.T) {
-	connectedConnection, err := compassConnectionCRClient.Get(context.Background(), compassConnectionName, v1.GetOptions{})
-	require.NoError(t, err)
-	t.Logf("Connection status error: %s", connectedConnection.Status.ConnectionStatus.Error)
-	assert.NotEmpty(t, connectedConnection.Status.ConnectionStatus.Error)
 }
 
 func assertSynchronizationStatusError(t *testing.T) {

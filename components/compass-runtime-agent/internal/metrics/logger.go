@@ -35,9 +35,10 @@ func NewMetricsLogger(
 }
 
 func (l *logger) Start(ctx context.Context) error {
+	tick := time.NewTicker(l.loggingTimeInterval)
 	for {
 		select {
-		case <-time.Tick(l.loggingTimeInterval):
+		case <-tick.C:
 			l.log()
 		case <-ctx.Done():
 			log.Info("Logging stopped.")

@@ -156,7 +156,7 @@ func TestConfigClient_FetchConfiguration(t *testing.T) {
 				{
 					ID:    "asda-oqiu",
 					Name:  "App3",
-					Auths: []*graphql.AppSystemAuth{{"asd", nil}},
+					Auths: []*graphql.AppSystemAuth{{ID: "asd"}},
 				},
 			},
 			PageInfo:   &graphql.PageInfo{},

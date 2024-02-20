@@ -15,8 +15,9 @@ import (
 // ManagerConstructor creates Secret Manager for specified namespace
 type ManagerConstructor func(namespace string) Manager
 
-//go:generate mockery --name=Manager
 // Manager contains operations for managing k8s secrets
+//
+//go:generate mockery --name=Manager
 type Manager interface {
 	Get(ctx context.Context, name string, options metav1.GetOptions) (*v1.Secret, error)
 	Create(ctx context.Context, secret *v1.Secret, options metav1.CreateOptions) (*v1.Secret, error)
@@ -24,8 +25,9 @@ type Manager interface {
 	Delete(ctx context.Context, name string, options metav1.DeleteOptions) error
 }
 
-//go:generate mockery --name=Repository
 // Repository contains operations for managing client credentials
+//
+//go:generate mockery --name=Repository
 type Repository interface {
 	Exists(name types.NamespacedName) (bool, error)
 	Get(name types.NamespacedName) (map[string][]byte, error)
@@ -36,7 +38,6 @@ type Repository interface {
 
 type repository struct {
 	secretsManagerConstructor ManagerConstructor
-	application               string
 }
 
 // NewRepository creates a new secrets repository

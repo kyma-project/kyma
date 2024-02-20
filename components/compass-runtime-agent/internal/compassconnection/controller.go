@@ -87,7 +87,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (
 		correlation.RequestIDHeaderKey: correlationID,
 	}
 	log := r.log.WithFields(logFields)
-	ctx = correlation.SaveCorrelationIDHeaderToContext(context.Background(), str.Ptr(correlation.RequestIDHeaderKey), str.Ptr(correlationID))
+	ctx = correlation.SaveCorrelationIDHeaderToContext(ctx, str.Ptr(correlation.RequestIDHeaderKey), str.Ptr(correlationID))
 
 	connection, err := r.getConnection(ctx, log, request)
 	if err != nil {

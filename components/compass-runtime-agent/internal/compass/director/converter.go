@@ -139,10 +139,9 @@ func convertCredentials(compassAuth *graphql.Auth) *kymamodel.Credentials {
 	if compassAuth == nil {
 		return nil
 	}
-	credential := compassAuth.Credential
-	switch credential.(type) {
+	switch compassAuth.Credential.(type) {
 	case *graphql.OAuthCredentialData:
-		v := credential.(*graphql.OAuthCredentialData)
+		v := compassAuth.Credential.(*graphql.OAuthCredentialData)
 		if v != nil {
 			return &kymamodel.Credentials{
 				Oauth: &kymamodel.Oauth{
@@ -154,7 +153,7 @@ func convertCredentials(compassAuth *graphql.Auth) *kymamodel.Credentials {
 			}
 		}
 	case *graphql.BasicCredentialData:
-		v := credential.(*graphql.BasicCredentialData)
+		v := compassAuth.Credential.(*graphql.BasicCredentialData)
 		if v != nil {
 			return &kymamodel.Credentials{
 				Basic: &kymamodel.Basic{
