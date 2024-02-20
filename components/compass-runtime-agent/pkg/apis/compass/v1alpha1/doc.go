@@ -2,3 +2,5 @@
 
 // +groupName=compass.kyma-project.io
 package v1alpha1
+
+//test gha

@@ -1,0 +1,50 @@
+name: golangci-lint template
+
+inputs:
+  GO_VERSION: 
+    required: true
+  LINTER_VERSION:
+    required: true
+  LINTER_WORKING_DIRECTORY:
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-go@v5
+      with:
+        go-version: '${{ inputs.GO_VERSION }}'
+        cache: false
+    - name: golangci-lint
+      uses: golangci/golangci-lint-action@v4
+      with:
+        # Require: The version of golangci-lint to use.
+        # When `install-mode` is `binary` (default) the value can be v1.2 or v1.2.3 or `latest` to use the latest version.
+        # When `install-mode` is `goinstall` the value can be v1.2.3, `latest`, or the hash of a commit.
+        version: '${{ inputs.LINTER_VERSION }}'
+
+        # Optional: working directory, useful for monorepos
+        working-directory: '${{ inputs.LINTER_WORKING_DIRECTORY }}'
+
+        # Optional: golangci-lint command line arguments.
+        #
+        # Note: By default, the `.golangci.yml` file should be at the root of the repository.
+        # The location of the configuration file can be changed by using `--config=`
+        # args: --timeout=30m --config=/my/path/.golangci.yml --issues-exit-code=0 
+        args: --timeout=5m
+
+        # Optional: show only new issues if it's a pull request. The default value is `false`.
+        only-new-issues: true
+
+        # Optional: if set to true, then all caching functionality will be completely disabled,
+        #           takes precedence over all other caching options.
+        skip-cache: true
+
+        # Optional: if set to true, then the action won't cache or restore ~/go/pkg.
+        # skip-pkg-cache: true
+
+        # Optional: if set to true, then the action won't cache or restore ~/.cache/go-build.
+        # skip-build-cache: true
+
+        # Optional: The mode to install golangci-lint. It can be 'binary' or 'goinstall'.
+        # install-mode: "goinstall"
