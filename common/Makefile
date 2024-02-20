@@ -4,8 +4,13 @@ TAG = $(DOCKER_TAG)
 
 .PHONY: build
 build:
-	./before-commit.sh
-	cd  logging && ./before-commit.sh && cd -
+	go mod vendor
+	go mod verify
+	go test -count 100 -race -coverprofile=cover.out ./...
+
+testi:
+.PHONY: test
+test: build
 
 .PHONY: ci-pr
 ci-pr: build
