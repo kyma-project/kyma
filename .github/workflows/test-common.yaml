@@ -33,5 +33,7 @@ jobs:
           go-version: 1.21.5
 
       - name: Run unit tests
+        with:
+          working-directory: 'common'
         run: make test
 
