@@ -1,0 +1,24 @@
+name: Run golangci-lint on central application gateway
+
+permissions:
+  contents: read
+
+on:
+  push:
+    paths:
+      - 'components/central-application-gateway/**'
+    branches: [ "main" ]
+  pull_request:
+    paths:
+      - 'components/central-application-gateway/**'
+
+jobs:
+  golangci-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: "./.github/workflows/template/golangci-lint"
+        with:
+          GO_VERSION: '1.21'
+          LINTER_VERSION: v1.56.2
+          LINTER_WORKING_DIRECTORY: 'components/central-application-gateway'
