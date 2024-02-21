@@ -2,7 +2,11 @@ name: Run unit tests
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - 'common/**'
   pull_request:
+    paths:
+      - 'common/**'
 permissions:
   contents: read
 jobs:
