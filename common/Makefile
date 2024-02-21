@@ -8,7 +8,6 @@ build:
 	go mod verify
 	go test -count 100 -race -coverprofile=cover.out ./...
 
-testi:
 .PHONY: test
 test: build
 
