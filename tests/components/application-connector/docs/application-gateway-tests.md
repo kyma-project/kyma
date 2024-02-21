@@ -25,11 +25,11 @@ The tests consist of:
 - [Test runners](../test/application-gateway/) with various checks for the subsets of cases, grouped by the Application CRs
 - [Mock application](../tools/external-api-mock-app/) which simulates the remote endpoints
 
-Additionally, the following resources are created on the cluster:
+Additionally, the following resources are created in the cluster:
 - [Service Account](../resources/charts/gateway-test/charts/test/templates/service-account.yml) used by the tests to read the Application CRs
 - [Secrets](../resources/charts/gateway-test/charts/test/templates/applications/credentials) used by the Mock application to configure mTLS servers
 
-The tests are executed as a Kubernetes Job on a Kyma cluster where the tested Application Gateway is installed.
+The tests are executed as a Kubernetes Job in a Kyma cluster where the tested Application Gateway is installed.
 The test Job and the mock application deployment are in the `test` namespace.
 
 ![Application Gateway tests architecture](assets/app-gateway-tests-architecture.svg)
@@ -158,7 +158,7 @@ To run the mock application locally, follow these steps:
 
 1. Change all the **targetUrl** values in the [Application CRs](../resources/charts/gateway-test/charts/test/templates/applications/) to reflect the new application URL. For example, `http://localhost:8081/v1/api/unsecure/ok`.
 2. Change all the **centralGatewayUrl** values to reflect the new Application Gateway URL. For example, `http://localhost:8080/positive-authorisation/unsecure-always-ok`.
-3. Deploy all the resources on the cluster.
+3. Deploy all the resources in the cluster.
    > **NOTE:** You can omit the test Job and the Central Gateway, but it's easier to just let them fail.
 4. Build the mock application:
 

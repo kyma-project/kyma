@@ -105,7 +105,7 @@ If you want to provision a new volume or restore the existing one, create on-dem
 
 ### Steps
 
-  1. [Enable the required feature gate on the cluster](https://cloud.google.com/kubernetes-engine/docs/how-to/gce-pd-csi-driver).
+  1. [Enable the required feature gate in the cluster](https://cloud.google.com/kubernetes-engine/docs/how-to/gce-pd-csi-driver).
   2. Check out [the repository for the Google Compute Engine Persistent Disk (GCE PD) CSI driver](https://github.com/kubernetes-sigs/gcp-compute-persistent-disk-csi-driver) for details on how to use volume snapshots on GKE.
 
 <!-- tabs:end -->
