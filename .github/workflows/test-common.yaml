@@ -31,7 +31,6 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: 1.21.5
-          working-directory: 'common'
       - name: Run unit tests
-        run: make test
+        run: make -C common test
 
