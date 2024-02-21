@@ -57,11 +57,7 @@ func TestMigrator(t *testing.T) {
 
 		// when
 		migrator := NewMigrator(secretsRepositoryMock, func(key string) bool {
-			if key == "key2" {
-				return true
-			}
-
-			return false
+			return key == "key2"
 		})
 		err := migrator.Do(sourceSecret, targetSecret)
 
