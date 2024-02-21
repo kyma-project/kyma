@@ -17,7 +17,7 @@ The tests consist of:
 - [Test resources](../resources/charts/application-connectivity-validator-test/) used to perform the test
 - [Test runner](../test/application-connectivity-validator/) with all the test cases
 
-The tests are executed as a Kubernetes Job on a Kyma cluster where the tested Application Connectivity Validator is installed. The test Job is deployed in the `test` namespace.
+The tests are executed as a Kubernetes Job in a Kyma cluster where the tested Application Connectivity Validator is installed. The test Job is deployed in the `test` namespace.
 
 ![Connectivity Validator tests architecture](assets/connectivity-validator-tests-architecture.svg)
 

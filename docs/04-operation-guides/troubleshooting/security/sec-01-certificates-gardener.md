@@ -45,7 +45,7 @@ The result describes the reason for the failure of issuing a domain SSL certific
 
 You can create a new Certificate resource applying suggestions from the error message to request a new domain SSL certificate. Follow these steps:
 
-1. Make sure the Secret connected to the Certificate resource is not present on the cluster. To find its name and namespace, run:
+1. Make sure the Secret connected to the Certificate resource is not present in the cluster. To find its name and namespace, run:
 
     ```bash
     kubectl get certificates -n {CERTIFICATE_NAMESPACE} {CERTIFICATE_NAME} -o jsonpath='{ .spec.secretRef }'
