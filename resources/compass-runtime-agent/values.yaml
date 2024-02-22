@@ -5,7 +5,7 @@ global:
   images:
     compass_runtime_agent:
       name: "compass-runtime-agent"
-      version: "v20230922-56ec8afc"
+      version: "v20231218-ff3777c4"
       directory: "prod"
   istio:
     gateway:
@@ -57,10 +57,6 @@ compassRuntimeAgent:
           keys: ["cacert"]
   compass:
     skipTLSVerification: true
-  director:
-    proxy:
-      port: 8081
-      insecureSkipVerify: true
   debug:
     queryLogging: false
   metrics:

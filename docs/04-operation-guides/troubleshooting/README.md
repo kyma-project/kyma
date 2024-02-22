@@ -1,6 +1,4 @@
----
-title: Troubleshooting
----
+# Troubleshooting
 
 The troubleshooting section aims to identify the most common recurring problems the users face when they install and start using Kyma, as well as the most suitable solutions to these problems.
 
@@ -8,51 +6,24 @@ If you can't find a solution, don't hesitate to create a [GitHub](https://github
 
 See the full list of Kyma troubleshooting guides:
 
-### General troubleshooting guides
+## General Troubleshooting Guides
 
-- [Component doesn't work after successful installation](./01-component-installation-fails.md)
-- [Local Kyma deployment fails with pending Pods](./01-deplyoment-fails-pending-pods.md)
-- [Provisioning k3d fails on a Linux machine](./01-k3d-fails-on-linux.md)
-- [Error for kubectl port forwarding](./01-kube-troubleshoot-kubectl-port-forward.md)
-- [Kyma domain is not resolvable](./01-kyma-domain-unresolvable.md)
-- [Kyma resource is misconfigured](./01-resources-misconfigured.md)
-- [Cannot create a volume snapshot](./01-volume-backup.md)
+- [Component Doesn't Work After Successful Installation](./01-component-installation-fails.md)
+- [Local Kyma Deployment Fails with Pending Pods](./01-deplyoment-fails-pending-pods.md)
+- [Provisioning k3d Fails on a Linux Machine](./01-k3d-fails-on-linux.md)
+- [Error for kubectl Port Forwarding](./01-kube-troubleshoot-kubectl-port-forward.md)
+- [Kyma Domain Is Not Resolvable](./01-kyma-domain-unresolvable.md)
+- [Kyma Resource Is Misconfigured](./01-resources-misconfigured.md)
+- [Cannot Create a Volume Snapshot](./01-volume-backup.md)
 
-### API Exposure
-  
-- Cannot connect to a service exposed by an APIRule
-  - [Basic diagnostics](./api-exposure/apix-01-cannot-connect-to-service/apix-01-01-apigateway-connect-api-rule.md)
-  - [404 Not Found](./api-exposure/apix-01-cannot-connect-to-service/apix-01-03-404-not-found.md)
-  - [500 Internal Server Error](./api-exposure/apix-01-cannot-connect-to-service/apix-01-04-500-server-error.md)
-- External DNS management
-  - [Connection refused or timeout](./api-exposure/apix-02-dns-mgt/apix-02-01-dns-mgt-connection-refused.md)
-  - [Could not resolve host](./api-exposure/apix-02-dns-mgt/apix-02-02-dns-mgt-could-not-resolve-host.md)
-  - [Resource ignored by the controller](./api-exposure/apix-02-dns-mgt/apix-02-03-dns-mgt-resource-ignored.md)
-- [Certificate management - Issuer not created](./api-exposure/apix-03-cert-mgt-issuer-not-created.md)
-- [Kyma Gateway - not reachable](./api-exposure/apix-04-gateway-not-reachable.md)
-- [Issues when creating an APIRule - various reasons](./api-exposure/apix-06-api-rule-troubleshooting.md)
+## Modules` Troubleshooting Guides
 
-### Eventing
+- [Istio Troubleshooting](https://kyma-project.io/#/istio/user/troubleshooting/README)
+- [Serverless Troubleshooting](https://kyma-project.io/#/serverless-manager/user/troubleshooting-guides/README)
+- For [Telemetry](https://kyma-project.io/#/telemetry-manager/user/README), the troubleshooting guides are part of the document of each signal type.
+- [Troubleshooting - Eventing](https://kyma-project.io/#/eventing-manager/user/troubleshooting/README)
+- [API Gateway Troubleshooting Guides](https://kyma-project.io/#/api-gateway/user/troubleshooting-guides/README)
 
-- [Kyma Eventing - Basic Diagnostics](./eventing/evnt-01-eventing-troubleshooting.md)
-- [NATS JetStream backend troubleshooting](./eventing/evnt-02-jetstream-troubleshooting.md)
-- [Subscriber receives irrelevant events](./eventing/evnt-03-type-collision.md)
-- [Eventing backend stopped receiving events due to full storage](./eventing/evnt-04-free-jetstream-storage.md)
-- [Published events are pending in the stream](./eventing/evnt-05-fix-pending-messages.md)
+## Security
 
-### Observability
-
-- [Prometheus Istio Server restarting or in crashback loop](./observability/obsv-01-troubleshoot-prometheus-istio-server-crash-oom.md)
-- [Component doesn't work after successful installation](./observability/obsv-02-troubleshoot-trace-backend-shows-few-traces.md)
-
-### Security
-  
-- [Issues with certificates on Gardener](./security/sec-01-certificates-gardener.md)
-
-### Istio
-
-- [Can't access a Kyma endpoint (503 status code)](https://kyma-project.io/#/istio/user/02-operation-guides/troubleshooting/03-10-503-no-access)
-- [Connection refused errors](https://kyma-project.io/#/istio/user/02-operation-guides/troubleshooting/03-20-connection-refused)
-- [Issues with Istio sidecar injection](https://kyma-project.io/#/istio/user/02-operation-guides/troubleshooting/03-30-istio-no-sidecar)
-- [Incompatible Istio sidecar version after Kyma upgrade](https://kyma-project.io/#/istio/user/02-operation-guides/troubleshooting/03-40-incompatible-istio-sidecar-version)
-- [Istio unintentionally deleted](https://kyma-project.io/#/istio/user/02-operation-guides/troubleshooting/03-50-recovering-from-unintentional-istio-module-removal)
+- [Issues with Certificates on Gardener](./security/sec-01-certificates-gardener.md)

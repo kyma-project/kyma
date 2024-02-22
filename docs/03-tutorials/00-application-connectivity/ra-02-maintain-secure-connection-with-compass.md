@@ -1,6 +1,4 @@
----
-title: Maintain a secure connection with Compass
----
+# Maintain a Secure Connection with Compass
 
 After you have established a secure connection with Compass, you can fetch the configuration details and renew the client certificate before it expires. To renew the client certificate, follow the steps in this tutorial.
 
@@ -44,7 +42,8 @@ After you have established a secure connection with Compass, you can fetch the c
     openssl genrsa -out compass-app.key $KEY_LENGTH
     openssl req -new -sha256 -out compass-app.csr -key compass-app.key -subj "{SUBJECT}"
     ```
-   > **NOTE:** The key length is configurable, however, 4096 is the recommended value.
+   > [!NOTE] 
+   > The key length is configurable, however, 4096 is the recommended value.
 
 3. Sign the CSR and renew the client certificate.
 
@@ -75,4 +74,5 @@ After you have established a secure connection with Compass, you can fetch the c
     base64 -d {CERTIFICATE_CHAIN}
     ```
 
->**NOTE:** See how to [revoke a client certificate](ra-03-revoke-client-certificate.md).
+> [!NOTE]
+> See how to [revoke a client certificate](ra-03-revoke-client-certificate.md).

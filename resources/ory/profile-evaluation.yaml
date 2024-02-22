@@ -1,9 +1,0 @@
----
-oathkeeper:
-  replicaCount: 1
-  deployment:
-    resources:
-      requests:
-        cpu: "10m"
-    autoscaling:
-      enabled: false

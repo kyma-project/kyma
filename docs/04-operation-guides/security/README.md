@@ -1,6 +1,4 @@
----
-title: Security in Kyma
----
+# Security in Kyma
 
 To ensure a stable and secure work environment, the Kyma security component uses the following tools:
 
@@ -12,7 +10,4 @@ This is a complete list of security-related guides in Kyma:
 
 * [Authentication in Kyma](sec-01-authentication-in-kyma.md)
 * [Authorization in Kyma](sec-02-authorization-in-kyma.md)
-* [Access Kyma securely](sec-03-access-kyma.md)
-* [Ingress and Egress traffic](https://kyma-project.io/#/istio/user/02-operation-guides/security/02-10-ingress-egress-traffic)
-* [Access and Expose Grafana](sec-06-access-expose-grafana.md)
-* [Useful links](sec-07-useful-links.md)
+* [Access Kyma Securely](sec-03-access-kyma.md)

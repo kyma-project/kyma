@@ -1,6 +1,0 @@
-# This triggers initial reconciliation for eventing-controller and is updated with necessary labels/status
-apiVersion: eventing.kyma-project.io/v1alpha1
-kind: EventingBackend
-metadata:
-  name: {{ include "eventing.backend.name" . }}
-spec: {}

@@ -1,4 +1,4 @@
-# Hack directory
+# Hack Directory
 
 ## Overview
 

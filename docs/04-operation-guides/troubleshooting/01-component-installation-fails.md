@@ -1,6 +1,4 @@
----
-title: Component doesn't work after successful installation
----
+# Component Doesn't Work After Successful Installation {docsify-ignore-all}
 
 ## Symptom
 
@@ -18,7 +16,7 @@ A Pod might be not running.
    kubectl get pods --all-namespaces
    ```
    
-   The command retrieves all Pods from all Namespaces, the status of the Pods, and their instance numbers. 
+   The command retrieves all Pods from all namespaces, the status of the Pods, and their instance numbers. 
 
 2. Check if the status is `Running` for all Pods.
 3. If any of the Pods that you need was not started successfully, install Kyma again.

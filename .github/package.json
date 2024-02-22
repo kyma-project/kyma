@@ -12,7 +12,6 @@
     "labels": {
       "area/api-gateway": "Api Gateway",
       "area/application-connector": "Application Connector",
-      "area/serverless": "Serverless",
       "area/cluster": "Cluster",
       "area/eventing": "Eventing",
       "area/security": "Security",

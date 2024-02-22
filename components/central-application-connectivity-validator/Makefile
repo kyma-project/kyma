@@ -14,9 +14,6 @@ VERIFY_IGNORE := /vendor\|/mocks
 release:
 	$(MAKE) gomod-release-local
 
-.PHONY: path-to-referenced-charts
-path-to-referenced-charts:
-	@echo "resources/application-connector"
 
 ## Location to install dependencies to
 LOCALBIN ?= $(shell pwd)/bin

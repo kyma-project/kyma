@@ -1,6 +1,4 @@
----
-title: Reconnect Runtime Agent with Compass
----
+# Reconnect Runtime Agent with Compass
 
 This tutorial shows how to reconnect Runtime Agent with Compass after the established connection was lost.
 

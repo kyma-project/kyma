@@ -2,21 +2,22 @@
 
 **Table of Contents**
 
-- [Design and architecture](#design-and-architecture)
-- [Building](#building)
-- [Running](#running)
-  - [Deploy a Kyma cluster locally](#deploy-a-kyma-cluster-locally)
-  - [Run the tests](#run-the-tests)
-- [Debugging](#debugging)
-  - [Running without cleanup](#running-without-cleanup)
+- [Application Connectivity Validator](#application-connectivity-validator)
+  - [Design and Architecture](#design-and-architecture)
+  - [Building](#building)
+  - [Running](#running)
+    - [Deploy a Kyma Cluster Locally](#deploy-a-kyma-cluster-locally)
+    - [Run the Tests](#run-the-tests)
+  - [Debugging](#debugging)
+    - [Running Without Cleanup](#running-without-cleanup)
   
-## Design and architecture
+## Design and Architecture
 
 The tests consist of:
 - [Test resources](../resources/charts/application-connectivity-validator-test/) used to perform the test
 - [Test runner](../test/application-connectivity-validator/) with all the test cases
 
-The tests are executed as a Kubernetes Job on a Kyma cluster where the tested Application Connectivity Validator is installed. The test Job is deployed in the `test` Namespace.
+The tests are executed as a Kubernetes Job in a Kyma cluster where the tested Application Connectivity Validator is installed. The test Job is deployed in the `test` namespace.
 
 ![Connectivity Validator tests architecture](assets/connectivity-validator-tests-architecture.svg)
 
@@ -41,7 +42,7 @@ Tests can be run on any Kyma cluster with Application Connectivity Validator.
 
 Pipelines run the tests using the **test-validator** target from the `Makefile`.
 
-### Deploy a Kyma cluster locally
+### Deploy a Kyma Cluster Locally
 
 1. Provision a local Kubernetes cluster with k3d:
    ```sh
@@ -56,19 +57,19 @@ Pipelines run the tests using the **test-validator** target from the `Makefile`.
 
    >**TIP:** Read more about Kyma installation in the [official Kyma documentation](https://kyma-project.io/#/02-get-started/01-quick-install).
 
-### Run the tests
+### Run the Tests
 
 ``` sh
 make -f Makefile.test-application-conn-validator test-validator
 ```
 
-By default, the tests clean up after themselves, removing all the previously created resources and the `test` Namespace.
+By default, the tests clean up after themselves, removing all the previously created resources and the `test` namespace.
 
 > **CAUTION:** If the names of your existing resources are the same as the names used in the tests, running this command overrides or removes the existing resources.
 
 ## Debugging
 
-### Running without cleanup
+### Running Without Cleanup
 
 To run the tests without removing all the created resources afterwards, run them in the debugging mode.
 

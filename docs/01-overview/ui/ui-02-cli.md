@@ -1,6 +1,4 @@
----
-title: Kyma CLI
----
+# Kyma CLI
 
 ## Purpose
 

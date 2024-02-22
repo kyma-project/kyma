@@ -1,9 +1,9 @@
 module github.com/kyma-project/kyma/components/central-application-gateway
 
-go 1.19
+go 1.21
 
 require (
-	github.com/gorilla/mux v1.8.0
+	github.com/gorilla/mux v1.8.1
 	github.com/oklog/run v1.1.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/stretchr/testify v1.8.4
@@ -39,11 +39,12 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/stretchr/objx v0.5.0 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
-	golang.org/x/net v0.8.0 // indirect
+	golang.org/x/crypto v0.16.0 // indirect
+	golang.org/x/net v0.19.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20220223155221-ee480838109b // indirect
-	golang.org/x/sys v0.10.0 // indirect
-	golang.org/x/term v0.6.0 // indirect
-	golang.org/x/text v0.8.0 // indirect
+	golang.org/x/sys v0.15.0 // indirect
+	golang.org/x/term v0.15.0 // indirect
+	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/time v0.0.0-20220210224613-90d013bbcef8 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
@@ -59,6 +60,8 @@ require (
 )
 
 replace (
-	golang.org/x/net => golang.org/x/net v0.8.0
-	golang.org/x/text => golang.org/x/text v0.3.8
+	golang.org/x/crypto => golang.org/x/crypto v0.16.0
+	golang.org/x/net => golang.org/x/net v0.19.0
+	golang.org/x/sys => golang.org/x/sys v0.15.0
+	golang.org/x/text => golang.org/x/text v0.14.0
 )

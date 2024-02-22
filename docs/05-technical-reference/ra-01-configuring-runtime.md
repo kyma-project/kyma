@@ -1,8 +1,7 @@
----
-title: Configuring the Runtime
----
+# Configuring the Runtime
 
-> **NOTE:** To represent API and Event Definitions of the Applications connected to a Runtime, we recommend that you use the Open Service Broker API.
+> [!NOTE] 
+> To represent API and Event Definitions of the Applications connected to a Runtime, we recommend that you use the Open Service Broker API.
 
 Runtime Agent periodically requests for the configuration of its Runtime from Compass.
 Changes in the configuration for the Runtime are applied by Runtime Agent on the Runtime.

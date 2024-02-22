@@ -2,22 +2,24 @@
 
 **Table of Contents**
 
-- [Design and architecture](#design-and-architecture)
-- [Building](#building)
-- [Running](#running)
-  - [Deploy a Kyma cluster locally](#deploy-a-kyma-cluster-locally)
-  - [Test setup](#test-setup---compass-runtime-agent-configuration)
-  - [Run the tests](#run-the-tests)
-- [Debugging](#debugging)
-  - [Running without cleanup](#running-without-cleanup)
+- [Compass Runtime Agent](#compass-runtime-agent)
+  - [Design and Architecture](#design-and-architecture)
+  - [Building](#building)
+  - [Running](#running)
+    - [Deploy a Kyma Cluster Locally](#deploy-a-kyma-cluster-locally)
+    - [Test Setup - Compass Runtime Agent Configuration](#test-setup---compass-runtime-agent-configuration)
+    - [Run the Tests](#run-the-tests)
+  - [Debugging](#debugging)
+    - [Running Without Cleanup](#running-without-cleanup)
+    - [Debugging in the IDE](#debugging-in-the-ide)
 
-## Design and architecture
+## Design and Architecture
 
 The tests consist of:
 - [Test resources](../resources/charts/compass-runtime-agent-test/) used to perform the test
 - [Test runner](../test/application-connectivity-validator/) with all the test cases
 
-The tests are executed as a Kubernetes Job on a Kyma cluster where the tested Compass Runtime Agent is installed. The test Job is deployed in the `test` Namespace.
+The tests are executed as a Kubernetes Job in a Kyma cluster where the tested Compass Runtime Agent is installed. The test Job is deployed in the `test` namespace.
 
 ![Compass Runtime Agent tests architecture](assets/compass-runtime-agent-tests-architecture.svg)
 
@@ -50,7 +52,7 @@ Tests can be run on any Kyma cluster with Compass Runtime Agent.
 
 Pipelines run the tests using the **test-compass-runtime-agent** target from the `Makefile`.
 
-### Deploy a Kyma cluster locally
+### Deploy a Kyma Cluster Locally
 
 1. Provision a local Kubernetes cluster with k3d:
    ```bash
@@ -65,7 +67,7 @@ Pipelines run the tests using the **test-compass-runtime-agent** target from the
 
    >**TIP:** Read more about [Kyma installation](https://kyma-project.io/#/02-get-started/01-quick-install).
 
-### Test setup - Compass Runtime Agent configuration
+### Test Setup - Compass Runtime Agent Configuration
 
 The [`values.yaml`](../resources/charts/compass-runtime-agent-test/values.yaml) file contains environment variables that are used in the Compass Runtime Agent tests. These values can be modified as needed.
 
@@ -75,7 +77,7 @@ The [`values.yaml`](../resources/charts/compass-runtime-agent-test/values.yaml) 
 - **APP_OAUTH_CREDENTIALS_SECRET_NAME** - Secret name for Compass OAuth credentials
 - **APP_OAUTH_CREDENTIALS_NAMESPACE** - Namespace for Compass OAuth credentials
 
-### Run the tests
+### Run the Tests
 
 1. Before running the test export the following environment variables
    - **COMPASS_HOST** - host running Compass 
@@ -88,13 +90,13 @@ The [`values.yaml`](../resources/charts/compass-runtime-agent-test/values.yaml) 
    make test-compass-runtime-agent
    ```
 
-By default, the tests clean up after themselves, removing all the previously created resources and the `test` Namespace.
+By default, the tests clean up after themselves, removing all the previously created resources and the `test` namespace.
 
 > **CAUTION:** If the names of your existing resources are the same as the names used in the tests, running this command overrides or removes the existing resources.
 
 ## Debugging
 
-### Running without cleanup
+### Running Without Cleanup
 
 To run the tests without removing all the created resources afterwards, run them in the debugging mode.
 

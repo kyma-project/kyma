@@ -147,9 +147,6 @@ func TestCompassConnectionController(t *testing.T) {
 	configurationClientMock := &directorMocks.DirectorClient{}
 	configurationClientMock.On("FetchConfiguration", requestIDCtxMatcher).Return(kymaModelApps, graphql.Labels{}, nil)
 	configurationClientMock.On("SetURLsLabels", requestIDCtxMatcher, runtimeURLsConfig, graphql.Labels{}).Return(runtimeLabels, nil)
-	// Director proxy configurator
-	directorProxyConfiguratorMock := &directorMocks.ProxyConfigurator{}
-	directorProxyConfiguratorMock.On("SetURLAndCerts", mock.AnythingOfType("cache.ConnectionData")).Return(nil)
 	// Clients provider
 	clientsProviderMock := clientsProviderMock(configurationClientMock, tokensConnectorClientMock, certsConnectorClientMock)
 	// Sync service
@@ -163,7 +160,6 @@ func TestCompassConnectionController(t *testing.T) {
 		assert.Equal(t, directorURL, data.DirectorURL)
 		return nil
 	})
-	connectionDataCache.AddSubscriber(directorProxyConfiguratorMock.SetURLAndCerts)
 
 	var baseDependencies = DependencyConfig{
 		K8sConfig:         cfg,
@@ -259,7 +255,7 @@ func TestCompassConnectionController(t *testing.T) {
 		connectedConnection.Spec.RefreshCredentialsNow = true
 
 		// when
-		connectedConnection, err = compassConnectionCRClient.Update(context.Background(), connectedConnection, v1.UpdateOptions{})
+		_, err = compassConnectionCRClient.Update(context.Background(), connectedConnection, v1.UpdateOptions{})
 		require.NoError(t, err)
 
 		err = waitFor(checkInterval, testTimeout, func() bool {
@@ -348,8 +344,6 @@ func TestCompassConnectionController(t *testing.T) {
 		require.Equal(t, true, isConnectionInState(v1alpha1.Synchronized))
 		clientsProviderMock.ExpectedCalls = nil
 		clientsProviderMock.Calls = nil
-		directorProxyConfiguratorMock.ExpectedCalls = nil
-		directorProxyConfiguratorMock.On("SetURLAndCerts", mock.AnythingOfType("cache.ConnectionData")).Return(nil)
 		clientsProviderMock.On("GetConnectorTokensClient", connectorURL).Return(tokensConnectorClientMock, nil)
 		clientsProviderMock.On("GetConnectorCertSecuredClient").Return(certsConnectorClientMock, nil)
 		clientsProviderMock.On("GetDirectorClient", runtimeConfig).Return(nil, errors.New("error"))
@@ -370,8 +364,6 @@ func TestCompassConnectionController(t *testing.T) {
 		// given
 		configProviderMock.ExpectedCalls = nil
 		configProviderMock.Calls = nil
-		directorProxyConfiguratorMock.ExpectedCalls = nil
-		directorProxyConfiguratorMock.On("SetURLAndCerts", mock.AnythingOfType("cache.ConnectionData")).Return(nil)
 		configProviderMock.On("GetConnectionConfig").Return(connectionConfig, nil)
 		configProviderMock.On("GetRuntimeConfig").Return(runtimeConfig, errors.New("error"))
 
@@ -623,13 +615,6 @@ func isConnectionInState(expectedState v1alpha1.ConnectionState) bool {
 	}
 
 	return connectedConnection.Status.State == expectedState
-}
-
-func assertConnectionStatusError(t *testing.T) {
-	connectedConnection, err := compassConnectionCRClient.Get(context.Background(), compassConnectionName, v1.GetOptions{})
-	require.NoError(t, err)
-	t.Logf("Connection status error: %s", connectedConnection.Status.ConnectionStatus.Error)
-	assert.NotEmpty(t, connectedConnection.Status.ConnectionStatus.Error)
 }
 
 func assertSynchronizationStatusError(t *testing.T) {

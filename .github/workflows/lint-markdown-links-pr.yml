@@ -6,6 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: gaurav-nelson/github-action-markdown-link-check@v1
         with:
           use-quiet-mode: 'yes'  
@@ -14,4 +15,4 @@ jobs:
           folder-path: '.'
           max-depth: -1
           check-modified-files-only: 'yes'
-          base-branch: 'main'
+          base-branch: ${{ github.base_ref }}

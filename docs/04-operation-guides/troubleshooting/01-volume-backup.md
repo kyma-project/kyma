@@ -1,6 +1,4 @@
----
-title: Cannot create a volume snapshot
----
+# Cannot Create a Volume Snapshot
 
 ## Symptom
 

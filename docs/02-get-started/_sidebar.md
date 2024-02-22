@@ -1,7 +1,0 @@
-* [Home](/)
-* [Modular Kyma](08-install-uninstall-upgrade-kyma-module.md)
-* [Get Started](README.md)
-  * [Deploy and expose a Function](02-deploy-expose-function.md)
-  * [Deploy and expose a microservice](03-deploy-expose-microservice.md)
-  * [Trigger a workload with an event](04-trigger-workload-with-event.md)
-  * [Observability](05-observability.md)

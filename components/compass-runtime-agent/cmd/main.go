@@ -10,7 +10,6 @@ import (
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/certificates"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/cache"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/director"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compassconnection"
 	confProvider "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/config"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/graphql"
@@ -92,12 +91,6 @@ func main() {
 	configProvider := confProvider.NewConfigProvider(agentConfigSecret, secretsRepository)
 	clientsProvider := compass.NewClientsProvider(graphql.New, options.SkipCompassTLSVerify, options.QueryLogging)
 	connectionDataCache.AddSubscriber(clientsProvider.UpdateConnectionData)
-
-	log.Infoln("Setting up Director Proxy Service")
-	directorProxy := director.NewProxy(options.DirectorProxy)
-	err = mgr.Add(directorProxy)
-	exitOnError(err, "Failed to create director proxy")
-	connectionDataCache.AddSubscriber(directorProxy.SetURLAndCerts)
 
 	log.Infoln("Setting up Controller")
 	controllerDependencies := compassconnection.DependencyConfig{

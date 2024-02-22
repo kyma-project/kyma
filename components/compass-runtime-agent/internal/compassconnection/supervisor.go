@@ -21,8 +21,6 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -31,10 +29,10 @@ const (
 
 //go:generate mockery --name=CRManager
 type CRManager interface {
-	Create(ctx context.Context, cc *v1alpha1.CompassConnection, options v1.CreateOptions) (*v1alpha1.CompassConnection, error)
-	Update(ctx context.Context, cc *v1alpha1.CompassConnection, options v1.UpdateOptions) (*v1alpha1.CompassConnection, error)
-	Delete(ctx context.Context, name string, options v1.DeleteOptions) error
-	Get(ctx context.Context, name string, options v1.GetOptions) (*v1alpha1.CompassConnection, error)
+	Create(ctx context.Context, cc *v1alpha1.CompassConnection, options metav1.CreateOptions) (*v1alpha1.CompassConnection, error)
+	Update(ctx context.Context, cc *v1alpha1.CompassConnection, options metav1.UpdateOptions) (*v1alpha1.CompassConnection, error)
+	Delete(ctx context.Context, name string, options metav1.DeleteOptions) error
+	Get(ctx context.Context, name string, options metav1.GetOptions) (*v1alpha1.CompassConnection, error)
 }
 
 //go:generate mockery --name=Supervisor
@@ -86,7 +84,7 @@ type crSupervisor struct {
 }
 
 func (s *crSupervisor) InitializeCompassConnection(ctx context.Context) (*v1alpha1.CompassConnection, error) {
-	compassConnectionCR, err := s.crManager.Get(context.Background(), DefaultCompassConnectionName, v1.GetOptions{})
+	compassConnectionCR, err := s.crManager.Get(context.Background(), DefaultCompassConnectionName, metav1.GetOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			return s.newCompassConnection(ctx)
@@ -259,7 +257,7 @@ func (s *crSupervisor) urlsUpdated(compassConnectionCR *v1alpha1.CompassConnecti
 
 func (s *crSupervisor) newCompassConnection(ctx context.Context) (*v1alpha1.CompassConnection, error) {
 	connectionCR := &v1alpha1.CompassConnection{
-		ObjectMeta: v1.ObjectMeta{
+		ObjectMeta: metav1.ObjectMeta{
 			Name: DefaultCompassConnectionName,
 		},
 		Spec: v1alpha1.CompassConnectionSpec{},
@@ -267,7 +265,7 @@ func (s *crSupervisor) newCompassConnection(ctx context.Context) (*v1alpha1.Comp
 
 	s.establishConnection(ctx, connectionCR)
 
-	return s.crManager.Create(context.Background(), connectionCR, v1.CreateOptions{})
+	return s.crManager.Create(context.Background(), connectionCR, metav1.CreateOptions{})
 }
 
 func (s *crSupervisor) establishConnection(ctx context.Context, connectionCR *v1alpha1.CompassConnection) {
@@ -345,7 +343,7 @@ func (s *crSupervisor) setConnectionMaintenanceFailedStatus(connectionCR *v1alph
 func (s *crSupervisor) updateCompassConnection(connectionCR *v1alpha1.CompassConnection) (*v1alpha1.CompassConnection, error) {
 	// TODO: with retries
 
-	return s.crManager.Update(context.Background(), connectionCR, v1.UpdateOptions{})
+	return s.crManager.Update(context.Background(), connectionCR, metav1.UpdateOptions{})
 }
 
 func (s *crSupervisor) setSyncFailedStatus(connectionCR *v1alpha1.CompassConnection, attemptTime metav1.Time, errorMsg string) {

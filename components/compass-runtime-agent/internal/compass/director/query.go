@@ -63,7 +63,7 @@ func applicationData() string {
 }
 
 func systemAuthData() string {
-	return fmt.Sprintf(`id`)
+	return "id"
 }
 
 func bundlesData() string {
@@ -120,18 +120,18 @@ func credentialData() string {
 }
 
 func basicCredentialData() string {
-	return fmt.Sprintf(`
+	return `
 		username
 		password
-	`)
+	`
 }
 
 func oauthCredentialData() string {
-	return fmt.Sprintf(`
+	return `
 		clientId
 		clientSecret
 		url
-	`)
+	`
 }
 
 func requestAuthData() string {
@@ -141,7 +141,7 @@ func requestAuthData() string {
 }
 
 func csrfData() string {
-	return fmt.Sprintf(`
+	return `
 		tokenEndpointURL
-		`)
+		`
 }
