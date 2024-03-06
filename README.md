@@ -7,6 +7,10 @@
 [![Slack](https://img.shields.io/badge/slack-@kyma--community-yellow.svg)](https://kyma-community.slack.com/)<!-- markdown-link-check-disable-next-line -->
 [![Twitter](https://img.shields.io/badge/twitter-@kymaproject-blue.svg)](https://twitter.com/kymaproject)
 
+[![REUSE status](https://api.reuse.software/badge/github.com/kyma-project/kyma)](https://api.reuse.software/info/github.com/kyma-project/kyma)
+
+![GitHub tag checks state](https://img.shields.io/github/checks-status/kyma-project/kyma/main?label=telemetry-manager&link=https%3A%2F%2Fgithub.com%2Fkyma-project%2Ftelemetry-manager%2Fcommits%2Fmain)
+
 ## Overview
 
 **Kyma** `/kee-ma/` Kyma is an opinionated set of Kubernetes-based modular building blocks, including all necessary capabilities to develop and run enterprise-grade cloud-native applications. It is the open path to the SAP ecosystem supporting business scenarios end-to-end.
