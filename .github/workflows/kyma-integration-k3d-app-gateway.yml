@@ -1,0 +1,28 @@
+name: Run app-gateway integration tests on k3d
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'components/central-application-gateway/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'components/central-application-gateway/**'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+            /home/runner/work/common/bin
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - name: Run unit tests
+        run: make -C tests/components/application-connector/hack/ci k3d-gateway-tests
