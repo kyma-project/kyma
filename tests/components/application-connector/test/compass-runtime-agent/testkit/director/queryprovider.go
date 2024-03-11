@@ -48,7 +48,7 @@ func (qp queryProvider) addBundleMutation(appID string) string {
 				  format: YAML
 				}
 				version: {
-				  value: "v1"
+				  value: "1.0.0"
 				  deprecated: true
 				  deprecatedSince: "v5"
 				  forRemoval: false
