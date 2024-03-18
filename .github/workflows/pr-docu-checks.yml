@@ -1,0 +1,24 @@
+name: Verify markdown links
+
+on:
+  pull_request:
+    branches:
+      - "main"
+      - "release-*"
+  workflow_dispatch:
+
+jobs:
+  verify-links:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: Install node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+      - name: Install md-check-link
+        run: npm install -g md-check-link
+      - name: Verify links
+        run: |
+          md-check-link -q -n 8 -c https://raw.githubusercontent.com/kyma-project/md-check-link/main/.mlc.config.json ./
