@@ -2,7 +2,7 @@
 
 Kyma API versioning and deprecation closely follows the Kubernetes API versioning and deprecation policy. Hence, this document is based on the Kubernetes official documentation.
 
-## API Versioning 
+## API Versioning
 
 (Derived from [API Overview](https://kubernetes.io/docs/reference/using-api/#api-versioning))
 
@@ -43,14 +43,14 @@ API versions fall into 3 main tracks. Each of the tracks has different policies 
 | v1beta1  | Beta (pre-release)               |
 | v1alpha1 | Alpha (experimental)             |
 
-The following rules govern the deprecation of elements of the API which 
+The following rules govern the deprecation of elements of the API which
 include:
 
-   * REST resources (also known as API objects)
-   * Fields of REST resources
-   * Annotations on REST resources, including `beta` annotations, but not including `alpha` annotations
-   * Enumerated or constant values
-   * Component config structures
+- REST resources (also known as API objects)
+- Fields of REST resources
+- Annotations on REST resources, including `beta` annotations, but not including `alpha` annotations
+- Enumerated or constant values
+- Component config structures
 
 These rules are enforced between official releases, not between arbitrary commits to main or release branches.
 
@@ -64,15 +64,15 @@ For example, an object can be written as v1 and then read back as v2 and convert
 
 **Rule #3: An API version in a given track may not be deprecated in favor of a less stable API version.**
 
-  * GA API versions can replace beta and alpha API versions.
-  * Beta API versions can replace earlier beta and alpha API versions, but *may not* replace GA API versions.
-  * Alpha API versions can replace earlier alpha API versions, but *may not* replace GA or beta API versions.
+- GA API versions can replace beta and alpha API versions.
+- Beta API versions can replace earlier beta and alpha API versions, but *may not* replace GA API versions.
+- Alpha API versions can replace earlier alpha API versions, but *may not* replace GA or beta API versions.
 
 **Rule #4a: minimum API lifetime is determined by the API stability level.**
 
-   * **GA API versions may be marked as deprecated, but must not be removed within a major version of a Kyma module**
-   * **Beta API versions must be supported for 6 months or 3 releases (whichever is longer) after deprecation**
-   * **Alpha API versions may be removed in any release without prior deprecation notice**
+- **GA API versions may be marked as deprecated, but must not be removed within a major version of a Kyma module**
+- **Beta API versions must be supported for 6 months or 3 releases (whichever is longer) after deprecation**
+- **Alpha API versions may be removed in any release without prior deprecation notice**
 
 **Rule #4b: The `preferred` API version and the `storage version` for a given group may not advance until after a release has been made that supports both the new version and the previous version.**
 

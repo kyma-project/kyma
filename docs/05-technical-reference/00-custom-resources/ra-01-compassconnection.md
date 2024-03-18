@@ -1,8 +1,8 @@
 # CompassConnection CR
 
-The `compassconnections.compass.kyma-project.io` CustomResourceDefinition (CRD) 
-is a detailed description of the kind of data and the format used to preserve 
-the status of the connection between the Runtime Agent and Compass. 
+The `compassconnections.compass.kyma-project.io` CustomResourceDefinition (CRD)
+is a detailed description of the kind of data and the format used to preserve
+the status of the connection between the Runtime Agent and Compass.
 The `CompassConnection` custom resource (CR) contains the connection statuses and Compass URLs.
 To get the up-to-date CRD and show the output in the `yaml` format, run this command:
 
@@ -13,7 +13,7 @@ kubectl get crd compassconnections.compass.kyma-project.io -o yaml
 ## Sample Custom Resource
 
 This is a sample resource that registers the `compass-agent-connection` CompassConnection
-which preserves the status of the connection between Runtime Agent and Compass. 
+which preserves the status of the connection between Runtime Agent and Compass.
 It also stores the URLs for the Connector and the Director.
 
 ```yaml
@@ -51,7 +51,7 @@ This table lists all the possible parameters of the CompassConnection custom res
 <!-- The content between "TABLE-START" and "TABLE-END" will be replaced -->
 
 <!-- TABLE-START -->
-### CompassConnection.compass.kyma-project.io/v1alpha1
+### CompassConnection.compass.Kyma-project.io/v1alpha1
 
 **Spec:**
 
@@ -91,4 +91,3 @@ This table lists all the possible parameters of the CompassConnection custom res
 | **Component** | **Description**                                                                                            |
 |---------------|------------------------------------------------------------------------------------------------------------|
 | Runtime Agent | Stores the Connector and Director URLs and preserves the status of the connection with Compass in this CR. |
-

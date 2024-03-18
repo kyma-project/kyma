@@ -4,7 +4,7 @@
 
 You get the following error message:
 
-```
+```bash
 The configured Kyma domain {DOMAIN} is not resolvable. This could be due to activated rebind protection of your DNS resolver. Please add virtual service domains to your hosts file."
 ```
 

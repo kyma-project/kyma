@@ -1,0 +1,28 @@
+# This is a configuration file for the markdownlint. You can use this file to overwrite the default settings.
+# MD013 is set to false by default because many files include lines longer than the conventional 80 character limit
+MD013: false
+# Disable the Multiple headings with the same content rule
+MD024: false
+# MD029 is set to false because it generated some issues with longer lists
+MD029: false
+# Checks if there some inline HTML-elements
+MD033: false
+# MD044 is used to set capitalization for the particular words. You can determine whether it should be used also for code blocks and html elements
+MD044:
+  code_blocks: false
+  html_elements: false
+  names:
+  - Kyma
+  - Kubernetes
+  - ConfigMap
+  - CronJob
+  - CustomResourceDefinition
+  - Ingress
+  - Node
+  - PodPreset
+  - Pod
+  - ProwJob
+  - Secret
+  - ServiceBinding
+  - ServiceClass
+  - ServiceInstance

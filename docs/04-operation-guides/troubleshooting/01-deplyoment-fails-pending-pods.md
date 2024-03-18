@@ -11,7 +11,7 @@ Describing the Pod reveals such an error message:
 
 ## Cause
 
-The underlying Docker environment ran out of resources (memory/CPU/disk). 
+The underlying Docker environment ran out of resources (memory/CPU/disk).
 Thus, k3d marked all Kubernetes nodes with a taint `disk-pressure`.
 
 ## Remedy
@@ -19,10 +19,13 @@ Thus, k3d marked all Kubernetes nodes with a taint `disk-pressure`.
 Verify the cause:
 
 1. Find out which Pods are pending:
+
    ```bash
    kubectl --all-namespaces get pods
    ```
+
 2. For the pending Pods, verify which error message you get:
+
    ```bash
    kubectl -n {POD_NAMESPACE} describe pod {POD_NAME}
    ```

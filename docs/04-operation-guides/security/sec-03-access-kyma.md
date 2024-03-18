@@ -22,5 +22,5 @@ The diagram shows the Kyma access flow using Kyma dashboard.
 
 ## Kubernetes-Native CLI (kubectl)
 
-To access and manage your resources, you need a `kubeconfig` file required for authentication. 
+To access and manage your resources, you need a `kubeconfig` file required for authentication.
 You can obtain the `kubeconfig` file directly from your Kubernetes Service Provider. It allows you to access the Kubernetes API server, usually as the admin user. Kyma does not manage this config file in any way.
