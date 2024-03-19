@@ -3,6 +3,7 @@ module github.com/kyma-project/kyma/components/compass-runtime-agent
 go 1.21
 
 require (
+	github.com/go-task/slim-sprig v0.0.0-20210107165309-348f09dbbbc0
 	github.com/google/uuid v1.5.0
 	github.com/gorilla/mux v1.8.1
 	github.com/kofalt/go-memoize v0.0.0-20200917044458-9b55a8d73e1c
