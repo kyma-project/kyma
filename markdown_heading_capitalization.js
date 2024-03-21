@@ -1,3 +1,5 @@
+// This file is used to trigger the custom rule that checks if all markdown headings (words longer than 4 characters) are written in the title case. To run this check, you must include the check in the markdownlint command. 
+// For example, if you want to run the check on the `docs` folder, run the following command: `markdownlint -r ./markdown_heading_capitalization.js docs/`.
 module.exports = [{
     "names": [ "custom/capitalize-headings" ],
     "description": "Heading words longer than 4 characters should be capitalized",
