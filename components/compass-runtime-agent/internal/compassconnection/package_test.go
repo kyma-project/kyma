@@ -146,6 +146,7 @@ func TestCompassConnectionController(t *testing.T) {
 	// Director config client
 	configurationClientMock := &directorMocks.DirectorClient{}
 	configurationClientMock.On("FetchConfiguration", requestIDCtxMatcher).Return(kymaModelApps, graphql.Labels{}, nil)
+	configurationClientMock.On("SetRuntimeStatusCondition", mock.AnythingOfType("context.context"), graphql.RuntimeStatusConditionConnected).Return(nil)
 	configurationClientMock.On("SetURLsLabels", requestIDCtxMatcher, runtimeURLsConfig, graphql.Labels{}).Return(runtimeLabels, nil)
 	// Clients provider
 	clientsProviderMock := clientsProviderMock(configurationClientMock, tokensConnectorClientMock, certsConnectorClientMock)
@@ -278,10 +279,12 @@ func TestCompassConnectionController(t *testing.T) {
 		clearMockCalls(&configurationClientMock.Mock)
 		configurationClientMock.On("FetchConfiguration", requestIDCtxMatcher).Return(kymaModelApps, graphql.Labels{}, nil)
 		configurationClientMock.On("SetURLsLabels", requestIDCtxMatcher, runtimeURLsConfig, graphql.Labels{}).Return(nil, apperrors.Internal("error"))
+		configurationClientMock.On("SetRuntimeStatusCondition", mock.AnythingOfType("context.context"), graphql.RuntimeStatusConditionConnected).Return(nil)
 
 		// when
 		err = waitFor(checkInterval, testTimeout, func() bool {
-			return mockFunctionCalled(&configurationClientMock.Mock, "SetURLsLabels", requestIDCtxMatcher, runtimeURLsConfig, graphql.Labels{})
+			return mockFunctionCalled(&configurationClientMock.Mock, "SetURLsLabels", requestIDCtxMatcher, runtimeURLsConfig, graphql.Labels{}) &&
+				mockFunctionCalled(&configurationClientMock.Mock, "SetRuntimeStatusCondition", graphql.RuntimeStatusConditionConnected)
 		})
 
 		// then
@@ -336,6 +339,7 @@ func TestCompassConnectionController(t *testing.T) {
 		clearMockCalls(&configurationClientMock.Mock)
 		configurationClientMock.On("FetchConfiguration", requestIDCtxMatcher).Return(kymaModelApps, graphql.Labels{}, nil)
 		configurationClientMock.On("SetURLsLabels", requestIDCtxMatcher, runtimeURLsConfig, graphql.Labels{}).Return(runtimeLabels, nil)
+		configurationClientMock.On("SetRuntimeStatusCondition", mock.AnythingOfType("context.context"), graphql.RuntimeStatusConditionConnected).Return(nil)
 	})
 
 	t.Run("Compass Connection should be in SynchronizationFailed state if failed create Director config client", func(t *testing.T) {
