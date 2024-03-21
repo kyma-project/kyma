@@ -296,12 +296,14 @@ func TestCompassConnectionController(t *testing.T) {
 		// restore previous director mock configuration to not interfere with other tests
 		configurationClientMock.On("FetchConfiguration", requestIDCtxMatcher).Return(kymaModelApps, graphql.Labels{}, nil)
 		configurationClientMock.On("SetURLsLabels", requestIDCtxMatcher, runtimeURLsConfig, graphql.Labels{}).Return(runtimeLabels, nil)
+		configurationClientMock.On("SetRuntimeStatusCondition", mock.Anything, graphql.RuntimeStatusConditionConnected).Return(nil)
 	})
 
 	t.Run("Compass Connection should be in ResourceApplicationFailed state if failed to apply resources", func(t *testing.T) {
 		// given
 		clearMockCalls(&synchronizationServiceMock.Mock)
 		synchronizationServiceMock.On("Apply", kymaModelApps).Return(nil, apperrors.Internal("error"))
+		configurationClientMock.On("SetRuntimeStatusCondition", mock.Anything, graphql.RuntimeStatusConditionConnected).Return(nil)
 
 		// when
 		err = waitFor(checkInterval, testTimeout, func() bool {
