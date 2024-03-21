@@ -35,6 +35,7 @@ type UpdateRuntimeResponse struct {
 type DirectorClient interface {
 	FetchConfiguration(ctx context.Context) ([]kymamodel.Application, graphql.Labels, error)
 	SetURLsLabels(ctx context.Context, urlsCfg RuntimeURLsConfig, actualLabels graphql.Labels) (graphql.Labels, error)
+	SetRuntimeStatusCondition(ctx context.Context, statusCondition graphql.RuntimeStatusCondition) error
 }
 
 func NewConfigurationClient(gqlClient gql.Client, runtimeConfig config.RuntimeConfig) DirectorClient {
@@ -100,7 +101,7 @@ func (cc *directorClient) SetURLsLabels(ctx context.Context, urlsCfg RuntimeURLs
 	return updatedLabels, nil
 }
 
-func (cc *directorClient) UpdateRuntime(ctx context.Context, id string, directorInput *graphql.RuntimeInput, tenant string) error {
+func (cc *directorClient) UpdateRuntime(ctx context.Context, id string, directorInput *graphql.RuntimeInput) error {
 
 	if directorInput == nil {
 		return errors.New("Cannot update runtime in Director: missing Runtime config")
@@ -130,11 +131,11 @@ func (cc *directorClient) UpdateRuntime(ctx context.Context, id string, director
 	return nil
 }
 
-func (cc *directorClient) SetRuntimeStatusCondition(ctx context.Context, id string, statusCondition graphql.RuntimeStatusCondition, tenant string) error {
+func (cc *directorClient) SetRuntimeStatusCondition(ctx context.Context, statusCondition graphql.RuntimeStatusCondition) error {
 	// TODO: Set StatusCondition without getting the Runtime
 	//       It'll be possible after this issue implementation:
 	//       - https://github.com/kyma-incubator/compass/issues/1186
-	runtime, err := cc.getRuntime(ctx, id, tenant)
+	runtime, err := cc.getRuntime(ctx)
 	if err != nil {
 		return err
 	}
@@ -144,16 +145,16 @@ func (cc *directorClient) SetRuntimeStatusCondition(ctx context.Context, id stri
 		StatusCondition: &statusCondition,
 		Labels:          runtime.Labels,
 	}
-	err = cc.UpdateRuntime(ctx, id, runtimeInput, tenant)
+	err = cc.UpdateRuntime(ctx, cc.runtimeConfig.RuntimeId, runtimeInput)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (cc *directorClient) getRuntime(ctx context.Context, id, tenant string) (graphql.RuntimeExt, error) {
+func (cc *directorClient) getRuntime(ctx context.Context) (graphql.RuntimeExt, error) {
 
-	runtimeQuery := cc.queryProvider.getRuntimeQuery(id)
+	runtimeQuery := cc.queryProvider.getRuntimeQuery(cc.runtimeConfig.RuntimeId)
 
 	req := gcli.NewRequest(runtimeQuery)
 	req.Header.Set(TenantHeader, cc.runtimeConfig.Tenant)
@@ -166,7 +167,7 @@ func (cc *directorClient) getRuntime(ctx context.Context, id, tenant string) (gr
 	if response.Result == nil {
 		return graphql.RuntimeExt{}, err
 	}
-	if response.Result.ID != id {
+	if response.Result.ID != cc.runtimeConfig.RuntimeId {
 		return graphql.RuntimeExt{}, err
 	}
 

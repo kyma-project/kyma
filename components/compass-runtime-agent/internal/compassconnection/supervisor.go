@@ -3,6 +3,7 @@ package compassconnection
 import (
 	"context"
 	"fmt"
+	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
 	"time"
 
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/cache"
@@ -153,6 +154,16 @@ func (s *crSupervisor) SynchronizeWithCompass(ctx context.Context, connection *v
 		return s.updateCompassConnection(connection)
 	}
 
+	s.log.Info("Checking whether Runtime has connected status in Compass", connection.Spec.ManagementInfo.DirectorURL)
+	if !s.runtimeHasConnectedStatusInCompass(connection) {
+		err := directorClient.SetRuntimeStatusCondition(ctx, graphql.RuntimeStatusConditionConnected)
+		if err != nil {
+			return connection, err
+		}
+
+		s.setRuntimeStatusInCompass(connection)
+	}
+
 	applicationsConfig, runtimeLabels, err := directorClient.FetchConfiguration(ctx)
 	if err != nil {
 		errorMsg := fmt.Sprintf("Failed to fetch configuration: %s", err.Error())
@@ -197,6 +208,23 @@ func (s *crSupervisor) SynchronizeWithCompass(ctx context.Context, connection *v
 	connection.Spec.ResyncNow = false
 
 	return s.updateCompassConnection(connection)
+}
+
+func (s *crSupervisor) runtimeHasConnectedStatusInCompass(compassConnection *v1alpha1.CompassConnection) bool {
+	annotations := compassConnection.Annotations
+	_, found := annotations["operator.kyma-project.io/compass-status-connected"]
+
+	return found
+}
+
+func (s *crSupervisor) setRuntimeStatusInCompass(compassConnection *v1alpha1.CompassConnection) {
+	annotations := compassConnection.Annotations
+
+	if annotations == nil {
+		annotations = map[string]string{}
+	}
+
+	annotations["operator.kyma-project.io/compass-status-connected"] = string(graphql.RuntimeStatusConditionConnected)
 }
 
 func (s *crSupervisor) maintainCompassConnection(ctx context.Context, compassConnection *v1alpha1.CompassConnection) error {
