@@ -33,8 +33,9 @@
 
 /tests/components/application-connector @kyma-project/Framefrog
 
-# Config file for MILV - milv.config.yaml
-milv.config.yaml @kyma-project/technical-writers
+# Config files for markdownlint
+.markdownlint.yaml @kyma-project/technical-writers
+heading_capitalization.js @kyma-project/technical-writers
 
 # VERSION file
 VERSION @kyma-project/prow

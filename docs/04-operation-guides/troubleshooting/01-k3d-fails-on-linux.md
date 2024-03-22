@@ -12,6 +12,7 @@ On Linux, the ports are reserved to be used by a privileged user.
 ## Remedy
 
 Use a custom port for the load balancer. For example, use the port `8080`:
+
 ```bash
 kyma provision k3d -p 8080:80@loadbalancer -p 8443:443@loadbalancer
 ```

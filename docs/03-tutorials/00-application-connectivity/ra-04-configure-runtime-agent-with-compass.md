@@ -10,7 +10,7 @@ This tutorial shows how to configure Runtime Agent with Compass.
 - One-time token from the Connector
 - Tenant ID
 
-> [!NOTE] 
+> [!NOTE]
 > Learn also about the [parameters required](../../05-technical-reference/00-configuration-parameters/ra-01-connection-with-compass.md) to initialize the connection between Runtime Agent and Compass.
 
 ## Steps
