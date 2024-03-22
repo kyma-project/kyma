@@ -154,8 +154,9 @@ func (s *crSupervisor) SynchronizeWithCompass(ctx context.Context, connection *v
 		return s.updateCompassConnection(connection)
 	}
 
-	s.log.Info("Checking whether Runtime has connected status in Compass", connection.Spec.ManagementInfo.DirectorURL)
+	s.log.Info("Checking whether Runtime has CONNECTED status in Compass")
 	if !s.runtimeHasConnectedStatusInCompass(connection) {
+		s.log.Info("Setting CONNECTED status for Runtime", connection.Spec.ManagementInfo.DirectorURL)
 		err := directorClient.SetRuntimeStatusCondition(ctx, graphql.RuntimeStatusConditionConnected)
 		if err != nil {
 			return connection, err
@@ -225,6 +226,7 @@ func (s *crSupervisor) setRuntimeStatusInCompass(compassConnection *v1alpha1.Com
 	}
 
 	annotations["operator.kyma-project.io/compass-status-connected"] = string(graphql.RuntimeStatusConditionConnected)
+	compassConnection.Annotations = annotations
 }
 
 func (s *crSupervisor) maintainCompassConnection(ctx context.Context, compassConnection *v1alpha1.CompassConnection) error {
