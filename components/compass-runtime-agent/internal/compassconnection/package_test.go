@@ -325,10 +325,12 @@ func TestCompassConnectionController(t *testing.T) {
 		// given
 		clearMockCalls(&configurationClientMock.Mock)
 		configurationClientMock.On("FetchConfiguration", requestIDCtxMatcher).Return(nil, nil, errors.New("error"))
+		configurationClientMock.On("SetRuntimeStatusCondition", mock.Anything, graphql.RuntimeStatusConditionConnected).Return(nil)
 
 		// when
 		err = waitFor(checkInterval, testTimeout, func() bool {
-			return mockFunctionCalled(&configurationClientMock.Mock, "FetchConfiguration", requestIDCtxMatcher)
+			return mockFunctionCalled(&configurationClientMock.Mock, "FetchConfiguration", requestIDCtxMatcher) &&
+				mockFunctionCalled(&configurationClientMock.Mock, "SetRuntimeStatusCondition", mock.Anything, graphql.RuntimeStatusConditionConnected)
 		})
 
 		// then
