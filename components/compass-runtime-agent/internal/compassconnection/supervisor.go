@@ -156,7 +156,7 @@ func (s *crSupervisor) SynchronizeWithCompass(ctx context.Context, connection *v
 
 	s.log.Info("Checking whether Runtime has CONNECTED status in Compass")
 	if !s.runtimeHasConnectedStatusInCompass(connection) {
-		s.log.Info("Setting CONNECTED status for Runtime", connection.Spec.ManagementInfo.DirectorURL)
+		s.log.Info("Setting CONNECTED status for Runtime")
 		err := directorClient.SetRuntimeStatusCondition(ctx, graphql.RuntimeStatusConditionConnected)
 		if err != nil {
 			return connection, err
