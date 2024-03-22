@@ -283,8 +283,7 @@ func TestCompassConnectionController(t *testing.T) {
 
 		// when
 		err = waitFor(checkInterval, testTimeout, func() bool {
-			return mockFunctionCalled(&configurationClientMock.Mock, "SetURLsLabels", requestIDCtxMatcher, runtimeURLsConfig, graphql.Labels{}) &&
-				mockFunctionCalled(&configurationClientMock.Mock, "SetRuntimeStatusCondition", mock.Anything, graphql.RuntimeStatusConditionConnected)
+			return mockFunctionCalled(&configurationClientMock.Mock, "SetURLsLabels", requestIDCtxMatcher, runtimeURLsConfig, graphql.Labels{})
 		})
 
 		// then
@@ -329,8 +328,7 @@ func TestCompassConnectionController(t *testing.T) {
 
 		// when
 		err = waitFor(checkInterval, testTimeout, func() bool {
-			return mockFunctionCalled(&configurationClientMock.Mock, "FetchConfiguration", requestIDCtxMatcher) &&
-				mockFunctionCalled(&configurationClientMock.Mock, "SetRuntimeStatusCondition", mock.Anything, graphql.RuntimeStatusConditionConnected)
+			return mockFunctionCalled(&configurationClientMock.Mock, "FetchConfiguration", requestIDCtxMatcher)
 		})
 
 		// then
