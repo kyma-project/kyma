@@ -32,7 +32,6 @@ type DirectorClient interface {
 	FetchConfiguration(ctx context.Context) ([]kymamodel.Application, graphql.Labels, error)
 	SetURLsLabels(ctx context.Context, urlsCfg RuntimeURLsConfig, actualLabels graphql.Labels) (graphql.Labels, error)
 	SetRuntimeStatusCondition(ctx context.Context, statusCondition graphql.RuntimeStatusCondition) error
-	GetRuntime(ctx context.Context) (graphql.RuntimeExt, error)
 }
 
 func NewConfigurationClient(gqlClient gql.Client, runtimeConfig config.RuntimeConfig) DirectorClient {
@@ -122,7 +121,7 @@ func (cc *directorClient) SetRuntimeStatusCondition(ctx context.Context, statusC
 	// TODO: Set StatusCondition without getting the Runtime
 	//       It'll be possible after this issue implementation:
 	//       - https://github.com/kyma-incubator/compass/issues/1186
-	runtime, err := cc.GetRuntime(ctx)
+	runtime, err := cc.getRuntime(ctx)
 	if err != nil {
 		return err
 	}
@@ -139,7 +138,7 @@ func (cc *directorClient) SetRuntimeStatusCondition(ctx context.Context, statusC
 	return nil
 }
 
-func (cc *directorClient) GetRuntime(ctx context.Context) (graphql.RuntimeExt, error) {
+func (cc *directorClient) getRuntime(ctx context.Context) (graphql.RuntimeExt, error) {
 
 	runtimeQuery := cc.queryProvider.getRuntimeQuery(cc.runtimeConfig.RuntimeId)
 

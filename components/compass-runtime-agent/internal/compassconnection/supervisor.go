@@ -163,13 +163,6 @@ func (s *crSupervisor) SynchronizeWithCompass(ctx context.Context, connection *v
 		}
 
 		s.setRuntimeStatusInCompass(connection)
-
-		// <AG> Just for testing
-		runtime, err := directorClient.GetRuntime(ctx)
-		if err != nil {
-			s.log.Infof("TEST: Current Runtime status: %s", runtime.Status.Condition.String())
-		}
-		// <AG>
 	}
 
 	applicationsConfig, runtimeLabels, err := directorClient.FetchConfiguration(ctx)
