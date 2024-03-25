@@ -53,6 +53,30 @@ func (_m *DirectorClient) FetchConfiguration(ctx context.Context) ([]model.Appli
 	return r0, r1, r2
 }
 
+// GetRuntime provides a mock function with given fields: ctx
+func (_m *DirectorClient) GetRuntime(ctx context.Context) (graphql.RuntimeExt, error) {
+	ret := _m.Called(ctx)
+
+	var r0 graphql.RuntimeExt
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context) (graphql.RuntimeExt, error)); ok {
+		return rf(ctx)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context) graphql.RuntimeExt); ok {
+		r0 = rf(ctx)
+	} else {
+		r0 = ret.Get(0).(graphql.RuntimeExt)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // SetRuntimeStatusCondition provides a mock function with given fields: ctx, statusCondition
 func (_m *DirectorClient) SetRuntimeStatusCondition(ctx context.Context, statusCondition graphql.RuntimeStatusCondition) error {
 	ret := _m.Called(ctx, statusCondition)
