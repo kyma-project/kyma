@@ -3,6 +3,9 @@ package compassconnection
 import (
 	"context"
 	"errors"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/certificates"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/cache"
 	"sync"
 	"testing"
 	"time"
@@ -13,17 +16,11 @@ import (
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/cache"
-
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
 
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/director"
 
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma"
-
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
-
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/certificates"
 
 	"github.com/stretchr/testify/assert"
 
@@ -146,6 +143,7 @@ func TestCompassConnectionController(t *testing.T) {
 	// Director config client
 	configurationClientMock := &directorMocks.DirectorClient{}
 	configurationClientMock.On("FetchConfiguration", requestIDCtxMatcher).Return(kymaModelApps, graphql.Labels{}, nil)
+	configurationClientMock.On("SetRuntimeStatusCondition", mock.Anything, graphql.RuntimeStatusConditionConnected).Return(nil)
 	configurationClientMock.On("SetURLsLabels", requestIDCtxMatcher, runtimeURLsConfig, graphql.Labels{}).Return(runtimeLabels, nil)
 	// Clients provider
 	clientsProviderMock := clientsProviderMock(configurationClientMock, tokensConnectorClientMock, certsConnectorClientMock)
@@ -210,6 +208,7 @@ func TestCompassConnectionController(t *testing.T) {
 			credentialsManagerMock)
 		certsConnectorClientMock.AssertCalled(t, "Configuration", requestIDCtxMatcher, nilHeaders)
 		certsConnectorClientMock.AssertNotCalled(t, "SignCSR", requestIDCtxMatcher, mock.AnythingOfType("string"), nilHeaders)
+		assertRuntimeInConnectedStateAnnotation(t, graphql.RuntimeStatusConditionConnected)
 	})
 
 	t.Run("Compass Connection should be reinitialized if deleted", func(t *testing.T) {
@@ -234,6 +233,7 @@ func TestCompassConnectionController(t *testing.T) {
 			credentialsManagerMock)
 		certsConnectorClientMock.AssertCalled(t, "Configuration", requestIDCtxMatcher, nilHeaders)
 		certsConnectorClientMock.AssertNotCalled(t, "SignCSR", requestIDCtxMatcher, mock.AnythingOfType("string"), nilHeaders)
+		assertRuntimeInConnectedStateAnnotation(t, graphql.RuntimeStatusConditionConnected)
 	})
 
 	t.Run("Should not reinitialized connection if connection is in Synchronized state", func(t *testing.T) {
@@ -271,6 +271,7 @@ func TestCompassConnectionController(t *testing.T) {
 		assertCertificateRenewed(t)
 		assertManagementInfoSetInCR(t)
 		certsConnectorClientMock.AssertCalled(t, "SignCSR", requestIDCtxMatcher, mock.AnythingOfType("string"), nilHeaders)
+		assertRuntimeInConnectedStateAnnotation(t, graphql.RuntimeStatusConditionConnected)
 	})
 
 	t.Run("Compass Connection should be in MetadataUpdateFailed state if failed to set labels on Runtime", func(t *testing.T) {
@@ -278,6 +279,7 @@ func TestCompassConnectionController(t *testing.T) {
 		clearMockCalls(&configurationClientMock.Mock)
 		configurationClientMock.On("FetchConfiguration", requestIDCtxMatcher).Return(kymaModelApps, graphql.Labels{}, nil)
 		configurationClientMock.On("SetURLsLabels", requestIDCtxMatcher, runtimeURLsConfig, graphql.Labels{}).Return(nil, apperrors.Internal("error"))
+		configurationClientMock.On("SetRuntimeStatusCondition", mock.Anything, graphql.RuntimeStatusConditionConnected).Return(nil)
 
 		// when
 		err = waitFor(checkInterval, testTimeout, func() bool {
@@ -288,17 +290,20 @@ func TestCompassConnectionController(t *testing.T) {
 		require.NoError(t, err)
 		require.NoError(t, waitForResourceUpdate(v1alpha1.MetadataUpdateFailed))
 		assertManagementInfoSetInCR(t)
+		assertRuntimeInConnectedStateAnnotation(t, graphql.RuntimeStatusConditionConnected)
 
 		clearMockCalls(&configurationClientMock.Mock)
 		// restore previous director mock configuration to not interfere with other tests
 		configurationClientMock.On("FetchConfiguration", requestIDCtxMatcher).Return(kymaModelApps, graphql.Labels{}, nil)
 		configurationClientMock.On("SetURLsLabels", requestIDCtxMatcher, runtimeURLsConfig, graphql.Labels{}).Return(runtimeLabels, nil)
+		configurationClientMock.On("SetRuntimeStatusCondition", mock.Anything, graphql.RuntimeStatusConditionConnected).Return(nil)
 	})
 
 	t.Run("Compass Connection should be in ResourceApplicationFailed state if failed to apply resources", func(t *testing.T) {
 		// given
 		clearMockCalls(&synchronizationServiceMock.Mock)
 		synchronizationServiceMock.On("Apply", kymaModelApps).Return(nil, apperrors.Internal("error"))
+		configurationClientMock.On("SetRuntimeStatusCondition", mock.Anything, graphql.RuntimeStatusConditionConnected).Return(nil)
 
 		// when
 		err = waitFor(checkInterval, testTimeout, func() bool {
@@ -310,6 +315,7 @@ func TestCompassConnectionController(t *testing.T) {
 		require.NoError(t, waitForResourceUpdate(v1alpha1.ResourceApplicationFailed))
 		assertManagementInfoSetInCR(t)
 		assertSynchronizationStatusError(t)
+		assertRuntimeInConnectedStateAnnotation(t, graphql.RuntimeStatusConditionConnected)
 
 		// restore previous sync service mock configuration to not interfere with other tests
 		clearMockCalls(&synchronizationServiceMock.Mock)
@@ -320,6 +326,7 @@ func TestCompassConnectionController(t *testing.T) {
 		// given
 		clearMockCalls(&configurationClientMock.Mock)
 		configurationClientMock.On("FetchConfiguration", requestIDCtxMatcher).Return(nil, nil, errors.New("error"))
+		configurationClientMock.On("SetRuntimeStatusCondition", mock.Anything, graphql.RuntimeStatusConditionConnected).Return(nil)
 
 		// when
 		err = waitFor(checkInterval, testTimeout, func() bool {
@@ -331,11 +338,13 @@ func TestCompassConnectionController(t *testing.T) {
 		require.NoError(t, waitForResourceUpdate(v1alpha1.SynchronizationFailed))
 		assertManagementInfoSetInCR(t)
 		assertSynchronizationStatusError(t)
+		assertRuntimeInConnectedStateAnnotation(t, graphql.RuntimeStatusConditionConnected)
 
 		// restore previous director mock configuration to not interfere with other tests
 		clearMockCalls(&configurationClientMock.Mock)
 		configurationClientMock.On("FetchConfiguration", requestIDCtxMatcher).Return(kymaModelApps, graphql.Labels{}, nil)
 		configurationClientMock.On("SetURLsLabels", requestIDCtxMatcher, runtimeURLsConfig, graphql.Labels{}).Return(runtimeLabels, nil)
+		configurationClientMock.On("SetRuntimeStatusCondition", mock.Anything, graphql.RuntimeStatusConditionConnected).Return(nil)
 	})
 
 	t.Run("Compass Connection should be in SynchronizationFailed state if failed create Director config client", func(t *testing.T) {
@@ -344,6 +353,7 @@ func TestCompassConnectionController(t *testing.T) {
 		require.Equal(t, true, isConnectionInState(v1alpha1.Synchronized))
 		clientsProviderMock.ExpectedCalls = nil
 		clientsProviderMock.Calls = nil
+		assertCompassRuntimeConnectedStatusAnnotationRemoved(t)
 		clientsProviderMock.On("GetConnectorTokensClient", connectorURL).Return(tokensConnectorClientMock, nil)
 		clientsProviderMock.On("GetConnectorCertSecuredClient").Return(certsConnectorClientMock, nil)
 		clientsProviderMock.On("GetDirectorClient", runtimeConfig).Return(nil, errors.New("error"))
@@ -358,6 +368,7 @@ func TestCompassConnectionController(t *testing.T) {
 		require.NoError(t, waitForResourceUpdate(v1alpha1.SynchronizationFailed))
 		assertManagementInfoSetInCR(t)
 		assertSynchronizationStatusError(t)
+		assertRuntimeInConnectedStateAnnotation(t, "")
 	})
 
 	t.Run("Compass Connection should be in SynchronizationFailed state if failed to read runtime configuration", func(t *testing.T) {
@@ -637,6 +648,12 @@ func assertCompassConnectionState(t *testing.T, expectedState v1alpha1.Connectio
 	assert.Equal(t, expectedState, connectedConnection.Status.State)
 }
 
+func assertRuntimeInConnectedStateAnnotation(t *testing.T, expected graphql.RuntimeStatusCondition) {
+	connectedConnection, err := compassConnectionCRClient.Get(context.Background(), compassConnectionName, v1.GetOptions{})
+	require.NoError(t, err)
+	assert.Equal(t, string(expected), connectedConnection.Annotations[RuntimeConnectedStatusAnnotation])
+}
+
 func assertConnectionStatusSet(t *testing.T) {
 	connectedConnection, err := compassConnectionCRClient.Get(context.Background(), compassConnectionName, v1.GetOptions{})
 	require.NoError(t, err)
@@ -656,6 +673,16 @@ func assertRecreateSynchronizedConnection(t *testing.T) {
 	require.NoError(t, err)
 	assertConnectionStatusSet(t)
 	assertManagementInfoSetInCR(t)
+}
+
+func assertCompassRuntimeConnectedStatusAnnotationRemoved(t *testing.T) {
+	connectedConnection, err := compassConnectionCRClient.Get(context.Background(), compassConnectionName, v1.GetOptions{})
+	require.NoError(t, err)
+
+	delete(connectedConnection.Annotations, RuntimeConnectedStatusAnnotation)
+
+	_, err = compassConnectionCRClient.Update(context.Background(), connectedConnection, v1.UpdateOptions{})
+	require.NoError(t, err)
 }
 
 func assertCertificateRenewed(t *testing.T) {

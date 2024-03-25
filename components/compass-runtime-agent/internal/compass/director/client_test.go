@@ -119,6 +119,19 @@ const (
 			value
 		}
 	}`
+
+	expectedGetRuntimeQuery = `query {
+    result: runtime(id: "runtimeId") {
+         id name description labels
+}}`
+	expectedUpdateRuntimeMutation = `mutation {
+    result: updateRuntime(id: "runtimeId" in: {
+		name: "Runtime Test name",
+		labels: {label1:"something",label2:"something2",},
+		statusCondition: CONNECTED,
+	}) {
+		id
+}}`
 )
 
 var runtimeConfig = config.RuntimeConfig{
@@ -460,4 +473,140 @@ func TestConfigClient_SetURLsLabels(t *testing.T) {
 		assert.Contains(t, err.Error(), "nil response")
 		assert.Nil(t, updatedLabels)
 	})
+}
+
+func TestConfigClient_SetRuntimeStatusCondition(t *testing.T) {
+	getRuntimeReq := gcli.NewRequest(expectedGetRuntimeQuery)
+	getRuntimeReq.Header.Set(TenantHeader, "tenant")
+
+	updateRuntimeReq := gcli.NewRequest(expectedUpdateRuntimeMutation)
+	updateRuntimeReq.Header.Set(TenantHeader, "tenant")
+
+	expectedSuccessfulGetRuntimeResponse := &graphql.RuntimeExt{
+		Runtime: graphql.Runtime{
+			ID:   "runtimeId",
+			Name: "Runtime Test name",
+		},
+		Labels: graphql.Labels{
+			"label1": "something", "label2": "something2",
+		},
+	}
+
+	expectedUpdateRuntimeResponse := &graphql.Runtime{
+		ID:   "runtimeId",
+		Name: "Runtime Test name",
+	}
+
+	t.Run("should set runtime status", func(t *testing.T) {
+		client := &mocks.Client{}
+
+		client.
+			On("Do", context.Background(), getRuntimeReq, &GQLResponse[graphql.RuntimeExt]{}).
+			Return(nil).
+			Run(setExpectedResponse[graphql.RuntimeExt](t, expectedSuccessfulGetRuntimeResponse)).
+			Once()
+
+		client.
+			On("Do", context.Background(), updateRuntimeReq, &GQLResponse[graphql.Runtime]{}).
+			Return(nil).
+			Run(setExpectedResponse[graphql.Runtime](t, expectedUpdateRuntimeResponse)).
+			Once()
+
+		configClient := NewConfigurationClient(client, runtimeConfig)
+
+		// when
+		err := configClient.SetRuntimeStatusCondition(context.Background(), graphql.RuntimeStatusConditionConnected)
+
+		// then
+		assert.NoError(t, err)
+	})
+
+	t.Run("should fail when GraphQL query was not executed correctly", func(t *testing.T) {
+		type testCase struct {
+			description   string
+			getClientMock func() *mocks.Client
+		}
+
+		for _, tc := range []testCase{
+			{
+				description: "should fail when failed to get runtime",
+				getClientMock: func() *mocks.Client {
+					client := &mocks.Client{}
+					client.
+						On("Do", context.Background(), mock.Anything, mock.Anything).
+						Return(errors.New("error")).
+						Once()
+
+					return client
+				},
+			},
+			{
+				description: "should fail when result returned from getRuntime query is nil",
+				getClientMock: func() *mocks.Client {
+					client := &mocks.Client{}
+					client.
+						On("Do", context.Background(), mock.Anything, mock.Anything).
+						Return(nil).
+						Run(setExpectedResponse[graphql.RuntimeExt](t, nil)).
+						Once()
+
+					return client
+				},
+			},
+			{
+				description: "should fail when failed to update runtime",
+				getClientMock: func() *mocks.Client {
+					client := &mocks.Client{}
+					client.
+						On("Do", context.Background(), getRuntimeReq, &GQLResponse[graphql.RuntimeExt]{}).
+						Return(nil).
+						Run(setExpectedResponse[graphql.RuntimeExt](t, expectedSuccessfulGetRuntimeResponse)).
+						Once()
+
+					client.
+						On("Do", context.Background(), updateRuntimeReq, &GQLResponse[graphql.Runtime]{}).
+						Return(errors.New("error")).
+						Once()
+					return client
+				},
+			},
+			{
+				description: "should fail when failed to update runtime",
+				getClientMock: func() *mocks.Client {
+					client := &mocks.Client{}
+					client.
+						On("Do", context.Background(), getRuntimeReq, &GQLResponse[graphql.RuntimeExt]{}).
+						Return(nil).
+						Run(setExpectedResponse[graphql.RuntimeExt](t, expectedSuccessfulGetRuntimeResponse)).
+						Once()
+
+					client.
+						On("Do", context.Background(), updateRuntimeReq, &GQLResponse[graphql.Runtime]{}).
+						Return(nil).
+						Run(setExpectedResponse[graphql.Runtime](t, nil)).
+						Once()
+
+					return client
+				},
+			},
+		} {
+			configClient := NewConfigurationClient(tc.getClientMock(), runtimeConfig)
+
+			// when
+			err := configClient.SetRuntimeStatusCondition(context.Background(), graphql.RuntimeStatusConditionConnected)
+
+			// then
+			assert.Error(t, err)
+		}
+
+	})
+}
+
+func setExpectedResponse[T graphql.RuntimeExt | graphql.Runtime](t *testing.T, expectedResult *T) func(args mock.Arguments) {
+	return func(args mock.Arguments) {
+		response, ok := args[2].(*GQLResponse[T])
+		require.True(t, ok)
+		assert.Empty(t, response.Result)
+		response.Result = expectedResult
+	}
 }
