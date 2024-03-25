@@ -580,12 +580,10 @@ func TestConfigClient_SetRuntimeStatusCondition(t *testing.T) {
 						Run(setExpectedResponse[graphql.RuntimeExt](t, expectedSuccessfulGetRuntimeResponse)).
 						Once()
 
-					var expectedResult *graphql.Runtime
-
 					client.
 						On("Do", context.Background(), updateRuntimeReq, &GQLResponse[graphql.Runtime]{}).
 						Return(nil).
-						Run(setExpectedResponse[graphql.Runtime](t, expectedResult)).
+						Run(setExpectedResponse[graphql.Runtime](t, nil)).
 						Once()
 
 					return client

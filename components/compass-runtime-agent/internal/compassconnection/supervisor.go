@@ -25,7 +25,8 @@ import (
 )
 
 const (
-	DefaultCompassConnectionName = "compass-connection"
+	DefaultCompassConnectionName     = "compass-connection"
+	RuntimeConnectedStatusAnnotation = "operator.kyma-project.io/compass-status-connected"
 )
 
 //go:generate mockery --name=CRManager
@@ -213,7 +214,7 @@ func (s *crSupervisor) SynchronizeWithCompass(ctx context.Context, connection *v
 
 func (s *crSupervisor) runtimeHasConnectedStatusInCompass(compassConnection *v1alpha1.CompassConnection) bool {
 	annotations := compassConnection.Annotations
-	_, found := annotations["operator.kyma-project.io/compass-status-connected"]
+	_, found := annotations[RuntimeConnectedStatusAnnotation]
 
 	return found
 }
@@ -225,7 +226,7 @@ func (s *crSupervisor) setRuntimeStatusInCompass(compassConnection *v1alpha1.Com
 		annotations = map[string]string{}
 	}
 
-	annotations["operator.kyma-project.io/compass-status-connected"] = string(graphql.RuntimeStatusConditionConnected)
+	annotations[RuntimeConnectedStatusAnnotation] = string(graphql.RuntimeStatusConditionConnected)
 	compassConnection.Annotations = annotations
 }
 
