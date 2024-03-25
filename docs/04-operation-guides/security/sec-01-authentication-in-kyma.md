@@ -10,7 +10,7 @@ The diagram shows the user authentication flow:
 2. Kyma dashboard redirects you to an OIDC-compliant identity provider to handle the authentication.
 3. After successful authentication, the identity provider issues a JWT token that is stored in the browser session and used for all subsequent requests.
 
-### ID Tokens
+## ID Tokens
 
  ID Tokens are JSON Web Tokens (JWTs) signed by an OIDC-compliant identity provider and returned as part of the OAuth2 response that attest to the end user's identity.
  An example of the decoded JWT looks as follows:

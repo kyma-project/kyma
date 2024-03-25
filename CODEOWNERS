@@ -7,8 +7,10 @@
 # These are the default owners for the whole content of the `kyma` repository. The default owners are automatically added as reviewers when you open a pull request unless different owners are specified in the file.
 * @kyma-project/kyma-steering-committee
 
-/.github @kyma-project/prow
-/.github/workflows @kyma-project/prow
+/.github/dependabot.yaml @kyma-project/prow
+/.github/package.json @kyma-project/prow
+/.github/workflows @kyma-project/gopher
+/.github/workflows/github-release.yaml @kyma-project/prow
 /.github/ISSUE_TEMPLATE @kyma-project/technical-writers
 
 
@@ -33,8 +35,9 @@
 
 /tests/components/application-connector @kyma-project/Framefrog
 
-# Config file for MILV - milv.config.yaml
-milv.config.yaml @kyma-project/technical-writers
+# Config files for markdownlint
+.markdownlint.yaml @kyma-project/technical-writers
+heading_capitalization.js @kyma-project/technical-writers
 
 # VERSION file
 VERSION @kyma-project/prow
