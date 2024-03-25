@@ -476,44 +476,41 @@ func TestConfigClient_SetURLsLabels(t *testing.T) {
 }
 
 func TestConfigClient_SetRuntimeStatusCondition(t *testing.T) {
+	getRuntimeReq := gcli.NewRequest(expectedGetRuntimeQuery)
+	getRuntimeReq.Header.Set(TenantHeader, "tenant")
+
+	updateRuntimeReq := gcli.NewRequest(expectedUpdateMutation)
+	updateRuntimeReq.Header.Set(TenantHeader, "tenant")
+
+	expectedSuccessfulGetRuntimeResponse := &graphql.RuntimeExt{
+		Runtime: graphql.Runtime{
+			ID:   "runtimeId",
+			Name: "Runtime Test name",
+		},
+		Labels: graphql.Labels{
+			"label1": "something", "label2": "something2",
+		},
+	}
+
+	expectedUpdateRuntimeResponse := &graphql.Runtime{
+		ID:   "runtimeId",
+		Name: "Runtime Test name",
+	}
 
 	t.Run("should set runtime status", func(t *testing.T) {
 		client := &mocks.Client{}
-		{
-			req := gcli.NewRequest(expectedGetRuntimeQuery)
-			req.Header.Set(TenantHeader, "tenant")
 
-			expectedResponse := &graphql.RuntimeExt{
-				Runtime: graphql.Runtime{
-					ID:   "runtimeId",
-					Name: "Runtime Test name",
-				},
-				Labels: graphql.Labels{
-					"label1": "something", "label2": "something2",
-				},
-			}
+		client.
+			On("Do", context.Background(), getRuntimeReq, &GQLResponse[graphql.RuntimeExt]{}).
+			Return(nil).
+			Run(setExpectedResponse[graphql.RuntimeExt](t, expectedSuccessfulGetRuntimeResponse)).
+			Once()
 
-			client.
-				On("Do", context.Background(), req, &GQLResponse[graphql.RuntimeExt]{}).
-				Return(nil).
-				Run(setExpectedResponse[graphql.RuntimeExt](t, expectedResponse)).
-				Once()
-		}
-		{
-			req := gcli.NewRequest(expectedUpdateMutation)
-			req.Header.Set(TenantHeader, "tenant")
-
-			expectedResponse := &graphql.Runtime{
-				ID:   "runtimeId",
-				Name: "Runtime Test name",
-			}
-
-			client.
-				On("Do", context.Background(), req, &GQLResponse[graphql.Runtime]{}).
-				Return(nil).
-				Run(setExpectedResponse[graphql.Runtime](t, expectedResponse)).
-				Once()
-		}
+		client.
+			On("Do", context.Background(), updateRuntimeReq, &GQLResponse[graphql.Runtime]{}).
+			Return(nil).
+			Run(setExpectedResponse[graphql.Runtime](t, expectedUpdateRuntimeResponse)).
+			Once()
 
 		configClient := NewConfigurationClient(client, runtimeConfig)
 
@@ -560,35 +557,16 @@ func TestConfigClient_SetRuntimeStatusCondition(t *testing.T) {
 				description: "should fail when failed to update runtime",
 				getClientMock: func() *mocks.Client {
 					client := &mocks.Client{}
-					{
-						req := gcli.NewRequest(expectedGetRuntimeQuery)
-						req.Header.Set(TenantHeader, "tenant")
+					client.
+						On("Do", context.Background(), getRuntimeReq, &GQLResponse[graphql.RuntimeExt]{}).
+						Return(nil).
+						Run(setExpectedResponse[graphql.RuntimeExt](t, expectedSuccessfulGetRuntimeResponse)).
+						Once()
 
-						expectedResponse := &graphql.RuntimeExt{
-							Runtime: graphql.Runtime{
-								ID:   "runtimeId",
-								Name: "Runtime Test name",
-							},
-							Labels: graphql.Labels{
-								"label1": "something", "label2": "something2",
-							},
-						}
-
-						client.
-							On("Do", context.Background(), req, &GQLResponse[graphql.RuntimeExt]{}).
-							Return(nil).
-							Run(setExpectedResponse[graphql.RuntimeExt](t, expectedResponse)).
-							Once()
-					}
-					{
-						req := gcli.NewRequest(expectedUpdateMutation)
-						req.Header.Set(TenantHeader, "tenant")
-
-						client.
-							On("Do", context.Background(), req, &GQLResponse[graphql.Runtime]{}).
-							Return(errors.New("error")).
-							Once()
-					}
+					client.
+						On("Do", context.Background(), updateRuntimeReq, &GQLResponse[graphql.Runtime]{}).
+						Return(errors.New("error")).
+						Once()
 					return client
 				},
 			},
@@ -596,37 +574,20 @@ func TestConfigClient_SetRuntimeStatusCondition(t *testing.T) {
 				description: "should fail when failed to update runtime",
 				getClientMock: func() *mocks.Client {
 					client := &mocks.Client{}
-					{
-						req := gcli.NewRequest(expectedGetRuntimeQuery)
-						req.Header.Set(TenantHeader, "tenant")
+					client.
+						On("Do", context.Background(), getRuntimeReq, &GQLResponse[graphql.RuntimeExt]{}).
+						Return(nil).
+						Run(setExpectedResponse[graphql.RuntimeExt](t, expectedSuccessfulGetRuntimeResponse)).
+						Once()
 
-						expectedResponse := &graphql.RuntimeExt{
-							Runtime: graphql.Runtime{
-								ID:   "runtimeId",
-								Name: "Runtime Test name",
-							},
-							Labels: graphql.Labels{
-								"label1": "something", "label2": "something2",
-							},
-						}
+					var expectedResult *graphql.Runtime
 
-						client.
-							On("Do", context.Background(), req, &GQLResponse[graphql.RuntimeExt]{}).
-							Return(nil).
-							Run(setExpectedResponse[graphql.RuntimeExt](t, expectedResponse)).
-							Once()
-					}
-					{
-						req := gcli.NewRequest(expectedUpdateMutation)
-						req.Header.Set(TenantHeader, "tenant")
-						var expectedResult *graphql.Runtime
+					client.
+						On("Do", context.Background(), updateRuntimeReq, &GQLResponse[graphql.Runtime]{}).
+						Return(nil).
+						Run(setExpectedResponse[graphql.Runtime](t, expectedResult)).
+						Once()
 
-						client.
-							On("Do", context.Background(), req, &GQLResponse[graphql.Runtime]{}).
-							Return(nil).
-							Run(setExpectedResponse[graphql.Runtime](t, expectedResult)).
-							Once()
-					}
 					return client
 				},
 			},
