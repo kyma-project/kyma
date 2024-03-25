@@ -124,7 +124,7 @@ const (
     result: runtime(id: "runtimeId") {
          id name description labels
 }}`
-	expectedUpdateMutation = `mutation {
+	expectedUpdateRuntimeMutation = `mutation {
     result: updateRuntime(id: "runtimeId" in: {
 		name: "Runtime Test name",
 		labels: {label1:"something",label2:"something2",},
@@ -479,7 +479,7 @@ func TestConfigClient_SetRuntimeStatusCondition(t *testing.T) {
 	getRuntimeReq := gcli.NewRequest(expectedGetRuntimeQuery)
 	getRuntimeReq.Header.Set(TenantHeader, "tenant")
 
-	updateRuntimeReq := gcli.NewRequest(expectedUpdateMutation)
+	updateRuntimeReq := gcli.NewRequest(expectedUpdateRuntimeMutation)
 	updateRuntimeReq.Header.Set(TenantHeader, "tenant")
 
 	expectedSuccessfulGetRuntimeResponse := &graphql.RuntimeExt{
