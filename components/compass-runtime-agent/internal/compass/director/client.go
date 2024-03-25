@@ -154,7 +154,7 @@ func (cc *directorClient) getRuntime(ctx context.Context) (graphql.RuntimeExt, e
 		return graphql.RuntimeExt{}, errors.New("getRuntime query returned nil response")
 	}
 	if response.Result.ID != cc.runtimeConfig.RuntimeId {
-		return graphql.RuntimeExt{}, err
+		return graphql.RuntimeExt{}, errors.New("getRuntime query returned incorrect runtime id")
 	}
 
 	return *response.Result, nil
@@ -184,7 +184,7 @@ func (cc *directorClient) updateRuntime(ctx context.Context, id string, director
 		return errors.New("getRuntime query returned nil response")
 	}
 	if response.Result.ID != id {
-		return err
+		return errors.New("updateRuntime query returned incorrect runtime id")
 	}
 
 	return nil
