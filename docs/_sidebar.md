@@ -18,6 +18,5 @@
   * [Troubleshooting](/04-operation-guides/troubleshooting/README.md)
 * [Technical Reference](/05-technical-reference/README.md)
   * [API Overview](/05-technical-reference/00-api-overview/README.md)
-  * [Configure the Runtime](/05-technical-reference/ra-01-configuring-runtime.md)
 * [Glossary](/glossary.md)
 <!-- markdown-link-check-enable -->
