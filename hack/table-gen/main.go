@@ -340,7 +340,7 @@ func convertUnstructuredToElementTree(obj interface{}, name string, required boo
 	e.name = name
 	e.required = required
 	if d, ok := m["description"].(string); ok {
-		e.description = d
+		e.description = strings.ReplaceAll(d, "\n", " ")
 	}
 
 	e.elemtype = getType(m)
