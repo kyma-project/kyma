@@ -15,25 +15,21 @@ const (
 )
 
 type Config struct {
-	AgentConfigurationSecret           string        `envconfig:"default=kyma-system/compass-agent-configuration"`
-	ControllerSyncPeriod               time.Duration `envconfig:"default=20s"`
-	MinimalCompassSyncTime             time.Duration `envconfig:"default=10s"`
-	CertValidityRenewalThreshold       float64       `envconfig:"default=0.3"`
-	ClusterCertificatesSecret          string        `envconfig:"default=kyma-system/cluster-client-certificates"`
-	CaCertificatesSecret               string        `envconfig:"default=istio-system/ca-certificates"`
-	SkipCompassTLSVerify               bool          `envconfig:"default=false"`
-	GatewayPort                        int           `envconfig:"default=8080"`
-	SkipAppsTLSVerify                  bool          `envconfig:"default=false"`
-	CentralGatewayServiceUrl           string        `envconfig:"default=http://central-application-gateway.kyma-system.svc.cluster.local:8082"`
-	QueryLogging                       bool          `envconfig:"default=false"`
-	MetricsLoggingTimeInterval         time.Duration `envconfig:"default=30m"`
-	HealthPort                         string        `envconfig:"default=8090"`
-	IntegrationNamespace               string        `envconfig:"default=kyma-system"`
-	CaCertSecretToMigrate              string        `envconfig:"optional"`
-	CaCertSecretKeysToMigrate          string        `envconfig:"default='cacert'"`
-	ClusterCertificatesSecretToMigrate string        `envconfig:"optional"`
-	AgentConfigurationSecretToMigrate  string        `envconfig:"optional"`
-	Runtime                            director.RuntimeURLsConfig
+	AgentConfigurationSecret     string        `envconfig:"default=kyma-system/compass-agent-configuration"`
+	ControllerSyncPeriod         time.Duration `envconfig:"default=20s"`
+	MinimalCompassSyncTime       time.Duration `envconfig:"default=10s"`
+	CertValidityRenewalThreshold float64       `envconfig:"default=0.3"`
+	ClusterCertificatesSecret    string        `envconfig:"default=kyma-system/cluster-client-certificates"`
+	CaCertificatesSecret         string        `envconfig:"default=istio-system/ca-certificates"`
+	SkipCompassTLSVerify         bool          `envconfig:"default=false"`
+	GatewayPort                  int           `envconfig:"default=8080"`
+	SkipAppsTLSVerify            bool          `envconfig:"default=false"`
+	CentralGatewayServiceUrl     string        `envconfig:"default=http://central-application-gateway.kyma-system.svc.cluster.local:8082"`
+	QueryLogging                 bool          `envconfig:"default=false"`
+	MetricsLoggingTimeInterval   time.Duration `envconfig:"default=30m"`
+	HealthPort                   string        `envconfig:"default=8090"`
+	IntegrationNamespace         string        `envconfig:"default=kyma-system"`
+	Runtime                      director.RuntimeURLsConfig
 }
 
 func (o *Config) String() string {
@@ -44,9 +40,7 @@ func (o *Config) String() string {
 		"SkipAppTLSVerify=%v, "+
 		"QueryLogging=%v, MetricsLoggingTimeInterval=%s, "+
 		"RuntimeEventsURL=%s, RuntimeConsoleURL=%s, "+
-		"HealthPort=%s, IntegrationNamespace=%s, CaCertSecretToMigrate=%s, caCertificateSecretKeysToMigrate=%s, "+
-		"ClusterCertificatesSecretToMigrate=%s, AgentConfigurationSecretToMigrate=%s, "+
-		"CentralGatewayServiceUrl=%v",
+		"HealthPort=%s, IntegrationNamespace=%s, CentralGatewayServiceUrl=%v",
 		o.AgentConfigurationSecret,
 		o.ControllerSyncPeriod.String(), o.MinimalCompassSyncTime.String(),
 		o.CertValidityRenewalThreshold, o.ClusterCertificatesSecret, o.CaCertificatesSecret,
@@ -54,9 +48,8 @@ func (o *Config) String() string {
 		o.SkipAppsTLSVerify,
 		o.QueryLogging, o.MetricsLoggingTimeInterval,
 		o.Runtime.EventsURL, o.Runtime.ConsoleURL,
-		o.HealthPort, o.IntegrationNamespace, o.CaCertSecretToMigrate, o.CaCertSecretKeysToMigrate,
-		o.ClusterCertificatesSecretToMigrate, o.AgentConfigurationSecretToMigrate,
-		o.CentralGatewayServiceUrl)
+		o.HealthPort, o.IntegrationNamespace, o.CentralGatewayServiceUrl,
+	)
 }
 
 func parseNamespacedName(value string) types.NamespacedName {
