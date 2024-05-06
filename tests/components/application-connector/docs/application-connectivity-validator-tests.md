@@ -46,7 +46,8 @@ Pipelines run the tests using the **test-validator** target from the `Makefile`.
 
 1. Provision a local Kubernetes cluster with k3d:
    ```sh
-   kyma provision k3d
+   k3d cluster create
+   kubectl create ns kyma-system
    ```
 
 2. Install the minimal set of components required to run Application Connectivity Validator **for Kyma SKR (Compass mode)**:

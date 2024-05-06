@@ -56,7 +56,8 @@ Pipelines run the tests using the **test-compass-runtime-agent** target from the
 
 1. Provision a local Kubernetes cluster with k3d:
    ```bash
-   kyma provision k3d
+   k3d cluster create
+   kubectl create ns kyma-system
    ```
 
 2. Install the minimal set of components required to run Compass Runtime Agent **for Kyma SKR (Compass mode)**:

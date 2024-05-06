@@ -107,7 +107,8 @@ Pipelines run the tests using the **test-gateway** target from the `Makefile`.
 
 1. Provision a local Kubernetes cluster with k3d:
    ```sh
-   kyma provision k3d
+   k3d cluster create
+   kubectl create ns kyma-system
    ```
 
 2. Install the minimal set of components required to run Application Gateway for either Kyma OS or SKR:
