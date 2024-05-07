@@ -1,7 +1,6 @@
 module github.com/kyma-project/kyma/components/central-application-connectivity-validator
 
-go 1.21
-toolchain go1.22.2
+go 1.22.2
 
 require (
 	github.com/gorilla/mux v1.8.1
@@ -61,9 +60,9 @@ require (
 	golang.org/x/exp v0.0.0-20220722155223-a9213eeb770e // indirect
 	golang.org/x/net v0.24.0 // indirect
 	golang.org/x/oauth2 v0.12.0 // indirect
-	golang.org/x/sys v0.19.0 // indirect
-	golang.org/x/term v0.18.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
+	golang.org/x/sys v0.20.0 // indirect
+	golang.org/x/term v0.20.0 // indirect
+	golang.org/x/text v0.15.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	golang.org/x/tools v0.20.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.4.0 // indirect
@@ -85,8 +84,8 @@ replace (
 	github.com/containerd/containerd => github.com/containerd/containerd v1.4.11
 	github.com/docker/docker => github.com/docker/docker v20.10.8+incompatible
 	github.com/opencontainers/runc => github.com/opencontainers/runc v1.1.12
-	golang.org/x/crypto => golang.org/x/crypto v0.16.0
-	golang.org/x/net => golang.org/x/net v0.19.0
-	golang.org/x/sys => golang.org/x/sys v0.15.0
-	golang.org/x/text => golang.org/x/text v0.14.0
+	golang.org/x/crypto => golang.org/x/crypto v0.23.0
+	golang.org/x/net => golang.org/x/net v0.25.0
+	golang.org/x/sys => golang.org/x/sys v0.20.0
+	golang.org/x/text => golang.org/x/text v0.15.0
 )
