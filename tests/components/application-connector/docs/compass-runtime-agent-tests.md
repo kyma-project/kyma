@@ -56,7 +56,8 @@ Pipelines run the tests using the **test-compass-runtime-agent** target from the
 
 1. Provision a local Kubernetes cluster with k3d:
    ```bash
-   k3d cluster create
+   k3d registry create kyma-registry --port 5001
+   k3d cluster create kyma --kubeconfig-switch-context -p 80:80@loadbalancer -p 443:443@loadbalancer --registry-use kyma-registry
    kubectl create ns kyma-system
    ```
 
