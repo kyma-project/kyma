@@ -74,7 +74,7 @@ func main() {
 	}
 	log, err := logger.New(format, level)
 	if err != nil {
-		if logErr := logger.LogFatalError("Failed to initialize logger: %s", err.Error()); logErr != nil {
+		if logErr := logger.LogFatalError("Failed to initialize loggger: %s", err.Error()); logErr != nil {
 			fmt.Printf("Failed to initializie default fatal error logger: %s, Failed to initialize logger: %s", logErr, err)
 		}
 		os.Exit(4)
