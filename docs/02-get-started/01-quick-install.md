@@ -17,7 +17,8 @@ To get started with Kyma, let's quickly install it with specific modules first.
 1. Provision a k3d cluster, run:
 
   ```bash
-  kyma provision k3d
+  k3d cluster create
+  kubectl create ns kyma-system
   ```
 
 1. To install a Kyma module of your choice on a Kubernetes cluster, deploy its module manager and apply the module configuration. See the following Kyma modules with their quick installation commands and links to their GitHub repositories:
