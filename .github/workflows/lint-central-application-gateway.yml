@@ -7,10 +7,12 @@ on:
   push:
     paths:
       - 'components/central-application-gateway/**'
+      - '!components/central-application-gateway/**/*.md'
     branches: [ "main" ]
   pull_request:
     paths:
       - 'components/central-application-gateway/**'
+      - '!components/central-application-gateway/**/*.md'
 
 jobs:
   golangci-lint:

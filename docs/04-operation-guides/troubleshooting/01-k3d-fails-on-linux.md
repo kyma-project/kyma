@@ -14,7 +14,7 @@ On Linux, the ports are reserved to be used by a privileged user.
 Use a custom port for the load balancer. For example, use the port `8080`:
 
 ```bash
-kyma provision k3d -p 8080:80@loadbalancer -p 8443:443@loadbalancer
+k3d cluster create -p 8080:80@loadbalancer -p 8443:443@loadbalancer
 ```
 
-Alternatively, execute the `kyma provision k3d` command with sudo privileges.
+Alternatively, execute the `k3d cluster create` command with sudo privileges.
