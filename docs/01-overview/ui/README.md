@@ -19,6 +19,10 @@ Kyma dashboard is a web-based UI for managing resources within Kyma or any Kuber
 
 ## Kyma CLI
 
+> [!WARNING]
+> The Kyma CLI version `v2`, with all commands available within this version, is deprecated. We've started designing the `v3` commands that will be first released within the `alpha` command group.
+> Read more about the decision [here](https://github.com/kyma-project/community/issues/872).
+
 ### Purpose
 
 Kyma CLI is a command-line tool that supports Kyma developers. It provides a set of commands and flags you can use to:
@@ -35,7 +39,7 @@ Kyma CLI is always released in parallel with Kyma to support the latest features
 
 Kyma CLI comes with a set of commands, each of which has its own specific set of flags. Use them to provision the cluster locally or using a chosen cloud provider, install, and test Kyma.
 
-See [the full list of commands and flags](https://github.com/kyma-project/cli/tree/main/docs/gen-docs).
+See [the full list of commands and flags](https://github.com/kyma-project/cli/tree/release-2.20/docs/gen-docs).
 
 ### Syntax
 
