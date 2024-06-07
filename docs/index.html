@@ -57,6 +57,7 @@
                 url = vm.route.file
                   .replace('raw.githubusercontent.com', 'github.com')
                   .replace(/\/main/, '/blob/main')
+                  .replace(/\/release-\d+(\.\d+)?/g, '/blob$&');
               } else {
                 url = 'https://github.com/kyma-project/kyma/blob/main/docs/' + vm.route.file
               }
