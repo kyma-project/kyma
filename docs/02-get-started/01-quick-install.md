@@ -14,7 +14,7 @@ To get started with Kyma, let's quickly install it with specific modules first.
 
 ## Steps
 
-1. Provision a k3d cluster, run:
+1. To provision a k3d cluster, run:
 
   ```bash
   k3d cluster create
