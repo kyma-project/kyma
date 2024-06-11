@@ -3,7 +3,7 @@
 To get started with Kyma, let's quickly install it with specific modules first.
 
 > [!NOTE]
-> This guide describes installation of standalone Kyma with specific modules. If you are using SAP BTP, Kyma runtime (SKR), read [Enable and Disable a Kyma Module](https://help.sap.com/docs/btp/sap-business-technology-platform/enable-and-disable-kyma-module?locale=en-US&version=Cloud) instead.
+> This guide describes installation of standalone Kyma with specific modules. If you are using SAP BTP, Kyma runtime (SKR), read [Add and Delete a Kyma Module](https://help.sap.com/docs/btp/sap-business-technology-platform/enable-and-disable-kyma-module?locale=en-US&version=Cloud) instead.
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ To get started with Kyma, let's quickly install it with specific modules first.
 
 ## Steps
 
-1. Provision a k3d cluster, run:
+1. To provision a k3d cluster, run:
 
   ```bash
   k3d cluster create
