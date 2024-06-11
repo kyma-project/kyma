@@ -20,20 +20,10 @@
 # Logging library
 /common/logging @kyma-project/Framefrog
 
-/components/central-application-connectivity-validator @kyma-project/Framefrog
-/components/central-application-gateway @kyma-project/Framefrog
-/components/compass-runtime-agent @kyma-project/Framefrog
-
-
 # All files and subdirectories in /docs
 /docs @kyma-project/technical-writers
 
 /installation @kyma-project/Jellyfish
-/installation/resources/crds/compass-runtime-agent @kyma-project/Framefrog
-
-/resources/compass-runtime-agent @kyma-project/Framefrog
-
-/tests/components/application-connector @kyma-project/Framefrog
 
 # Config files for markdownlint
 .markdownlint.yaml @kyma-project/technical-writers
