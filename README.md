@@ -8,6 +8,9 @@
 [![Twitter](https://img.shields.io/badge/twitter-@kymaproject-blue.svg)](https://twitter.com/kymaproject)
 [![REUSE status](https://api.reuse.software/badge/github.com/kyma-project/kyma)](https://api.reuse.software/info/github.com/kyma-project/kyma)
 
+> [!NOTE]
+> We are delighted to announce that Kyma has successfully undergone its transformation, achieving modularity. The [global Kyma releases](https://github.com/kyma-project/kyma/releases) were discontinued. Now, Kyma modules provide one functionality developed independently of the other ones. To benefit from the functionalities, subscribe to individual Kyma module repositories. You can add and delete modules without installing the monolithic Kyma. For more details, please refer to [Kyma Modules](https://kyma-project.io/#/06-modules/README).
+
 ## Overview
 
 **Kyma** `/kee-ma/` Kyma is an opinionated set of Kubernetes-based modular building blocks, including all necessary capabilities to develop and run enterprise-grade cloud-native applications. It is the open path to the SAP ecosystem supporting business scenarios end-to-end.
