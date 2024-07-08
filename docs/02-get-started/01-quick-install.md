@@ -17,7 +17,7 @@ To get started with Kyma, let's quickly install it with specific modules first.
 1. To provision a k3d cluster, run:
 
   ```bash
-  k3d cluster create
+  k3d cluster create --k3s-arg '--tls-san=host.docker.internal@server:*'
   kubectl create ns kyma-system
   ```
 
