@@ -17,4 +17,4 @@ You can enable modules at any time. If you decide that some of them are not need
 | [NATS](https://kyma-project.io/#/nats-manager/user/README.md) | NATS deploys a NATS cluster within the Kyma cluster. You can use it as a backend for Kyma Eventing. |
 | [Eventing](https://kyma-project.io/#/eventing-manager/user/README) | Eventing provides functionality to publish and subscribe to CloudEvents. <br> At the moment, the SAP Event Mesh default plan and NATS (provided by the NATS module) are supported. |
 | [API Gateway](https://kyma-project.io/#/api-gateway/user/README) | API Gateway provides functionalities that allow you to expose and secure APIs. |
-| Cloud Manager| Cloud Manager brings hyperscaler products and resources into the Kyma cluster in a secure way. |
+| [Cloud Manager](https://kyma-project.io/#/cloud-manager/user/README)| Cloud Manager brings hyperscaler products and resources into the Kyma cluster in a secure way. | <!-- markdown-link-check-disable-line -->
