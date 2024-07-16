@@ -9,7 +9,7 @@
 [![REUSE status](https://api.reuse.software/badge/github.com/kyma-project/kyma)](https://api.reuse.software/info/github.com/kyma-project/kyma)
 
 > [!NOTE]
-> We are delighted to announce that Kyma has successfully undergone its transformation, achieving modularity. The [global Kyma releases](https://github.com/kyma-project/kyma/releases) were discontinued. Now, each Kyma module provides one functionality developed independently of the other ones. To benefit from the functionalities, subscribe to individual Kyma module repositories. You can add and delete modules without installing the monolithic Kyma. For more details, please refer to [Kyma Modules](https://kyma-project.io/#/06-modules/README).
+> Kyma has successfully undergone its transformation, achieving modularity. The [global Kyma releases](https://github.com/kyma-project/kyma/releases) are discontinued. Now, each Kyma module provides functionality developed and delivered independently of the other ones. To benefit from the functionalities, subscribe to individual Kyma module repositories. You can add and delete modules without installing the monolithic Kyma. For more details, please refer to [Kyma Modules](https://kyma-project.io/#/06-modules/README).
 
 ## Overview
 
