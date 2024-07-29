@@ -11,6 +11,7 @@
   * [NATS](/nats-manager/user/README.md)
   * [Eventing](/eventing-manager/user/README.md)
   * [API Gateway](/api-gateway/user/README.md)
+  * [Cloud Manager](/cloud-manager/user/README.md)
 * [User Interfaces](/01-overview/ui/README.md)
 * [Operation Guides](/04-operation-guides/README.md)
   * [Operations](/04-operation-guides/operations/README.md)

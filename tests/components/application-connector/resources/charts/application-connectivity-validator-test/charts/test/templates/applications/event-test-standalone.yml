@@ -1,7 +1,0 @@
-apiVersion: applicationconnector.kyma-project.io/v1alpha1
-kind: Application
-metadata:
-  name: event-test-standalone
-spec:
-  description: Test app-con-validator
-  skipVerify: true

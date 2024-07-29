@@ -7,7 +7,7 @@ Here's a list of the most commonly used terms that you may come across when brow
 
 | Term |  Description | Useful links |
 | ---- | ------------ | ------------ |
-| Application | An external solution connected to Kyma through Application Connector.   <br><br> <div style="background-color:#ffddd3; padding:9px;"> **Warning** <br> Don't confuse it with `application`, which is the term used for a microservice deployed on Kyma or in a general sense for software.</div>  | [Application custom resource](https://kyma-project.io/#/application-connector-manager/user/resources/06-10-application)      |
+| Application | An external solution connected to Kyma through Application Connector.   <br><br> <div style="background-color:#ffddd3; padding:9px; color:#757575"> **Warning** <br> Don't confuse it with `application`, which is the term used for a microservice deployed on Kyma or in a general sense for software.</div>  | [Application custom resource](https://kyma-project.io/#/application-connector-manager/user/resources/06-10-application)      |
 | Credentials/Secrets | Sensitive data to call the service, connect to it, and authenticate it.  |       |
 | Custom resource | A custom resource (CR) allows you to extend the Kubernetes API to cover use cases that are not directly covered by core Kubernetes.  | [Kubernetes - Custom Resource](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/) |
 | CustomResourceDefinition (CRD) | An object used to define a custom resource. |       |
