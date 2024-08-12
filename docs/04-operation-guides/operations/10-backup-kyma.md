@@ -173,7 +173,7 @@ spec:
                   name: volume-snapshot-${RANDOM_ID}
                   namespace: {NAMESPACE}
                   labels:
-                    job: volume-snapshotter-{PVC_NAME}
+                    job: volume-snapshotter
                     name: volume-snapshot-${RANDOM_ID}
                 spec:
                   volumeSnapshotClassName: {SNAPSHOT_CLASS_NAME}
