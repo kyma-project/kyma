@@ -46,7 +46,7 @@ If you want to provision a new volume or restore the existing one, create on-dem
     - for Azure: `disk.csi.azure.com`
 
   ```yaml
-  apiVersion: snapshot.storage.k8s.io/v1beta1
+  apiVersion: snapshot.storage.k8s.io/v1
   kind: VolumeSnapshotClass
   metadata:
     annotations:
@@ -59,7 +59,7 @@ If you want to provision a new volume or restore the existing one, create on-dem
   2. Create a VolumeSnapshot resource:
 
   ```yaml
-  apiVersion: snapshot.storage.k8s.io/v1beta1
+  apiVersion: snapshot.storage.k8s.io/v1
   kind: VolumeSnapshot
   metadata:
     name: snapshot
@@ -144,7 +144,7 @@ subjects:
 - kind: ServiceAccount
   name: volume-snapshotter
 ---
-apiVersion: batch/v1beta1
+apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: volume-snapshotter
@@ -156,6 +156,7 @@ spec:
       template:
         spec:
           serviceAccountName: volume-snapshotter
+          restartPolicy: Never
           containers:
           - name: job
             image: europe-docker.pkg.dev/kyma-project/prod/tpi/k8s-tools:v20231026-aa6060ec
@@ -165,16 +166,15 @@ spec:
               - |
                 # Create volume snapshot with random name.
                 RANDOM_ID=$(openssl rand -hex 4)
-
                 cat <<EOF | kubectl apply -f -
-                apiVersion: snapshot.storage.k8s.io/v1beta1
+                apiVersion: snapshot.storage.k8s.io/v1
                 kind: VolumeSnapshot
                 metadata:
                   name: volume-snapshot-${RANDOM_ID}
                   namespace: {NAMESPACE}
                   labels:
-                    "job": "volume-snapshotter"
-                    "name": "volume-snapshot-${RANDOM_ID}"
+                    job: volume-snapshotter-{PVC_NAME}
+                    name: volume-snapshot-${RANDOM_ID}
                 spec:
                   volumeSnapshotClassName: {SNAPSHOT_CLASS_NAME}
                   source:
@@ -192,14 +192,20 @@ spec:
                     fi
 
                     if [[ "${i}" -lt "${attempts}" ]]; then
-                        echo "Volume snapshot is not yet ready to use, let's wait ${retryTimeInSec} seconds and retry. Attempts ${i} of ${attempts}."
+                        echo "Volume snapshot [volume-snapshot-${RANDOM_ID}] is not yet ready to use, let's wait ${retryTimeInSec} seconds and retry. Attempts ${i} of ${attempts}."
                     else
-                        echo "Volume snapshot is still not ready to use after ${attempts} attempts, giving up."
+                        echo "Volume snapshot [volume-snapshot-${RANDOM_ID}] is still not ready to use after ${attempts} attempts, giving up."
                         exit 1
                     fi
                     sleep ${retryTimeInSec}
                 done
 
-                # Delete old volume snapshots.
-                kubectl delete volumesnapshot -n {NAMESPACE} -l job=volume-snapshotter,name!=volume-snapshot-${RANDOM_ID}
-```
+                # Retain only the last $total_snapshot_count snapshots.
+                total_snapshot_count=1
+                snapshots_to_delete=$(kubectl get volumesnapshot -n {NAMESPACE} -l job=volume-snapshotter -o=jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' | sort -r | tail -n +$(($total_snapshot_count + 1)))
+                if [ -n "$snapshots_to_delete" ]; then
+                  echo "Deleting old snapshots: $snapshots_to_delete"
+                  echo "$snapshots_to_delete" | xargs -n 1 kubectl -n {NAMESPACE} delete volumesnapshot 
+                else
+                  echo "No snapshots to delete, keeping the last $total_snapshot_count snapshots."
+                fi
