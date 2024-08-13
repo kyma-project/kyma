@@ -27,8 +27,7 @@ You can create on-demand volume snapshots manually, or set up a periodic job tha
 
 ## Back Up Resources Using Velero
 
-You can back up and restore individual resources manually or automatically with Velero. For more information, read the [Velero documentation](https://velero.io/docs/).
-Be aware that a full backup of a Kyma cluster isn't supported. Start with the existing Kyma installation and restore specific resources individually.
+Velero backup is not supported at this time.
 
 ## Create On-Demand Volume Snapshots
 
