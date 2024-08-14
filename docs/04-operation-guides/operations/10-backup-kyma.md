@@ -25,9 +25,9 @@ Taking volume snapshots is possible thanks to [Container Storage Interface (CSI)
 
 You can create on-demand volume snapshots manually, or set up a periodic job that takes automatic snapshots periodically.
 
-## Back Up Resources Using Velero
+## Back Up Resources Using 3rd Parties Tools
 
-Velero backup is not supported at this time.
+3rd part tols like velero backup is not supported at this time.
 
 ## Create On-Demand Volume Snapshots
 
