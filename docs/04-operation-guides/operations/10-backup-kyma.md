@@ -27,7 +27,7 @@ You can create on-demand volume snapshots manually, or set up a periodic job tha
 
 ## Back Up Resources Using Third-Party Parties Tools
 >[!WARNING]
-> Third-party tools like Velero Backup are not currently supported. These tools may have limitations and might not fully support automated cluster backups. They often require specific access rights to cluster infrastructure, which may not be available in Kyma's managed offerings, where access rights to the infrastructure account are restricted.
+> Third-party tools like Velero are not currently supported. These tools may have limitations and might not fully support automated cluster backups. They often require specific access rights to cluster infrastructure, which may not be available in Kyma's managed offerings, where access rights to the infrastructure account are restricted.
 
 ## Create On-Demand Volume Snapshots
 
