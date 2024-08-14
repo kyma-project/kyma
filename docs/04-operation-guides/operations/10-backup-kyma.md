@@ -26,8 +26,8 @@ Taking volume snapshots is possible thanks to [Container Storage Interface (CSI)
 You can create on-demand volume snapshots manually, or set up a periodic job that takes automatic snapshots periodically.
 
 ## Back Up Resources Using Third-Party Parties Tools
-
-Third-Party party tools like velero backup is not supported at this time.
+>[!WARNING]
+> Third-party tools like Velero Backup are not currently supported. These tools may have limitations and might not fully support automated cluster backups. They often require specific access rights to cluster infrastructure, which may not be available in Kyma's managed offerings, where access rights to the infrastructure account are restricted.
 
 ## Create On-Demand Volume Snapshots
 
