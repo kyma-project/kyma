@@ -91,7 +91,7 @@ To get started with Kyma, let's quickly install it with specific modules first.
   kubectl apply -f https://github.com/kyma-project/api-gateway/releases/latest/download/apigateway-default-cr.yaml
   ```
   
-3. Update Core DNS to correctly resolve the `local.kyma.dev` domain:
+3. Update CoreDNS to correctly resolve the `local.kyma.dev` domain:
 
   ```bash
   cat <<EOF | kubectl apply -f -
