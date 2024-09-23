@@ -17,7 +17,7 @@ To get started with Kyma, let's quickly install it with specific modules first.
 1. To provision a k3d cluster, run:
 
   ```bash
-  k3d cluster create -p '80:80@loadbalancer' -p '443:443@loadbalancer' --k3s-arg '--disable=traefik@server:*' --k3s-arg '--tls-san=host.docker.internal@server:*'
+  k3d cluster create kyma --kubeconfig-switch-context -p '80:80@loadbalancer' -p '443:443@loadbalancer' --k3s-arg '--disable=traefik@server:*' --k3s-arg '--tls-san=host.docker.internal@server:*'
   kubectl create ns kyma-system
   ```
 
