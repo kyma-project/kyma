@@ -20,6 +20,8 @@ To get started with Kyma, let's quickly install it with specific modules first.
   k3d cluster create kyma --kubeconfig-switch-context -p '80:80@loadbalancer' -p '443:443@loadbalancer' --k3s-arg '--disable=traefik@server:*' --k3s-arg '--tls-san=host.docker.internal@server:*'
   kubectl create ns kyma-system
   ```
+  >[!NOTE]
+  > If ports `80` and `443` are already in use on your host, change the command to map different ports from the host to ports `80` and `443` on the cluster's load balancer container. For example, `'30080:80@loadbalancer' -p '30443:443@loadbalancer'`.
 
 1. To install a Kyma module of your choice on a Kubernetes cluster, deploy its module manager and apply the module configuration. See the following Kyma modules with their quick installation commands and links to their GitHub repositories:
 
