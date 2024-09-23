@@ -17,7 +17,7 @@ To get started with Kyma, let's quickly install it with specific modules first.
 1. To provision a k3d cluster, run:
 
   ```bash
-  k3d cluster create --k3s-arg '--tls-san=host.docker.internal@server:*'
+  k3d cluster create -p '80:80@loadbalancer' -p '443:443@loadbalancer' --k3s-arg '--disable=traefik@server:*' --k3s-arg '--tls-san=host.docker.internal@server:*'
   kubectl create ns kyma-system
   ```
 
@@ -90,8 +90,25 @@ To get started with Kyma, let's quickly install it with specific modules first.
   kubectl apply -f https://github.com/kyma-project/api-gateway/releases/latest/download/api-gateway-manager.yaml
   kubectl apply -f https://github.com/kyma-project/api-gateway/releases/latest/download/apigateway-default-cr.yaml
   ```
+  
+3. Update Core DNS to correctly resolve the `local.kyma.dev` domain:
 
-1. To manage Kyma using graphical user interface (GUI), open Kyma dashboard:
+  ```bash
+  cat <<EOF | kubectl apply -f -
+  apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: coredns-custom
+    namespace: kube-system
+  data:
+    kyma.override: |
+      rewrite name regex (.*)\.local\.kyma\.dev istio-ingressgateway.istio-system.svc.cluster.local
+  EOF
+
+  kubectl rollout restart deployment -n kube-system coredns
+  ```
+
+4. To manage Kyma using graphical user interface (GUI), open Kyma dashboard:
 
   ```bash
   kyma dashboard
