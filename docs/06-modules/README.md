@@ -18,3 +18,4 @@ You can add modules at any time. If you decide that some of them are not needed 
 | [Eventing](https://kyma-project.io/#/eventing-manager/user/README) | Eventing provides functionality to publish and subscribe to CloudEvents. <br> At the moment, the SAP Event Mesh default plan and NATS (provided by the NATS module) are supported. |
 | [API Gateway](https://kyma-project.io/#/api-gateway/user/README) | API Gateway provides functionalities that allow you to expose and secure APIs. |
 | [Cloud Manager](https://kyma-project.io/#/cloud-manager/user/README)| Cloud Manager brings hyperscaler products and resources into the Kyma cluster in a secure way. |
+| [Docker Registry](https://kyma-project.io/#/docker-registry/user/README)| The Docker Registry module provides a lightweight, open-source Docker registry for storing and distributing container images in the Kubernetes environment. | <!-- markdown-link-check-disable-line -->
