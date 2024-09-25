@@ -85,3 +85,11 @@ Kyma team is located mostly in Poland and Germany. See the open job positions fo
   - [Official Go learning tutorials](https://go.dev/learn/)
   - [50 Shades of Go: Traps, Gotchas, and Common Mistakes for New Golang Devs](http://devs.cloudimmunity.com/gotchas-and-common-mistakes-in-go-golang/)
   - [Language converter](https://ide.onelang.io/?input=HelloWorldRaw) - this tool helps you to convert code from one language to any other one
+
+## Code of Conduct
+
+See the [Code of Conduct](CODE_OF_CONDUCT.md) document.
+
+## Licensing
+
+See the [license](./LICENSE) file.

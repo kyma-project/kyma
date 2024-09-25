@@ -4,7 +4,7 @@ Classic Kyma offered a fixed set of preconfigured components whose development r
 
 With the modular approach, Kyma components became independent modules, each providing one functionality developed independently of the other ones. Each module has its own custom resource that holds the desired configuration and the operator that reconciles the configuration.
 
-You can enable modules at any time. If you decide that some of them are not needed for your use case, you can disable them and free the resources. To learn how to install a module, visit [Quick install](../02-get-started/01-quick-install.md). To learn how to quickly uninstall or upgrade Kyma with specific modules, visit [Uninstall and upgrade Kyma with a module](../02-get-started/08-uninstall-upgrade-kyma-module.md).
+You can add modules at any time. If you decide that some of them are not needed for your use case, you can delete them and free the resources. To learn how to install a module, visit [Quick install](../02-get-started/01-quick-install.md). To learn how to quickly uninstall or upgrade Kyma with specific modules, visit [Uninstall and upgrade Kyma with a module](../02-get-started/08-uninstall-upgrade-kyma-module.md).
 
 | Module | Purpose |
 |---|---|

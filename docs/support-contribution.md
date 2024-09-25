@@ -10,4 +10,4 @@ Here are our support channels:
 
 ## Contribution
 
-To learn how to contribute to Kyma code and documentation, check [Kyma Community](https://github.com/kyma-project/community?tab=readme-ov-file#kyma-community).
+To contribute to this project, follow the general [Contributing Rules](https://github.com/kyma-project/community/blob/main/docs/contributing/02-contributing.md).
