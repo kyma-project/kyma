@@ -240,7 +240,8 @@ function extractLinksFromMarkdown(markdownText) {
   return links;
 }
 
-async function pathsFromSidebars(sidebarsPaths,paths, router) {
+async function pathsFromSidebars(sidebarsPaths, router) {
+  const paths = []
   const tasks = []
   for (const path of sidebarsPaths) {
     tasks.push(
@@ -255,8 +256,7 @@ async function pathsFromSidebars(sidebarsPaths,paths, router) {
         l.url = l.url.startsWith('/') ? l.url : path + l.url
         //trim the '.md' extension
         l.url = l.url.replace(/\.md$/, '')
-
-        if (!paths.some(p => p === l.url)) {
+        if (paths.indexOf(l.url) === -1) {
           paths.push(l.url)
         }
       }
@@ -269,8 +269,8 @@ async function pathsFromSidebars(sidebarsPaths,paths, router) {
 export async function init(config, vm) {
   const isAuto = config.paths === 'auto';
   let paths = []
-  if (config.pathsWithSidebars) {    
-    await pathsFromSidebars(config.pathsWithSidebars,paths,vm.router)
+  if (config.sidebars) {    
+    paths = await pathsFromSidebars(config.sidebars, vm.router)
   } else {
     paths = isAuto ? getAllPaths(vm.router) : config.paths;
   }

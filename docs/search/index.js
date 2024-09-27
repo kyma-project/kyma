@@ -30,7 +30,7 @@ const install = function (hook, vm) {
       opts.hideOtherSidebarContent || CONFIG.hideOtherSidebarContent;
     CONFIG.namespace = opts.namespace || CONFIG.namespace;
     CONFIG.pathNamespaces = opts.pathNamespaces || CONFIG.pathNamespaces;
-    CONFIG.pathsWithSidebars = opts.pathsWithSidebars 
+    CONFIG.sidebars = opts.sidebars 
   }
 
   const isAuto = CONFIG.paths === 'auto';
