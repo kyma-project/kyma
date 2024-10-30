@@ -38,8 +38,6 @@ If you want to provision a new volume or restore the existing one, create on-dem
 
 #### **Gardener**
 
-### Steps
-
   1. Create a VolumeSnapshot resource using the default VolumeSnapshotClass and your PVC name:
   
     ```yaml
@@ -55,20 +53,16 @@ If you want to provision a new volume or restore the existing one, create on-dem
     EOF
     ```
 
-  The VolumeSnapshot resource is created.
+    The VolumeSnapshot resource is created.
   
-  2. To verify that the snapshot was taken successfully, run kubectl get -n {NAMESPACE} volumesnapshot -w and check that the field READYTOUSE has status true.
+  2. To verify that the snapshot was taken successfully, run `kubectl get -n {NAMESPACE} volumesnapshot -w` and check that the field **READYTOUSE** has status `true`.
 
 #### **AKS**
-
-### Steps
 
   1. [Install the CSI driver](https://github.com/kubernetes-sigs/azuredisk-csi-driver/blob/master/docs/install-csi-driver-master.md).
   2. Follow our instructions to create a volume snapshot on Gardener, using the driver for Azure.
 
 #### **GKE**
-
-### Steps
 
   1. [Enable the required feature gate in the cluster](https://cloud.google.com/kubernetes-engine/docs/how-to/gce-pd-csi-driver).
   2. Check out [the repository for the Google Compute Engine Persistent Disk (GCE PD) CSI driver](https://github.com/kubernetes-sigs/gcp-compute-persistent-disk-csi-driver) for details on how to use volume snapshots on GKE.
