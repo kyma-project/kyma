@@ -42,18 +42,18 @@ If you want to provision a new volume or restore the existing one, create on-dem
 
   1. Create a VolumeSnapshot resource using the default VolumeSnapshotClass and your PVC name:
   
-  ```yaml
-  kubectl apply -n {NAMESPACE} -f <<EOF
-  apiVersion: snapshot.storage.k8s.io/v1
-  kind: VolumeSnapshot
-  metadata:
-    name: snapshot
-  spec:
-    volumeSnapshotClassName: default
-    source:
-      persistentVolumeClaimName: {YOUR_PVC_NAME}
-  EOF
-  ```
+    ```yaml
+    kubectl apply -n {NAMESPACE} -f <<EOF
+    apiVersion: snapshot.storage.k8s.io/v1
+    kind: VolumeSnapshot
+    metadata:
+      name: snapshot
+    spec:
+      volumeSnapshotClassName: default
+      source:
+        persistentVolumeClaimName: {YOUR_PVC_NAME}
+    EOF
+    ```
 
   The VolumeSnapshot resource is created.
   
