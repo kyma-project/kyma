@@ -21,190 +21,32 @@ If the etcd database experiences any problems, Gardener automatically restores t
 
 We recommend that you back up your volumes periodically with the [VolumeSnapshot API resource](https://kubernetes.io/docs/concepts/storage/volume-snapshots/#volumesnapshots), which is provided by Kubernetes. You can use your snapshot to provision a new volume prepopulated with the snapshot data, or restore the existing volume to the state represented by the snapshot.
 
-Taking volume snapshots is possible thanks to [Container Storage Interface (CSI) drivers](https://kubernetes-csi.github.io/docs/), which allow third-party storage providers to expose storage systems in Kubernetes. For details on available drivers, see the [full list of drivers](https://kubernetes-csi.github.io/docs/drivers.html).
-
-You can create on-demand volume snapshots manually, or set up a periodic job that takes automatic snapshots periodically.
-
-## Back Up Resources Using Third-Party Tools
->[!WARNING]
-> Third-party tools like Velero are not currently supported. These tools may have limitations and might not fully support automated cluster backups. They often require specific access rights to cluster infrastructure, which may not be available in Kyma's managed offerings, where access rights to the infrastructure account are restricted.
+Taking volume snapshots is possible thanks to [Container Storage Interface (CSI) drivers](https://kubernetes-csi.github.io/docs/), which allow third-party storage providers to expose storage systems in Kubernetes. The driver must be specified in the VolumeSnapshotClass resource. Kyma clusters usually have a default VolumeSnapshotClass available. If you use the default resource, you don't have to configure the driver.
 
 ## Create On-Demand Volume Snapshots
 
-If you want to provision a new volume or restore the existing one, create on-demand [volume snapshots](https://kubernetes.io/docs/concepts/storage/volume-snapshots/):
+To manually back up your volumes, use the [VolumeSnapshot](https://kubernetes.io/docs/concepts/storage/volume-snapshots/) Kubernetes resource:
 
-<!-- tabs:start -->
-
-#### **Gardener**
-
-### Steps
-
-  1. Create a VolumeSnapshotClass with the correct driver:
-    - for GCP: `pd.csi.storage.gke.io`
-    - for AWS: `ebs.csi.aws.com`
-    - for Azure: `disk.csi.azure.com`
-
-  ```yaml
-  apiVersion: snapshot.storage.k8s.io/v1
-  kind: VolumeSnapshotClass
-  metadata:
-    annotations:
-      snapshot.storage.kubernetes.io/is-default-class: "true"
-    name: snapshot-class
-  driver: <enter correct one for cloud provider>
-  deletionPolicy: Delete
-  ```
+1. Create a VolumeSnapshot resource using the default VolumeSnapshotClass and your PVC name:
   
-  2. Create a VolumeSnapshot resource:
-
-  ```yaml
-  apiVersion: snapshot.storage.k8s.io/v1
-  kind: VolumeSnapshot
-  metadata:
-    name: snapshot
-  spec:
-    volumeSnapshotClassName: snapshot-class
-    source:
-      persistentVolumeClaimName: {PVC_NAME}
-  ```
-
-  3. Wait until the **READYTOUSE** field has the `true` status to verify that the snapshot was taken successfully:
-
-  ```bash
-  kubectl get volumesnapshot -w
-  ```
-
-  4. Use this snapshot as a datasource to create a PVC:
-  
-  ```yaml
-  apiVersion: v1
-  kind: PersistentVolumeClaim
-  metadata:
-    name: pvc-restored
-  spec:
-    accessModes:
-     - ReadWriteOnce
-    resources:
-      requests:
-        storage: {SIZE_OF_ORIGINAL_PVC}
-    dataSource:
+    ```yaml
+    kubectl apply -n {NAMESPACE} -f <<EOF
+    apiVersion: snapshot.storage.k8s.io/v1
+    kind: VolumeSnapshot
+    metadata:
       name: snapshot
-      kind: VolumeSnapshot
-      apiGroup: snapshot.storage.k8s.io
-  ```
-
-#### **AKS**
-
-### Steps
-
-  1. [Install the CSI driver](https://github.com/kubernetes-sigs/azuredisk-csi-driver/blob/master/docs/install-csi-driver-master.md).
-  2. Follow our instructions to create a volume snapshot on Gardener, using the driver for Azure.
-
-#### **GKE**
-
-### Steps
-
-  1. [Enable the required feature gate in the cluster](https://cloud.google.com/kubernetes-engine/docs/how-to/gce-pd-csi-driver).
-  2. Check out [the repository for the Google Compute Engine Persistent Disk (GCE PD) CSI driver](https://github.com/kubernetes-sigs/gcp-compute-persistent-disk-csi-driver) for details on how to use volume snapshots on GKE.
-
-<!-- tabs:end -->
-
-## Create a Periodic Snapshot Job
-
-You can also create a CronJob to handle taking volume snapshots periodically. A sample CronJob definition that includes the required ServiceAccount and roles looks as follows:
-
-```yaml
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: volume-snapshotter
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: volume-snapshotter
-  namespace: {NAMESPACE}
-rules:
-- apiGroups: ["snapshot.storage.k8s.io"]
-  resources: ["volumesnapshots"]
-  verbs: ["create", "get", "list", "delete"]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: volume-snapshotter
-  namespace: {NAMESPACE}
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: volume-snapshotter
-subjects:
-- kind: ServiceAccount
-  name: volume-snapshotter
----
-apiVersion: batch/v1
-kind: CronJob
-metadata:
-  name: volume-snapshotter
-  namespace: {NAMESPACE}
-spec:
-  schedule: "@hourly" #Run once an hour, beginning of hour
-  jobTemplate:
     spec:
-      template:
-        spec:
-          serviceAccountName: volume-snapshotter
-          restartPolicy: Never
-          containers:
-          - name: job
-            image: europe-docker.pkg.dev/kyma-project/prod/tpi/k8s-tools:v20231026-aa6060ec
-            command:
-              - /bin/bash
-              - -c
-              - |
-                # Create volume snapshot with random name.
-                RANDOM_ID=$(openssl rand -hex 4)
-                cat <<EOF | kubectl apply -f -
-                apiVersion: snapshot.storage.k8s.io/v1
-                kind: VolumeSnapshot
-                metadata:
-                  name: volume-snapshot-${RANDOM_ID}
-                  namespace: {NAMESPACE}
-                  labels:
-                    job: volume-snapshotter
-                    name: volume-snapshot-${RANDOM_ID}
-                spec:
-                  volumeSnapshotClassName: {SNAPSHOT_CLASS_NAME}
-                  source:
-                    persistentVolumeClaimName: {PVC_NAME}
-                EOF
+      volumeSnapshotClassName: default
+      source:
+        persistentVolumeClaimName: {YOUR_PVC_NAME}
+    EOF
+    ```
 
-                # Wait until volume snapshot is ready to use.
-                attempts=3
-                retryTimeInSec="30"
-                for ((i=1; i<=attempts; i++)); do
-                    STATUS=$(kubectl get volumesnapshot volume-snapshot-${RANDOM_ID} -n {NAMESPACE} -o jsonpath='{.status.readyToUse}')
-                    if [ "${STATUS}" == "true" ]; then
-                        echo "Volume snapshot is ready to use."
-                        break
-                    fi
+    The VolumeSnapshot resource is created.
+  
+2. To verify that the snapshot was taken successfully, run `kubectl get -n {NAMESPACE} volumesnapshot -w` and check that the field **READYTOUSE** has status `true`.
 
-                    if [[ "${i}" -lt "${attempts}" ]]; then
-                        echo "Volume snapshot [volume-snapshot-${RANDOM_ID}] is not yet ready to use, let's wait ${retryTimeInSec} seconds and retry. Attempts ${i} of ${attempts}."
-                    else
-                        echo "Volume snapshot [volume-snapshot-${RANDOM_ID}] is still not ready to use after ${attempts} attempts, giving up."
-                        exit 1
-                    fi
-                    sleep ${retryTimeInSec}
-                done
+## Back Up Resources Using Third-Party Tools
 
-                # Retain only the last $total_snapshot_count snapshots.
-                total_snapshot_count=1
-                snapshots_to_delete=$(kubectl get volumesnapshot -n {NAMESPACE} -l job=volume-snapshotter -o=jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' | sort -r | tail -n +$(($total_snapshot_count + 1)))
-                if [ -n "$snapshots_to_delete" ]; then
-                  echo "Deleting old snapshots: $snapshots_to_delete"
-                  echo "$snapshots_to_delete" | xargs -n 1 kubectl -n {NAMESPACE} delete volumesnapshot 
-                else
-                  echo "No snapshots to delete, keeping the last $total_snapshot_count snapshots."
-                fi
+>[!WARNING]
+> Third-party tools like Velero are not currently supported. These tools may have limitations and might not fully support automated cluster backups. They often require specific access rights to cluster infrastructure, which may not be available in Kyma's managed offerings, where access rights to the infrastructure account are restricted.
