@@ -8,8 +8,8 @@ You can add modules at any time. If you decide that some of them are not needed 
 
 | Module | Purpose |
 |---|---|
-| [API Gateway](https://kyma-project.io/#/api-gateway/user/README) | API Gateway provides functionalities that allow you to expose and secure APIs. |
 | [Istio](https://kyma-project.io/#/istio/user/README) | Istio is a service mesh with the Kyma-specific configuration. |
+| [API Gateway](https://kyma-project.io/#/api-gateway/user/README) | API Gateway provides functionalities that allow you to expose and secure APIs. |
 | [SAP BTP Operator](https://kyma-project.io/#/btp-manager/user/README.md) | Within the SAP BTP Operator module, BTP Manager installs SAP BTP Service Operator that allows you to consume SAP BTP services from your Kubernetes cluster using Kubernetes-native tools. |
 | [Application Connector](https://kyma-project.io/#/application-connector-manager/user/README) | Application Connector allows you to connect with external solutions. No matter if you want to integrate an on-premise or a cloud system, the integration process doesn't change, which allows you to avoid any configuration or network-related problems. |
 | [Cloud Manager](https://kyma-project.io/#/cloud-manager/user/README)| Cloud Manager brings hyperscaler products and resources into the Kyma cluster in a secure way. |
