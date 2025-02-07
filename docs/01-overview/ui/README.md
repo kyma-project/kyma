@@ -19,7 +19,7 @@ Kyma dashboard is a web-based UI for managing resources within Kyma or any Kuber
 
 ## Kyma CLI
 
-> [!WARNING]
+> [!CAUTION]
 > The Kyma CLI version `v2`, with all commands available within this version, is deprecated. We've started designing the `v3` commands that will be first released within the `alpha` command group.
 > Read more about the decision [here](https://github.com/kyma-project/community/issues/872).
 
