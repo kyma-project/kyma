@@ -1,6 +1,6 @@
 # Kyma Modules
 
-> [!CAUTION] This is the open-source documentation for the Kyma project. If you are a managed offering user of SAP BTP, Kyma runtime, see [Kyma's Modular Approach](https://help.sap.com/docs/btp/sap-business-technology-platform/kyma-s-modular-approach?version=Cloud) on SAP Help Portal.
+> [!CAUTION] This is the open-source documentation for the Kyma project. If you are a managed offering user of **SAP BTP, Kyma runtime**, see [Kyma's Modular Approach](https://help.sap.com/docs/btp/sap-business-technology-platform/kyma-s-modular-approach?version=Cloud) on SAP Help Portal.
 
 Classic Kyma offered a fixed set of preconfigured components whose development rhythm was synchronized and determined by the release schedule.
 
