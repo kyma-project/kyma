@@ -14,6 +14,8 @@
   * [Serverless](/serverless-manager/user/README.md)
   * [Telemetry](/telemetry-manager/user/README.md)
 * [User Interfaces](/01-overview/ui/README.md)
+  * [Kyma Dashboard](/01-overview/ui/ui-01-gui.md)
+  * [Kyma CLI](/cli/user/README.md)
 * [Operation Guides](/04-operation-guides/README.md)
   * [Operations](/04-operation-guides/operations/README.md)
   * [Troubleshooting](/04-operation-guides/troubleshooting/README.md)
