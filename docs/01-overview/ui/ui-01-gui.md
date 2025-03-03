@@ -16,8 +16,4 @@ You can use Kyma dashboard to perform the following actions:
 * Generate access tokens based on service accounts and Kubernetes RoleBindings and ClusterRoleBindings, which regulate access using Role-based access control (RBAC).
 * Have a quick look at the basic cluster condition.
 
-## Integration
-
-Kyma dashboard is a web-based UI for managing resources within Kyma or any Kubernetes cluster. It consists of separate micro front-end applications managed by the [Luigi framework](https://luigi-project.io/). Kyma dashboard has a dedicated Node.js back end, which is a proxy for a [Kubernetes API server](https://kubernetes.io/docs/concepts/overview/components/#kube-apiserver).
-
 ![Cluster overview](../../assets/dashboard.png)
