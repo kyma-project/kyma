@@ -1,11 +1,9 @@
 # Kyma Modules
 
 > [!WARNING]
-> This is the open-source documentation for the Kyma project. If you are a managed offering user of **SAP BTP, Kyma runtime**, see [Kyma's Modular Approach](https://help.sap.com/docs/btp/sap-business-technology-platform/kyma-s-modular-approach?version=Cloud) on SAP Help Portal.
+> This is the open-source documentation for the Kyma project. If you are a managed offering user of **SAP BTP, Kyma runtime**, see [Kyma Environment](https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/468c2f3c3ca24c2c8497ef9f83154c44.html) on SAP Help Portal.
 
-Classic Kyma offered a fixed set of preconfigured components whose development rhythm was synchronized and determined by the release schedule.
-
-With the modular approach, Kyma components became independent modules, each providing one functionality developed independently of the other ones. Each module has its own custom resource that holds the desired configuration and the operator that reconciles the configuration.
+With Kyma’s modular approach, you can install just the modules you need, instead of a predefined set of components. Each module has its own custom resource that holds the desired configuration and the operator that reconciles the configuration.
 
 You can add modules at any time. If you decide that some of them are not needed for your use case, you can delete them and free the resources. To learn how to install a module, visit [Quick install](../02-get-started/01-quick-install.md). To learn how to quickly uninstall or upgrade Kyma with specific modules, visit [Uninstall and upgrade Kyma with a module](../02-get-started/08-uninstall-upgrade-kyma-module.md).
 
