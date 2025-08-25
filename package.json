@@ -1,0 +1,14 @@
+{
+  "devDependencies": {
+    "vitepress": "^2.0.0-alpha.12"
+  },
+  "scripts": {
+    "docs:dev": "vitepress dev",
+    "docs:build": "vitepress build",
+    "docs:preview": "vitepress preview"
+  },
+  "dependencies": {
+    "markdown-it": "^14.1.0",
+    "vite-plugin-node-polyfills": "^0.24.0"
+  }
+}

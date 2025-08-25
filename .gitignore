@@ -70,3 +70,8 @@ installation/versions-overrides.env
 
 # direnv files
 .envrc
+
+.vitepress/cache/
+.vitepress/dist/
+.DS_Store
+node_modules/
