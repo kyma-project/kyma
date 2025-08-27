@@ -1,0 +1,30 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: dynatrace
+  namespace: kube-public
+  labels:
+    busola.io/extension: statics
+    busola.io/extension-version: '0.5'
+data:
+  dataSources: |-
+    dynatraceSecret:
+      resource:
+        kind: Secret
+        version: v1
+        namespace: dynatrace
+        name: dynakube
+
+  general: |-
+    externalNodes:
+    - category: Dynatrace
+      icon: display
+      children:
+        - label: "Dashboards"
+          link: "$substringBefore($base64decode($string($dynatraceSecret().data.'apiurl')),'/api') & \"/ui/dashboards\""
+        - label: "Inspect Services"
+          link: "$substringBefore($base64decode($string($dynatraceSecret().data.'apiurl')),'/api') & \"/ui/services\""
+        - label: "Discover Traces"
+          link: "$substringBefore($base64decode($string($dynatraceSecret().data.'apiurl')),'/api') & \"/ui/diagnostictools/purepaths\""
+        - label: "Discover Metrics"
+          link: "$substringBefore($base64decode($string($dynatraceSecret().data.'apiurl')),'/api') & \"/ui/metrics\""

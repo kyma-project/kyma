@@ -28,9 +28,8 @@ If any of these issues appears, follow these steps:
 
 The result describes the reason for the failure of issuing a domain SSL certificate. Depending on the moment when the error occurred, you can perform different actions.
 
-<!-- tabs:start -->
-
-#### **Error During the Installation**
+<Tabs>
+<Tab name="Error During the Installation">
 
 1. Make sure the provided domain name is proper and meets the Gardener requirements.
 
@@ -40,8 +39,9 @@ The result describes the reason for the failure of issuing a domain SSL certific
     dns.gardener.cloud/class=garden
     dns.gardener.cloud/dnsnames=*.{DOMAIN}
     ```
+</Tab>
 
-#### **Error After the Installation**
+<Tab name="Error After the Installation">
 
 You can create a new Certificate resource applying suggestions from the error message to request a new domain SSL certificate. Follow these steps:
 
@@ -58,4 +58,5 @@ You can create a new Certificate resource applying suggestions from the error me
 > [!NOTE]
 > If you upgrade Kyma, you may need to perform steps from the **Error during the installation** tab.
 
-<!-- tabs:end -->
+</Tab>
+</Tabs>
