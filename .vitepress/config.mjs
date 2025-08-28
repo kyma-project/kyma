@@ -1,4 +1,5 @@
 import { defineConfig } from 'vitepress'
+import tabsPlugin from './plugins/tabs-plugin';
 import istioSidebar from '../docs/externalContent/istio/docs/user/_sidebar';
 import apiGatewaySidebar from '../docs/externalContent/api-gateway/docs/user/_sidebar';
 import sapBtpOperatorSidebar from '../docs/externalContent/btp-manager/docs/user/_sidebar';
@@ -170,5 +171,10 @@ export default defineConfig({
       { icon: 'github', link: 'https://github.com/kyma-project' }
     ],
     search: getSearchConfig()
+  },
+  markdown: {
+    config: (md) => {
+      md.use(tabsPlugin);
+    }
   }
 })

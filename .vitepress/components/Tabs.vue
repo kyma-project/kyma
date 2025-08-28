@@ -1,4 +1,3 @@
-
 <template>
   <div class="tabs" ref="tabsContainer">
     <div class="tab-buttons">
@@ -7,35 +6,50 @@
         :key="index"
         :class="{ active: index === activeTab }"
         @click="activeTab = index"
+        v-html="tab"
       >
-        {{ tab }}
       </button>
     </div>
     <div class="tab-content">
-      <slot />
+      <div v-if="isPropDriven" v-html="tabs[activeTab]?.content"></div>
+      <slot v-else />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, toRefs, onMounted, watch, computed } from 'vue'
 
+const props = defineProps({
+  tabs: {
+    type: Array,
+    required: false
+  }
+})
+
+const { tabs } = toRefs(props)
 const activeTab = ref(0)
 const tabTitles = ref([])
 const tabsContainer = ref(null)
 
+const isPropDriven = computed(() => !!props.tabs);
+
 onMounted(() => {
-  const tabElements = tabsContainer.value.querySelectorAll('[data-tab-name]')
-  tabTitles.value = Array.from(tabElements).map(el => el.getAttribute('data-tab-name'))
+  if (isPropDriven.value) {
+    // New prop-driven logic
+    tabTitles.value = props.tabs.map(tab => tab.label);
+  } else {
+    // Old slot-based logic for backward compatibility
+    const tabElements = tabsContainer.value.querySelectorAll('[data-tab-name]')
+    tabTitles.value = Array.from(tabElements).map(el => el.getAttribute('data-tab-name'))
 
-  const updateVisibility = () => {
-    tabElements.forEach((el, index) => {
-      el.style.display = index === activeTab.value ? 'block' : 'none'
-    })
+    const updateVisibility = () => {
+      tabElements.forEach((el, index) => {
+        el.style.display = index === activeTab.value ? 'block' : 'none'
+      })
+    }
+    watch(activeTab, updateVisibility, { immediate: true })
   }
-
-  updateVisibility()
-  watch(activeTab, updateVisibility)
 })
 </script>
 
@@ -45,6 +59,8 @@ onMounted(() => {
   border-radius: 6px;
   background-color: var(--vp-c-bg);
   color: var(--vp-c-text-1);
+  margin-top: 1em;
+  margin-bottom: 1em;
 }
 
 .tab-buttons {
