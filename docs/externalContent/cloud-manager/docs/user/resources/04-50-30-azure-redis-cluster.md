@@ -52,7 +52,7 @@ The following table list the meaningful parameters of the auth Secret:
 | **.metadata.annotations** | object | Specified custom annotations (if any)                                                           |
 | **.data.host**            | string | Primary connection host. Base64 encoded.                                                        |
 | **.data.port**            | string | Primary connection port. Base64 encoded.                                                        |
-| **.data.primaryEndpoint** | string | Primary connection endpoint. Provided in <host>:<port> format. Base64 encoded.                  |
+| **.data.primaryEndpoint** | string | Primary connection endpoint. Provided in `<host>:<port>` format. Base64 encoded.                  |
 | **.data.authString**      | string | Auth string. Base64 encoded.                                                                    |
 
 ## Notes

@@ -1,0 +1,50 @@
+:root {
+    --sidebar-width: 20rem;
+    --sidebar-nav-link-color--hover: var(--theme-color);
+    --sidebar-nav-link-font-weight--active: bold;
+    --sidebar-nav-link-text-decoration--active: none;
+    --sidebar-nav-link-text-decoration--hover: none;
+
+    --navbar-root-color--hover: var(--theme-color);
+
+    --code-inline-color: inherit;
+    --code-inline-background: hsla(113, 0%, 50%, 0.25);
+    --code-font-size: calc(var(--font-size-m) * 0.9);
+    --code-font-weight: inherit;
+
+    --strong-color: inherit;
+
+    --heading-h1-font-weight: 600;
+    --heading-h1-margin: 2rem 0 0;
+    --heading-h2-margin: 1.5rem 0 0;
+    --heading-h3-margin: 1.5rem 0 0;
+    --heading-h1-font-size: calc(var(--font-size-xxl)*0.95);
+    
+    --pagination-title-font-size: var(--font-size-m);
+    --pagination-chevron-height: 2em;
+    --pagination-chevron-stroke-width: 1.5px; 
+}
+
+@font-face {
+    font-family: "72";
+    src: url("https://cdn.jsdelivr.net/npm/@sap-theming/theming-base-content/content/Base/baseLib/baseTheme/fonts/72-Regular-full.woff") format("woff");
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "72";
+    src: url("https://cdn.jsdelivr.net/npm/@sap-theming/theming-base-content/content/Base/baseLib/baseTheme/fonts/72-Bold-full.woff") format("woff");
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "72";
+    src: url("https://cdn.jsdelivr.net/npm/@sap-theming/theming-base-content/content/Base/baseLib/baseTheme/fonts/72-Light-full.woff") format("woff");
+    font-weight: 300;
+    font-style: normal;
+}
+html, button, input, optgroup, select, textarea {
+    font-family: "72";
+}

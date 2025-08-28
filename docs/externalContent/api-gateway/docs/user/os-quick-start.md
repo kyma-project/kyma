@@ -191,5 +191,4 @@ To access the HTTPBin Service, use [curl](https://curl.se).
   ```
   If successful, the call returns the `200 OK` response code.
 
-</Tab>
 <!-- tabs:end -->

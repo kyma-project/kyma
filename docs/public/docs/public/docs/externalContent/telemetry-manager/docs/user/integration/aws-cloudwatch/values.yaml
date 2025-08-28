@@ -1,0 +1,81 @@
+# Place this content in a file called "otel-values.yaml" and then call:
+#   helm upgrade --install aws-gateway open-telemetry/opentelemetry-collector -f values.yaml
+# All settings are documented here: https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-collector/values.yaml
+
+# Uses the deployment mode
+mode: "deployment"
+
+image:
+  repository: "otel/opentelemetry-collector-contrib"
+
+config:
+  exporters:
+    otlphttp/logs:
+      compression: gzip
+      logs_endpoint: https://logs.${AWS_REGION}.amazonaws.com/v1/logs
+      headers: 
+        x-aws-log-group: /logs/kyma
+        x-aws-log-stream: default
+      auth:
+        authenticator: sigv4auth/logs
+        
+    otlphttp/traces:
+      compression: gzip
+      traces_endpoint: https://xray.${AWS_REGION}.amazonaws.com/v1/traces
+      auth:
+        authenticator: sigv4auth/traces
+    
+    awsemf:
+      region: ${AWS_REGION}
+
+  extensions:
+    sigv4auth/logs:
+      region: "${AWS_REGION}"
+      service: "logs"
+    sigv4auth/traces:
+      region: "${AWS_REGION}"
+      service: "xray"
+
+  service:
+    telemetry:
+      logs:
+        level: "warn" # debug|info|warn
+        encoding: "json" # console|json
+
+    extensions:
+      - sigv4auth/logs
+      - sigv4auth/traces
+      - health_check
+
+    pipelines:
+      logs:
+        receivers:
+          - otlp
+        processors:
+          - memory_limiter
+          - batch
+        exporters:
+          - otlphttp/logs
+          - debug
+      traces:
+        receivers:
+          - otlp
+        processors:
+          - memory_limiter
+          - batch
+        exporters:
+          - otlphttp/traces
+          - debug
+      metrics:
+        receivers:
+          - otlp
+        processors:
+          - memory_limiter
+          - batch
+        exporters:
+          - awsemf
+          - debug
+
+extraEnvsFrom:
+  - secretRef:
+      name: aws

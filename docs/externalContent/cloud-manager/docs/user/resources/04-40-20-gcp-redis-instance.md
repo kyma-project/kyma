@@ -87,7 +87,7 @@ The following table list the meaningful parameters of the auth Secret:
 | **.metadata.annotations**   | object | Specified custom annotations (if any)                                                                       |
 | **.data.host**              | string | Primary connection host.                                                                                    |
 | **.data.port**              | string | Primary connection port.                                                                                    |
-| **.data.primaryEndpoint**   | string | Primary connection endpoint. Provided in <host>:<port> format.                                              |
+| **.data.primaryEndpoint**   | string | Primary connection endpoint. Provided in `<host>:<port>` format.                                              |
 | **.data.authString**        | string | Auth string. Provided if authEnabled is set to true.                                                        |
 | **.data.CaCert.pem**        | string | CA Certificate that must be used for TLS. Provided if transit encryption is set to server authentication.   |
 

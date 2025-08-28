@@ -1,0 +1,152 @@
+{
+   "name": "Kyma Telemetry Status",
+   "type": "monitor",
+   "monitor_type": "query_level_monitor",
+   "enabled": true,
+   "schedule": {
+      "period": {
+         "unit": "MINUTES",
+         "interval": 1
+      }
+   },
+   "inputs": [
+      {
+         "search": {
+            "indices": [
+               "metrics-otel-v1-*"
+            ],
+            "query": {
+               "size": 0,
+               "query": {
+                  "bool": {
+                     "filter": [
+                        {
+                           "range": {
+                              "time": {
+                                 "from": "{{period_end}}||-10m",
+                                 "to": "{{period_end}}",
+                                 "include_lower": true,
+                                 "include_upper": true,
+                                 "format": "epoch_millis",
+                                 "boost": 1
+                              }
+                           }
+                        },
+                        {
+                           "match_phrase": {
+                              "name": {
+                                 "query": "kyma.resource.status.state",
+                                 "slop": 0,
+                                 "zero_terms_query": "NONE",
+                                 "boost": 1
+                              }
+                           }
+                        }
+                     ],
+                     "must_not": [
+                        {
+                           "match_phrase": {
+                              "metric.attributes.state": {
+                                 "query": "Ready",
+                                 "slop": 0,
+                                 "zero_terms_query": "NONE",
+                                 "boost": 1
+                              }
+                           }
+                        }
+                     ],
+                     "adjust_pure_negative": true,
+                     "boost": 1
+                  }
+               }
+            }
+         }
+      }
+   ],
+   "triggers": [
+      {
+         "query_level_trigger": {
+            "id": "r88m6pABs6tXO7H26USv",
+            "name": "Inform about module problem",
+            "severity": "1",
+            "condition": {
+               "script": {
+                  "source": "ctx.results[0].hits.total.value > 0",
+                  "lang": "painless"
+               }
+            },
+            "actions": [
+               {
+                  "id": "sM8m6pABs6tXO7H26USv",
+                  "name": "Inform about module problem",
+                  "destination_id": "",
+                  "message_template": {
+                     "source": "Monitor {{ctx.monitor.name}} just entered alert status. Please investigate the issue.\n  - Trigger: {{ctx.trigger.name}}\n  - Severity: {{ctx.trigger.severity}}\n  - Period start: {{ctx.periodStart}}\n  - Period end: {{ctx.periodEnd}}\n  - https://dashboards-sf-1502277b-af0e-44ef-b169-a4d004105616.cls-01.cloud.logs.services.sap.hana.ondemand.com/app/alerting",
+                     "lang": "mustache"
+                  },
+                  "throttle_enabled": true,
+                  "subject_template": {
+                     "source": "Module in non-ready state",
+                     "lang": "mustache"
+                  },
+                  "throttle": {
+                     "value": 60,
+                     "unit": "MINUTES"
+                  }
+               }
+            ]
+         }
+      }
+   ],
+   "ui_metadata": {
+      "schedule": {
+         "timezone": null,
+         "frequency": "interval",
+         "period": {
+            "unit": "MINUTES",
+            "interval": 1
+         },
+         "daily": 0,
+         "weekly": {
+            "tue": false,
+            "wed": false,
+            "thur": false,
+            "sat": false,
+            "fri": false,
+            "mon": false,
+            "sun": false
+         },
+         "monthly": {
+            "type": "day",
+            "day": 1
+         },
+         "cronExpression": "0 */1 * * *"
+      },
+      "search": {
+         "searchType": "query",
+         "timeField": "@timestamp",
+         "aggregations": [
+            {
+               "aggregationType": "max",
+               "fieldName": "audit_compliance_doc_version"
+            }
+         ],
+         "groupBy": [],
+         "bucketValue": 1,
+         "bucketUnitOfTime": "h",
+         "where": {
+            "fieldName": [
+               {
+                  "label": "audit_format_version",
+                  "type": "number"
+               }
+            ],
+            "fieldRangeEnd": 0,
+            "fieldRangeStart": 0,
+            "fieldValue": 4,
+            "operator": "is"
+         }
+      },
+      "monitor_type": "query_level_monitor"
+   }
+}

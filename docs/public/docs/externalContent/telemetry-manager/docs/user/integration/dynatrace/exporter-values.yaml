@@ -1,0 +1,63 @@
+# All available settings are documented here: https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-collector/values.yaml
+# helm upgrade --install dynatrace-exporter open-telemetry/opentelemetry-collector -f exporter-values.yaml
+
+# Uses the deployment mode
+mode: "deployment"
+
+image:
+  repository: "otel/opentelemetry-collector-contrib"
+
+config:
+  exporters:
+    otlphttp:
+      endpoint: ${apiurl}/v2/otlp
+      headers:
+        Authorization: Api-Token ${otlpToken}
+      sending_queue:
+        enabled: true
+        queue_size: 128
+      retry_on_failure:
+        enabled: true
+        initial_interval: 5s
+        max_interval: 30s
+        max_elapsed_time: 300s
+
+  processors:
+    cumulativetodelta: {}
+
+    # Selects only one metric for the current collector Pod
+    filter:
+      error_mode: ignore
+      metrics:
+        datapoint:
+        - 'metric.type == METRIC_DATA_TYPE_SUMMARY' # summaries are not supported
+
+  service:
+    # Enables metrics only with a custom config
+    pipelines:
+      logs: null
+      traces: null
+      metrics:
+        exporters:
+          - otlphttp
+        processors:
+          - memory_limiter
+          - cumulativetodelta
+          - filter
+          - batch
+        receivers:
+          - otlp
+
+# Defines resourceLimits, as a good practice
+resources:
+  requests:
+    cpu: 10m
+    memory: 50Mi
+  limits:
+    cpu: 512m
+    memory: 1024Mi
+
+# Load envs from a secret called "dynatrace" to be located in the same namespace
+extraEnvsFrom:
+  - secretRef:
+      name: dynatrace

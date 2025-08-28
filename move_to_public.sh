@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ROOT_DIR="."
+ROOT_DIR="./docs/"
 PUBLIC_DIR="$ROOT_DIR/public"
 SCRIPT_NAME="move_to_public.sh"
 ASSETS_DIR="$ROOT_DIR/assets"
