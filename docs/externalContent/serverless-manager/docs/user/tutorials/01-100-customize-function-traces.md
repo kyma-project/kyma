@@ -18,8 +18,9 @@ The following code samples illustrate how to enrich the default trace with custo
 
 1. [Create an inline Function](01-10-create-inline-function.md) with the following body:
 
-<Tabs>
-<Tab name="Node.js">
+<!-- tabs:start -->
+
+#### Node.js
 
    ```javascript
 
@@ -55,8 +56,8 @@ The following code samples illustrate how to enrich the default trace with custo
       return axios.get('https://swapi.dev/api/people/'+id)
    }
    ```
-</Tab>
-<Tab name="Python">
+
+#### Python
 
    [OpenTelemetry SDK](https://opentelemetry.io/docs/instrumentation/python/manual/#traces) allows you to customize trace spans and events.
 
@@ -83,8 +84,8 @@ The following code samples illustrate how to enrich the default trace with custo
       r = requests.get('https://swapi.dev/api/people/2')
       return r.json()
    ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 2. [Expose your Function](01-20-expose-function.md).
 

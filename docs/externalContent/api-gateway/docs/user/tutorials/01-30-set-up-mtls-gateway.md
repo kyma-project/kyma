@@ -26,8 +26,9 @@ The procedure of setting up a working mTLS Gateway is described in the following
 
 ### Set Up an mTLS Gateway
 
-<Tabs>
-<Tab name="Kyma Dashboard">
+<!-- tabs:start -->
+
+#### Kyma Dashboard
 
 1. Create a DNS Entry and generate a wildcard certificate.
 
@@ -64,8 +65,8 @@ The procedure of setting up a working mTLS Gateway is described in the following
       - **Name**: `kyma-mtls-certs`
       - **Type**: `Opaque`
       - In the `Data` section, choose **Read value from file**. Select the file that contains your Root CA certificate.
-</Tab>
-<Tab name="kubectl">
+
+#### kubectl
 
 1. Create a DNS Entry and generate a wildcard certificate.
 
@@ -116,5 +117,5 @@ The procedure of setting up a working mTLS Gateway is described in the following
     ```bash
     kubectl create secret generic -n istio-system kyma-mtls-certs --from-file=cacert=cacert.crt
     ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->

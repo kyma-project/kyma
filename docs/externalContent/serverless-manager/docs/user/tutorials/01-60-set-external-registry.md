@@ -11,31 +11,33 @@ By default, you install Kyma with Serverless that uses the internal Docker regis
 
 ## Prerequisites
 
-<Tabs>
-<Tab name="Docker Hub">
+<!-- tabs:start -->
+
+#### Docker Hub
 
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
-</Tab>
-<Tab name="GAR">
+
+#### GAR
 
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 - [gcloud](https://cloud.google.com/sdk/gcloud/)
 - [Google Cloud Platform (GCP)](https://cloud.google.com) project
-</Tab>
-<Tab name="ACR">
+
+#### ACR
 
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 - [Azure CLI](https://docs.microsoft.com/en-us/cli/azure)
 - [Microsoft Azure](http://azure.com) subscription
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 ## Steps
 
 ### Create Required Cloud Resources
 
-<Tabs>
-<Tab name="Docker Hub">
+<!-- tabs:start -->
+
+#### Docker Hub
 
 1. Run the `export {VARIABLE}={value}` command to set up these environment variables, where:
 
@@ -55,8 +57,8 @@ By default, you install Kyma with Serverless that uses the internal Docker regis
     export SERVER_ADDRESS=https://index.docker.io/v1/
     export REGISTRY_ADDRESS=kyma-rocks
     ```
-</Tab>
-<Tab name="GAR">
+
+#### GAR
 
 To use GAR, create a Google service account that has a private key and the **Storage Admin** role permissions. Follow these steps:
 
@@ -109,8 +111,8 @@ To use GAR, create a Google service account that has a private key and the **Sto
     ```bash
     export GCS_KEY_JSON=$(< "$SECRET_FILE" base64 | tr -d '\n')
     ```
-</Tab>
-<Tab name="ACR">
+
+#### ACR
 
 Create an ACR and a service principal. Follow these steps:
 
@@ -174,15 +176,16 @@ Create an ACR and a service principal. Follow these steps:
     export SP_PASSWORD=$(az ad sp show --id http://${AZ_SERVICE_PRINCIPAL_NAME} --query password --output tsv)
     az role assignment create --assignee ${SP_APP_ID} --scope ${AZ_REGISTRY_ID} --role ${ROLE}
     ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 ### Override Serverless Configuration
 
 Prepare yaml file with overrides that match your Docker registry provider:
 
-<Tabs>
-<Tab name="Docker Hub">
+<!-- tabs:start -->
+
+#### Docker Hub
 
 ```bash
 cat > docker-registry-overrides.yaml <<EOF
@@ -195,8 +198,8 @@ serverless:
     registryAddress: "${REGISTRY_ADDRESS}"
 EOF
 ```
-</Tab>
-<Tab name="GAR">
+
+#### GAR
 
 ```bash
 cat > docker-registry-overrides.yaml <<EOF
@@ -209,8 +212,8 @@ serverless:
     registryAddress: "${SERVER_ADDRESS}/${PROJECT}"
 EOF
 ```
-</Tab>
-<Tab name="ACR">
+
+#### ACR
 
 ```bash
 cat > docker-registry-overrides.yaml <<EOF
@@ -223,8 +226,8 @@ serverless:
     registryAddress: "${AZ_REGISTRY_NAME}.${SERVER_ADDRESS}" 
 EOF
 ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 > [!WARNING]
 > If you want to set an external Docker registry before you install Kyma, manually apply the Secret to the cluster before you run the installation script.

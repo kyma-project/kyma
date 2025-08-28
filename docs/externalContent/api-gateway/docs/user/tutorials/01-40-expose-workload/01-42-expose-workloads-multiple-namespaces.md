@@ -23,8 +23,9 @@ Learn how to expose Service endpoints in multiple namespaces.
 
 ## Steps
 
-<Tabs>
-<Tab name="Kyma Dashboard">
+<!-- tabs:start -->
+
+#### Kyma Dashboard
 
 1. Create a namespace with the Istio sidecar proxy injection enabled.
 2. In the created namespace, go to **Discovery and Network > API Rules** and choose **Create**.
@@ -57,8 +58,8 @@ Learn how to expose Service endpoints in multiple namespaces.
           noAuth: true
     ```
 5. Choose **Create**.
-</Tab>
-<Tab name="kubectl">
+
+#### kubectl
 
 1. Create a separate namespace for the APIRule CR with enabled Istio sidecar proxy injection.
     ```bash
@@ -96,8 +97,8 @@ Learn how to expose Service endpoints in multiple namespaces.
           noAuth: true
     EOF
     ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 ### Access Your Workloads
 

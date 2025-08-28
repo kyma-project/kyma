@@ -26,13 +26,14 @@ kubectl create configmap my-config --from-literal config-env="I come from config
 kubectl create secret generic my-secret --from-literal secret-env="I come from secret"
 ```
 
-<Tabs>
-<Tab name="Kyma CLI">
+<!-- tabs:start -->
+
+#### Kyma CLI
 
 > [!WARNING]
 > This section is not yet compliant with Kyma CLI v3.
-</Tab>
-<Tab name="kubectl">
+
+#### kubectl
 
 3. Create a Function CR that specifies the Function's logic:
 
@@ -83,8 +84,8 @@ kubectl create secret generic my-secret --from-literal secret-env="I come from s
     ```bash
     kubectl get functions my-function
     ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 ## Redis based example
 

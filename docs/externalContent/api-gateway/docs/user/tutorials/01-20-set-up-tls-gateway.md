@@ -9,8 +9,9 @@ This tutorial shows how to set up a TLS Gateway in simple mode.
 ## Steps
 
 
-<Tabs>
-<Tab name="Kyma Dashboard">
+<!-- tabs:start -->
+
+#### Kyma Dashboard
 
 1. Go to **Istio > Gateways** and select **Create**.
 2. Provide the following configuration details:
@@ -24,8 +25,8 @@ This tutorial shows how to set up a TLS Gateway in simple mode.
     - Use `{SUBDOMAIN}.{CUSTOM_DOMAIN}` as a host.
 
 3. Select **Create**.
-</Tab>
-<Tab name="kubectl">
+
+#### kubectl
 
 1. Export the following values as environment variables:
 
@@ -60,5 +61,5 @@ This tutorial shows how to set up a TLS Gateway in simple mode.
             - "*.$DOMAIN_TO_EXPOSE_WORKLOADS"
     EOF
     ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->

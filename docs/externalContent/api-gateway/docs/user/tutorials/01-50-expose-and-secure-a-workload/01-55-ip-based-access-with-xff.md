@@ -25,8 +25,9 @@ To use the XFF header, you must configure the corresponding settings in the Isti
 
 ## Procedure
 
-<Tabs>
-<Tab name="Kyma Dashboard">
+<!-- tabs:start -->
+
+#### Kyma Dashboard
 
 1. To use the XFF header, configure the number of trusted proxies in the Istio custom resource.
    1. Go to **Cluster Details** and choose **Modify Modules**.
@@ -99,8 +100,8 @@ To use the XFF header, you must configure the corresponding settings in the Isti
     3. Add a rule with a **From** field.
     4. In the **RemoteIpBlocks** field, specify the IP addresses that should be allowed access to the workload.
     5. Choose **Create**.
-</Tab>
-<Tab name="kubectl">
+
+#### kubectl
 
 1. To use the XFF header, configure the number of trusted proxies in the Istio custom resource.
    1. Run the following command:
@@ -198,8 +199,8 @@ To use the XFF header, you must configure the corresponding settings in the Isti
           {KEY}: {VALUE}
     EOF
     ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 ### Results
 You have configured the XFF header in the Istio CR and exposed your workload to the internet. Access to the workload is limited to the IP addresses that you have specified.

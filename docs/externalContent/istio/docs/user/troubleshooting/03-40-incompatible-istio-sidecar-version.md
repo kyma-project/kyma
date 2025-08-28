@@ -17,8 +17,9 @@ You must manually restart such workloads to ensure proper functionality with the
 
 ## Solution
 
-<Tabs>
-<Tab name="Kyma dashboard">
+<!-- tabs:start -->
+
+#### Kyma dashboard
 
 1. Choose **Modify Modules**.
 2. Select the Istio module.
@@ -27,8 +28,8 @@ You must manually restart such workloads to ensure proper functionality with the
    The sidecars of the following workloads could not be restarted: test/httpbin
    ```
 3. Restart the listed workloads so that new Istio sidecars are injected into the Pods.
-</Tab>
-<Tab name="kubectl">
+
+#### kubectl
 
 1. To get the Istio CR, run:
    ```
@@ -44,5 +45,5 @@ You must manually restart such workloads to ensure proper functionality with the
      type: ProxySidecarRestartSucceeded
    ```
 3. Restart the listed workloads so that new Istio sidecars are injected into the Pods.
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->

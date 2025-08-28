@@ -78,8 +78,9 @@ Follow these steps to use the external Docker registry in Serverless:
 
    Examples:
 
-<Tabs>
-<Tab name="Docker Hub">
+<!-- tabs:start -->
+
+#### Docker Hub
 
       ```bash
       kubectl create secret generic my-registry-config \
@@ -89,8 +90,8 @@ Follow these steps to use the external Docker registry in Serverless:
          --from-literal=serverAddress=https://index.docker.io/v1/ \
          --from-literal=registryAddress={USERNAME}
       ```
-</Tab>
-<Tab name="Artifact Registry">
+
+#### Artifact Registry
 
       ```bash
       kubectl create secret generic my-registry-config \
@@ -102,8 +103,8 @@ Follow these steps to use the external Docker registry in Serverless:
       ```
 
    For more information on how to set up authentication for Docker with Artifact Registry, see the [Artifact Registry documentation](https://cloud.google.com/artifact-registry/docs/docker/authentication#json-key).
-</Tab>
-<Tab name="ACR">
+
+#### ACR
 
       ```bash
       kubectl create secret generic my-registry-config \
@@ -115,8 +116,8 @@ Follow these steps to use the external Docker registry in Serverless:
       ```
 
    For more information on how to authenticate with ACR, see the [ACR documentation](https://learn.microsoft.com/en-us/azure/container-registry/container-registry-authentication?tabs=azure-cli#az-acr-login-with---expose-token).
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 2. Reference the Secret in the Serverless CR:
 

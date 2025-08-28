@@ -26,8 +26,9 @@ The following instructions demonstrate a simple use case where VirtualService ex
 
 ## Procedure
 
-<Tabs>
-<Tab name="Kyma Dashboard">
+<!-- tabs:start -->
+
+#### Kyma Dashboard
 
 1. Go to the namespace in which you want to create a VirtualService resource.
 2. Go to **Istio > Virtual Services**.
@@ -80,8 +81,8 @@ spec:
     curl -s -I https://{SUBDOMAIN}.{DOMAIN_NAME}/
     ```
     If successful, you get code `200` in response.
-</Tab>
-<Tab name="kubectl">
+
+#### kubectl
 
 1. To expose a workload using VirtualService, replace the placeholders and run the following command:
    
@@ -151,5 +152,5 @@ spec:
     ```
 
     If successful, you get code `200` in response.
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->

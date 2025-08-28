@@ -21,14 +21,15 @@ Use either Kyma dashboard or kubectl to delete a service binding or a service in
 Kyma dashboard is a web-based UI providing a graphical overview of your cluster and all its resources.
 To access Kyma dashboard, use the link available in the **Kyma Environment** section of your subaccount **Overview**.
 
-<Tabs>
-<Tab name="Kyma Dashboard">
+<!-- tabs:start -->
+
+#### Kyma Dashboard
 
 1. In the navigation area, choose **Namespaces**, and go to the namespace you want to delete a service binding/instance from.
 2. Go to **Service Management**, and then to **Service Bindings** or **Service Instances**.
 3. Choose the service binding/instance and delete it.
-</Tab>
-<Tab name="kubectl">
+
+#### kubectl
 
 To delete a service binding, run:
 
@@ -41,5 +42,5 @@ To delete a service instance, run:
 ```bash
 kubectl delete serviceinstances.services.cloud.sap.com {SERVICE_INSTANCE_NAME}
 ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->

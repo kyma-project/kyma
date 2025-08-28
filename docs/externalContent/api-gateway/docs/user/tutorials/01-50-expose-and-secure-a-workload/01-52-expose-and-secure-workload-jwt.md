@@ -22,8 +22,9 @@ This tutorial shows how to expose and secure Services using APIGateway Controlle
 
 ## Steps
 
-<Tabs>
-<Tab name="Kyma Dashboard">
+<!-- tabs:start -->
+
+#### Kyma Dashboard
 
 1. Go to **Discovery and Network > API Rules** and choose **Create**. 
 2. Provide all the required configuration details.
@@ -33,8 +34,8 @@ This tutorial shows how to expose and secure Services using APIGateway Controlle
     - **Method**: `GET`
     - **Path**: `/*`
 4. Choose **Create**.
-</Tab>
-<Tab name="kubectl">
+
+#### kubectl
 
 To expose and secure your Service, create the following APIRule:
 
@@ -62,8 +63,8 @@ spec:
       path: /*
 EOF
 ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 
 ### Access the Secured Resources

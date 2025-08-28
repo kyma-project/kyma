@@ -17,8 +17,9 @@ Kyma Eventing also supports sending and receiving of legacy events. In this tuto
 
 To subscribe to events, we need a [Subscription](../resources/evnt-cr-subscription.md) custom resource (CR). We're going to subscribe to events of the type `order.received.v1`.
 
-<Tabs>
-<Tab name="Kyma Dashboard">
+<!-- tabs:start -->
+
+#### Kyma Dashboard
 
 1. Go to **Namespaces** and select the default namespace.
 2. Go to **Configuration** > **Subscriptions** and click **Create Subscription+**.
@@ -31,8 +32,8 @@ To subscribe to events, we need a [Subscription](../resources/evnt-cr-subscripti
 
 4. Click **Create**.
 5. Wait a few seconds for the Subscription to have status `READY`.
-</Tab>
-<Tab name="curl">
+
+#### curl
 
 Run:
 
@@ -58,8 +59,8 @@ kubectl get subscriptions lastorder-sub -o=jsonpath="{.status.ready}"
 ```
 
 The operation was successful if the command returns `true`.
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 ## Publish a Legacy Event To Trigger the Workload
 
@@ -95,15 +96,16 @@ You created the `lastorder` Function, and subscribed to the `order.received.v1` 
 
 To verify that the event was properly delivered, check the logs of the Function:
 
-<Tabs>
-<Tab name="Kyma Dashboard">
+<!-- tabs:start -->
+
+#### Kyma Dashboard
 
 1. In Kyma Dashboard, return to the view of your `lastorder` Function.
 2. In the **Code** view, find the **Replicas of the Function** section.
 3. Click the name of your replica.
 4. Locate the **Containers** section and click on **View Logs**.
-</Tab>
-<Tab name="kubectl">
+
+#### kubectl
 
 Run:
 
@@ -113,8 +115,8 @@ kubectl logs \
   -l serverless.kyma-project.io/function-name=lastorder,serverless.kyma-project.io/resource=deployment \
   -c function
 ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 You see the received event in the logs:
 

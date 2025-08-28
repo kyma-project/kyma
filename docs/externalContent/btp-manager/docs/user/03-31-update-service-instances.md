@@ -18,8 +18,9 @@ You are using a service instance in the Kyma environment and want to update the 
 
 To update a service instance, use either Kyma dashboard or kubectl.
 
-<Tabs>
-<Tab name="Kyma Dashboard">
+<!-- tabs:start -->
+
+#### Kyma Dashboard
 
 Kyma dashboard is a web-based UI providing a graphical overview of your cluster and all its resources.
 To access Kyma dashboard, use the link in the **Kyma Environment** section of your subaccount **Overview**.
@@ -30,8 +31,8 @@ To access Kyma dashboard, use the link in the **Kyma Environment** section of yo
 4. Update the required service details in **Form** and save your changes.
    Alternatively, you can switch to the **YAML** tab to edit or upload your file, and save your changes.
    You see the message confirming the service instance update.
-</Tab>
-<Tab name="kubectl">
+
+#### kubectl
 
 1.  To update a ServiceInstance custom resource (CR), replace the placeholders with the following:
     - The name of the service instance you want to update
@@ -71,5 +72,5 @@ To access Kyma dashboard, use the link in the **Kyma Environment** section of yo
     NAME                      OFFERING                  PLAN                  STATUS    AGE
     {SERVICE_INSTANCE_NAME}   {SERVICE_OFFERING_NAME}   {SERVICE_PLAN_NAME}   UPDATED   30m27s
     ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->

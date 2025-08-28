@@ -21,8 +21,9 @@ Read also about [Function’s specification](../technical-reference/07-70-functi
 
 You can expose a Function using Kyma dashboard, Kyma CLI, or kubectl:
 
-<Tabs>
-<Tab name="Kyma Dashboard">
+<!-- tabs:start -->
+
+#### Kyma Dashboard
 
 1. Select a namespace from the drop-down list in the navigation panel. Make sure the namespace includes the Function that you want to expose using the APIRule CR.
 
@@ -46,13 +47,13 @@ You can expose a Function using Kyma dashboard, Kyma CLI, or kubectl:
 5. Select **Create** to confirm your changes.
 
 6. To check if you can access the Function, copy the host link from the **General** section and paste it into your browser. If successful, the following message appears: `Hello World from the Kyma Function my-function running on nodejs20!`.
-</Tab>
-<Tab name="Kyma CLI">
+
+#### Kyma CLI
 
 > [!WARNING]
 > This section is not yet compliant with Kyma CLI v3.
-</Tab>
-<Tab name="kubectl">
+
+#### kubectl
 
 1. Run the following command to get the domain name of your Kyma cluster:
 
@@ -114,5 +115,5 @@ You can expose a Function using Kyma dashboard, Kyma CLI, or kubectl:
     ```
 
     If successful, the following mesage appears: `Hello World from the Kyma Function my-function running on nodejs20!`.
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->

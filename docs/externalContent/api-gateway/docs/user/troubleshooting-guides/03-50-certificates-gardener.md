@@ -28,8 +28,9 @@ If any of these issues appears, follow these steps:
 
 The result describes the reason for the failure of issuing a domain SSL certificate. Depending on the moment when the error occurred, you can perform different actions.
 
-<Tabs>
-<Tab name="Error During the Installation">
+<!-- tabs:start -->
+
+#### Error During the Installation
 
 1. Make sure the provided domain name is proper and meets the Gardener requirements.
 
@@ -39,8 +40,8 @@ The result describes the reason for the failure of issuing a domain SSL certific
     dns.gardener.cloud/class=garden
     dns.gardener.cloud/dnsnames=*.{DOMAIN}
     ```
-</Tab>
-<Tab name="Error After the Installation">
+
+#### Error After the Installation
 
 You can create a new Certificate resource applying suggestions from the error message to request a new domain SSL certificate. Follow these steps:
 
@@ -53,5 +54,5 @@ You can create a new Certificate resource applying suggestions from the error me
 2. Delete the incorrect Certificate from the cluster.
 
 3. Apply the fixed Certificate.
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->

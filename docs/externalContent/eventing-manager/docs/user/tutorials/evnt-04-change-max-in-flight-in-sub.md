@@ -12,8 +12,9 @@ The "in-flight messages" config defines the number of events that Kyma Eventing 
 2. [Create and Modify an Inline Function](https://kyma-project.io/#/serverless-manager/user/tutorials/01-10-create-inline-function).
 3. For this tutorial, instead of the default code sample, replace the Function source with the following code. To simulate prolonged event processing, the Function waits for 5 seconds before returning the response.
 
-<Tabs>
-<Tab name="Kyma Dashboard">
+<!-- tabs:start -->
+
+#### Kyma Dashboard
 
 ```js
 module.exports = {
@@ -26,8 +27,8 @@ module.exports = {
   } 
 }
 ```
-</Tab>
-<Tab name="kubectl">
+
+#### kubectl
 
 ```bash
 cat <<EOF | kubectl apply -f -
@@ -58,15 +59,16 @@ spec:
         }
  EOF
  ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 ## Create a Subscription With Max-In-Flight Config
 
 Create a [Subscription](../resources/evnt-cr-subscription.md) custom resource (CR). Subscribe for events of the type: `order.received.v1` and set the `maxInFlightMessages` to `5`, so that Kyma Eventing forwards maximum 5 events in parallel to the sink without waiting for a response.
 
-<Tabs>
-<Tab name="Kyma Dashboard">
+<!-- tabs:start -->
+
+#### Kyma Dashboard
 
 1. Go to **Namespaces** and select the default namespace.
 2. Go to **Configuration** > **Subscriptions** and click **Create Subscription+**.
@@ -80,8 +82,8 @@ Create a [Subscription](../resources/evnt-cr-subscription.md) custom resource (C
 
 4. Click **Create**.
 5. Wait a few seconds for the Subscription to have status `READY`.
-</Tab>
-<Tab name="kubectl">
+
+#### kubectl
 
 Run:
 
@@ -109,8 +111,8 @@ kubectl get subscriptions lastorder-sub -o=jsonpath="{.status.ready}"
 ```
 
 The operation was successful if the returned status says `true`.
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 ## Trigger the Workload With Multiple Events
 
@@ -125,8 +127,9 @@ Next, publish 15 events at once and see how Kyma Eventing triggers the workload.
 
 2. Now publish 15 events to the Eventing Publisher Proxy Service. In another terminal window, run:
 
-<Tabs>
-<Tab name="CloudEvents Conformance Tool">
+<!-- tabs:start -->
+
+#### CloudEvents Conformance Tool
 
 ```bash
 for i in {1..15}
@@ -140,8 +143,8 @@ do
     --yaml
 done
 ```
-</Tab>
-<Tab name="curl">
+
+#### curl
 
 ```bash
 for i in {1..15}
@@ -157,22 +160,23 @@ do
     http://localhost:3000/publish
 done
 ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 ## Verify the Event Delivery
 
 To verify that the event was properly delivered, check the logs of the Function:
 
-<Tabs>
-<Tab name="Kyma Dashboard">
+<!-- tabs:start -->
+
+#### Kyma Dashboard
 
 1. In Kyma Dashboard, return to the view of your `lastorder` Function.
 2. In the **Code** view, find the **Replicas of the Function** section.
 3. Click the name of your replica.
 4. Locate the **Containers** section and click on **View Logs**.
-</Tab>
-<Tab name="kubectl">
+
+#### kubectl
 
 Run:
 
@@ -182,8 +186,8 @@ kubectl logs \
   -l serverless.kyma-project.io/function-name=lastorder,serverless.kyma-project.io/resource=deployment \
   -c function
 ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 You will see the received events in the logs as:
 

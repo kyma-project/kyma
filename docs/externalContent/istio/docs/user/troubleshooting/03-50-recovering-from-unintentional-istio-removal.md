@@ -27,8 +27,9 @@ For example, the issue occurs when you delete Istio, but there are still Virtual
 
 ## Solution
 
-<Tabs>
-<Tab name="Kyma dashboard">
+<!-- tabs:start -->
+
+#### Kyma dashboard
 
 1. In the **Cluster Details** section, select **Modify Modules**.
 2. Select the Istio module.
@@ -44,8 +45,8 @@ For example, the issue occurs when you delete Istio, but there are still Virtual
 7. Add the Istio module again.
 
 When you re-add the Istio module, its reconciliation is reinitiated. The Istio CR returns to the Ready state within a few seconds.
-</Tab>
-<Tab name="kubectl">
+
+#### kubectl
 
 1. To edit the Istio CR, run:
     ```bash
@@ -61,5 +62,5 @@ When you re-add the Istio module, its reconciliation is reinitiated. The Istio C
 4. Add the Istio module again.
 
 When you re-add the Istio module, its reconciliation is reinitiated. The Istio CR returns to the Ready state within a few seconds.
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->

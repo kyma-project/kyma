@@ -30,10 +30,12 @@ Use `kubectl apply` to create a Secret containing the credentials and export its
 export SECRET={SECRET_NAME}
 ```
 <!-- tabs:end -->
+
 ### Create a DNSProvider Custom Resource (CR)
 
-<Tabs>
-<Tab name="Kyma Dashboard">
+<!-- tabs:start -->
+
+#### Kyma Dashboard
 
 1. Go to **Configuration > DNS Providers**.
 2. Choose **Create** and provide the details:
@@ -46,8 +48,8 @@ export SECRET={SECRET_NAME}
       - **Name** is the name of the Secret.
     - In the `Include Domains` section, add your custom domain.
 3. Choose **Create**.
-</Tab>
-<Tab name="kubectl">
+
+#### kubectl
 
 1. Export the following values as environment variables: the type of your DNS cloud service provider, the name of your custom domain, and the name of the namespace you want to use.
 
@@ -76,13 +78,14 @@ export SECRET={SECRET_NAME}
           - $DOMAIN_TO_EXPOSE_WORKLOADS
     EOF
     ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 ### Create a DNSEntry CR
 
-<Tabs>
-<Tab name="Kyma Dashboard">
+<!-- tabs:start -->
+
+#### Kyma Dashboard
 
 1. In the `istio-system` namespace, go to **Discovery and Network > Services**. Select the `istio-ingressgateway` Service and copy its external IP address.
 2. In the namespace of your HTTPBin Deployment, go to **Configuration > DNS Entries**.
@@ -93,8 +96,8 @@ export SECRET={SECRET_NAME}
     - For **DNSName**, use `*.{DOMAIN_TO_EXPOSE_WORKLOADS}`. Replace `{DOMAIN_TO_EXPOSE_WORKLOADS}` with the name of your custom domain.
     - Paste the external IP address of the `istio-ingressgateway` Service in the **Target** field.
 4. Choose **Create**.
-</Tab>
-<Tab name="kubectl">
+
+#### kubectl
 
 1. Export the following values as environment variables:
 
@@ -122,16 +125,17 @@ export SECRET={SECRET_NAME}
         - $IP
     EOF
     ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 ### Create a Certificate CR
 
 > [!NOTE]
 > While using the default configuration, certificates with the Let's Encrypt Issuer are valid for 90 days and automatically renewed 30 days before their validity expires. For more information, read the documentation on [Gardener Certificate Management](https://github.com/gardener/cert-management#requesting-a-certificate) and [Gardener extensions for certificate Services](https://gardener.cloud/docs/extensions/others/gardener-extension-shoot-cert-service/).
 
-<Tabs>
-<Tab name="Kyma Dashboard">
+<!-- tabs:start -->
+
+#### Kyma Dashboard
 
 1. Go to the `istio-system` namespace.
 2. Go to **Configuration > Certificates**.
@@ -140,8 +144,8 @@ export SECRET={SECRET_NAME}
     - **Secret Name** is the name of your TLS Secret.
     - **Common Name** is the name of your custom domain.
 4. Choose **Create**.
-</Tab>
-<Tab name="kubectl">
+
+#### kubectl
 
 1. Export the name of the TLS Secret that you would like to create:
 
@@ -171,8 +175,8 @@ export SECRET={SECRET_NAME}
     ```bash
     kubectl get certificate my-cert -n istio-system
     ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 ### Next Steps
 [Set up a TLS Gateway](./01-20-set-up-tls-gateway.md) or [set up an mTLS Gateway](./01-30-set-up-mtls-gateway.md).

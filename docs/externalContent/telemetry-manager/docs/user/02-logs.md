@@ -191,8 +191,9 @@ Integrations into external systems usually need authentication details dealing w
 
 Using the **http** output definition and the **valueFrom** attribute, you can map Secret keys for mutual TLS (mTLS) or Basic Authentication:
 
-<Tabs>
-<Tab name="mTLS">
+<!-- tabs:start -->
+
+#### mTLS
 
 ```yaml
 apiVersion: telemetry.kyma-project.io/v1alpha1
@@ -229,8 +230,8 @@ spec:
   filters:
     ...
 ```
-</Tab>
-<Tab name="Basic Authentication">
+
+#### Basic Authentication
 
 ```yaml
 apiVersion: telemetry.kyma-project.io/v1alpha1
@@ -266,8 +267,8 @@ spec:
   filters:
     ...
 ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 The related Secret must have the referenced name, be located in the referenced namespace, and contain the mapped key. See the following example:
 

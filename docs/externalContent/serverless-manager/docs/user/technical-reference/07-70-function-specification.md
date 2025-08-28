@@ -15,8 +15,9 @@ All Functions have a predefined signature with elements common for all available
 
 See these signatures for each runtime:
 
-<Tabs>
-<Tab name="Node.js">
+<!-- tabs:start -->
+
+#### Node.js
 
 ```js
 module.exports = {
@@ -25,15 +26,15 @@ module.exports = {
     }
 }
 ```
-</Tab>
-<Tab name="Python">
+
+#### Python
 
 ```python
 def main(event, context):
     return
 ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 ### Event Object
 
@@ -41,8 +42,9 @@ The `event` object contains information about the event the Function refers to. 
 
 Functions in Kyma accept [CloudEvents](https://cloudevents.io/) (**ce**) with the following specification:
 
-<Tabs>
-<Tab name="Node.js">
+<!-- tabs:start -->
+
+#### Node.js
 
 ```json
 ...
@@ -61,8 +63,8 @@ Functions in Kyma accept [CloudEvents](https://cloudevents.io/) (**ce**) with th
     }
 }
 ```
-</Tab>
-<Tab name="Python">
+
+#### Python
 
 ```json
 {
@@ -79,8 +81,8 @@ Functions in Kyma accept [CloudEvents](https://cloudevents.io/) (**ce**) with th
     }
 }
 ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 See the detailed descriptions of these fields:
 
@@ -100,8 +102,9 @@ See the detailed descriptions of these fields:
 
 The `event` object is extended by methods making some operations easier. You can use every method by providing `event.{FUNCTION_NAME(ARGUMENTS...)}`.
 
-<Tabs>
-<Tab name="Node.js">
+<!-- tabs:start -->
+
+#### Node.js
 
 | Method name | Arguments | Description |
 |---------------|-----------|-------------|
@@ -109,14 +112,14 @@ The `event` object is extended by methods making some operations easier. You can
 | **setResponseContentType** | type | Sets the `ContentType` header to the `response` object based on the given type |
 | **setResponseStatus** | status | Sets the `response` status based on the given status |
 | **emitCloudEvent** | type, source, data, optionalCloudEventAttribute | Builds a CloudEvent based on the arguments and emits it on the eventing publisher service. You can pass any additional [cloudevent attributes](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/formats/json-format.md#2-attributes) as properties of the last optional argument `optionalCloudEventAttribute` |
-</Tab>
-<Tab name="Python">
+
+#### Python
 
 | Method name | Arguments | Description |
 |---------------|-----------|-------------|
 | **emitCloudEvent** | type, source, data, optionalCloudEventAttribute | Builds a CloudEvent based on the arguments and emits it on the eventing publisher service. You must pass [`datacontenttype`](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/formats/json-format.md#2-attributes) as properties of the last optional argument `optionalCloudEventAttribute` |
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 ### Context Object
 
@@ -157,8 +160,9 @@ By default, a failing Function simply throws an error to tell the Event Service 
 
 Apart from these two default codes, you can define custom responses. Learn how to do that in Node.js and Python:
 
-<Tabs>
-<Tab name="Node.js">
+<!-- tabs:start -->
+
+#### Node.js
 
 To define custom responses in all Node.js runtimes, use the **event.extensions.response** object.
 
@@ -178,8 +182,8 @@ module.exports = {
     }
 }
 ```
-</Tab>
-<Tab name="Python">
+
+#### Python
 
 To define custom responses in all Python runtimes, use the **HTTPResponse** object available in Bottle.
 
@@ -209,8 +213,8 @@ def main(event, context):
 
     return HTTPResponse(body=response_payload, status=status, headers=headers)
 ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 ## Override Runtime Image
 

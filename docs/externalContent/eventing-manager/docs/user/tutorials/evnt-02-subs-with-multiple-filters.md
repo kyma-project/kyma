@@ -14,8 +14,9 @@ The [Subscription](../resources/evnt-cr-subscription.md) CustomResourceDefinitio
 
 To subscribe to multiple events, you need a [Subscription](../resources/evnt-cr-subscription.md) custom resource (CR). In the following example, you learn how to subscribe to events of two types: `order.received.v1` and `order.changed.v1`.
 
-<Tabs>
-<Tab name="Kyma Dashboard">
+<!-- tabs:start -->
+
+#### Kyma Dashboard
 
 1. Go to **Namespaces** and select the default namespace.
 2. Go to **Configuration** > **Subscriptions** and click **Create Subscription+**.
@@ -30,8 +31,8 @@ To subscribe to multiple events, you need a [Subscription](../resources/evnt-cr-
 
 4. Click **Create**.
 5. Wait a few seconds for the Subscription to have status `READY`.
-</Tab>
-<Tab name="kubectl">
+
+#### kubectl
 
 Run:
 
@@ -58,8 +59,8 @@ kubectl get subscriptions lastorder-sub -o=jsonpath="{.status.ready}"
 ```
 
 The operation was successful if the returned status says `true`.
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 ## Trigger the Workload with an Event
 
@@ -74,8 +75,9 @@ In the following example, you port-forward the [Eventing Publisher Proxy](../evn
 
 2. Publish an event of type `order.received.v1` to trigger your Function. In another terminal window, run:
 
-<Tabs>
-<Tab name="CloudEvents Conformance Tool">
+<!-- tabs:start -->
+
+#### CloudEvents Conformance Tool
 
 ```bash
 cloudevents send http://localhost:3000/publish \
@@ -86,8 +88,8 @@ cloudevents send http://localhost:3000/publish \
    --data "{\"orderCode\":\"3211213\", \"orderStatus\":\"received\"}" \
    --yaml
 ```
-</Tab>
-<Tab name="curl">
+
+#### curl
 
 ```bash
 curl -v -X POST \
@@ -100,13 +102,14 @@ curl -v -X POST \
      -d "{\"orderCode\":\"3211213\", \"orderStatus\":\"received\"}" \
      http://localhost:3000/publish
 ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 3. Now, publish an event of type `order.changed.v1` to trigger your Function.
 
-<Tabs>
-<Tab name="Kyma Dashboard">
+<!-- tabs:start -->
+
+#### Kyma Dashboard
 
 ```bash
 cloudevents send http://localhost:3000/publish \
@@ -117,8 +120,8 @@ cloudevents send http://localhost:3000/publish \
    --data "{\"orderCode\":\"3211213\", \"orderStatus\":\"changed\"}" \
    --yaml
 ```
-</Tab>
-<Tab name="CloudEvents Conformance Tool">
+
+#### CloudEvents Conformance Tool
 
 ```bash
 curl -v -X POST \
@@ -131,22 +134,23 @@ curl -v -X POST \
      -d "{\"orderCode\":\"3211213\", \"orderStatus\":\"changed\"}" \ 
      http://localhost:3000/publish
 ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 ## Verify the Event Delivery
 
 To verify that the event was properly delivered, check the logs of the Function:
 
-<Tabs>
-<Tab name="Kyma Dashboard">
+<!-- tabs:start -->
+
+#### Kyma Dashboard
 
 1. In Kyma Dashboard, return to the view of your `lastorder` Function.
 2. In the **Code** view, find the **Replicas of the Function** section.
 3. Click the name of your replica.
 4. Locate the **Containers** section and click on **View Logs**.
-</Tab>
-<Tab name="kubectl">
+
+#### kubectl
 
 Run:
 
@@ -156,8 +160,8 @@ kubectl logs \
   -l serverless.kyma-project.io/function-name=lastorder,serverless.kyma-project.io/resource=deployment \
   -c function
 ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 You see the received event in the logs:
 

@@ -17,8 +17,9 @@ To learn more about Function's signature, `event` and `context` objects, and cus
 
 You can create a Function with Kyma dashboard, Kyma CLI, or kubectl:
 
-<Tabs>
-<Tab name="Kyma Dashboard">
+<!-- tabs:start -->
+
+#### Kyma Dashboard
 
 1. Create a namespace or select one from the drop-down list in the navigation panel.
 
@@ -46,8 +47,8 @@ You can create a Function with Kyma dashboard, Kyma CLI, or kubectl:
 Wait for the **Status** field to change into `RUNNING`, confirming that the Function was created successfully.
 
 If you decide to modify your Function, choose **Edit**, make the changes, and choose the **Save** button. If successful, the message at the bottom of the screen confirms that the Function was updated.
-</Tab>
-<Tab name="Kyma CLI">
+
+#### Kyma CLI
 
 1. Export these variables:
 
@@ -102,8 +103,8 @@ If you decide to modify your Function, choose **Edit**, make the changes, and ch
     NAME       CONFIGURED   BUILT   RUNNING   RUNTIME    GENERATION
     nodejs22   True         True    True      nodejs22   1
     ```
-</Tab>
-<Tab name="kubectl">
+
+#### kubectl
 
 1. Export these variables:
 
@@ -147,5 +148,5 @@ If you decide to modify your Function, choose **Edit**, make the changes, and ch
     NAME            CONFIGURED   BUILT     RUNNING   RUNTIME    VERSION   AGE
     test-function   True         True      True      nodejs20   1         96s
     ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->

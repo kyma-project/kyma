@@ -22,22 +22,23 @@ Follow the instructions to expose the instances of the HTTPBin Service on differ
 
 2. Depending on whether you use your custom domain or a Kyma domain, export the necessary values as environment variables:
   
-<Tabs>
-<Tab name="Custom Domain">
+<!-- tabs:start -->
+
+#### Custom Domain
 
   ```bash
   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
   export GATEWAY=$NAMESPACE/httpbin-gateway
   ```
-</Tab>
-<Tab name="Kyma Domain">
+
+#### Kyma Domain
 
   ```bash
   export DOMAIN_TO_EXPOSE_WORKLOADS={KYMA_DOMAIN_NAME}
   export GATEWAY=kyma-system/kyma-gateway
   ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 3. To expose the instances of the HTTPBin Service, create the following APIRule:
 
@@ -88,22 +89,23 @@ You can also define a Service at the root level. Such a definition is applied to
 
 2. Depending on whether you use your custom domain or a Kyma domain, export the necessary values as environment variables:
   
-<Tabs>
-<Tab name="Custom Domain">
+<!-- tabs:start -->
+
+#### Custom Domain
 
   ```bash
   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
   export GATEWAY=$NAMESPACE/httpbin-gateway
   ```
-</Tab>
-<Tab name="Kyma Domain">
+
+#### Kyma Domain
 
   ```bash
   export DOMAIN_TO_EXPOSE_WORKLOADS={KYMA_DOMAIN_NAME}
   export GATEWAY=kyma-system/kyma-gateway
   ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 
 3. To expose the instances of the HTTPBin Service, create the following APIRule:

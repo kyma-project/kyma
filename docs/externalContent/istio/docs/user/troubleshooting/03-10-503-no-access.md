@@ -13,8 +13,9 @@ This behavior might be caused by a configuration error in Istio Ingress Gateway.
 
 To fix this problem, restart the Pods of Istio Ingress Gateway.
 
-<Tabs>
-<Tab name="kubectl">
+<!-- tabs:start -->
+
+#### kubectl
 
 1. List all available endpoints:
 
@@ -28,9 +29,7 @@ To fix this problem, restart the Pods of Istio Ingress Gateway.
      kubectl delete pod -l app=istio-ingressgateway -n istio-system
      ```
      
-</Tab>
-
-<Tab name="Kyma Dashboard">
+#### Kyma Dashboard
 
 1. Go to the `istio-system` namespace.
 2. In the **Workloads** section, select **Pods**.
@@ -38,15 +37,15 @@ To fix this problem, restart the Pods of Istio Ingress Gateway.
 4. To trigger the recreation of their configuration, delete each of the displayed Pods.
    ![Delete Pods with `app=istio-ingressgateway` label](../../assets/delete-istio-ingressgateway-pods.svg)
 
-</Tab>
-</Tabs>
+<!-- tabs:end -->
 
 If the restart doesn't help, follow these steps:
 
 1. Check all ports used by Istio Ingress Gateway:
 
-   <Tabs>
-   <Tab name="kubectl">
+   <!-- tabs:start -->
+
+#### kubectl
 
    1. List all the Pods of Istio Ingress Gateway:
 
@@ -60,8 +59,7 @@ If the restart doesn't help, follow these steps:
       kubectl get -n istio-system pod {ISTIO_INGRESS_GATEWAY_POD_NAME} -o jsonpath='{.spec.containers[*].ports[*].containerPort}'
       ```
    
-   </Tab>
-   <Tab name="Kyma Dashboard">
+#### Kyma Dashboard
 
    1. Go to the `istio-system` namespace.
    2. In the **Workloads** section, select **Pods**.
@@ -70,14 +68,14 @@ If the restart doesn't help, follow these steps:
    4. Scroll down to find the `Containers` section and check which ports the `istio-proxy` container uses.
    ![Check ports used by istio-proxy](../../assets/check-istio-proxy-ports.svg)
 
-   </Tab>
-   </Tabs>
+   <!-- tabs:end -->
 
 
 2. If the ports `80` and `443` are not used, check the logs of the `istio-proxy` container for errors related to certificates.
 
-   <Tabs>
-   <Tab name="kubectl">
+   <!-- tabs:start -->
+
+#### kubectl
    
    Run the following command:
 
@@ -85,13 +83,11 @@ If the restart doesn't help, follow these steps:
    kubectl logs -n istio-system -l app=istio-ingressgateway -c istio-proxy
    ```
    
-   </Tab>
-   <Tab name="Kyma Dashboard">
+#### Kyma Dashboard
 
    Click **View Logs**.
    ![View logs of the istio-proxy-container](../../assets/view-istio-proxy-logs.svg)
    
-   </Tab>
-   </Tabs>
+   <!-- tabs:end -->
 
 3. To make sure that a corrupted certificate is regenerated, verify if the **spec.enableKymaGateway** field of your APIGateway custom resource is set to `true`. If you are running Kyma provisioned through Gardener, follow the [Gardener troubleshooting guide](https://kyma-project.io/docs/kyma/latest/04-operation-guides/troubleshooting/security/sec-01-certificates-gardener/) instead.

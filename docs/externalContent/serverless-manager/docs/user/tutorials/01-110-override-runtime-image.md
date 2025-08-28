@@ -14,8 +14,9 @@ Follow these steps:
 
 1. Follow [this example](https://github.com/kyma-project/serverless/tree/main/examples/custom-serverless-runtime-image) to build the Python's custom runtime image.
 
-<Tabs>
-<Tab name="Kyma CLI">
+<!-- tabs:start -->
+
+#### Kyma CLI
 
 2. Export these variables:
 
@@ -47,8 +48,8 @@ Follow these steps:
     ```bash
     kyma alpha function get $NAME --namespace $NAMESPACE
     ```
-</Tab>
-<Tab name="kubectl">
+
+#### kubectl
 
 2. Export these variables:
 
@@ -83,5 +84,5 @@ Follow these steps:
     ```bash
     kubectl get functions $NAME -n $NAMESPACE
     ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->

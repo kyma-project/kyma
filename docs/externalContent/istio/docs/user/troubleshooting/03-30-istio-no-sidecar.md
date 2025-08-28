@@ -64,8 +64,9 @@ Find out which Pods do not have Istio sidecar proxy injection enabled and why. Y
 
 ### Check a Selective Pod
 
-<Tabs>
-<Tab name="Kyma Dashboard">
+<!-- tabs:start -->
+
+#### Kyma Dashboard
 
 1. Go to the Pod's namespace.
 2. Check if Istio sidecar proxy injection is enabled at the namespace level.
@@ -78,8 +79,8 @@ Find out which Pods do not have Istio sidecar proxy injection enabled and why. Y
    1. In the **Workloads** section, choose **Pods**.
    2. Search for `sidecar.istio.io/inject: false`. 
    If your Pod is displayed on the list, it has the label set.
-</Tab>
-<Tab name="kubectl">
+
+#### kubectl
 
 1. To check if Istio sidecar proxy injection is enabled at the namespace level, run the command:
 
@@ -97,5 +98,5 @@ Find out which Pods do not have Istio sidecar proxy injection enabled and why. Y
     kubectl get pod {POD} -n default -o=jsonpath='{.metadata.labels.sidecar\.istio\.io/inject}
     ```
 4. To learn how to include a Pod into the Istio service mesh, see [Enabling Istio Sidecar Proxy Injection](https://help.sap.com/docs/btp/sap-business-technology-platform-internal/enabling-istio-sidecar-proxy?locale=en-US&state=DRAFT&version=Internal).
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->

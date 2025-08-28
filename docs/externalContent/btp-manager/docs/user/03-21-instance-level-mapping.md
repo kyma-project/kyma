@@ -68,8 +68,9 @@ To access Kyma dashboard, use the link available in the **Kyma Environment** sec
 
 ### Procedure
 
-<Tabs>
-<Tab name="Kyma Dashboard">
+<!-- tabs:start -->
+
+#### Kyma Dashboard
 
 1. In the **Namespaces** view, go to the namespace you want to work in.
 2. Go to **Service Management** -> **Service Instances**.
@@ -80,8 +81,8 @@ To access Kyma dashboard, use the link available in the **Kyma Environment** sec
    > Once you set a Secret name in the service instance, you cannot change it in the future.
   
     You see the status `PROVISIONED`.
-</Tab>
-<Tab name="kubectl">
+
+#### kubectl
 
 1. Create your service instance with the following:
 
@@ -117,8 +118,8 @@ To access Kyma dashboard, use the link available in the **Kyma Environment** sec
     You also see your Secret name in the **btpAccessCredentialsSecret** field of the `spec`.
 
 3.  To verify that you've correctly added the access credentials of the SAP Service Manager instance in your service instance, go to the CR `status` section, and make sure the subaccount ID to which the instance belongs is provided in the **subaccountID** field. The field must not be empty.
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 ## Related Information
 
 [Working with Multiple Subaccounts](03-20-multitenancy.md)<br>

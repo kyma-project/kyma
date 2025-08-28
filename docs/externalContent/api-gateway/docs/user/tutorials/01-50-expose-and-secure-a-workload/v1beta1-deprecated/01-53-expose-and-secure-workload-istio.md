@@ -18,8 +18,9 @@ This tutorial shows how to expose and secure a workload using Istio's built-in s
 
 ### Expose Your Workload
 
-<Tabs>
-<Tab name="Kyma dashboard">
+<!-- tabs:start -->
+
+#### Kyma dashboard
 
   1. Go to **Istio > Virtual Services** and select **Create**.
   2. Provide the following configuration details:
@@ -29,27 +30,28 @@ This tutorial shows how to expose and secure a workload using Istio's built-in s
         - **Host**: `httpbin.{NAMESPACE}.svc.cluster.local`
         - **Port Number**: `8000`
   3. To create the VirtualService, select **Create**.
-</Tab>
-<Tab name="kubectl">
+
+#### kubectl
 
   1. Depending on whether you use your custom domain or a Kyma domain, export the necessary values as environment variables:
 
-<Tabs>
-<Tab name="Custom Domain">
+<!-- tabs:start -->
+
+##### Custom Domain
 
       ```bash
       export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
       export GATEWAY=$NAMESPACE/httpbin-gateway
       ```
-</Tab>
-<Tab name="Kyma Domain">
+
+##### Kyma Domain
 
       ```bash
       export DOMAIN_TO_EXPOSE_WORKLOADS={KYMA_DOMAIN_NAME}
       export GATEWAY=kyma-system/kyma-gateway
       ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
   2. To expose your workload, create a VirtualService:
 
@@ -76,15 +78,16 @@ This tutorial shows how to expose and secure a workload using Istio's built-in s
               host: httpbin.$NAMESPACE.svc.cluster.local
       EOF
       ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 ### Secure Your Workload
 
 To secure the HTTPBin workload using a JWT, create a Request Authentication with Authorization Policy. Workloads with the **matchLabels** parameter specified require a JWT for all requests. Follow the instructions:
 
-<Tabs>
-<Tab name="Kyma Dashboard">
+<!-- tabs:start -->
+
+#### Kyma Dashboard
 
   1. Go to **Configuration > Custom Resources > RequestAuthentications**.
   2. Select **Create** and paste the following configuration into the editor:
@@ -127,8 +130,8 @@ To secure the HTTPBin workload using a JWT, create a Request Authentication with
       ```
   7. Replace `{NAMESPACE}` with the name of the namespace in which you deployed the HTTPBin Service.
   8. Select **Create**.
-</Tab>
-<Tab name="kubectl">
+
+#### kubectl
 
   Create the Request Authentication and Authorization Policy resources:
 
@@ -162,8 +165,8 @@ To secure the HTTPBin workload using a JWT, create a Request Authentication with
           requestPrincipals: ["*"]
   EOF
   ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 ### Access the Secured Resources
 
 To access your HTTPBin Service, use [curl](https://curl.se).

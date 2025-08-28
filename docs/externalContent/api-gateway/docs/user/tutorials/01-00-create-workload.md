@@ -4,8 +4,9 @@ This tutorial explains how to create a sample HTTPBin Service Deployment.
 
 ## Steps
 
-<Tabs>
-<Tab name="Kyma Dashboard">
+<!-- tabs:start -->
+
+#### Kyma Dashboard
 
 1. Create a namespace with enabled Istio sidecar injection.
 2. Go to **Configuration > Service Accounts** and select **Create**. Enter `httpbin` as your Service Account's name and select **Create**.
@@ -23,8 +24,8 @@ This tutorial explains how to create a sample HTTPBin Service Deployment.
       - **Target Port**: `80`
     - Select **Create**.
 8. Go to **Workloads > Deployments** and select **Create**. Choose the HTTPBin template and select **Create**.
-</Tab>
-<Tab name="kubectl">
+
+#### kubectl
 
 1. Create a namespace and export its value as an environment variable. Run:
 
@@ -102,5 +103,5 @@ This tutorial explains how to create a sample HTTPBin Service Deployment.
     NAME                        READY    STATUS     RESTARTS    AGE
     {SERVICE_NAME}-{SUFFIX}     2/2      Running    0           96s
     ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->

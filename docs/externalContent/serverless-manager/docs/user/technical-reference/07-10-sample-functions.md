@@ -7,8 +7,9 @@ Functions support multiple languages through the use of runtimes. To use a chose
 
 See sample Functions for all available runtimes:
 
-<Tabs>
-<Tab name="Node.js">
+<!-- tabs:start -->
+
+#### Node.js
 
 Serverless supports both CommonJS (cjs) and ECMAScript (ESM) syntax supported by Node.js.
 You can switch between them using the `type` property in the Function dependencies.
@@ -71,8 +72,8 @@ spec:
         }
 EOF
 ```
-</Tab>
-<Tab name="Python">
+
+#### Python
 
 ```bash
 cat <<EOF | kubectl apply -f -
@@ -93,5 +94,5 @@ spec:
             return r.json()
 EOF
 ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->

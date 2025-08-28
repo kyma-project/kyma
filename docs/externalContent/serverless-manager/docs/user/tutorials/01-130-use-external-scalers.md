@@ -14,8 +14,9 @@ Before you start, make sure you have these tools installed:
 
 Follow these steps:
 
-<Tabs>
-<Tab name="HPA">
+<!-- tabs:start -->
+
+#### HPA
 
 1. Create your Function with the `replicas` value set to 1, to prevent the internal Serverless HPA creation:
 
@@ -58,8 +59,8 @@ Follow these steps:
     NAME              REFERENCE                  TARGETS   MINPODS   MAXPODS   REPLICAS   AGE
     scaled-function   Function/scaled-function   1%/50%    5         10        5          61s
     ```
-</Tab>
-<Tab name="Keda CPU">
+
+#### Keda CPU
 
 1. Create your Function with the **replicas** value set to `1` to prevent the internal Serverless HPA creation:
 
@@ -122,8 +123,8 @@ Follow these steps:
     NAME              SCALETARGETKIND                                SCALETARGETNAME   MIN   MAX   TRIGGERS   AUTHENTICATION   READY   ACTIVE   FALLBACK   AGE
     scaled-function   serverless.kyma-project.io/v1alpha2.Function   scaled-function   5     10    cpu                         True    True     Unknown    4m15s
     ```
-</Tab>
-<Tab name="Keda Prometheus">
+
+#### Keda Prometheus
 
 1. Create your Function with the **replicas** value set to `1` to prevent the internal Serverless HPA creation:
 
@@ -190,5 +191,5 @@ Follow these steps:
     ```
 
 Check out this [example](https://github.com/kyma-project/keda-manager/tree/main/examples/scale-to-zero-with-keda) to see how to use Kyma Serverless and Eventing in combination with Keda to accomplish scaling to zero.
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->

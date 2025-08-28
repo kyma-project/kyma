@@ -19,8 +19,9 @@ Alternatively, you can set the **token_from.location** parameter to `query_param
 
 See these sample excerpts from APIRule custom resources that show the **rules** attribute for Services secured with OAuth2, JWT, and an OAuth2 and JWT combination.
 
-<Tabs>
-<Tab name="OAuth2">
+<!-- tabs:start -->
+
+#### OAuth2
 
   ```yaml
   rules:
@@ -32,8 +33,8 @@ See these sample excerpts from APIRule custom resources that show the **rules** 
           config:
             required_scope: ["read"]
   ```
-</Tab>
-<Tab name="JWT">
+
+#### JWT
 
   ```yaml
   rules:
@@ -46,8 +47,8 @@ See these sample excerpts from APIRule custom resources that show the **rules** 
             trusted_issuers:
             - {issuer URL of your custom OpenID Connect-compliant identity provider}
   ```
-</Tab>
-<Tab name="OAuth2 and JWT">
+
+#### OAuth2 and JWT
 
   ```yaml
   rules:
@@ -65,5 +66,5 @@ See these sample excerpts from APIRule custom resources that show the **rules** 
              token_from:
                header: ID-Token
   ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->

@@ -29,22 +29,23 @@ Create three namespaces. Deploy two instances of the HTTPBin Service, each in a 
   
 2. Depending on whether you use your custom domain or a Kyma domain, export the necessary values as environment variables:
   
-<Tabs>
-<Tab name="Custom Domain">
+<!-- tabs:start -->
+
+#### Custom Domain
 
     ```bash
     export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
     export GATEWAY=$NAMESPACE/httpbin-gateway
     ```
-</Tab>
-<Tab name="Kyma Domain">
+
+#### Kyma Domain
 
     ```bash
     export DOMAIN_TO_EXPOSE_WORKLOADS={KYMA_DOMAIN_NAME}
     export GATEWAY=kyma-system/kyma-gateway
     ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 3. Expose the HTTPBin Services in their respective namespaces by creating an APIRule custom resource (CR) in its own namespace. Run:
 

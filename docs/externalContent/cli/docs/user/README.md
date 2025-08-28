@@ -28,21 +28,22 @@ The Kyma CLI provides the following features:
 
 To get the latest stable Kyma CLI for MacOS or Linux, run the following script from the command line:
 
-<Tabs>
-<Tab name="Homebrew">
+<!-- tabs:start -->
+
+#### Homebrew
 
 ```sh
 brew install kyma-cli
 ```
-</Tab>
-<Tab name="GitHub releases">
+
+#### GitHub releases
 
 ```sh
 curl -sL "https://raw.githubusercontent.com/kyma-project/cli/refs/heads/main/hack/install_cli_stable.sh" | sh -
 kyma
 ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 ### Latest Build
 

@@ -22,8 +22,9 @@ This tutorial shows how to expose an unsecured instance of the HTTPBin Service a
 
 ## Steps
 
-<Tabs>
-<Tab name="Kyma Dashboard">
+<!-- tabs:start -->
+
+#### Kyma Dashboard
 
 1. Go to **Discovery and Network > API Rules** and select **Create**.
 2. Provide the name of the APIRule CR.
@@ -38,8 +39,8 @@ This tutorial shows how to expose an unsecured instance of the HTTPBin Service a
     - **Handler**: `No Auth`
     - **Methods**: `POST`
 7. Choose **Create**.
-</Tab>
-<Tab name="kubectl">
+
+#### kubectl
 
 To expose your workload, create an APIRule CR. You can adjust the configuration, if needed.
 
@@ -67,8 +68,8 @@ spec:
       noAuth: true
 EOF
 ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 
 ### Access Your Workload

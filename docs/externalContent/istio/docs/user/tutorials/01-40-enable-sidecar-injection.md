@@ -20,23 +20,24 @@ Enabling Istio sidecar proxy injection for a namespace allows istiod to watch al
 
 ### Procedure
 
-<Tabs>
-<Tab name="Kyma Dashboard">
+<!-- tabs:start -->
+
+#### Kyma Dashboard
 
 1. Select the namespace where you want to enable sidecar proxy injection.
 2. Choose **Edit**.
 3. In the **UI Form** section, siwtch the toggle to enable Istio sidecar proxy injection.
 4. Choose **Save**.
-</Tab>
-<Tab name="kubectl">
+
+#### kubectl
 
 Use the following command:
 
 ```bash
 kubectl label namespace {YOUR_NAMESPACE} istio-injection=enabled
 ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 ### Results
 You've enabled Istio sidecar proxy injection for the specified namespace. The namespace is labeled with `istio-injection: enabled`, which means that all Pods created in it from now on have the Istio sidecar proxy injected.
@@ -58,8 +59,9 @@ Enabling Istio sidecar proxy injection for a Deployment injects an Istio sidecar
 
 ### Procedure
 
-<Tabs>
-<Tab name="Kyma Dashboard">
+<!-- tabs:start -->
+
+#### Kyma Dashboard
 
 1. Select the namespace of the Deployment for which you want to enable Istio sidecar proxy injection.
 2. In the **Workloads** section, select **Deployments**.
@@ -67,16 +69,16 @@ Enabling Istio sidecar proxy injection for a Deployment injects an Istio sidecar
 4. Choose **Edit**.
 5. In the **UI Form** section, switch the toggle to enable Istio sidecar proxy injection.
 6. Choose **Save**.
-</Tab>
-<Tab name="kubectl">
+
+#### kubectl
 
 Run the following command:
 
 ```bash
 kubectl patch -n {YOUR_NAMESPACE} deployments/{YOUR_DEPLOYMENT} -p '{"spec":{"template":{"metadata":{"labels":{"sidecar.istio.io/inject":"true"}}}}}'
 ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 ### Results
 

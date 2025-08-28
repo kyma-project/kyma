@@ -14,8 +14,9 @@ This tutorial shows how to expose and secure a workload with mutual authenticati
 
 ## Procedure
 
-<Tabs>
-<Tab name="Kyma Dashboard">
+<!-- tabs:start -->
+
+#### Kyma Dashboard
 
 1. Go to the namespace in which you want to create an APIRule CR.
 
@@ -34,8 +35,8 @@ This tutorial shows how to expose and secure a workload with mutual authenticati
       - **X-CLIENT-SSL-ISSUER**: `%DOWNSTREAM_PEER_ISSUER%`
     - Add the name and port of the Service you want to expose.
 5. Choose **Create**.
-</Tab>
-<Tab name="kubectl">
+
+#### kubectl
 
 1. Export the following values as environment variables:
 
@@ -78,8 +79,8 @@ This tutorial shows how to expose and secure a workload with mutual authenticati
         port: {SERVICE_PORT}
     EOF
     ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 ## Access the Secured Resources
 

@@ -13,8 +13,9 @@ This quick start guide shows how to create a sample HTTPBin workload and expose 
 
 ## Create a Workload
 
-<Tabs>
-<Tab name="Kyma Dashboard">
+<!-- tabs:start -->
+
+#### Kyma Dashboard
 
 1. In Kyma dashboard, go to **Namespaces** and choose **Create**.
 1. Provide the name `api-gateway-tutorial` and switch the toggle to enable Istio sidecar proxy injection.
@@ -37,8 +38,8 @@ This quick start guide shows how to create a sample HTTPBin workload and expose 
       - **Port**: `8000`
       - **Target Port**: `80`
 8. Choose **Create**.
-</Tab>
-<Tab name="kubectl">
+
+#### kubectl
 
 1. Create a namespace and export its value as an environment variable. Run:
 
@@ -110,13 +111,14 @@ This quick start guide shows how to create a sample HTTPBin workload and expose 
     NAME                 READY    STATUS     RESTARTS    AGE
     httpbin-{SUFFIX}     2/2      Running    0           96s
     ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 ## Expose a Workload
 
-<Tabs>
-<Tab name="Kyma Dashboard">
+<!-- tabs:start -->
+
+#### Kyma Dashboard
 
 1. In the `api-gateway-tutorial` namespace, go to **Discovery and Network > API Rules**.
 2. Choose **Create**.
@@ -138,8 +140,8 @@ This quick start guide shows how to create a sample HTTPBin workload and expose 
        - **Handler**: `no_auth`
        - **Methods**: `POST`
 4.  Choose **Create**.
-</Tab>
-<Tab name="kubectl">
+
+#### kubectl
 
 To expose the HTTPBin Service, create the follwing APIRule CR. Run:
 
@@ -168,8 +170,8 @@ spec:
         - handler: no_auth
 EOF
 ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 ## Access a Workload
 
@@ -190,4 +192,4 @@ To access the HTTPBin Service, use [curl](https://curl.se).
   If successful, the call returns the `200 OK` response code.
 
 </Tab>
-</Tabs>
+<!-- tabs:end -->

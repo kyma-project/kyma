@@ -39,8 +39,9 @@ With the introduction of buildless mode, we significantly shortened the feedback
 
 To enable buildless mode for Serverless, you must add the relevant annotation in the Serverless custom resource (CR). Follow these steps:
 
-<Tabs>
-<Tab name="Kyma Dashboard">
+<!-- tabs:start -->
+
+#### Kyma Dashboard
 
 1. Go to Kyma dashboard.
 
@@ -51,8 +52,8 @@ To enable buildless mode for Serverless, you must add the relevant annotation in
 4. In **Annotations**, enter `serverless.kyma-project.io/buildless-mode` as the key, and `enabled` as the value. Save the changes.
 
 You have enabled Serverless buildless mode.
-</Tab>
-<Tab name="kubectl">
+
+#### kubectl
 
 1. Edit the Serverless CR:
 
@@ -70,7 +71,7 @@ You have enabled Serverless buildless mode.
 3. Save the file to apply the changes.
 
 You have enabled Serverless buildless mode.
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 To disable buildless mode for Serverless, remove the annotation.

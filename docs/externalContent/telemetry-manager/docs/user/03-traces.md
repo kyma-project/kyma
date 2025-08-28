@@ -121,8 +121,9 @@ spec:
 
 To integrate with external systems, you must configure authentication  details. You can use mutual TLS (mTLS), Basic Authentication, or custom headers:
 
-<Tabs>
-<Tab name="mTLS">
+<!-- tabs:start -->
+
+#### mTLS
 
 ```yaml
 apiVersion: telemetry.kyma-project.io/v1alpha1
@@ -144,8 +145,8 @@ spec:
             -----BEGIN RSA PRIVATE KEY-----
             ...
 ```
-</Tab>
-<Tab name="Basic Authentication">
+
+#### Basic Authentication
 
 ```yaml
 apiVersion: telemetry.kyma-project.io/v1alpha1
@@ -164,8 +165,8 @@ spec:
           password:
             value: myPwd
 ```
-</Tab>
-<Tab name="Token-based authentication with custom headers">
+
+#### Token-based authentication with custom headers
 
 ```yaml
 apiVersion: telemetry.kyma-project.io/v1alpha1
@@ -182,8 +183,8 @@ spec:
         prefix: Bearer
         value: "myToken"
 ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 ### 3b. Add Authentication Details From Secrets
 
@@ -193,8 +194,9 @@ Using the **valueFrom** attribute, you can map Secret keys for mutual TLS (mTLS)
 
 You can store the value of the token in the referenced Secret without any prefix or scheme, and you can configure it in the `headers` section of the TracePipeline. In the following example, the token has the prefix "Bearer".
 
-<Tabs>
-<Tab name="mTLS">
+<!-- tabs:start -->
+
+#### mTLS
 
 ```yaml
 apiVersion: telemetry.kyma-project.io/v1alpha1
@@ -220,8 +222,8 @@ spec:
               namespace: default
               key: key
 ```
-</Tab>
-<Tab name="Basic Authentication">
+
+#### Basic Authentication
 
 ```yaml
 apiVersion: telemetry.kyma-project.io/v1alpha1
@@ -252,8 +254,8 @@ spec:
                 namespace: default
                 key: password
 ```
-</Tab>
-<Tab name="Token-based authentication with custom headers">
+
+#### Token-based authentication with custom headers
 
 ```yaml
 apiVersion: telemetry.kyma-project.io/v1alpha1
@@ -274,8 +276,8 @@ spec:
               namespace: default
               key: token
 ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 The related Secret must have the referenced name, be located in the referenced namespace, and contain the mapped key. See the following example:
 
@@ -329,8 +331,9 @@ The Istio module is crucial in distributed tracing because it provides the [Ingr
 
 The Istio module is configured with an [extension provider](https://istio.io/latest/docs/tasks/observability/telemetry/) called `kyma-traces`. To activate the provider on the global mesh level using the Istio [Telemetry API](https://istio.io/latest/docs/reference/config/telemetry/#Tracing), place a resource to the `istio-system` namespace. The following code samples help setting up the Istio tracing feature:
 
-<Tabs>
-<Tab name="Extension Provider">
+<!-- tabs:start -->
+
+#### Extension Provider
 
 The following example configures all Istio proxies with the `kyma-traces` extension provider, which, by default, reports span data to the trace gateway of the Telemetry module.
 
@@ -345,8 +348,8 @@ spec:
   - providers:
     - name: "kyma-traces"
 ```
-</Tab>
-<Tab name="Sampling Rate">
+
+#### Sampling Rate
 
 By default, the sampling rate is configured to 1%. That means that only 1 trace out of 100 traces is reported to the trace gateway, and all others are dropped. The sampling decision itself is propagated as part of the [trace context](https://www.w3.org/TR/trace-context/#sampled-flag) so that either all involved components are reporting the span data of a trace, or none.
 
@@ -368,8 +371,8 @@ spec:
     - name: "kyma-traces"
     randomSamplingPercentage: 100.00
 ```
-</Tab>
-<Tab name="Namespaces or Workloads">
+
+#### Namespaces or Workloads
 
 If you need specific settings for individual namespaces or workloads, place additional Telemetry resources. If you don't want to report spans at all for a specific workload, activate the `disableSpanReporting` flag with the selector expression.
 
@@ -388,8 +391,8 @@ spec:
     - name: "kyma-traces"
     randomSamplingPercentage: 100.00
 ```
-</Tab>
-<Tab name="Trace Context Without Spans">
+
+#### Trace Context Without Spans
 
 To enable the propagation of the [W3C Trace Context](https://www.w3.org/TR/trace-context/) only, without reporting any spans (so the actual tracing feature is disabled), you must enable the `kyma-traces` provider with a sampling rate of 0. With this configuration, you get the relevant trace context into the [access logs](https://kyma-project.io/#/istio/user/tutorials/01-45-enable-istio-access-logs) without any active trace reporting.
 
@@ -405,8 +408,8 @@ To enable the propagation of the [W3C Trace Context](https://www.w3.org/TR/trace
       - name: "kyma-traces"
       randomSamplingPercentage: 0
   ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 ### Eventing
 

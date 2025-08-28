@@ -16,8 +16,9 @@ To use an SAP BTP service in your Kyma cluster, create its service instance and 
 
 To create a service instance, use either Kyma dashboard or kubectl.
 
-<Tabs>
-<Tab name="Kyma Dashboard">
+<!-- tabs:start -->
+
+#### Kyma Dashboard
 
 Kyma dashboard is a web-based UI providing a graphical overview of your cluster and all its resources.
 To access Kyma dashboard, use the link available in the **Kyma Environment** section of your subaccount **Overview**.
@@ -29,8 +30,7 @@ To access Kyma dashboard, use the link available in the **Kyma Environment** sec
 
    You see the status `PROVISIONED`.
    
-</Tab>
-<Tab name="kubectl">
+#### kubectl
 
 1.  To create a ServiceInstance custom resource (CR), replace the placeholders and run the following command:
 
@@ -63,8 +63,8 @@ To access Kyma dashboard, use the link available in the **Kyma Environment** sec
     NAME                      OFFERING                  PLAN                  STATUS    AGE
     {SERVICE_INSTANCE_NAME}   {SERVICE_OFFERING_NAME}   {SERVICE_PLAN_NAME}   Created   44s
     ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 ## Create a Service Binding
 
@@ -75,8 +75,9 @@ These access credentials are available to applications through a Secret resource
 
 ### Procedure
 
-<Tabs>
-<Tab name="Kyma Dashboard">
+<!-- tabs:start -->
+
+#### Kyma Dashboard
 
 Kyma dashboard is a web-based UI providing a graphical overview of your cluster and all its resources.
 To access Kyma dashboard, use the link available in the **Kyma Environment** section of your subaccount **Overview**.
@@ -88,8 +89,8 @@ To access Kyma dashboard, use the link available in the **Kyma Environment** sec
 4. Choose **Create**.
 
    You see the status `PROVISIONED`.
-</Tab>
-<Tab name="kubectl">
+
+#### kubectl
 
 1. To create a ServiceBinding CR, replace the palceholders and run the following command:
 
@@ -126,8 +127,8 @@ To access Kyma dashboard, use the link available in the **Kyma Environment** sec
     kubectl get secrets {SECRET_NAME} -n {NAMESPACE}
     ```
     You see the same Secret name as in the **spec.secretName** field of the ServiceBinding CR.
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 ### Results
 

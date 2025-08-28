@@ -74,8 +74,9 @@ The following push URLs are set up:
 
 The default protocol for shipping the data to a backend is GRPC, but you can choose HTTP instead. Depending on the configured protocol, an `otlp` or an `otlphttp` exporter is used. Ensure that the correct port is configured as part of the endpoint.
 
-<Tabs>
-<Tab name="GRPC">
+<!-- tabs:start -->
+
+#### GRPC
 
 For GRPC, use:
 
@@ -90,8 +91,8 @@ spec:
       endpoint:
         value: https://backend.example.com:4317
 ```
-</Tab>
-<Tab name="HTTP">
+
+#### HTTP
 
 For HTTP, use the `protocol` attribute:
 
@@ -107,15 +108,16 @@ spec:
       endpoint:
         value: https://backend.example.com:4318
 ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 ### 2a. Add Authentication Details From Plain Text
 
 To integrate with external systems, you must configure authentication details. You can use mutual TLS (mTLS), Basic Authentication, or custom headers:
 
-<Tabs>
-<Tab name="mTLS">
+<!-- tabs:start -->
+
+#### mTLS
 
 ```yaml
 apiVersion: telemetry.kyma-project.io/v1alpha1
@@ -137,8 +139,8 @@ spec:
             -----BEGIN RSA PRIVATE KEY-----
             ...
 ```
-</Tab>
-<Tab name="Basic Authentication">
+
+#### Basic Authentication
 
 ```yaml
 apiVersion: telemetry.kyma-project.io/v1alpha1
@@ -157,8 +159,8 @@ spec:
           password:
             value: myPwd
 ```
-</Tab>
-<Tab name="Token-based authentication with custom headers">
+
+#### Token-based authentication with custom headers
 
 ```yaml
 apiVersion: telemetry.kyma-project.io/v1alpha1
@@ -175,8 +177,8 @@ spec:
           prefix: Bearer
           value: "myToken"
 ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 ### 2b. Add Authentication Details From Secrets
 
 Integrations into external systems usually need authentication details dealing with sensitive data. To handle that data properly in Secrets, MetricsPipeline supports the reference of Secrets.
@@ -185,8 +187,9 @@ Using the **valueFrom** attribute, you can map Secret keys for mutual TLS (mTLS)
 
 You can store the value of the token in the referenced Secret without any prefix or scheme, and you can configure it in the headers section of the MetricPipeline. In this example, the token has the prefix “Bearer”.
 
-<Tabs>
-<Tab name="mTLS">
+<!-- tabs:start -->
+
+#### mTLS
 
 ```yaml
 apiVersion: telemetry.kyma-project.io/v1alpha1
@@ -212,8 +215,8 @@ spec:
                 namespace: default
                 key: key
 ```
-</Tab>
-<Tab name="Basic Authentication">
+
+#### Basic Authentication
 
 ```yaml
 apiVersion: telemetry.kyma-project.io/v1alpha1
@@ -244,8 +247,8 @@ spec:
                 namespace: default
                 key: password
 ```
-</Tab>
-<Tab name="Token-based authentication with custom headers">
+
+#### Token-based authentication with custom headers
 
 ```yaml
 apiVersion: telemetry.kyma-project.io/v1alpha1
@@ -266,8 +269,8 @@ spec:
                 namespace: default
                 key: token
 ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
 
 The related Secret must have the referenced name, be located in the referenced namespace, and contain the mapped key. See the following example:
 

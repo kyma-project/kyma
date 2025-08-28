@@ -15,8 +15,9 @@ To learn more about Git repository sources for Functions and different ways of s
 
 You can create a Function either with kubectl or Kyma dashboard:
 
-<Tabs>
-<Tab name="Kyma Dashboard">
+<!-- tabs:start -->
+
+#### Kyma Dashboard
 
 > [!NOTE]
 > Kyma dashboard uses Busola, which is not installed by default. Follow the [installation instructions](https://github.com/kyma-project/busola/blob/main/docs/install-kyma-dashboard-manually.md).
@@ -62,8 +63,8 @@ You can create a Function either with kubectl or Kyma dashboard:
 
     After a while, a message confirms that the Function has been created.
     Make sure that the new Function has the `RUNNING` status.
-</Tab>
-<Tab name="kubectl">
+
+#### kubectl
 
 1. Export these variables:
 
@@ -159,5 +160,5 @@ You can create a Function either with kubectl or Kyma dashboard:
     NAME            CONFIGURED   BUILT     RUNNING   RUNTIME    VERSION   AGE
     test-function   True         True      True      nodejs20   1         96s
     ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->

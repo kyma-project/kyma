@@ -53,8 +53,9 @@ export DR_USERNAME=$(kubectl get secret -n kyma-system dockerregistry-config -o 
 export DR_PASSWORD=$(kubectl get secret -n kyma-system dockerregistry-config -o jsonpath="{.data.password}" | base64 -d)
 ```
 
-<Tabs>
-<Tab name="Registry API">
+<!-- tabs:start -->
+
+#### Registry API
 
 5. Verify that the image was pushed to the registry and exists with the given tag:
 
@@ -73,8 +74,8 @@ curl -u "$DR_USERNAME:$DR_PASSWORD" -o /dev/null -w '%header{Docker-Content-Dige
 ```bash
 curl -u "$DR_USERNAME:$DR_PASSWORD" -X DELETE localhost:5000/v2/dr/manifests/<DIGEST>
 ```
-</Tab>
-<Tab name="skopeo">
+
+#### skopeo
 
 5. Verify that the image was pushed to the registry and exists with given tag:
 
@@ -87,5 +88,5 @@ skopeo list-tags --creds "$DR_USERNAME:$DR_PASSWORD" --tls-verify=false docker:/
 ```bash
 skopeo delete --creds "$DR_USERNAME:$DR_PASSWORD" --tls-verify=false docker://localhost:5000/<IMAGE_NAME>:<IMAGE_TAG>
 ```
-</Tab>
-</Tabs>
+
+<!-- tabs:end -->
