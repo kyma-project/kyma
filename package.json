@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "markdown-it": "^14.1.0",
+    "markdown-it-container": "^4.0.0",
     "vite-plugin-node-polyfills": "^0.24.0",
     "vitepress-plugin-nested-sidebar": "^0.1.3",
     "vitepress-sidebar": "^1.33.0"
