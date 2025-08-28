@@ -6,7 +6,7 @@ export default function tabsPlugin(md) {
     
     const newSrc = src.replace(tabBlockRegex, (match, content) => {
       const tabs = [];
-      const headingRegex = /^####\s+(.*)/;
+      const headingRegex = /^####\s+(?:\*\*|__)(.*?)(?:\*\*|__)$/;
       let currentTab = null;
       let currentContent = '';
 
