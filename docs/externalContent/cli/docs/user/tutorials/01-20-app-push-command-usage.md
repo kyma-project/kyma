@@ -16,7 +16,7 @@ To use `kyma alpha app push`, you must also provide either a Dockerfile, Docker 
 
 2. Clone the [Paketo code examples](https://github.com/paketo-buildpacks/samples/tree/main) repository into the desired folder:
 
-   ```url
+   ```text
    git clone https://github.com/paketo-buildpacks/samples.git
    ```
 

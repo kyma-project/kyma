@@ -114,7 +114,6 @@ export default defineConfig({
     ],
 
     sidebar: [
-      { text: 'Kyma Home', link: '/' },
       { text: 'Quick Install', link: '/02-get-started/01-quick-install' },
       {
         text: 'Modules',

@@ -379,7 +379,7 @@ Metric Attributes for Monitoring:
 
 To set up alerting, use an alert rule. In the following example, the alert is triggered if metrics are not delivered to the backend:
 
-```promql
+```text
  min by (k8s_resource_name) ((kyma_resource_status_conditions{type="TelemetryFlowHealthy",k8s_resource_kind="metricpipelines"})) == 0
 ```
 

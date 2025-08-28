@@ -1,6 +1,6 @@
 <template>
   <footer class="my-footer">
-    <p>© 2024 Kyma Project. All rights reserved.</p>
+    <p>© 2025 Kyma Project. All rights reserved.</p>
     <p>
       <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a>
     </p>

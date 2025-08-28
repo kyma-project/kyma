@@ -11,66 +11,93 @@ hero:
     alt: Kyma logo
   actions:
     - theme: brand
-      text: Markdown Examples
-      link: /markdown-examples
+      text: Why Kyma?
+      link: /README
     - theme: alt
-      text: API Examples
-      link: /api-examples
-
+      text: Quick Install
+      link: /02-get-started/01-quick-install.html
 features_additonal_description: Who is using <span class="home-kyma-heavy-bold">Kyma</span>?
 features_additonal:
   - icon: 
-      src: /assets/logo_icon_background.svg
+      src: https://raw.githubusercontent.com/kyma-project/website/refs/heads/main/content/adopters/logos/sap.svg
+      width: 180px
+      height: 70px
     title: SAP
-    details: Leading enterprise software company.
   - icon: 
-      src: /assets/logo_icon_background.svg
-      width: 200px
-      height: 200px
-    title: Client Two
-    details: A description for the second client.
+      src: https://raw.githubusercontent.com/kyma-project/website/refs/heads/main/content/adopters/logos/accenture.svg
+      width: 180px
+      height: 70px
+    title: Accenture
+  - icon:
+      src: https://raw.githubusercontent.com/kyma-project/website/refs/heads/main/content/adopters/logos/netconomy.svg
+      width: 180px
+      height: 70px
+    title: NETCONOMY
   - icon: 
-      src: /assets/logo_icon_background.svg
-      width: 200px
-      height: 200px
-    title: Client Three
-    details: Another great client of ours.
+      src: https://raw.githubusercontent.com/kyma-project/website/refs/heads/main/content/adopters/logos/neteleven.svg
+      width: 180px
+      height: 70px
+    title: Neteleven
+  - icon:
+      src: https://raw.githubusercontent.com/kyma-project/website/refs/heads/main/content/adopters/logos/arithnea.svg
+      width: 180px
+      height: 70px
+    title: Arithnea
   - icon: 
-      src: /assets/logo_icon_background.svg
-      width: 200px
-      height: 200px
-    title: Client Four
-    details: Description for the fourth client.
+      src: https://raw.githubusercontent.com/kyma-project/website/refs/heads/main/content/adopters/logos/digital_lights.svg
+      width: 180px
+      height: 70px
+    title: Digital Lights
+  - icon:
+      src: https://raw.githubusercontent.com/kyma-project/website/refs/heads/main/content/adopters/logos/FAIR_LOGO_HEADER.svg
+      width: 180px
+      height: 70px
+    title: FAIR
+  - icon: 
+      src: https://raw.githubusercontent.com/kyma-project/website/refs/heads/main/content/adopters/logos/Sybit-Logo.svg
+      width: 180px
+      height: 70px
+    title: Sysbit
+  - icon:
+      src: https://raw.githubusercontent.com/kyma-project/website/refs/heads/main/content/adopters/logos/arineo.svg
+      width: 180px
+      height: 70px
+    title: Arineo
+  - icon: 
+      src: https://raw.githubusercontent.com/kyma-project/website/refs/heads/main/content/adopters/logos/dotsource.svg
+      width: 180px
+      height: 70px
+    title: dotSource
 
 features:
   - icon: 
-      src: /assets/k8s.png
-      width: 80
-    title: Focus on building application, we manage Kubernetes for you
-    details: Fully managed infrastructure and 2nd day operations with deep security for your Kubernetes cluster and Kyma modules like Istio
+      src: /assets/cloud.png
+      width: 100
+    title: Accelerate cloud-native development
+    details: Boost development using pre-integrated, enterprise-grade modules built on proven open-source technologies like Istio, NATS, and OpenTelemetry
   - icon: 
-      src: /assets/modules.png
-      width: 80
-    title: Additional managed modules
-    details: Managed integration layer and additional features on the top of Kubernetes simplifying application development
+      src: /assets/application.png
+      width: 100
+    title: Focus on applications, not infrastructure
+    details: Enable developers to move faster by abstracting infrastructure and focusing on microservice-driven business logic.
   - icon: 
-      src: https://gardener.cloud/gardener-logo.svg
-      width: 80
-    title: Abstracts hyperscalers
-    details: Dedicated Application built using <a href="https://pages.github.tools.sap/kubernetes/gardener" target="_blank" rel="noopener noreferrer">SAP Kubernetes Service (Gardener)</a>, abstracts major hyperscalers to reduce vendor lock-in offering secure, compliant account management to save development time.
-  - icon: 
-      src: /assets/time.png
-      width: 80
-    title: Save time, reduce costs
-    details: Enables rapid design of lightweight, containerized microservices and extensions for enterprise apps leveraging ready-to-be-used modular block fitting to diverse business needs.
+      src: /assets/settings.png
+      width: 100
+    title: Seamless ecosystem integration
+    details: "Power up your integration layer with Kyma: the ideal runtime for extending and connecting third party and SAP services and systems."
   - icon: 
       src: /assets/security.png
-      width: 80
-    title: Enterprise-grade solution for enterprise-grade applications
-    details: Integrated with SAP IAS, supports enterprise-grade observability, ensures default high availability, helps meet SAP security standards, and is backed by key certifications.
+      width: 90
+    title: Stay secure and up-to-date effortlessly
+    details: An updated and maintained enviroment, composed by modules, eliminates the complexity of tool selection and maintenance.
   - icon: 
-      src: /assets/btp.png
-      width: 280
-    title: Runtime for BTP usage
-    details: Natively integrated into SAP BTP, enabling easy consumption of SAP cloud and on-prem services, and empowering modern, Kubernetes-based application development within BTP."
+      src: /assets/enterprise.png
+      width: 100
+    title: Enterprise-grade from day one
+    details: Kyma combines developer agility with production-grade reliability, backed by SAP’s commitment to open-source innovation.
+  - icon: 
+      src: /assets/community.png
+      width: 100
+    title: Built for openness and independence,
+    details: Kyma empowers developers with full transparency, community support, and vendor-neutral architecture.
 ---
