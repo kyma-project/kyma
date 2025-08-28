@@ -4,7 +4,7 @@
   },
   "scripts": {
     "docs:dev": "vitepress dev",
-    "docs:build": "vitepress build",
+    "docs:build": "sh ./move_to_public.sh && vitepress build && rm -rf ./public",
     "docs:preview": "vitepress preview"
   },
   "dependencies": {

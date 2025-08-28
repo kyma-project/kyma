@@ -43,6 +43,31 @@
  *   in custom container, badges, etc.
  * -------------------------------------------------------------------------- */
 
+
+@font-face {
+    font-family: "72";
+    src: url("https://cdn.jsdelivr.net/npm/@sap-theming/theming-base-content/content/Base/baseLib/baseTheme/fonts/72-Regular-full.woff") format("woff");
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "72";
+    src: url("https://cdn.jsdelivr.net/npm/@sap-theming/theming-base-content/content/Base/baseLib/baseTheme/fonts/72-Bold-full.woff") format("woff");
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "72";
+    src: url("https://cdn.jsdelivr.net/npm/@sap-theming/theming-base-content/content/Base/baseLib/baseTheme/fonts/72-Light-full.woff") format("woff");
+    font-weight: 300;
+    font-style: normal;
+}
+html, button, input, optgroup, select, textarea {
+    font-family: "72";
+}
+
 :root {
   --vp-c-default-1: var(--vp-c-gray-1);
   --vp-c-default-2: var(--vp-c-gray-2);
@@ -70,17 +95,24 @@
   --vp-c-danger-soft: var(--vp-c-red-soft);
 }
 
+:root {
+  --vp-layout-max-width: 1600px;
+}
+
 /**
  * Component: Button
  * -------------------------------------------------------------------------- */
 
 :root {
+  --kyma-color-primary: #0b74de;
+  --kyma-color-primary-shadow: rgba(11, 117, 222, 0.2);
+  --kyma-color-primary-dark: #0a549d;
   --vp-button-brand-border: transparent;
   --vp-button-brand-text: var(--vp-c-white);
-  --vp-button-brand-bg: var(--vp-c-brand-3);
+  --vp-button-brand-bg: var(--kyma-color-primary);
   --vp-button-brand-hover-border: transparent;
   --vp-button-brand-hover-text: var(--vp-c-white);
-  --vp-button-brand-hover-bg: var(--vp-c-brand-2);
+  --vp-button-brand-hover-bg: var(--kyma-color-primary-dark);
   --vp-button-brand-active-border: transparent;
   --vp-button-brand-active-text: var(--vp-c-white);
   --vp-button-brand-active-bg: var(--vp-c-brand-1);
@@ -94,14 +126,14 @@
   --vp-home-hero-name-color: transparent;
   --vp-home-hero-name-background: -webkit-linear-gradient(
     120deg,
-    #bd34fe 30%,
-    #41d1ff
+    #014ea0 20%,
+    var(--kyma-color-primary) 60%
   );
 
   --vp-home-hero-image-background-image: linear-gradient(
     -45deg,
-    #bd34fe 50%,
-    #47caff 50%
+    #01366f 50%,
+    var(--kyma-color-primary) 50%
   );
   --vp-home-hero-image-filter: blur(44px);
 }
@@ -117,6 +149,17 @@
     --vp-home-hero-image-filter: blur(68px);
   }
 }
+
+span.home-kyma-heavy-bold {
+    font-weight: bold;
+    color: var(--kyma-color-primary);
+}
+
+span.home-kyma-phonetic {
+    font-style: italic;
+    color: #0195FF;
+}
+
 
 /**
  * Component: Custom Block
@@ -136,3 +179,120 @@
 .DocSearch {
   --docsearch-primary-color: var(--vp-c-brand-1) !important;
 }
+
+/* Custom styles for features grid */
+@media (min-width: 768px) {
+  .VPHomeFeatures {
+    width: 100vw;
+    margin-left: calc(-50vw + 50%);
+  }
+
+  .VPHomeFeatures .items {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    width: 100%;
+    max-width: none; 
+  }
+
+  .VPHomeFeatures .item {
+    width: 100% !important;
+  }
+
+  .VPHomeFeatures .box:hover {
+    transform: scale(1.1);
+  }
+
+  .VPHomeFeatures .box {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  background-color: var(--vp-c-bg);
+  transition: transform 0.6s ease;
+}
+
+.VPHomeFeatures .box::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    var(--kyma-color-primary-dark) 0%,
+    var(--kyma-color-primary) 60%,
+    transparent 100%
+  );
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  filter: blur(150px);
+  z-index: 0;
+}
+
+.VPHomeFeatures .box:hover::before {
+  opacity: 1;
+}
+
+.VPHomeFeatures .box > * {
+  position: relative;
+  z-index: 1;
+}
+
+}
+
+.VPFeature a {
+  color: var(--kyma-color-primary); /* Change to your preferred link color */
+  text-decoration: none; /* Removes underline */
+  text-decoration: underline; /* Adds underline on hover */
+}
+
+.VPFeature a:hover {
+  color: var(--kyma-color-primary-dark); /* Darker shade on hover */
+  font-weight: bold;
+}
+
+/* Global Footer */
+.my-footer {
+  text-align: center;
+  padding: 2rem 1.5rem;
+  border-top: 1px solid var(--vp-c-divider);
+  margin-top: 2rem;
+  color: var(--vp-c-text-2);
+  font-size: 0.9rem;
+}
+
+.my-footer a {
+  color: var(--vp-c-brand);
+  text-decoration: none;
+}
+
+.my-footer a:hover {
+  text-decoration: underline;
+}
+
+/* Client Logos Section (Homepage only) */
+.features-add {
+  padding: 4rem 0;
+  border-top: 1px solid var(--vp-c-divider);
+}
+
+.features-add h2 {
+  text-align: center;
+  margin-bottom: 2.5rem;
+  font-size: 1.8rem;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+}
+
+.fetures-add-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+  justify-items: center;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+
+.feature-card:hover {
+  box-shadow: 0 0 12px 10px var(--kyma-color-primary-shadow)!important;
+}
+

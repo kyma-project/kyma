@@ -10,8 +10,10 @@ import kedaSidebar from '../docs/externalContent/keda-manager/docs/user/_sidebar
 import natsSidebar from '../docs/externalContent/nats-manager/docs/user/_sidebar';
 import serverlessSidebar from '../docs/externalContent/serverless-manager/docs/user/_sidebar';
 import telemetrySidebar from '../docs/externalContent/telemetry-manager/docs/user/_sidebar';
+import cliSidebar from '../docs/externalContent/cli/docs/user/_sidebar';
+import busolaSidebar from '../docs/externalContent/busola/docs/user/_sidebar';
 
-function getSearchConfig() {
+export function getSearchConfig() {
   return {
       provider: 'local',
       detailedView: true,
@@ -95,14 +97,15 @@ function makeSidebarAbsolutePath(sidebar, objectName) {
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
   srcDir: "docs",
-  title: "Kyma Project",
-  description: "**Kyma** `/'ki.ma/` Kyma is an opinionated set of Kubernetes-based modular building blocks, including all necessary capabilities to develop and run enterprise-grade cloud-native applications. It is the open path to the SAP ecosystem supporting business scenarios end-to-end.",
+  title: "Kyma",
+  description: "Kyma documentation",
   lastUpdated: true,
   ignoreDeadLinks: true,
   base: '/kyma/documentation/',
   assetsDir:'vite-assets',
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
+    logo: {src: '/assets/logo_icon.svg', width: 24, height: 24},
     nav: [
       { text: 'Release Notes', link: '/release-notes' },
       { text: 'Support & Contribution', link: '/support-contribution' },
@@ -133,8 +136,8 @@ export default defineConfig({
         text: 'User Interfaces',
         link: '/01-overview/ui/README',
         items: [
-          { text: 'Kyma Dashboard', link: '/busola/user/README' },
-          { text: 'Kyma CLI', link: '/cli/user/README' }
+          { text: 'Kyma Dashboard', link: '/externalContent/busola/docs/user/README.md', collapsed: true, items: makeSidebarAbsolutePath(busolaSidebar, 'busola') },
+          { text: 'Kyma CLI', link: '/externalContent/cli/docs/user/README.md', collapsed: true, items: makeSidebarAbsolutePath(cliSidebar, 'cli') }
         ]
       },
       {
@@ -147,7 +150,11 @@ export default defineConfig({
       },
       { text: 'Glossary', link: '/glossary' }
     ],
-
+    head: [[
+      'link',
+      {rel: 'icon', type: 'image/svg+xml', href: '/assets/logo.svg'}
+    ],['link', { rel: 'icon', href: '/assets/favicon.ico' }]
+    ],
     socialLinks: [{
         icon: {
           svg: '<svg aria-hidden="true" class="svg-icon iconLogoGlyphMd native native" width="32" height="37" viewBox="0 0 32 37"><path d="M26 33v-9h4v13H0V24h4v9h22Z" fill="#BCBBBB"></path><path d="m21.5 0-2.7 2 9.9 13.3 2.7-2L21.5 0ZM26 18.4 13.3 7.8l2.1-2.5 12.7 10.6-2.1 2.5ZM9.1 15.2l15 7 1.4-3-15-7-1.4 3Zm14 10.79.68-2.95-16.1-3.35L7 23l16.1 2.99ZM23 30H7v-3h16v3Z" fill="#F48024"></path></svg>'

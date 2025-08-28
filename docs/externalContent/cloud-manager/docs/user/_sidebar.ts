@@ -3,7 +3,7 @@ export default [
   { text: 'VPC Peering', link: './00-30-vpc-peering' },
   { text: 'Authorizing Cloud Manager in the Remote Cloud Provider', link: './00-31-vpc-peering-authorization' },
   { text: 'Redis', link: './00-40-redis' },
-  { text: 'Resources', link: './resources/README', collapsed: true },
+  { text: 'Resources', link: './resources/README' },
   { text: 'Tutorials', link: './tutorials/README', collapsed: true, items: [
     { text: 'Using NFS in Amazon Web Services', link: './tutorials/01-20-10-aws-nfs-volume' },
     { text: 'Using NFS in Google Cloud', link: './tutorials/01-20-20-gcp-nfs-volume' },
