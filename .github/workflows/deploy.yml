@@ -1,9 +1,9 @@
-name: Deploy VitePress site to GitHub Pages
+name: 📰 Deploy VitePress site to GitHub Pages
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *'  # Runs at 00:00 UTC every day
 
 permissions:
   contents: read
@@ -15,16 +15,74 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  copy-docs:
+    strategy:
+      fail-fast: false
+      matrix:
+        repository:
+          - btp-manager
+          - istio
+          - serverless-manager
+          - telemetry-manager
+          - eventing-manager
+          - api-gateway
+          - nats-manager
+          - application-connector-manager
+          - keda-manager
+          - cloud-manager
+          - docker-registry
+          - busola
+          - cli
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🗂️ Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🗂️ Checkout ${{matrix.repository}}
+        uses: actions/checkout@v4
+        with:
+          repository: kyma-project/${{matrix.repository}}
+          path: /${{matrix.repository}}
+
+      - name: 🚢 Copy to main repo
+        run: |
+          SOURCE_PATH="/${{matrix.repository}}/docs/user"
+          TARGET_PATH="./docs/externalContent/${{matrix.repository}}/docs/users"
+          SOURCE_PATH_ASSETS="/${{matrix.repository}}/docs/assets"
+          TARGET_PATH_ASSETS="./docs/externalContent/${{matrix.repository}}/docs/assets"
+          if [ -d "$SOURCE_PATH" ]; then
+            echo "📁 found in ${{matrix.repository}}, copy to $TARGET_PATH"
+            mkdir -p "$TARGET_PATH"
+            cp -rf "$SOURCE_PATH/" "$TARGET_PATH/"
+              if [ -d "$SOURCE_PATH_ASSETS" ]; then
+                echo "↳📁 found in ${{matrix.repository}}, copy to $TARGET_PATH_ASSETS"
+                mkdir -p "$TARGET_PATH_ASSETS"
+                cp -rf "$SOURCE_PATH_ASSETS/" "$TARGET_PATH_ASSETS/"
+              else
+                echo "↳🚫 no folder  docs/assets in ${{matrix.repository}}"
+              fi
+          else
+            echo "🚫 No folder docs/users in ${{matrix.repository}}"
+          fi
+
+      - name: 🛎️ Commit and push copied docs
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/externalContent
+          git commit -m "chore: update external docs from ${{matrix.repository}}" || echo "No changes to commit"
+          git push origin main
+
   build-and-deploy:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Checkout repository
+      - name: 🗂️ Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: 🪢 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -33,17 +91,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build VitePress site
+      - name: 🛠️ Build VitePress site
         run: npm run docs:build
 
-      - name: Configure GitHub Pages
+      - name: ⚙️ Configure GitHub Pages
         uses: actions/configure-pages@v5
 
-      - name: Upload build artifact
+      - name: 🚀 Upload build artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: .vitepress/dist
 
-      - name: Deploy to GitHub Pages
+      - name: 🔝 Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
