@@ -64,6 +64,13 @@ jobs:
           else
             echo "🚫 No folder docs/users in ${{matrix.repository}}"
           fi
+      
+      - name: 📦 Upload copied docs
+        uses: actions/upload-artifact@v3
+        with:
+          name: external-docs
+          path: docs/externalContent
+
 
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -73,6 +80,11 @@ jobs:
     steps:
       - name: 🗂️ Checkout repository
         uses: actions/checkout@v4
+        
+      - name: 📥 Download copied docs
+        uses: actions/download-artifact@v3
+        with:
+          name: external-docs
 
       - name: 🪢 Setup Node.js
         uses: actions/setup-node@v4
