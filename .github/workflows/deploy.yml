@@ -6,7 +6,7 @@ on:
     - cron: '0 0 * * *'  # Runs at 00:00 UTC every day
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -42,13 +42,13 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: kyma-project/${{matrix.repository}}
-          path: /${{matrix.repository}}
+          path: ${{matrix.repository}}
 
       - name: 🚢 Copy to main repo
         run: |
-          SOURCE_PATH="/${{matrix.repository}}/docs/user"
+          SOURCE_PATH="${{matrix.repository}}/docs/user"
           TARGET_PATH="./docs/externalContent/${{matrix.repository}}/docs/users"
-          SOURCE_PATH_ASSETS="/${{matrix.repository}}/docs/assets"
+          SOURCE_PATH_ASSETS="${{matrix.repository}}/docs/assets"
           TARGET_PATH_ASSETS="./docs/externalContent/${{matrix.repository}}/docs/assets"
           if [ -d "$SOURCE_PATH" ]; then
             echo "📁 found in ${{matrix.repository}}, copy to $TARGET_PATH"
@@ -64,14 +64,6 @@ jobs:
           else
             echo "🚫 No folder docs/users in ${{matrix.repository}}"
           fi
-
-      - name: 🛎️ Commit and push copied docs
-        run: |
-          git config --local user.name "github-actions[bot]"
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/externalContent
-          git commit -m "chore: update external docs from ${{matrix.repository}}" || echo "No changes to commit"
-          git push origin main
 
   build-and-deploy:
     runs-on: ubuntu-latest
