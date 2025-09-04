@@ -1,69 +1,59 @@
 #!/bin/bash
 
-# === CONFIGURAZIONE ===
-ORG="kyma-project"
-#TOKEN="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"
-PER_PAGE=100
-PAGE=1
-
-# === HEADERS ===
-#HEADER="Authorization: token $TOKEN"
-
-# === CREAZIONE CARTELLA ===
+ORG=kyma-project
+TARGET_DIR=docs/externalContent
 mkdir -p "$ORG"
+mkdir -p "$TARGET_DIR"
 cd "$ORG" || exit
 
-echo "Recupero repository da GitHub per l'organizzazione: $ORG..."
+echo '🔁 Cloning selected repositories...'
+REPOS=(
+  btp-manager
+  istio
+  serverless
+  telemetry-manager
+  eventing-manager
+  api-gateway
+  nats-manager
+  application-connector-manager
+  keda-manager
+  cloud-manager
+  docker-registry
+  busola
+  cli
+)
 
-while : ; do
-    RESPONSE=$(curl -s "https://api.github.com/orgs/$ORG/repos?per_page=$PER_PAGE&page=$PAGE")
-
-    # Estrai gli URL di clonazione usando jq
-    REPO_URLS=$(echo "$RESPONSE" | jq -r '.[].clone_url')
-
-    # Se non ci sono URL, termina
-    if [ -z "$REPO_URLS" ]; then
-        echo "Fine dei repository."
-        break
-    fi
-
-    # Clona ogni repository
-    while IFS= read -r REPO; do
-        echo "Clonando $REPO..."
-        git clone "$REPO"
-    done <<< "$REPO_URLS"
-
-    PAGE=$((PAGE + 1))
+for repo in "${REPOS[@]}"; do
+  echo "📥 Cloning https://github.com/$ORG/$repo.git"
+  git clone https://github.com/$ORG/$repo.git
 done
 
-echo "✅ Clonazione completata."
+cd ..
+echo '📂 Copying docs/user and docs/assets folders...'
+for repo in "${REPOS[@]}"; do
+  SOURCE_USER="$ORG/$repo/docs/user"
+  TARGET_USER="$TARGET_DIR/$repo/docs/user"
+  SOURCE_ASSETS="$ORG/$repo/docs/assets"
+  TARGET_ASSETS="$TARGET_DIR/$repo/docs/assets"
 
-# === ESTRAZIONE CARTELLE docs/user ===
-echo "🔍 Estrazione cartelle docs/user dai repository..."
+  if [ -d "$SOURCE_USER" ]; then
+    echo "📁 Copying $SOURCE_USER to $TARGET_USER"
+    mkdir -p "$TARGET_USER"
+    cp -r "$SOURCE_USER/" "$TARGET_USER/"
+  else
+    echo "🚫 No docs/user folder in $repo"
+  fi
 
-mkdir -p ../modules
-
-for dir in */ ; do
-    REPO_NAME="${dir%/}"
-    SOURCE_PATH="$REPO_NAME/docs/user"
-    TARGET_PATH="../modules/$REPO_NAME/docs/user"
-    SOURCE_PATH_ASSETS="$REPO_NAME/docs/assets"
-    TARGET_PATH_ASSETS="../modules/$REPO_NAME/docs/assets"
-
-    if [ -d "$SOURCE_PATH" ]; then
-        echo "📁 Trovata in $REPO_NAME, copio in modules/$REPO_NAME/docs/user"
-        mkdir -p "$TARGET_PATH"
-        cp -r "$SOURCE_PATH/" "$TARGET_PATH/"
-        if [ -d "$SOURCE_PATH_ASSETS" ]; then
-            echo "↳📁 Trovata in $REPO_NAME, copio in modules/$REPO_NAME/docs/assets"
-            mkdir -p "$TARGET_PATH_ASSETS"
-            cp -r "$SOURCE_PATH_ASSETS/" "$TARGET_PATH_ASSETS/"
-        else
-            echo "↳🚫 Nessuna cartella docs/assets in $REPO_NAME"
-        fi
-    else
-        echo "🚫 Nessuna cartella docs/users in $REPO_NAME"
-    fi
+  if [ -d "$SOURCE_ASSETS" ]; then
+    echo "📁 Copying $SOURCE_ASSETS to $TARGET_ASSETS"
+    mkdir -p "$TARGET_ASSETS"
+    cp -r "$SOURCE_ASSETS/" "$TARGET_ASSETS/"
+  else
+    echo "🚫 No docs/assets folder in $repo"
+  fi
 done
 
-echo "✅ Operazione completata."
+echo '🧹 Cleanup: remove all cloned repositories...'
+rm -rf "$ORG"
+
+echo '✅ Operation completed.'

@@ -22,7 +22,7 @@ jobs:
         repository:
           - btp-manager
           - istio
-          - serverless-manager
+          - serverless
           - telemetry-manager
           - eventing-manager
           - api-gateway
