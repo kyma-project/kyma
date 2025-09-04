@@ -68,23 +68,94 @@ jobs:
       - name: 📦 Upload copied docs
         uses: actions/upload-artifact@v4
         with:
-          name: external-docs
-          path: docs/externalContent
-
+          name: external-docs-${{matrix.repository}}
+          path: externalContent/${{matrix.repository}}
 
   build-and-deploy:
+    name: 🛠️ Build and Deploy VitePress
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    needs: copy-docs
     steps:
       - name: 🗂️ Checkout repository
         uses: actions/checkout@v4
         
       - name: 📥 Download copied docs
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v3
         with:
-          name: external-docs
+          name: external-docs-btp-manager
+          path: docs/externalContent/btp-manager
+
+      - name: 📥 Download copied docs
+        uses: actions/download-artifact@v3
+        with:
+          name: external-docs-istio
+          path: docs/externalContent/istio
+
+      - name: 📥 Download copied docs
+        uses: actions/download-artifact@v3
+        with:
+          name: external-docs-serverless-manager
+          path: docs/externalContent/serverless-manager
+
+      - name: 📥 Download copied docs
+        uses: actions/download-artifact@v3
+        with:
+          name: external-docs-telemetry-manager
+          path: docs/externalContent/telemetry-manager
+
+      - name: 📥 Download copied docs
+        uses: actions/download-artifact@v3
+        with:
+          name: external-docs-eventing-manager
+          path: docs/externalContent/eventing-manager
+
+      - name: 📥 Download copied docs
+        uses: actions/download-artifact@v3
+        with:
+          name: external-docs-api-gateway
+          path: docs/externalContent/api-gateway
+
+      - name: 📥 Download copied docs
+        uses: actions/download-artifact@v3
+        with:
+          name: external-docs-nats-manager
+          path: docs/externalContent/nats-manager
+
+      - name: 📥 Download copied docs
+        uses: actions/download-artifact@v3
+        with:
+          name: external-docs-application-connector-manager
+          path: docs/externalContent/application-connector-manager
+
+      - name: 📥 Download copied docs
+        uses: actions/download-artifact@v3
+        with:
+          name: external-docs-keda-manager
+          path: docs/externalContent/keda-manager
+
+      - name: 📥 Download copied docs
+        uses: actions/download-artifact@v3
+        with:
+          name: external-docs-cloud-manager
+          path: docs/externalContent/cloud-manager
+
+      - name: 📥 Download copied docs
+        uses: actions/download-artifact@v3
+        with:
+          name: external-docs-docker-registry
+          path: docs/externalContent/docker-registry
+
+      - name: 📥 Download copied docs
+        uses: actions/download-artifact@v3
+        with:
+          name: external-docs-busola
+          path: docs/externalContent/busola
+
+      - name: 📥 Download copied docs
+        uses: actions/download-artifact@v3
+        with:
+          name: external-docs-cli
+          path: docs/externalContent/cli
 
       - name: 🪢 Setup Node.js
         uses: actions/setup-node@v4
