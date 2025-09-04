@@ -65,14 +65,6 @@ jobs:
             echo "🚫 No folder docs/users in ${{matrix.repository}}"
           fi
 
-      - name: 🛎️ Commit and push copied docs
-        run: |
-          git config --local user.name "github-actions[bot]"
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/externalContent
-          git commit -m "chore: update external docs from ${{matrix.repository}}" || echo "No changes to commit"
-          git push origin main
-
   build-and-deploy:
     runs-on: ubuntu-latest
     environment:
