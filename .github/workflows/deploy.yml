@@ -66,7 +66,7 @@ jobs:
           fi
       
       - name: 📦 Upload copied docs
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: external-docs
           path: docs/externalContent
@@ -82,7 +82,7 @@ jobs:
         uses: actions/checkout@v4
         
       - name: 📥 Download copied docs
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: external-docs
 
