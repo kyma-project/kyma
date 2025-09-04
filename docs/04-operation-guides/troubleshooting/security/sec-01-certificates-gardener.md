@@ -30,7 +30,7 @@ The result describes the reason for the failure of issuing a domain SSL certific
 
 <!-- tabs:start -->
 
-#### **Error During the Installation**
+#### Error During the Installation
 
 1. Make sure the provided domain name is proper and meets the Gardener requirements.
 
@@ -41,7 +41,7 @@ The result describes the reason for the failure of issuing a domain SSL certific
     dns.gardener.cloud/dnsnames=*.{DOMAIN}
     ```
 
-#### **Error After the Installation**
+#### Error After the Installation
 
 You can create a new Certificate resource applying suggestions from the error message to request a new domain SSL certificate. Follow these steps:
 

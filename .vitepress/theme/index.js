@@ -1,9 +1,15 @@
 import DefaultTheme from 'vitepress/theme'
-import DynamicContentLoader from '../components/DynamicContentLoader.vue'
+import Layout from './Layout.vue'
+import './style.css'
+import Tabs from '../components/Tabs.vue'
+import Tab from '../components/Tab.vue'
 
 export default {
   ...DefaultTheme,
-  enhanceApp({ app }) {
-    app.component('DynamicContentLoader', DynamicContentLoader)
+  Layout,
+  enhanceApp({ app, router, siteData }) {
+    app.component('Tabs', Tabs)
+    app.component('Tab', Tab)
+    // You can register global components here if needed
   }
 }
