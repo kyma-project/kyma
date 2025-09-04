@@ -43,10 +43,10 @@ jobs:
 
       - name: 🚢 Copy for main repo
         run: |
-          SOURCE_PATH="${{matrix.repository}}/docs/user"
-          TARGET_PATH="./docs/externalContent/${{matrix.repository}}/docs/user"
-          SOURCE_PATH_ASSETS="${{matrix.repository}}/docs/assets"
-          TARGET_PATH_ASSETS="./docs/externalContent/${{matrix.repository}}/docs/assets"
+          SOURCE_PATH="${{matrix.repository}}/docs/user/"
+          TARGET_PATH="./docs/externalContent/${{matrix.repository}}/docs/"
+          SOURCE_PATH_ASSETS="${{matrix.repository}}/docs/assets/"
+          TARGET_PATH_ASSETS="./docs/externalContent/${{matrix.repository}}/docs/assets/"
           if [ -d "$SOURCE_PATH" ]; then
             echo "📁 found in ${{matrix.repository}}, copy to $TARGET_PATH"
             mkdir -p "$TARGET_PATH"
