@@ -1,9 +1,0 @@
-
-sidecar:
-  datasources:
-    enabled: true
-  dashboards:
-    enabled: true
-
-podLabels:
-  sidecar.istio.io/inject: "true"
