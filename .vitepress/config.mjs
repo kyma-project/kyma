@@ -1,18 +1,18 @@
 import { defineConfig } from 'vitepress'
 import tabsPlugin from './plugins/tabs-plugin';
-import istioSidebar from '../docs/externalContent/istio/docs/user/_sidebar';
-import apiGatewaySidebar from '../docs/externalContent/api-gateway/docs/user/_sidebar';
-import sapBtpOperatorSidebar from '../docs/externalContent/btp-manager/docs/user/_sidebar';
-import applicationConnectorSidebar from '../docs/externalContent/application-connector-manager/docs/user/_sidebar';
-import cloudManagerSidebar from '../docs/externalContent/cloud-manager/docs/user/_sidebar';
-import dockerRegistrySidebar from '../docs/externalContent/docker-registry/docs/user/_sidebar';
-import eventingSidebar from '../docs/externalContent/eventing-manager/docs/user/_sidebar';
-import kedaSidebar from '../docs/externalContent/keda-manager/docs/user/_sidebar';
-import natsSidebar from '../docs/externalContent/nats-manager/docs/user/_sidebar';
-import serverlessSidebar from '../docs/externalContent/serverless-manager/docs/user/_sidebar';
-import telemetrySidebar from '../docs/externalContent/telemetry-manager/docs/user/_sidebar';
-import cliSidebar from '../docs/externalContent/cli/docs/user/_sidebar';
-import busolaSidebar from '../docs/externalContent/busola/docs/user/_sidebar';
+import istioSidebar from '../docs/external-content/istio/docs/user/_sidebar';
+import apiGatewaySidebar from '../docs/external-content/api-gateway/docs/user/_sidebar';
+import sapBtpOperatorSidebar from '../docs/external-content/btp-manager/docs/user/_sidebar';
+import applicationConnectorSidebar from '../docs/external-content/application-connector-manager/docs/user/_sidebar';
+import cloudManagerSidebar from '../docs/external-content/cloud-manager/docs/user/_sidebar';
+import dockerRegistrySidebar from '../docs/external-content/docker-registry/docs/user/_sidebar';
+import eventingSidebar from '../docs/external-content/eventing-manager/docs/user/_sidebar';
+import kedaSidebar from '../docs/external-content/keda-manager/docs/user/_sidebar';
+import natsSidebar from '../docs/external-content/nats-manager/docs/user/_sidebar';
+import serverlessSidebar from '../docs/external-content/serverless-manager/docs/user/_sidebar';
+import telemetrySidebar from '../docs/external-content/telemetry-manager/docs/user/_sidebar';
+import cliSidebar from '../docs/external-content/cli/docs/user/_sidebar';
+import busolaSidebar from '../docs/external-content/busola/docs/user/_sidebar';
 
 export function getSearchConfig() {
   return {
@@ -84,7 +84,7 @@ function makeSidebarAbsolutePath(sidebar, objectName) {
     const newItem = { ...item };
 
     if (item.link) {
-      newItem.link = `/externalContent/${objectName}/docs/user/${item.link.replace('./', '')}`;
+      newItem.link = `/external-content/${objectName}/docs/user/${item.link.replace('./', '')}`;
     }
 
     if (item.items) {
@@ -119,25 +119,25 @@ export default defineConfig({
         text: 'Modules',
         link: '/06-modules/README',
         items: [
-          { text: 'Istio', link: '/externalContent/istio/docs/user/README.md', collapsed: true, items: makeSidebarAbsolutePath(istioSidebar, 'istio')},
-          { text: 'API Gateway', link: '/externalContent/api-gateway/docs/user/README.md', collapsed: true, items: makeSidebarAbsolutePath(apiGatewaySidebar, 'api-gateway')},
-          { text: 'SAP BTP Operator', link: '/externalContent/btp-manager/docs/user/README.md', collapsed: true, items: makeSidebarAbsolutePath(sapBtpOperatorSidebar, 'btp-manager')},
-          { text: 'Application Connector', link: '/externalContent/application-connector-manager/docs/user/README.md', collapsed: true, items: makeSidebarAbsolutePath(applicationConnectorSidebar, 'application-connector-manager')},
-          { text: 'Cloud Manager', link: '/externalContent/cloud-manager/docs/user/README.md', collapsed: true, items: makeSidebarAbsolutePath(cloudManagerSidebar, 'cloud-manager')},
-          { text: 'Docker Registry', link: '/externalContent/docker-registry/docs/user/README.md', collapsed: true, items: makeSidebarAbsolutePath(dockerRegistrySidebar, 'docker-registry')},
-          { text: 'Eventing', link: '/externalContent/eventing-manager/docs/user/README.md', collapsed: true, items: makeSidebarAbsolutePath(eventingSidebar, 'eventing-manager')},
-          { text: 'Keda', link: '/externalContent/keda-manager/docs/user/README.md', collapsed: true, items: makeSidebarAbsolutePath(kedaSidebar, 'keda-manager')},
-          { text: 'NATS', link: '/externalContent/nats-manager/docs/user/README.md', collapsed: true, items: makeSidebarAbsolutePath(natsSidebar, 'nats-manager')},
-          { text: 'Serverless', link: '/externalContent/serverless-manager/docs/user/README.md', collapsed: true, items: makeSidebarAbsolutePath(serverlessSidebar, 'serverless-manager')},
-          { text: 'Telemetry', link: '/externalContent/telemetry-manager/docs/user/README.md', collapsed: true, items: makeSidebarAbsolutePath(telemetrySidebar, 'telemetry-manager')}
+          { text: 'Istio', link: '/external-content/istio/docs/user/README.md', collapsed: true, items: makeSidebarAbsolutePath(istioSidebar, 'istio')},
+          { text: 'API Gateway', link: '/external-content/api-gateway/docs/user/README.md', collapsed: true, items: makeSidebarAbsolutePath(apiGatewaySidebar, 'api-gateway')},
+          { text: 'SAP BTP Operator', link: '/external-content/btp-manager/docs/user/README.md', collapsed: true, items: makeSidebarAbsolutePath(sapBtpOperatorSidebar, 'btp-manager')},
+          { text: 'Application Connector', link: '/external-content/application-connector-manager/docs/user/README.md', collapsed: true, items: makeSidebarAbsolutePath(applicationConnectorSidebar, 'application-connector-manager')},
+          { text: 'Cloud Manager', link: '/external-content/cloud-manager/docs/user/README.md', collapsed: true, items: makeSidebarAbsolutePath(cloudManagerSidebar, 'cloud-manager')},
+          { text: 'Docker Registry', link: '/external-content/docker-registry/docs/user/README.md', collapsed: true, items: makeSidebarAbsolutePath(dockerRegistrySidebar, 'docker-registry')},
+          { text: 'Eventing', link: '/external-content/eventing-manager/docs/user/README.md', collapsed: true, items: makeSidebarAbsolutePath(eventingSidebar, 'eventing-manager')},
+          { text: 'Keda', link: '/external-content/keda-manager/docs/user/README.md', collapsed: true, items: makeSidebarAbsolutePath(kedaSidebar, 'keda-manager')},
+          { text: 'NATS', link: '/external-content/nats-manager/docs/user/README.md', collapsed: true, items: makeSidebarAbsolutePath(natsSidebar, 'nats-manager')},
+          { text: 'Serverless', link: '/external-content/serverless-manager/docs/user/README.md', collapsed: true, items: makeSidebarAbsolutePath(serverlessSidebar, 'serverless-manager')},
+          { text: 'Telemetry', link: '/external-content/telemetry-manager/docs/user/README.md', collapsed: true, items: makeSidebarAbsolutePath(telemetrySidebar, 'telemetry-manager')}
         ]
       },
       {
         text: 'User Interfaces',
         link: '/01-overview/ui/README',
         items: [
-          { text: 'Kyma Dashboard', link: '/externalContent/busola/docs/user/README.md', collapsed: true, items: makeSidebarAbsolutePath(busolaSidebar, 'busola') },
-          { text: 'Kyma CLI', link: '/externalContent/cli/docs/user/README.md', collapsed: true, items: makeSidebarAbsolutePath(cliSidebar, 'cli') }
+          { text: 'Kyma Dashboard', link: '/external-content/busola/docs/user/README.md', collapsed: true, items: makeSidebarAbsolutePath(busolaSidebar, 'busola') },
+          { text: 'Kyma CLI', link: '/external-content/cli/docs/user/README.md', collapsed: true, items: makeSidebarAbsolutePath(cliSidebar, 'cli') }
         ]
       },
       {

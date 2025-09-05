@@ -14,7 +14,7 @@ This directory contains tools, such as linters, that help to maintain the source
 
 Import the external (Modules') documentation by executing the script `copy_external_content.sh` from the folder `hack`.
 
-This process will copy all the `docs/user` folder and `docs/assets` folder from the repositories specified in the sh file. Everything will be copied to the folder `externalContent`; all the existing files will be overritten.
+This process will copy all the `docs/user` folder and `docs/assets` folder from the repositories specified in the sh file. Everything will be copied to the folder `external-content`; all the existing files will be overritten.
 
 #### Run the Server in Development Mode
 
