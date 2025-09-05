@@ -6,7 +6,7 @@ on:
     - cron: '0 0 * * *'  # Runs at 00:00 UTC every day
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -22,7 +22,7 @@ jobs:
         repository:
           - btp-manager
           - istio
-          - serverless-manager
+          - serverless
           - telemetry-manager
           - eventing-manager
           - api-gateway
@@ -35,21 +35,18 @@ jobs:
           - cli
     runs-on: ubuntu-latest
     steps:
-      - name: 🗂️ Checkout repository
-        uses: actions/checkout@v4
-
       - name: 🗂️ Checkout ${{matrix.repository}}
         uses: actions/checkout@v4
         with:
           repository: kyma-project/${{matrix.repository}}
           path: ${{matrix.repository}}
 
-      - name: 🚢 Copy to main repo
+      - name: 🚢 Copy for main repo
         run: |
-          SOURCE_PATH="${{matrix.repository}}/docs/user"
-          TARGET_PATH="./docs/externalContent/${{matrix.repository}}/docs/users"
-          SOURCE_PATH_ASSETS="${{matrix.repository}}/docs/assets"
-          TARGET_PATH_ASSETS="./docs/externalContent/${{matrix.repository}}/docs/assets"
+          SOURCE_PATH="${{matrix.repository}}/docs/user/"
+          TARGET_PATH="./docs/externalContent/${{matrix.repository}}/docs/"
+          SOURCE_PATH_ASSETS="${{matrix.repository}}/docs/assets/"
+          TARGET_PATH_ASSETS="./docs/externalContent/${{matrix.repository}}/docs/"
           if [ -d "$SOURCE_PATH" ]; then
             echo "📁 found in ${{matrix.repository}}, copy to $TARGET_PATH"
             mkdir -p "$TARGET_PATH"
@@ -64,23 +61,98 @@ jobs:
           else
             echo "🚫 No folder docs/users in ${{matrix.repository}}"
           fi
-
-      - name: 🛎️ Commit and push copied docs
-        run: |
-          git config --local user.name "github-actions[bot]"
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/externalContent
-          git commit -m "chore: update external docs from ${{matrix.repository}}" || echo "No changes to commit"
-          git push origin main
+      
+      - name: 📦 Upload copied docs
+        uses: actions/upload-artifact@v4
+        with:
+          name: external-docs-${{matrix.repository}}
+          path: ./docs/externalContent/${{matrix.repository}}
 
   build-and-deploy:
+    name: 🛠️ Build and Deploy VitePress
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    needs: copy-docs
     steps:
       - name: 🗂️ Checkout repository
         uses: actions/checkout@v4
+        
+      - name: 📥 Download copied docs
+        uses: actions/download-artifact@v4
+        with:
+          name: external-docs-btp-manager
+          path: docs/externalContent/btp-manager
+
+      - name: 📥 Download copied docs
+        uses: actions/download-artifact@v4
+        with:
+          name: external-docs-istio
+          path: docs/externalContent/istio
+
+      - name: 📥 Download copied docs
+        uses: actions/download-artifact@v4
+        with:
+          name: external-docs-serverless-manager
+          path: docs/externalContent/serverless-manager
+
+      - name: 📥 Download copied docs
+        uses: actions/download-artifact@v4
+        with:
+          name: external-docs-telemetry-manager
+          path: docs/externalContent/telemetry-manager
+
+      - name: 📥 Download copied docs
+        uses: actions/download-artifact@v4
+        with:
+          name: external-docs-eventing-manager
+          path: docs/externalContent/eventing-manager
+
+      - name: 📥 Download copied docs
+        uses: actions/download-artifact@v4
+        with:
+          name: external-docs-api-gateway
+          path: docs/externalContent/api-gateway
+
+      - name: 📥 Download copied docs
+        uses: actions/download-artifact@v4
+        with:
+          name: external-docs-nats-manager
+          path: docs/externalContent/nats-manager
+
+      - name: 📥 Download copied docs
+        uses: actions/download-artifact@v4
+        with:
+          name: external-docs-application-connector-manager
+          path: docs/externalContent/application-connector-manager
+
+      - name: 📥 Download copied docs
+        uses: actions/download-artifact@v4
+        with:
+          name: external-docs-keda-manager
+          path: docs/externalContent/keda-manager
+
+      - name: 📥 Download copied docs
+        uses: actions/download-artifact@v4
+        with:
+          name: external-docs-cloud-manager
+          path: docs/externalContent/cloud-manager
+
+      - name: 📥 Download copied docs
+        uses: actions/download-artifact@v4
+        with:
+          name: external-docs-docker-registry
+          path: docs/externalContent/docker-registry
+
+      - name: 📥 Download copied docs
+        uses: actions/download-artifact@v4
+        with:
+          name: external-docs-busola
+          path: docs/externalContent/busola
+
+      - name: 📥 Download copied docs
+        uses: actions/download-artifact@v4
+        with:
+          name: external-docs-cli
+          path: docs/externalContent/cli
 
       - name: 🪢 Setup Node.js
         uses: actions/setup-node@v4

@@ -75,3 +75,7 @@ installation/versions-overrides.env
 .vitepress/dist/
 .DS_Store
 node_modules/
+# Ignore folder docs/externalContent to avoid including external content in the repo
+docs/externalContent/
+# ...but include all the _sidebars.ts files in docs/externalContent
+!docs/externalContent/**/_sidebars.ts
