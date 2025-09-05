@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ORG=kyma-project
-TARGET_DIR=docs/externalContent
+TARGET_DIR=../docs/externalContent
 mkdir -p "$ORG"
 mkdir -p "$TARGET_DIR"
 cd "$ORG" || exit
