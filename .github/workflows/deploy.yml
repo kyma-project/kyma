@@ -44,9 +44,9 @@ jobs:
       - name: 🚢 Copy for main repo
         run: |
           SOURCE_PATH="${{matrix.repository}}/docs/user/"
-          TARGET_PATH="./docs/externalContent/${{matrix.repository}}/docs/"
+          TARGET_PATH="./docs/external-content/${{matrix.repository}}/docs/"
           SOURCE_PATH_ASSETS="${{matrix.repository}}/docs/assets/"
-          TARGET_PATH_ASSETS="./docs/externalContent/${{matrix.repository}}/docs/"
+          TARGET_PATH_ASSETS="./docs/external-content/${{matrix.repository}}/docs/"
           if [ -d "$SOURCE_PATH" ]; then
             echo "📁 found in ${{matrix.repository}}, copy to $TARGET_PATH"
             mkdir -p "$TARGET_PATH"
@@ -66,7 +66,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: external-docs-${{matrix.repository}}
-          path: ./docs/externalContent/${{matrix.repository}}
+          path: ./docs/external-content/${{matrix.repository}}
 
   build-and-deploy:
     name: 🛠️ Build and Deploy VitePress
@@ -80,79 +80,79 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: external-docs-btp-manager
-          path: docs/externalContent/btp-manager
+          path: docs/external-content/btp-manager
 
       - name: 📥 Download copied docs
         uses: actions/download-artifact@v4
         with:
           name: external-docs-istio
-          path: docs/externalContent/istio
+          path: docs/external-content/istio
 
       - name: 📥 Download copied docs
         uses: actions/download-artifact@v4
         with:
           name: external-docs-serverless-manager
-          path: docs/externalContent/serverless-manager
+          path: docs/external-content/serverless-manager
 
       - name: 📥 Download copied docs
         uses: actions/download-artifact@v4
         with:
           name: external-docs-telemetry-manager
-          path: docs/externalContent/telemetry-manager
+          path: docs/external-content/telemetry-manager
 
       - name: 📥 Download copied docs
         uses: actions/download-artifact@v4
         with:
           name: external-docs-eventing-manager
-          path: docs/externalContent/eventing-manager
+          path: docs/external-content/eventing-manager
 
       - name: 📥 Download copied docs
         uses: actions/download-artifact@v4
         with:
           name: external-docs-api-gateway
-          path: docs/externalContent/api-gateway
+          path: docs/external-content/api-gateway
 
       - name: 📥 Download copied docs
         uses: actions/download-artifact@v4
         with:
           name: external-docs-nats-manager
-          path: docs/externalContent/nats-manager
+          path: docs/external-content/nats-manager
 
       - name: 📥 Download copied docs
         uses: actions/download-artifact@v4
         with:
           name: external-docs-application-connector-manager
-          path: docs/externalContent/application-connector-manager
+          path: docs/external-content/application-connector-manager
 
       - name: 📥 Download copied docs
         uses: actions/download-artifact@v4
         with:
           name: external-docs-keda-manager
-          path: docs/externalContent/keda-manager
+          path: docs/external-content/keda-manager
 
       - name: 📥 Download copied docs
         uses: actions/download-artifact@v4
         with:
           name: external-docs-cloud-manager
-          path: docs/externalContent/cloud-manager
+          path: docs/external-content/cloud-manager
 
       - name: 📥 Download copied docs
         uses: actions/download-artifact@v4
         with:
           name: external-docs-docker-registry
-          path: docs/externalContent/docker-registry
+          path: docs/external-content/docker-registry
 
       - name: 📥 Download copied docs
         uses: actions/download-artifact@v4
         with:
           name: external-docs-busola
-          path: docs/externalContent/busola
+          path: docs/external-content/busola
 
       - name: 📥 Download copied docs
         uses: actions/download-artifact@v4
         with:
           name: external-docs-cli
-          path: docs/externalContent/cli
+          path: docs/external-content/cli
 
       - name: 🪢 Setup Node.js
         uses: actions/setup-node@v4
