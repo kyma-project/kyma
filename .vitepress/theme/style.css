@@ -239,9 +239,9 @@ span.home-kyma-phonetic {
 }
 
 .VPFeature a {
-  color: var(--kyma-color-primary); /* Change to your preferred link color */
-  text-decoration: none; /* Removes underline */
-  text-decoration: underline; /* Adds underline on hover */
+  color: var(--kyma-color-primary); 
+  text-decoration: none; 
+  text-decoration: underline; 
 }
 
 .VPFeature a:hover {
