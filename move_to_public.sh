@@ -28,7 +28,6 @@ find "$ROOT_DIR" -type f \
   ! -name "*.scss" \
   ! -name "*.html" \
   ! -name "config.*" \
-  ! -name ".DS_Store" \
   ! -name "$SCRIPT_NAME" \
   | while read -r file; do
     # Skip files in root directory unless they are inside /assets/
