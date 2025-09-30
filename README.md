@@ -47,20 +47,20 @@ Read the [`CONTRIBUTING.md`](CONTRIBUTING.md) document that includes the contrib
 The following companies use Kyma:
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/kyma-project/website/refs/heads/main/content/adopters/logos/sap.svg" alt="SAP" width="120" height="70" />
-  <img src="https://raw.githubusercontent.com/kyma-project/website/refs/heads/main/content/adopters/logos/accenture.svg" alt="Accenture" width="300" height="70" />
-  <img src="https://raw.githubusercontent.com/kyma-project/website/refs/heads/main/content/adopters/logos/netconomy.svg" alt="NETCONOMY" width="300" height="70" />
-  <img src="https://raw.githubusercontent.com/kyma-project/website/refs/heads/main/content/adopters/logos/neteleven.svg" alt="neteleven" width="250" height="60" />
+  <img src="./docs/assets/adopters/logos/sap.svg" alt="SAP" width="120" height="70" />
+  <img src="./docs/assets/adopters/logos/accenture.svg" alt="Accenture" width="300" height="70" />
+  <img src="./docs/assets/adopters/logos/netconomy.svg" alt="NETCONOMY" width="300" height="70" />
+  <img src="./docs/assets/adopters/logos/neteleven.svg" alt="neteleven" width="250" height="60" />
 </p>
 <p align="center">
-  <img src="https://raw.githubusercontent.com/kyma-project/website/refs/heads/main/content/adopters/logos/arithnea.svg" alt="ARITHNEA" width="300" height="130" />
-  <img src="https://raw.githubusercontent.com/kyma-project/website/refs/heads/main/content/adopters/logos/digital_lights.svg" alt="Digital Lights" width="200" height="130" />
-  <img src="https://raw.githubusercontent.com/kyma-project/website/refs/heads/main/content/adopters/logos/FAIR_LOGO_HEADER.svg" alt="FAIR" width="300" height="130" />
-  <img src="https://raw.githubusercontent.com/kyma-project/website/refs/heads/main/content/adopters/logos/Sybit-Logo.svg" alt="FAIR" width="300" height="130" />
+  <img src="./docs/assets/adopters/logos/arithnea.svg" alt="ARITHNEA" width="300" height="130" />
+  <img src="./docs/assets/adopters/logos/digital_lights.svg" alt="Digital Lights" width="200" height="130" />
+  <img src="./docs/assets/adopters/logos/FAIR_LOGO_HEADER.svg" alt="FAIR" width="300" height="130" />
+  <img src="./docs/assets/adopters/logos/Sybit-Logo.svg" alt="FAIR" width="300" height="130" />
 </p>
 <p align="center">
-  <img src="https://raw.githubusercontent.com/kyma-project/website/refs/heads/main/content/adopters/logos/arineo.svg" alt="Arineo" width="250" height="40" />
-  <img src="https://raw.githubusercontent.com/kyma-project/website/refs/heads/main/content/adopters/logos/dotsource.svg" alt="dotSource" width="250" height="40" />
+  <img src="./docs/assets/adopters/logos/arineo.svg" alt="Arineo" width="250" height="40" />
+  <img src="./docs/assets/adopters/logos/dotsource.svg" alt="dotSource" width="250" height="40" />
 </p>
 
 ## Join Us

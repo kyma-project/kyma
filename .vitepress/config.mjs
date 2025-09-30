@@ -28,25 +28,12 @@ export function getSearchConfig() {
             // Configure how fields are extracted from documents
             extractField: (document, fieldName) => {
               // Extract frontmatter metadata for search
-              if (fieldName === 'categories' && document.frontmatter?.categories) {
-                return Array.isArray(document.frontmatter.categories)
-                    ? document.frontmatter.categories.join(' ')
-                    : document.frontmatter.categories;
+              const frontmatterValue = getFrontmatterFieldValue(document, fieldName);
+              if (frontmatterValue !== undefined) {
+                return frontmatterValue;
               }
-              if (fieldName === 'tags' && document.frontmatter?.tags) {
-                return Array.isArray(document.frontmatter.tags)
-                    ? document.frontmatter.tags.join(' ')
-                    : document.frontmatter.tags;
-              }
-              if (fieldName === 'description' && document.frontmatter?.description) {
-                return document.frontmatter.description;
-              }
-              if (fieldName === 'page_synonyms' && document.frontmatter?.page_synonyms) {
-                return Array.isArray(document.frontmatter.page_synonyms)
-                    ? document.frontmatter.page_synonyms.join(' ')
-                    : document.frontmatter.page_synonyms;
-              }
-              // Extract default fields
+
+              // Fallback to default field
               return document[fieldName];
             },
             // Custom tokenizer to handle special characters in technical docs
@@ -78,6 +65,27 @@ export function getSearchConfig() {
       }
     }
 }
+
+
+function getFrontmatterFieldValue(document, fieldName) {
+  const frontmatter = document?.frontmatter;
+  if (!frontmatter || !frontmatter[fieldName]) return undefined;
+
+  const fieldsToJoin = ['categories', 'tags', 'page_synonyms'];
+
+  if (fieldsToJoin.includes(fieldName)) {
+    return Array.isArray(frontmatter[fieldName])
+      ? frontmatter[fieldName].join(' ')
+      : frontmatter[fieldName];
+  }
+
+  if (fieldName === 'description') {
+    return frontmatter.description;
+  }
+
+  return undefined;
+}
+
 
 function makeSidebarAbsolutePath(sidebar, objectName) {
   return sidebar.map(item => {

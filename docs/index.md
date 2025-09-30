@@ -8,6 +8,7 @@ hero:
   tagline: <span class="home-kyma-heavy-bold">Kyma</span> <span class="home-kyma-phonetic">/'ki.ma/</span> is an opinionated set of Kubernetes-based modular building blocks, including all necessary capabilities to develop and run enterprise-grade cloud-native applications. It is the open path to the SAP ecosystem supporting business scenarios end-to-end.
   image:
     src: /assets/logo_icon_background.svg
+    width: 320px
     alt: Kyma logo
   actions:
     - theme: brand
@@ -19,52 +20,52 @@ hero:
 features_additonal_description: Who is using <span class="home-kyma-heavy-bold">Kyma</span>?
 features_additonal:
   - icon: 
-      src: https://raw.githubusercontent.com/kyma-project/website/refs/heads/main/content/adopters/logos/sap.svg
+      src: /assets/adopters/logos/sap.svg
       width: 180px
       height: 70px
     title: SAP
   - icon: 
-      src: https://raw.githubusercontent.com/kyma-project/website/refs/heads/main/content/adopters/logos/accenture.svg
+      src: /assets/adopters/logos/accenture.svg
       width: 180px
       height: 70px
     title: Accenture
   - icon:
-      src: https://raw.githubusercontent.com/kyma-project/website/refs/heads/main/content/adopters/logos/netconomy.svg
+      src: /assets/adopters/logos/netconomy.svg
       width: 180px
       height: 70px
     title: NETCONOMY
   - icon: 
-      src: https://raw.githubusercontent.com/kyma-project/website/refs/heads/main/content/adopters/logos/neteleven.svg
+      src: /assets/adopters/logos/neteleven.svg
       width: 180px
       height: 70px
     title: Neteleven
   - icon:
-      src: https://raw.githubusercontent.com/kyma-project/website/refs/heads/main/content/adopters/logos/arithnea.svg
+      src: /assets/adopters/logos/arithnea.svg
       width: 180px
       height: 70px
     title: Arithnea
   - icon: 
-      src: https://raw.githubusercontent.com/kyma-project/website/refs/heads/main/content/adopters/logos/digital_lights.svg
+      src: /assets/adopters/logos/digital_lights.svg
       width: 180px
       height: 70px
     title: Digital Lights
   - icon:
-      src: https://raw.githubusercontent.com/kyma-project/website/refs/heads/main/content/adopters/logos/FAIR_LOGO_HEADER.svg
+      src: /assets/adopters/logos/FAIR_LOGO_HEADER.svg
       width: 180px
       height: 70px
     title: FAIR
   - icon: 
-      src: https://raw.githubusercontent.com/kyma-project/website/refs/heads/main/content/adopters/logos/Sybit-Logo.svg
+      src: /assets/adopters/logos/Sybit-Logo.svg
       width: 180px
       height: 70px
     title: Sysbit
   - icon:
-      src: https://raw.githubusercontent.com/kyma-project/website/refs/heads/main/content/adopters/logos/arineo.svg
+      src: /assets/adopters/logos/arineo.svg
       width: 180px
       height: 70px
     title: Arineo
   - icon: 
-      src: https://raw.githubusercontent.com/kyma-project/website/refs/heads/main/content/adopters/logos/dotsource.svg
+      src: /assets/adopters/logos/dotsource.svg
       width: 180px
       height: 70px
     title: dotSource
