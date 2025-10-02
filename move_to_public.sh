@@ -32,11 +32,11 @@ find "$ROOT_DIR" -type f \
   ! -name "$SCRIPT_NAME" \
   | while read -r file; do
     # Skip files in root directory unless they are inside /assets/
-    if [[ "$(dirname "$file")" == "." && "$file" != "$ASSETS_DIR"* ]]; then
+    if [[ "$(dirname "$file")" == "$ROOT_DIR" && "$file" != "$ASSETS_DIR"* ]]; then
       continue
     fi
 
-    rel_path="${file#$ROOT_DIR/}"
+    rel_path="${file#$ROOT_DIR}"
     target_path="$PUBLIC_DIR/$rel_path"
 
     mkdir -p "$(dirname "$target_path")"
