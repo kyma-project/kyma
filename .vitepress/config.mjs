@@ -13,6 +13,7 @@ import serverlessSidebar from '../docs/external-content/serverless-manager/docs/
 import telemetrySidebar from '../docs/external-content/telemetry-manager/docs/user/_sidebar';
 import cliSidebar from '../docs/external-content/cli/docs/user/_sidebar';
 import busolaSidebar from '../docs/external-content/busola/docs/user/_sidebar';
+import registryProxySidebar from '../docs/external-content/registry-proxy/docs/user/_sidebar';
 
 export function getSearchConfig() {
   return {
@@ -137,7 +138,8 @@ export default defineConfig({
           { text: 'Keda', link: '/external-content/keda-manager/docs/user/README.md', collapsed: true, items: makeSidebarAbsolutePath(kedaSidebar, 'keda-manager')},
           { text: 'NATS', link: '/external-content/nats-manager/docs/user/README.md', collapsed: true, items: makeSidebarAbsolutePath(natsSidebar, 'nats-manager')},
           { text: 'Serverless', link: '/external-content/serverless-manager/docs/user/README.md', collapsed: true, items: makeSidebarAbsolutePath(serverlessSidebar, 'serverless-manager')},
-          { text: 'Telemetry', link: '/external-content/telemetry-manager/docs/user/README.md', collapsed: true, items: makeSidebarAbsolutePath(telemetrySidebar, 'telemetry-manager')}
+          { text: 'Telemetry', link: '/external-content/telemetry-manager/docs/user/README.md', collapsed: true, items: makeSidebarAbsolutePath(telemetrySidebar, 'telemetry-manager')},
+          { text: 'Registry Proxy', link: '/external-content/registry-proxy/docs/user/README.md', collapsed: true, items: makeSidebarAbsolutePath(registryProxySidebar, 'registry-proxy')}
         ]
       },
       {

@@ -33,6 +33,7 @@ jobs:
           - docker-registry
           - busola
           - cli
+          - registry-proxy
     runs-on: ubuntu-latest
     steps:
       - name: 🗂️ Checkout ${{matrix.repository}}
@@ -154,13 +155,19 @@ jobs:
           name: external-docs-cli
           path: docs/external-content/cli
 
+      - name: 📥 Download copied docs
+        uses: actions/download-artifact@v4
+        with:
+          name: external-docs-registry-proxy
+          path: docs/external-content/registry-proxy
+
       - name: 🪢 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
 
-      - name: Install dependencies
+      - name: 💾 Install dependencies
         run: npm ci
 
       - name: 🛠️ Build VitePress site

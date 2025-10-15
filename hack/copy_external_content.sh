@@ -21,6 +21,7 @@ REPOS=(
   docker-registry
   busola
   cli
+  registry-proxy
 )
 
 for repo in "${REPOS[@]}"; do
