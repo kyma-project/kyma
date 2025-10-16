@@ -3,62 +3,10 @@ name: 📰 Deploy VitePress site to GitHub Pages
 on:
   workflow_dispatch:
     inputs:
-      btp_manager_branch:
-        description: 'Branch for btp-manager'
+      repository_branches:
+        description: 'JSON with repository branches: {"btp-manager":"main","istio":"release-1.20"} or [{"repository":"btp-manager","branch":"main"}]'
         required: false
-        default: 'main'
-      istio_branch:
-        description: 'Branch for istio'
-        required: false
-        default: 'main'
-      serverless_branch:
-        description: 'Branch for serverless'
-        required: false
-        default: 'main'
-      telemetry_manager_branch:
-        description: 'Branch for telemetry-manager'
-        required: false
-        default: 'main'
-      eventing_manager_branch:
-        description: 'Branch for eventing-manager'
-        required: false
-        default: 'main'
-      api_gateway_branch:
-        description: 'Branch for api-gateway'
-        required: false
-        default: 'main'
-      nats_manager_branch:
-        description: 'Branch for nats-manager'
-        required: false
-        default: 'main'
-      application_connector_manager_branch:
-        description: 'Branch for application-connector-manager'
-        required: false
-        default: 'main'
-      keda_manager_branch:
-        description: 'Branch for keda-manager'
-        required: false
-        default: 'main'
-      cloud_manager_branch:
-        description: 'Branch for cloud-manager'
-        required: false
-        default: 'main'
-      docker_registry_branch:
-        description: 'Branch for docker-registry'
-        required: false
-        default: 'main'
-      busola_branch:
-        description: 'Branch for busola'
-        required: false
-        default: 'main'
-      cli_branch:
-        description: 'Branch for cli'
-        required: false
-        default: 'main'
-      registry_proxy_branch:
-        description: 'Branch for registry-proxy'
-        required: false
-        default: 'main'
+        default: '{}'
   schedule:
     - cron: '0 0 * * *'  # Runs at 00:00 UTC every day
 
@@ -96,84 +44,65 @@ jobs:
       - name: 🔧 Determine branch for ${{matrix.repository}}
         id: get-branch
         run: |
-          case "${{matrix.repository}}" in
-            "btp-manager")
-              BRANCH="${{ inputs.btp_manager_branch }}"
-              if [ -z "$BRANCH" ]; then BRANCH="${{ vars.BTP_MANAGER_BRANCH }}"; fi
-              if [ -z "$BRANCH" ]; then BRANCH="main"; fi
-              ;;
-            "istio")
-              BRANCH="${{ inputs.istio_branch }}"
-              if [ -z "$BRANCH" ]; then BRANCH="${{ vars.ISTIO_BRANCH }}"; fi
-              if [ -z "$BRANCH" ]; then BRANCH="main"; fi
-              ;;
-            "serverless")
-              BRANCH="${{ inputs.serverless_branch }}"
-              if [ -z "$BRANCH" ]; then BRANCH="${{ vars.SERVERLESS_BRANCH }}"; fi
-              if [ -z "$BRANCH" ]; then BRANCH="main"; fi
-              ;;
-            "telemetry-manager")
-              BRANCH="${{ inputs.telemetry_manager_branch }}"
-              if [ -z "$BRANCH" ]; then BRANCH="${{ vars.TELEMETRY_MANAGER_BRANCH }}"; fi
-              if [ -z "$BRANCH" ]; then BRANCH="main"; fi
-              ;;
-            "eventing-manager")
-              BRANCH="${{ inputs.eventing_manager_branch }}"
-              if [ -z "$BRANCH" ]; then BRANCH="${{ vars.EVENTING_MANAGER_BRANCH }}"; fi
-              if [ -z "$BRANCH" ]; then BRANCH="main"; fi
-              ;;
-            "api-gateway")
-              BRANCH="${{ inputs.api_gateway_branch }}"
-              if [ -z "$BRANCH" ]; then BRANCH="${{ vars.API_GATEWAY_BRANCH }}"; fi
-              if [ -z "$BRANCH" ]; then BRANCH="main"; fi
-              ;;
-            "nats-manager")
-              BRANCH="${{ inputs.nats_manager_branch }}"
-              if [ -z "$BRANCH" ]; then BRANCH="${{ vars.NATS_MANAGER_BRANCH }}"; fi
-              if [ -z "$BRANCH" ]; then BRANCH="main"; fi
-              ;;
-            "application-connector-manager")
-              BRANCH="${{ inputs.application_connector_manager_branch }}"
-              if [ -z "$BRANCH" ]; then BRANCH="${{ vars.APPLICATION_CONNECTOR_MANAGER_BRANCH }}"; fi
-              if [ -z "$BRANCH" ]; then BRANCH="main"; fi
-              ;;
-            "keda-manager")
-              BRANCH="${{ inputs.keda_manager_branch }}"
-              if [ -z "$BRANCH" ]; then BRANCH="${{ vars.KEDA_MANAGER_BRANCH }}"; fi
-              if [ -z "$BRANCH" ]; then BRANCH="main"; fi
-              ;;
-            "cloud-manager")
-              BRANCH="${{ inputs.cloud_manager_branch }}"
-              if [ -z "$BRANCH" ]; then BRANCH="${{ vars.CLOUD_MANAGER_BRANCH }}"; fi
-              if [ -z "$BRANCH" ]; then BRANCH="main"; fi
-              ;;
-            "docker-registry")
-              BRANCH="${{ inputs.docker_registry_branch }}"
-              if [ -z "$BRANCH" ]; then BRANCH="${{ vars.DOCKER_REGISTRY_BRANCH }}"; fi
-              if [ -z "$BRANCH" ]; then BRANCH="main"; fi
-              ;;
-            "busola")
-              BRANCH="${{ inputs.busola_branch }}"
-              if [ -z "$BRANCH" ]; then BRANCH="${{ vars.BUSOLA_BRANCH }}"; fi
-              if [ -z "$BRANCH" ]; then BRANCH="main"; fi
-              ;;
-            "cli")
-              BRANCH="${{ inputs.cli_branch }}"
-              if [ -z "$BRANCH" ]; then BRANCH="${{ vars.CLI_BRANCH }}"; fi
-              if [ -z "$BRANCH" ]; then BRANCH="main"; fi
-              ;;
-            "registry-proxy")
-              BRANCH="${{ inputs.registry_proxy_branch }}"
-              if [ -z "$BRANCH" ]; then BRANCH="${{ vars.REGISTRY_PROXY_BRANCH }}"; fi
-              if [ -z "$BRANCH" ]; then BRANCH="main"; fi
-              ;;
-            *)
-              BRANCH="main"
-              ;;
-          esac
+          REPO="${{matrix.repository}}"
+          JSON_INPUT="${{ inputs.repository_branches }}"
+          
+          # Default branch
+          BRANCH="main"
+          
+          # Try to parse JSON input first
+          if [ -n "$JSON_INPUT" ] && [ "$JSON_INPUT" != "{}" ]; then
+            echo "📄 Parsing JSON input: $JSON_INPUT"
+            
+            # Check if it's object format: {"repo":"branch"}
+            if echo "$JSON_INPUT" | jq -e "has(\"$REPO\")" > /dev/null 2>&1; then
+              BRANCH=$(echo "$JSON_INPUT" | jq -r ".[\"$REPO\"]")
+              echo "✅ Found branch '$BRANCH' for $REPO in JSON (object format)"
+            else
+              # Check if it's array format: [{"repository":"repo","branch":"branch"}]
+              BRANCH_FROM_ARRAY=$(echo "$JSON_INPUT" | jq -r ".[] | select(.repository == \"$REPO\") | .branch" 2>/dev/null || echo "")
+              if [ -n "$BRANCH_FROM_ARRAY" ] && [ "$BRANCH_FROM_ARRAY" != "null" ]; then
+                BRANCH="$BRANCH_FROM_ARRAY"
+                echo "✅ Found branch '$BRANCH' for $REPO in JSON (array format)"
+              else
+                echo "ℹ️  Repository $REPO not found in JSON, checking GitHub variables..."
+              fi
+            fi
+          else
+            echo "ℹ️  No JSON input provided, checking GitHub variables..."
+          fi
+          
+          # Fallback to GitHub Variables if not found in JSON
+          if [ "$BRANCH" = "main" ]; then
+            REPO_VAR=$(echo "$REPO" | tr '[:lower:]' '[:upper:]' | tr '-' '_')_BRANCH
+            case "$REPO" in
+              "btp-manager") VAR_BRANCH="${{ vars.BTP_MANAGER_BRANCH }}" ;;
+              "istio") VAR_BRANCH="${{ vars.ISTIO_BRANCH }}" ;;
+              "serverless") VAR_BRANCH="${{ vars.SERVERLESS_BRANCH }}" ;;
+              "telemetry-manager") VAR_BRANCH="${{ vars.TELEMETRY_MANAGER_BRANCH }}" ;;
+              "eventing-manager") VAR_BRANCH="${{ vars.EVENTING_MANAGER_BRANCH }}" ;;
+              "api-gateway") VAR_BRANCH="${{ vars.API_GATEWAY_BRANCH }}" ;;
+              "nats-manager") VAR_BRANCH="${{ vars.NATS_MANAGER_BRANCH }}" ;;
+              "application-connector-manager") VAR_BRANCH="${{ vars.APPLICATION_CONNECTOR_MANAGER_BRANCH }}" ;;
+              "keda-manager") VAR_BRANCH="${{ vars.KEDA_MANAGER_BRANCH }}" ;;
+              "cloud-manager") VAR_BRANCH="${{ vars.CLOUD_MANAGER_BRANCH }}" ;;
+              "docker-registry") VAR_BRANCH="${{ vars.DOCKER_REGISTRY_BRANCH }}" ;;
+              "busola") VAR_BRANCH="${{ vars.BUSOLA_BRANCH }}" ;;
+              "cli") VAR_BRANCH="${{ vars.CLI_BRANCH }}" ;;
+              "registry-proxy") VAR_BRANCH="${{ vars.REGISTRY_PROXY_BRANCH }}" ;;
+              *) VAR_BRANCH="" ;;
+            esac
+            
+            if [ -n "$VAR_BRANCH" ]; then
+              BRANCH="$VAR_BRANCH"
+              echo "✅ Using branch '$BRANCH' from GitHub variable for $REPO"
+            else
+              echo "ℹ️  Using default branch 'main' for $REPO"
+            fi
+          fi
           
           echo "branch=$BRANCH" >> $GITHUB_OUTPUT
-          echo "Using branch '$BRANCH' for repository '${{matrix.repository}}'"
+          echo "🎯 Final decision: Using branch '$BRANCH' for repository '$REPO'"
 
       - name: '🗂️ Checkout ${{matrix.repository}} (branch: ${{steps.get-branch.outputs.branch}})'
         uses: actions/checkout@v4
