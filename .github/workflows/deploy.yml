@@ -175,7 +175,7 @@ jobs:
           echo "branch=$BRANCH" >> $GITHUB_OUTPUT
           echo "Using branch '$BRANCH' for repository '${{matrix.repository}}'"
 
-      - name: 🗂️ Checkout ${{matrix.repository}} (branch: ${{steps.get-branch.outputs.branch}})
+      - name: '🗂️ Checkout ${{matrix.repository}} (branch: ${{steps.get-branch.outputs.branch}})'
         uses: actions/checkout@v4
         with:
           repository: kyma-project/${{matrix.repository}}
