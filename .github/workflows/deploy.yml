@@ -237,7 +237,7 @@ jobs:
           cache: 'npm'
 
       - name: 💾 Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: 🛠️ Build VitePress site
         run: npm run docs:build
