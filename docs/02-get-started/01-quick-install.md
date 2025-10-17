@@ -108,13 +108,13 @@ To get started with Kyma, let's quickly install it with specific modules first.
   kubectl rollout restart deployment -n kube-system coredns
   ```
 
-4. To manage Kyma using graphical user interface (GUI), open Kyma dashboard:
+<!-- 4. To manage Kyma using graphical user interface (GUI), open Kyma dashboard:
 
   ```bash
   kyma dashboard
   ```
-  <!-- markdown-link-check-disable-next-line -->
-  This command takes you to your Kyma dashboard under [`http://localhost:3001/`](http://localhost:3001/).
+  
+  This command takes you to your Kyma dashboard under [`http://localhost:3001/`](http://localhost:3001/). -->
 
 ## Related Links
 
