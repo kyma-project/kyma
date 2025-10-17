@@ -45,7 +45,8 @@
           '/docker-registry/user/',
           '/cli/user/',
           '/busola/user/',
-          '/registry-proxy/user/'
+          '/registry-proxy/user/',
+          '/community-modules/user/'
         ]
       },
       name: 'Kyma Project',
@@ -73,6 +74,7 @@
         '/cli/(.*)': 'https://raw.githubusercontent.com/kyma-project/cli/main/docs/$1',
         '/busola/(.*)': 'https://raw.githubusercontent.com/kyma-project/busola/main/docs/$1',
         '/registry-proxy/(.*)': 'https://raw.githubusercontent.com/kyma-project/registry-proxy/main/docs/$1',
+        '/community-modules/(.*)': 'https://raw.githubusercontent.com/kyma-project/community-modules/main/docs/$1',
       },
       plugins: [
         function (hook, vm) {
