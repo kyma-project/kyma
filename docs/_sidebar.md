@@ -2,7 +2,6 @@
 <!-- markdown-link-check-disable -->
 * [Quick Install](/02-get-started/01-quick-install.md)
 * [Modules](/06-modules/README.md)
-* [Community Modules](/community-modules/user/README.md)
   * [Istio](/istio/user/README.md)
   * [API Gateway](/api-gateway/user/README.md)
   * [SAP BTP Operator](/btp-manager/user/README.md)
@@ -15,6 +14,7 @@
   * [Serverless](/serverless-manager/user/README.md)
   * [Telemetry](/telemetry-manager/user/README.md)
   * [Registry Proxy](/registry-proxy/user/README.md)
+* [Community Modules](/community-modules/user/README.md)
 * [User Interfaces](/01-overview/ui/README.md)
   * [Kyma Dashboard](/busola/user/README.md)
   * [Kyma CLI](/cli/user/README.md)
