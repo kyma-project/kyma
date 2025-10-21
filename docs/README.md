@@ -1,6 +1,6 @@
 # What Is Kyma
 
-> [!WARNING]
+> [!IMPORTANT]
 > This is the open-source documentation for the Kyma project. If you are a managed offering user of **SAP BTP, Kyma runtime**, see [Kyma Environment](https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/468c2f3c3ca24c2c8497ef9f83154c44.html) on SAP Help Portal.
 
 Kyma is an opinionated set of Kubernetes-based modular building blocks, including all necessary capabilities to develop and run enterprise-grade cloud-native applications.
