@@ -43,29 +43,36 @@
  *   in custom container, badges, etc.
  * -------------------------------------------------------------------------- */
 
-
 @font-face {
-    font-family: "72";
-    src: url("https://cdn.jsdelivr.net/npm/@sap-theming/theming-base-content/content/Base/baseLib/baseTheme/fonts/72-Regular-full.woff") format("woff");
-    font-weight: normal;
-    font-style: normal;
+  font-family: '72';
+  src: url('https://cdn.jsdelivr.net/npm/@sap-theming/theming-base-content/content/Base/baseLib/baseTheme/fonts/72-Regular-full.woff')
+    format('woff');
+  font-weight: normal;
+  font-style: normal;
 }
 
 @font-face {
-    font-family: "72";
-    src: url("https://cdn.jsdelivr.net/npm/@sap-theming/theming-base-content/content/Base/baseLib/baseTheme/fonts/72-Bold-full.woff") format("woff");
-    font-weight: 700;
-    font-style: normal;
+  font-family: '72';
+  src: url('https://cdn.jsdelivr.net/npm/@sap-theming/theming-base-content/content/Base/baseLib/baseTheme/fonts/72-Bold-full.woff')
+    format('woff');
+  font-weight: 700;
+  font-style: normal;
 }
 
 @font-face {
-    font-family: "72";
-    src: url("https://cdn.jsdelivr.net/npm/@sap-theming/theming-base-content/content/Base/baseLib/baseTheme/fonts/72-Light-full.woff") format("woff");
-    font-weight: 300;
-    font-style: normal;
+  font-family: '72';
+  src: url('https://cdn.jsdelivr.net/npm/@sap-theming/theming-base-content/content/Base/baseLib/baseTheme/fonts/72-Light-full.woff')
+    format('woff');
+  font-weight: 300;
+  font-style: normal;
 }
-html, button, input, optgroup, select, textarea {
-    font-family: "72";
+html,
+button,
+input,
+optgroup,
+select,
+textarea {
+  font-family: '72';
 }
 
 :root {
@@ -151,15 +158,14 @@ html, button, input, optgroup, select, textarea {
 }
 
 span.home-kyma-heavy-bold {
-    font-weight: bold;
-    color: var(--kyma-color-primary);
+  font-weight: bold;
+  color: var(--kyma-color-primary);
 }
 
 span.home-kyma-phonetic {
-    font-style: italic;
-    color: #0195FF;
+  font-style: italic;
+  color: #0195ff;
 }
-
 
 /**
  * Component: Custom Block
@@ -192,7 +198,7 @@ span.home-kyma-phonetic {
     grid-template-columns: repeat(3, 1fr);
     gap: 2rem;
     width: 100%;
-    max-width: none; 
+    max-width: none;
   }
 
   .VPHomeFeatures .item {
@@ -204,44 +210,43 @@ span.home-kyma-phonetic {
   }
 
   .VPHomeFeatures .box {
-  position: relative;
-  overflow: hidden;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  background-color: var(--vp-c-bg);
-  transition: transform 0.6s ease;
-}
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    background-color: var(--vp-c-bg);
+    transition: transform 0.6s ease;
+  }
 
-.VPHomeFeatures .box::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    var(--kyma-color-primary-dark) 0%,
-    var(--kyma-color-primary) 60%,
-    transparent 100%
-  );
-  opacity: 0;
-  transition: opacity 0.6s ease;
-  filter: blur(150px);
-  z-index: 0;
-}
+  .VPHomeFeatures .box::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      var(--kyma-color-primary-dark) 0%,
+      var(--kyma-color-primary) 60%,
+      transparent 100%
+    );
+    opacity: 0;
+    transition: opacity 0.6s ease;
+    filter: blur(150px);
+    z-index: 0;
+  }
 
-.VPHomeFeatures .box:hover::before {
-  opacity: 1;
-}
+  .VPHomeFeatures .box:hover::before {
+    opacity: 1;
+  }
 
-.VPHomeFeatures .box > * {
-  position: relative;
-  z-index: 1;
-}
-
+  .VPHomeFeatures .box > * {
+    position: relative;
+    z-index: 1;
+  }
 }
 
 .VPFeature a {
-  color: var(--kyma-color-primary); 
-  text-decoration: none; 
-  text-decoration: underline; 
+  color: var(--kyma-color-primary);
+  text-decoration: none;
+  text-decoration: underline;
 }
 
 .VPFeature a:hover {
@@ -291,8 +296,6 @@ span.home-kyma-phonetic {
   margin: 0 auto;
 }
 
-
 .feature-card:hover {
-  box-shadow: 0 0 12px 10px var(--kyma-color-primary-shadow)!important;
+  box-shadow: 0 0 12px 10px var(--kyma-color-primary-shadow) !important;
 }
-

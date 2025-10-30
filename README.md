@@ -27,7 +27,6 @@ Kyma modules offer various functionalities, such as:
 - Collection and shipment of telemetry data to observability backends using the [Telemetry module](https://kyma-project.io/#/telemetry-manager/user/README)
 - CLI supported by the intuitive UI through which you can connect your application to a Kubernetes cluster
 
-
 Go to the [Kyma project website](https://kyma-project.io/) to learn more about our project, its features, and Kyma modules.
 
 ## Installation
@@ -66,6 +65,7 @@ The following companies use Kyma:
 ## Join Us
 
 Kyma team is located mostly in Poland and Germany. See the open job positions for both locations:
+
 - [Gliwice, Poland](https://jobs.sap.com/search/?createNewAlert=false&q=%23kymaopensource&optionsFacetsDD_department=&optionsFacetsDD_customfield3=&optionsFacetsDD_country=&locationsearch=)
 - [Munich, Germany](https://jobs.sap.com/search/?createNewAlert=false&q=%23kyma&optionsFacetsDD_department=&optionsFacetsDD_customfield3=&optionsFacetsDD_country=&locationsearch=munich)
 

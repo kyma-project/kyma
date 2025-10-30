@@ -16,6 +16,6 @@ Port forwarding failed because the local port is already reserved by another pro
 
 There are several ways to fix this:
 
-* Kill the other process listening on the same port.
-* Choose another (unused) local port.
-* Let `kubectl` choose a random unused local port for you (see the [Kubernetes port forwarding documentation](https://kubernetes.io/docs/tasks/access-application-cluster/port-forward-access-application-cluster/#let-kubectl-choose-local-port)).
+- Kill the other process listening on the same port.
+- Choose another (unused) local port.
+- Let `kubectl` choose a random unused local port for you (see the [Kubernetes port forwarding documentation](https://kubernetes.io/docs/tasks/access-application-cluster/port-forward-access-application-cluster/#let-kubectl-choose-local-port)).

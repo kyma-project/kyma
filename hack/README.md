@@ -33,4 +33,5 @@ Execute the following commands:
 npm run docs:build
 npm run docs:preview
 ```
+
 **Note:** The `npm run docs:build` will copy all the unreferenced assets and non-grphical files (like scripts, documents, etc.) to the `docs/public` [directory](https://vitepress.dev/guide/asset-handling#the-public-directory) to grent to get them included in the `dist` folder of the project.

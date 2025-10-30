@@ -12,17 +12,17 @@ MD044:
   code_blocks: false
   html_elements: false
   names:
-  - Kyma
-  - Kubernetes
-  - ConfigMap
-  - CronJob
-  - CustomResourceDefinition
-  - Ingress
-  - Node
-  - PodPreset
-  - Pod
-  - ProwJob
-  - Secret
-  - ServiceBinding
-  - ServiceClass
-  - ServiceInstance
+    - Kyma
+    - Kubernetes
+    - ConfigMap
+    - CronJob
+    - CustomResourceDefinition
+    - Ingress
+    - Node
+    - PodPreset
+    - Pod
+    - ProwJob
+    - Secret
+    - ServiceBinding
+    - ServiceClass
+    - ServiceInstance
