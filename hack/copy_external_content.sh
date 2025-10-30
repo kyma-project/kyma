@@ -22,6 +22,7 @@ REPOS=(
   busola
   cli
   registry-proxy
+  community-modules
 )
 
 for repo in "${REPOS[@]}"; do

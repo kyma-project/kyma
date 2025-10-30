@@ -143,6 +143,10 @@ export default defineConfig({
         ]
       },
       {
+        text: 'Community Modules',
+        link: '/external-content/community-modules/docs/user/README.md'
+      },
+      {
         text: 'User Interfaces',
         link: '/01-overview/ui/README',
         items: [

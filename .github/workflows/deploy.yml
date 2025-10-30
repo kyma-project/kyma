@@ -39,6 +39,7 @@ jobs:
           - busola
           - cli
           - registry-proxy
+          - community-modules
     runs-on: ubuntu-latest
     steps:
       - name: 🔧 Determine branch for ${{matrix.repository}}
@@ -229,6 +230,12 @@ jobs:
         with:
           name: external-docs-registry-proxy
           path: docs/external-content/registry-proxy
+
+      - name: 📥 Download copied docs
+        uses: actions/download-artifact@v4
+        with:
+          name: external-docs-community-modules
+          path: docs/external-content/community-modules
 
       - name: 🪢 Setup Node.js
         uses: actions/setup-node@v4
