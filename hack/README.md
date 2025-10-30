@@ -20,7 +20,7 @@ This process will copy all the `docs/user` folder and `docs/assets` folder from 
 
 Execute the following commands:
 
-```
+```bash
 npm install
 npm run docs:dev
 ```
@@ -29,9 +29,17 @@ npm run docs:dev
 
 Execute the following commands:
 
-```
+```bash
 npm run docs:build
 npm run docs:preview
 ```
 
 **Note:** The `npm run docs:build` will copy all the unreferenced assets and non-grphical files (like scripts, documents, etc.) to the `docs/public` [directory](https://vitepress.dev/guide/asset-handling#the-public-directory) to grent to get them included in the `dist` folder of the project.
+
+### Execute Prettier
+
+Prettier will help to maintain a proper formatting. The project is already configured to use this formatter automatically in case you are using Visual Studio Code (leveraging the VSCode Prettier plugin). Unfortunately it's running prettier at commit time on git; if you are not using git integrated in VSCode to do commits, you will need to execute it manually by running:
+
+```bash
+npx prettier --config ./.prettierrc --ignore-path ./.prettierignore --write '**/*.{ts,tsx,mjs,js,jsx,json,html,css,yaml,md}'
+```
