@@ -144,119 +144,125 @@ jobs:
     runs-on: ubuntu-latest
     needs: copy-docs
     steps:
-      - name: 🗂️ Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/download-artifact@v5
+        with:
+          path: docs/external-content
+      - name: Display structure of downloaded files
+        run: ls -R docs/external-content
+    #  steps:
+    #   - name: 🗂️ Checkout repository
+    #     uses: actions/checkout@v4
         
-      - name: 📥 Download copied docs
-        uses: actions/download-artifact@v4
-        with:
-          name: external-docs-btp-manager
-          path: docs/external-content/btp-manager
+    #   - name: 📥 Download copied docs
+    #     uses: actions/download-artifact@v4
+    #     with:
+    #       name: external-docs-btp-manager
+    #       path: docs/external-content/btp-manager
 
-      - name: 📥 Download copied docs
-        uses: actions/download-artifact@v4
-        with:
-          name: external-docs-istio
-          path: docs/external-content/istio
+    #   - name: 📥 Download copied docs
+    #     uses: actions/download-artifact@v4
+    #     with:
+    #       name: external-docs-istio
+    #       path: docs/external-content/istio
 
-      - name: 📥 Download copied docs
-        uses: actions/download-artifact@v4
-        with:
-          name: external-docs-serverless
-          path: docs/external-content/serverless
+    #   - name: 📥 Download copied docs
+    #     uses: actions/download-artifact@v4
+    #     with:
+    #       name: external-docs-serverless
+    #       path: docs/external-content/serverless
 
-      - name: 📥 Download copied docs
-        uses: actions/download-artifact@v4
-        with:
-          name: external-docs-telemetry-manager
-          path: docs/external-content/telemetry-manager
+    #   - name: 📥 Download copied docs
+    #     uses: actions/download-artifact@v4
+    #     with:
+    #       name: external-docs-telemetry-manager
+    #       path: docs/external-content/telemetry-manager
 
-      - name: 📥 Download copied docs
-        uses: actions/download-artifact@v4
-        with:
-          name: external-docs-eventing-manager
-          path: docs/external-content/eventing-manager
+    #   - name: 📥 Download copied docs
+    #     uses: actions/download-artifact@v4
+    #     with:
+    #       name: external-docs-eventing-manager
+    #       path: docs/external-content/eventing-manager
 
-      - name: 📥 Download copied docs
-        uses: actions/download-artifact@v4
-        with:
-          name: external-docs-api-gateway
-          path: docs/external-content/api-gateway
+    #   - name: 📥 Download copied docs
+    #     uses: actions/download-artifact@v4
+    #     with:
+    #       name: external-docs-api-gateway
+    #       path: docs/external-content/api-gateway
 
-      - name: 📥 Download copied docs
-        uses: actions/download-artifact@v4
-        with:
-          name: external-docs-nats-manager
-          path: docs/external-content/nats-manager
+    #   - name: 📥 Download copied docs
+    #     uses: actions/download-artifact@v4
+    #     with:
+    #       name: external-docs-nats-manager
+    #       path: docs/external-content/nats-manager
 
-      - name: 📥 Download copied docs
-        uses: actions/download-artifact@v4
-        with:
-          name: external-docs-application-connector-manager
-          path: docs/external-content/application-connector-manager
+    #   - name: 📥 Download copied docs
+    #     uses: actions/download-artifact@v4
+    #     with:
+    #       name: external-docs-application-connector-manager
+    #       path: docs/external-content/application-connector-manager
 
-      - name: 📥 Download copied docs
-        uses: actions/download-artifact@v4
-        with:
-          name: external-docs-keda-manager
-          path: docs/external-content/keda-manager
+    #   - name: 📥 Download copied docs
+    #     uses: actions/download-artifact@v4
+    #     with:
+    #       name: external-docs-keda-manager
+    #       path: docs/external-content/keda-manager
 
-      - name: 📥 Download copied docs
-        uses: actions/download-artifact@v4
-        with:
-          name: external-docs-cloud-manager
-          path: docs/external-content/cloud-manager
+    #   - name: 📥 Download copied docs
+    #     uses: actions/download-artifact@v4
+    #     with:
+    #       name: external-docs-cloud-manager
+    #       path: docs/external-content/cloud-manager
 
-      - name: 📥 Download copied docs
-        uses: actions/download-artifact@v4
-        with:
-          name: external-docs-docker-registry
-          path: docs/external-content/docker-registry
+    #   - name: 📥 Download copied docs
+    #     uses: actions/download-artifact@v4
+    #     with:
+    #       name: external-docs-docker-registry
+    #       path: docs/external-content/docker-registry
 
-      - name: 📥 Download copied docs
-        uses: actions/download-artifact@v4
-        with:
-          name: external-docs-busola
-          path: docs/external-content/busola
+    #   - name: 📥 Download copied docs
+    #     uses: actions/download-artifact@v4
+    #     with:
+    #       name: external-docs-busola
+    #       path: docs/external-content/busola
 
-      - name: 📥 Download copied docs
-        uses: actions/download-artifact@v4
-        with:
-          name: external-docs-cli
-          path: docs/external-content/cli
+    #   - name: 📥 Download copied docs
+    #     uses: actions/download-artifact@v4
+    #     with:
+    #       name: external-docs-cli
+    #       path: docs/external-content/cli
 
-      - name: 📥 Download copied docs
-        uses: actions/download-artifact@v4
-        with:
-          name: external-docs-registry-proxy
-          path: docs/external-content/registry-proxy
+    #   - name: 📥 Download copied docs
+    #     uses: actions/download-artifact@v4
+    #     with:
+    #       name: external-docs-registry-proxy
+    #       path: docs/external-content/registry-proxy
 
-      - name: 📥 Download copied docs
-        uses: actions/download-artifact@v4
-        with:
-          name: external-docs-community-modules
-          path: docs/external-content/community-modules
+    #   - name: 📥 Download copied docs
+    #     uses: actions/download-artifact@v4
+    #     with:
+    #       name: external-docs-community-modules
+    #       path: docs/external-content/community-modules
 
-      - name: 🪢 Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
+    #   - name: 🪢 Setup Node.js
+    #     uses: actions/setup-node@v4
+    #     with:
+    #       node-version: 20
+    #       cache: 'npm'
 
-      - name: 💾 Install dependencies
-        run: npm install
+    #   - name: 💾 Install dependencies
+    #     run: npm install
 
-      - name: 🛠️ Build VitePress site
-        run: npm run docs:build
+    #   - name: 🛠️ Build VitePress site
+    #     run: npm run docs:build
 
-      - name: ⚙️ Configure GitHub Pages
-        uses: actions/configure-pages@v5
+    #   - name: ⚙️ Configure GitHub Pages
+    #     uses: actions/configure-pages@v5
 
-      - name: 🚀 Upload build artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: .vitepress/dist
+    #   - name: 🚀 Upload build artifact
+    #     uses: actions/upload-pages-artifact@v3
+    #     with:
+    #       path: .vitepress/dist
 
-      - name: 🔝 Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+    #   - name: 🔝 Deploy to GitHub Pages
+    #     id: deployment
+    #     uses: actions/deploy-pages@v4
