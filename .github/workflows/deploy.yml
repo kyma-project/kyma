@@ -145,15 +145,15 @@ jobs:
     runs-on: ubuntu-latest
     needs: copy-docs
     steps:
+      - name: 🗂️ Checkout repository
+        uses: actions/checkout@v4
+        
       - name: 📥 Download copied docs
         uses: actions/download-artifact@v5
         with:
           path: docs/external-content
       - name: Display structure of downloaded files
         run: ls -R docs/external-content
-    
-      - name: 🗂️ Checkout repository
-        uses: actions/checkout@v4
         
     #   - name: 📥 Download copied docs
     #     uses: actions/download-artifact@v4
