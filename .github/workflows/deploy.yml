@@ -21,6 +21,7 @@ concurrency:
 
 jobs:
   copy-docs:
+    name: 📋 Copy doc files from external repositories
     strategy:
       fail-fast: false
       matrix:
@@ -150,9 +151,9 @@ jobs:
           path: docs/external-content
       - name: Display structure of downloaded files
         run: ls -R docs/external-content
-    #  steps:
-    #   - name: 🗂️ Checkout repository
-    #     uses: actions/checkout@v4
+    
+      - name: 🗂️ Checkout repository
+        uses: actions/checkout@v4
         
     #   - name: 📥 Download copied docs
     #     uses: actions/download-artifact@v4
