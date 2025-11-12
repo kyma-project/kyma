@@ -81,7 +81,7 @@ Contains all VitePress configuration files for the Kyma project:
   - Excludes common development files (`*.md`, `*.ts`, `*.js`, `*.vue`, `*.css`, config files, etc.)
   - Skips VitePress internal directories (`.vitepress`, `Node_modules`, `.git`, `.github`)
   - Copies qualifying files to `./docs/public/` maintaining directory structure
-  - Specifically handles entire `/assets/` folder copying to public directory
+  - Specifically handles the entire `/assets/` folder copying to the public directory
   - Provides console output showing file movement operations
   - Creates necessary target directories automatically
 
