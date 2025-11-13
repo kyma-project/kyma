@@ -33,3 +33,6 @@ heading_capitalization.js @kyma-project/technical-writers
 /modules @pbochynski @kyma-project/Jellyfish
 
 /hack/table-gen @k15r @kyma-project/kyma-steering-committee
+
+# VitePress configuration
+.vitepress/config.mjs @kyma-project/technical-writers
