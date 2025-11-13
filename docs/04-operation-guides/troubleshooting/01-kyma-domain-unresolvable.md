@@ -21,5 +21,5 @@ Add the VirtualService domains manually to the hosts file of your local system.
 Run the following command:
 
 ```bash
-sudo kyma import hosts 
+sudo kyma import hosts
 ```

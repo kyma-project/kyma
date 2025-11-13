@@ -13,7 +13,7 @@
 
 ## Overview
 
-**Kyma** `/kee-ma/` Kyma is an opinionated set of Kubernetes-based modular building blocks, including all necessary capabilities to develop and run enterprise-grade cloud-native applications. It is the open path to the SAP ecosystem supporting business scenarios end-to-end.
+**Kyma** `/'ki.ma/` Kyma is an opinionated set of Kubernetes-based modular building blocks, including all necessary capabilities to develop and run enterprise-grade cloud-native applications. It is the open path to the SAP ecosystem supporting business scenarios end-to-end.
 
 Kyma is an actively maintained open-source project supported by SAP. The Kyma project is also a foundation of SAP BTP, Kyma runtime which is a part of SAP Business Technology Platform (BTP). You can use Kyma modules in your own Kubernetes cluster, or try the managed version from SAP BTP with a ready-to-use Kubernetes cluster powered by Gardener.
 
@@ -26,7 +26,6 @@ Kyma modules offer various functionalities, such as:
 - Secure [API exposure](https://kyma-project.io/#/api-gateway/user/README)
 - Collection and shipment of telemetry data to observability backends using the [Telemetry module](https://kyma-project.io/#/telemetry-manager/user/README)
 - CLI supported by the intuitive UI through which you can connect your application to a Kubernetes cluster
-
 
 Go to the [Kyma project website](https://kyma-project.io/) to learn more about our project, its features, and Kyma modules.
 
@@ -47,25 +46,26 @@ Read the [`CONTRIBUTING.md`](CONTRIBUTING.md) document that includes the contrib
 The following companies use Kyma:
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/kyma-project/website/refs/heads/main/content/adopters/logos/sap.svg" alt="SAP" width="120" height="70" />
-  <img src="https://raw.githubusercontent.com/kyma-project/website/refs/heads/main/content/adopters/logos/accenture.svg" alt="Accenture" width="300" height="70" />
-  <img src="https://raw.githubusercontent.com/kyma-project/website/refs/heads/main/content/adopters/logos/netconomy.svg" alt="NETCONOMY" width="300" height="70" />
-  <img src="https://raw.githubusercontent.com/kyma-project/website/refs/heads/main/content/adopters/logos/neteleven.svg" alt="neteleven" width="250" height="60" />
+  <img src="./docs/assets/adopters/logos/sap.svg" alt="SAP" width="120" height="70" />
+  <img src="./docs/assets/adopters/logos/accenture.svg" alt="Accenture" width="300" height="70" />
+  <img src="./docs/assets/adopters/logos/netconomy.svg" alt="NETCONOMY" width="300" height="70" />
+  <img src="./docs/assets/adopters/logos/neteleven.svg" alt="neteleven" width="250" height="60" />
 </p>
 <p align="center">
-  <img src="https://raw.githubusercontent.com/kyma-project/website/refs/heads/main/content/adopters/logos/arithnea.svg" alt="ARITHNEA" width="300" height="130" />
-  <img src="https://raw.githubusercontent.com/kyma-project/website/refs/heads/main/content/adopters/logos/digital_lights.svg" alt="Digital Lights" width="200" height="130" />
-  <img src="https://raw.githubusercontent.com/kyma-project/website/refs/heads/main/content/adopters/logos/FAIR_LOGO_HEADER.svg" alt="FAIR" width="300" height="130" />
-  <img src="https://raw.githubusercontent.com/kyma-project/website/refs/heads/main/content/adopters/logos/Sybit-Logo.svg" alt="FAIR" width="300" height="130" />
+  <img src="./docs/assets/adopters/logos/arithnea.svg" alt="ARITHNEA" width="300" height="130" />
+  <img src="./docs/assets/adopters/logos/digital_lights.svg" alt="Digital Lights" width="200" height="130" />
+  <img src="./docs/assets/adopters/logos/FAIR_LOGO_HEADER.svg" alt="FAIR" width="300" height="130" />
+  <img src="./docs/assets/adopters/logos/Sybit-Logo.svg" alt="FAIR" width="300" height="130" />
 </p>
 <p align="center">
-  <img src="https://raw.githubusercontent.com/kyma-project/website/refs/heads/main/content/adopters/logos/arineo.svg" alt="Arineo" width="250" height="40" />
-  <img src="https://raw.githubusercontent.com/kyma-project/website/refs/heads/main/content/adopters/logos/dotsource.svg" alt="dotSource" width="250" height="40" />
+  <img src="./docs/assets/adopters/logos/arineo.svg" alt="Arineo" width="250" height="40" />
+  <img src="./docs/assets/adopters/logos/dotsource.svg" alt="dotSource" width="250" height="40" />
 </p>
 
 ## Join Us
 
 Kyma team is located mostly in Poland and Germany. See the open job positions for both locations:
+
 - [Gliwice, Poland](https://jobs.sap.com/search/?createNewAlert=false&q=%23kymaopensource&optionsFacetsDD_department=&optionsFacetsDD_customfield3=&optionsFacetsDD_country=&locationsearch=)
 - [Munich, Germany](https://jobs.sap.com/search/?createNewAlert=false&q=%23kyma&optionsFacetsDD_department=&optionsFacetsDD_customfield3=&optionsFacetsDD_country=&locationsearch=munich)
 

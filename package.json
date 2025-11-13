@@ -1,0 +1,18 @@
+{
+  "devDependencies": {
+    "prettier": "^3.6.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.5",
+    "vitepress": "^1.6.3"
+  },
+  "scripts": {
+    "docs:dev": "vitepress dev",
+    "docs:build": "sh ./move_to_public.sh && vitepress build && rm -rf ./docs/public",
+    "docs:build2": "vitepress build",
+    "docs:preview": "vitepress preview"
+  },
+  "lint-staged": {
+    "public/i18n/*.yaml": "yaml-sort --lineWidth=-1 -i ",
+    "*.{vue,ts,tsx,js,jsx,json,html,css,scss,yaml,md}": "prettier --write"
+  }
+}

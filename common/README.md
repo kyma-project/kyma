@@ -6,7 +6,7 @@ This package is a set of Go libraries that implement common use cases found in d
 
 With the consolidated structure of the Kyma project, all core components written in Go are stored in a single repository. Although all components have the same programming language as a cornerstone, they are written differently. This makes testing the existing code and making new contributions difficult as each component must be approached in a different way.
 
-This package aims to address this problem by providing a set of libraries that the developers should use rather than  introduce new solutions to an already solved problem.
+This package aims to address this problem by providing a set of libraries that the developers should use rather than introduce new solutions to an already solved problem.
 
 ## How to Add Code to This Package
 
