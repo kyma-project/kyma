@@ -208,7 +208,7 @@ export default defineConfig({
           },
           {
             text: 'Serverless',
-            link: '/external-content/serverless-manager/docs/user/README.md',
+            link: '/external-content/serverless/docs/user/README.md',
             collapsed: true,
             items: makeSidebarAbsolutePath(
               serverlessSidebar,
