@@ -181,7 +181,7 @@ jobs:
         run: |
           npm install -g netlify-cli
           netlify deploy --prod \
-            --dir=docs/.vitepress/dist \
+            --dir=.vitepress/dist \
             --auth=$NETLIFY_AUTH_TOKEN \
             --site=$NETLIFY_SITE_ID
         env:
