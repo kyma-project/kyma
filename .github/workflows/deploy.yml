@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       repository_branches:
-        description: 'JSON with repository branches: {"btp-manager":"main","istio":"release-1.20"} or [{"repository":"btp-manager","branch":"main"}]'
+        description: 'YAML-MAP or JSON with repository branches: {"btp-manager": "main", "istio": "release-1.20"} or [{"repository": "btp-manager", "branch": "main"}]'
         required: false
         default: '{}'
   schedule:
@@ -46,60 +46,65 @@ jobs:
       - name: 🔧 Determine branch for ${{matrix.repository}}
         id: get-branch
         run: |
-          REPO="${{matrix.repository}}"
-          JSON_INPUT="${{ inputs.repository_branches }}"
+          set -euo pipefail
           
-          # Default branch
-          BRANCH="main"
+          REPO="${{ matrix.repository }}"
+          INPUT_RAW="${{ inputs.repository_branches }}"
+          DEFAULT_BRANCH="main"
+          BRANCH="$DEFAULT_BRANCH"
           
-          # Try to parse JSON input first
-          if [ -n "$JSON_INPUT" ] && [ "$JSON_INPUT" != "{}" ]; then
-            echo "📄 Parsing JSON input: $JSON_INPUT"
-            
-            # Check if it's object format: {"repo":"branch"}
-            if echo "$JSON_INPUT" | jq -e "has(\"$REPO\")" > /dev/null 2>&1; then
-              BRANCH=$(echo "$JSON_INPUT" | jq -r ".[\"$REPO\"]")
-              echo "✅ Found branch '$BRANCH' for $REPO in JSON (object format)"
-            else
-              # Check if it's array format: [{"repository":"repo","branch":"branch"}]
-              BRANCH_FROM_ARRAY=$(echo "$JSON_INPUT" | jq -r ".[] | select(.repository == \"$REPO\") | .branch" 2>/dev/null || echo "")
-              if [ -n "$BRANCH_FROM_ARRAY" ] && [ "$BRANCH_FROM_ARRAY" != "null" ]; then
-                BRANCH="$BRANCH_FROM_ARRAY"
-                echo "✅ Found branch '$BRANCH' for $REPO in JSON (array format)"
-              else
-                echo "ℹ️  Repository $REPO not found in JSON, checking GitHub variables..."
-              fi
-            fi
+          echo "📄 Raw input: $INPUT_RAW"
+          echo "🔍 Repository: $REPO"
+          echo "🔍 Default branch: $DEFAULT_BRANCH"
+          
+          # 1. Search in the env variables: build the variable name as repo name --> to capital --> replace " " and "-" with "_" --> append "_BRANCH"
+          REPO_VAR=$(echo "$REPO" | tr '[:lower:]' '[:upper:]' | tr ' -' '_')_BRANCH
+          echo "🔍 Computed env variable name: $REPO_VAR"
+          
+          # Variable expansion using ! is not working for env if VARIABLE is dynamic. Combine jq and toJson to get the env variable value
+          VAR_BRANCH=$(jq -r --arg key "$REPO_VAR" '.[$key]' <<< '${{ toJson(vars) }}')
+
+          echo "🔍 Value from env ($REPO_VAR): ${VAR_BRANCH:-<not set>}"
+          
+          if [ "$VAR_BRANCH" != "null" ]; then
+            BRANCH="$VAR_BRANCH"
+            echo "✅ Using branch '$BRANCH' from GitHub variable ($REPO_VAR) for $REPO"
           else
-            echo "ℹ️  No JSON input provided, checking GitHub variables..."
-          fi
+            echo "ℹ️ No GitHub variable found for $REPO, checking input YAML/JSON..."
           
-          # Fallback to GitHub Variables if not found in JSON
-          if [ "$BRANCH" = "main" ]; then
-            REPO_VAR=$(echo "$REPO" | tr '[:lower:]' '[:upper:]' | tr '-' '_')_BRANCH
-            case "$REPO" in
-              "btp-manager") VAR_BRANCH="${{ vars.BTP_MANAGER_BRANCH }}" ;;
-              "istio") VAR_BRANCH="${{ vars.ISTIO_BRANCH }}" ;;
-              "serverless") VAR_BRANCH="${{ vars.SERVERLESS_BRANCH }}" ;;
-              "telemetry-manager") VAR_BRANCH="${{ vars.TELEMETRY_MANAGER_BRANCH }}" ;;
-              "eventing-manager") VAR_BRANCH="${{ vars.EVENTING_MANAGER_BRANCH }}" ;;
-              "api-gateway") VAR_BRANCH="${{ vars.API_GATEWAY_BRANCH }}" ;;
-              "nats-manager") VAR_BRANCH="${{ vars.NATS_MANAGER_BRANCH }}" ;;
-              "application-connector-manager") VAR_BRANCH="${{ vars.APPLICATION_CONNECTOR_MANAGER_BRANCH }}" ;;
-              "keda-manager") VAR_BRANCH="${{ vars.KEDA_MANAGER_BRANCH }}" ;;
-              "cloud-manager") VAR_BRANCH="${{ vars.CLOUD_MANAGER_BRANCH }}" ;;
-              "docker-registry") VAR_BRANCH="${{ vars.DOCKER_REGISTRY_BRANCH }}" ;;
-              "busola") VAR_BRANCH="${{ vars.BUSOLA_BRANCH }}" ;;
-              "cli") VAR_BRANCH="${{ vars.CLI_BRANCH }}" ;;
-              "registry-proxy") VAR_BRANCH="${{ vars.REGISTRY_PROXY_BRANCH }}" ;;
-              *) VAR_BRANCH="" ;;
-            esac
-            
-            if [ -n "$VAR_BRANCH" ]; then
-              BRANCH="$VAR_BRANCH"
-              echo "✅ Using branch '$BRANCH' from GitHub variable for $REPO"
+            # 2. No GitHub variable, read from input string
+            if [ -n "$INPUT_RAW" ] && [ "$INPUT_RAW" != "{}" ]; then
+              echo "🔍 Parsing input..."
+              if echo "$INPUT_RAW" | yq -o=json '.' >/dev/null 2>&1; then
+                PARSED=$(echo "$INPUT_RAW" | yq -o=json '.')
+                echo "✅ Input read as YAML converted to JSON"
+              elif echo "$INPUT_RAW" | jq empty >/dev/null 2>&1; then
+                PARSED="$INPUT_RAW"
+                echo "✅ Valid JSON conversion"
+              else
+                echo "⚠️ Not a valid YAML nor JSON"
+                PARSED="{}"
+              fi
+          
+              echo "🔍 Parsed content: $PARSED"
+          
+              # 3. Search in the map {repo: branch}
+              if echo "$PARSED" | jq -e "has(\"$REPO\")" >/dev/null 2>&1; then
+                BRANCH=$(echo "$PARSED" | jq -r ".[\"$REPO\"]")
+                echo "✅ Found branch '$BRANCH' for $REPO (map format)"
+              else
+                # 4. Search as array [{repository: repo, branch: branch}]
+                BRANCH_FROM_ARRAY=$(echo "$PARSED" | jq -r ".[] | select(.repository == \"$REPO\") | .branch" 2>/dev/null || echo "")
+                echo "🔍 Branch from array: ${BRANCH_FROM_ARRAY:-<none>}"
+                if [ -n "$BRANCH_FROM_ARRAY" ] && [ "$BRANCH_FROM_ARRAY" != "null" ]; then
+                  BRANCH="$BRANCH_FROM_ARRAY"
+                  echo "✅ Found branch '$BRANCH' for $REPO (array format)"
+                else
+                  echo "ℹ️ Repository $REPO not found in input, using default branch '$DEFAULT_BRANCH'"
+                fi
+              fi
             else
-              echo "ℹ️  Using default branch 'main' for $REPO"
+              echo "ℹ️ No input provided, using default branch '$DEFAULT_BRANCH'"
             fi
           fi
           
@@ -177,7 +182,7 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-      - name: Deploy to Netlify
+      - name: 🇳 Deploy to Netlify
         run: |
           npm install -g netlify-cli
           netlify deploy --prod \
