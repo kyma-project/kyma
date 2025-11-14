@@ -15,7 +15,7 @@ See the full list of Kyma troubleshooting guides:
 ## Modules` Troubleshooting Guides
 
 - [Istio Troubleshooting](https://kyma-project.io/#/istio/user/troubleshooting/README)
-- [Serverless Troubleshooting](https://kyma-project.io/#/serverless-manager/user/troubleshooting-guides/README)
+- [Serverless Troubleshooting](https://kyma-project.io/#/serverless/user/troubleshooting-guides/README)
 - For [Telemetry](https://kyma-project.io/#/telemetry-manager/user/README), the troubleshooting guides are part of the document of each signal type.
 - [Troubleshooting - Eventing](https://kyma-project.io/#/eventing-manager/user/troubleshooting/README)
 - [API Gateway Troubleshooting Guides](https://kyma-project.io/#/api-gateway/user/troubleshooting-guides/README)

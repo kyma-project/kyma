@@ -19,7 +19,7 @@ Kyma is an actively maintained open-source project supported by SAP. The Kyma pr
 
 Kyma modules offer various functionalities, such as:
 
-- [Serverless](https://kyma-project.io/#/serverless-manager/user/README) development platform to run lightweight Functions in a cost-efficient and scalable way
+- [Serverless](https://kyma-project.io/#/serverless/user/README) development platform to run lightweight Functions in a cost-efficient and scalable way
 - [System connectivity](https://kyma-project.io/#/application-connector-manager/user/README) that provides an endpoint to securely register Events and APIs of external applications
 - [Istio](https://kyma-project.io/#/istio/user/README) for service-to-service communication and proxying
 - [Service Management](https://kyma-project.io/#/btp-manager/user/README) to use the built-in cloud services from such cloud providers as GCP, Azure, and AWS

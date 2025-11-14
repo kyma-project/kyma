@@ -55,7 +55,7 @@ kubectl apply -f https://github.com/kyma-project/keda-manager/releases/latest/do
 kubectl apply -f https://github.com/kyma-project/keda-manager/releases/latest/download/keda-default-cr.yaml -n kyma-system
 ```
 
-[**Serverless**](https://github.com/kyma-project/serverless-manager)
+[**Serverless**](https://github.com/kyma-project/serverless)
 
 ```bash
 kubectl apply -f https://github.com/kyma-project/serverless-manager/releases/latest/download/serverless-operator.yaml
