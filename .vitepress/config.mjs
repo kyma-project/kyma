@@ -212,7 +212,7 @@ export default defineConfig({
             collapsed: true,
             items: makeSidebarAbsolutePath(
               serverlessSidebar,
-              'serverless-manager',
+              'serverless',
             ),
           },
           {
