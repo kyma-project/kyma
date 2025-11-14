@@ -126,6 +126,7 @@ export default defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     logo: { src: '/assets/logo_icon.svg', width: 24, height: 24 },
     nav: [
+      { text: 'Documentation', link: '/README' },
       { text: 'Release Notes', link: '/release-notes' },
       { text: 'Support & Contribution', link: '/support-contribution' },
       {
