@@ -88,16 +88,7 @@ Contains all VitePress configuration files for the Kyma project:
 ### Configuration and Assets
 
 - **package.json**: Contains scripts for development, build, and preview
-- **public/**: Should contain references to assets that will be propagated on the website (managed by `move-to-public.sh`)
-
-## Building and Previewing Documentation
-
-To verify the build process:
-
-```bash
-npm run docs:build
-npm run docs:preview
-```
+- **public/**: Should contain references to assets that will be propagated on the website (managed by `move-to-public.sh`). It's a temporary folder that should be generated and deleted with every build. If the build fails, the folder is not deleted. It must be deleted before the next build, to clean up the environment.
 
 ## Summary
 
