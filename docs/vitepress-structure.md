@@ -50,7 +50,7 @@ Contains all VitePress configuration files for the Kyma project:
   - Automatic detection of tab headers using `#### **Title**` format
   - Content extraction and markdown rendering for each tab
   - Base64 encoding of tab data for component consumption
-  - Integration with custom Tabs Vue component via `tabs-data` prop
+  - Integration with the custom Tabs Vue component via `tabs-data` prop
   - Extends markdown renderer while preserving original functionality
 
 ### Documentation Content
@@ -62,7 +62,7 @@ Contains all VitePress configuration files for the Kyma project:
   - Custom CSS classes for styling (`home-kyma-heavy-bold`, `home-kyma-phonetic`)
   - Asset references for icons and logos with specified dimensions
 - **external-content/**: Aggregates documentation from different repositories.
-- **_sidebar.ts**: Sidebar configuration files imported from the individual modules repositories. Each module has its own sidebar configuration that gets transformed by the `makeSidebarAbsolutePath` function in `config.mjs` to work with the absolute path structure
+- **_sidebar.ts**: Sidebar configuration files imported from the individual modules repositories. Each module has its own sidebar configuration that gets transformed by the `makeSidebarAbsolutePath` function in `config.mjs` to work with the absolute path structure.
 
 ### Automation and Workflows
 
