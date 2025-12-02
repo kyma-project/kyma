@@ -21,14 +21,14 @@ This section is about truly understanding the problem, not jumping to solutions.
 
 <!-- Describe the timing or frequency of the problem, and what triggers it. Identify the context, processes, or conditions under which the problem arises. -->
 
-**Why it matters?**
+**Why does it matter?**
 
 <!-- Explain the underlying cause, not just the symptom. What's the business opportunity if we solve this? -->
 
 **Source of problem**
 
-<!--Capture where the initial input came from. Reported by: (e.g., Customer Name, Internal Team/Department, Sales Rep, Telemetry Alert). Original Request/Trigger (if applicable):
-       What was the initial observation, pain point expressed, or specific feature requested? Relevant Links/References: (e.g., Customer ticket, survey ID, meeting notes, telemetry report) -->
+<!-- Reported by (if applicable): Capture where the initial input came from. For example, the customer name, internal team/department, sales representative, or telemetry alert.
+Relevant links/references (if applicable): What was the initial observation, pain point expressed, or specific feature requested? For example, a customer ticket, survey ID, meeting notes, or telemetry report.
 
 **Success metrics and targets**
 
@@ -36,7 +36,7 @@ This section is about truly understanding the problem, not jumping to solutions.
 
 **Risks, unknowns and constraints**
 
-<!-- Describe the biggest open questions that could invalidate this opportunity-->
+<!-- Describe the biggest open questions that could invalidate this opportunity.-->
 
 **Dependencies and stakeholder map**
 
