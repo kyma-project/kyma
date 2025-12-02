@@ -32,7 +32,7 @@ This section is about truly understanding the problem, not jumping to solutions.
 
 **Success metrics and targets**
 
-<!-- Focus on the measurable impact and value created once the problem is solved -->
+<!-- Focus on the measurable impact and value created once the problem is solved. -->
 
 **Risks, unknowns and constraints**
 
