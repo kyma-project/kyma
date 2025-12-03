@@ -8,7 +8,7 @@ on:
         required: false
         default: '{}'
   schedule:
-    - cron: '0 0,12,16 * * *'  # Runs at 00:00 UTC every day
+    - cron: '0 0,12,16 * * *'  # Runs at 00:00, 12:00, and 16:00 UTC every day
 
 permissions:
   contents: write
