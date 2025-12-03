@@ -27,7 +27,7 @@ This section is about truly understanding the problem, not jumping to solutions.
 
 <!-- Explain the underlying cause, not just the symptom. What's the business opportunity if we solve this? -->
 
-## Trigger/Original Request
+## Original request/Trigger
 
 <!-- Reported by (if applicable): Capture where the initial input came from. For example, the customer name, internal team/department, sales representative, or telemetry alert.
 Relevant links/references (if applicable): What was the initial observation, pain point expressed, or specific feature requested? For example, a customer ticket, survey ID, meeting notes, or telemetry report. -->
