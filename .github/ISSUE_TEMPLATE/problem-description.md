@@ -36,7 +36,7 @@ Relevant links/references (if applicable): What was the initial observation, pai
 
 <!-- Focus on the measurable impact and value created once the problem is solved. -->
 
-## Risks, unknowns and constraints
+## Risks, unknowns, and constraints
 
 <!-- Describe the biggest open questions that could invalidate this opportunity.-->
 
