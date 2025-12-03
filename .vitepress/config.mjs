@@ -14,6 +14,7 @@ import telemetrySidebar from '../docs/external-content/telemetry-manager/docs/us
 import cliSidebar from '../docs/external-content/cli/docs/user/_sidebar';
 import busolaSidebar from '../docs/external-content/busola/docs/user/_sidebar';
 import registryProxySidebar from '../docs/external-content/registry-proxy/docs/user/_sidebar';
+import communityModulesSidebar from '../docs/external-content/community-modules/docs/user/_sidebar';
 
 export function getSearchConfig() {
   return {
@@ -239,6 +240,11 @@ export default defineConfig({
       {
         text: 'Community Modules',
         link: '/external-content/community-modules/docs/user/README.md',
+        collapsed: true,
+        items: makeSidebarAbsolutePath(
+          communityModulesSidebar,
+          'community-modules',
+        ),
       },
       {
         text: 'User Interfaces',
