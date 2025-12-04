@@ -299,3 +299,77 @@ span.home-kyma-phonetic {
 .feature-card:hover {
   box-shadow: 0 0 12px 10px var(--kyma-color-primary-shadow) !important;
 }
+
+/* --- SIDEBAR FIXES --- */
+:root {
+  --vp-sidebar-width: 260px;
+}
+
+@media (min-width: 960px) {
+  .VPSidebar {
+    width: var(--vp-sidebar-width);
+    min-width: var(--vp-sidebar-width);
+    max-width: var(--vp-sidebar-width);
+  }
+}
+
+@media (min-width: 1280px) {
+  :root {
+    --vp-sidebar-width: 300px;
+  }
+}
+
+@media (min-width: 1600px) {
+  :root {
+    --vp-sidebar-width: 340px;
+  }
+}
+
+.VPSidebarItem .text {
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.5;
+  flex: 1 1 auto;
+  font-size: 15px;
+  color: var(--vp-c-text-1);
+}
+
+.VPSidebarItem .link {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  padding: 6px 0;
+}
+
+.VPSidebarItem.collapsible .caret {
+  flex-shrink: 0;
+  margin-right: 8px;
+  opacity: 1;
+  visibility: visible;
+}
+
+.VPSidebarItem.collapsible > .item > .link {
+  padding-right: 24px;
+}
+
+.VPSidebarItem .items {
+  padding-left: 0 !important;
+  margin-left: 0 !important;
+}
+
+/* Mobile: sidebar full width, collapsible visible */
+@media (max-width: 959px) {
+  .VPSidebar {
+    width: 100vw;
+    min-width: 0;
+    max-width: 100vw;
+  }
+  .VPSidebarItem .text {
+    font-size: 16px;
+  }
+  .VPSidebarItem.collapsible .caret {
+    margin-right: 12px;
+    font-size: 18px;
+  }
+}
