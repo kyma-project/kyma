@@ -7,7 +7,7 @@
 ## Prerequisites
 
 - [Docker](https://www.docker.com/get-started)
-- [GNU Makefile](https://www.gnu.org/software/make/manual/make.html) v3.80 or higher
+- [GNU Makefile](https://www.gnu.org/software/make/manual/make.html) v3.80 or higher <!-- markdown-link-check-disable-line -->
 
 For local usage, you need:
 

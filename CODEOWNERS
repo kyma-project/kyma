@@ -7,7 +7,7 @@
 # These are the default owners for the whole content of the `kyma` repository. The default owners are automatically added as reviewers when you open a pull request unless different owners are specified in the file.
 * @kyma-project/kyma-steering-committee
 
-/.github/workflows @kyma-project/gopher
+/.github/workflows/deploy.yml @kyma-project/technical-writers
 /.github/ISSUE_TEMPLATE @kyma-project/technical-writers
 
 
