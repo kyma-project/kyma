@@ -8,6 +8,7 @@
 * @kyma-project/kyma-steering-committee
 
 /.github/workflows @kyma-project/gopher
+/.github/workflows/deploy.yml @kyma-project/technical-writers
 /.github/ISSUE_TEMPLATE @kyma-project/technical-writers
 
 
