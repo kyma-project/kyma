@@ -353,9 +353,18 @@ span.home-kyma-phonetic {
   padding-right: 24px;
 }
 
+/* Proper indentation for nested sidebar items */
 .VPSidebarItem .items {
-  padding-left: 0 !important;
-  margin-left: 0 !important;
+  padding-left: 16px;
+}
+
+/* Deeper nesting gets more indentation */
+.VPSidebarItem .items .VPSidebarItem .items {
+  padding-left: 16px;
+}
+
+.VPSidebarItem .items .VPSidebarItem .items .VPSidebarItem .items {
+  padding-left: 16px;
 }
 
 /* Mobile: sidebar full width, collapsible visible */
