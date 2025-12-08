@@ -10,10 +10,6 @@
 /.github/workflows/deploy.yml @kyma-project/technical-writers
 /.github/ISSUE_TEMPLATE @kyma-project/technical-writers
 
-
-# Owners of the .kyma-project-io folder
-/.kyma-project-io/ @kyma-project/Hasselhoff
-
 # Logging library
 /common/logging @kyma-project/Framefrog
 
