@@ -226,6 +226,16 @@ export default defineConfig({
               'telemetry-manager',
             ),
           },
+        ],
+      },
+      {
+        text: 'Community Modules',
+        link: '/external-content/community-modules/docs/user/README.md',
+        items: [
+          ...makeSidebarAbsolutePath(
+            communityModulesSidebar,
+            'community-modules',
+          ),
           {
             text: 'Registry Proxy',
             link: '/external-content/registry-proxy/docs/user/README.md',
@@ -236,15 +246,6 @@ export default defineConfig({
             ),
           },
         ],
-      },
-      {
-        text: 'Community Modules',
-        link: '/external-content/community-modules/docs/user/README.md',
-        collapsed: true,
-        items: makeSidebarAbsolutePath(
-          communityModulesSidebar,
-          'community-modules',
-        ),
       },
       {
         text: 'User Interfaces',
