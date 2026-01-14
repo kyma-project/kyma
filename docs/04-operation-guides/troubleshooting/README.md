@@ -14,11 +14,13 @@ See the full list of Kyma troubleshooting guides:
 
 ## Modules` Troubleshooting Guides
 
-- [Istio Troubleshooting](https://kyma-project.io/#/istio/user/troubleshooting/README)
-- [Serverless Troubleshooting](https://kyma-project.io/#/serverless/user/troubleshooting-guides/README)
-- [Telemetry](https://kyma-project.io/#/telemetry-manager/user/troubleshooting)
-- [Troubleshooting - Eventing](https://kyma-project.io/#/eventing-manager/user/troubleshooting/README)
-- [API Gateway Troubleshooting Guides](https://kyma-project.io/#/api-gateway/user/troubleshooting-guides/README)
+- [Istio](https://kyma-project.io/external-content/istio/docs/user/troubleshooting/README.html)
+- [API Gateway](https://kyma-project.io/external-content/api-gateway/docs/user/troubleshooting-guides/README.html)
+- [SAP BTP Operator](https://kyma-project.io/external-content/btp-manager/docs/user/troubleshooting/README.html)
+- [Eventing](https://kyma-project.io/external-content/eventing-manager/docs/user/troubleshooting/README.html)
+- [NATS](https://kyma-project.io/external-content/nats-manager/docs/user/troubleshooting/README.html)
+- [Serverless](https://kyma-project.io/external-content/serverless/docs/user/troubleshooting-guides/README.html)
+- [Telemetry](https://kyma-project.io/external-content/telemetry-manager/docs/user/troubleshooting.html)
 
 ## Security
 
