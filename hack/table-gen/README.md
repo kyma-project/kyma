@@ -12,16 +12,25 @@ You can run the table generator in two ways:
 - [Run from command line](#use-command-line) (for one-time generation): Execute directly with `go run` for quick testing or ad-hoc documentation
 
 ### Use Makefile (Recommended)
-To update the makefile, just introduce a new label for your CRD, and then add it to the `generate`. Alternatively, if you want to group your `go run` commands, you can create different labels, group them under the one, and include it to the `generate`, the same way as with `make telemetry-docs`
+Follow the steps:
 
 1. Prepare the parameters' descriptions in the CR's specification file. For example, for the Telemetry CR, prepare the description in [`operator.kyma-project.io_telemetries.yaml`](https://github.com/kyma-project/telemetry-manager/blob/main/helm/charts/default/templates/operator.kyma-project.io_telemetries.yaml).
 
-2. Add the following mappings to the module's Makefile:
+2. Add a new target to your module's Makefile with the table generator commands:
 
-- `--crd-filename` - full or relative path to the `.yaml` file with the CRD
-- `--md-filename` - full or relative path to the `.md` file in which you want to generate the table
+   ```makefile
+   .PHONY: crd-docs-gen
+   crd-docs-gen: $(TABLE_GEN) manifests
+      $(TABLE_GEN) --crd-filename ./path/to/your-crd.yaml --md-filename ./docs/user/your-doc.md
+      $(TABLE_GEN) --crd-filename ./path/to/your-crd-2.yaml --md-filename ./docs/user/your-doc-2.md
+      ...
+   ```
 
-   For example, see the [Telemetry module's Makefile](https://github.com/kyma-project/telemetry-manager/blob/main/Makefile#L185).
+   Use the following parameters:
+   - **--crd-filename**: Path to the CRD YAML file
+   - **--md-filename**: Path to the Markdown file where the table will be inserted
+  
+   You can create different labels, group them under the one, and add your target to the `generate` command. For a complete example, see the [Telemetry module's Makefile](https://github.com/kyma-project/telemetry-manager/blob/main/Makefile#L185). 
 
 3. Set up the table generator in the `.md` file in which you want to generate the table. Add the `TABLE-START` and `TABLE-END` tags in the exact place in the document where you want to generate the table.
 
