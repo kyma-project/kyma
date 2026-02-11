@@ -245,6 +245,10 @@ export default defineConfig({
               'registry-proxy',
             ),
           },
+          {
+            text: 'CAP Operator',
+            link: 'https://sap.github.io/cap-operator/',
+          },
         ],
       },
       {
