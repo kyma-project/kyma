@@ -30,7 +30,7 @@ Follow the steps:
    - **--crd-filename**: Path to the CRD YAML file
    - **--md-filename**: Path to the Markdown file where the table will be inserted
   
-   You can create different labels, group them under the one, and add your target to the `generate` command. For a complete example, see the [Telemetry module's Makefile](https://github.com/kyma-project/telemetry-manager/blob/main/Makefile#L185). 
+   You can create different labels, group them under one, and add your target to the `generate` command. For a complete example, see the [Telemetry module's Makefile](https://github.com/kyma-project/telemetry-manager/blob/main/Makefile#L185). 
 
 3. Set up the table generator in the `.md` file in which you want to generate the table. Add the `TABLE-START` and `TABLE-END` tags in the exact place in the document where you want to generate the table.
 
@@ -50,7 +50,7 @@ Follow the steps:
 
 ### Use Command Line
 
-You can also call the table generator from the command line, without needing to add it to the Makefile. to do this, you can either build it and start it, or use `go run`. See the following example:
+You can also call the table generator from the command line, without needing to add it to the Makefile. To do this, you can either build it and start it, or use `go run`. See the following example:
    ```bash
    go run main.go --crd-filename ../../installation/resources/crds/telemetry/logpipelines.crd.yaml --md-filename ../../docs/05-technical-reference/00-custom-resources/telemetry-01-logpipeline.md
    ```
