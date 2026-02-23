@@ -24,16 +24,16 @@ Follow the steps:
       <!-- TABLE-END -->
    ```
 
-3. Add a new target to your module's Makefile with the table generator commands:
+3. Build the table generator as a binary named `table-gen`, and add a new target to your module's Makefile that calls this binary. See the following example:
 
    ```makefile
    .PHONY: crd-docs-gen
-   crd-docs-gen: $(TABLE_GEN)
-      $(TABLE_GEN) --crd-filename ./path/to/your-crd.yaml --md-filename ./docs/user/your-doc.md
-      $(TABLE_GEN) --crd-filename ./path/to/your-crd-2.yaml --md-filename ./docs/user/your-doc-2.md
+   crd-docs-gen: table-gen
+      table-gen --crd-filename ./path/to/your-crd.yaml --md-filename ./docs/user/your-doc.md
+      table-gen --crd-filename ./path/to/your-crd-2.yaml --md-filename ./docs/user/your-doc-2.md
       ...
    ```
-
+   
    Use the following parameters:
    - **--crd-filename**: Path to the CRD YAML file
    - **--md-filename**: Path to the Markdown file where the table will be inserted
