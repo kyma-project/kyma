@@ -8,19 +8,27 @@ This package contains a tool that automatically generates a documentation table 
 
 You can run the table generator in two ways:
 
-- [Add to Makefile](#use-makefile-recommended) (recommended for regular updates): Configure your CRD once and generate tables with simple `make` commands
-- [Run from command line](#use-command-line) (for one-time generation): Execute directly with `go run` for quick testing or ad-hoc documentation
+- [Use Makefile (Recommended)](#use-makefile-recommended): Configure your CRD once and generate tables with simple `make` commands.
+- [Run from command line](#use-command-line): Execute directly with `go run` for quick testing or ad-hoc documentation.
 
 ### Use Makefile (Recommended)
 Follow the steps:
 
 1. Prepare the parameters' descriptions in the CR's specification file. For example, for the Telemetry CR, prepare the description in [`operator.kyma-project.io_telemetries.yaml`](https://github.com/kyma-project/telemetry-manager/blob/main/helm/charts/default/templates/operator.kyma-project.io_telemetries.yaml).
 
-2. Add a new target to your module's Makefile with the table generator commands:
+2. Set up the table generator in the `.md` file in which you want to generate the table. Add the `TABLE-START` and `TABLE-END` tags in the exact place in the document where you want to generate the table.
+
+   ```bash
+      <!-- TABLE-START -->
+   
+      <!-- TABLE-END -->
+   ```
+
+3. Add a new target to your module's Makefile with the table generator commands:
 
    ```makefile
    .PHONY: crd-docs-gen
-   crd-docs-gen: $(TABLE_GEN) manifests
+   crd-docs-gen: $(TABLE_GEN)
       $(TABLE_GEN) --crd-filename ./path/to/your-crd.yaml --md-filename ./docs/user/your-doc.md
       $(TABLE_GEN) --crd-filename ./path/to/your-crd-2.yaml --md-filename ./docs/user/your-doc-2.md
       ...
@@ -31,14 +39,6 @@ Follow the steps:
    - **--md-filename**: Path to the Markdown file where the table will be inserted
   
    You can create different labels, group them under one, and add your target to the `generate` command. For a complete example, see the [Telemetry module's Makefile](https://github.com/kyma-project/telemetry-manager/blob/main/Makefile#L185). 
-
-3. Set up the table generator in the `.md` file in which you want to generate the table. Add the `TABLE-START` and `TABLE-END` tags in the exact place in the document where you want to generate the table.
-
-   ```bash
-      <!-- TABLE-START -->
-   
-      <!-- TABLE-END -->
-   ```
 
 4. In the terminal, run the following command from root:
 
