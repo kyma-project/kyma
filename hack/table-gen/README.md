@@ -1,40 +1,56 @@
-# The Table Generator: Generate Documentation Tables Automatically from CRDs
+# Table Generator: Autogenerate CRD Documentation Tables
 
 ## Overview
 
 This package contains a tool that automatically generates a documentation table documenting a CRD, and writes it to specified `.md` files.
 
-## Parameters
+## Generate Tables
 
-You must specify the following parameters:
+You can run the table generator in two ways:
 
-- `crd-filename` - full or relative path to the `.yaml` file containing the CRD
-- `md-filename` - full or relative path to the `.md` file in which to insert the table rows
+- [Use Makefile (Recommended)](#use-makefile-recommended): Configure your CRD once and generate tables with simple `make` commands.
+- [Run from command line](#use-command-line): Execute directly with `go run` for quick testing or ad-hoc documentation.
 
-## Set Up the Table Generator
+### Use Makefile (Recommended)
+Follow the steps:
 
-Open the `.md` file you want to generate table in, and in the place where you want to insert a table, enter the tags `TABLE-START` and `TABLE-END`.
+1. Prepare the parameters' descriptions in the CR's specification file. For example, for the Telemetry CR, prepare the description in [`operator.kyma-project.io_telemetries.yaml`](https://github.com/kyma-project/telemetry-manager/blob/main/helm/charts/default/templates/operator.kyma-project.io_telemetries.yaml).
 
-```
-   <!-- TABLE-START -->
+2. Set up the table generator in the `.md` file in which you want to generate the table. Add the `TABLE-START` and `TABLE-END` tags in the exact place in the document where you want to generate the table.
 
-   <!-- TABLE-END -->
-```
+   ```bash
+      <!-- TABLE-START -->
+   
+      <!-- TABLE-END -->
+   ```
 
-### Call the Table Generator
+3. Build the table generator as a binary named `table-gen`, and add a new target to your module's Makefile that calls this binary. See the following example:
 
-You can call the table generator either from the command line, or with the makefile:
+   ```makefile
+   .PHONY: crd-docs-gen
+   crd-docs-gen:
+      table-gen --crd-filename ./path/to/your-crd.yaml --md-filename ./docs/user/your-doc.md
+      table-gen --crd-filename ./path/to/your-crd-2.yaml --md-filename ./docs/user/your-doc-2.md
+      ...
+   ```
+   
+   Use the following parameters:
+   - **--crd-filename**: Path to the CRD YAML file
+   - **--md-filename**: Path to the Markdown file where the table will be inserted
+  
+   For a complete example, see the [Telemetry module's Makefile](https://github.com/kyma-project/telemetry-manager/blob/main/Makefile#L185). 
 
-- If you want to call the table generator from the command line, you can either build it and start it, or use `go run`. See the following example:
-  `go run main.go --crd-filename ../../installation/resources/crds/telemetry/logpipelines.crd.yaml --md-filename ../../docs/05-technical-reference/00-custom-resources/telemetry-01-logpipeline.md`
+4. In the terminal, run the following command from root:
 
-- If you update a CRD that is already present in the makefile, you can just call `make generate`.
+   ```bash
+   make crd-docs-gen
+   ```
+   To verify the result, go to the `.md` files and check that the table has been generated as specified.
 
-  If you want to compare only a particular operator or a specific CRD, specify the label you need while calling `make`; for example, `make telemetry-docs`.
 
-  To update the makefile, just introduce a new label for your CRD, and then add it to the `generate`.
-  Alternatively, if you want to group your `go run` commands, you can create different labels, group them under the one, and include it to the `generate`, the same way as with `make telemetry-docs`.
+### Use Command Line
 
-## Verifying the Result
-
-Go to the `.md` files and check that the table has been generated as specified.
+You can also call the table generator from the command line, without needing to add it to the Makefile. To do this, you can either build it and start it, or use `go run`. See the following example:
+   ```bash
+   go run main.go --crd-filename ../../installation/resources/crds/telemetry/logpipelines.crd.yaml --md-filename ../../docs/05-technical-reference/00-custom-resources/telemetry-01-logpipeline.md
+   ```
