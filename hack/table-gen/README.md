@@ -38,7 +38,7 @@ Follow the steps:
    - **--crd-filename**: Path to the CRD YAML file
    - **--md-filename**: Path to the Markdown file where the table will be inserted
   
-   You can create different labels, group them under one, and add your target to the `generate` command. For a complete example, see the [Telemetry module's Makefile](https://github.com/kyma-project/telemetry-manager/blob/main/Makefile#L185). 
+   For a complete example, see the [Telemetry module's Makefile](https://github.com/kyma-project/telemetry-manager/blob/main/Makefile#L185). 
 
 4. In the terminal, run the following command from root:
 
