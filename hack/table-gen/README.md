@@ -28,7 +28,7 @@ Follow the steps:
 
    ```makefile
    .PHONY: crd-docs-gen
-   crd-docs-gen: table-gen
+   crd-docs-gen:
       table-gen --crd-filename ./path/to/your-crd.yaml --md-filename ./docs/user/your-doc.md
       table-gen --crd-filename ./path/to/your-crd-2.yaml --md-filename ./docs/user/your-doc-2.md
       ...
@@ -43,7 +43,7 @@ Follow the steps:
 4. In the terminal, run the following command from root:
 
    ```bash
-   make generate
+   make crd-docs-gen
    ```
    To verify the result, go to the `.md` files and check that the table has been generated as specified.
 
