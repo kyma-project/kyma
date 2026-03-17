@@ -87,7 +87,7 @@ kubectl apply -f https://github.com/kyma-project/eventing-manager/releases/lates
 > You must configure a backend for the Eventing module. To use the NATS backend, install the NATS module before you install Eventing, and configure the backend:
 >
 > ```bash
-> kkubectl patch eventings.operator.kyma-project.io eventing -n kyma-system --type=merge -p '{"spec":{"backend":{"type":"NATS"}}}'
+> kubectl patch eventings.operator.kyma-project.io eventing -n kyma-system --type=merge -p '{"spec":{"backend":{"type":"NATS"}}}'
 > ```
 
 [**API Gateway**](https://github.com/kyma-project/api-gateway)
