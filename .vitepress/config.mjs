@@ -124,7 +124,17 @@ export default defineConfig({
   base: '/',
   assetsDir: 'vite-assets',
   themeConfig: {
-    // https://vitepress.dev/reference/default-theme-config
+    editLink: {
+      pattern: ({ filePath }) => {
+        if (filePath.startsWith('external-content/')) {
+          const [, repoName, ...repoPathParts] = filePath.split('/');
+          return `https://github.com/kyma-project/${repoName}/edit/main/${repoPathParts.join('/')}`;
+        }
+
+        return `https://github.com/kyma-project/kyma/edit/main/docs/${filePath}`;
+      },
+      text: 'Edit this page on GitHub',
+    },
     logo: { src: '/assets/logo_icon.svg', width: 24, height: 24 },
     nav: [
       { text: 'Documentation', link: '/README' },
