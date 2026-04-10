@@ -124,7 +124,7 @@ export default defineConfig({
   base: '/',
   assetsDir: 'vite-assets',
   themeConfig: {
-  // https://vitepress.dev/reference/default-theme-config
+    // https://vitepress.dev/reference/default-theme-config
     editLink: {
       pattern: ({ filePath }) => {
         if (filePath.startsWith('external-content/')) {
