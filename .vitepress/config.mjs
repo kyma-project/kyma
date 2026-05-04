@@ -193,15 +193,6 @@ export default defineConfig({
             ),
           },
           {
-            text: 'Docker Registry',
-            link: '/external-content/docker-registry/docs/user/README.md',
-            collapsed: true,
-            items: makeSidebarAbsolutePath(
-              dockerRegistrySidebar,
-              'docker-registry',
-            ),
-          },
-          {
             text: 'Eventing',
             link: '/external-content/eventing-manager/docs/user/README.md',
             collapsed: true,
@@ -254,6 +245,15 @@ export default defineConfig({
             items: makeSidebarAbsolutePath(
               registryProxySidebar,
               'registry-proxy',
+            ),
+          },
+          {
+            text: 'Docker Registry',
+            link: '/external-content/docker-registry/docs/user/README.md',
+            collapsed: true,
+            items: makeSidebarAbsolutePath(
+              dockerRegistrySidebar,
+              'docker-registry',
             ),
           },
           {
