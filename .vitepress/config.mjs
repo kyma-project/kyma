@@ -9,6 +9,7 @@ import dockerRegistrySidebar from '../docs/external-content/docker-registry/docs
 import eventingSidebar from '../docs/external-content/eventing-manager/docs/user/_sidebar';
 import kedaSidebar from '../docs/external-content/keda-manager/docs/user/_sidebar';
 import natsSidebar from '../docs/external-content/nats-manager/docs/user/_sidebar';
+import registryCacheSidebar from '../docs/external-content/registry-cache/docs/user/_sidebar';
 import serverlessSidebar from '../docs/external-content/serverless/docs/user/_sidebar';
 import telemetrySidebar from '../docs/external-content/telemetry-manager/docs/user/_sidebar';
 import cliSidebar from '../docs/external-content/cli/docs/user/_sidebar';
@@ -209,6 +210,15 @@ export default defineConfig({
             link: '/external-content/nats-manager/docs/user/README.md',
             collapsed: true,
             items: makeSidebarAbsolutePath(natsSidebar, 'nats-manager'),
+          },
+          {
+            text: 'Registry Cache',
+            link: '/external-content/registry-cache/docs/user/README.md',
+            collapsed: true,
+            items: makeSidebarAbsolutePath(
+              registryCacheSidebar,
+              'registry-cache',
+            ),
           },
           {
             text: 'Serverless',
