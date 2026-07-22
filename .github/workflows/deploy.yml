@@ -41,6 +41,7 @@ jobs:
           - cli
           - registry-proxy
           - community-modules
+          - registry-cache
     runs-on: ubuntu-latest
     steps:
       - name: 🔧 Determine branch for ${{matrix.repository}}
