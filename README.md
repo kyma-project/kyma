@@ -4,8 +4,8 @@
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/kyma-project/kyma)](https://goreportcard.com/report/github.com/kyma-project/kyma)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/2168/badge)](https://bestpractices.coreinfrastructure.org/projects/2168)
-[![Slack](https://img.shields.io/badge/slack-@kyma--community-yellow.svg)](https://kyma-community.slack.com/)<!-- markdown-link-check-disable-next-line -->
-[![Twitter](https://img.shields.io/badge/twitter-@kymaproject-blue.svg)](https://twitter.com/kymaproject)
+[![Slack](https://img.shields.io/badge/slack-@kyma--community-yellow.svg)](https://kyma-community.slack.com/) <!-- markdown-link-check-disable-line -->
+[![Twitter](https://img.shields.io/badge/twitter-@kymaproject-blue.svg)](https://twitter.com/kymaproject) <!-- markdown-link-check-disable-line -->
 [![REUSE status](https://api.reuse.software/badge/github.com/kyma-project/kyma)](https://api.reuse.software/info/github.com/kyma-project/kyma)
 
 > [!NOTE]
