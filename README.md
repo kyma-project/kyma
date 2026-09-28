@@ -66,11 +66,10 @@ The following companies use Kyma:
 
 Kyma team is located mostly in Poland and Germany. See the open job positions for both locations:
 
-- [Gliwice, Poland](https://careers.sap.com/search/?createNewAlert=false&q=%23kyma&locationsearch=Gliwice&optionsFacetsDD_department=&optionsFacetsDD_customfield3=&optionsFacetsDD_country=)
-- [Munich, Germany](https://careers.sap.com/search/?createNewAlert=false&q=%23kyma&optionsFacetsDD_department=&optionsFacetsDD_customfield3=&optionsFacetsDD_country=&locationsearch=munich)
+- [Gliwice, Poland](https://careers.sap.com/search/?createNewAlert=false&q=kyma&locationsearch=Gliwice&optionsFacetsDD_department=&optionsFacetsDD_customfield3=&optionsFacetsDD_country=)
+- [Munich, Germany](https://careers.sap.com/search/?createNewAlert=false&q=kyma&locationsearch=Munich&optionsFacetsDD_department=&optionsFacetsDD_customfield3=&optionsFacetsDD_country=)
 
 ### FAQ
-
 - **What is your IDE?**
 
   Nothing is enforced. People often use GoLand, Visual Studio Code, VIM.
