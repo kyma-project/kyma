@@ -22,6 +22,7 @@ REPOS=(
   busola
   cli
   registry-proxy
+  registry-cache
   community-modules
 )
 
