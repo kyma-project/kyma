@@ -326,6 +326,12 @@ export default defineConfig({
   markdown: {
     config: (md) => {
       md.use(tabsPlugin);
+      // Prevent Vue from interpreting {{ }} (e.g., Go templates) in inline code from external docs.
+      const defaultCodeInline = md.renderer.rules.code_inline;
+      md.renderer.rules.code_inline = (tokens, idx, options, env, self) => {
+        tokens[idx].attrSet('v-pre', '');
+        return defaultCodeInline(tokens, idx, options, env, self);
+      };
     },
   },
 });
