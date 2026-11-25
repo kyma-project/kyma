@@ -1,21 +1,148 @@
 import { defineConfig } from 'vitepress';
 import tabsPlugin from './plugins/tabs-plugin';
-import istioSidebar from '../docs/external-content/istio/docs/user/_sidebar';
-import apiGatewaySidebar from '../docs/external-content/api-gateway/docs/user/_sidebar';
-import sapBtpOperatorSidebar from '../docs/external-content/btp-manager/docs/user/_sidebar';
-import applicationConnectorSidebar from '../docs/external-content/application-connector-manager/docs/user/_sidebar';
-import cloudManagerSidebar from '../docs/external-content/cloud-manager/docs/user/_sidebar';
-import dockerRegistrySidebar from '../docs/external-content/docker-registry/docs/user/_sidebar';
-import eventingSidebar from '../docs/external-content/eventing-manager/docs/user/_sidebar';
-import kedaSidebar from '../docs/external-content/keda-manager/docs/user/_sidebar';
-import natsSidebar from '../docs/external-content/nats-manager/docs/user/_sidebar';
-import registryCacheSidebar from '../docs/external-content/registry-cache/docs/user/_sidebar';
-import serverlessSidebar from '../docs/external-content/serverless/docs/user/_sidebar';
-import telemetrySidebar from '../docs/external-content/telemetry-manager/docs/user/_sidebar';
-import cliSidebar from '../docs/external-content/cli/docs/user/_sidebar';
-import busolaSidebar from '../docs/external-content/busola/docs/user/_sidebar';
-import registryProxySidebar from '../docs/external-content/registry-proxy/docs/user/_sidebar';
-import communityModulesSidebar from '../docs/external-content/community-modules/docs/user/_sidebar';
+import { readFileSync } from 'fs';
+import { resolve, dirname } from 'path';
+import { fileURLToPath } from 'url';
+import { parse } from '@babel/parser';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+// Turns a Babel AST node into a plain JS value WITHOUT executing any code.
+// Only pure literals are accepted; anything else (identifier reference,
+// function call, spread, template with expressions, ...) throws.
+function literalFromNode(node) {
+  switch (node.type) {
+    case 'StringLiteral':
+    case 'NumericLiteral':
+    case 'BooleanLiteral':
+      return node.value;
+    case 'NullLiteral':
+      return null;
+    case 'TemplateLiteral':
+      if (node.expressions.length === 0) {
+        return node.quasis[0].value.cooked;
+      }
+      throw new Error('template literal with embedded expression');
+    case 'UnaryExpression':
+      if (node.operator === '-') return -literalFromNode(node.argument);
+      if (node.operator === '+') return +literalFromNode(node.argument);
+      throw new Error(`unsupported unary operator "${node.operator}"`);
+    case 'ArrayExpression':
+      return node.elements.map((el) => {
+        if (el === null) throw new Error('sparse array element');
+        if (el.type === 'SpreadElement') throw new Error('spread element');
+        return literalFromNode(el);
+      });
+    case 'ObjectExpression': {
+      const obj = {};
+      for (const prop of node.properties) {
+        if (prop.type !== 'ObjectProperty') {
+          throw new Error(`unsupported property "${prop.type}"`);
+        }
+        if (prop.computed) throw new Error('computed object key');
+        let key;
+        if (prop.key.type === 'Identifier') {
+          key = prop.key.name;
+        } else if (prop.key.type === 'StringLiteral') {
+          key = prop.key.value;
+        } else if (prop.key.type === 'NumericLiteral') {
+          key = String(prop.key.value);
+        } else {
+          throw new Error(`unsupported key type "${prop.key.type}"`);
+        }
+        obj[key] = literalFromNode(prop.value);
+      }
+      return obj;
+    }
+    default:
+      throw new Error(`non-literal expression "${node.type}"`);
+  }
+}
+
+// Parses a legacy JS/TS sidebar file as DATA: builds an AST and statically
+// evaluates its `export default` literal. The file is never imported or
+// executed, so malicious top-level code in an external repo cannot run here.
+function parseSidebarModule(src) {
+  const ast = parse(src, {
+    sourceType: 'module',
+    plugins: ['typescript'],
+  });
+  const defaultExport = ast.program.body.find(
+    (node) => node.type === 'ExportDefaultDeclaration',
+  );
+  if (!defaultExport) throw new Error('no default export');
+  return literalFromNode(defaultExport.declaration);
+}
+
+// Loads a module's sidebar. Prefers the inert _sidebar.json; falls back to a
+// legacy _sidebar.{ts,js} parsed as data (never executed) with a migration
+// notice. Any failure is logged loudly and degrades to an empty sidebar
+// instead of silently breaking the whole build.
+function readSidebar(repoName) {
+  const base = resolve(
+    __dirname,
+    `../docs/external-content/${repoName}/docs/user`,
+  );
+
+  // Recommended format: inert JSON, parsed directly.
+  try {
+    return JSON.parse(readFileSync(`${base}/_sidebar.json`, 'utf8'));
+  } catch (err) {
+    if (err.code !== 'ENOENT') {
+      console.error(
+        `[sidebar] ${repoName}: _sidebar.json is present but invalid (${err.message}) — sidebar will be empty.`,
+      );
+      return [];
+    }
+  }
+
+  // Legacy format: JS/TS module read as text and parsed via AST, never run.
+  for (const ext of ['_sidebar.ts', '_sidebar.js', '_sidebar']) {
+    let src;
+    try {
+      src = readFileSync(`${base}/${ext}`, 'utf8');
+    } catch (err) {
+      if (err.code === 'ENOENT') continue;
+      throw err;
+    }
+    console.warn(
+      `[sidebar] ${repoName}: using legacy "${ext}" — please migrate this file to an inert _sidebar.json.`,
+    );
+    try {
+      return parseSidebarModule(src);
+    } catch (err) {
+      console.error(
+        `[sidebar] ${repoName}: "${ext}" is not a static literal (${err.message}). ` +
+          `Sidebar will be EMPTY until it is migrated to _sidebar.json.`,
+      );
+      return [];
+    }
+  }
+
+  console.error(
+    `[sidebar] ${repoName}: no _sidebar.json or _sidebar.{ts,js} found — sidebar will be empty.`,
+  );
+  return [];
+}
+
+const istioSidebar = readSidebar('istio');
+const apiGatewaySidebar = readSidebar('api-gateway');
+const sapBtpOperatorSidebar = readSidebar('btp-manager');
+const applicationConnectorSidebar = readSidebar(
+  'application-connector-manager',
+);
+const cloudManagerSidebar = readSidebar('cloud-manager');
+const dockerRegistrySidebar = readSidebar('docker-registry');
+const eventingSidebar = readSidebar('eventing-manager');
+const kedaSidebar = readSidebar('keda-manager');
+const natsSidebar = readSidebar('nats-manager');
+const registryCacheSidebar = readSidebar('registry-cache');
+const serverlessSidebar = readSidebar('serverless');
+const telemetrySidebar = readSidebar('telemetry-manager');
+const cliSidebar = readSidebar('cli');
+const busolaSidebar = readSidebar('busola');
+const registryProxySidebar = readSidebar('registry-proxy');
+const communityModulesSidebar = readSidebar('community-modules');
 
 export function getSearchConfig() {
   return {
@@ -224,10 +351,7 @@ export default defineConfig({
             text: 'Serverless',
             link: '/external-content/serverless/docs/user/README.md',
             collapsed: true,
-            items: makeSidebarAbsolutePath(
-              serverlessSidebar,
-              'serverless',
-            ),
+            items: makeSidebarAbsolutePath(serverlessSidebar, 'serverless'),
           },
           {
             text: 'Telemetry',
