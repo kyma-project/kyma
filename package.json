@@ -1,5 +1,6 @@
 {
   "devDependencies": {
+    "@babel/parser": "^7.29.15",
     "prettier": "^3.6.2",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.5",

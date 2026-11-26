@@ -1,21 +1,274 @@
 import { defineConfig } from 'vitepress';
 import tabsPlugin from './plugins/tabs-plugin';
-import istioSidebar from '../docs/external-content/istio/docs/user/_sidebar';
-import apiGatewaySidebar from '../docs/external-content/api-gateway/docs/user/_sidebar';
-import sapBtpOperatorSidebar from '../docs/external-content/btp-manager/docs/user/_sidebar';
-import applicationConnectorSidebar from '../docs/external-content/application-connector-manager/docs/user/_sidebar';
-import cloudManagerSidebar from '../docs/external-content/cloud-manager/docs/user/_sidebar';
-import dockerRegistrySidebar from '../docs/external-content/docker-registry/docs/user/_sidebar';
-import eventingSidebar from '../docs/external-content/eventing-manager/docs/user/_sidebar';
-import kedaSidebar from '../docs/external-content/keda-manager/docs/user/_sidebar';
-import natsSidebar from '../docs/external-content/nats-manager/docs/user/_sidebar';
-import registryCacheSidebar from '../docs/external-content/registry-cache/docs/user/_sidebar';
-import serverlessSidebar from '../docs/external-content/serverless/docs/user/_sidebar';
-import telemetrySidebar from '../docs/external-content/telemetry-manager/docs/user/_sidebar';
-import cliSidebar from '../docs/external-content/cli/docs/user/_sidebar';
-import busolaSidebar from '../docs/external-content/busola/docs/user/_sidebar';
-import registryProxySidebar from '../docs/external-content/registry-proxy/docs/user/_sidebar';
-import communityModulesSidebar from '../docs/external-content/community-modules/docs/user/_sidebar';
+import { readFileSync } from 'fs';
+import { resolve, dirname, sep } from 'path';
+import { fileURLToPath } from 'url';
+import { parse } from '@babel/parser';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+// All statically-resolved files must stay within this root. A relative import
+// in a legacy sidebar can only pull in other files from the copied external
+// content — never escape to an arbitrary path on the build machine.
+const EXTERNAL_CONTENT_ROOT = resolve(__dirname, '../docs/external-content');
+const MAX_IMPORT_DEPTH = 5;
+// Extensions tried when resolving a relative import like './gen-docs/_sidebar'.
+const IMPORT_EXTS = ['', '.json', '.ts', '.js'];
+
+// Names of modules still shipping a legacy JS/TS sidebar; reported once as a
+// single migration reminder after all sidebars are loaded.
+const legacySidebars = [];
+
+// Turns a Babel AST node into a plain JS value WITHOUT executing any code.
+// Only pure literals are accepted. A reference to a locally-imported module
+// (e.g. `items: commandsSidebar`) is resolved by statically parsing that
+// module too; anything else (function call, spread, dynamic expression, ...)
+// throws.
+function literalFromNode(node, ctx) {
+  switch (node.type) {
+    case 'StringLiteral':
+    case 'NumericLiteral':
+    case 'BooleanLiteral':
+      return node.value;
+    case 'NullLiteral':
+      return null;
+    case 'TemplateLiteral':
+      if (node.expressions.length === 0) {
+        return node.quasis[0].value.cooked;
+      }
+      throw new Error('template literal with embedded expression');
+    case 'UnaryExpression':
+      if (node.operator === '-') return -literalFromNode(node.argument, ctx);
+      if (node.operator === '+') return +literalFromNode(node.argument, ctx);
+      throw new Error(`unsupported unary operator "${node.operator}"`);
+    case 'ArrayExpression':
+      return node.elements.map((el) => {
+        if (el === null) throw new Error('sparse array element');
+        if (el.type === 'SpreadElement') throw new Error('spread element');
+        return literalFromNode(el, ctx);
+      });
+    case 'ObjectExpression': {
+      const obj = {};
+      for (const prop of node.properties) {
+        if (prop.type !== 'ObjectProperty') {
+          throw new Error(`unsupported property "${prop.type}"`);
+        }
+        if (prop.computed) throw new Error('computed object key');
+        let key;
+        if (prop.key.type === 'Identifier') {
+          key = prop.key.name;
+        } else if (prop.key.type === 'StringLiteral') {
+          key = prop.key.value;
+        } else if (prop.key.type === 'NumericLiteral') {
+          key = String(prop.key.value);
+        } else {
+          throw new Error(`unsupported key type "${prop.key.type}"`);
+        }
+        obj[key] = literalFromNode(prop.value, ctx);
+      }
+      return obj;
+    }
+    case 'Identifier': {
+      const binding = ctx.imports.get(node.name);
+      if (!binding) throw new Error(`unresolved identifier "${node.name}"`);
+      return resolveImportedExport(binding, ctx);
+    }
+    default:
+      throw new Error(`non-literal expression "${node.type}"`);
+  }
+}
+
+// Collects import bindings of a parsed module: localName -> { source, imported }.
+function collectImports(ast) {
+  const imports = new Map();
+  for (const node of ast.program.body) {
+    if (node.type !== 'ImportDeclaration') continue;
+    for (const spec of node.specifiers) {
+      if (spec.type === 'ImportDefaultSpecifier') {
+        imports.set(spec.local.name, {
+          source: node.source.value,
+          imported: 'default',
+        });
+      } else if (spec.type === 'ImportSpecifier') {
+        imports.set(spec.local.name, {
+          source: node.source.value,
+          imported:
+            spec.imported.type === 'Identifier'
+              ? spec.imported.name
+              : spec.imported.value,
+        });
+      }
+      // Namespace imports (`import * as x`) are unsupported and will surface
+      // as an "unresolved identifier" if referenced.
+    }
+  }
+  return imports;
+}
+
+// Resolves a relative import binding to the exported literal of the target
+// file, which is parsed statically (never executed) and must live inside the
+// external-content root.
+function resolveImportedExport(binding, ctx) {
+  if (ctx.depth >= MAX_IMPORT_DEPTH) {
+    throw new Error('import nesting too deep');
+  }
+  const { source, imported } = binding;
+  if (!source.startsWith('./') && !source.startsWith('../')) {
+    throw new Error(`non-relative import "${source}"`);
+  }
+
+  const resolvedBase = resolve(ctx.dir, source);
+  let filePath = null;
+  for (const ext of IMPORT_EXTS) {
+    const candidate = resolvedBase + ext;
+    try {
+      readFileSync(candidate);
+      filePath = candidate;
+      break;
+    } catch (err) {
+      if (err.code !== 'ENOENT' && err.code !== 'EISDIR') throw err;
+    }
+  }
+  if (!filePath) throw new Error(`cannot resolve import "${source}"`);
+
+  if (
+    filePath !== EXTERNAL_CONTENT_ROOT &&
+    !filePath.startsWith(EXTERNAL_CONTENT_ROOT + sep)
+  ) {
+    throw new Error(`import "${source}" escapes external-content root`);
+  }
+
+  return loadModuleExport(filePath, imported, ctx.depth + 1);
+}
+
+// Reads a JS/TS/JSON module file as DATA and statically evaluates one of its
+// exports. The file is never imported or executed, so malicious top-level
+// code in an external repo cannot run here.
+function loadModuleExport(filePath, exportName, depth) {
+  const src = readFileSync(filePath, 'utf8');
+
+  if (filePath.endsWith('.json')) {
+    if (exportName !== 'default') {
+      throw new Error(`JSON module has no named export "${exportName}"`);
+    }
+    return JSON.parse(src);
+  }
+
+  const ast = parse(src, { sourceType: 'module', plugins: ['typescript'] });
+  const ctx = { imports: collectImports(ast), dir: dirname(filePath), depth };
+
+  for (const node of ast.program.body) {
+    if (exportName === 'default' && node.type === 'ExportDefaultDeclaration') {
+      return literalFromNode(node.declaration, ctx);
+    }
+    if (node.type === 'ExportNamedDeclaration') {
+      // export const NAME = [...]
+      if (node.declaration && node.declaration.type === 'VariableDeclaration') {
+        for (const d of node.declaration.declarations) {
+          if (d.id.type === 'Identifier' && d.id.name === exportName) {
+            return literalFromNode(d.init, ctx);
+          }
+        }
+      }
+      // export { NAME }
+      for (const spec of node.specifiers ?? []) {
+        if (spec.type !== 'ExportSpecifier') continue;
+        const exportedName =
+          spec.exported.type === 'Identifier'
+            ? spec.exported.name
+            : spec.exported.value;
+        if (exportedName === exportName) {
+          return literalFromNode(
+            { type: 'Identifier', name: spec.local.name },
+            ctx,
+          );
+        }
+      }
+    }
+  }
+  throw new Error(`export "${exportName}" not found`);
+}
+
+// Loads a module's sidebar. Prefers the inert _sidebar.json; falls back to a
+// legacy _sidebar.{ts,js} parsed as data (never executed) with a migration
+// notice. Any failure is logged loudly and degrades to an empty sidebar
+// instead of silently breaking the whole build.
+function readSidebar(repoName) {
+  const base = resolve(
+    __dirname,
+    `../docs/external-content/${repoName}/docs/user`,
+  );
+
+  // Recommended format: inert JSON, parsed directly.
+  try {
+    const data = JSON.parse(readFileSync(`${base}/_sidebar.json`, 'utf8'));
+    if (!Array.isArray(data)) throw new Error('_sidebar.json is not an array');
+    return data;
+  } catch (err) {
+    if (err.code !== 'ENOENT') {
+      console.error(
+        `[sidebar] ${repoName}: _sidebar.json is present but invalid (${err.message}) — sidebar will be empty.`,
+      );
+      return [];
+    }
+  }
+
+  // Legacy format: JS/TS module read as text and parsed via AST, never run.
+  for (const ext of ['_sidebar.ts', '_sidebar.js', '_sidebar']) {
+    const filePath = `${base}/${ext}`;
+    try {
+      readFileSync(filePath);
+    } catch (err) {
+      if (err.code === 'ENOENT') continue;
+      throw err;
+    }
+    legacySidebars.push(repoName);
+    try {
+      const data = loadModuleExport(filePath, 'default', 0);
+      if (!Array.isArray(data)) {
+        throw new Error('default export is not an array');
+      }
+      return data;
+    } catch (err) {
+      console.error(
+        `[sidebar] ${repoName}: "${ext}" could not be statically parsed (${err.message}). ` +
+          `Sidebar will be EMPTY until it is migrated to _sidebar.json.`,
+      );
+      return [];
+    }
+  }
+
+  console.error(
+    `[sidebar] ${repoName}: no _sidebar.json or _sidebar.{ts,js} found — sidebar will be empty.`,
+  );
+  return [];
+}
+
+const istioSidebar = readSidebar('istio');
+const apiGatewaySidebar = readSidebar('api-gateway');
+const sapBtpOperatorSidebar = readSidebar('btp-manager');
+const applicationConnectorSidebar = readSidebar(
+  'application-connector-manager',
+);
+const cloudManagerSidebar = readSidebar('cloud-manager');
+const dockerRegistrySidebar = readSidebar('docker-registry');
+const eventingSidebar = readSidebar('eventing-manager');
+const kedaSidebar = readSidebar('keda-manager');
+const natsSidebar = readSidebar('nats-manager');
+const registryCacheSidebar = readSidebar('registry-cache');
+const serverlessSidebar = readSidebar('serverless');
+const telemetrySidebar = readSidebar('telemetry-manager');
+const cliSidebar = readSidebar('cli');
+const busolaSidebar = readSidebar('busola');
+const registryProxySidebar = readSidebar('registry-proxy');
+const communityModulesSidebar = readSidebar('community-modules');
+
+if (legacySidebars.length > 0) {
+  console.warn(
+    `[sidebar] ${legacySidebars.length} module(s) still use a legacy JS/TS sidebar and ` +
+      `should migrate to an inert _sidebar.json: ${legacySidebars.join(', ')}.`,
+  );
+}
 
 export function getSearchConfig() {
   return {
@@ -224,10 +477,7 @@ export default defineConfig({
             text: 'Serverless',
             link: '/external-content/serverless/docs/user/README.md',
             collapsed: true,
-            items: makeSidebarAbsolutePath(
-              serverlessSidebar,
-              'serverless',
-            ),
+            items: makeSidebarAbsolutePath(serverlessSidebar, 'serverless'),
           },
           {
             text: 'Telemetry',
